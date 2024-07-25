@@ -1,0 +1,17 @@
+
+// Apply any other configurations specific to your project
+
+plugins {
+    id "java"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+apply from: rootProject.file('/shared.gradle')
+
+def tasksPath = "/src/main/groovy/"
+
+// Use the custom task defined in buildSrc
+tasks.register("myCustomTask", ()-> {
+    return tasks.getByPath(tasksPath + 'MyCustomTask.groovy')
+})
+
