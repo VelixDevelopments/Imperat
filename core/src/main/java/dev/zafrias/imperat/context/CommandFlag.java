@@ -1,4 +1,4 @@
-package dev.zafrias.imperat.context.flags;
+package dev.zafrias.imperat.context;
 
 import dev.zafrias.imperat.CommandSource;
 import org.jetbrains.annotations.NotNull;
@@ -13,9 +13,11 @@ public interface CommandFlag {
 
 	/**
 	 * The main name of the flag
+	 *
 	 * @return the name(unique) of the flag
 	 */
-	@NotNull String getName();
+	@NotNull
+	String getName();
 
 	/**
 	 * @return the aliases of the flag

@@ -1,28 +1,18 @@
-package dev.zafrias.imperat.context.flags;
+package dev.zafrias.imperat.context;
 
 import dev.zafrias.imperat.Command;
 import dev.zafrias.imperat.Result;
-import dev.zafrias.imperat.context.ArgumentQueue;
-import dev.zafrias.imperat.context.Context;
-import dev.zafrias.imperat.context.flags.internal.FlagRegistry;
+import dev.zafrias.imperat.context.internal.FlagRegistry;
 import dev.zafrias.imperat.util.Registry;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a way of extracting/loading flags
  * from a given context
+ *
  * @param <C>
  */
 public interface CommandFlagExtractor<C> {
-
-
-	/**
-	 * @return the context by which
-	 * the flag extractor will be using to
-	 * extract the used flags in this execution
-	 */
-	@NotNull
-	Context<C> getContext();
 
 
 	/**
@@ -32,7 +22,7 @@ public interface CommandFlagExtractor<C> {
 	boolean isArgumentFlag(String rawArgument);
 
 	/**
-	 * @param command the command's data
+	 * @param command    the command's data
 	 * @param rawArgFlag the raw flag used in the command execution
 	 * @return whether this flag is registered and known to be usable for this command
 	 */
@@ -46,18 +36,21 @@ public interface CommandFlagExtractor<C> {
 	 * so assuming it succeeds and no error happens during the extraction process,
 	 * it will cache the flags extracted into the flag registry before returning that registry
 	 * </p>
+	 *
 	 * @param command the command's data
-	 * @param queue the queue to use for extracting the flags
+	 * @param queue   the queue to use for extracting the flags
 	 */
-	Result<FlagRegistry> extract(Command<C> command, ArgumentQueue queue);
+	Result<FlagRegistry> extract(@NotNull Command<C> command, @NotNull ArgumentQueue queue);
 
 	/**
 	 * Extracts the flags
 	 * using the cached context
+	 *
 	 * @param command the command's data
+	 * @param context the context for extraction
 	 */
-	default Result<FlagRegistry> extract(Command<C> command) {
-		return extract(command, getContext().getArguments());
+	default Result<FlagRegistry> extract(@NotNull Command<C> command, @NotNull Context<C> context) {
+		return extract(command, context.getArguments());
 	}
 
 	/**

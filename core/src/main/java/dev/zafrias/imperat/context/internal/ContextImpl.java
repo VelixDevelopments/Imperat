@@ -1,12 +1,13 @@
-package dev.zafrias.imperat.context.impl;
+package dev.zafrias.imperat.context.internal;
 
 import dev.zafrias.imperat.CommandSource;
 import dev.zafrias.imperat.context.ArgumentQueue;
+import dev.zafrias.imperat.context.CommandFlagExtractor;
 import dev.zafrias.imperat.context.Context;
-import dev.zafrias.imperat.context.flags.CommandFlagExtractor;
-import dev.zafrias.imperat.context.flags.impl.CommandFlagExtractorImpl;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public final class ContextImpl<C> implements Context<C> {
@@ -19,11 +20,12 @@ public final class ContextImpl<C> implements Context<C> {
 
 	ContextImpl(CommandSource<C> commandSource,
 	            String command,
-	            ArgumentQueue args) {
+	            ArgumentQueue args,
+	            Supplier<CommandFlagExtractor<C>> flagExtractor) {
 		this.commandSource = commandSource;
 		this.command = command;
 		this.args = args;
-		this.flagExtractor = new CommandFlagExtractorImpl<>();
+		this.flagExtractor = flagExtractor.get();
 	}
 
 

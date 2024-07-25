@@ -6,12 +6,15 @@ plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-apply from: rootProject.file('/shared.gradle')
+subprojects {
+    //apply from: rootProject.file('/buildSrc/shared.gradle')
+    plugins.apply("java")
+    plugins.apply("com.github.johnrengelman.shadow")
 
-def tasksPath = "/src/main/groovy/"
 
-// Use the custom task defined in buildSrc
-tasks.register("myCustomTask", ()-> {
-    return tasks.getByPath(tasksPath + 'MyCustomTask.groovy')
-})
+}
+
+
+
+
 

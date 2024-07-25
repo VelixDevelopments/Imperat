@@ -1,10 +1,11 @@
-package dev.zafrias.imperat.context.impl;
+package dev.zafrias.imperat.context.internal;
 
 import dev.zafrias.imperat.context.ArgumentQueue;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
+
 import java.util.*;
 
 @ApiStatus.Internal

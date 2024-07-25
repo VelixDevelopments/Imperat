@@ -1,2 +1,14 @@
+import org.gradle.api.initialization.resolve.RulesMode
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+    delegate.setRulesMode(RulesMode.PREFER_PROJECT)
+}
 rootProject.name = 'Imperat'
+include 'core'
+include 'bukkit'
+include 'bungee'
+include 'velocity'
 

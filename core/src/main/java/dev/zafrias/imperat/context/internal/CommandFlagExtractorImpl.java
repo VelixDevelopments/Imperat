@@ -1,11 +1,10 @@
-package dev.zafrias.imperat.context.flags.internal;
+package dev.zafrias.imperat.context.internal;
 
 import dev.zafrias.imperat.Command;
 import dev.zafrias.imperat.Result;
 import dev.zafrias.imperat.context.ArgumentQueue;
-import dev.zafrias.imperat.context.Context;
-import dev.zafrias.imperat.context.flags.CommandFlag;
-import dev.zafrias.imperat.context.flags.CommandFlagExtractor;
+import dev.zafrias.imperat.context.CommandFlag;
+import dev.zafrias.imperat.context.CommandFlagExtractor;
 import dev.zafrias.imperat.util.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -15,22 +14,11 @@ import java.util.Objects;
 @ApiStatus.Internal
 public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C> {
 
-	private final Context<C> context;
+
 	private final Registry<String, CommandFlag> flagRegistry;
 
-	CommandFlagExtractorImpl(Context<C> context) {
-		this.context = context;
+	CommandFlagExtractorImpl() {
 		this.flagRegistry = new Registry<>();
-	}
-
-	/**
-	 * @return the context by which
-	 * the flag extractor will be using to
-	 * extract the used flags in this execution
-	 */
-	@Override
-	public @NotNull Context<C> getContext() {
-		return context;
 	}
 
 	/**
@@ -68,21 +56,21 @@ public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C
 	 * @param queue the queue to use for extracting the flags
 	 */
 	@Override
-	public Result<FlagRegistry> extract(Command<C> command, ArgumentQueue queue) {
+	public Result<FlagRegistry> extract(@NotNull Command<C> command, @NotNull ArgumentQueue queue) {
 		try {
 			return Result.success(
 					  queue.stream()
-					 .filter(this::isArgumentFlag)
-					 .filter((flagArg) -> isKnownFlag(command, flagArg))
-					 .map((flagArg) -> {
-						 String flagAliasUsed = getFlagAliasUsed(flagArg);
-						 return command.getKnownFlags()
-									.searchFlagAlias(flagAliasUsed).orElse(null);
-					 })
-					 .filter(Objects::nonNull)
-					 .collect(FlagRegistry.COLLECTOR)
+								 .filter(this::isArgumentFlag)
+								 .filter((flagArg) -> isKnownFlag(command, flagArg))
+								 .map((flagArg) -> {
+									 String flagAliasUsed = getFlagAliasUsed(flagArg);
+									 return command.getKnownFlags()
+												.searchFlagAlias(flagAliasUsed).orElse(null);
+								 })
+								 .filter(Objects::nonNull)
+								 .collect(FlagRegistry.COLLECTOR)
 			);
-		}catch (Exception exc) {
+		} catch (Exception exc) {
 			return Result.fail(exc);
 		}
 	}
