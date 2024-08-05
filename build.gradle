@@ -11,7 +11,6 @@ subprojects {
     plugins.apply("java")
     plugins.apply("com.github.johnrengelman.shadow")
 
-
 }
 
 

@@ -1,10 +1,9 @@
-import org.gradle.api.initialization.resolve.RulesMode
 
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
-    delegate.setRulesMode(RulesMode.PREFER_PROJECT)
 }
 rootProject.name = 'Imperat'
 include 'core'
