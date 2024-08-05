@@ -23,7 +23,7 @@ final class TokenIterator implements Iterator<Character> {
 
 	public @Nullable Character peek() {
 		try {
-			return source.charAt(position+1);
+			return source.charAt(position + 1);
 		} catch (StringIndexOutOfBoundsException ex) {
 			return null;
 		}

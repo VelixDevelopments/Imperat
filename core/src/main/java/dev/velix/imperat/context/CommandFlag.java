@@ -33,6 +33,7 @@ public interface CommandFlag {
 
 
 	record CommandFlagImpl(String name, String alias)
-			  implements CommandFlag { }
+			  implements CommandFlag {
+	}
 
 }

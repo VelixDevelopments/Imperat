@@ -9,24 +9,24 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 public final class FieldAccessorFactory {
-    private static final String ACCESSOR = "Accessor";
-    private final ObjectFactory<FieldAccessor> factory;
+	private static final String ACCESSOR = "Accessor";
+	private final ObjectFactory<FieldAccessor> factory;
 
-    public FieldAccessorFactory(ObjectFactory<FieldAccessor> factory) {
-        this.factory = Objects.requireNonNull(factory);
-    }
+	public FieldAccessorFactory(ObjectFactory<FieldAccessor> factory) {
+		this.factory = Objects.requireNonNull(factory);
+	}
 
-    public FieldAccessorFactory(DefineLoader loader) {
-        this(new DefineObjectFactory<>(loader));
-    }
+	public FieldAccessorFactory(DefineLoader loader) {
+		this(new DefineObjectFactory<>(loader));
+	}
 
-    public FieldAccessorFactory() {
-        this(new DefineClassLoader());
-    }
+	public FieldAccessorFactory() {
+		this(new DefineClassLoader());
+	}
 
-    public FieldAccessor packField(Field field) {
-        var toHash = field.getDeclaringClass().getName() + field.getName();
-        var name = ACCESSOR + toHash.hashCode();
-        return factory.create(name, () -> FieldUtil.createAccessor(name, field));
-    }
+	public FieldAccessor packField(Field field) {
+		var toHash = field.getDeclaringClass().getName() + field.getName();
+		var name = ACCESSOR + toHash.hashCode();
+		return factory.create(name, () -> FieldUtil.createAccessor(name, field));
+	}
 }

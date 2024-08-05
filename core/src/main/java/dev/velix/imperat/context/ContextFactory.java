@@ -4,6 +4,7 @@ import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.internal.CommandFlagExtractorImpl;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.function.Supplier;
 
 /**
@@ -36,10 +37,8 @@ public interface ContextFactory<C> {
 	);
 
 	/**
-	 *
-	 * @param command the command that's running
+	 * @param command      the command that's running
 	 * @param plainContext the context plain
-	 *
 	 * @return the context after resolving args into values for
 	 * later on parsing it into the execution
 	 */

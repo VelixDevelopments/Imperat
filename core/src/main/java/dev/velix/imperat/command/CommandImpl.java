@@ -18,6 +18,8 @@ final class CommandImpl<C> implements Command<C> {
 
 	private int position = -1;
 
+	private boolean suppressACPermissionChecks = false;
+
 	private final List<String> aliases = new ArrayList<>();
 
 	private CommandUsage<C> defaultUsage;
@@ -38,7 +40,8 @@ final class CommandImpl<C> implements Command<C> {
 		this.parent = parent;
 		this.name = name;
 		this.flagRegistry = new FlagRegistry();
-		setDefaultUsageExecution((source, context)-> {});
+		setDefaultUsageExecution((source, context) -> {
+		});
 		this.autoCompleter = AutoCompleter.createNative(this);
 	}
 
@@ -203,7 +206,7 @@ final class CommandImpl<C> implements Command<C> {
 	public @NotNull CommandUsage<C> getMainUsage() {
 		return usages.stream().filter((usage ->
 							 usage.getMinLength() >= 1 &&
-							 !usage.hasParamType(Command.class)))
+										!usage.hasParamType(Command.class)))
 				  .findFirst().orElse(defaultUsage);
 	}
 
@@ -226,6 +229,7 @@ final class CommandImpl<C> implements Command<C> {
 
 	/**
 	 * The command to be added as a subcommand of this instance
+	 *
 	 * @param command the sub-command to be added
 	 */
 	@Override
@@ -242,13 +246,13 @@ final class CommandImpl<C> implements Command<C> {
 	@Override
 	public @Nullable Command<C> getSubCommand(String name) {
 		Command<C> sub = children.get(name);
-		if(sub != null)
+		if (sub != null)
 			return sub;
 
-		for(String subsNames : children.keySet()) {
+		for (String subsNames : children.keySet()) {
 			Command<C> other = children.get(subsNames);
-			if(other.hasName(name)) return other;
-			else if(subsNames.startsWith(name)) return other;
+			if (other.hasName(name)) return other;
+			else if (subsNames.startsWith(name)) return other;
 		}
 		return null;
 	}
@@ -259,5 +263,31 @@ final class CommandImpl<C> implements Command<C> {
 	@Override
 	public @NotNull Collection<? extends Command<C>> getSubCommands() {
 		return children.values();
+	}
+
+	/**
+	 * whether to ignore permission checks on the auto-completion of command and
+	 * sub commands or not
+	 *
+	 * @return whether to ignore permission checks on the auto-completion of command and
+	 * sub commands or not
+	 */
+	@Override
+	public boolean isIgnoringACPerms() {
+		return suppressACPermissionChecks;
+	}
+
+	/**
+	 * if true , it will ignore permission checks
+	 * on the auto-completion of command and sub commands
+	 * <p>
+	 * otherwise, it will perform permission checks and
+	 * only tab-completes the usages/subcommands that you have permission for
+	 *
+	 * @param suppress true if you want to ignore the permission checks on tab completion of args
+	 */
+	@Override
+	public void ignoreACPermissions(boolean suppress) {
+		this.suppressACPermissionChecks = suppress;
 	}
 }

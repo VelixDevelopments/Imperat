@@ -17,4 +17,11 @@ public @interface Command {
 	 * others are going to be considered the aliases
 	 */
 	@NotNull String[] value();
+
+	/**
+	 * @return Whether to ignore the permission checks
+	 * while auto-completing or not
+	 * @see dev.velix.imperat.command.Command#ignoreACPermissions(boolean)
+	 */
+	boolean ignoreAutoCompletionPermission() default false;
 }

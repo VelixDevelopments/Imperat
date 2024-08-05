@@ -6,6 +6,7 @@ import dev.velix.imperat.command.cooldown.UsageCooldown;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -112,7 +113,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
 	public boolean hasParamType(Class<?> clazz) {
 		return getParameters()
 				  .stream()
-				  .anyMatch((param)-> param.getType().equals(clazz));
+				  .anyMatch((param) -> param.getType().equals(clazz));
 	}
 
 	/**
@@ -123,8 +124,8 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
 	@Override
 	public int getMinLength() {
 		return (int) getParameters().stream()
-				  .filter((param)-> !param.isFlag())
-				  .filter((param)-> !param.isOptional())
+				  .filter((param) -> !param.isFlag())
+				  .filter((param) -> !param.isOptional())
 				  .count();
 	}
 
@@ -147,8 +148,8 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
 	 */
 	@Override
 	public boolean hasParameter(Predicate<UsageParameter> parameterPredicate) {
-		for(UsageParameter parameter : getParameters())
-			if(parameterPredicate.test(parameter))
+		for (UsageParameter parameter : getParameters())
+			if (parameterPredicate.test(parameter))
 				return true;
 
 		return false;
@@ -160,8 +161,8 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
 	 */
 	@Override
 	public @Nullable UsageParameter getParameter(Predicate<UsageParameter> parameterPredicate) {
-		for(UsageParameter parameter : getParameters()) {
-			if(parameterPredicate.test(parameter))
+		for (UsageParameter parameter : getParameters()) {
+			if (parameterPredicate.test(parameter))
 				return parameter;
 		}
 		return null;

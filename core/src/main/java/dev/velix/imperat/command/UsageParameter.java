@@ -22,6 +22,7 @@ public interface UsageParameter {
 	/**
 	 * Sets the position of this parameter in a syntax
 	 * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
+	 *
 	 * @param position the position to set
 	 */
 	@ApiStatus.Internal
@@ -73,15 +74,16 @@ public interface UsageParameter {
 
 	/**
 	 * Casts the parameter to a subcommand/command
+	 *
 	 * @return the parameter as a command
 	 */
 	Command<?> asCommand();
 
 
-
 	/**
 	 * Formats the usage parameter
 	 * using the command
+	 *
 	 * @param command The command owning this parameter
 	 * @return the formatted parameter
 	 */
@@ -120,7 +122,6 @@ public interface UsageParameter {
 	static UsageParameter requiredDouble(String name) {
 		return required(name, Double.class);
 	}
-
 
 
 	static UsageParameter flag(String flagName) {

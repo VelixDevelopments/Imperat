@@ -16,7 +16,7 @@ final class FlagUsageParameter extends InputParameter {
 	public <C> String format(Command<C> command) {
 		CommandFlag commandFlag = command.getKnownFlags().getData(this.getName())
 				  .orElse(null);
-		if(commandFlag == null) return "N/A";
+		if (commandFlag == null) return "N/A";
 		return StringUtils.normalizedParameterFormatting(
 				  "-" + commandFlag.alias(), isOptional()
 		);

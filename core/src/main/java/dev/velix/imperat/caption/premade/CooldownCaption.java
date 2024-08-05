@@ -1,11 +1,11 @@
 package dev.velix.imperat.caption.premade;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.concurrent.TimeUnit;
 
 public final class CooldownCaption<C> implements Caption<C> {
@@ -27,9 +28,9 @@ public final class CooldownCaption<C> implements Caption<C> {
 	}
 
 	/**
-	 * @param dispatcher the dispatcher
-	 * @param command  the command
-	 * @param usage the usage
+	 * @param dispatcher    the dispatcher
+	 * @param command       the command
+	 * @param usage         the usage
 	 * @param commandSource the source
 	 * @param context       the context
 	 * @param exception     the exception, may be null if no exception provided
@@ -62,8 +63,8 @@ public final class CooldownCaption<C> implements Caption<C> {
 	}
 
 	private String formatTime(UsageCooldown cooldown, long lastTimeExecuted) {
-		long timePassed = System.currentTimeMillis()-lastTimeExecuted;
-		long remaining = cooldown.toMillis()-timePassed;
+		long timePassed = System.currentTimeMillis() - lastTimeExecuted;
+		long remaining = cooldown.toMillis() - timePassed;
 		return TimeUnit.MILLISECONDS.toSeconds(remaining) + " second(s) ";
 	}
 }

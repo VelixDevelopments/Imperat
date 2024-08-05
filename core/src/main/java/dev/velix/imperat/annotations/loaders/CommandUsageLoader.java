@@ -1,18 +1,17 @@
 package dev.velix.imperat.annotations.loaders;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.annotations.AnnotationLoader;
-import dev.velix.imperat.util.MethodVerifier;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.Cooldown;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.*;
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
-
+import dev.velix.imperat.util.MethodVerifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
@@ -40,22 +39,22 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 	/**
 	 * Loads the object using the annotation
 	 *
-	 * @param alreadyLoaded  the already loaded object
+	 * @param alreadyLoaded the already loaded object
 	 * @return the object loaded from the annotation
 	 */
 	@Override
 	public @Nullable CommandUsage<C> load(@Nullable Command<C> alreadyLoaded) {
-		if(alreadyLoaded == null) {
+		if (alreadyLoaded == null) {
 			return null;
 		}
 
 		Usage usage = method.getAnnotation(Usage.class);
 		SubCommand subCommand = method.getAnnotation(SubCommand.class);
 
-		if(usage == null && subCommand == null) {
-			if(method.getAnnotation(DefaultUsage.class) != null) {
+		if (usage == null && subCommand == null) {
+			if (method.getAnnotation(DefaultUsage.class) != null) {
 				MethodVerifier.verifyMethod(dispatcher, aClass, method, true);
-				alreadyLoaded.setDefaultUsageExecution((source, context)-> {
+				alreadyLoaded.setDefaultUsageExecution((source, context) -> {
 					try {
 						method.invoke(instance, source);
 					} catch (IllegalAccessException | InvocationTargetException e) {
@@ -66,7 +65,7 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 			}
 			//System.out.println("NO USAGE ANNOTATION !");
 			throw new IllegalStateException("Couldn't find @Usage or @SubCommand in method '" + method.getName() + "' in class '" + aClass.getName() + "'");
-		}else if(usage != null && subCommand != null) {
+		} else if (usage != null && subCommand != null) {
 			throw new IllegalStateException("Found annotation duplicates of similar context '@Usage' and '@SubCommand' in the same method !");
 		}
 
@@ -74,13 +73,13 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 
 		//setting permission
 		Permission permission = method.getAnnotation(Permission.class);
-		if(permission != null) {
+		if (permission != null) {
 			builder.permission(permission.value());
 		}
 
 		//loading cooldown
 		Cooldown cooldown = method.getAnnotation(Cooldown.class);
-		if(cooldown != null) {
+		if (cooldown != null) {
 			builder.cooldown(cooldown.value(), cooldown.unit());
 		}
 
@@ -91,17 +90,17 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		//resolving parameters and execution
 		Object[] paramsInstances = new Object[methodParams.length];
 
-		List<UsageParameter> usageParameters = new ArrayList<>(methodParams.length-1);
+		List<UsageParameter> usageParameters = new ArrayList<>(methodParams.length - 1);
 		var mainUsage = alreadyLoaded.getMainUsage();
 
-		for(Parameter parameter : method.getParameters()) {
+		for (Parameter parameter : method.getParameters()) {
 			UsageParameter usageParameter = getParameter(parameter);
-			if(usageParameter == null) {
+			if (usageParameter == null) {
 				continue;
 			}
-			if(subCommand != null
+			if (subCommand != null
 					  && mainUsage
-					  .hasParameter((param)-> param.equals(usageParameter))) {
+					  .hasParameter((param) -> param.equals(usageParameter))) {
 				continue;
 			}
 			System.out.println("Passed " + usageParameter.getName());
@@ -114,12 +113,11 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		fullParameters.addAll(usageParameters);
 
 
-
 		builder.execute(((commandSource, context) -> {
 			paramsInstances[0] = commandSource;
 			for (int i = 1, p = 0; i < paramsInstances.length; i++, p++) {
 				UsageParameter parameter = getUsageParam(fullParameters, p);
-				if(parameter == null) continue;
+				if (parameter == null) continue;
 				paramsInstances[i] = parameter.isFlag() ? context.getFlag(parameter.getName()) : context.getArgument(parameter.getName());
 			}
 
@@ -136,13 +134,13 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 	private @Nullable UsageParameter getUsageParam(List<UsageParameter> params, int index) {
 		try {
 			return params.get(index);
-		}catch (Exception ex) {
+		} catch (Exception ex) {
 			return null;
 		}
 	}
 
 	private UsageParameter getParameter(Parameter parameter) {
-		if(dispatcher.canBeSender(parameter.getType())) {
+		if (dispatcher.canBeSender(parameter.getType())) {
 			return null;
 		}
 
@@ -157,32 +155,30 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		boolean optional = parameter.getAnnotation(Optional.class) != null;
 		String defaultValue = hasDefault ? defaultAnnotation.value() : null;
 
-		if(arg != null) {
+		if (arg != null) {
 			name = arg.value();
-		}else if(flag != null) {
+		} else if (flag != null) {
 			name = flag.value();
 			optional = true;
-		}else {
+		} else {
 			name = parameter.getName();
 		}
 
 		boolean greedy = parameter.getAnnotation(Greedy.class) != null;
 
-		if(greedy && parameter.getType() != String.class) {
+		if (greedy && parameter.getType() != String.class) {
 			throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy type '" + parameter.getType().getName() + "'");
 		}
 
 
 		UsageParameter usageParameter;
-		if(greedy) {
+		if (greedy) {
 			usageParameter = UsageParameter.greedy(name, optional, defaultValue);
-		}
-		else if(optional) {
+		} else if (optional) {
 			usageParameter = UsageParameter.optional(name, parameter.getType(), defaultValue);
-		}else if(flag != null) {
+		} else if (flag != null) {
 			usageParameter = UsageParameter.flag(flag.value());
-		}
-		else {
+		} else {
 			usageParameter = UsageParameter.required(name, parameter.getType());
 		}
 

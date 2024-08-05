@@ -27,6 +27,7 @@ public final class GroupCommand {
 	}
 
 	@SubCommand(value = "setperm")
+	@Permission("command.group.setperm")
 	public void setPermission(BukkitCommandSource source,
 	                          @Arg("group") Group group,
 	                          @Arg("permission") String permission) {
@@ -34,6 +35,7 @@ public final class GroupCommand {
 	}
 
 	@SubCommand("setprefix")
+	@Permission("command.group.setprefix")
 	public void setPrefix(
 			  BukkitCommandSource source,
 			  @Arg("group") Group group,

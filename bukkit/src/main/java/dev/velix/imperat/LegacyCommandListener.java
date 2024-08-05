@@ -34,12 +34,13 @@ public class LegacyCommandListener implements Listener {
 		System.out.println("CMD=" + event.getCommand());
 		String[] args = event.getCommand().split(" ");
 
-		String[] rawArgs = new String[args.length-1];
-		System.arraycopy(args, 1, rawArgs, 0, args.length-1);
+		String[] rawArgs = new String[args.length - 1];
+		System.arraycopy(args, 1, rawArgs, 0, args.length - 1);
 		dispatcher.dispatch(event.getSender(), args[0], rawArgs);
 
 		event.setCancelled(true);
 	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onCommand(PlayerCommandPreprocessEvent event) {
 		String message = event.getMessage();
@@ -62,7 +63,7 @@ public class LegacyCommandListener implements Listener {
 			for (Map.Entry<String, Command> entry : commands.entrySet()) {
 				Command command = entry.getValue();
 				dev.velix.imperat.command.Command<CommandSender> imperatCommand = dispatcher.getCommand(command.getName());
-				if(imperatCommand != null)continue;
+				if (imperatCommand != null) continue;
 				dispatcher.registerCommand(bukkitCommandToImperat(command));
 			}
 
@@ -70,6 +71,8 @@ public class LegacyCommandListener implements Listener {
 			e.printStackTrace();
 		}
 	}
+
+	@SuppressWarnings("unchecked")
 	private static Map<String, Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException {
 		CraftServer craftServer = (CraftServer) getServer();
 		Field commandMapField = craftServer.getClass().getDeclaredField("commandMap");
@@ -79,7 +82,7 @@ public class LegacyCommandListener implements Listener {
 		// Get the commands registered in the command map
 		Field hashMapCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
 		hashMapCommandsField.setAccessible(true);
-		return (Map<String, Command>)hashMapCommandsField.get(commandMap);
+		return (Map<String, Command>) hashMapCommandsField.get(commandMap);
 	}
 
 	public static dev.velix.imperat.command.Command<CommandSender> bukkitCommandToImperat(Command bukkitCommand) {
@@ -91,35 +94,35 @@ public class LegacyCommandListener implements Listener {
 		String usage = processUsage(bukkitCommand.getUsage());
 		String[] splitUsage = usage.split(" ");
 
-		UsageParameter[] parameters = new UsageParameter[splitUsage.length-1];
+		UsageParameter[] parameters = new UsageParameter[splitUsage.length - 1];
 		boolean collected = false;
 		for (int i = 1; i < splitUsage.length; i++) {
 			String arg = splitUsage[i];
 			String argId = getArgName(arg);
 
-			if(argId.contains("|")) {
+			if (argId.contains("|")) {
 				collected = true;
 				String[] literals = argId.replace("|", " ").split(" ");
 				for (String literal : literals) {
 					UsageParameter literalParam = UsageParameter.literal(literal);
 					CommandUsage<CommandSender> commandUsage = CommandUsage.<CommandSender>builder()
 							  .parameters(literalParam)
-							  .execute((sender, context)->
-								Bukkit.dispatchCommand(sender.getOrigin(), command.getName() + " " + literal))
+							  .execute((sender, context) ->
+										 Bukkit.dispatchCommand(sender.getOrigin(), command.getName() + " " + literal))
 							  .build();
 
 					command.addUsage(commandUsage);
 				}
 
 				break;
-			}else {
-				parameters[i-1] = isOptionalArg(arg)
+			} else {
+				parameters[i - 1] = isOptionalArg(arg)
 						  ? UsageParameter.optional(argId, String.class, null)
 						  : UsageParameter.required(argId, String.class);
 			}
 		}
 
-		if(!collected) {
+		if (!collected) {
 			command.addUsage(
 					  CommandUsage.<CommandSender>builder()
 								 .parameters(parameters)
@@ -135,7 +138,7 @@ public class LegacyCommandListener implements Listener {
 
 	private static String getArgName(String arg) {
 		StringBuilder builder = new StringBuilder();
-		for (int i = 1; i < arg.length()-1; i++) {
+		for (int i = 1; i < arg.length() - 1; i++) {
 			builder.append(arg.charAt(i));
 		}
 		return builder.toString();
@@ -146,7 +149,7 @@ public class LegacyCommandListener implements Listener {
 	}
 
 	private static boolean isArgEnder(char c) {
-		return c== '>' || c==']';
+		return c == '>' || c == ']';
 	}
 
 	private static boolean isOptionalArg(String argName) {
@@ -157,15 +160,15 @@ public class LegacyCommandListener implements Listener {
 		return argName.startsWith("<") && argName.endsWith(">");
 	}
 
-	private static String processUsage( final String usage) {
+	private static String processUsage(final String usage) {
 		char[] chars = usage.toCharArray();
-		for (int i = usage.indexOf(' ')+1; i < chars.length; i++) {
+		for (int i = usage.indexOf(' ') + 1; i < chars.length; i++) {
 			char c = chars[i];
-			if(!isArgStarter(c)) {
+			if (!isArgStarter(c)) {
 				continue;
 			}
 			while (!isArgEnder(chars[i])) {
-				if(Character.isWhitespace(chars[i])) {
+				if (Character.isWhitespace(chars[i])) {
 					chars[i] = '-';
 				}
 				i++;

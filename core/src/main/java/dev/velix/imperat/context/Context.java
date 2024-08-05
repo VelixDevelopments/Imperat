@@ -1,7 +1,7 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.NotNull;
 
 /**

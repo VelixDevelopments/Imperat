@@ -3,9 +3,9 @@ package dev.velix.imperat.context.internal;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.EnumContextResolver;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
-import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.util.Registry;
+import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.concurrent.TimeUnit;
@@ -17,30 +17,30 @@ public final class ContextResolverRegistry<C> extends Registry<Class<?>, Context
 		super();
 		registerResolver(String.class, ((source, context, raw) -> raw));
 		registerResolver(Integer.class, (source, context, raw) -> {
-			if(TypeUtility.isInteger(raw)) {
+			if (TypeUtility.isInteger(raw)) {
 				return Integer.parseInt(raw);
-			}else {
+			} else {
 				throw exception(context, raw, Integer.class);
 			}
 		});
-		registerResolver(Long.class, (source, context, raw)-> {
-			if(TypeUtility.isLong(raw)) {
+		registerResolver(Long.class, (source, context, raw) -> {
+			if (TypeUtility.isLong(raw)) {
 				return Long.parseLong(raw);
-			}else {
+			} else {
 				throw exception(context, raw, Long.class);
 			}
 		});
 		registerResolver(Boolean.class, (source, context, raw) -> {
-			if(TypeUtility.isBoolean(raw)) {
+			if (TypeUtility.isBoolean(raw)) {
 				return Boolean.valueOf(raw);
-			}else {
+			} else {
 				throw exception(context, raw, Boolean.class);
 			}
 		});
-		registerResolver(Double.class, (source, context, raw)-> {
-			if(TypeUtility.isDouble(raw)) {
+		registerResolver(Double.class, (source, context, raw) -> {
+			if (TypeUtility.isDouble(raw)) {
 				return Double.parseDouble(raw);
-			}else {
+			} else {
 				throw exception(context, raw, Double.class);
 			}
 		});

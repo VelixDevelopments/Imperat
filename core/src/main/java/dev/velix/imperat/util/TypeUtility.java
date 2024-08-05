@@ -3,17 +3,17 @@ package dev.velix.imperat.util;
 public final class TypeUtility {
 
 	public static boolean isInteger(String string) {
-		if(string == null)return false;
+		if (string == null) return false;
 		try {
 			Integer.parseInt(string);
 			return true;
-		}catch (NumberFormatException ex) {
+		} catch (NumberFormatException ex) {
 			return false;
 		}
 	}
 
 	public static boolean isBoolean(String string) {
-		if(string == null)return false;
+		if (string == null) return false;
 		return Boolean.parseBoolean(string);
 	}
 

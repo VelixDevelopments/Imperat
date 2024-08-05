@@ -14,6 +14,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -32,6 +33,7 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * Registering a command into the dispatcher
+	 *
 	 * @param command the command to register
 	 */
 	void registerCommand(Command<C> command);
@@ -39,8 +41,9 @@ public interface CommandDispatcher<C> {
 	/**
 	 * Registers a command class built by the
 	 * annotations using a parser
+	 *
 	 * @param command the annotated command instance to parse
-	 * @param <T> the type of this class instance
+	 * @param <T>     the type of this class instance
 	 */
 	<T> void registerCommand(T command);
 
@@ -48,7 +51,8 @@ public interface CommandDispatcher<C> {
 	 * @param name the name/alias of the command
 	 * @return fetches {@link Command} with specific name
 	 */
-	@Nullable Command<C> getCommand(String name);
+	@Nullable
+	Command<C> getCommand(String name);
 
 	/**
 	 * @param parameter the parameter
@@ -60,10 +64,11 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * @param owningCommand the command owning this sub-command
-	 * @param name the name of the subcommand you're looking for
+	 * @param name          the name of the subcommand you're looking for
 	 * @return the subcommand of a command
 	 */
-	@Nullable Command<C> getSubCommand(String owningCommand, String name);
+	@Nullable
+	Command<C> getSubCommand(String owningCommand, String name);
 
 	/**
 	 * @return the factory for creation of
@@ -73,6 +78,7 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * sets the context factory {@link ContextFactory} for the contexts
+	 *
 	 * @param contextFactory the context factory to set
 	 */
 	void setContextFactory(ContextFactory<C> contextFactory);
@@ -85,18 +91,20 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * Fetches {@link ContextResolver} for a certain value
+	 *
 	 * @param resolvingValueType the value that the resolver ends providing it from the context
+	 * @param <T>                the type of value resolved from the context resolver
 	 * @return the context resolver of a certain type
-	 * @param <T> the type of value resolved from the context resolver
 	 */
 	@Nullable
 	<T> ContextResolver<C, T> getContextResolver(Class<T> resolvingValueType);
 
 	/**
 	 * Fetches the {@link ContextResolver} suitable for the {@link UsageParameter}
+	 *
 	 * @param usageParameter the parameter of a command's usage
+	 * @param <T>            the type of value that will be resolved by {@link ContextResolver}
 	 * @return the context resolver for this parameter's value type
-	 * @param <T> the type of value that will be resolved by {@link ContextResolver}
 	 */
 	@SuppressWarnings("unchecked")
 	default <T> ContextResolver<C, T> getContextResolver(UsageParameter usageParameter) {
@@ -105,9 +113,10 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * Registers {@link ContextResolver}
-	 * @param type the class-type of value being resolved from context
+	 *
+	 * @param type     the class-type of value being resolved from context
 	 * @param resolver the resolver for this value
-	 * @param <T> the type of value being resolved from context
+	 * @param <T>      the type of value being resolved from context
 	 */
 	<T> void registerContextResolver(Class<T> type, @NotNull ContextResolver<C, T> resolver);
 
@@ -119,17 +128,18 @@ public interface CommandDispatcher<C> {
 	/**
 	 * Fetches the suggestion provider/resolver for a specific type of
 	 * argument or parameter.
+	 *
 	 * @param parameter the parameter symbolizing the type and argument name
+	 * @param <T>       the type parameter representing the type of value that the suggestion resolver
+	 *                  will work with
 	 * @return the {@link SuggestionResolver} instance for that type
-	 * @param <T> the type parameter representing the type of value that the suggestion resolver
-	 *           will work with
 	 */
 	@SuppressWarnings("unchecked")
 	default @Nullable <T> SuggestionResolver<C, T> getSuggestionResolver(UsageParameter parameter) {
-		SuggestionResolver<C, T> resolver = getSuggestionResolver((Class<T>)parameter.getType());
+		SuggestionResolver<C, T> resolver = getSuggestionResolver((Class<T>) parameter.getType());
 		SuggestionResolver<C, T> argResolver = getArgumentSuggestionResolver(parameter.getName());
 
-		if(argResolver != null) {
+		if (argResolver != null) {
 			return argResolver;
 		}
 
@@ -139,45 +149,52 @@ public interface CommandDispatcher<C> {
 	/**
 	 * Fetches the suggestion provider/resolver for a specific type of
 	 * argument or parameter.
+	 *
 	 * @param clazz the clazz symbolizing the type
+	 * @param <T>   the type parameter representing the type of value that the suggestion resolver
+	 *              will work with
 	 * @return the {@link SuggestionResolver} instance for that type
-	 * @param <T> the type parameter representing the type of value that the suggestion resolver
-	 *           will work with
 	 */
-	@Nullable <T> SuggestionResolver<C, T> getSuggestionResolver(Class<T> clazz);
+	@Nullable
+	<T> SuggestionResolver<C, T> getSuggestionResolver(Class<T> clazz);
 
 	/**
 	 * Fetches the suggestion provider/resolver for a specific argument
 	 *
 	 * @param name the name of the argument
+	 * @param <T>  the type parameter representing the type of value that the suggestion resolver
+	 *             will work with
 	 * @return the {@link SuggestionResolver} instance for that argument
-	 * @param <T> the type parameter representing the type of value that the suggestion resolver
-	 *           will work with
 	 */
-	@Nullable <T> SuggestionResolver<C, T> getArgumentSuggestionResolver(String name);
+	@Nullable
+	<T> SuggestionResolver<C, T> getArgumentSuggestionResolver(String name);
 
 	/**
 	 * Registers a suggestion resolver
+	 *
 	 * @param suggestionResolver the suggestion resolver to register
-	 * @param <T> the type of value that the suggestion resolver will work with.
+	 * @param <T>                the type of value that the suggestion resolver will work with.
 	 */
 	<T> void registerSuggestionResolver(SuggestionResolver<C, T> suggestionResolver);
 
 	/**
 	 * Registers a suggestion resolver
+	 *
 	 * @param suggestionResolver the suggestion resolver to register
-	 * @param <T> the type of value that the suggestion resolver will work with.
+	 * @param <T>                the type of value that the suggestion resolver will work with.
 	 */
 	<T> void registerArgumentSuggestionResolver(String argumentName, SuggestionResolver<C, T> suggestionResolver);
 
 	/**
 	 * Sets the usage verifier to a new instance
+	 *
 	 * @param usageVerifier the usage verifier to set
 	 */
 	void setUsageVerifier(UsageVerifier<C> usageVerifier);
 
 	/**
 	 * Registers a caption
+	 *
 	 * @param caption the caption to register
 	 */
 	void registerCaption(Caption<C> caption);
@@ -185,27 +202,28 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * Sends a caption to the source
-	 * @param source the command sender
-	 * @param context the context of the command
-	 * @param usage the usage of the command, null if not resolved yet
+	 *
+	 * @param source    the command sender
+	 * @param context   the context of the command
+	 * @param usage     the usage of the command, null if not resolved yet
 	 * @param exception the error
-	 * @param key the id/key of the caption
+	 * @param key       the id/key of the caption
 	 */
 	void sendCaption(CaptionKey key,
-						  @NotNull Command<C> command,
+	                 @NotNull Command<C> command,
 	                 CommandSource<C> source,
 	                 Context<C> context,
 	                 @Nullable CommandUsage<C> usage,
-						  @Nullable Exception exception
+	                 @Nullable Exception exception
 	);
 
 
 	/**
 	 * Sends a caption to the source
 	 *
-	 * @param key the id/key of the caption
+	 * @param key     the id/key of the caption
 	 * @param command the command detected
-	 * @param source the command sender
+	 * @param source  the command sender
 	 * @param context the context of the command
 	 */
 	void sendCaption(CaptionKey key,
@@ -217,6 +235,7 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * Wraps the sender into a built-in command-sender type
+	 *
 	 * @param sender the sender's actual value
 	 * @return the wrapped command-sender type
 	 */
@@ -224,6 +243,7 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * Checks whether the type can be a command sender
+	 *
 	 * @param type the type
 	 * @return whether the type can be a command sender
 	 */
@@ -231,9 +251,10 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * Dispatches and executes a command with certain raw arguments
-	 * @param sender the sender/executor of this command
+	 *
+	 * @param sender      the sender/executor of this command
 	 * @param commandName the name of the command to execute
-	 * @param rawInput the command's args input
+	 * @param rawInput    the command's args input
 	 */
 	void dispatch(C sender, String commandName, String... rawInput);
 
@@ -245,14 +266,15 @@ public interface CommandDispatcher<C> {
 
 	/**
 	 * @param command the data about the command being written in the chat box
-	 * @param sender the sender writing the command
-	 * @param args the arguments currently written
+	 * @param sender  the sender writing the command
+	 * @param args    the arguments currently written
 	 * @return the suggestions at the current position
 	 */
 	List<String> suggest(Command<C> command, C sender, String[] args);
 
 	/**
 	 * Gets all registered commands
+	 *
 	 * @return the registered commands
 	 */
 	Collection<? extends Command<C>> getRegisteredCommands();

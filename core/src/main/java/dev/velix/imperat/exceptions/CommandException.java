@@ -15,8 +15,9 @@ public abstract class CommandException extends Exception {
 
 	/**
 	 * Handles the exception
+	 *
 	 * @param context the context
-	 * @param <C> the command-sender type
+	 * @param <C>     the command-sender type
 	 */
 	public abstract <C> void handle(Context<C> context);
 

@@ -1,12 +1,12 @@
 package dev.velix.imperat.caption.premade;
 
 import dev.velix.imperat.AbstractCommandDispatcher;
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
 import dev.velix.imperat.context.Context;
@@ -28,8 +28,8 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
 	}
 
 	/**
-	 * @param dispatcher the dispatcher
-	 * @param command the command
+	 * @param dispatcher    the dispatcher
+	 * @param command       the command
 	 * @param commandSource the source
 	 * @param context       the context
 	 * @param usage         the command usage, can be null if it hasn't been resolved yet
@@ -46,30 +46,30 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
 			  @Nullable Exception exception
 	) {
 
-		if(usage == null) {
+		if (usage == null) {
 			//UNKNOWN USAGE
 			return Messages.getMsg(Messages.INVALID_SYNTAX_UNKNOWN_USAGE,
 					  Placeholder.parsed("raw_args", context.getArguments().join(" ")));
-		}else {
-			final int last = context.getArguments().size()-1;
+		} else {
+			final int last = context.getArguments().size() - 1;
 
 			List<UsageParameter> params = new ArrayList<>(usage.getParameters())
 					  .stream()
-					  .filter((param)-> !param.isOptional() && param.getPosition() > last)
+					  .filter((param) -> !param.isOptional() && param.getPosition() > last)
 					  .toList();
 
 			StringBuilder builder = new StringBuilder();
-			for(int i = 0; i < params.size(); i++) {
+			for (int i = 0; i < params.size(); i++) {
 				UsageParameter param = params.get(i);
 				assert !param.isOptional();
 				builder.append(param.format(command));
-				if(i != params.size()-1)
+				if (i != params.size() - 1)
 					builder.append(" ");
 
 			}
 			//INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
 			return Messages.getMsg(Messages.INVALID_SYNTAX_INCOMPLETE_USAGE,
-					  Placeholder.parsed("required_args", builder.toString()))
+								 Placeholder.parsed("required_args", builder.toString()))
 					  .appendNewline()
 					  .append(AbstractCommandDispatcher.FULL_SYNTAX_PREFIX).append(
 								 Messages.getMsg(Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE, Placeholder.parsed("usage", dispatcher.commandPrefix() + CommandUsage.format(command, usage)))

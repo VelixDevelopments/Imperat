@@ -19,7 +19,6 @@ import dev.velix.imperat.command.CommandUsage;
  * therefore, if you want to add any greedy arguments,
  * you should put A SINGLE (not multiple) greedy argument
  * at the END of the usage parameters list ONLY
- *
  */
 public interface UsageVerifier<C> {
 
@@ -31,10 +30,10 @@ public interface UsageVerifier<C> {
 	boolean verify(CommandUsage<C> usage);
 
 	/**
-	 * E
 	 * @param usage1 the first usage
 	 * @param usage2 the second usage
-	 * @return whether both are usages similar and share similar indistinguishable parameters/syntax
+	 * @return whether both usages are similar
+	 * and/or share similar indistinguishable parameters or syntax
 	 */
 	boolean areAmbiguous(CommandUsage<C> usage1, CommandUsage<C> usage2);
 

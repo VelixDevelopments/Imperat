@@ -9,7 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a wrapper for the actual command's data
@@ -26,10 +28,12 @@ public interface Command<C> extends UsageParameter {
 	/**
 	 * @return The permission of the command
 	 */
-	@Nullable String getPermission();
+	@Nullable
+	String getPermission();
 
 	/**
 	 * Sets the permission of a command
+	 *
 	 * @param permission the permission of a command
 	 */
 	void setPermission(@Nullable String permission);
@@ -37,10 +41,12 @@ public interface Command<C> extends UsageParameter {
 	/**
 	 * @return The  description of a command
 	 */
-	@NotNull String getDescription();
+	@NotNull
+	String getDescription();
 
 	/**
 	 * Sets the description of a command
+	 *
 	 * @param description the desc to set
 	 */
 	void setDescription(String description);
@@ -53,6 +59,7 @@ public interface Command<C> extends UsageParameter {
 
 	/**
 	 * Sets the aliases of a command
+	 *
 	 * @param aliases the aliases for te command to set
 	 */
 	void addAliases(List<String> aliases);
@@ -60,6 +67,7 @@ public interface Command<C> extends UsageParameter {
 	/**
 	 * Sets the position of this command in a syntax
 	 * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
+	 *
 	 * @param position the position to set
 	 */
 	@ApiStatus.Internal
@@ -77,7 +85,8 @@ public interface Command<C> extends UsageParameter {
 	 * @return the default usage of the command
 	 * without any args
 	 */
-	@NotNull CommandUsage<C> getDefaultUsage();
+	@NotNull
+	CommandUsage<C> getDefaultUsage();
 
 	/**
 	 * @param execution sets what happens when there's no parameters
@@ -96,6 +105,7 @@ public interface Command<C> extends UsageParameter {
 
 	/**
 	 * Adds a usage to the command
+	 *
 	 * @param usage the usage {@link CommandUsage} of the command
 	 */
 	void addUsage(CommandUsage<C> usage);
@@ -111,7 +121,8 @@ public interface Command<C> extends UsageParameter {
 	 * @return the usage that doesn't include any subcommands , only
 	 * parameters
 	 */
-	@NotNull CommandUsage<C> getMainUsage();
+	@NotNull
+	CommandUsage<C> getMainUsage();
 
 	/**
 	 * @return Returns {@link AutoCompleter}
@@ -122,33 +133,35 @@ public interface Command<C> extends UsageParameter {
 	/**
 	 * @return the parent command of this sub-command
 	 */
-	@Nullable Command<C> getParent();
+	@Nullable
+	Command<C> getParent();
 
 	/**
 	 * The command to be added as a subcommand of this instance
+	 *
 	 * @param command the sub-command to be added
 	 */
 	void addSubCommand(Command<C> command);
 
 
-
 	/**
 	 * Creates and adds a new sub-command (if it doesn't exist) then add
 	 * the {@link CommandUsage} to the sub-command
-	 * @param subCommand the sub-command's unique name
-	 * @param aliases of the subcommand
-	 * @param usage the usage
+	 *
+	 * @param subCommand     the sub-command's unique name
+	 * @param aliases        of the subcommand
+	 * @param usage          the usage
 	 * @param attachDirectly whether the sub command's usage will be attached to
 	 *                       the main/default usage of the command directly or not
-	 * <p>
-	 *  if you have the command's default usage '/group' for example
-	 *  and then you add the usage with attachDirectly being true, the usage
-	 *  added will be in the form of "/command yoursubcommand param1 param2"
-	 *  However, if you set attachDirectly to false, this will merge all the command's usages
-	 *  automatically with the subcommand's usage, so if your command has a usage of '/command param1'
-	 *  then the final usage will be : "/command param1 yoursubcommand param2, param3"
+	 *                       <p>
+	 *                       if you have the command's default usage '/group' for example
+	 *                       and then you add the usage with attachDirectly being true, the usage
+	 *                       added will be in the form of "/command yoursubcommand param1 param2"
+	 *                       However, if you set attachDirectly to false, this will merge all the command's usages
+	 *                       automatically with the subcommand's usage, so if your command has a usage of '/command param1'
+	 *                       then the final usage will be : "/command param1 yoursubcommand param2, param3"
 	 *
-	 * </p>
+	 *                       </p>
 	 */
 	default void addSubCommandUsage(String subCommand,
 	                                List<String> aliases,
@@ -161,9 +174,9 @@ public interface Command<C> extends UsageParameter {
 		subCmd.addUsage(usage);
 
 		int position;
-		if(attachDirectly) {
-			position = getPosition()+1;
-		}else {
+		if (attachDirectly) {
+			position = getPosition() + 1;
+		} else {
 			CommandUsage<C> main = getMainUsage();
 			position = this.getPosition() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
 		}
@@ -192,8 +205,9 @@ public interface Command<C> extends UsageParameter {
 	/**
 	 * Creates and adds a new sub-command (if it doesn't exist) then add
 	 * the {@link CommandUsage} to the sub-command
+	 *
 	 * @param subCommand the sub-command's unique name
-	 * @param usage the usage
+	 * @param usage      the usage
 	 */
 	default void addSubCommandUsage(String subCommand, CommandUsage<C> usage) {
 		addSubCommandUsage(subCommand, usage, false);
@@ -203,7 +217,8 @@ public interface Command<C> extends UsageParameter {
 	 * @param name the name of the wanted sub-command
 	 * @return the sub-command of specific name
 	 */
-	@Nullable Command<C> getSubCommand(String name);
+	@Nullable
+	Command<C> getSubCommand(String name);
 
 	/**
 	 * @return the subcommands of this command
@@ -212,13 +227,13 @@ public interface Command<C> extends UsageParameter {
 	Collection<? extends Command<C>> getSubCommands();
 
 
-
 	/**
 	 * Adds a flag to this command
+	 *
 	 * @param flagName the flag's unique id/name to add to the command
-	 * @param alias the alias for this flag
+	 * @param alias    the alias for this flag
 	 */
-	default void addFlag(String flagName, String alias){
+	default void addFlag(String flagName, String alias) {
 		getKnownFlags().setData(flagName, CommandFlag.create(flagName, alias));
 	}
 
@@ -228,7 +243,7 @@ public interface Command<C> extends UsageParameter {
 	}
 
 
-	default boolean hasParent(){
+	default boolean hasParent() {
 		return getParent() != null;
 	}
 
@@ -283,6 +298,27 @@ public interface Command<C> extends UsageParameter {
 	default <CC> String format(Command<CC> owningCommand) {
 		return getName();
 	}
+
+
+	/**
+	 * whether to ignore permission checks on the auto-completion of command and
+	 * sub commands or not
+	 *
+	 * @return whether to ignore permission checks on the auto-completion of command and
+	 * sub commands or not
+	 */
+	boolean isIgnoringACPerms();
+
+	/**
+	 * if true , it will ignore permission checks
+	 * on the auto-completion of command and sub commands
+	 * <p>
+	 * otherwise, it will perform permission checks and
+	 * only tab-completes the usages/subcommands that you have permission for
+	 *
+	 * @param ignore true if you want to ignore the permission checks on tab completion of args
+	 */
+	void ignoreACPermissions(boolean ignore);
 
 	static <C> Command<C> createCommand(String name) {
 		return createCommand(null, name);

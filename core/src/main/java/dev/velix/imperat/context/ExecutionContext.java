@@ -26,18 +26,16 @@ public interface ExecutionContext {
 
 	/**
 	 * Fetches a resolved argument's value
-	 * @see ResolvedArgument
 	 *
 	 * @param name the name of the command
-	 *
+	 * @param <T>  the type of this value
 	 * @return the value of the resolved argument
-	 *
-	 * @param <T> the type of this value
+	 * @see ResolvedArgument
 	 */
 	<T> @Nullable T getArgument(String name);
 
 	default String getRawArgument(int index) {
-		if(index >= getArguments().size() || index < 0) return null;
+		if (index >= getArguments().size() || index < 0) return null;
 		return getArguments().get(index);
 	}
 

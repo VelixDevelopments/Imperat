@@ -12,7 +12,7 @@ public final class InvalidCommandUsageException extends RuntimeException {
 	 */
 	public <C> InvalidCommandUsageException(Command<C> command,
 	                                        CommandUsage<C> usage) {
-		super (
+		super(
 				  String.format("Invalid command usage: '%s'", CommandUsage.format(command, usage))
 		);
 	}

@@ -1,19 +1,20 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.exceptions.TokenParseException;
 import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exceptions.TokenParseException;
 import dev.velix.imperat.resolvers.ContextResolver;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
@@ -52,25 +53,25 @@ final class SmartUsageResolve<C> {
 		final ArgumentQueue raws = context.getArguments().copy();
 
 		int lengthWithoutFlags = (int) usage.getParameters()
-							 .stream().filter((param)-> !param.isFlag())
-							 .count();
+				  .stream().filter((param) -> !param.isFlag())
+				  .count();
 
 		while (position.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
 
 			UsageParameter currentParameter = position.peekParameter(parameterList);
 			assert currentParameter != null;
-			if(currentParameter.isFlag()) {
+			if (currentParameter.isFlag()) {
 				//debug("Found flag param '%s' at %s", currentParameter.getName(), position.parameter);
 				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 				continue;
 			}
 
 			String currentRaw = position.peekRaw(raws);
-			if(currentRaw == null) {
+			if (currentRaw == null) {
 				for (int i = position.parameter; i < parameterList.size(); i++) {
 					UsageParameter parameter = position.peekParameter(parameterList);
 					assert parameter != null;
-					if(!parameter.isOptional()) {
+					if (!parameter.isOptional()) {
 						//cannot happen if no bugs, but just in case
 						throw new IllegalStateException(String.format(
 								  "Missing required parameters to be filled '%s'", parameter.format(command))
@@ -87,21 +88,21 @@ final class SmartUsageResolve<C> {
 			}
 			//debug("Raw= %s at %s", currentRaw, position.raw);
 
-			if(context.getFlagExtractor().isKnownFlag(mainCommand, currentRaw)) {
+			if (context.getFlagExtractor().isKnownFlag(mainCommand, currentRaw)) {
 				//debug("Found flag raw '%s' at %s", currentRaw, position.raw);
 				position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
 				continue;
 			}
 
-			if(currentParameter.isCommand()) {
+			if (currentParameter.isCommand()) {
 
 				//debug("Found command %s at %s", currentParameter.getName(), position.parameter);
 
 				@SuppressWarnings("unchecked")
 				Command<C> parameterSubCmd = (Command<C>) currentParameter;
-				if(parameterSubCmd.hasName(currentRaw)) {
+				if (parameterSubCmd.hasName(currentRaw)) {
 					this.command = parameterSubCmd;
-				}else {
+				} else {
 					throw new IllegalArgumentException("Unknown sub-command '" + currentRaw + "'");
 				}
 
@@ -114,7 +115,7 @@ final class SmartUsageResolve<C> {
 			if (resolver == null)
 				throw new IllegalStateException("Cannot find resolver for type '" + currentParameter.getType().getName() + "'");
 
-			if(currentParameter.isOptional()) {
+			if (currentParameter.isOptional()) {
 				//debug("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
 				//debug("raws-size= %s, usageMaxWithoutFlags= %s", raws.size() , (lengthWithoutFlags));
 				//optional argument handling
@@ -122,7 +123,7 @@ final class SmartUsageResolve<C> {
 						  parameterList, currentRaw, currentParameter,
 						  lengthWithoutFlags);
 
-			}else {
+			} else {
 				//debug("Required parameter '%s' at position %s", currentParameter.getName(), position.parameter);
 				resolveRequired(context, resolver,
 						  raws, currentRaw, currentParameter);
@@ -138,22 +139,22 @@ final class SmartUsageResolve<C> {
 	                             String currentRaw,
 	                             UsageParameter currentParameter) throws CommandException {
 		Object resolveResult;
-		if(currentParameter.isGreedy()) {
+		if (currentParameter.isGreedy()) {
 
 			StringBuilder builder = new StringBuilder();
-			for(int i = position.raw; i < raws.size(); i++) {
+			for (int i = position.raw; i < raws.size(); i++) {
 				builder.append(position.peekRaw(raws)).append(" ");
 				position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
 			}
 
-			if(builder.isEmpty()) {
+			if (builder.isEmpty()) {
 				throw new TokenParseException("Failed to parse greedy argument '"
 						  + currentParameter.format(command) + "'");
 			}
 			resolveResult = builder.toString();
 
 			position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-		}else {
+		} else {
 			resolveResult = this.getResult(resolver, context, currentRaw);
 			position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
 		}
@@ -169,16 +170,16 @@ final class SmartUsageResolve<C> {
 	                             String currentRaw,
 	                             UsageParameter currentParameter,
 	                             int lengthWithoutFlags) throws CommandException {
-		if(raws.size() < lengthWithoutFlags) {
-			int diff = lengthWithoutFlags-raws.size();
+		if (raws.size() < lengthWithoutFlags) {
+			int diff = lengthWithoutFlags - raws.size();
 
 			Object resolveResult = getResult(resolver, context, currentRaw);
 
-			if(!position.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
+			if (!position.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
 
-				if(diff > 1) {
-					UsageParameter nextParam = getNextParam(position.parameter+1, parameterList, (param)-> !param.isOptional());
-					if(nextParam == null) {
+				if (diff > 1) {
+					UsageParameter nextParam = getNextParam(position.parameter + 1, parameterList, (param) -> !param.isOptional());
+					if (nextParam == null) {
 						position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 						return;
 					}
@@ -186,17 +187,17 @@ final class SmartUsageResolve<C> {
 					context.resolveArgument(command, currentRaw, position.parameter,
 							  currentParameter, currentParameter.getDefaultValue());
 
-					context.resolveArgument(command, currentRaw, position.parameter+1,
+					context.resolveArgument(command, currentRaw, position.parameter + 1,
 							  nextParam, resolveResult);
 
 					position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-				}else {
+				} else {
 					context.resolveArgument(command, currentRaw, position.parameter,
 							  currentParameter, resolveResult);
 					position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
 				}
 
-			}else {
+			} else {
 
 				context.resolveArgument(command, currentRaw, position.parameter,
 						  currentParameter, currentParameter.getDefaultValue());
@@ -204,19 +205,18 @@ final class SmartUsageResolve<C> {
 				//shifting the parameters && raw again, so it can start after the new shift
 				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 			}
-		}
-		else {
+		} else {
 
 			Object resolveResult;
-			if(currentParameter.isGreedy()) {
+			if (currentParameter.isGreedy()) {
 
 				StringBuilder builder = new StringBuilder();
-				for(int i = position.raw; i < raws.size(); i++) {
+				for (int i = position.raw; i < raws.size(); i++) {
 					builder.append(position.peekRaw(raws)).append(" ");
 					position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
 				}
 
-				if(builder.isEmpty()) {
+				if (builder.isEmpty()) {
 					throw new TokenParseException("Failed to parse greedy argument '"
 							  + currentParameter.format(command) + "'");
 				}
@@ -225,7 +225,7 @@ final class SmartUsageResolve<C> {
 				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 				context.resolveArgument(command, currentRaw, position.parameter,
 						  currentParameter, resolveResult);
-			}else {
+			} else {
 				resolveResult = getResult(resolver, context, currentRaw);
 				context.resolveArgument(command, currentRaw, position.parameter, currentParameter, resolveResult);
 				position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
@@ -245,9 +245,9 @@ final class SmartUsageResolve<C> {
 
 	private @Nullable UsageParameter getNextParam(int start, List<UsageParameter> parameters,
 	                                              Predicate<UsageParameter> parameterCondition) {
-		if(start >= parameters.size()) return null;
+		if (start >= parameters.size()) return null;
 		for (int i = start; i < parameters.size(); i++) {
-			if(parameterCondition.test(parameters.get(i)))
+			if (parameterCondition.test(parameters.get(i)))
 				return parameters.get(i);
 
 		}
@@ -261,9 +261,9 @@ final class SmartUsageResolve<C> {
 		private int parameter, raw;
 
 		public void shift(ShiftTarget shift, IntUnaryOperator operator) {
-			if(shift == ShiftTarget.RAW_ONLY)
+			if (shift == ShiftTarget.RAW_ONLY)
 				this.raw = operator.applyAsInt(raw);
-			else if(shift == ShiftTarget.PARAMETER_ONLY)
+			else if (shift == ShiftTarget.PARAMETER_ONLY)
 				this.parameter = operator.applyAsInt(parameter);
 			else {
 				this.raw = operator.applyAsInt(raw);
@@ -289,18 +289,18 @@ final class SmartUsageResolve<C> {
 		public @Nullable String peekRaw(ArgumentQueue raws) {
 			try {
 				return raws.get(raw);
-			}catch (Exception ex){
+			} catch (Exception ex) {
 				return null;
 			}
 		}
 
 		public boolean isLast(ShiftTarget shiftTarget, int maxParams, int maxRaws) {
-			if(shiftTarget == ShiftTarget.PARAMETER_ONLY)
-				return parameter == maxParams-1;
-			else if(shiftTarget == ShiftTarget.RAW_ONLY)
-				return raw == maxRaws-1;
+			if (shiftTarget == ShiftTarget.PARAMETER_ONLY)
+				return parameter == maxParams - 1;
+			else if (shiftTarget == ShiftTarget.RAW_ONLY)
+				return raw == maxRaws - 1;
 			else
-				return parameter == maxParams-1 && raw == maxRaws-1;
+				return parameter == maxParams - 1 && raw == maxRaws - 1;
 		}
 
 		public boolean isLast(ShiftTarget shiftTarget, List<UsageParameter> params, ArgumentQueue raws) {
@@ -309,11 +309,12 @@ final class SmartUsageResolve<C> {
 	}
 
 	enum ShiftOperation {
-		RIGHT(value -> value+1),
+		RIGHT(value -> value + 1),
 
-		LEFT(value -> value-1);
+		LEFT(value -> value - 1);
 
 		private final IntUnaryOperator operator;
+
 		ShiftOperation(IntUnaryOperator operator) {
 			this.operator = operator;
 		}
@@ -322,9 +323,9 @@ final class SmartUsageResolve<C> {
 
 	enum ShiftTarget {
 
-		RAW_ONLY((pos, maxParam, maxRaw)-> pos.raw < maxRaw),
+		RAW_ONLY((pos, maxParam, maxRaw) -> pos.raw < maxRaw),
 
-		PARAMETER_ONLY((pos, maxParam, maxRaw)-> pos.parameter < maxParam),
+		PARAMETER_ONLY((pos, maxParam, maxRaw) -> pos.parameter < maxParam),
 
 		ALL((pos, maxRaw, maxParameter) ->
 				  pos.raw < maxRaw && pos.parameter < maxParameter);

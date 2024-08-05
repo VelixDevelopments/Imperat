@@ -13,8 +13,7 @@ public final class TokenParseException extends RuntimeException {
 	/**
 	 * Return a new {@link TokenParseException} with the given message, cause, source and position.
 	 *
-	 * @param message  The message to use for this exception
-
+	 * @param message The message to use for this exception
 	 */
 	public TokenParseException(String message) {
 		super(message);

@@ -12,6 +12,7 @@ import java.util.Map;
 public final class SuggestionResolverRegistry<C> extends Registry<Class<?>, SuggestionResolver<C, ?>> {
 
 	private final Map<String, SuggestionResolver<C, ?>> resolversPerArg;
+
 	public SuggestionResolverRegistry() {
 		super();
 		resolversPerArg = new HashMap<>();

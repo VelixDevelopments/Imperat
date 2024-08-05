@@ -8,11 +8,11 @@ import dev.velix.imperat.util.jeflect.ByteClass;
  */
 public interface ClassFileParser {
 
-    /**
-     * Parses the bytecode of the class.
-     *
-     * @param classFileBuffer buffer containing class bytecode
-     * @return {@link ByteClass} instance containing parsed class data
-     */
-    ByteClass parse(byte[] classFileBuffer);
+	/**
+	 * Parses the bytecode of the class.
+	 *
+	 * @param classFileBuffer buffer containing class bytecode
+	 * @return {@link ByteClass} instance containing parsed class data
+	 */
+	ByteClass parse(byte[] classFileBuffer);
 }

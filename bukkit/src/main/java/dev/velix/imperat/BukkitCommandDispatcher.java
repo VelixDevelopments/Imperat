@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
+
 import java.util.Map;
 
 public final class BukkitCommandDispatcher extends AbstractCommandDispatcher<CommandSender> {
@@ -30,7 +31,7 @@ public final class BukkitCommandDispatcher extends AbstractCommandDispatcher<Com
 	public static BukkitCommandDispatcher create(Plugin plugin) {
 		RegisteredServiceProvider<BukkitCommandDispatcher> provider =
 				  Bukkit.getServicesManager().getRegistration(BukkitCommandDispatcher.class);
-		if(provider == null) {
+		if (provider == null) {
 			BukkitCommandDispatcher dispatcher = new BukkitCommandDispatcher(plugin);
 			Bukkit.getServicesManager().register(BukkitCommandDispatcher.class, dispatcher, plugin, ServicePriority.Normal);
 			return dispatcher;
@@ -65,6 +66,7 @@ public final class BukkitCommandDispatcher extends AbstractCommandDispatcher<Com
 
 	/**
 	 * Registering a command into the dispatcher
+	 *
 	 * @param command the command to register
 	 */
 	@Override
@@ -79,7 +81,7 @@ public final class BukkitCommandDispatcher extends AbstractCommandDispatcher<Com
 	@Override
 	public PermissionResolver<CommandSender> getPermissionResolver() {
 		return ((source, permission) -> {
-			if(permission == null) return true;
+			if (permission == null) return true;
 			CommandSender sender = source.getOrigin();
 			return sender.hasPermission(permission);
 		});

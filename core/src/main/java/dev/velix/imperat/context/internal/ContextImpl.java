@@ -2,8 +2,8 @@ package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.CommandFlagExtractor;
+import dev.velix.imperat.context.Context;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

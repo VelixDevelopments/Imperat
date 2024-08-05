@@ -7,7 +7,7 @@ public final class GroupRegistry extends Registry<String, Group> {
 	private static GroupRegistry instance;
 
 	public static GroupRegistry getInstance() {
-		if(instance == null)
+		if (instance == null)
 			instance = new GroupRegistry();
 		return instance;
 	}

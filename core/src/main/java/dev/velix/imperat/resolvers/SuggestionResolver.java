@@ -11,8 +11,9 @@ import java.util.List;
 /**
  * Represents a suggestion providing interface
  * for an argument/parameter
- * @see dev.velix.imperat.command.UsageParameter
+ *
  * @param <C> the command-sender type
+ * @see dev.velix.imperat.command.UsageParameter
  */
 public interface SuggestionResolver<C, T> {
 
@@ -22,12 +23,12 @@ public interface SuggestionResolver<C, T> {
 	Class<T> getType();
 
 	/**
-	 * @param command the running command
-	 * @param source the sender of the command
-	 * @param queue the argument raw input
+	 * @param command             the running command
+	 * @param source              the sender of the command
+	 * @param queue               the argument raw input
 	 * @param parameterToComplete the parameter of the arg to complete
-	 * @param argToComplete the current raw argument/input that's being requested
-	 *                      to complete
+	 * @param argToComplete       the current raw argument/input that's being requested
+	 *                            to complete
 	 * @return the auto-completed suggestions of the current argument
 	 */
 	List<String> autoComplete(Command<C> command,

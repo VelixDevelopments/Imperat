@@ -5,11 +5,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a required cooldown of a {@link dev.velix.imperat.command.CommandUsage}
- * @see TimeUnit
- * @see Duration
  *
  * @param value the value for this
  * @param unit
+ * @see TimeUnit
+ * @see Duration
  */
 public record UsageCooldown(long value, TimeUnit unit) {
 

@@ -53,8 +53,8 @@ public final class StringTokenizer {
 			assert character != null;
 			character = iterator.next();
 
-			if ( (quoted && character == start)
-					  || (!quoted && Character.isWhitespace(character)) ) {
+			if ((quoted && character == start)
+					  || (!quoted && Character.isWhitespace(character))) {
 				break;
 			}
 

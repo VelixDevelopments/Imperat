@@ -25,7 +25,7 @@ public final class EnumContextResolver<C, E extends Enum<E>> implements ContextR
 	public E resolve(CommandSource<C> source, Context<C> context, String raw) throws CommandException {
 		try {
 			return Enum.valueOf(enumType, raw.toUpperCase());
-		}catch (EnumConstantNotPresentException ex) {
+		} catch (EnumConstantNotPresentException ex) {
 			throw new ContextResolveException("Invalid " + enumType.getSimpleName() + " '" + raw + "'");
 		}
 	}

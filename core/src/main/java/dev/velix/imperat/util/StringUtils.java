@@ -101,12 +101,12 @@ public final class StringUtils {
 
 	public static String normalizedParameterFormatting(String parameterContent, boolean optional) {
 		String prefix, suffix;
-		if(optional) {
-			prefix="[";
+		if (optional) {
+			prefix = "[";
 			suffix = "]";
-		}else {
-			prefix="<";
-			suffix=">";
+		} else {
+			prefix = "<";
+			suffix = ">";
 		}
 		return prefix + parameterContent + suffix;
 	}

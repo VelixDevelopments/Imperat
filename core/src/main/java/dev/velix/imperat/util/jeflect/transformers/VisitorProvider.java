@@ -6,5 +6,5 @@ import java.util.function.Function;
 
 @FunctionalInterface
 public interface VisitorProvider {
-    Function<ClassVisitor, ClassVisitor> get(String className);
+	Function<ClassVisitor, ClassVisitor> get(String className);
 }

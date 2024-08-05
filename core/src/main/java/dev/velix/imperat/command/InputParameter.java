@@ -1,6 +1,7 @@
 package dev.velix.imperat.command;
 
 import org.jetbrains.annotations.ApiStatus;
+
 import java.util.Objects;
 
 @ApiStatus.Internal
@@ -16,7 +17,7 @@ abstract class InputParameter implements UsageParameter {
 	                         boolean literal, boolean optional, boolean flag, boolean greedy,
 	                         Object defaultValue) {
 		this.name = name;
-		this.type= type;
+		this.type = type;
 		this.literal = literal;
 		this.optional = optional;
 		this.flag = flag;
@@ -101,7 +102,7 @@ abstract class InputParameter implements UsageParameter {
 	 */
 	@Override
 	public boolean isGreedy() {
-		if(this.type != String.class && greedy) {
+		if (this.type != String.class && greedy) {
 			throw new IllegalStateException(
 					  String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type.getName())
 			);

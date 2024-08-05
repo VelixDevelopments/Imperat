@@ -1,27 +1,34 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.caption.*;
+import dev.velix.imperat.caption.Caption;
+import dev.velix.imperat.caption.CaptionKey;
+import dev.velix.imperat.caption.CaptionRegistry;
+import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.CommandUsageLookup;
+import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
+import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextResolverRegistry;
-import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
+import dev.velix.imperat.context.internal.DefaultContextFactory;
 import dev.velix.imperat.exceptions.AmbiguousUsageAdditionException;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.InvalidCommandUsageException;
 import dev.velix.imperat.resolvers.ContextResolver;
-import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.internal.DefaultContextFactory;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.verification.UsageVerifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.*;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @ApiStatus.Internal
 public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<C> {
@@ -42,6 +49,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	private final CaptionRegistry<C> captionRegistry;
 
 	private final AnnotationParser<C> annotationParser;
+
 	public AbstractCommandDispatcher() {
 		contextFactory = new DefaultContextFactory<>();
 		contextResolverRegistry = new ContextResolverRegistry<>();
@@ -53,6 +61,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 	/**
 	 * Registering a command into the dispatcher
+	 *
 	 * @param command the command to register
 	 */
 	@Override
@@ -71,7 +80,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 				}
 			}
 			commands.put(command.getName().toLowerCase(), command);
-		}catch (RuntimeException ex) {
+		} catch (RuntimeException ex) {
 			ex.printStackTrace();
 		}
 
@@ -98,9 +107,9 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		final String cmdName = name.toLowerCase();
 
 		Command<C> result = commands.get(cmdName);
-		if(result != null) return result;
-		for(Command<C> headCommands : commands.values()) {
-			if(headCommands.hasName(cmdName)) return headCommands;
+		if (result != null) return result;
+		for (Command<C> headCommands : commands.values()) {
+			if (headCommands.hasName(cmdName)) return headCommands;
 		}
 
 		return null;
@@ -114,11 +123,11 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	@Override
 	public @Nullable Command<C> getSubCommand(String owningCommand, String name) {
 		Command<C> owningCmd = getCommand(owningCommand);
-		if(owningCmd == null) return null;
+		if (owningCmd == null) return null;
 
-		for(Command<C> subCommand : owningCmd.getSubCommands()) {
+		for (Command<C> subCommand : owningCmd.getSubCommands()) {
 			Command<C> result = search(subCommand, name);
-			if(result != null) return result;
+			if (result != null) return result;
 		}
 
 		return null;
@@ -223,7 +232,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	/**
 	 * Registers a suggestion resolver
 	 *
-	 * @param argumentName the argument name
+	 * @param argumentName       the argument name
 	 * @param suggestionResolver the suggestion resolver to register
 	 */
 	@Override
@@ -244,7 +253,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 	@ApiStatus.Internal
 	private Command<C> search(Command<C> sub, String name) {
-		if(sub.hasName(name)) {
+		if (sub.hasName(name)) {
 			return sub;
 		}
 
@@ -277,7 +286,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	 * @param key     the id/key of the caption
 	 * @param source  the command sender
 	 * @param context the context of the command
-	 * @param usage the usage of the command
+	 * @param usage   the usage of the command
 	 */
 	@Override
 	public void sendCaption(CaptionKey key,
@@ -306,7 +315,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	                        @Nullable CommandUsage<C> usage,
 	                        @Nullable Exception exception) {
 		Caption<C> caption = captionRegistry.getCaption(key);
-		if(caption == null) {
+		if (caption == null) {
 			throw new IllegalStateException(String.format("Unregistered caption from key '%s'", key.id()));
 		}
 		source.reply(CAPTION_EXECUTION_ERROR_PREFIX.append(caption.asComponent(this, command, source, context, usage)));
@@ -330,11 +339,11 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 		try {
 			handleExecution(commandSource, plainContext);
-		}catch (Exception ex) {
-			if(!(ex instanceof CommandException))
+		} catch (Exception ex) {
+			if (!(ex instanceof CommandException))
 				ex.printStackTrace();
 			else
-				((CommandException)ex).handle(plainContext);
+				((CommandException) ex).handle(plainContext);
 		}
 	}
 
@@ -342,12 +351,12 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	private void handleExecution(CommandSource<C> source, Context<C> context) throws CommandException {
 
 		Command<C> command = getCommand(context.getCommandUsed());
-		if(command == null) {
+		if (command == null) {
 			source.reply("Unknown command !");
 			return;
 		}
 
-		if(!getPermissionResolver().hasPermission(source, command.getPermission())) {
+		if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
 			sendCaption(CaptionKey.NO_PERMISSION, command, source, context, null);
 			return;
 		}
@@ -357,7 +366,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		CommandUsageLookup<C>.SearchResult searchResult = command.lookup()
 				  .searchUsage(context);
 
-		if(searchResult.getCommandUsage() == null || context.getArguments().isEmpty()) {
+		if (searchResult.getCommandUsage() == null || context.getArguments().isEmpty()) {
 			System.out.println("EXECUTING DEFAULT");
 			CommandUsage<C> defaultUsage = command.getDefaultUsage();
 			defaultUsage.getExecution().execute(source, context);
@@ -366,12 +375,12 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 		//executing usage
 		CommandUsage<C> usage = searchResult.getCommandUsage();
-		if(!getPermissionResolver().hasUsagePermission(source, usage)) {
+		if (!getPermissionResolver().hasUsagePermission(source, usage)) {
 			sendCaption(CaptionKey.NO_PERMISSION, command, source, context, null);
 			return;
 		}
 
-		if(searchResult.getResult() == CommandUsageLookup.Result.FOUND_COMPLETE)
+		if (searchResult.getResult() == CommandUsageLookup.Result.FOUND_COMPLETE)
 			executeUsage(command, source, context, usage);
 		else
 			sendCaption(CaptionKey.INVALID_SYNTAX, command, source, context, usage);
@@ -382,7 +391,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	                          CommandSource<C> source,
 	                          Context<C> context,
 	                          CommandUsage<C> usage) throws CommandException {
-		if(usage.getCooldownHandler().hasCooldown(source)) {
+		if (usage.getCooldownHandler().hasCooldown(source)) {
 			sendCaption(CaptionKey.COOLDOWN, command, source, context, usage);
 			return;
 		}
@@ -401,12 +410,13 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	 */
 	@Override
 	public List<String> suggest(Command<C> command, C sender, String[] args) {
-		//TODO implement later
-		return command.getAutoCompleter().autoComplete(this, sender, args);
+		CommandSource<C> source = wrapSender(sender);
+		return command.getAutoCompleter().autoComplete(this, source, args);
 	}
 
 	/**
 	 * Gets all registered commands
+	 *
 	 * @return the registered commands
 	 */
 	@Override

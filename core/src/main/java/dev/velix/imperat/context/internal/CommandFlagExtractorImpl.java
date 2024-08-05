@@ -14,7 +14,7 @@ import java.util.Objects;
 public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C> {
 
 
-	private FlagRegistry flagRegistry;
+	private final FlagRegistry flagRegistry;
 
 	CommandFlagExtractorImpl() {
 		this.flagRegistry = new FlagRegistry();
@@ -40,7 +40,7 @@ public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C
 	 */
 	@Override
 	public boolean isKnownFlag(Command<C> command, String rawArgFlag) {
-		if(!isArgumentFlag(rawArgFlag))return false;
+		if (!isArgumentFlag(rawArgFlag)) return false;
 		String flagAliasUsed = getFlagAliasUsed(rawArgFlag);
 		return command.getKnownFlags()
 				  .search((name, flag) -> flag.hasAlias(flagAliasUsed))
@@ -60,18 +60,18 @@ public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C
 	 */
 	@Override
 	public void extract(@NotNull Command<C> command,
-	                                    @NotNull ArgumentQueue queue) {
+	                    @NotNull ArgumentQueue queue) {
 		try {
 
 			queue.stream()
-				 .filter((flagArg) -> isKnownFlag(command, flagArg))
-				 .map((flagArg) -> {
-					 String flagAliasUsed = getFlagAliasUsed(flagArg);
-					 return command.getKnownFlags()
-								.searchFlagAlias(flagAliasUsed).orElse(null);
-				 })
-				 .filter(Objects::nonNull)
-			.forEach((flag)-> flagRegistry.setData(flag.name(), flag));
+					  .filter((flagArg) -> isKnownFlag(command, flagArg))
+					  .map((flagArg) -> {
+						  String flagAliasUsed = getFlagAliasUsed(flagArg);
+						  return command.getKnownFlags()
+									 .searchFlagAlias(flagAliasUsed).orElse(null);
+					  })
+					  .filter(Objects::nonNull)
+					  .forEach((flag) -> flagRegistry.setData(flag.name(), flag));
 
 		} catch (Exception exc) {
 			throw new RuntimeException(exc);

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	private final CommandSender sender;
 	private final BukkitAudiences audiences;
+
 	public BukkitCommandSource(CommandSender sender, BukkitAudiences audiences) {
 		this.sender = sender;
 		this.audiences = audiences;

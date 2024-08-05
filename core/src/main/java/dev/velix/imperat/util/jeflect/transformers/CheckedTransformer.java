@@ -9,42 +9,42 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public abstract class CheckedTransformer implements ClassFileTransformer {
-    private final Supplier<List<Throwable>> supplier;
-    private List<Throwable> problems;
+	private final Supplier<List<Throwable>> supplier;
+	private List<Throwable> problems;
 
-    protected CheckedTransformer(Supplier<List<Throwable>> supplier) {
-        this.supplier = supplier;
-        this.problems = Collections.synchronizedList(supplier.get());
-    }
+	protected CheckedTransformer(Supplier<List<Throwable>> supplier) {
+		this.supplier = supplier;
+		this.problems = Collections.synchronizedList(supplier.get());
+	}
 
-    protected CheckedTransformer() {
-        this(LinkedList::new);
-    }
+	protected CheckedTransformer() {
+		this(LinkedList::new);
+	}
 
-    public synchronized void validate() {
-        if (!problems.isEmpty()) {
-            throw new ClassTransformException(problems);
-        }
-        this.problems = Collections.synchronizedList(supplier.get());
-    }
+	public synchronized void validate() {
+		if (!problems.isEmpty()) {
+			throw new ClassTransformException(problems);
+		}
+		this.problems = Collections.synchronizedList(supplier.get());
+	}
 
-    protected abstract byte[] checkedTransform(ClassLoader loader,
-                                               String className,
-                                               Class<?> classBeingRedefined,
-                                               ProtectionDomain protectionDomain,
-                                               byte[] classfileBuffer) throws Throwable;
+	protected abstract byte[] checkedTransform(ClassLoader loader,
+	                                           String className,
+	                                           Class<?> classBeingRedefined,
+	                                           ProtectionDomain protectionDomain,
+	                                           byte[] classfileBuffer) throws Throwable;
 
-    @Override
-    public byte[] transform(ClassLoader loader,
-                            String className,
-                            Class<?> classBeingRedefined,
-                            ProtectionDomain protectionDomain,
-                            byte[] classfileBuffer) {
-        try {
-            return checkedTransform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
-        } catch (Throwable e) {
-            problems.add(e);
-            return classfileBuffer;
-        }
-    }
+	@Override
+	public byte[] transform(ClassLoader loader,
+	                        String className,
+	                        Class<?> classBeingRedefined,
+	                        ProtectionDomain protectionDomain,
+	                        byte[] classfileBuffer) {
+		try {
+			return checkedTransform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+		} catch (Throwable e) {
+			problems.add(e);
+			return classfileBuffer;
+		}
+	}
 }

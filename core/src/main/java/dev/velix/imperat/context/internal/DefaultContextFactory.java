@@ -1,7 +1,7 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -28,8 +28,8 @@ public class DefaultContextFactory<C> implements ContextFactory<C> {
 	}
 
 	/**
-	 * @param command       the command that's running
-	 * @param plainContext  the context plain
+	 * @param command      the command that's running
+	 * @param plainContext the context plain
 	 * @return the context after resolving args into values for
 	 * later on parsing it into the execution
 	 */

@@ -16,6 +16,7 @@ class BukkitUtil {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public static Map<String, org.bukkit.command.Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException {
 		CraftServer craftServer = (CraftServer) getServer();
 		Field commandMapField = craftServer.getClass().getDeclaredField("commandMap");
@@ -25,7 +26,7 @@ class BukkitUtil {
 		// Get the commands registered in the command map
 		Field hashMapCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
 		hashMapCommandsField.setAccessible(true);
-		return (Map<String, Command>)hashMapCommandsField.get(commandMap);
+		return (Map<String, Command>) hashMapCommandsField.get(commandMap);
 	}
 
 }

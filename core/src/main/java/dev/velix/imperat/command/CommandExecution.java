@@ -13,8 +13,9 @@ public interface CommandExecution<C> {
 
 	/**
 	 * Executes the command's actions
+	 *
 	 * @param commandSource the source/sender of this command
-	 * @param context the context of the command
+	 * @param context       the context of the command
 	 */
 	void execute(CommandSource<C> commandSource,
 	             ExecutionContext context);

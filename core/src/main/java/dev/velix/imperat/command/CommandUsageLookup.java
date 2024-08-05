@@ -1,10 +1,10 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import lombok.Data;
 import org.jetbrains.annotations.ApiStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -20,11 +20,11 @@ public final class CommandUsageLookup<C> {
 
 
 	public SearchResult searchUsage(Context<C> context) {
-		for(CommandUsage<C> commandUsage : primeCommand.getUsages()) {
+		for (CommandUsage<C> commandUsage : primeCommand.getUsages()) {
 			System.out.println("CHECKING " + CommandUsage.format(this.primeCommand, commandUsage));
-			if(usageMatchesContext(context, commandUsage))
+			if (usageMatchesContext(context, commandUsage))
 				return new SearchResult(commandUsage, Result.FOUND_COMPLETE);
-			else if(commandUsage.hasParamType(Command.class) && checkResolvedLogic(context, commandUsage))
+			else if (commandUsage.hasParamType(Command.class) && checkResolvedLogic(context, commandUsage))
 				return new SearchResult(commandUsage, Result.FOUND_INCOMPLETE);
 		}
 
@@ -33,7 +33,7 @@ public final class CommandUsageLookup<C> {
 
 	public List<CommandUsage<C>> findUsages(Predicate<CommandUsage<C>> predicate) {
 		List<CommandUsage<C>> usages = new ArrayList<>();
-		for(CommandUsage<C> usage : primeCommand.getUsages()) {
+		for (CommandUsage<C> usage : primeCommand.getUsages()) {
 			if (predicate.test(usage)) {
 				usages.add(usage);
 			}
@@ -56,18 +56,18 @@ public final class CommandUsageLookup<C> {
 
 		int i = 0;
 		while (!rawArgs.isEmpty()) {
-			if(i >= parameters.size()) break;
+			if (i >= parameters.size()) break;
 
 			final String raw = rawArgs.poll();
 			final UsageParameter parameter = parameters.get(i);
 
-			if(parameter.isFlag())
+			if (parameter.isFlag())
 				continue;
 
-			if(parameter.isCommand()) {
+			if (parameter.isCommand()) {
 				//the raw is the commandName
 				Command<C> sub = (Command<C>) parameter;
-				if(!sub.hasName(raw)) {
+				if (!sub.hasName(raw)) {
 					return false;
 				}
 
@@ -85,11 +85,11 @@ public final class CommandUsageLookup<C> {
 		int maxExpectedLength = usage.getMaxLength();
 		int minExpectedLength = usage.getMinLength();
 
-		UsageParameter lastParameter = usage.getParameters().get(maxExpectedLength-1);
-		if(lastParameter.isGreedy()) {
-			final int minMaxDiff = maxExpectedLength-minExpectedLength;
-			int paramPos = lastParameter.getPosition()-minMaxDiff;
-			rawLength = rawLength-(rawLength-paramPos-1);
+		UsageParameter lastParameter = usage.getParameters().get(maxExpectedLength - 1);
+		if (lastParameter.isGreedy()) {
+			final int minMaxDiff = maxExpectedLength - minExpectedLength;
+			int paramPos = lastParameter.getPosition() - minMaxDiff;
+			rawLength = rawLength - (rawLength - paramPos - 1);
 		}
 
 		return rawLength >= minExpectedLength && rawLength <= maxExpectedLength;
@@ -108,7 +108,7 @@ public final class CommandUsageLookup<C> {
 
 		FOUND_INCOMPLETE,
 
-		FOUND_COMPLETE;
+		FOUND_COMPLETE
 
 	}
 }

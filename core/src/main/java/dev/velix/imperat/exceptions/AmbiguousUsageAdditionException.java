@@ -1,7 +1,7 @@
 package dev.velix.imperat.exceptions;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 
 public final class AmbiguousUsageAdditionException extends RuntimeException {
@@ -14,9 +14,9 @@ public final class AmbiguousUsageAdditionException extends RuntimeException {
 	) {
 		super(
 				  String.format(
-				   "Failed to add usage '%s' because it's ambiguous along with other usage '%s'",
-				   CommandUsage.format(command, first),
-				   CommandUsage.format(command, second)
+							 "Failed to add usage '%s' because it's ambiguous along with other usage '%s'",
+							 CommandUsage.format(command, first),
+							 CommandUsage.format(command, second)
 				  )
 		);
 	}

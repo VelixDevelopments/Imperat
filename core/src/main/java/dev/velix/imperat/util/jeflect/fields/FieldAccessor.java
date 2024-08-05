@@ -10,47 +10,47 @@ package dev.velix.imperat.util.jeflect.fields;
  */
 public interface FieldAccessor {
 
-    /**
-     * Gets the value of the virtual field. The primitives will be packed.
-     *
-     * @param object instance of the class declaring the field
-     * @return field value
-     * @throws UnsupportedOperationException if packed field is not virtual
-     */
-    default Object get(Object object) {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * Gets the value of the virtual field. The primitives will be packed.
+	 *
+	 * @param object instance of the class declaring the field
+	 * @return field value
+	 * @throws UnsupportedOperationException if packed field is not virtual
+	 */
+	default Object get(Object object) {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * Gets the value of the static field. The primitives will be packed.
-     *
-     * @return field value
-     * @throws UnsupportedOperationException if packed field is not static
-     */
-    default Object get() {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * Gets the value of the static field. The primitives will be packed.
+	 *
+	 * @return field value
+	 * @throws UnsupportedOperationException if packed field is not static
+	 */
+	default Object get() {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * Sets the value of the virtual field. The primitives will be unpacked.
-     * Maybe unimplemented if the target field is final.
-     *
-     * @param object instance of the class declaring the field
-     * @param value  the value to be assigned
-     * @throws UnsupportedOperationException if packed field is not virtual
-     */
-    default void set(Object object, Object value) {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * Sets the value of the virtual field. The primitives will be unpacked.
+	 * Maybe unimplemented if the target field is final.
+	 *
+	 * @param object instance of the class declaring the field
+	 * @param value  the value to be assigned
+	 * @throws UnsupportedOperationException if packed field is not virtual
+	 */
+	default void set(Object object, Object value) {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * Sets the value of the static field. The primitives will be unpacked.
-     * Maybe unimplemented if the target field is final.
-     *
-     * @param value the value to be assigned
-     * @throws UnsupportedOperationException if packed field is not static
-     */
-    default void set(Object value) {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * Sets the value of the static field. The primitives will be unpacked.
+	 * Maybe unimplemented if the target field is final.
+	 *
+	 * @param value the value to be assigned
+	 * @throws UnsupportedOperationException if packed field is not static
+	 */
+	default void set(Object value) {
+		throw new UnsupportedOperationException();
+	}
 }

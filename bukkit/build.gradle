@@ -26,7 +26,8 @@ dependencies {
 
     compileOnly lombok()
     annotationProcessor lombok()
-    compileOnly 'org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT' // The full Spigot server with no shadowing. Requires mavenLocal.
+    compileOnly 'org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT'
+    // The full Spigot server with no shadowing. Requires mavenLocal.
     testImplementation project(":core")
     testCompileOnly lombok()
     testAnnotationProcessor lombok()
@@ -37,7 +38,6 @@ dependencies {
     testImplementation kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
     testCompileOnly('org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT')
 }
-
 
 
 processTestResources {

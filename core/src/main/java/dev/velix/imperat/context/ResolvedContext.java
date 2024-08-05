@@ -1,10 +1,10 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.command.UsageParameter;
-import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,8 +32,9 @@ public interface ResolvedContext<C> extends Context<C> {
 
 	/**
 	 * Resolves the arguments from the given plain input {@link Context}
+	 *
 	 * @param dispatcher the dispatcher handling all commands
-	 * @param usage the usage that were determined suitable for resolving the args
+	 * @param usage      the usage that were determined suitable for resolving the args
 	 */
 	void resolve(CommandDispatcher<C> dispatcher, CommandUsage<C> usage) throws CommandException;
 
@@ -42,8 +43,7 @@ public interface ResolvedContext<C> extends Context<C> {
 	 * except for the arguments that represent the literal/subcommand name arguments
 	 *
 	 * @param command the command/subcommand owning the argument
-	 * @param name the name of the argument
-	 *
+	 * @param name    the name of the argument
 	 * @return the argument resolved from raw into a value
 	 */
 	@Nullable
@@ -58,7 +58,8 @@ public interface ResolvedContext<C> extends Context<C> {
 	/**
 	 * @return all {@link Command} that have been used in this context
 	 */
-	@NotNull Collection<? extends Command<C>> getCommandsUsed();
+	@NotNull
+	Collection<? extends Command<C>> getCommandsUsed();
 
 	/**
 	 * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
@@ -67,16 +68,15 @@ public interface ResolvedContext<C> extends Context<C> {
 	Collection<? extends ResolvedArgument> getResolvedArguments();
 
 	/**
-	 *
 	 * Resolves the raw input and
 	 * the parameters into arguments {@link ResolvedArgument}
 	 *
-	 * @param command the command owning the argument
-	 * @param raw the raw input
-	 * @param index the position of this argument
+	 * @param command   the command owning the argument
+	 * @param raw       the raw input
+	 * @param index     the position of this argument
 	 * @param parameter the parameter of the argument
-	 * @param value the resolved value of the argument
-	 * @param <T> the type of resolved value of the argument
+	 * @param value     the resolved value of the argument
+	 * @param <T>       the type of resolved value of the argument
 	 */
 	<T> void resolveArgument(Command<C> command,
 	                         @Nullable String raw,

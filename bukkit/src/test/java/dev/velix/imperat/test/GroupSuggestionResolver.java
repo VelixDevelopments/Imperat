@@ -7,6 +7,7 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,8 @@ public class GroupSuggestionResolver implements SuggestionResolver<CommandSender
 	 * @return the auto-completed suggestions of the current argument
 	 */
 	@Override
-	public List<String> autoComplete(Command<CommandSender> command, CommandSender source, ArgumentQueue queue, UsageParameter parameterToComplete, @Nullable CompletionArg argToComplete) {
+	public List<String> autoComplete(Command<CommandSender> command, CommandSender source,
+	                                 ArgumentQueue queue, UsageParameter parameterToComplete, @Nullable CompletionArg argToComplete) {
 		return GroupRegistry.getInstance().getAll()
 				  .stream().map(Group::getName)
 				  .collect(Collectors.toList());

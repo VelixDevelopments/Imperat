@@ -2,17 +2,18 @@ package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
-import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandFlagExtractor;
+import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 
 /**
@@ -73,7 +74,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	@Override
 	public @Nullable ResolvedArgument getResolvedArgument(Command<C> command, String name) {
 		Map<String, ResolvedArgument> resolvedArgs = resolvedArgumentsPerCommand.get(command);
-		if(resolvedArgs == null) return null;
+		if (resolvedArgs == null) return null;
 
 		return resolvedArgs.get(name);
 	}
@@ -85,7 +86,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	@Override
 	public List<ResolvedArgument> getResolvedArguments(Command<C> command) {
 		Map<String, ResolvedArgument> argMap = resolvedArgumentsPerCommand.get(command);
-		if(argMap == null) return Collections.emptyList();
+		if (argMap == null) return Collections.emptyList();
 		return new ArrayList<>(argMap.values());
 	}
 
@@ -113,10 +114,11 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	 * @return the value of the resolved argument
 	 * @see ResolvedArgument
 	 */
-	@Override @SuppressWarnings("unchecked")
+	@Override
+	@SuppressWarnings("unchecked")
 	public <T> @Nullable T getArgument(String name) {
 		ResolvedArgument argument = allResolvedArgs.get(name.toLowerCase());
-		if(argument == null)return null;
+		if (argument == null) return null;
 		return (T) argument.getValue();
 	}
 
@@ -171,6 +173,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
 	/**
 	 * Resolves the arguments from the given plain input {@link Context}
+	 *
 	 * @param dispatcher the dispatcher handling all commands
 	 */
 	@Override
@@ -188,8 +191,8 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	                                @Nullable T value) {
 
 		final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
-		resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs)-> {
-			if(existingResolvedArgs != null) {
+		resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
+			if (existingResolvedArgs != null) {
 				existingResolvedArgs.put(parameter.getName(), argument);
 				return existingResolvedArgs;
 			}

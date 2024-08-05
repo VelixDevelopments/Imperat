@@ -16,9 +16,9 @@ import dev.velix.imperat.exceptions.CommandException;
 public interface ContextResolver<C, T> {
 
 	/**
-	 * @param source the source of the command
+	 * @param source  the source of the command
 	 * @param context the context for the command
-	 * @param raw the required parameter of the command.
+	 * @param raw     the required parameter of the command.
 	 * @return the resolved output from the input object
 	 */
 	T resolve(CommandSource<C> source, Context<C> context, String raw) throws CommandException;

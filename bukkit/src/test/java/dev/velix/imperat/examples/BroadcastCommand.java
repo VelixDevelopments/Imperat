@@ -26,7 +26,7 @@ public final class BroadcastCommand {
 	@Description("broadcasts a message")
 	public void example(BukkitCommandSource source, @Arg("message") @Greedy String msg) {
 		// /broadcast <msg...>
-		for(var player : Bukkit.getOnlinePlayers())
+		for (var player : Bukkit.getOnlinePlayers())
 			player.sendMessage(msg);
 
 		source.reply("Broadcast has been sent !");

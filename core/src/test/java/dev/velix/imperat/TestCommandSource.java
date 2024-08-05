@@ -2,7 +2,7 @@ package dev.velix.imperat;
 
 import net.kyori.adventure.text.Component;
 
-public class TestCommandSource implements CommandSource<TestSender>{
+public class TestCommandSource implements CommandSource<TestSender> {
 
 	private final TestSender sender;
 
