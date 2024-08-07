@@ -6,10 +6,13 @@ import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
+import dev.velix.imperat.annotations.types.methods.Help;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.annotations.types.parameters.Arg;
+import dev.velix.imperat.annotations.types.parameters.Named;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.test.Group;
+import org.bukkit.command.CommandSender;
 
 @Command({"group", "rank"})
 @Permission("command.group")
@@ -18,19 +21,24 @@ public final class GroupCommand {
 
 	@DefaultUsage
 	public void defaultUsage(BukkitCommandSource source) {
-		source.reply("/group help");
+		source.reply("/group <group>");
 	}
 
+
 	@Usage
-	public void group(BukkitCommandSource source, @Arg("group") Group group) {
-		source.reply("hello , group entered= " + group.getName());
+	@Help
+	public void group(BukkitCommandSource source,
+	                  @Named("group") Group group,
+	                  CommandHelp<CommandSender> help) {
+		source.reply("Group entered= " + group.getName());
+		help.display(source);
 	}
 
 	@SubCommand(value = "setperm")
 	@Permission("command.group.setperm")
 	public void setPermission(BukkitCommandSource source,
-	                          @Arg("group") Group group,
-	                          @Arg("permission") String permission) {
+	                          @Named("group") Group group,
+	                          @Named("permission") String permission) {
 		source.reply("You have set permission '" + permission + "' to group '" + group.getName() + "'");
 	}
 
@@ -38,8 +46,8 @@ public final class GroupCommand {
 	@Permission("command.group.setprefix")
 	public void setPrefix(
 			  BukkitCommandSource source,
-			  @Arg("group") Group group,
-			  @Arg("prefix") String prefix
+			  @Named("group") Group group,
+			  @Named("prefix") String prefix
 	) {
 		source.reply("You have set prefix '" + prefix + "' to group '" + group.getName() + "'");
 	}

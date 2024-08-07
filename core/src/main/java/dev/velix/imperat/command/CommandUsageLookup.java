@@ -21,7 +21,6 @@ public final class CommandUsageLookup<C> {
 
 	public SearchResult searchUsage(Context<C> context) {
 		for (CommandUsage<C> commandUsage : primeCommand.getUsages()) {
-			System.out.println("CHECKING " + CommandUsage.format(this.primeCommand, commandUsage));
 			if (usageMatchesContext(context, commandUsage))
 				return new SearchResult(commandUsage, Result.FOUND_COMPLETE);
 			else if (commandUsage.hasParamType(Command.class) && checkResolvedLogic(context, commandUsage))

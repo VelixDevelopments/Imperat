@@ -4,6 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.UsageParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * @param <C> the command-sender type
  * @see dev.velix.imperat.command.UsageParameter
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface SuggestionResolver<C, T> {
 
 	/**

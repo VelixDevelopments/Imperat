@@ -2,6 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.context.ExecutionContext;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * This class represents the execution/action of this command that's triggered when
@@ -9,6 +10,7 @@ import dev.velix.imperat.context.ExecutionContext;
  *
  * @param <C> the command sender type
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface CommandExecution<C> {
 
 	/**

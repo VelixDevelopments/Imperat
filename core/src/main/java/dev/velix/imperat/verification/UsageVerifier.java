@@ -1,6 +1,7 @@
 package dev.velix.imperat.verification;
 
 import dev.velix.imperat.command.CommandUsage;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Verifies that the {@link CommandUsage} is suitable
@@ -20,6 +21,7 @@ import dev.velix.imperat.command.CommandUsage;
  * you should put A SINGLE (not multiple) greedy argument
  * at the END of the usage parameters list ONLY
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface UsageVerifier<C> {
 
 

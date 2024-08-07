@@ -1,23 +1,30 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.context.CommandFlag;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.FlagRegistry;
+import dev.velix.imperat.help.CommandHelp;
+import dev.velix.imperat.help.HelpExecution;
+import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.util.ListUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Represents a wrapper for the actual command's data
- *
  * @param <C> the command sender type
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface Command<C> extends UsageParameter {
 
 	/**
@@ -319,6 +326,33 @@ public interface Command<C> extends UsageParameter {
 	 * @param ignore true if you want to ignore the permission checks on tab completion of args
 	 */
 	void ignoreACPermissions(boolean ignore);
+
+	/**
+	 * Adds help as a sub-command to the command chain
+	 */
+	@SuppressWarnings("unchecked")
+	default void addHelpCommand(CommandDispatcher<C> dispatcher,
+	                            HelpExecution<C> helpExecution) {
+		List<UsageParameter> params = new ArrayList<>();
+		if(dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
+			params.add(UsageParameter.optional("page", Integer.class, "1"));
+		}
+
+		addSubCommandUsage(
+				  "help",
+				  CommandUsage.<C>builder()
+						    .parameters(params)
+						    .execute((sender, context)-> {
+								 Integer page = context.getArgument("page");
+								 if(page == null) page = 1;
+							    CommandHelp<C> help = new CommandHelp<>(dispatcher,
+									      this, (Context<C>) context,
+									      ((ResolvedContext<C>)context).getDetectedUsage());
+								 helpExecution.help(sender, help, page);
+						    }).build(),
+				  true
+		);
+	}
 
 	static <C> Command<C> createCommand(String name) {
 		return createCommand(null, name);

@@ -6,8 +6,8 @@ import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.annotations.types.parameters.Arg;
 import dev.velix.imperat.annotations.types.parameters.Greedy;
+import dev.velix.imperat.annotations.types.parameters.Named;
 import org.bukkit.Bukkit;
 
 @Command("broadcast")
@@ -24,7 +24,7 @@ public final class BroadcastCommand {
 
 	@Usage
 	@Description("broadcasts a message")
-	public void example(BukkitCommandSource source, @Arg("message") @Greedy String msg) {
+	public void example(BukkitCommandSource source, @Named("message") @Greedy String msg) {
 		// /broadcast <msg...>
 		for (var player : Bukkit.getOnlinePlayers())
 			player.sendMessage(msg);

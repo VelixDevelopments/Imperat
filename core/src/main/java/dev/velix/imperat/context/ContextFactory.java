@@ -3,6 +3,7 @@ package dev.velix.imperat.context;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.internal.CommandFlagExtractorImpl;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -13,6 +14,7 @@ import java.util.function.Supplier;
  *
  * @param <C>
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface ContextFactory<C> {
 
 	default @NotNull Context<C> createContext(@NotNull CommandSource<C> commandSource,

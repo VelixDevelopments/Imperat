@@ -3,13 +3,16 @@ package dev.velix.imperat.command.suggestions;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
 /**
- * Handles all auto-completion process
- * //TODO implement
+ * Represents a class that's responsible for
+ * Handling all auto-completion process during
+ * tab-completion per one command, regardless of the sender type
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface AutoCompleter<C> {
 
 
@@ -44,6 +47,6 @@ public interface AutoCompleter<C> {
 	                                  CommandSource<C> sender, CompletionArg currentArg, String[] args);
 
 	static <C> AutoCompleter<C> createNative(Command<C> command) {
-		return new AutoCompleterImpl<C>(command);
+		return new AutoCompleterImpl<>(command);
 	}
 }

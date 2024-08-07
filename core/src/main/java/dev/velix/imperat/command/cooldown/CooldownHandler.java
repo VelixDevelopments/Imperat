@@ -2,6 +2,7 @@ package dev.velix.imperat.command.cooldown;
 
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.CommandUsage;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import java.util.Optional;
  *
  * @param <C> the sender-type
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface CooldownHandler<C> {
 
 

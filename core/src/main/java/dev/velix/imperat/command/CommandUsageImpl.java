@@ -1,7 +1,7 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
+import dev.velix.imperat.command.cooldown.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

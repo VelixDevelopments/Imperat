@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
  * Represents the command parameter required
  * by the usage of the command itself
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface UsageParameter {
 
 	/**

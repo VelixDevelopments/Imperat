@@ -3,12 +3,14 @@ package dev.velix.imperat.resolvers;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a functional way of checking for the permissions
  * of the command source/sender.
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface PermissionResolver<C> {
 
 	/**

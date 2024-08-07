@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Represents the sender/source
@@ -9,6 +10,7 @@ import net.kyori.adventure.text.Component;
  *
  * @param <C> the command source type
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface CommandSource<C> {
 
 	/**

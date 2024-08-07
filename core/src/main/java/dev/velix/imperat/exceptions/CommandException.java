@@ -1,10 +1,12 @@
 package dev.velix.imperat.exceptions;
 
 import dev.velix.imperat.context.Context;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Defines an exception that occurs during context
  */
+@ApiStatus.AvailableSince("1.0.0")
 public abstract class CommandException extends Exception {
 
 	protected final String msg;

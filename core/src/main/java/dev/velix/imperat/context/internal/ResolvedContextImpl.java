@@ -30,6 +30,9 @@ import java.util.*;
 public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
 	private final Command<C> commandUsed;
+	private Command<C> lastCommand;
+	private CommandUsage<C> usage;
+
 	private final Context<C> context;
 
 	//per command/subcommand because the class 'Command' is can be also treated as a sub command
@@ -42,6 +45,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	ResolvedContextImpl(Command<C> commandUsed,
 	                    Context<C> context) {
 		this.commandUsed = commandUsed;
+		this.lastCommand = commandUsed;
 		this.context = context;
 	}
 
@@ -180,6 +184,8 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public void resolve(CommandDispatcher<C> dispatcher, CommandUsage<C> usage) throws CommandException {
 		SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
 		handler.resolve(dispatcher, this);
+		this.usage = usage;
+		this.lastCommand = handler.getCommand();
 	}
 
 
@@ -201,6 +207,25 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 			return args;
 		});
 		allResolvedArgs.put(parameter.getName(), argument);
+	}
+
+	/**
+	 * Fetches the last used resolved command
+	 * of a resolved context !
+	 *
+	 * @return the last used command/subcommand
+	 */
+	@Override
+	public @NotNull Command<C> getLastUsedCommand() {
+		return lastCommand;
+	}
+
+	/**
+	 * @return The used usage to use it to resolve commands
+	 */
+	@Override
+	public CommandUsage<C> getDetectedUsage() {
+		return usage;
 	}
 
 }

@@ -5,13 +5,15 @@ import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.UsageParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
-import dev.velix.imperat.command.UsageParameter;
-import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.verification.UsageVerifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,8 +26,9 @@ import java.util.List;
  * It also caches the settings that the user can
  * change or modify in the api.
  *
- * @param <C>
+ * @param <C> the command sender type
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface CommandDispatcher<C> {
 
 
@@ -90,40 +93,40 @@ public interface CommandDispatcher<C> {
 	PermissionResolver<C> getPermissionResolver();
 
 	/**
-	 * Fetches {@link ContextResolver} for a certain value
+	 * Fetches {@link ValueResolver} for a certain value
 	 *
 	 * @param resolvingValueType the value that the resolver ends providing it from the context
 	 * @param <T>                the type of value resolved from the context resolver
 	 * @return the context resolver of a certain type
 	 */
 	@Nullable
-	<T> ContextResolver<C, T> getContextResolver(Class<T> resolvingValueType);
+	<T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType);
 
 	/**
-	 * Fetches the {@link ContextResolver} suitable for the {@link UsageParameter}
+	 * Fetches the {@link ValueResolver} suitable for the {@link UsageParameter}
 	 *
 	 * @param usageParameter the parameter of a command's usage
-	 * @param <T>            the type of value that will be resolved by {@link ContextResolver}
+	 * @param <T>            the type of value that will be resolved by {@link ValueResolver}
 	 * @return the context resolver for this parameter's value type
 	 */
 	@SuppressWarnings("unchecked")
-	default <T> ContextResolver<C, T> getContextResolver(UsageParameter usageParameter) {
-		return (ContextResolver<C, T>) getContextResolver(usageParameter.getType());
+	default <T> ValueResolver<C, T> getValueResolver(UsageParameter usageParameter) {
+		return (ValueResolver<C, T>) getValueResolver(usageParameter.getType());
 	}
 
 	/**
-	 * Registers {@link ContextResolver}
+	 * Registers {@link ValueResolver}
 	 *
 	 * @param type     the class-type of value being resolved from context
 	 * @param resolver the resolver for this value
 	 * @param <T>      the type of value being resolved from context
 	 */
-	<T> void registerContextResolver(Class<T> type, @NotNull ContextResolver<C, T> resolver);
+	<T> void registerValueResolver(Class<T> type, @NotNull ValueResolver<C, T> resolver);
 
 	/**
-	 * @return all currently registered {@link ContextResolver}
+	 * @return all currently registered {@link ValueResolver}
 	 */
-	Collection<? extends ContextResolver<C, ?>> getRegisteredContextResolvers();
+	Collection<? extends ValueResolver<C, ?>> getRegisteredContextResolvers();
 
 	/**
 	 * Fetches the suggestion provider/resolver for a specific type of
@@ -278,4 +281,15 @@ public interface CommandDispatcher<C> {
 	 * @return the registered commands
 	 */
 	Collection<? extends Command<C>> getRegisteredCommands();
+
+	/**
+	 * @return The template for showing help
+	 */
+	@NotNull HelpTemplate getHelpTemplate();
+
+	/**
+	 * Set the help template to use
+	 * @param template the help template
+	 */
+	void setHelpTemplate(HelpTemplate template);
 }

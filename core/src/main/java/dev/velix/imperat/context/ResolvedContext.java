@@ -6,6 +6,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.exceptions.CommandException;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +24,7 @@ import java.util.List;
  *
  * @see Command
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface ResolvedContext<C> extends Context<C> {
 
 	/**
@@ -84,4 +86,15 @@ public interface ResolvedContext<C> extends Context<C> {
 	                         UsageParameter parameter,
 	                         @Nullable T value);
 
+	/**
+	 * Fetches the last used resolved command
+	 * of a resolved context !
+	 * @return the last used command/subcommand
+	 */
+	Command<C> getLastUsedCommand();
+
+	/**
+	 * @return The used usage to use it to resolve commands
+	 */
+	CommandUsage<C> getDetectedUsage();
 }

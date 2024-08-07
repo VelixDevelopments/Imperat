@@ -9,9 +9,10 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.TokenParseException;
-import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.resolvers.ValueResolver;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,8 @@ import java.util.function.Predicate;
 final class SmartUsageResolve<C> {
 
 	private final Command<C> mainCommand;
+
+	@Getter
 	private Command<C> command;
 
 	private final CommandUsage<C> usage;
@@ -111,7 +114,7 @@ final class SmartUsageResolve<C> {
 			}
 
 			//argument input
-			ContextResolver<C, ?> resolver = dispatcher.getContextResolver(currentParameter);
+			ValueResolver<C, ?> resolver = dispatcher.getValueResolver(currentParameter);
 			if (resolver == null)
 				throw new IllegalStateException("Cannot find resolver for type '" + currentParameter.getType().getName() + "'");
 
@@ -134,7 +137,7 @@ final class SmartUsageResolve<C> {
 	}
 
 	private void resolveRequired(ResolvedContext<C> context,
-	                             ContextResolver<C, ?> resolver,
+	                             ValueResolver<C, ?> resolver,
 	                             ArgumentQueue raws,
 	                             String currentRaw,
 	                             UsageParameter currentParameter) throws CommandException {
@@ -164,7 +167,7 @@ final class SmartUsageResolve<C> {
 	}
 
 	private void resolveOptional(ResolvedContext<C> context,
-	                             ContextResolver<C, ?> resolver,
+	                             ValueResolver<C, ?> resolver,
 	                             ArgumentQueue raws,
 	                             List<UsageParameter> parameterList,
 	                             String currentRaw,
@@ -238,7 +241,7 @@ final class SmartUsageResolve<C> {
 		System.out.println(String.format(msg, objects));
 	}*/
 
-	private <T> T getResult(ContextResolver<C, T> resolver, Context<C> context, String raw) throws CommandException {
+	private <T> T getResult(ValueResolver<C, T> resolver, Context<C> context, String raw) throws CommandException {
 		return resolver.resolve(context.getCommandSource(), context, raw);
 	}
 

@@ -3,6 +3,7 @@ package dev.velix.imperat.context;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.context.internal.SortedArgumentQueue;
 import dev.velix.imperat.util.StringTokenizer;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -14,6 +15,7 @@ import java.util.List;
  * Represents a custom data structure made specifically
  * for handling the arguments entered by the {@link CommandSource}
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
 
 	/**

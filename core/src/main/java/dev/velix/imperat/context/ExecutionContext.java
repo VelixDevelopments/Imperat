@@ -1,6 +1,7 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.context.internal.ResolvedArgument;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
  * Represents the context capabilities
  * during the execution of a command
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface ExecutionContext {
 
 	/**

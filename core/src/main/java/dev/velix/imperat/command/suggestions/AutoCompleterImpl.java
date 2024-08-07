@@ -84,7 +84,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 
 		ArgumentQueue queue = ArgumentQueue.parse(args);
 		List<CommandUsage<C>> closestUsages = getClosestUsages(args);
-		int index = currentArg.getIndex();
+		int index = currentArg.index();
 		if (index == -1)
 			index = 0;
 

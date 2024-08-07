@@ -3,14 +3,13 @@ package dev.velix.imperat.annotations.loaders;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.annotations.AnnotationLoader;
 import dev.velix.imperat.annotations.types.Permission;
-import dev.velix.imperat.annotations.types.methods.Cooldown;
-import dev.velix.imperat.annotations.types.methods.DefaultUsage;
-import dev.velix.imperat.annotations.types.methods.SubCommand;
-import dev.velix.imperat.annotations.types.methods.Usage;
+import dev.velix.imperat.annotations.types.methods.*;
 import dev.velix.imperat.annotations.types.parameters.*;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.util.MethodVerifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,27 +47,59 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 			return null;
 		}
 
+
 		Usage usage = method.getAnnotation(Usage.class);
 		SubCommand subCommand = method.getAnnotation(SubCommand.class);
 
+		if (method.getAnnotation(DefaultUsage.class) != null) {
+			MethodVerifier.verifyMethod(dispatcher, aClass, method, true);
+			alreadyLoaded.setDefaultUsageExecution((source, context) -> {
+				try {
+					method.invoke(instance, source);
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					throw new RuntimeException(e);
+				}
+			});
+			return null;
+		}
+
+
 		if (usage == null && subCommand == null) {
-			if (method.getAnnotation(DefaultUsage.class) != null) {
-				MethodVerifier.verifyMethod(dispatcher, aClass, method, true);
-				alreadyLoaded.setDefaultUsageExecution((source, context) -> {
-					try {
-						method.invoke(instance, source);
-					} catch (IllegalAccessException | InvocationTargetException e) {
-						throw new RuntimeException(e);
-					}
-				});
-				return null;
-			}
 			//System.out.println("NO USAGE ANNOTATION !");
 			throw new IllegalStateException("Couldn't find @Usage or @SubCommand in method '" + method.getName() + "' in class '" + aClass.getName() + "'");
 		} else if (usage != null && subCommand != null) {
 			throw new IllegalStateException("Found annotation duplicates of similar context '@Usage' and '@SubCommand' in the same method !");
 		}
 
+
+		Help help = method.getAnnotation(Help.class);
+		if(help == null) {
+			return loadUsage(subCommand, alreadyLoaded, null);
+		}
+
+		if (usage == null) {
+			MethodVerifier.verifyHelpMethod(dispatcher, aClass, method);
+			alreadyLoaded.addHelpCommand(dispatcher, (source, cmdHelp, page) -> {
+				try {
+					if (method.getParameters().length == 3) {
+						method.invoke(instance, source, cmdHelp, page);
+					} else {
+						method.invoke(instance, source, cmdHelp);
+					}
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					throw new RuntimeException(e);
+				}
+			});
+			return null;
+		} else {
+			return loadUsage(null, alreadyLoaded, help);
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private CommandUsage<C> loadUsage(SubCommand subCommand,
+	                                  Command<C> alreadyLoaded, Help help) {
 		CommandUsage.Builder<C> builder = CommandUsage.builder();
 
 		//setting permission
@@ -90,11 +121,12 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		//resolving parameters and execution
 		Object[] paramsInstances = new Object[methodParams.length];
 
-		List<UsageParameter> usageParameters = new ArrayList<>(methodParams.length - 1);
+		int subtractionIndex = help != null ? 2 : 1;
+		List<UsageParameter> usageParameters = new ArrayList<>(methodParams.length - subtractionIndex);
 		var mainUsage = alreadyLoaded.getMainUsage();
 
 		for (Parameter parameter : method.getParameters()) {
-			UsageParameter usageParameter = getParameter(parameter);
+			UsageParameter usageParameter = getParameter(parameter, help);
 			if (usageParameter == null) {
 				continue;
 			}
@@ -103,21 +135,27 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 					  .hasParameter((param) -> param.equals(usageParameter))) {
 				continue;
 			}
-			System.out.println("Passed " + usageParameter.getName());
 			usageParameters.add(usageParameter);
 		}
 
 		builder.parameters(usageParameters);
+
 		final List<UsageParameter> fullParameters = new ArrayList<>(usageParameters.size() + mainUsage.getParameters().size());
 		fullParameters.addAll(mainUsage.getParameters());
 		fullParameters.addAll(usageParameters);
 
-
 		builder.execute(((commandSource, context) -> {
 			paramsInstances[0] = commandSource;
+
 			for (int i = 1, p = 0; i < paramsInstances.length; i++, p++) {
+				Parameter actualParameter = methodParams[i];
+				if(help != null && actualParameter.getType() == CommandHelp.class) {
+					paramsInstances[i] = new CommandHelp<>(dispatcher, alreadyLoaded, (Context<C>) context, null);
+					p--;
+					continue;
+				}
 				UsageParameter parameter = getUsageParam(fullParameters, p);
-				if (parameter == null) continue;
+				if(parameter == null) continue;
 				paramsInstances[i] = parameter.isFlag() ? context.getFlag(parameter.getName()) : context.getArgument(parameter.getName());
 			}
 
@@ -139,24 +177,24 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		}
 	}
 
-	private UsageParameter getParameter(Parameter parameter) {
+	private UsageParameter getParameter(Parameter parameter, Help help) {
+		if(help != null && parameter.getType() == CommandHelp.class)return null;
 		if (dispatcher.canBeSender(parameter.getType())) {
 			return null;
 		}
 
-		Arg arg = parameter.getAnnotation(Arg.class);
+		Named named = parameter.getAnnotation(Named.class);
 		Flag flag = parameter.getAnnotation(Flag.class);
 
 		String name;
-
 
 		Default defaultAnnotation = parameter.getAnnotation(Default.class);
 		boolean hasDefault = defaultAnnotation != null;
 		boolean optional = parameter.getAnnotation(Optional.class) != null;
 		String defaultValue = hasDefault ? defaultAnnotation.value() : null;
 
-		if (arg != null) {
-			name = arg.value();
+		if (named != null) {
+			name = named.value();
 		} else if (flag != null) {
 			name = flag.value();
 			optional = true;
@@ -169,7 +207,6 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		if (greedy && parameter.getType() != String.class) {
 			throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy type '" + parameter.getType().getName() + "'");
 		}
-
 
 		UsageParameter usageParameter;
 		if (greedy) {

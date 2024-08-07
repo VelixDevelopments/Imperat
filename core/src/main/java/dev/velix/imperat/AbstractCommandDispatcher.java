@@ -12,13 +12,15 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
 import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.internal.ContextResolverRegistry;
 import dev.velix.imperat.context.internal.DefaultContextFactory;
+import dev.velix.imperat.context.internal.ValueResolverRegistry;
 import dev.velix.imperat.exceptions.AmbiguousUsageAdditionException;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.InvalidCommandUsageException;
-import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.help.HelpTemplate;
+import dev.velix.imperat.help.templates.DefaultTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.verification.UsageVerifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -40,7 +42,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	private final Map<String, Command<C>> commands = new HashMap<>();
 
 	private ContextFactory<C> contextFactory;
-	private final ContextResolverRegistry<C> contextResolverRegistry;
+	private final ValueResolverRegistry<C> contextResolverRegistry;
 
 	private final SuggestionResolverRegistry<C> suggestionResolverRegistry;
 
@@ -50,13 +52,16 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 	private final AnnotationParser<C> annotationParser;
 
+	private HelpTemplate template;
+
 	public AbstractCommandDispatcher() {
 		contextFactory = new DefaultContextFactory<>();
-		contextResolverRegistry = new ContextResolverRegistry<>();
+		contextResolverRegistry = new ValueResolverRegistry<>();
 		suggestionResolverRegistry = new SuggestionResolverRegistry<>();
 		verifier = UsageVerifier.defaultVerifier();
 		captionRegistry = new CaptionRegistry<>();
 		annotationParser = new AnnotationParser<>(this);
+		template = new DefaultTemplate();
 	}
 
 	/**
@@ -154,32 +159,32 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 
 	/**
-	 * Registers {@link ContextResolver}
+	 * Registers {@link ValueResolver}
 	 *
 	 * @param type     the class-type of value being resolved from context
 	 * @param resolver the resolver for this value
 	 */
 	@Override
-	public <T> void registerContextResolver(Class<T> type, @NotNull ContextResolver<C, T> resolver) {
+	public <T> void registerValueResolver(Class<T> type, @NotNull ValueResolver<C, T> resolver) {
 		contextResolverRegistry.registerResolver(type, resolver);
 	}
 
 	/**
-	 * @return all currently registered {@link ContextResolver}
+	 * @return all currently registered {@link ValueResolver}
 	 */
 	@Override
-	public Collection<? extends ContextResolver<C, ?>> getRegisteredContextResolvers() {
+	public Collection<? extends ValueResolver<C, ?>> getRegisteredContextResolvers() {
 		return contextResolverRegistry.getAll();
 	}
 
 	/**
-	 * Fetches {@link ContextResolver} for a certain value
+	 * Fetches {@link ValueResolver} for a certain value
 	 *
 	 * @param resolvingValueType the value that the resolver ends providing it from the context
 	 * @return the context resolver of a certain type
 	 */
 	@Override
-	public @Nullable <T> ContextResolver<C, T> getContextResolver(Class<T> resolvingValueType) {
+	public @Nullable <T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType) {
 		return contextResolverRegistry.getResolver(resolvingValueType);
 	}
 
@@ -367,7 +372,6 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 				  .searchUsage(context);
 
 		if (searchResult.getCommandUsage() == null || context.getArguments().isEmpty()) {
-			System.out.println("EXECUTING DEFAULT");
 			CommandUsage<C> defaultUsage = command.getDefaultUsage();
 			defaultUsage.getExecution().execute(source, context);
 			return;
@@ -422,5 +426,23 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	@Override
 	public Collection<? extends Command<C>> getRegisteredCommands() {
 		return commands.values();
+	}
+
+	/**
+	 * @return The template for showing help
+	 */
+	@Override
+	public @NotNull HelpTemplate getHelpTemplate() {
+		return template;
+	}
+
+	/**
+	 * Set the help template to use
+	 *
+	 * @param template the help template
+	 */
+	@Override
+	public void setHelpTemplate(HelpTemplate template) {
+		this.template = template;
 	}
 }

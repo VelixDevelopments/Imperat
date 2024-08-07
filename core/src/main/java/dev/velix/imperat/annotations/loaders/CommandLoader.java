@@ -31,7 +31,6 @@ public final class CommandLoader<C> implements AnnotationLoader<C, Command<C>> {
 		}
 
 		final String[] values = annotation.value();
-		System.out.println("VALUES SIZE= " + values.length);
 
 		List<String> aliases = new ArrayList<>(Arrays.asList(values).subList(1, values.length));
 		Command<C> command = Command.createCommand(values[0]);
@@ -40,6 +39,7 @@ public final class CommandLoader<C> implements AnnotationLoader<C, Command<C>> {
 
 		Permission perm = aClass.getAnnotation(Permission.class);
 		Description description = aClass.getAnnotation(Description.class);
+
 
 		if (perm != null) {
 			command.setPermission(perm.value());

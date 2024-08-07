@@ -2,6 +2,7 @@ package dev.velix.imperat.context;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.util.Registry;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <C>
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface CommandFlagExtractor<C> {
 
 

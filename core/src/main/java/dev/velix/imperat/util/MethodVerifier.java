@@ -1,6 +1,7 @@
 package dev.velix.imperat.util;
 
 import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.help.CommandHelp;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Method;
@@ -27,4 +28,13 @@ public final class MethodVerifier {
 
 	}
 
+	public static <C> void verifyHelpMethod(CommandDispatcher<C> dispatcher,
+	                                    Class<?> clazz,Method method) {
+
+		verifyMethod(dispatcher, clazz, method, false);
+		var params = method.getParameters();
+		if(params.length < 2 || params.length > 3 || params[1].getType() != CommandHelp.class) {
+			throw new IllegalStateException("In class '" + clazz.getName() + "', Found help method '" + method.getName() + "' without parameter type of " + CommandHelp.class.getName());
+		}
+	}
 }

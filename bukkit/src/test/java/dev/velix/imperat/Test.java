@@ -4,7 +4,6 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.UsageParameter;
-import dev.velix.imperat.examples.BroadcastCommand;
 import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.test.Group;
@@ -39,7 +38,7 @@ public final class Test extends JavaPlugin {
 
 	private void testImperat() {
 		dispatcher = BukkitCommandDispatcher.create(this);
-		dispatcher.registerContextResolver(Group.class, ((source, context, raw) -> {
+		dispatcher.registerValueResolver(Group.class, ((source, context, raw) -> {
 			Optional<Group> container = GroupRegistry.getInstance().getData(raw);
 			return container.orElseThrow(() ->
 					  new ContextResolveException("Invalid group '" + raw + "'"));
@@ -47,7 +46,7 @@ public final class Test extends JavaPlugin {
 
 		dispatcher.registerSuggestionResolver(new GroupSuggestionResolver());
 
-		dispatcher.registerCommand(new BroadcastCommand());
+		//dispatcher.registerCommand(new BroadcastCommand());
 		dispatcher.registerCommand(new GroupCommand());
 
 		for (Command<CommandSender> command : dispatcher.getRegisteredCommands()) {

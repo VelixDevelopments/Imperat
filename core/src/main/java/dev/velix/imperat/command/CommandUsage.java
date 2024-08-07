@@ -16,7 +16,7 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public interface CommandUsage<C> {
+public interface CommandUsage<C>{
 
 	/**
 	 * @return the permission for this usage
@@ -196,6 +196,11 @@ public interface CommandUsage<C> {
 	 * @param cooldownHandler the cool down handler to set
 	 */
 	void setCooldownHandler(CooldownHandler<C> cooldownHandler);
+
+	default boolean isDefault() {
+		return getParameters().isEmpty();
+	}
+
 
 
 	class Builder<C> {
