@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import lombok.Data;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;

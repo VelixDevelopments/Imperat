@@ -3,8 +3,6 @@ package dev.velix.imperat.annotations;
 import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
-
 /**
  * This class represents an object that is loaded from an annotation
  *

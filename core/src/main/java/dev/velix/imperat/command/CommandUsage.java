@@ -2,6 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

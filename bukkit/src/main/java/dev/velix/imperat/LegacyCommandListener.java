@@ -1,7 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
@@ -104,7 +104,7 @@ public class LegacyCommandListener implements Listener {
 				collected = true;
 				String[] literals = argId.replace("|", " ").split(" ");
 				for (String literal : literals) {
-					UsageParameter literalParam = UsageParameter.literal(literal);
+					UsageParameter literalParam = UsageParameter.required(literal, String.class);
 					CommandUsage<CommandSender> commandUsage = CommandUsage.<CommandSender>builder()
 							  .parameters(literalParam)
 							  .execute((sender, context) ->

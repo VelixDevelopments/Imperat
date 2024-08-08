@@ -1,24 +1,24 @@
-package dev.velix.imperat.command;
+package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 
 @ApiStatus.Internal
-abstract class InputParameter implements UsageParameter {
+public abstract class InputParameter implements UsageParameter {
 
 	private final String name;
 	private int index;
 	private final Class<?> type;
-	private final boolean literal, optional, flag, greedy;
+	private final boolean optional, flag, greedy;
 	private final Object defaultValue;
 
 	protected InputParameter(String name, Class<?> type,
-	                         boolean literal, boolean optional, boolean flag, boolean greedy,
+	                          boolean optional, boolean flag, boolean greedy,
 	                         Object defaultValue) {
 		this.name = name;
 		this.type = type;
-		this.literal = literal;
 		this.optional = optional;
 		this.flag = flag;
 		this.greedy = greedy;
@@ -69,16 +69,6 @@ abstract class InputParameter implements UsageParameter {
 		return defaultValue;
 	}
 
-	/**
-	 * @return is a literal string parameter
-	 * which can be treated as a sub command
-	 * WARNING: NOT RECOMMENDED TO USE THIS , instead use
-	 * the well documented subcommands API.
-	 */
-	@Override
-	public boolean isLiteral() {
-		return literal;
-	}
 
 	/**
 	 * @return whether this is an optional argument

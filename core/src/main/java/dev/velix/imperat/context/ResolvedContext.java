@@ -3,7 +3,7 @@ package dev.velix.imperat.context;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;

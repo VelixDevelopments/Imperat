@@ -53,14 +53,24 @@ public class DefaultTemplate implements HelpTemplate {
 		this.formatter = formatter;
 	}
 
+	/**
+	 * @return the usages displayer
+	 */
 	@Override
-	public UsagesDisplayer getUsageDisplayer() {
+	public UsagesDisplayer getUsagesDisplayer() {
 		return displayer;
 	}
 
+	/**
+	 * Sets the usages displayer instance
+	 * to a new one
+	 *
+	 * @param displayer the displayer instance to set
+	 */
 	@Override
-	public void setUsageDisplayer(UsagesDisplayer displayer) {
+	public void setUsagesDisplayer(UsagesDisplayer displayer) {
 		this.displayer = displayer;
 	}
+
 
 }

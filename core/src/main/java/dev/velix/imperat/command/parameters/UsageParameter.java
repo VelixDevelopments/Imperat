@@ -1,5 +1,7 @@
-package dev.velix.imperat.command;
+package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
+import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,14 +43,6 @@ public interface UsageParameter {
 	Object getDefaultValue();
 
 	/**
-	 * @return is a literal string parameter
-	 * which can be treated as a sub command
-	 * WARNING: NOT RECOMMENDED TO USE THIS , instead use
-	 * the well documented subcommands API.
-	 */
-	boolean isLiteral();
-
-	/**
 	 * @return whether this is an optional argument
 	 */
 	boolean isOptional();
@@ -80,6 +74,21 @@ public interface UsageParameter {
 	 */
 	Command<?> asCommand();
 
+	/**
+	 * @return Whether this usage parameter has been constructed
+	 * using the annotations through methods or not
+	 */
+	default boolean isAnnotated() {
+		return this instanceof AnnotatedParameter;
+	}
+	/**
+	 * Casts the parameter to a parameter with annotations
+	 * @see AnnotatedParameter
+	 * @return the parameter as annotated one
+	 */
+	default AnnotatedParameter asAnnotated() {
+		return (AnnotatedParameter) this;
+	}
 
 	/**
 	 * Formats the usage parameter
@@ -97,11 +106,6 @@ public interface UsageParameter {
 
 	static <T> UsageParameter optional(String name, Class<T> clazz, @Nullable String defaultValue) {
 		return new NormalUsageParameter(name, clazz, true, false, defaultValue);
-	}
-
-	@Deprecated
-	static UsageParameter literal(String name) {
-		return new LiteralUsageParameter(name);
 	}
 
 	static UsageParameter greedy(String name, boolean optional, @Nullable String defaultValue) {
@@ -123,7 +127,6 @@ public interface UsageParameter {
 	static UsageParameter requiredDouble(String name) {
 		return required(name, Double.class);
 	}
-
 
 	static UsageParameter flag(String flagName) {
 		return new FlagUsageParameter(flagName);

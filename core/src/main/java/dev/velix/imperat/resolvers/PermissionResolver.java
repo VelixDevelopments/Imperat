@@ -2,7 +2,7 @@ package dev.velix.imperat.resolvers;
 
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

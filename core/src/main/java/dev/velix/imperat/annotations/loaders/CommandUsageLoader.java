@@ -2,13 +2,14 @@ package dev.velix.imperat.annotations.loaders;
 
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.annotations.AnnotationLoader;
+import dev.velix.imperat.annotations.MethodCommandExecutor;
+import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.*;
 import dev.velix.imperat.annotations.types.parameters.*;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.util.MethodVerifier;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandUsage<C>> {
@@ -28,7 +30,8 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 
 	public CommandUsageLoader(CommandDispatcher<C> dispatcher,
 	                          Object instance,
-	                          Class<?> clazz, Method method) {
+	                          Class<?> clazz,
+	                          Method method) {
 		this.dispatcher = dispatcher;
 		this.method = method;
 		this.aClass = clazz;
@@ -53,13 +56,10 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 
 		if (method.getAnnotation(DefaultUsage.class) != null) {
 			MethodVerifier.verifyMethod(dispatcher, aClass, method, true);
-			alreadyLoaded.setDefaultUsageExecution((source, context) -> {
-				try {
-					method.invoke(instance, source);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					throw new RuntimeException(e);
-				}
-			});
+			alreadyLoaded.setDefaultUsageExecution(
+					  new MethodCommandExecutor<>(instance, dispatcher, alreadyLoaded,
+							    method, Collections.emptyList(), null)
+			);
 			return null;
 		}
 
@@ -97,7 +97,6 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 
 	}
 
-	@SuppressWarnings("unchecked")
 	private CommandUsage<C> loadUsage(SubCommand subCommand,
 	                                  Command<C> alreadyLoaded, Help help) {
 		CommandUsage.Builder<C> builder = CommandUsage.builder();
@@ -119,8 +118,6 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		MethodVerifier.verifyMethod(dispatcher, aClass, method, false);
 
 		//resolving parameters and execution
-		Object[] paramsInstances = new Object[methodParams.length];
-
 		int subtractionIndex = help != null ? 2 : 1;
 		List<UsageParameter> usageParameters = new ArrayList<>(methodParams.length - subtractionIndex);
 		var mainUsage = alreadyLoaded.getMainUsage();
@@ -144,38 +141,17 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		fullParameters.addAll(mainUsage.getParameters());
 		fullParameters.addAll(usageParameters);
 
-		builder.execute(((commandSource, context) -> {
-			paramsInstances[0] = commandSource;
-
-			for (int i = 1, p = 0; i < paramsInstances.length; i++, p++) {
-				Parameter actualParameter = methodParams[i];
-				if(help != null && actualParameter.getType() == CommandHelp.class) {
-					paramsInstances[i] = new CommandHelp<>(dispatcher, alreadyLoaded, (Context<C>) context, null);
-					p--;
-					continue;
-				}
-				UsageParameter parameter = getUsageParam(fullParameters, p);
-				if(parameter == null) continue;
-				paramsInstances[i] = parameter.isFlag() ? context.getFlag(parameter.getName()) : context.getArgument(parameter.getName());
-			}
-
-			try {
-				method.invoke(instance, paramsInstances);
-			} catch (Throwable e) {
-				throw new RuntimeException(e);
-			}
-		}));
+		builder.execute(
+				  new MethodCommandExecutor<>(
+				  instance, dispatcher, alreadyLoaded,
+				  method, fullParameters, help
+				  )
+		);
 
 		return builder.build();
 	}
 
-	private @Nullable UsageParameter getUsageParam(List<UsageParameter> params, int index) {
-		try {
-			return params.get(index);
-		} catch (Exception ex) {
-			return null;
-		}
-	}
+
 
 	private UsageParameter getParameter(Parameter parameter, Help help) {
 		if(help != null && parameter.getType() == CommandHelp.class)return null;
@@ -209,14 +185,11 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		}
 
 		UsageParameter usageParameter;
-		if (greedy) {
-			usageParameter = UsageParameter.greedy(name, optional, defaultValue);
-		} else if (optional) {
-			usageParameter = UsageParameter.optional(name, parameter.getType(), defaultValue);
-		} else if (flag != null) {
-			usageParameter = UsageParameter.flag(flag.value());
-		} else {
-			usageParameter = UsageParameter.required(name, parameter.getType());
+
+		if(flag != null) {
+			usageParameter = AnnotatedParameter.flag(name, parameter);
+		}else {
+			usageParameter = AnnotatedParameter.input(name, parameter.getType(), optional, greedy, defaultValue, parameter);
 		}
 
 		return usageParameter;

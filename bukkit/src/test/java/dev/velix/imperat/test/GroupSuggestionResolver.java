@@ -1,7 +1,7 @@
 package dev.velix.imperat.test;
 
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.resolvers.SuggestionResolver;

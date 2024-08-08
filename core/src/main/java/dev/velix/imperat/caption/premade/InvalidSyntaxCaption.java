@@ -8,7 +8,7 @@ import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.Context;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;

@@ -77,7 +77,7 @@ public final class CommandHelp<C> {
 			return;
 		}
 
-		template.getUsageDisplayer().display(dispatcher, command, source,
+		template.getUsagesDisplayer().display(dispatcher, command, source,
 				  template.getUsageFormatter(), textPage.asList());
 
 		source.reply(template.getFooter(command));
@@ -92,7 +92,7 @@ public final class CommandHelp<C> {
 		}
 
 		source.reply(template.getHeader(command));
-		template.getUsageDisplayer().display(dispatcher, command, source,
+		template.getUsagesDisplayer().display(dispatcher, command, source,
 				  template.getUsageFormatter(), new ArrayList<>(command.getUsages()));
 
 		source.reply(template.getFooter(command));

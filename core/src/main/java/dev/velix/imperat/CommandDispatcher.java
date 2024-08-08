@@ -5,7 +5,7 @@ import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
 import dev.velix.imperat.help.HelpTemplate;

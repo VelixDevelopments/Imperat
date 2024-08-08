@@ -1,5 +1,6 @@
-package dev.velix.imperat.command;
+package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -9,7 +10,8 @@ final class FlagUsageParameter extends InputParameter {
 
 
 	FlagUsageParameter(String flagName) {
-		super(flagName, CommandFlag.class, false, true, true, false, null);
+		super(flagName, CommandFlag.class,
+				  true, true, false, null);
 	}
 
 	@Override

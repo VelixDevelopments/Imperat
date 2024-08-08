@@ -8,7 +8,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents how each syntax will look like
+ *  Represents a class responsible for formatting
+ *  each single {@link CommandUsage} into
+ *  adventure components {@link Component}
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageFormatter {

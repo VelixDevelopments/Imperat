@@ -1,6 +1,7 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Context;

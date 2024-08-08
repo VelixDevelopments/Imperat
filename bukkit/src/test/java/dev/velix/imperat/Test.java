@@ -3,8 +3,9 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.examples.GroupCommand;
+import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.test.Group;
 import dev.velix.imperat.test.GroupRegistry;
@@ -38,6 +39,9 @@ public final class Test extends JavaPlugin {
 
 	private void testImperat() {
 		dispatcher = BukkitCommandDispatcher.create(this);
+
+		dispatcher.setHelpTemplate(new ExampleHelpTemplate());
+
 		dispatcher.registerValueResolver(Group.class, ((source, context, raw) -> {
 			Optional<Group> container = GroupRegistry.getInstance().getData(raw);
 			return container.orElseThrow(() ->

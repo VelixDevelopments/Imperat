@@ -3,7 +3,7 @@ package dev.velix.imperat.context.internal;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;

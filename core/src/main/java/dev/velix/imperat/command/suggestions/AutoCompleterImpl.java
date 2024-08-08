@@ -4,7 +4,7 @@ import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;

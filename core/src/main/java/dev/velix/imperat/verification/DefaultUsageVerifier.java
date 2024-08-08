@@ -2,7 +2,7 @@ package dev.velix.imperat.verification;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.UsageParameter;
+import dev.velix.imperat.command.parameters.UsageParameter;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;

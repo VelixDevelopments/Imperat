@@ -1,5 +1,6 @@
-package dev.velix.imperat.command;
+package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.util.StringUtils;
 
 final class NormalUsageParameter extends InputParameter {
@@ -9,7 +10,7 @@ final class NormalUsageParameter extends InputParameter {
 	                     boolean optional,
 	                     boolean greedy,
 	                     Object defaultValue) {
-		super(name, type, false, optional, false, greedy, defaultValue);
+		super(name, type, optional, false, greedy, defaultValue);
 	}
 
 	/**
@@ -19,6 +20,9 @@ final class NormalUsageParameter extends InputParameter {
 	 */
 	@Override
 	public <C> String format(Command<C> command) {
-		return StringUtils.normalizedParameterFormatting(getName(), isOptional());
+		var content = getName();
+		if(isGreedy())
+			content += "...";
+		return StringUtils.normalizedParameterFormatting(content, isOptional());
 	}
 }

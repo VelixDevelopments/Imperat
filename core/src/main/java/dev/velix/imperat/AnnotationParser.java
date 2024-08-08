@@ -1,8 +1,8 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.annotations.loaders.CommandLoader;
 import dev.velix.imperat.annotations.loaders.CommandUsageLoader;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
-import dev.velix.imperat.annotations.loaders.CommandLoader;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import org.jetbrains.annotations.ApiStatus;

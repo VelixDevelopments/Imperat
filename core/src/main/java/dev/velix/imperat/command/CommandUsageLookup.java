@@ -1,5 +1,6 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import lombok.Data;

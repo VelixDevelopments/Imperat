@@ -8,7 +8,7 @@ import dev.velix.imperat.help.UsagesDisplayer;
 import dev.velix.imperat.help.templates.DefaultFormatter;
 import net.kyori.adventure.text.Component;
 
-public class TestHelpTemplate implements HelpTemplate {
+public final class ExampleHelpTemplate implements HelpTemplate {
 
 	private UsagesDisplayer displayer = UsagesDisplayer.plain();
 	private UsageFormatter formatter = new DefaultFormatter();
@@ -30,10 +30,7 @@ public class TestHelpTemplate implements HelpTemplate {
 	 */
 	@Override
 	public Component getFooter(Command<?> command) {
-		return Messages.
-				  getMsg(
-							 "<dark_gray><bold><strikethrough>==============================================="
-				  );
+		return Messages.getMsg("<dark_gray><bold><strikethrough>===============================================");
 	}
 
 	/**
@@ -56,13 +53,23 @@ public class TestHelpTemplate implements HelpTemplate {
 		this.formatter = formatter;
 	}
 
+	/**
+	 * @return the usages displayer
+	 */
 	@Override
-	public UsagesDisplayer getUsageDisplayer() {
+	public UsagesDisplayer getUsagesDisplayer() {
 		return displayer;
 	}
 
+	/**
+	 * Sets the usages displayer instance
+	 * to a new one
+	 *
+	 * @param displayer the displayer instance to set
+	 */
 	@Override
-	public void setUsageDisplayer(UsagesDisplayer displayer) {
+	public void setUsagesDisplayer(UsagesDisplayer displayer) {
 		this.displayer = displayer;
 	}
+
 }

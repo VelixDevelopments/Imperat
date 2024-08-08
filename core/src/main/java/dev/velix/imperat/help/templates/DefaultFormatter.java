@@ -30,7 +30,7 @@ public final class DefaultFormatter implements UsageFormatter {
 	@Override
 	public <C> Component formatUsage(@NotNull CommandDispatcher<C> dispatcher, Command<C> command, CommandUsage<C> usage, boolean isLast) {
 		String format = dispatcher.commandPrefix() + CommandUsage.format(command, usage);
-		String msg = "<green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
+		String msg = "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
 		return Messages.getMsg(msg);
 	}
 

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 
 /**
- * Represents all usages together are organized to be
+ * Represents how all usages together are organized to be
  * displayed to the command sender.
  * <p>
  * This class is only responsible for organizing the
@@ -17,7 +17,6 @@ import java.util.List;
  * <p>
  * Formatting the usages is the mere responsibility
  * of the class {@link UsageFormatter}
- *
  */
 @ApiStatus.AvailableSince("1.0.0")
 @FunctionalInterface
