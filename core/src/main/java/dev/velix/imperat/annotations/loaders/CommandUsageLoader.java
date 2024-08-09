@@ -211,7 +211,7 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		return usageParameter;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "deprecation"})
 	private static <C, T> @NotNull OptionalValueSupplier<C, T> getOptionalValueSupplier(Parameter parameter, Class<? extends OptionalValueSupplier<?, ?>> supplierClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		var emptyConstructor = supplierClass.getDeclaredConstructor();
 		if(!emptyConstructor.isAccessible()) {
