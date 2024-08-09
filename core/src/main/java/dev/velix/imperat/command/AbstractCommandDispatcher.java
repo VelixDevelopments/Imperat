@@ -1,17 +1,18 @@
-package dev.velix.imperat;
+package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.CaptionRegistry;
 import dev.velix.imperat.caption.Messages;
-import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.CommandUsageLookup;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
 import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.internal.ContextResolverFactory;
+import dev.velix.imperat.context.internal.ContextResolverRegistry;
 import dev.velix.imperat.context.internal.DefaultContextFactory;
 import dev.velix.imperat.context.internal.ValueResolverRegistry;
 import dev.velix.imperat.exceptions.AmbiguousUsageAdditionException;
@@ -19,6 +20,7 @@ import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.InvalidCommandUsageException;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.help.templates.DefaultTemplate;
+import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -26,7 +28,6 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,10 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	private final Map<String, Command<C>> commands = new HashMap<>();
 
 	private ContextFactory<C> contextFactory;
-	private final ValueResolverRegistry<C> contextResolverRegistry;
+
+	private final ContextResolverRegistry<C> contextResolverRegistry;
+
+	private final ValueResolverRegistry<C> valueResolverRegistry;
 
 	private final SuggestionResolverRegistry<C> suggestionResolverRegistry;
 
@@ -56,7 +60,8 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 	public AbstractCommandDispatcher() {
 		contextFactory = new DefaultContextFactory<>();
-		contextResolverRegistry = new ValueResolverRegistry<>();
+		contextResolverRegistry = new ContextResolverRegistry<>();
+		valueResolverRegistry = new ValueResolverRegistry<>();
 		suggestionResolverRegistry = new SuggestionResolverRegistry<>();
 		verifier = UsageVerifier.defaultVerifier();
 		captionRegistry = new CaptionRegistry<>();
@@ -159,6 +164,62 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 
 	/**
+	 * Checks whether the type has
+	 * a registered context-resolver
+	 *
+	 * @param type the type
+	 * @return whether the type has
+	 * a context-resolver
+	 */
+	@Override
+	public boolean hasContextResolver(Class<?> type) {
+		return getContextResolver(type) != null;
+	}
+
+	/**
+	 * Registers a context resolver factory
+	 *
+	 * @param factory the factory to register
+	 */
+	@Override
+	public void registerContextResolverFactory(ContextResolverFactory<C> factory) {
+		contextResolverRegistry.setFactory(factory);
+	}
+
+	/**
+	 * @return returns the factory for creation of
+	 * {@link ContextResolver}
+	 */
+	@Override
+	public ContextResolverFactory<C> getContextResolverFactory() {
+		return contextResolverRegistry.getFactory();
+	}
+
+	/**
+	 * Fetches {@link ContextResolver} for a certain type
+	 *
+	 * @param resolvingContextType the type for this resolver
+	 * @return the context resolver
+	 */
+	@Override
+	public <T> @Nullable ContextResolver<C, T> getContextResolver(Class<T> resolvingContextType) {
+		return contextResolverRegistry.getResolver(resolvingContextType);
+	}
+
+	/**
+	 * Registers {@link ContextResolver}
+	 *
+	 * @param type     the class-type of value being resolved from context
+	 * @param resolver the resolver for this value
+	 */
+	@Override
+	public <T> void registerContextResolver(Class<T> type,
+	                                        @NotNull ContextResolver<C, T> resolver) {
+		contextResolverRegistry.registerResolver(type, resolver);
+	}
+
+
+	/**
 	 * Registers {@link ValueResolver}
 	 *
 	 * @param type     the class-type of value being resolved from context
@@ -166,15 +227,15 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	 */
 	@Override
 	public <T> void registerValueResolver(Class<T> type, @NotNull ValueResolver<C, T> resolver) {
-		contextResolverRegistry.registerResolver(type, resolver);
+		valueResolverRegistry.registerResolver(type, resolver);
 	}
 
 	/**
 	 * @return all currently registered {@link ValueResolver}
 	 */
 	@Override
-	public Collection<? extends ValueResolver<C, ?>> getRegisteredContextResolvers() {
-		return contextResolverRegistry.getAll();
+	public Collection<? extends ValueResolver<C, ?>> getRegisteredValueResolvers() {
+		return valueResolverRegistry.getAll();
 	}
 
 	/**
@@ -185,7 +246,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	 */
 	@Override
 	public @Nullable <T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType) {
-		return contextResolverRegistry.getResolver(resolvingValueType);
+		return valueResolverRegistry.getResolver(resolvingValueType);
 	}
 
 
@@ -340,15 +401,15 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		CommandSource<C> commandSource = wrapSender(sender);
 
 		Context<C> plainContext = getContextFactory()
-				  .createContext(commandSource, commandName, rawArguments);
+				  .createContext(this, commandSource, commandName, rawArguments);
 
 		try {
 			handleExecution(commandSource, plainContext);
 		} catch (Exception ex) {
-			if (!(ex instanceof CommandException))
+			if (!(ex instanceof CommandException exception))
 				ex.printStackTrace();
 			else
-				((CommandException) ex).handle(plainContext);
+				exception.handle(plainContext);
 		}
 	}
 
@@ -368,7 +429,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 
 		context.extractCommandFlags(command);
 
-		CommandUsageLookup<C>.SearchResult searchResult = command.lookup()
+		CommandUsageLookup<C>.SearchResult searchResult = command.lookup(this)
 				  .searchUsage(context);
 
 		if (searchResult.getCommandUsage() == null || context.getArguments().isEmpty()) {
@@ -401,7 +462,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		}
 		usage.getCooldownHandler().registerExecutionMoment(source);
 
-		ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(command, context);
+		ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(this, command, context);
 		resolvedContext.resolve(this, usage);
 		usage.getExecution().execute(source, resolvedContext);
 	}

@@ -6,13 +6,9 @@ import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
-import dev.velix.imperat.annotations.types.methods.Help;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
-import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Named;
-import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.test.Group;
-import org.bukkit.command.CommandSender;
 
 @Command({"group", "rank"})
 @Permission("command.group")
@@ -25,14 +21,14 @@ public final class GroupCommand {
 	}
 
 
-	@Usage
+	/*@Usage
 	@Help
 	public void group(BukkitCommandSource source,
 	                  @Named("group") Group group,
 	                  CommandHelp<CommandSender> help) {
 		source.reply("Group entered= " + group.getName());
 		help.display(source);
-	}
+	}*/
 
 	@SubCommand(value = "setperm")
 	@Permission("command.group.setperm")
@@ -52,5 +48,13 @@ public final class GroupCommand {
 		source.reply("You have set prefix '" + prefix + "' to group '" + group.getName() + "'");
 	}
 
+	@SubCommand(value = "info")
+	public void info(BukkitCommandSource source, Group group) {
+		if(source.isConsole()) {
+			source.reply("You can't do that, only players can !");
+			return;
+		}
+		source.reply("Showing info about group: " + group.getName());
+	}
 
 }

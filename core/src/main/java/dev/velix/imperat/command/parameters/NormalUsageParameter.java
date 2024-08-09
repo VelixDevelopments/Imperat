@@ -1,6 +1,7 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.StringUtils;
 
 final class NormalUsageParameter extends InputParameter {
@@ -9,8 +10,8 @@ final class NormalUsageParameter extends InputParameter {
 	                     Class<?> type,
 	                     boolean optional,
 	                     boolean greedy,
-	                     Object defaultValue) {
-		super(name, type, optional, false, greedy, defaultValue);
+	                     OptionalValueSupplier<?, ?> valueSupplier) {
+		super(name, type, optional, false, greedy, valueSupplier);
 	}
 
 	/**

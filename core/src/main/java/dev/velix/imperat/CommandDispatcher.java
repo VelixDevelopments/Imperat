@@ -8,10 +8,9 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
+import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.help.HelpTemplate;
-import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.ValueResolver;
+import dev.velix.imperat.resolvers.*;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +31,9 @@ import java.util.List;
 public interface CommandDispatcher<C> {
 
 
+	/**
+	 * @return The command prefix
+	 */
 	String commandPrefix();
 
 	/**
@@ -92,12 +94,66 @@ public interface CommandDispatcher<C> {
 	 */
 	PermissionResolver<C> getPermissionResolver();
 
+
+	/**
+	 * Registers a context resolver factory
+	 * @param factory the factory to register
+	 */
+	void registerContextResolverFactory(ContextResolverFactory<C> factory);
+
+	/**
+	 * Checks whether the type has
+	 * a registered context-resolver
+	 *
+	 * @param type the type
+	 * @return whether the type has
+	 * a context-resolver
+	 */
+	boolean hasContextResolver(Class<?> type);
+
+	/**
+	 * @return returns the factory for creation of
+	 * {@link ContextResolver}
+	 */
+	ContextResolverFactory<C> getContextResolverFactory();
+
+	/**
+	 * Fetches {@link ContextResolver} for a certain type
+	 * @param resolvingContextType the type for this resolver
+	 *
+	 * @return the context resolver
+	 * @param <T> the type of class
+	 */
+	<T> ContextResolver<C, T> getContextResolver(Class<T> resolvingContextType);
+
+	/**
+	 * Fetches the {@link ContextResolver} suitable for the {@link UsageParameter}
+	 *
+	 * @param usageParameter the parameter of a command's usage
+	 * @param <T>  the type of value that will be resolved by {@link ValueResolver}
+	 * @return the context resolver for this parameter's value type
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> ContextResolver<C, T> getContextResolver(UsageParameter usageParameter) {
+		return (ContextResolver<C, T>) getContextResolver(usageParameter.getType());
+	}
+
+	/**
+	 * Registers {@link ContextResolver}
+	 *
+	 * @param type     the class-type of value being resolved from context
+	 * @param resolver the resolver for this value
+	 * @param <T>      the type of value being resolved from context
+	 */
+		  <T>
+	void registerContextResolver(Class<T> type, @NotNull ContextResolver<C, T> resolver);
+
 	/**
 	 * Fetches {@link ValueResolver} for a certain value
 	 *
 	 * @param resolvingValueType the value that the resolver ends providing it from the context
 	 * @param <T>                the type of value resolved from the context resolver
-	 * @return the context resolver of a certain type
+	 * @return the value resolver of a certain type
 	 */
 	@Nullable
 	<T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType);
@@ -107,7 +163,7 @@ public interface CommandDispatcher<C> {
 	 *
 	 * @param usageParameter the parameter of a command's usage
 	 * @param <T>            the type of value that will be resolved by {@link ValueResolver}
-	 * @return the context resolver for this parameter's value type
+	 * @return the value resolver for this parameter's value type
 	 */
 	@SuppressWarnings("unchecked")
 	default <T> ValueResolver<C, T> getValueResolver(UsageParameter usageParameter) {
@@ -126,7 +182,7 @@ public interface CommandDispatcher<C> {
 	/**
 	 * @return all currently registered {@link ValueResolver}
 	 */
-	Collection<? extends ValueResolver<C, ?>> getRegisteredContextResolvers();
+	Collection<? extends ValueResolver<C, ?>> getRegisteredValueResolvers();
 
 	/**
 	 * Fetches the suggestion provider/resolver for a specific type of

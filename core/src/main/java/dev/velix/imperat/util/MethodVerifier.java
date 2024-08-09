@@ -12,6 +12,9 @@ public final class MethodVerifier {
 
 	public static <C> void verifyMethod(CommandDispatcher<C> dispatcher,
 	                                    Class<?> clazz, Method method, boolean verifyDefault) {
+		if(method.getReturnType() != void.class) {
+			throw new IllegalStateException("In class '" + clazz.getName()  + "', this method '" + method.getName() + "' is not a void method");
+		}
 		Parameter[] methodParams = method.getParameters();
 		if (methodParams.length == 0) {
 			throw new IllegalStateException("In class '" + clazz.getName() + "', this method '" + method.getName() + "' has no parameters !");

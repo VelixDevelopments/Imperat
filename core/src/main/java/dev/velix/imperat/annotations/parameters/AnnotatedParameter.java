@@ -1,9 +1,10 @@
 package dev.velix.imperat.annotations.parameters;
 
+import dev.velix.imperat.command.AnnotationParser;
 import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.AnnotationMap;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
@@ -11,7 +12,7 @@ import java.util.Collection;
 /**
  * Represents an annotated parameter
  * from using annotation parser
- * @see dev.velix.imperat.AnnotationParser
+ * @see AnnotationParser
  */
 public interface AnnotatedParameter extends UsageParameter {
 
@@ -28,14 +29,14 @@ public interface AnnotatedParameter extends UsageParameter {
 		return new AnnotatedFlagParameter(flag, AnnotationMap.loadFrom(parameter));
 	}
 
-	static AnnotatedParameter input(String name,
+	static <C, T> AnnotatedParameter input(String name,
 	                                Class<?> type,
 	                                boolean optional,
-											  boolean greedy,
-											  Object defaultValue,
-	                                Parameter parameter) {
-		return new AnnotatedNormalParameter(name, type, optional, greedy,
-				  defaultValue, AnnotationMap.loadFrom(parameter));
+	                                boolean greedy,
+	                                Parameter parameter,
+	                                OptionalValueSupplier<C, T> valueSupplier) {
+		return new AnnotatedNormalParameter(name, type, optional, greedy, valueSupplier,
+				  AnnotationMap.loadFrom(parameter));
 	}
 
 }

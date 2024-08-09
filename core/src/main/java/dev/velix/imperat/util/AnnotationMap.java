@@ -19,7 +19,7 @@ public final class AnnotationMap
 			  Set.of(
 						 Command.class, Description.class, Usage.class, SubCommand.class,
 					    DefaultUsage.class, Permission.class, Named.class, Optional.class,
-					    Flag.class, Greedy.class, Range.class, Default.class, Help.class, Cooldown.class
+					    Flag.class, Greedy.class, Range.class, DefaultValue.class, Help.class, Cooldown.class
 			  );
 
 	public static AnnotationMap loadFrom(AnnotatedElement element) {

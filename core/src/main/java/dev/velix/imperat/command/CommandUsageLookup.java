@@ -1,5 +1,6 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
@@ -13,9 +14,12 @@ import java.util.function.Predicate;
 @ApiStatus.Internal
 public final class CommandUsageLookup<C> {
 
+	private final CommandDispatcher<C> dispatcher;
 	private final Command<C> primeCommand;
 
-	CommandUsageLookup(Command<C> command) {
+	CommandUsageLookup(CommandDispatcher<C> dispatcher,
+	                   Command<C> command) {
+		this.dispatcher = dispatcher;
 		this.primeCommand = command;
 	}
 
@@ -90,6 +94,16 @@ public final class CommandUsageLookup<C> {
 			final int minMaxDiff = maxExpectedLength - minExpectedLength;
 			int paramPos = lastParameter.getPosition() - minMaxDiff;
 			rawLength = rawLength - (rawLength - paramPos - 1);
+		}
+
+		if(rawLength < minExpectedLength) {
+			for(var param : usage.getParameters()) {
+				if(param.isOptional()) continue;
+				if(rawLength == minExpectedLength) break;
+
+				if(dispatcher.getContextResolver(param) != null)
+					rawLength++;
+			}
 		}
 
 		return rawLength >= minExpectedLength && rawLength <= maxExpectedLength;

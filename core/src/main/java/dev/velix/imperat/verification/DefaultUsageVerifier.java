@@ -58,7 +58,8 @@ final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 	public boolean areAmbiguous(CommandUsage<C> usage1, CommandUsage<C> usage2) {
 		//check length
 		boolean sameLength = usage1.getMinLength() == usage2.getMinLength();
-		boolean hasSubCommands = usage1.hasParamType(Command.class) && usage2.hasParamType(Command.class);
+		boolean hasSubCommands = usage1.hasParamType(Command.class)
+				  && usage2.hasParamType(Command.class);
 
 		if (sameLength && hasSubCommands) {
 			List<UsageParameter> parameterList1 = new ArrayList<>(usage1.getParameters());

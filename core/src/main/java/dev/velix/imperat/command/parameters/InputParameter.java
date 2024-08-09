@@ -1,6 +1,7 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
@@ -12,17 +13,17 @@ public abstract class InputParameter implements UsageParameter {
 	private int index;
 	private final Class<?> type;
 	private final boolean optional, flag, greedy;
-	private final Object defaultValue;
+	private final OptionalValueSupplier<?, ?> optionalValueSupplier;
 
 	protected InputParameter(String name, Class<?> type,
-	                          boolean optional, boolean flag, boolean greedy,
-	                         Object defaultValue) {
+	                         boolean optional, boolean flag, boolean greedy,
+	                         OptionalValueSupplier<?, ?> optionalValueSupplier) {
 		this.name = name;
 		this.type = type;
 		this.optional = optional;
 		this.flag = flag;
 		this.greedy = greedy;
-		this.defaultValue = defaultValue;
+		this.optionalValueSupplier = optionalValueSupplier;
 	}
 
 	/**
@@ -64,11 +65,10 @@ public abstract class InputParameter implements UsageParameter {
 	 * @return the default value if it's input is not present
 	 * in case of the parameter being optional
 	 */
-	@Override
-	public Object getDefaultValue() {
-		return defaultValue;
+	@Override @SuppressWarnings("unchecked")
+	public <C> OptionalValueSupplier<C, ?> getDefaultValueSupplier() {
+		return (OptionalValueSupplier<C, ?>) optionalValueSupplier;
 	}
-
 
 	/**
 	 * @return whether this is an optional argument

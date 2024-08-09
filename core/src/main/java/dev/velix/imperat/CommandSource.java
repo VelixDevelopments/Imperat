@@ -44,4 +44,5 @@ public interface CommandSource<C> {
 	 */
 	boolean isConsole();
 
+	<T> T as(Class<T> clazz);
 }

@@ -10,6 +10,7 @@ import dev.velix.imperat.context.internal.FlagRegistry;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.ListUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -80,6 +81,15 @@ public interface Command<C> extends UsageParameter {
 	 */
 	@ApiStatus.Internal
 	void setPosition(int position);
+
+	/**
+	 * @return the default value if it's input is not present
+	 * in case of the parameter being optional
+	 */
+	@Override
+	default @Nullable <C> OptionalValueSupplier<C, ?> getDefaultValueSupplier() {
+		return null;
+	}
 
 	/**
 	 * @param name the name used
@@ -159,6 +169,7 @@ public interface Command<C> extends UsageParameter {
 	 * @param subCommand     the sub-command's unique name
 	 * @param aliases        of the subcommand
 	 * @param usage          the usage
+	 *
 	 * @param attachDirectly whether the sub command's usage will be attached to
 	 *                       the main/default usage of the command directly or not
 	 *                       <p>
@@ -246,8 +257,8 @@ public interface Command<C> extends UsageParameter {
 	}
 
 
-	default CommandUsageLookup<C> lookup() {
-		return new CommandUsageLookup<>(this);
+	default CommandUsageLookup<C> lookup(CommandDispatcher<C> dispatcher) {
+		return new CommandUsageLookup<>(dispatcher, this);
 	}
 
 
@@ -336,7 +347,7 @@ public interface Command<C> extends UsageParameter {
 	                            HelpExecution<C> helpExecution) {
 		List<UsageParameter> params = new ArrayList<>();
 		if(dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
-			params.add(UsageParameter.optional("page", Integer.class, "1"));
+			params.add(UsageParameter.optional("page", Integer.class, OptionalValueSupplier.of(1)));
 		}
 
 		addSubCommandUsage(

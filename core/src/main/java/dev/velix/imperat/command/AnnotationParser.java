@@ -1,10 +1,9 @@
-package dev.velix.imperat;
+package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.annotations.loaders.CommandLoader;
 import dev.velix.imperat.annotations.loaders.CommandUsageLoader;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
-import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Method;

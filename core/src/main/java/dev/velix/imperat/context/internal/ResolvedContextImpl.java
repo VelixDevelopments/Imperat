@@ -35,7 +35,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
 	private final Context<C> context;
 
-	//per command/subcommand because the class 'Command' is can be also treated as a sub command
+	//per command/subcommand because the class 'Command' can be also treated as a sub command
 	private final Map<Command<C>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
 
 	//all resolved arguments EXCEPT for subcommands and flags.
@@ -123,9 +123,8 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public <T> @Nullable T getArgument(String name) {
 		ResolvedArgument argument = allResolvedArgs.get(name.toLowerCase());
 		if (argument == null) return null;
-		return (T) argument.getValue();
+		return (T) argument.value();
 	}
-
 
 	/**
 	 * @return the command source of the command

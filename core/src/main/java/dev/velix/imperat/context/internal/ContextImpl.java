@@ -16,13 +16,13 @@ public final class ContextImpl<C> implements Context<C> {
 	private final CommandSource<C> commandSource;
 	private final String command;
 	private final ArgumentQueue args;
-
 	private final CommandFlagExtractor<C> flagExtractor;
 
-	ContextImpl(CommandSource<C> commandSource,
-	            String command,
-	            ArgumentQueue args,
-	            Supplier<CommandFlagExtractor<C>> flagExtractor) {
+	ContextImpl(
+			  CommandSource<C> commandSource,
+			  String command,
+			  ArgumentQueue args,
+			  Supplier<CommandFlagExtractor<C>> flagExtractor) {
 		this.commandSource = commandSource;
 		this.command = command;
 		this.args = args;
@@ -78,6 +78,11 @@ public final class ContextImpl<C> implements Context<C> {
 	public <T> @Nullable T getArgument(String name) {
 		throw new UnsupportedOperationException();
 	}
+
+	//1- remove default values in usage parameter
+	//2- add optional resolvers + registry
+	//3- add mappings for defaults in context
+
 
 	/**
 	 * The class responsible for extracting/reading flags

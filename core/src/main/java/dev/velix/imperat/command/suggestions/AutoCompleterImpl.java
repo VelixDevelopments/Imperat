@@ -83,7 +83,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 		}
 
 		ArgumentQueue queue = ArgumentQueue.parse(args);
-		List<CommandUsage<C>> closestUsages = getClosestUsages(args);
+		List<CommandUsage<C>> closestUsages = getClosestUsages(dispatcher, args);
 		int index = currentArg.index();
 		if (index == -1)
 			index = 0;
@@ -110,9 +110,9 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 	}
 
 
-	private List<CommandUsage<C>> getClosestUsages(String[] args) {
+	private List<CommandUsage<C>> getClosestUsages(CommandDispatcher<C> dispatcher, String[] args) {
 
-		return command.lookup()
+		return command.lookup(dispatcher)
 				  .findUsages((usage) -> {
 					  if (args.length >= usage.getMaxLength()) {
 						  for (int i = 0; i < usage.getMaxLength(); i++) {

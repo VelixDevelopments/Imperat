@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.command.AbstractCommandDispatcher;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;

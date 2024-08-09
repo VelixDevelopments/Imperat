@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.command.AbstractCommandDispatcher;
 import dev.velix.imperat.resolvers.PermissionResolver;
 
 public final class TestCommandDispatcher extends AbstractCommandDispatcher<TestSender> {

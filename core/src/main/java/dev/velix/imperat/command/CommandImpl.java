@@ -31,6 +31,9 @@ final class CommandImpl<C> implements Command<C> {
 	private final AutoCompleter<C> autoCompleter;
 	private final Set<CommandUsage<C>> usages = new LinkedHashSet<>();
 
+	private final OptionalDefaultValueRegistry<C> optionalDefaultValueRegistry;
+
+
 	CommandImpl(String name) {
 		this(null, name);
 	}
@@ -43,6 +46,7 @@ final class CommandImpl<C> implements Command<C> {
 		setDefaultUsageExecution((source, context) -> {
 		});
 		this.autoCompleter = AutoCompleter.createNative(this);
+		this.optionalDefaultValueRegistry = new OptionalDefaultValueRegistry<>();
 	}
 
 
@@ -108,26 +112,6 @@ final class CommandImpl<C> implements Command<C> {
 	@Override
 	public void setPosition(int position) {
 		this.position = position;
-	}
-
-	/**
-	 * @return the default value if it's input is not present
-	 * in case of the parameter being optional
-	 */
-	@Override
-	public Object getDefaultValue() {
-		return getName();
-	}
-
-	/**
-	 * @return is a literal string parameter
-	 * which can be treated as a sub command
-	 * WARNING: NOT RECOMMENDED TO USE THIS , instead use
-	 * the well documented subcommands API.
-	 */
-	@Override
-	public boolean isLiteral() {
-		return true;
 	}
 
 
@@ -290,4 +274,6 @@ final class CommandImpl<C> implements Command<C> {
 	public void ignoreACPermissions(boolean suppress) {
 		this.suppressACPermissionChecks = suppress;
 	}
+
+
 }

@@ -9,13 +9,13 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.TokenParseException;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.resolvers.ValueResolver;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
@@ -83,7 +83,7 @@ final class SmartUsageResolve<C> {
 					//all parameters from here must be optional
 					//adding the absent optional args with their default values
 					context.resolveArgument(command, null, position.parameter,
-							  currentParameter, currentParameter.getDefaultValue());
+							  currentParameter, getDefaultValue(context, currentParameter));
 					position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 				}
 				//System.out.println("Closed at position= " + position);
@@ -186,9 +186,8 @@ final class SmartUsageResolve<C> {
 						position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 						return;
 					}
-
 					context.resolveArgument(command, currentRaw, position.parameter,
-							  currentParameter, currentParameter.getDefaultValue());
+							  currentParameter, getDefaultValue(context, currentParameter));
 
 					context.resolveArgument(command, currentRaw, position.parameter + 1,
 							  nextParam, resolveResult);
@@ -203,7 +202,7 @@ final class SmartUsageResolve<C> {
 			} else {
 
 				context.resolveArgument(command, currentRaw, position.parameter,
-						  currentParameter, currentParameter.getDefaultValue());
+						  currentParameter, getDefaultValue(context, currentParameter));
 
 				//shifting the parameters && raw again, so it can start after the new shift
 				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
@@ -255,6 +254,16 @@ final class SmartUsageResolve<C> {
 
 		}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public @Nullable <T> T getDefaultValue(Context<C> context, UsageParameter parameter) {
+		OptionalValueSupplier<C, T> optionalSupplier = (OptionalValueSupplier<C, T>) parameter.getDefaultValueSupplier();
+		T defaultValue = null;
+		if(optionalSupplier != null) {
+			defaultValue = optionalSupplier.supply(context);
+		}
+		return defaultValue;
 	}
 
 	@Data

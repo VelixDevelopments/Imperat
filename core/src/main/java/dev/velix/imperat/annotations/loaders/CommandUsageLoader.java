@@ -11,9 +11,11 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.help.CommandHelp;
+import dev.velix.imperat.help.MethodHelpExecution;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.MethodVerifier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -50,7 +52,6 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 			return null;
 		}
 
-
 		Usage usage = method.getAnnotation(Usage.class);
 		SubCommand subCommand = method.getAnnotation(SubCommand.class);
 
@@ -79,17 +80,7 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 
 		if (usage == null) {
 			MethodVerifier.verifyHelpMethod(dispatcher, aClass, method);
-			alreadyLoaded.addHelpCommand(dispatcher, (source, cmdHelp, page) -> {
-				try {
-					if (method.getParameters().length == 3) {
-						method.invoke(instance, source, cmdHelp, page);
-					} else {
-						method.invoke(instance, source, cmdHelp);
-					}
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					throw new RuntimeException(e);
-				}
-			});
+			alreadyLoaded.addHelpCommand(dispatcher, new MethodHelpExecution<>(instance, method));
 			return null;
 		} else {
 			return loadUsage(null, alreadyLoaded, help);
@@ -123,6 +114,9 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		var mainUsage = alreadyLoaded.getMainUsage();
 
 		for (Parameter parameter : method.getParameters()) {
+			if(dispatcher.hasContextResolver(parameter.getType()))
+				continue;
+
 			UsageParameter usageParameter = getParameter(parameter, help);
 			if (usageParameter == null) {
 				continue;
@@ -153,7 +147,8 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 
 
 
-	private UsageParameter getParameter(Parameter parameter, Help help) {
+	@SuppressWarnings("unchecked")
+	private <T> UsageParameter getParameter(Parameter parameter, Help help)  {
 		if(help != null && parameter.getType() == CommandHelp.class)return null;
 		if (dispatcher.canBeSender(parameter.getType())) {
 			return null;
@@ -163,11 +158,7 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		Flag flag = parameter.getAnnotation(Flag.class);
 
 		String name;
-
-		Default defaultAnnotation = parameter.getAnnotation(Default.class);
-		boolean hasDefault = defaultAnnotation != null;
 		boolean optional = parameter.getAnnotation(Optional.class) != null;
-		String defaultValue = hasDefault ? defaultAnnotation.value() : null;
 
 		if (named != null) {
 			name = named.value();
@@ -177,6 +168,8 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		} else {
 			name = parameter.getName();
 		}
+
+
 
 		boolean greedy = parameter.getAnnotation(Greedy.class) != null;
 
@@ -188,11 +181,47 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 
 		if(flag != null) {
 			usageParameter = AnnotatedParameter.flag(name, parameter);
-		}else {
-			usageParameter = AnnotatedParameter.input(name, parameter.getType(), optional, greedy, defaultValue, parameter);
+		} else {
+
+			OptionalValueSupplier<C, T> optionalValueSupplier = null;
+			if(optional) {
+				DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
+				DefaultValueProvider provider = parameter.getAnnotation(DefaultValueProvider.class);
+
+
+				if (defaultValueAnnotation != null) {
+					String def = defaultValueAnnotation.value();
+					optionalValueSupplier = (OptionalValueSupplier<C, T>) OptionalValueSupplier.of(def);
+				} else if (provider != null) {
+					Class<? extends OptionalValueSupplier<?, ?>> supplierClass = provider.value();
+					try {
+						optionalValueSupplier = getOptionalValueSupplier(parameter, supplierClass);
+					} catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+					         IllegalAccessException e) {
+						throw new RuntimeException("Optional value suppler class '" + supplierClass.getName() + "' doesn't have an empty accessible constructor !");
+					}
+				}
+			}
+
+			usageParameter = AnnotatedParameter.input(name, parameter.getType(),
+					  optional, greedy, parameter, optionalValueSupplier);
 		}
 
+
 		return usageParameter;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <C, T> @NotNull OptionalValueSupplier<C, T> getOptionalValueSupplier(Parameter parameter, Class<? extends OptionalValueSupplier<?, ?>> supplierClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		var emptyConstructor = supplierClass.getDeclaredConstructor();
+		if(!emptyConstructor.isAccessible()) {
+			emptyConstructor.setAccessible(true);
+		}
+		OptionalValueSupplier<C, T> valueSupplier = (OptionalValueSupplier<C, T>) emptyConstructor.newInstance();
+		if(valueSupplier.getValueType() != parameter.getType()) {
+			throw new IllegalArgumentException("Optional supplier of value-type '" + valueSupplier.getValueType().getName() + "' doesn't match the optional arg type '" + parameter.getType().getName() + "'");
+		}
+		return valueSupplier;
 	}
 
 }

@@ -2,6 +2,7 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +41,7 @@ public interface UsageParameter {
 	 * @return the default value if it's input is not present
 	 * in case of the parameter being optional
 	 */
-	Object getDefaultValue();
+	<C> OptionalValueSupplier<C, ?> getDefaultValueSupplier();
 
 	/**
 	 * @return whether this is an optional argument
@@ -104,11 +105,11 @@ public interface UsageParameter {
 		return new NormalUsageParameter(name, clazz, false, false, null);
 	}
 
-	static <T> UsageParameter optional(String name, Class<T> clazz, @Nullable String defaultValue) {
+	static <C, T> UsageParameter optional(String name, Class<T> clazz, @Nullable OptionalValueSupplier<C, T> defaultValue) {
 		return new NormalUsageParameter(name, clazz, true, false, defaultValue);
 	}
 
-	static UsageParameter greedy(String name, boolean optional, @Nullable String defaultValue) {
+	static <C> UsageParameter greedy(String name, boolean optional, @Nullable OptionalValueSupplier<C, String> defaultValue) {
 		return new NormalUsageParameter(name, String.class, optional, true, defaultValue);
 	}
 

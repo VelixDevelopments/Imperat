@@ -53,11 +53,26 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 
 		for (int i = 1, p = 0; i < paramsInstances.length; i++, p++) {
 			Parameter actualParameter = parameters[i];
+
+			var factory = dispatcher.getContextResolverFactory();
+			var contextResolver = factory.create(actualParameter);
+
+			if(contextResolver != null) {
+				paramsInstances[i] = contextResolver.resolve((Context<C>) context, actualParameter);
+				continue;
+			}
+			contextResolver = dispatcher.getContextResolver(actualParameter.getType());
+			if(contextResolver != null){
+				paramsInstances[i] = contextResolver.resolve((Context<C>) context, actualParameter);
+			}
+
+
 			if(helpAnnotation != null && actualParameter.getType() == CommandHelp.class) {
 				paramsInstances[i] = new CommandHelp<>(dispatcher, command, (Context<C>) context, null);
 				p--;
 				continue;
 			}
+
 			UsageParameter parameter = getUsageParam(fullParameters, p);
 			if(parameter == null) continue;
 			paramsInstances[i] = parameter.isFlag() ?

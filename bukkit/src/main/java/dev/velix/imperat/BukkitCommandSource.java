@@ -60,4 +60,11 @@ public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	public boolean isConsole() {
 		return !(sender instanceof Player);
 	}
+
+	@Override @SuppressWarnings("unchecked")
+	public <T> T as(Class<T> clazz) {
+		return (T) getOrigin();
+	}
+
+
 }

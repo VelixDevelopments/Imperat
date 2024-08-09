@@ -1,6 +1,7 @@
 package dev.velix.imperat.annotations.parameters;
 
 import dev.velix.imperat.command.parameters.InputParameter;
+import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.AnnotationMap;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,9 +13,10 @@ public abstract class AnnotatedInputParameter
 
 	private final AnnotationMap map;
 	AnnotatedInputParameter(String name, Class<?> type, boolean optional,
-	                                boolean flag, boolean greedy, Object defaultValue,
+	                                boolean flag, boolean greedy,
+											  @Nullable OptionalValueSupplier<?, ?> optionalValueSupplier,
 	                                AnnotationMap map) {
-		super(name, type, optional, flag, greedy, defaultValue);
+		super(name, type, optional, flag, greedy, optionalValueSupplier);
 		this.map = map;
 	}
 
