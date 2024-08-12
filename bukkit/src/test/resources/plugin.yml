@@ -1,0 +1,5 @@
+name: Imperat-Bukkit
+main: dev.velix.imperat.Test
+version: 1.0
+commands:
+  group:

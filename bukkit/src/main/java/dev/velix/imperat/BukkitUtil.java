@@ -1,13 +1,11 @@
 package dev.velix.imperat;
 
+import dev.array21.bukkitreflectionlib.ReflectionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
-
 import java.lang.reflect.Field;
 import java.util.Map;
-
-import static org.bukkit.Bukkit.getServer;
 
 class BukkitUtil {
 
@@ -15,14 +13,28 @@ class BukkitUtil {
 
 	}
 
+	public static Class<?> getCraftServer() {
 
+		/*if(ReflectionUtil.isUseNewSpigotPackaging()) {
+			// >= Minecraft 1.17
+			return ReflectionUtil.getMinecraftClass("world.entity.player.EntityHuman");
+		} else {
+			// =< Minecraft 1.16
+			// This method is also marked as @Deprecated !
+			return ReflectionUtil.getNmsClass("EntityHuman");
+		}*/
+		try {
+			return ReflectionUtil.getBukkitClass("CraftServer");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	@SuppressWarnings("unchecked")
 	public static Map<String, org.bukkit.command.Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException {
-		CraftServer craftServer = (CraftServer) getServer();
-		Field commandMapField = craftServer.getClass().getDeclaredField("commandMap");
+		Class<?> craftServer = getCraftServer();
+		Field commandMapField = craftServer.getDeclaredField("commandMap");
 		commandMapField.setAccessible(true);
-		CommandMap commandMap = (CommandMap) commandMapField.get(craftServer);
-
+		CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
 		// Get the commands registered in the command map
 		Field hashMapCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
 		hashMapCommandsField.setAccessible(true);
