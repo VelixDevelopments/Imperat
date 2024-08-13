@@ -1,4 +1,4 @@
-package dev.velix.imperat.util;
+package dev.velix.imperat.util.annotations;
 
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.help.CommandHelp;

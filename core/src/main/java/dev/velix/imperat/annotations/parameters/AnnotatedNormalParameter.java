@@ -2,8 +2,8 @@ package dev.velix.imperat.annotations.parameters;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
-import dev.velix.imperat.util.AnnotationMap;
 import dev.velix.imperat.util.StringUtils;
+import dev.velix.imperat.util.annotations.AnnotationMap;
 import org.jetbrains.annotations.Nullable;
 
 public final class AnnotatedNormalParameter extends AnnotatedInputParameter {

@@ -1,4 +1,4 @@
-package dev.velix.imperat.util;
+package dev.velix.imperat.util.annotations;
 
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
@@ -21,6 +21,12 @@ public final class AnnotationMap
 					    DefaultUsage.class, Permission.class, Named.class, Optional.class,
 					    Flag.class, Greedy.class, Range.class, DefaultValue.class, Help.class, Cooldown.class
 			  );
+
+
+	public void set(Annotation annotation) {
+		this.put(annotation.getClass(), annotation);
+	}
+
 
 	public static AnnotationMap loadFrom(AnnotatedElement element) {
 		AnnotationMap map = new AnnotationMap();

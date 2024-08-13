@@ -1,7 +1,6 @@
 package dev.velix.imperat.annotations.loaders;
 
 import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.annotations.AnnotationLoader;
 import dev.velix.imperat.annotations.MethodCommandExecutor;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.annotations.types.Permission;
@@ -13,9 +12,10 @@ import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.MethodHelpExecution;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
-import dev.velix.imperat.util.MethodVerifier;
+import dev.velix.imperat.util.annotations.MethodVerifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandUsage<C>> {
 
 	private final CommandDispatcher<C> dispatcher;
@@ -211,7 +212,7 @@ public final class CommandUsageLoader<C> implements AnnotationLoader<C, CommandU
 		return usageParameter;
 	}
 
-	@SuppressWarnings({"unchecked", "deprecation"})
+	@SuppressWarnings({"unchecked"})
 	private static <C, T> @NotNull OptionalValueSupplier<C, T> getOptionalValueSupplier(Parameter parameter, Class<? extends OptionalValueSupplier<?, ?>> supplierClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		var emptyConstructor = supplierClass.getDeclaredConstructor();
 		if(!emptyConstructor.isAccessible()) {

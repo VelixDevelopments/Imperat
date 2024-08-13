@@ -1,11 +1,11 @@
 package dev.velix.imperat.caption.premade;
 
-import dev.velix.imperat.command.AbstractCommandDispatcher;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
+import dev.velix.imperat.command.AbstractCommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.UsageParameter;

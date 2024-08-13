@@ -1,30 +1,28 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.annotations.loaders.CommandLoader;
-import dev.velix.imperat.annotations.loaders.CommandUsageLoader;
-import dev.velix.imperat.annotations.types.methods.SubCommand;
+import dev.velix.imperat.annotations.AnnotationReader;
+import dev.velix.imperat.annotations.CommandAnnotationRegistry;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 @ApiStatus.Internal
-public final class AnnotationParser<C> {
+final class AnnotationParser<C> {
 
 	private final CommandDispatcher<C> dispatcher;
+	private final CommandAnnotationRegistry annotationRegistry;
 
 	AnnotationParser(CommandDispatcher<C> dispatcher) {
 		this.dispatcher = dispatcher;
+		this.annotationRegistry = new CommandAnnotationRegistry();
 	}
 
 	@SuppressWarnings("unchecked")
 	<T> void parseCommandClass(T instance) {
 		Class<T> instanceClazz = (Class<T>) instance.getClass();
+		AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
 
-		CommandLoader<C> commandLoader = new CommandLoader<>(instanceClazz);
+		//TODO design structure for parsing !!
+		/*CommandLoader<C> commandLoader = new CommandLoader<>(instanceClazz);
 		Command<C> command = commandLoader.load(null);
 
 		for (Method method : instanceClazz.getDeclaredMethods()) {
@@ -47,9 +45,11 @@ public final class AnnotationParser<C> {
 			}
 
 			command.addUsage(usage);
-		}
-
-		dispatcher.registerCommand(command);
+		}*/
+		//dispatcher.registerCommand(command);
 	}
 
+	public CommandAnnotationRegistry getRegistry() {
+		return annotationRegistry;
+	}
 }

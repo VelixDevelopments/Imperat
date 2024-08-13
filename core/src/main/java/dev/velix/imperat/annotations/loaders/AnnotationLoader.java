@@ -1,4 +1,4 @@
-package dev.velix.imperat.annotations;
+package dev.velix.imperat.annotations.loaders;
 
 import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.Nullable;
@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> type of the object that can be annotated
  */
+@Deprecated
 public interface AnnotationLoader<C, T> {
 
 	/**

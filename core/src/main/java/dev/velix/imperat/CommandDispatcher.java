@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 
+import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
@@ -10,12 +11,16 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.help.HelpTemplate;
-import dev.velix.imperat.resolvers.*;
+import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,6 +56,15 @@ public interface CommandDispatcher<C> {
 	 * @param <T>     the type of this class instance
 	 */
 	<T> void registerCommand(T command);
+
+	/**
+	 * Registers annotation replacer
+	 * @param type the type to replace the annotation by
+	 * @param replacer the replacer
+	 * @param <A> the type of annotation to replace
+	 */
+	<A extends Annotation> void registerAnnotationReplacer(Class<A> type,
+	                                                       AnnotationReplacer<A> replacer);
 
 	/**
 	 * @param name the name/alias of the command

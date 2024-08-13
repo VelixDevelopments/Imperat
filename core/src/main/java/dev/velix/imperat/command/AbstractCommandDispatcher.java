@@ -2,6 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.CaptionRegistry;
@@ -28,6 +29,8 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -123,6 +126,16 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		}
 
 		return null;
+	}
+
+	/**
+	 * Registers {@link AnnotationReplacer}
+	 * @param type     the type to replace the annotation by
+	 * @param replacer the replacer
+	 */
+	@Override
+	public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
+		annotationParser.getRegistry().registerAnnotationReplacer(type, replacer);
 	}
 
 	/**

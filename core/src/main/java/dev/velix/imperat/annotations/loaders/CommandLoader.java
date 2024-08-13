@@ -1,6 +1,5 @@
 package dev.velix.imperat.annotations.loaders;
 
-import dev.velix.imperat.annotations.AnnotationLoader;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.command.Command;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Deprecated
 public final class CommandLoader<C> implements AnnotationLoader<C, Command<C>> {
 
 	private final Class<?> aClass;
