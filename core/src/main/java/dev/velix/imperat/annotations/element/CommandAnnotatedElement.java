@@ -1,9 +1,10 @@
 package dev.velix.imperat.annotations.element;
 
 import dev.velix.imperat.annotations.AnnotationReplacer;
-import dev.velix.imperat.annotations.CommandAnnotationRegistry;
+import dev.velix.imperat.annotations.AnnotationRegistry;
 import dev.velix.imperat.util.annotations.AnnotationMap;
 import lombok.Getter;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -11,6 +12,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 
+@ApiStatus.Internal
 public class CommandAnnotatedElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> {
 	
 	private final @NotNull AnnotationMap map = new AnnotationMap();
@@ -19,7 +21,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
 	private final @NotNull E element;
 	
 	public CommandAnnotatedElement(
-					@NotNull CommandAnnotationRegistry registry,
+					@NotNull AnnotationRegistry registry,
 					@NotNull E element
 	) {
 		this.element = element;
@@ -27,7 +29,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <A extends Annotation> void load(@NotNull CommandAnnotationRegistry registry) {
+	private <A extends Annotation> void load(@NotNull AnnotationRegistry registry) {
 		for (Annotation annotation : element.getDeclaredAnnotations()) {
 			Class<A> clazz = (Class<A>) annotation.annotationType();
 			if (registry.isRegistered(clazz)) {

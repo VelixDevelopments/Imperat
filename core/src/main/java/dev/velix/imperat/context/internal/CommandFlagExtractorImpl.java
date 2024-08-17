@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C> {
+final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C> {
 	
 	
 	private final FlagRegistry flagRegistry;

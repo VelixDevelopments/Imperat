@@ -205,7 +205,6 @@ public interface Command<C> extends UsageParameter {
 		
 		final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
 		final CommandUsage<C> combo = prime.mergeWithCommand(subCmd, usage);
-		System.out.println("Adding usage = " + CommandUsage.format(this, combo));
 		this.addUsage(combo);
 	}
 	
@@ -356,8 +355,8 @@ public interface Command<C> extends UsageParameter {
 										.parameters(params)
 										.execute((sender, context) -> {
 											Integer page = context.getArgument("page");
-											if (page == null) page = 1;
-											CommandHelp<C> help = dispatcher.createCommandHelp(this, (Context<C>) context, ((ResolvedContext<C>) context).getDetectedUsage());
+											CommandHelp<C> help = dispatcher.createCommandHelp(this,
+															(Context<C>) context, ((ResolvedContext<C>) context).getDetectedUsage());
 											helpExecution.help(sender, help, page);
 										}).build(),
 						true

@@ -9,17 +9,19 @@ import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.*;
 import dev.velix.imperat.util.ClassMap;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-public final class CommandAnnotationRegistry extends LinkedHashSet<Class<? extends Annotation>> {
+@ApiStatus.Internal
+public final class AnnotationRegistry extends LinkedHashSet<Class<? extends Annotation>> {
 	
 	private final ClassMap<Annotation, AnnotationReplacer<?>> replacers = new ClassMap<>();
 	
-	public CommandAnnotationRegistry() {
+	public AnnotationRegistry() {
 		this.registerAnnotationTypes(Command.class, Description.class, Permission.class);
 		this.registerAnnotationTypes(Usage.class, DefaultUsage.class, SubCommand.class, Help.class, Command.class);
 		this.registerAnnotationTypes(DefaultValue.class, DefaultValueProvider.class,

@@ -1,13 +1,13 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.command.AbstractCommandDispatcher;
+import dev.velix.imperat.command.BaseCommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.PermissionResolver;
 
-public final class TestCommandDispatcher extends AbstractCommandDispatcher<TestSender> {
+public final class TestCommandDispatcher extends BaseCommandDispatcher<TestSender> {
 	
 	TestCommandDispatcher() {
 		super();
@@ -56,5 +56,13 @@ public final class TestCommandDispatcher extends AbstractCommandDispatcher<TestS
 	@Override
 	public CommandHelp<TestSender> createCommandHelp(Command<TestSender> command, Context<TestSender> context, CommandUsage<TestSender> detectedUsage) {
 		return null;
+	}
+	
+	/**
+	 *
+	 */
+	@Override
+	public void shutdownPlatform() {
+	
 	}
 }

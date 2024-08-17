@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueResolver<C, ?>> {
 	
 	
-	public ValueResolverRegistry() {
+	private ValueResolverRegistry() {
 		super();
 		registerResolver(String.class, ((source, context, raw) -> raw));
 		registerResolver(Integer.class, (source, context, raw) -> {
@@ -46,6 +46,10 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
 			}
 		});
 		registerEnumResolver(TimeUnit.class);
+	}
+	
+	public static <C> ValueResolverRegistry<C> createDefault() {
+		return new ValueResolverRegistry<>();
 	}
 	
 	private ContextResolveException exception(Context<C> context,

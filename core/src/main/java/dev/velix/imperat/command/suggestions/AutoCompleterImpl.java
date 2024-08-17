@@ -74,7 +74,6 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 	                                         CompletionArg currentArg,
 	                                         String[] args) {
 		
-		AutoCompleteList results = new AutoCompleteList();
 		
 		final PermissionResolver<C> permResolver = dispatcher.getPermissionResolver();
 		if (!command.isIgnoringACPerms() &&
@@ -88,6 +87,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 		if (index == -1)
 			index = 0;
 		
+		AutoCompleteList results = new AutoCompleteList();
 		for (CommandUsage<C> usage : closestUsages) {
 			if (index < 0 || index >= usage.getMaxLength()) continue;
 			UsageParameter parameter = usage.getParameters().get(index);

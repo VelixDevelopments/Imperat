@@ -1,7 +1,6 @@
 package dev.velix.imperat.annotations.element;
 
 import dev.velix.imperat.annotations.AnnotationContainer;
-import dev.velix.imperat.annotations.AnnotationReader;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.AnnotatedElement;
@@ -26,7 +25,7 @@ public interface ElementVisitor<E extends AnnotatedElement> {
 	 * @param element the element
 	 * @return the element unique key
 	 */
-	AnnotationReader.ElementKey loadKey(E element);
+	ElementKey loadKey(E element);
 	
 	/**
 	 * Visits the annotation container and an element in
@@ -43,17 +42,17 @@ public interface ElementVisitor<E extends AnnotatedElement> {
 	}
 	
 	static ElementVisitor<Class<?>> classes() {
-		return (element) -> new AnnotationReader.ElementKey(element.getName());
+		return (element) -> ElementKey.of(element.getName());
 	}
 	
 	static ElementVisitor<Method> methods() {
-		return (element) -> new AnnotationReader.ElementKey(element.getName(),
+		return (element) -> new ElementKey(element.getName(),
 						Arrays.stream(element.getParameterTypes())
 										.map(Class::getName).toArray(String[]::new));
 	}
 	
 	static ElementVisitor<Parameter> parameters() {
-		return (param) -> new AnnotationReader.ElementKey(param.getName(),
+		return (param) -> new ElementKey(param.getName(),
 						param.getType().getName());
 	}
 	

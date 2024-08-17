@@ -4,7 +4,6 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.UsageParameter;
 import org.jetbrains.annotations.ApiStatus;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +24,6 @@ final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 			return false;
 		}
 		
-		UsageParameter firstParameter = usage.getParameters().get(0);
-		boolean firstArgIsRequired = firstParameter != null
-						&& !firstParameter.isOptional();
-		
 		int greedyCount = 0;
 		for (int i = 0; i < usage.getMaxLength(); i++) {
 			UsageParameter param = usage.getParameters().get(i);
@@ -39,7 +34,11 @@ final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 			return false;
 		}
 		
-		UsageParameter greedyParam = usage.getParameter((UsageParameter::isGreedy));
+		UsageParameter firstParameter = usage.getParameters().get(0);
+		boolean firstArgIsRequired = firstParameter != null
+						&& !firstParameter.isOptional();
+		
+		UsageParameter greedyParam = usage.getParameter(UsageParameter::isGreedy);
 		if (greedyParam == null)
 			return firstArgIsRequired;
 		

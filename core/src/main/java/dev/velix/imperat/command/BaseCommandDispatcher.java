@@ -2,8 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
-import dev.velix.imperat.annotations.AnnotationParser;
-import dev.velix.imperat.annotations.AnnotationReplacer;
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.CaptionRegistry;
@@ -11,11 +10,10 @@ import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ContextFactory;
+import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.context.internal.ContextResolverRegistry;
-import dev.velix.imperat.context.internal.DefaultContextFactory;
 import dev.velix.imperat.context.internal.ValueResolverRegistry;
 import dev.velix.imperat.exceptions.AmbiguousUsageAdditionException;
 import dev.velix.imperat.exceptions.CommandException;
@@ -25,12 +23,12 @@ import dev.velix.imperat.help.templates.DefaultTemplate;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
+import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.verification.UsageVerifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,11 +36,13 @@ import java.util.List;
 import java.util.Map;
 
 @ApiStatus.Internal
-public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<C> {
+public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 	
 	public final static Component START_PREFIX = Messages.getMsg("<dark_gray><bold>[<gold>!</gold>]</bold></dark_gray> ");
 	public final static Component CAPTION_EXECUTION_ERROR_PREFIX = START_PREFIX.append(Messages.getMsg("<red><bold>Execution error:</bold></red> "));
 	public final static Component FULL_SYNTAX_PREFIX = START_PREFIX.append(Messages.getMsg("<dark_aqua>Full syntax:</dark_aqua> "));
+	
+	public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
 	
 	private final Map<String, Command<C>> commands = new HashMap<>();
 	
@@ -58,19 +58,18 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	
 	private final CaptionRegistry<C> captionRegistry;
 	
-	private final AnnotationParser<C> annotationParser;
+	private HelpTemplate template = DEFAULT_HELP_TEMPLATE;
 	
-	private HelpTemplate template;
+	private AnnotationParser<C> annotationParser;
 	
-	public AbstractCommandDispatcher() {
-		contextFactory = new DefaultContextFactory<>();
-		contextResolverRegistry = new ContextResolverRegistry<>();
-		valueResolverRegistry = new ValueResolverRegistry<>();
-		suggestionResolverRegistry = new SuggestionResolverRegistry<>();
+	protected BaseCommandDispatcher() {
+		contextFactory = ContextFactory.defaultFactory();
+		contextResolverRegistry = ContextResolverRegistry.createDefault();
+		valueResolverRegistry = ValueResolverRegistry.createDefault();
+		suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
 		verifier = UsageVerifier.defaultVerifier();
-		captionRegistry = new CaptionRegistry<>();
-		annotationParser = new AnnotationParser<>(this);
-		template = new DefaultTemplate();
+		captionRegistry = CaptionRegistry.createDefault();
+		annotationParser = AnnotationParser.defaultParser(this);
 	}
 	
 	/**
@@ -83,21 +82,21 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		
 		try {
 			for (CommandUsage<C> usage : command.getUsages()) {
-				if (!verifier.verify(usage)) {
+				if (!verifier.verify(usage))
 					throw new InvalidCommandUsageException(command, usage);
-				}
+				
 				for (CommandUsage<C> other : command.getUsages()) {
 					if (other.equals(usage)) continue;
-					if (verifier.areAmbiguous(usage, other)) {
-						throw new AmbiguousUsageAdditionException(command, this, usage, other);
-					}
+					if (verifier.areAmbiguous(usage, other))
+						throw new AmbiguousUsageAdditionException(command, usage, other);
 				}
+				
 			}
 			commands.put(command.getName().toLowerCase(), command);
 		} catch (RuntimeException ex) {
-			ex.printStackTrace();
+			CommandDispatcher.traceError(ex);
+			shutdownPlatform();
 		}
-		
 		
 	}
 	
@@ -130,6 +129,17 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	}
 	
 	/**
+	 * Changes the instance of {@link AnnotationParser}
+	 *
+	 * @param parser the parser
+	 */
+	@Override
+	public void setAnnotationParser(AnnotationParser<C> parser) {
+		Preconditions.notNull(parser, "Parser cannot be null !");
+		this.annotationParser = parser;
+	}
+	
+	/**
 	 * Registers {@link AnnotationReplacer}
 	 *
 	 * @param type     the type to replace the annotation by
@@ -137,8 +147,9 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	 */
 	@Override
 	public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
-		annotationParser.getRegistry().registerAnnotationReplacer(type, replacer);
+		annotationParser.registerAnnotationReplacer(type, replacer);
 	}
+	
 	
 	/**
 	 * @param owningCommand the command owning this sub-command
@@ -439,11 +450,8 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		
 		try {
 			handleExecution(commandSource, plainContext);
-		} catch (Exception ex) {
-			if (!(ex instanceof CommandException exception))
-				ex.printStackTrace();
-			else
-				exception.handle(plainContext);
+		} catch (CommandException ex) {
+			ex.handle(plainContext);
 		}
 	}
 	
@@ -540,4 +548,6 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public void setHelpTemplate(HelpTemplate template) {
 		this.template = template;
 	}
+
+	
 }

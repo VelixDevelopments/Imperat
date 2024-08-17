@@ -1,12 +1,15 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
+import dev.velix.imperat.annotations.element.ElementKey;
 import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.util.Registry;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.AnnotatedElement;
 
-public final class AnnotationContainer extends Registry<AnnotationReader.ElementKey, AnnotatedElement> {
+@ApiStatus.Internal
+public final class AnnotationContainer extends Registry<ElementKey, AnnotatedElement> {
 	
 	private final AnnotationLevel level;
 	
@@ -17,7 +20,7 @@ public final class AnnotationContainer extends Registry<AnnotationReader.Element
 	
 	
 	public void addElement(
-					AnnotationReader.ElementKey key,
+					ElementKey key,
 					AnnotatedElement element
 	) {
 		if (!level.matches(element)) {
@@ -27,7 +30,7 @@ public final class AnnotationContainer extends Registry<AnnotationReader.Element
 		this.setData(key, element);
 	}
 	
-	public void removeElement(AnnotationReader.ElementKey key) {
+	public void removeElement(ElementKey key) {
 		this.setData(key, null);
 	}
 	

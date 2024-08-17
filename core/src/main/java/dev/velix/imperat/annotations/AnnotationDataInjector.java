@@ -1,6 +1,5 @@
-package dev.velix.imperat.annotations.injectors;
+package dev.velix.imperat.annotations;
 
-import dev.velix.imperat.annotations.AnnotationReader;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.NotNull;

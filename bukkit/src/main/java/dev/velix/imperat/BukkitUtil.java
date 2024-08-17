@@ -14,7 +14,7 @@ class BukkitUtil {
 	
 	}
 	
-	public static Class<?> getCraftServer() {
+	public static Class<?> getCraftServer() throws ClassNotFoundException {
 
 		/*if(ReflectionUtil.isUseNewSpigotPackaging()) {
 			// >= Minecraft 1.17
@@ -24,15 +24,11 @@ class BukkitUtil {
 			// This method is also marked as @Deprecated !
 			return ReflectionUtil.getNmsClass("EntityHuman");
 		}*/
-		try {
-			return ReflectionUtil.getBukkitClass("CraftServer");
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		return ReflectionUtil.getBukkitClass("CraftServer");
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Map<String, org.bukkit.command.Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException {
+	public static Map<String, org.bukkit.command.Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
 		Class<?> craftServer = getCraftServer();
 		Field commandMapField = craftServer.getDeclaredField("commandMap");
 		commandMapField.setAccessible(true);

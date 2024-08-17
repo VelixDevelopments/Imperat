@@ -1,4 +1,4 @@
-package dev.velix.imperat.annotations.injectors;
+package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.command.Command;
@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 
-public interface AnnotationDataCreator<O, A extends Annotation> {
+interface AnnotationDataCreator<O, A extends Annotation> {
 	
 	/**
 	 * Creates a data instance from the annotation

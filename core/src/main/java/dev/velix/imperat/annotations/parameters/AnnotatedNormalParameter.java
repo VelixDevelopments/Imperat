@@ -6,7 +6,7 @@ import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-public final class AnnotatedNormalParameter extends AnnotatedInputParameter {
+final class AnnotatedNormalParameter extends AnnotatedInputParameter {
 	AnnotatedNormalParameter(String name,
 	                         Class<?> type,
 	                         boolean optional, boolean greedy,

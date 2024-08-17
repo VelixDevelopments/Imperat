@@ -14,6 +14,7 @@ import java.lang.reflect.Parameter;
  */
 public interface ContextResolverFactory<C> {
 	
+	
 	/**
 	 * Creates a context resolver based on the parameter
 	 *

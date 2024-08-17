@@ -1,8 +1,6 @@
-package dev.velix.imperat.annotations.injectors;
+package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.annotations.CommandAnnotationRegistry;
-import dev.velix.imperat.annotations.MethodCommandExecutor;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.ParameterCommandElement;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
@@ -19,6 +17,7 @@ import dev.velix.imperat.help.MethodHelpExecution;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.annotations.MethodVerifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,13 +27,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
-public final class AnnotationDataRegistry<C> extends
+@ApiStatus.Internal
+@SuppressWarnings("unchecked")
+final class AnnotationDataRegistry<C> extends
 				Registry<Class<? extends Annotation>, AnnotationDataInjector<?, C, ?>> {
 	
 	
 	private final Map<Class<? extends Annotation>, AnnotationDataCreator<?, ?>> dataCreators = new HashMap<>();
 	
-	public AnnotationDataRegistry(CommandAnnotationRegistry annotationRegistry, CommandDispatcher<C> dispatcher) {
+	public AnnotationDataRegistry(AnnotationRegistry annotationRegistry, CommandDispatcher<C> dispatcher) {
 		super(LinkedHashMap::new);
 		registerDataCreator(
 						dev.velix.imperat.annotations.types.Command.class,
@@ -94,7 +95,7 @@ public final class AnnotationDataRegistry<C> extends
 		}));
 	}
 	
-	private void registerSubCmdInjector(CommandAnnotationRegistry annotationRegistry, CommandDispatcher<C> dispatcher) {
+	private void registerSubCmdInjector(AnnotationRegistry annotationRegistry, CommandDispatcher<C> dispatcher) {
 		registerCommandInjector(SubCommand.class, (proxy, command, toLoad, element, annotation) -> {
 			Method method = (Method) element.getElement();
 			
@@ -184,7 +185,7 @@ public final class AnnotationDataRegistry<C> extends
 		
 	}
 	
-	private List<UsageParameter> loadParameters(CommandAnnotationRegistry registry,
+	private List<UsageParameter> loadParameters(AnnotationRegistry registry,
 	                                            CommandDispatcher<C> dispatcher,
 	                                            @Nullable SubCommand subCommand,
 	                                            @Nullable CommandUsage<C> mainUsage,
@@ -208,9 +209,8 @@ public final class AnnotationDataRegistry<C> extends
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	private <T> UsageParameter getParameter(
-					CommandAnnotationRegistry registry,
+					AnnotationRegistry registry,
 					Parameter parameter
 	) {
 		Named named = parameter.getAnnotation(Named.class);
@@ -234,46 +234,47 @@ public final class AnnotationDataRegistry<C> extends
 			throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy type '" + parameter.getType().getName() + "'");
 		}
 		
-		UsageParameter usageParameter;
 		
-		if (flag != null) {
-			usageParameter = AnnotatedParameter.flag(name, null);
-		} else {
-			
-			OptionalValueSupplier<C, T> optionalValueSupplier = null;
-			if (optional) {
-				DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
-				DefaultValueProvider provider = parameter.getAnnotation(DefaultValueProvider.class);
-				
-				
-				if (defaultValueAnnotation != null) {
-					String def = defaultValueAnnotation.value();
-					optionalValueSupplier = (OptionalValueSupplier<C, T>) OptionalValueSupplier.of(def);
-				} else if (provider != null) {
-					Class<? extends OptionalValueSupplier<?, ?>> supplierClass = provider.value();
-					try {
-						optionalValueSupplier = getOptionalValueSupplier(parameter, supplierClass);
-					} catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-					         IllegalAccessException e) {
-						throw new RuntimeException("Optional value suppler class '" + supplierClass.getName() + "' doesn't have an empty accessible constructor !");
-					}
-				}
-			}
-			
-			usageParameter = AnnotatedParameter.input(name, parameter.getType(),
-							optional, greedy, new ParameterCommandElement(registry, name, parameter), optionalValueSupplier);
+		if (flag != null) 
+			return AnnotatedParameter.flag(name, null);
+		
+		OptionalValueSupplier<C, T> optionalValueSupplier = null;
+		if (optional) {
+			DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
+			DefaultValueProvider provider = parameter.getAnnotation(DefaultValueProvider.class);
+			optionalValueSupplier = deduceOptionalValueSupplier(parameter, defaultValueAnnotation, provider);
 		}
 		
+		return AnnotatedParameter.input(name, parameter.getType(),
+						optional, greedy, new ParameterCommandElement(registry, name, parameter),
+						optionalValueSupplier);
+	}
+	
+	
+	private static <C, T> OptionalValueSupplier<C, T> deduceOptionalValueSupplier(
+					Parameter parameter, DefaultValue defaultValueAnnotation,
+					DefaultValueProvider provider
+	) {
 		
-		return usageParameter;
+		if (defaultValueAnnotation != null) {
+			String def = defaultValueAnnotation.value();
+			return (OptionalValueSupplier<C, T>) OptionalValueSupplier.of(def);
+		} else if (provider != null) {
+			Class<? extends OptionalValueSupplier<?, ?>> supplierClass = provider.value();
+			try {
+				return getOptionalValueSupplier(parameter, supplierClass);
+			} catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+			         IllegalAccessException e) {
+				throw new IllegalAccessError("Optional value suppler class '" + supplierClass.getName() + "' doesn't have an empty accessible constructor !");
+			}
+		}
+		return null;
 	}
 	
 	@SuppressWarnings({"unchecked"})
 	private static <C, T> @NotNull OptionalValueSupplier<C, T> getOptionalValueSupplier(Parameter parameter, Class<? extends OptionalValueSupplier<?, ?>> supplierClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		var emptyConstructor = supplierClass.getDeclaredConstructor();
-		if (!emptyConstructor.isAccessible()) {
-			emptyConstructor.setAccessible(true);
-		}
+		emptyConstructor.setAccessible(true);
 		OptionalValueSupplier<C, T> valueSupplier = (OptionalValueSupplier<C, T>) emptyConstructor.newInstance();
 		if (valueSupplier.getValueType() != parameter.getType()) {
 			throw new IllegalArgumentException("Optional supplier of value-type '" + valueSupplier.getValueType().getName() + "' doesn't match the optional arg type '" + parameter.getType().getName() + "'");

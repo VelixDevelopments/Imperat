@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * can be place
  */
 @ApiStatus.Internal
-public enum AnnotationLevel {
+enum AnnotationLevel {
 	
 	
 	CLASS(ElementVisitor::classes) {
@@ -29,7 +29,7 @@ public enum AnnotationLevel {
 		}
 		
 		@Override
-		public Set<AnnotatedElement> getElements(CommandAnnotationRegistry registry, Class<?> target) {
+		public Set<AnnotatedElement> getElements(AnnotationRegistry registry, Class<?> target) {
 			return Set.of(new CommandAnnotatedElement<>(registry, target));
 		}
 	},
@@ -42,7 +42,7 @@ public enum AnnotationLevel {
 		}
 		
 		@Override
-		public Set<AnnotatedElement> getElements(CommandAnnotationRegistry registry,
+		public Set<AnnotatedElement> getElements(AnnotationRegistry registry,
 		                                         Class<?> target) {
 			Set<AnnotatedElement> elements = new HashSet<>();
 			for (Method method : target.getDeclaredMethods()) {
@@ -60,7 +60,7 @@ public enum AnnotationLevel {
 		}
 		
 		@Override
-		public Set<AnnotatedElement> getElements(CommandAnnotationRegistry registry, Class<?> target) {
+		public Set<AnnotatedElement> getElements(AnnotationRegistry registry, Class<?> target) {
 			Set<AnnotatedElement> elements = new HashSet<>();
 			for (Method method : target.getDeclaredMethods()) {
 				for (Parameter parameter : method.getParameters()) {
@@ -91,6 +91,6 @@ public enum AnnotationLevel {
 	
 	public abstract boolean matches(AnnotatedElement element);
 	
-	public abstract Set<? extends AnnotatedElement> getElements(CommandAnnotationRegistry registry,
+	public abstract Set<? extends AnnotatedElement> getElements(AnnotationRegistry registry,
 	                                                            Class<?> target);
 }

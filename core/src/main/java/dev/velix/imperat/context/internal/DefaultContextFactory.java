@@ -10,8 +10,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class DefaultContextFactory<C> implements ContextFactory<C> {
+class DefaultContextFactory<C> implements ContextFactory<C> {
 	
+	
+	DefaultContextFactory() {}
 	
 	/**
 	 * @param commandSource         the sender/source of this command execution

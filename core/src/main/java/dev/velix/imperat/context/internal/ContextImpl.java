@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public final class ContextImpl<C> implements Context<C> {
+final class ContextImpl<C> implements Context<C> {
 	
 	private final CommandSource<C> commandSource;
 	private final String command;

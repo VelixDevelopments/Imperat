@@ -1,23 +1,24 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
+import dev.velix.imperat.annotations.element.ElementKey;
 import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.util.Registry;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
+@ApiStatus.Internal
 final class AnnotationReaderImpl implements AnnotationReader {
 	
 	private final Class<?> clazz;
-	private final CommandAnnotationRegistry registry;
+	private final AnnotationRegistry registry;
 	
 	private final Registry<AnnotationLevel, AnnotationContainer> containers = new Registry<>(() -> new EnumMap<>(AnnotationLevel.class));
 	
-	AnnotationReaderImpl(CommandAnnotationRegistry registry,
+	AnnotationReaderImpl(AnnotationRegistry registry,
 	                     Class<?> clazz) {
 		this.registry = registry;
 		this.clazz = clazz;
@@ -41,13 +42,7 @@ final class AnnotationReaderImpl implements AnnotationReader {
 	}
 	
 	
-	/**
-	 * @return The class target
-	 */
-	@Override
-	public @NotNull Class<?> getTargetClass() {
-		return clazz;
-	}
+
 	
 	/**
 	 * Get annotated element

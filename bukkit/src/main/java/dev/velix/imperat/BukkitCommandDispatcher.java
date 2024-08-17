@@ -1,7 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.caption.Messages;
-import dev.velix.imperat.command.AbstractCommandDispatcher;
+import dev.velix.imperat.command.BaseCommandDispatcher;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
@@ -20,10 +20,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Map;
 
-public final class BukkitCommandDispatcher extends AbstractCommandDispatcher<CommandSender> {
+public final class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender> {
 	
 	private final Plugin plugin;
 	private final Map<String, Command> commandMap;
@@ -41,8 +40,9 @@ public final class BukkitCommandDispatcher extends AbstractCommandDispatcher<Com
 		this.provider = audienceProvider == null ? BukkitAudiences.create(plugin) : audienceProvider;
 		try {
 			commandMap = BukkitUtil.getCommandMap();
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new RuntimeException(e);
+		} catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
+			CommandDispatcher.debug("Failed to fetch bukkit command-map, disabling plugin '%s'", plugin.getName());
+			throw new IllegalAccessError(e.getMessage());
 		}
 		registerValueResolvers();
 	}
@@ -96,6 +96,11 @@ public final class BukkitCommandDispatcher extends AbstractCommandDispatcher<Com
 					CommandUsage<CommandSender> detectedUsage
 	) {
 		return BukkitCommandHelp.create(this, command, context, detectedUsage);
+	}
+
+	@Override
+	public void shutdownPlatform() {
+		Bukkit.getPluginManager().disablePlugin(plugin);
 	}
 	
 	

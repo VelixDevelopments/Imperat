@@ -5,7 +5,7 @@ import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
-import dev.velix.imperat.command.AbstractCommandDispatcher;
+import dev.velix.imperat.command.BaseCommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.UsageParameter;
@@ -64,14 +64,14 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
 				assert !param.isOptional();
 				builder.append(param.format(command));
 				if (i != params.size() - 1)
-					builder.append(" ");
+					builder.append(' ');
 				
 			}
 			//INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
 			return Messages.getMsg(Messages.INVALID_SYNTAX_INCOMPLETE_USAGE,
 											Placeholder.parsed("required_args", builder.toString()))
 							.appendNewline()
-							.append(AbstractCommandDispatcher.FULL_SYNTAX_PREFIX).append(
+							.append(BaseCommandDispatcher.FULL_SYNTAX_PREFIX).append(
 											Messages.getMsg(Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE, Placeholder.parsed("usage", dispatcher.commandPrefix() + CommandUsage.format(command, usage)))
 							);
 		}

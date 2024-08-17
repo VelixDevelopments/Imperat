@@ -9,11 +9,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class StringUtils {
+	
 	/**
-	 * General utilities for string operations
+	 * Pattern to extract snowflake IDs. Useful for JDA
 	 */
-	private StringUtils() {
-	}
+	public static final Pattern SNOWFLAKE = Pattern.compile("<(@!|@|@&|#)(?<snowflake>\\d{18})>");
 	
 	/**
 	 * Pattern to split by whitespace
@@ -21,15 +21,9 @@ public final class StringUtils {
 	public static final Pattern SPACE = Pattern.compile(" ", Pattern.LITERAL);
 	
 	/**
-	 * Pattern to split by whitespace
+	 * General utilities for string operations
 	 */
-	@SuppressWarnings("RegExpEmptyAlternationBranch") // we have LITERAL :face_palm:
-	public static final Pattern VERTICAL_BAR = Pattern.compile("|", Pattern.LITERAL);
-	
-	/**
-	 * Pattern to extract snowflake IDs. Useful for JDA
-	 */
-	public static final Pattern SNOWFLAKE = Pattern.compile("<(@!|@|@&|#)(?<snowflake>\\d{18})>");
+	private StringUtils() {}
 	
 	public static LinkedList<String> splitBySpace(String text) {
 		String[] result = SPACE.split(text);
@@ -86,17 +80,6 @@ public final class StringUtils {
 		System.arraycopy(array, 0, array, n, size - n);
 		return new String(array);
 	}
-
-	/*public static String colorize(@NotNull String text) {
-		char[] b = text.toCharArray();
-		for (int i = 0; i < b.length - 1; i++) {
-			if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx".indexOf(b[i + 1]) > -1) {
-				b[i] = '§';
-				b[i + 1] = Character.toLowerCase(b[i + 1]);
-			}
-		}
-		return new String(b);
-	}*/
 	
 	public static String normalizedParameterFormatting(String parameterContent, boolean optional) {
 		String prefix, suffix;
@@ -109,5 +92,6 @@ public final class StringUtils {
 		}
 		return prefix + parameterContent + suffix;
 	}
+	
 }
 

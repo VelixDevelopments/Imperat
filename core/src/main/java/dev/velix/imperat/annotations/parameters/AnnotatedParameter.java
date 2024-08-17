@@ -3,6 +3,7 @@ package dev.velix.imperat.annotations.parameters;
 import dev.velix.imperat.annotations.element.ParameterCommandElement;
 import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -12,6 +13,7 @@ import java.util.Collection;
  * Represents an annotated parameter
  * from using annotation parser
  */
+@ApiStatus.AvailableSince("1.0.0")
 public interface AnnotatedParameter extends UsageParameter {
 	
 	@Nullable

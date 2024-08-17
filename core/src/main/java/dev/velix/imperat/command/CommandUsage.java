@@ -118,12 +118,12 @@ public interface CommandUsage<C> {
 	
 	
 	static <C> String format(Command<C> command, CommandUsage<C> usage) {
-		StringBuilder builder = new StringBuilder(command.getName() + " ");
+		StringBuilder builder = new StringBuilder(command.getName()).append(' ');
 		int i = 0;
 		for (UsageParameter parameter : usage.getParameters()) {
 			builder.append(parameter.format(command));
 			if (i != usage.getParameters().size() - 1) {
-				builder.append(" ");
+				builder.append(' ');
 			}
 			i++;
 		}

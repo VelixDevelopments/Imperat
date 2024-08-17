@@ -1,6 +1,5 @@
 package dev.velix.imperat.exceptions;
 
-import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 
@@ -8,7 +7,6 @@ public final class AmbiguousUsageAdditionException extends RuntimeException {
 	
 	public <C> AmbiguousUsageAdditionException(
 					Command<C> command,
-					CommandDispatcher<C> dispatcher,
 					CommandUsage<C> first,
 					CommandUsage<C> second
 	) {

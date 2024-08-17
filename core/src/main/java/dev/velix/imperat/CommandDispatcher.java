@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 
+import dev.velix.imperat.annotations.AnnotationParser;
 import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
@@ -8,7 +9,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ContextFactory;
+import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpTemplate;
@@ -18,8 +19,11 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -36,6 +40,9 @@ import java.util.List;
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandDispatcher<C> {
 	
+	Logger LOGGER = LoggerFactory.getLogger(CommandDispatcher.class);
+	
+
 	
 	/**
 	 * @return The command prefix
@@ -57,6 +64,13 @@ public interface CommandDispatcher<C> {
 	 * @param <T>     the type of this class instance
 	 */
 	<T> void registerCommand(T command);
+	
+	/**
+	 * Changes the instance of {@link AnnotationParser}
+	 * @param parser the parser
+	 */
+	@Contract("null->fail")
+	void setAnnotationParser(AnnotationParser<C> parser);
 	
 	/**
 	 * Registers annotation replacer
@@ -212,14 +226,13 @@ public interface CommandDispatcher<C> {
 	 */
 	@SuppressWarnings("unchecked")
 	default @Nullable <T> SuggestionResolver<C, T> getSuggestionResolver(UsageParameter parameter) {
-		SuggestionResolver<C, T> resolver = getSuggestionResolver((Class<T>) parameter.getType());
 		SuggestionResolver<C, T> argResolver = getArgumentSuggestionResolver(parameter.getName());
 		
 		if (argResolver != null) {
 			return argResolver;
 		}
 		
-		return resolver;
+		return getSuggestionResolver((Class<T>) parameter.getType());
 	}
 	
 	/**
@@ -387,4 +400,26 @@ public interface CommandDispatcher<C> {
 	 * @return {@link CommandHelp} for the command usage used in a certain context
 	 */
 	CommandHelp<C> createCommandHelp(Command<C> command, Context<C> context, CommandUsage<C> detectedUsage);
+	
+	
+	void shutdownPlatform();
+	
+	
+	static void debug(String msg, Object... args) {
+		LOGGER.info(msg, args);
+	}
+	
+	static void warning(String msg, Object... args){
+		LOGGER.warn(msg, args);
+	}
+	
+	static void throwError(Throwable ex) {
+		LOGGER.atError().setCause(ex).log();
+	}
+	
+	static void traceError(Throwable ex) {
+		LOGGER.trace(ex.getMessage(), ex);
+	}
+
+
 }

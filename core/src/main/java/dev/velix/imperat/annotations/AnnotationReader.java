@@ -1,21 +1,22 @@
 package dev.velix.imperat.annotations;
 
-import org.jetbrains.annotations.NotNull;
+import dev.velix.imperat.annotations.element.ElementKey;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 
-public interface AnnotationReader {
-	
-	/**
-	 * @return The class target
-	 */
-	@NotNull
-	Class<?> getTargetClass();
+/**
+ * Represents a class that has a single responsibility of
+ * reading the annotation components of an annotated command class
+ * Each annotation component of specific {@link AnnotationLevel} is packed
+ * into a containing class {@link AnnotationContainer}
+ *
+ * @author Mqzen
+ */
+@ApiStatus.AvailableSince("1.0.0")
+interface AnnotationReader {
 	
 	/**
 	 * Get annotated element
@@ -56,33 +57,9 @@ public interface AnnotationReader {
 					Class<A> type
 	);
 	
-	record ElementKey(String id, String... signatureParamTypes) {
-		public static ElementKey of(String id) {
-			return new ElementKey(id);
-		}
-		
-		@Override
-		public String toString() {
-			return "ElementKey{" +
-							"id='" + id + '\'' +
-							", signatureParams='" + String.join("->", signatureParamTypes) + "'";
-		}
-		
-		@Override
-		public boolean equals(Object object) {
-			if (this == object) return true;
-			if (object == null || getClass() != object.getClass()) return false;
-			ElementKey key = (ElementKey) object;
-			return Objects.equals(id, key.id) && (Objects.deepEquals(signatureParamTypes, key.signatureParamTypes));
-		}
-		
-		@Override
-		public int hashCode() {
-			return Objects.hash(id, Arrays.hashCode(signatureParamTypes));
-		}
-	}
+
 	
-	static AnnotationReader read(CommandAnnotationRegistry registry, Class<?> target) {
+	static AnnotationReader read(AnnotationRegistry registry, Class<?> target) {
 		return new AnnotationReaderImpl(registry, target);
 	}
 }

@@ -41,7 +41,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
 			dispatcher.dispatch(sender, label, raw);
 			return true;
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			CommandDispatcher.traceError(ex);
 			return false;
 		}
 		

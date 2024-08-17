@@ -13,9 +13,13 @@ public final class SuggestionResolverRegistry<C> extends Registry<Class<?>, Sugg
 	
 	private final Map<String, SuggestionResolver<C, ?>> resolversPerArg;
 	
-	public SuggestionResolverRegistry() {
+	private SuggestionResolverRegistry() {
 		super();
 		resolversPerArg = new HashMap<>();
+	}
+	
+	public static <C> SuggestionResolverRegistry<C> createDefault() {
+		return new SuggestionResolverRegistry<>();
 	}
 	
 	public <T> void registerResolver(SuggestionResolver<C, T> suggestionResolver) {

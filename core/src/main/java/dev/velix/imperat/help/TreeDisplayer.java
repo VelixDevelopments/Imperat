@@ -57,7 +57,7 @@ public final class TreeDisplayer implements UsagesDisplayer {
 		StringBuilder builder = new StringBuilder(dispatcher.commandPrefix() + command.getName());
 		Command<C> lastSub = null;
 		for (var param : usage.getParameters()) {
-			builder.append(" ")
+			builder.append(' ')
 							.append(param.format(command));
 			if (param.isCommand()) {
 				lastSub = (Command<C>) param.asCommand();

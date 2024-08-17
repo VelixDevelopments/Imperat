@@ -1,5 +1,6 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.context.internal.FlagRegistry;
 import org.jetbrains.annotations.ApiStatus;
@@ -41,8 +42,7 @@ final class CommandImpl<C> implements Command<C> {
 		this.parent = parent;
 		this.name = name;
 		this.flagRegistry = new FlagRegistry();
-		setDefaultUsageExecution((source, context) -> {
-		});
+		setDefaultUsageExecution((source, context) -> {});
 		this.autoCompleter = AutoCompleter.createNative(this);
 	}
 	
@@ -167,6 +167,7 @@ final class CommandImpl<C> implements Command<C> {
 	 */
 	@Override
 	public void addUsage(CommandUsage<C> usage) {
+		CommandDispatcher.debug("Identified usage = '%s'", CommandUsage.format(this, usage));
 		usages.add(usage);
 	}
 	

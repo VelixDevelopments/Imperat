@@ -1,6 +1,7 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.util.Preconditions;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -10,6 +11,12 @@ import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.function.Supplier;
 
+/**
+ * A class that is responsible for creating
+ * dynamic instances of annotations of certain types
+ * useful while implementing/using {@link AnnotationReplacer}
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public final class AnnotationFactory {
 	
 	/**

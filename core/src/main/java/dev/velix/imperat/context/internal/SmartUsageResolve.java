@@ -147,7 +147,7 @@ final class SmartUsageResolve<C> {
 			
 			StringBuilder builder = new StringBuilder();
 			for (int i = position.raw; i < raws.size(); i++) {
-				builder.append(position.peekRaw(raws)).append(" ");
+				builder.append(position.peekRaw(raws)).append(' ');
 				position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
 			}
 			
@@ -236,10 +236,6 @@ final class SmartUsageResolve<C> {
 		}
 		
 	}
-
-	/*private void debug(String msg, Object... objects) {
-		System.out.println(String.format(msg, objects));
-	}*/
 	
 	private <T> T getResult(ValueResolver<C, T> resolver, Context<C> context, String raw) throws CommandException {
 		return resolver.resolve(context.getCommandSource(), context, raw);

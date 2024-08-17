@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class AnnotatedInputParameter
+abstract class AnnotatedInputParameter
 				extends InputParameter implements AnnotatedParameter {
 	
 	private final ParameterCommandElement element;

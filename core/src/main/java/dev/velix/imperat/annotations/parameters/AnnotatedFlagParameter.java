@@ -5,7 +5,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.util.StringUtils;
 
-public final class AnnotatedFlagParameter extends AnnotatedInputParameter {
+final class AnnotatedFlagParameter extends AnnotatedInputParameter {
 	AnnotatedFlagParameter(String name,
 	                       ParameterCommandElement element) {
 		super(name, CommandFlag.class, true,
