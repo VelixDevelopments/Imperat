@@ -14,8 +14,6 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface AutoCompleter<C> {
-	
-	
 	/**
 	 * @return The auto-completion command
 	 */
