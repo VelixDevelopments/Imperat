@@ -1,19 +1,20 @@
 package dev.velix.imperat;
 
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	private final CommandSender sender;
-	private final BukkitAudiences audiences;
-
-	public BukkitCommandSource(CommandSender sender, BukkitAudiences audiences) {
+	private final AudienceProvider audiences;
+	
+	public BukkitCommandSource(CommandSender sender, AudienceProvider audiences) {
 		this.sender = sender;
 		this.audiences = audiences;
 	}
-
+	
 	/**
 	 * @return name of command source
 	 */
@@ -21,7 +22,7 @@ public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	public String getName() {
 		return sender.getName();
 	}
-
+	
 	/**
 	 * @return The original command sender type instance
 	 */
@@ -29,7 +30,11 @@ public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	public CommandSender getOrigin() {
 		return sender;
 	}
-
+	
+	public Player asPlayer() {
+		return as(Player.class);
+	}
+	
 	/**
 	 * Replies to the command sender with a string message
 	 * this message is auto translated into a minimessage
@@ -40,7 +45,7 @@ public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	public void reply(String message) {
 		sender.sendMessage(message);
 	}
-
+	
 	/**
 	 * Replies to the command sender with a chat component
 	 *
@@ -49,10 +54,11 @@ public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	@Override
 	public void reply(Component component) {
 		//TODO implement
-		audiences.sender(sender)
-				  .sendMessage(component);
+		Audience audience = isConsole() ? audiences.console()
+						: audiences.player(((Player) sender).getUniqueId());
+		audience.sendMessage(component);
 	}
-
+	
 	/**
 	 * @return Whether the command source is from the console
 	 */
@@ -60,11 +66,12 @@ public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	public boolean isConsole() {
 		return !(sender instanceof Player);
 	}
-
-	@Override @SuppressWarnings("unchecked")
+	
+	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T as(Class<T> clazz) {
 		return (T) getOrigin();
 	}
-
-
+	
+	
 }

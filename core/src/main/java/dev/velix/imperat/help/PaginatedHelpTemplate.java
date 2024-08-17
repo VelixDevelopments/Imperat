@@ -9,18 +9,18 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface PaginatedHelpTemplate extends HelpTemplate {
-
+	
 	/**
 	 * @return The number of syntaxes to display
 	 * per page
 	 */
 	int syntaxesPerPage();
-
+	
 	/**
 	 * @return the pages header component
 	 */
 	Component pagesHeaderComponent(int page, int maxPages);
-
+	
 	default Component fullHeader(Command<?> command, int page, int maxPages) {
 		return getHeader(command).append(pagesHeaderComponent(page, maxPages));
 	}

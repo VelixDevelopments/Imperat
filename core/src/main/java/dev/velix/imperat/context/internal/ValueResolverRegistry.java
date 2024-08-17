@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 @ApiStatus.Internal
 public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueResolver<C, ?>> {
-
+	
+	
 	public ValueResolverRegistry() {
 		super();
 		registerResolver(String.class, ((source, context, raw) -> raw));
@@ -46,25 +47,25 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
 		});
 		registerEnumResolver(TimeUnit.class);
 	}
-
+	
 	private ContextResolveException exception(Context<C> context,
 	                                          String raw,
 	                                          Class<?> clazzRequired) {
 		return new ContextResolveException("Error while parsing " + context.getCommandUsed()
-				  + "'s argument input '" + raw + "' , it's NOT any type of " + clazzRequired.getSimpleName());
+						+ "'s argument input '" + raw + "' , it's NOT any type of " + clazzRequired.getSimpleName());
 	}
-
+	
 	public <T> void registerResolver(Class<T> clazz, ValueResolver<C, T> resolver) {
 		setData(clazz, resolver);
 	}
-
+	
 	public <E extends Enum<E>> void registerEnumResolver(Class<E> enumClass) {
 		registerResolver(enumClass, new EnumValueResolver<>(enumClass));
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public <T> ValueResolver<C, T> getResolver(Class<T> type) {
 		return (ValueResolver<C, T>) getData(type).orElse(null);
 	}
-
+	
 }

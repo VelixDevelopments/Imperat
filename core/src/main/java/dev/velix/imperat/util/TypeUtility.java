@@ -1,7 +1,7 @@
 package dev.velix.imperat.util;
 
 public final class TypeUtility {
-
+	
 	public static boolean isInteger(String string) {
 		if (string == null) return false;
 		try {
@@ -11,12 +11,12 @@ public final class TypeUtility {
 			return false;
 		}
 	}
-
+	
 	public static boolean isBoolean(String string) {
 		if (string == null) return false;
 		return Boolean.parseBoolean(string);
 	}
-
+	
 	public static boolean isDouble(String str) {
 		if (str == null) return false;
 		try {
@@ -26,7 +26,7 @@ public final class TypeUtility {
 			return false;
 		}
 	}
-
+	
 	public static boolean isLong(String str) {
 		if (str == null) return false;
 		try {

@@ -15,15 +15,16 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Caption<C> {
-
+	
 	/**
 	 * @return the key
 	 */
 	@NotNull
 	CaptionKey getKey();
-
+	
 	/**
 	 * @param dispatcher    the command dispatcher
+	 * @param command       the command being triggered originally
 	 * @param commandSource the source
 	 * @param context       the context
 	 * @param usage         the command usage, can be null if it hasn't been resolved yet
@@ -32,22 +33,22 @@ public interface Caption<C> {
 	 */
 	@NotNull
 	Component asComponent(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull Command<C> command,
-			  @NotNull CommandSource<C> commandSource,
-			  @NotNull Context<C> context,
-			  @Nullable CommandUsage<C> usage,
-			  @Nullable Exception exception
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull Command<C> command,
+					@NotNull CommandSource<C> commandSource,
+					@NotNull Context<C> context,
+					@Nullable CommandUsage<C> usage,
+					@Nullable Exception exception
 	);
-
-
+	
+	
 	default @NotNull Component asComponent(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull Command<C> command,
-			  @NotNull CommandSource<C> commandSource,
-			  @NotNull Context<C> context,
-			  @Nullable CommandUsage<C> usage
-
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull Command<C> command,
+					@NotNull CommandSource<C> commandSource,
+					@NotNull Context<C> context,
+					@Nullable CommandUsage<C> usage
+	
 	) {
 		return asComponent(dispatcher, command, commandSource, context, usage, null);
 	}

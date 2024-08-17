@@ -11,33 +11,31 @@ import java.util.*;
 
 @ApiStatus.Internal
 final class CommandImpl<C> implements Command<C> {
-
+	
 	private final String name;
 	private String permission = null;
 	private String description = "N/A";
-
+	
 	private int position = -1;
-
+	
 	private boolean suppressACPermissionChecks = false;
-
+	
 	private final List<String> aliases = new ArrayList<>();
-
+	
 	private CommandUsage<C> defaultUsage;
-
+	
 	private final FlagRegistry flagRegistry;
-
+	
 	private final Command<C> parent;
 	private final Map<String, Command<C>> children = new HashMap<>();
 	private final AutoCompleter<C> autoCompleter;
 	private final Set<CommandUsage<C>> usages = new LinkedHashSet<>();
-
-	private final OptionalDefaultValueRegistry<C> optionalDefaultValueRegistry;
-
-
+	
+	
 	CommandImpl(String name) {
 		this(null, name);
 	}
-
+	
 	//sub-command constructor
 	CommandImpl(@Nullable Command<C> parent, String name) {
 		this.parent = parent;
@@ -46,10 +44,9 @@ final class CommandImpl<C> implements Command<C> {
 		setDefaultUsageExecution((source, context) -> {
 		});
 		this.autoCompleter = AutoCompleter.createNative(this);
-		this.optionalDefaultValueRegistry = new OptionalDefaultValueRegistry<>();
 	}
-
-
+	
+	
 	/**
 	 * @return the name of the command
 	 */
@@ -57,7 +54,7 @@ final class CommandImpl<C> implements Command<C> {
 	public String getName() {
 		return name;
 	}
-
+	
 	/**
 	 * @return The permission of the command
 	 */
@@ -65,7 +62,7 @@ final class CommandImpl<C> implements Command<C> {
 	public @Nullable String getPermission() {
 		return permission;
 	}
-
+	
 	/**
 	 * Sets the permission of a command
 	 *
@@ -75,7 +72,7 @@ final class CommandImpl<C> implements Command<C> {
 	public void setPermission(@Nullable String permission) {
 		this.permission = permission;
 	}
-
+	
 	/**
 	 * @return The  description of a command
 	 */
@@ -83,7 +80,7 @@ final class CommandImpl<C> implements Command<C> {
 	public @NotNull String getDescription() {
 		return description;
 	}
-
+	
 	/**
 	 * Sets the description of a command
 	 *
@@ -93,8 +90,8 @@ final class CommandImpl<C> implements Command<C> {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-
+	
+	
 	/**
 	 * @return the index of this parameter
 	 */
@@ -102,7 +99,7 @@ final class CommandImpl<C> implements Command<C> {
 	public int getPosition() {
 		return position;
 	}
-
+	
 	/**
 	 * Sets the position of this command in a syntax
 	 * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -113,8 +110,8 @@ final class CommandImpl<C> implements Command<C> {
 	public void setPosition(int position) {
 		this.position = position;
 	}
-
-
+	
+	
 	/**
 	 * @return the aliases for this commands
 	 */
@@ -122,7 +119,7 @@ final class CommandImpl<C> implements Command<C> {
 	public @UnmodifiableView List<String> getAliases() {
 		return aliases;
 	}
-
+	
 	/**
 	 * Sets the aliases of a command
 	 *
@@ -132,7 +129,7 @@ final class CommandImpl<C> implements Command<C> {
 	public void addAliases(List<String> aliases) {
 		this.aliases.addAll(aliases);
 	}
-
+	
 	/**
 	 * @return the default usage of the command
 	 * without any args
@@ -141,17 +138,17 @@ final class CommandImpl<C> implements Command<C> {
 	public @NotNull CommandUsage<C> getDefaultUsage() {
 		return defaultUsage;
 	}
-
+	
 	/**
 	 * @param execution sets what happens when there's no parameters
 	 */
 	@Override
 	public void setDefaultUsageExecution(CommandExecution<C> execution) {
 		this.defaultUsage = CommandUsage.<C>builder()
-				  .execute(execution)
-				  .build();
+						.execute(execution)
+						.build();
 	}
-
+	
 	/**
 	 * The flags that are  registered
 	 * to be usable in this command's syntax
@@ -162,7 +159,7 @@ final class CommandImpl<C> implements Command<C> {
 	public @NotNull FlagRegistry getKnownFlags() {
 		return flagRegistry;
 	}
-
+	
 	/**
 	 * Adds a usage to the command
 	 *
@@ -172,7 +169,7 @@ final class CommandImpl<C> implements Command<C> {
 	public void addUsage(CommandUsage<C> usage) {
 		usages.add(usage);
 	}
-
+	
 	/**
 	 * @return all {@link CommandUsage} that were registered
 	 * to this command by the user
@@ -181,7 +178,7 @@ final class CommandImpl<C> implements Command<C> {
 	public Collection<? extends CommandUsage<C>> getUsages() {
 		return usages;
 	}
-
+	
 	/**
 	 * @return the usage that doesn't include any subcommands , only
 	 * parameters
@@ -189,11 +186,11 @@ final class CommandImpl<C> implements Command<C> {
 	@Override
 	public @NotNull CommandUsage<C> getMainUsage() {
 		return usages.stream().filter((usage ->
-							 usage.getMinLength() >= 1 &&
-										!usage.hasParamType(Command.class)))
-				  .findFirst().orElse(defaultUsage);
+										usage.getMinLength() >= 1 &&
+														!usage.hasParamType(Command.class)))
+						.findFirst().orElse(defaultUsage);
 	}
-
+	
 	/**
 	 * @return Returns {@link AutoCompleter}
 	 * that handles all auto-completes for this command
@@ -202,7 +199,7 @@ final class CommandImpl<C> implements Command<C> {
 	public AutoCompleter<C> getAutoCompleter() {
 		return autoCompleter;
 	}
-
+	
 	/**
 	 * @return Whether this command is a sub command or not
 	 */
@@ -210,7 +207,7 @@ final class CommandImpl<C> implements Command<C> {
 	public @Nullable Command<C> getParent() {
 		return parent;
 	}
-
+	
 	/**
 	 * The command to be added as a subcommand of this instance
 	 *
@@ -220,7 +217,7 @@ final class CommandImpl<C> implements Command<C> {
 	public void addSubCommand(Command<C> command) {
 		children.put(command.getName(), command);
 	}
-
+	
 	/**
 	 * @param name the name of the wanted sub-command
 	 * @return the sub-command of specific name directly from
@@ -232,7 +229,7 @@ final class CommandImpl<C> implements Command<C> {
 		Command<C> sub = children.get(name);
 		if (sub != null)
 			return sub;
-
+		
 		for (String subsNames : children.keySet()) {
 			Command<C> other = children.get(subsNames);
 			if (other.hasName(name)) return other;
@@ -240,7 +237,7 @@ final class CommandImpl<C> implements Command<C> {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * @return the subcommands of this command
 	 */
@@ -248,7 +245,7 @@ final class CommandImpl<C> implements Command<C> {
 	public @NotNull Collection<? extends Command<C>> getSubCommands() {
 		return children.values();
 	}
-
+	
 	/**
 	 * whether to ignore permission checks on the auto-completion of command and
 	 * sub commands or not
@@ -260,7 +257,7 @@ final class CommandImpl<C> implements Command<C> {
 	public boolean isIgnoringACPerms() {
 		return suppressACPermissionChecks;
 	}
-
+	
 	/**
 	 * if true , it will ignore permission checks
 	 * on the auto-completion of command and sub commands
@@ -274,6 +271,6 @@ final class CommandImpl<C> implements Command<C> {
 	public void ignoreACPermissions(boolean suppress) {
 		this.suppressACPermissionChecks = suppress;
 	}
-
-
+	
+	
 }

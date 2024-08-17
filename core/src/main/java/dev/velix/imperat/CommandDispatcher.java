@@ -10,6 +10,7 @@ import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
@@ -34,20 +35,20 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandDispatcher<C> {
-
-
+	
+	
 	/**
 	 * @return The command prefix
 	 */
 	String commandPrefix();
-
+	
 	/**
 	 * Registering a command into the dispatcher
 	 *
 	 * @param command the command to register
 	 */
 	void registerCommand(Command<C> command);
-
+	
 	/**
 	 * Registers a command class built by the
 	 * annotations using a parser
@@ -56,23 +57,24 @@ public interface CommandDispatcher<C> {
 	 * @param <T>     the type of this class instance
 	 */
 	<T> void registerCommand(T command);
-
+	
 	/**
 	 * Registers annotation replacer
-	 * @param type the type to replace the annotation by
+	 *
+	 * @param type     the type to replace the annotation by
 	 * @param replacer the replacer
-	 * @param <A> the type of annotation to replace
+	 * @param <A>      the type of annotation to replace
 	 */
 	<A extends Annotation> void registerAnnotationReplacer(Class<A> type,
 	                                                       AnnotationReplacer<A> replacer);
-
+	
 	/**
 	 * @param name the name/alias of the command
 	 * @return fetches {@link Command} with specific name
 	 */
 	@Nullable
 	Command<C> getCommand(String name);
-
+	
 	/**
 	 * @param parameter the parameter
 	 * @return the command from the parameter's name
@@ -80,7 +82,7 @@ public interface CommandDispatcher<C> {
 	default @Nullable Command<C> getCommand(UsageParameter parameter) {
 		return getCommand(parameter.getName());
 	}
-
+	
 	/**
 	 * @param owningCommand the command owning this sub-command
 	 * @param name          the name of the subcommand you're looking for
@@ -88,33 +90,34 @@ public interface CommandDispatcher<C> {
 	 */
 	@Nullable
 	Command<C> getSubCommand(String owningCommand, String name);
-
+	
 	/**
 	 * @return the factory for creation of
 	 * command related contexts {@link Context}
 	 */
 	ContextFactory<C> getContextFactory();
-
+	
 	/**
 	 * sets the context factory {@link ContextFactory} for the contexts
 	 *
 	 * @param contextFactory the context factory to set
 	 */
 	void setContextFactory(ContextFactory<C> contextFactory);
-
-
+	
+	
 	/**
 	 * @return {@link PermissionResolver} for the dispatcher
 	 */
 	PermissionResolver<C> getPermissionResolver();
-
-
+	
+	
 	/**
 	 * Registers a context resolver factory
+	 *
 	 * @param factory the factory to register
 	 */
 	void registerContextResolverFactory(ContextResolverFactory<C> factory);
-
+	
 	/**
 	 * Checks whether the type has
 	 * a registered context-resolver
@@ -124,34 +127,34 @@ public interface CommandDispatcher<C> {
 	 * a context-resolver
 	 */
 	boolean hasContextResolver(Class<?> type);
-
+	
 	/**
 	 * @return returns the factory for creation of
 	 * {@link ContextResolver}
 	 */
 	ContextResolverFactory<C> getContextResolverFactory();
-
+	
 	/**
 	 * Fetches {@link ContextResolver} for a certain type
-	 * @param resolvingContextType the type for this resolver
 	 *
+	 * @param resolvingContextType the type for this resolver
+	 * @param <T>                  the type of class
 	 * @return the context resolver
-	 * @param <T> the type of class
 	 */
 	<T> ContextResolver<C, T> getContextResolver(Class<T> resolvingContextType);
-
+	
 	/**
 	 * Fetches the {@link ContextResolver} suitable for the {@link UsageParameter}
 	 *
 	 * @param usageParameter the parameter of a command's usage
-	 * @param <T>  the type of value that will be resolved by {@link ValueResolver}
+	 * @param <T>            the type of value that will be resolved by {@link ValueResolver}
 	 * @return the context resolver for this parameter's value type
 	 */
 	@SuppressWarnings("unchecked")
 	default <T> ContextResolver<C, T> getContextResolver(UsageParameter usageParameter) {
 		return (ContextResolver<C, T>) getContextResolver(usageParameter.getType());
 	}
-
+	
 	/**
 	 * Registers {@link ContextResolver}
 	 *
@@ -159,9 +162,9 @@ public interface CommandDispatcher<C> {
 	 * @param resolver the resolver for this value
 	 * @param <T>      the type of value being resolved from context
 	 */
-		  <T>
+	<T>
 	void registerContextResolver(Class<T> type, @NotNull ContextResolver<C, T> resolver);
-
+	
 	/**
 	 * Fetches {@link ValueResolver} for a certain value
 	 *
@@ -171,7 +174,7 @@ public interface CommandDispatcher<C> {
 	 */
 	@Nullable
 	<T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType);
-
+	
 	/**
 	 * Fetches the {@link ValueResolver} suitable for the {@link UsageParameter}
 	 *
@@ -183,7 +186,7 @@ public interface CommandDispatcher<C> {
 	default <T> ValueResolver<C, T> getValueResolver(UsageParameter usageParameter) {
 		return (ValueResolver<C, T>) getValueResolver(usageParameter.getType());
 	}
-
+	
 	/**
 	 * Registers {@link ValueResolver}
 	 *
@@ -192,12 +195,12 @@ public interface CommandDispatcher<C> {
 	 * @param <T>      the type of value being resolved from context
 	 */
 	<T> void registerValueResolver(Class<T> type, @NotNull ValueResolver<C, T> resolver);
-
+	
 	/**
 	 * @return all currently registered {@link ValueResolver}
 	 */
 	Collection<? extends ValueResolver<C, ?>> getRegisteredValueResolvers();
-
+	
 	/**
 	 * Fetches the suggestion provider/resolver for a specific type of
 	 * argument or parameter.
@@ -211,14 +214,14 @@ public interface CommandDispatcher<C> {
 	default @Nullable <T> SuggestionResolver<C, T> getSuggestionResolver(UsageParameter parameter) {
 		SuggestionResolver<C, T> resolver = getSuggestionResolver((Class<T>) parameter.getType());
 		SuggestionResolver<C, T> argResolver = getArgumentSuggestionResolver(parameter.getName());
-
+		
 		if (argResolver != null) {
 			return argResolver;
 		}
-
+		
 		return resolver;
 	}
-
+	
 	/**
 	 * Fetches the suggestion provider/resolver for a specific type of
 	 * argument or parameter.
@@ -230,7 +233,7 @@ public interface CommandDispatcher<C> {
 	 */
 	@Nullable
 	<T> SuggestionResolver<C, T> getSuggestionResolver(Class<T> clazz);
-
+	
 	/**
 	 * Fetches the suggestion provider/resolver for a specific argument
 	 *
@@ -241,7 +244,7 @@ public interface CommandDispatcher<C> {
 	 */
 	@Nullable
 	<T> SuggestionResolver<C, T> getArgumentSuggestionResolver(String name);
-
+	
 	/**
 	 * Registers a suggestion resolver
 	 *
@@ -249,7 +252,7 @@ public interface CommandDispatcher<C> {
 	 * @param <T>                the type of value that the suggestion resolver will work with.
 	 */
 	<T> void registerSuggestionResolver(SuggestionResolver<C, T> suggestionResolver);
-
+	
 	/**
 	 * Registers a suggestion resolver
 	 *
@@ -257,22 +260,22 @@ public interface CommandDispatcher<C> {
 	 * @param <T>                the type of value that the suggestion resolver will work with.
 	 */
 	<T> void registerArgumentSuggestionResolver(String argumentName, SuggestionResolver<C, T> suggestionResolver);
-
+	
 	/**
 	 * Sets the usage verifier to a new instance
 	 *
 	 * @param usageVerifier the usage verifier to set
 	 */
 	void setUsageVerifier(UsageVerifier<C> usageVerifier);
-
+	
 	/**
 	 * Registers a caption
 	 *
 	 * @param caption the caption to register
 	 */
 	void registerCaption(Caption<C> caption);
-
-
+	
+	
 	/**
 	 * Sends a caption to the source
 	 *
@@ -289,8 +292,8 @@ public interface CommandDispatcher<C> {
 	                 @Nullable CommandUsage<C> usage,
 	                 @Nullable Exception exception
 	);
-
-
+	
+	
 	/**
 	 * Sends a caption to the source
 	 *
@@ -305,7 +308,17 @@ public interface CommandDispatcher<C> {
 	                 Context<C> context,
 	                 @Nullable CommandUsage<C> usage
 	);
-
+	
+	/**
+	 * Sends a {@link Caption} that requires dynamic input
+	 * through it's constructor
+	 *
+	 * @param source  the command source
+	 * @param context the context of the command
+	 * @param caption the caption to send
+	 */
+	void sendDynamicCaption(CommandSource<C> source, Context<C> context, Caption<C> caption);
+	
 	/**
 	 * Wraps the sender into a built-in command-sender type
 	 *
@@ -313,7 +326,7 @@ public interface CommandDispatcher<C> {
 	 * @return the wrapped command-sender type
 	 */
 	CommandSource<C> wrapSender(C sender);
-
+	
 	/**
 	 * Checks whether the type can be a command sender
 	 *
@@ -321,7 +334,7 @@ public interface CommandDispatcher<C> {
 	 * @return whether the type can be a command sender
 	 */
 	boolean canBeSender(Class<?> type);
-
+	
 	/**
 	 * Dispatches and executes a command with certain raw arguments
 	 *
@@ -330,13 +343,13 @@ public interface CommandDispatcher<C> {
 	 * @param rawInput    the command's args input
 	 */
 	void dispatch(C sender, String commandName, String... rawInput);
-
-
+	
+	
 	/**
 	 * @return the platform of the module
 	 */
 	Object getPlatform();
-
+	
 	/**
 	 * @param command the data about the command being written in the chat box
 	 * @param sender  the sender writing the command
@@ -344,22 +357,34 @@ public interface CommandDispatcher<C> {
 	 * @return the suggestions at the current position
 	 */
 	List<String> suggest(Command<C> command, C sender, String[] args);
-
+	
 	/**
 	 * Gets all registered commands
 	 *
 	 * @return the registered commands
 	 */
 	Collection<? extends Command<C>> getRegisteredCommands();
-
+	
 	/**
 	 * @return The template for showing help
 	 */
-	@NotNull HelpTemplate getHelpTemplate();
-
+	@NotNull
+	HelpTemplate getHelpTemplate();
+	
 	/**
 	 * Set the help template to use
+	 *
 	 * @param template the help template
 	 */
 	void setHelpTemplate(HelpTemplate template);
+	
+	/**
+	 * Creates an instance of {@link CommandHelp}
+	 *
+	 * @param command       the command
+	 * @param context       the context
+	 * @param detectedUsage the usage
+	 * @return {@link CommandHelp} for the command usage used in a certain context
+	 */
+	CommandHelp<C> createCommandHelp(Command<C> command, Context<C> context, CommandUsage<C> detectedUsage);
 }

@@ -1,34 +1,34 @@
 package dev.velix.imperat.annotations.parameters;
 
+import dev.velix.imperat.annotations.element.ParameterCommandElement;
 import dev.velix.imperat.command.parameters.InputParameter;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
-import dev.velix.imperat.util.annotations.AnnotationMap;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.List;
 
 public abstract class AnnotatedInputParameter
-		  extends InputParameter implements AnnotatedParameter {
-
-	private final AnnotationMap map;
+				extends InputParameter implements AnnotatedParameter {
+	
+	private final ParameterCommandElement element;
+	
 	AnnotatedInputParameter(String name, Class<?> type, boolean optional,
-	                                boolean flag, boolean greedy,
-											  @Nullable OptionalValueSupplier<?, ?> optionalValueSupplier,
-	                                AnnotationMap map) {
+	                        boolean flag, boolean greedy,
+	                        @Nullable OptionalValueSupplier<?, ?> optionalValueSupplier,
+	                        ParameterCommandElement element) {
 		super(name, type, optional, flag, greedy, optionalValueSupplier);
-		this.map = map;
+		this.element = element;
 	}
-
-	@Override @SuppressWarnings("unchecked")
+	
+	@Override
 	public <A extends Annotation> @Nullable A getAnnotation(Class<A> clazz) {
-		return (A) map.get(clazz);
+		return element.getAnnotation(clazz);
 	}
-
+	
 	@Override
 	public Collection<? extends Annotation> getAnnotations() {
-		return map.values();
+		return List.of(element.getAnnotations());
 	}
-
-
+	
 }

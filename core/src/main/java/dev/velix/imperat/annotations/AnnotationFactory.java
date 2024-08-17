@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public final class AnnotationFactory {
-
+	
 	/**
 	 * Creates a new annotation with no values. Any default values will
 	 * automatically be used.
@@ -23,7 +23,7 @@ public final class AnnotationFactory {
 	public static @NotNull <T extends Annotation> T create(@NotNull Class<T> type) {
 		return create(type, Collections.emptyMap());
 	}
-
+	
 	/**
 	 * Creates a new annotation with the given map values. Any default values will
 	 * automatically be used if not specified in the map.
@@ -41,12 +41,12 @@ public final class AnnotationFactory {
 		Preconditions.notNull(type, "type");
 		Preconditions.notNull(members, "members");
 		return type.cast(Proxy.newProxyInstance(
-				  type.getClassLoader(),
-				  new Class<?>[]{type},
-				  new DynamicAnnotationHandler(type, members)
+						type.getClassLoader(),
+						new Class<?>[]{type},
+						new DynamicAnnotationHandler(type, members)
 		));
 	}
-
+	
 	/**
 	 * Creates a new annotation with the given map values. Any default values will
 	 * automatically be used if not specified in the map.
@@ -71,12 +71,12 @@ public final class AnnotationFactory {
 			values.put(key, value);
 		}
 		return type.cast(Proxy.newProxyInstance(
-				  type.getClassLoader(),
-				  new Class<?>[]{type},
-				  new DynamicAnnotationHandler(type, values)
+						type.getClassLoader(),
+						new Class<?>[]{type},
+						new DynamicAnnotationHandler(type, values)
 		));
 	}
-
+	
 	/**
 	 * Implementation of {@link Annotation#hashCode()}.
 	 *
@@ -89,11 +89,11 @@ public final class AnnotationFactory {
 		for (Method method : type.getDeclaredMethods()) {
 			String name = method.getName();
 			Object value = members.get(name);
-			result += (127 * name.hashCode()) ^ (Arrays.deepHashCode(new Object[]{value}) - 31);
+			result += (127 * name.hashCode()) ^ (Objects.hashCode(value) - 31);
 		}
 		return result;
 	}
-
+	
 	/**
 	 * Implementation of {@link Annotation#equals(Object)}.
 	 *
@@ -108,13 +108,13 @@ public final class AnnotationFactory {
 		}
 		for (Method method : type.getDeclaredMethods()) {
 			String name = method.getName();
-			if (!Arrays.deepEquals(new Object[]{method.invoke(other)}, new Object[]{members.get(name)})) {
+			if (!Objects.deepEquals(method.invoke(other), members.get(name))) {
 				return false;
 			}
 		}
 		return true;
 	}
-
+	
 	/**
 	 * Implementation of {@link Annotation#toString()}.
 	 *
@@ -131,42 +131,42 @@ public final class AnnotationFactory {
 		sb.append(joiner);
 		return sb.append(")").toString();
 	}
-
+	
 	private static String deepToString(Object arg) {
 		String s = Arrays.deepToString(new Object[]{arg});
 		return s.substring(1, s.length() - 1); // cut off the []
 	}
-
+	
 	private record DynamicAnnotationHandler(Class<? extends Annotation> annotationType,
 	                                        Map<String, Object> annotationMembers) implements InvocationHandler {
-
-			private DynamicAnnotationHandler(Class<? extends Annotation> annotationType, Map<String, Object> annotationMembers) {
-				this.annotationType = annotationType;
-				this.annotationMembers = new HashMap<>(annotationMembers);
-				for (Method method : annotationType.getDeclaredMethods()) {
-					this.annotationMembers.putIfAbsent(method.getName(), method.getDefaultValue());
-				}
+		
+		private DynamicAnnotationHandler(Class<? extends Annotation> annotationType, Map<String, Object> annotationMembers) {
+			this.annotationType = annotationType;
+			this.annotationMembers = new HashMap<>(annotationMembers);
+			for (Method method : annotationType.getDeclaredMethods()) {
+				this.annotationMembers.putIfAbsent(method.getName(), method.getDefaultValue());
 			}
-
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				switch (method.getName()) {
-					case "toString":
-						return AnnotationFactory.toString(annotationType, annotationMembers);
-					case "hashCode":
-						return AnnotationFactory.hashCode(annotationType, annotationMembers);
-					case "equals":
-						return AnnotationFactory.equals(annotationType, annotationMembers, args[0]);
-					case "annotationType":
-						return annotationType;
-					default: {
-						Object v = annotationMembers.get(method.getName());
-						if (v == null)
-							throw new AbstractMethodError(method.getName());
-						return v instanceof Supplier ? ((Supplier<?>) v).get() : v;
-					}
+		}
+		
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			switch (method.getName()) {
+				case "toString":
+					return AnnotationFactory.toString(annotationType, annotationMembers);
+				case "hashCode":
+					return AnnotationFactory.hashCode(annotationType, annotationMembers);
+				case "equals":
+					return AnnotationFactory.equals(annotationType, annotationMembers, args[0]);
+				case "annotationType":
+					return annotationType;
+				default: {
+					Object v = annotationMembers.get(method.getName());
+					if (v == null)
+						throw new AbstractMethodError(method.getName());
+					return v instanceof Supplier ? ((Supplier<?>) v).get() : v;
 				}
 			}
 		}
-
+	}
+	
 }

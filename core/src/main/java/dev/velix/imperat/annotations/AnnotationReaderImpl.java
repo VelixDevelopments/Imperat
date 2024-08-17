@@ -1,5 +1,6 @@
 package dev.velix.imperat.annotations;
 
+import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.util.Registry;
 import org.jetbrains.annotations.NotNull;
@@ -9,36 +10,37 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
-final class AnnotationReaderImpl implements AnnotationReader{
-
+final class AnnotationReaderImpl implements AnnotationReader {
+	
 	private final Class<?> clazz;
-	private final Registry<AnnotationLevel, AnnotationContainer> containers = new Registry<>(()-> new EnumMap<>(AnnotationLevel.class));
 	private final CommandAnnotationRegistry registry;
-
+	
+	private final Registry<AnnotationLevel, AnnotationContainer> containers = new Registry<>(() -> new EnumMap<>(AnnotationLevel.class));
+	
 	AnnotationReaderImpl(CommandAnnotationRegistry registry,
 	                     Class<?> clazz) {
 		this.registry = registry;
 		this.clazz = clazz;
 		read();
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private <E extends AnnotatedElement> void read() {
-
-		for(AnnotationLevel level : AnnotationLevel.values()) {
+		
+		for (AnnotationLevel level : AnnotationLevel.values()) {
 			AnnotationContainer container = new AnnotationContainer(level);
-			Set<E> elementsOfLevel = (Set<E>) level.getElements(registry, clazz);
-
-			for(E element : elementsOfLevel)
-				((ElementVisitor<E>)level.getVisitor())
-						  .visit(container, element);
-
-			containers.setData(level, new AnnotationContainer(level));
+			Set<CommandAnnotatedElement<E>> elementsOfLevel = (Set<CommandAnnotatedElement<E>>) level.getElements(registry, clazz);
+			
+			for (CommandAnnotatedElement<E> element : elementsOfLevel) {
+				ElementVisitor<E> visitor = (ElementVisitor<E>) level.getVisitor();
+				container.accept(visitor, element);
+			}
+			containers.setData(level, container);
 		}
-
+		
 	}
-
-
+	
+	
 	/**
 	 * @return The class target
 	 */
@@ -46,7 +48,7 @@ final class AnnotationReaderImpl implements AnnotationReader{
 	public @NotNull Class<?> getTargetClass() {
 		return clazz;
 	}
-
+	
 	/**
 	 * Get annotated element
 	 * may be a parameter, method or even a class
@@ -57,12 +59,12 @@ final class AnnotationReaderImpl implements AnnotationReader{
 	 */
 	@Override
 	public @Nullable AnnotatedElement getAnnotated(AnnotationLevel level, ElementKey key) {
-		if(containers.getData(level).isEmpty()) return null;
-		return containers.getData(level)
-				  .flatMap(container -> container.getData(key))
-				  .orElse(null);
+		if (containers.getData(level).isEmpty()) return null;
+		AnnotationContainer container = containers.getData(level).orElse(null);
+		if (container == null) return null;
+		return container.getData(key).orElse(null);
 	}
-
+	
 	/**
 	 * Fetches all annotations registered within an element
 	 *
@@ -73,10 +75,10 @@ final class AnnotationReaderImpl implements AnnotationReader{
 	@Override
 	public Collection<Annotation> getAnnotations(AnnotationLevel level, ElementKey key) {
 		AnnotatedElement element = getAnnotated(level, key);
-		if(element == null) return Collections.emptyList();
+		if (element == null) return Collections.emptyList();
 		return List.of(element.getAnnotations());
 	}
-
+	
 	/**
 	 * Fetches the annotation of an element
 	 *
@@ -88,7 +90,7 @@ final class AnnotationReaderImpl implements AnnotationReader{
 	@Override
 	public <A extends Annotation> @Nullable A getAnnotation(ElementKey key, AnnotationLevel level, Class<A> type) {
 		AnnotatedElement element = getAnnotated(level, key);
-		if(element == null) return null;
+		if (element == null) return null;
 		return element.getAnnotation(type);
 	}
 }

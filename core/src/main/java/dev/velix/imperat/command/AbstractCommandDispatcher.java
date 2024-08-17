@@ -2,6 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.annotations.AnnotationParser;
 import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
@@ -38,29 +39,29 @@ import java.util.Map;
 
 @ApiStatus.Internal
 public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<C> {
-
+	
 	public final static Component START_PREFIX = Messages.getMsg("<dark_gray><bold>[<gold>!</gold>]</bold></dark_gray> ");
 	public final static Component CAPTION_EXECUTION_ERROR_PREFIX = START_PREFIX.append(Messages.getMsg("<red><bold>Execution error:</bold></red> "));
 	public final static Component FULL_SYNTAX_PREFIX = START_PREFIX.append(Messages.getMsg("<dark_aqua>Full syntax:</dark_aqua> "));
-
+	
 	private final Map<String, Command<C>> commands = new HashMap<>();
-
+	
 	private ContextFactory<C> contextFactory;
-
+	
 	private final ContextResolverRegistry<C> contextResolverRegistry;
-
+	
 	private final ValueResolverRegistry<C> valueResolverRegistry;
-
+	
 	private final SuggestionResolverRegistry<C> suggestionResolverRegistry;
-
+	
 	private @NotNull UsageVerifier<C> verifier;
-
+	
 	private final CaptionRegistry<C> captionRegistry;
-
+	
 	private final AnnotationParser<C> annotationParser;
-
+	
 	private HelpTemplate template;
-
+	
 	public AbstractCommandDispatcher() {
 		contextFactory = new DefaultContextFactory<>();
 		contextResolverRegistry = new ContextResolverRegistry<>();
@@ -71,7 +72,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		annotationParser = new AnnotationParser<>(this);
 		template = new DefaultTemplate();
 	}
-
+	
 	/**
 	 * Registering a command into the dispatcher
 	 *
@@ -79,7 +80,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	 */
 	@Override
 	public void registerCommand(Command<C> command) {
-
+		
 		try {
 			for (CommandUsage<C> usage : command.getUsages()) {
 				if (!verifier.verify(usage)) {
@@ -96,10 +97,10 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		} catch (RuntimeException ex) {
 			ex.printStackTrace();
 		}
-
-
+		
+		
 	}
-
+	
 	/**
 	 * Registers a command class built by the
 	 * annotations using a parser
@@ -110,7 +111,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public <T> void registerCommand(T command) {
 		annotationParser.parseCommandClass(command);
 	}
-
+	
 	/**
 	 * @param name the name/alias of the command
 	 * @return fetches {@link Command} with specific name/alias
@@ -118,18 +119,19 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	@Override
 	public @Nullable Command<C> getCommand(final String name) {
 		final String cmdName = name.toLowerCase();
-
+		
 		Command<C> result = commands.get(cmdName);
 		if (result != null) return result;
 		for (Command<C> headCommands : commands.values()) {
 			if (headCommands.hasName(cmdName)) return headCommands;
 		}
-
+		
 		return null;
 	}
-
+	
 	/**
 	 * Registers {@link AnnotationReplacer}
+	 *
 	 * @param type     the type to replace the annotation by
 	 * @param replacer the replacer
 	 */
@@ -137,7 +139,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
 		annotationParser.getRegistry().registerAnnotationReplacer(type, replacer);
 	}
-
+	
 	/**
 	 * @param owningCommand the command owning this sub-command
 	 * @param name          the name of the subcommand you're looking for
@@ -147,15 +149,15 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public @Nullable Command<C> getSubCommand(String owningCommand, String name) {
 		Command<C> owningCmd = getCommand(owningCommand);
 		if (owningCmd == null) return null;
-
+		
 		for (Command<C> subCommand : owningCmd.getSubCommands()) {
 			Command<C> result = search(subCommand, name);
 			if (result != null) return result;
 		}
-
+		
 		return null;
 	}
-
+	
 	/**
 	 * @return the factory for creation of
 	 * command related contexts {@link Context}
@@ -164,7 +166,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public ContextFactory<C> getContextFactory() {
 		return contextFactory;
 	}
-
+	
 	/**
 	 * sets the context factory {@link ContextFactory} for the contexts
 	 *
@@ -174,8 +176,8 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public void setContextFactory(ContextFactory<C> contextFactory) {
 		this.contextFactory = contextFactory;
 	}
-
-
+	
+	
 	/**
 	 * Checks whether the type has
 	 * a registered context-resolver
@@ -188,7 +190,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public boolean hasContextResolver(Class<?> type) {
 		return getContextResolver(type) != null;
 	}
-
+	
 	/**
 	 * Registers a context resolver factory
 	 *
@@ -198,7 +200,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public void registerContextResolverFactory(ContextResolverFactory<C> factory) {
 		contextResolverRegistry.setFactory(factory);
 	}
-
+	
 	/**
 	 * @return returns the factory for creation of
 	 * {@link ContextResolver}
@@ -207,7 +209,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public ContextResolverFactory<C> getContextResolverFactory() {
 		return contextResolverRegistry.getFactory();
 	}
-
+	
 	/**
 	 * Fetches {@link ContextResolver} for a certain type
 	 *
@@ -218,7 +220,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public <T> @Nullable ContextResolver<C, T> getContextResolver(Class<T> resolvingContextType) {
 		return contextResolverRegistry.getResolver(resolvingContextType);
 	}
-
+	
 	/**
 	 * Registers {@link ContextResolver}
 	 *
@@ -230,8 +232,8 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	                                        @NotNull ContextResolver<C, T> resolver) {
 		contextResolverRegistry.registerResolver(type, resolver);
 	}
-
-
+	
+	
 	/**
 	 * Registers {@link ValueResolver}
 	 *
@@ -242,7 +244,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public <T> void registerValueResolver(Class<T> type, @NotNull ValueResolver<C, T> resolver) {
 		valueResolverRegistry.registerResolver(type, resolver);
 	}
-
+	
 	/**
 	 * @return all currently registered {@link ValueResolver}
 	 */
@@ -250,7 +252,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public Collection<? extends ValueResolver<C, ?>> getRegisteredValueResolvers() {
 		return valueResolverRegistry.getAll();
 	}
-
+	
 	/**
 	 * Fetches {@link ValueResolver} for a certain value
 	 *
@@ -261,8 +263,8 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public @Nullable <T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType) {
 		return valueResolverRegistry.getResolver(resolvingValueType);
 	}
-
-
+	
+	
 	/**
 	 * Fetches the suggestion provider/resolver for a specific type of
 	 * argument or parameter.
@@ -275,7 +277,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public @Nullable <T> SuggestionResolver<C, T> getSuggestionResolver(Class<T> clazz) {
 		return (SuggestionResolver<C, T>) suggestionResolverRegistry.getResolver(clazz);
 	}
-
+	
 	/**
 	 * Checks whether the type can be a command sender
 	 *
@@ -286,7 +288,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public boolean canBeSender(Class<?> type) {
 		return CommandSource.class.isAssignableFrom(type);
 	}
-
+	
 	/**
 	 * Registers a suggestion resolver
 	 *
@@ -296,7 +298,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public <T> void registerSuggestionResolver(SuggestionResolver<C, T> suggestionResolver) {
 		suggestionResolverRegistry.registerResolver(suggestionResolver);
 	}
-
+	
 	/**
 	 * Fetches the suggestion provider/resolver for a specific argument
 	 *
@@ -307,7 +309,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public @Nullable <T> SuggestionResolver<C, T> getArgumentSuggestionResolver(String name) {
 		return suggestionResolverRegistry.getArgumentResolver(name);
 	}
-
+	
 	/**
 	 * Registers a suggestion resolver
 	 *
@@ -318,7 +320,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public <T> void registerArgumentSuggestionResolver(String argumentName, SuggestionResolver<C, T> suggestionResolver) {
 		suggestionResolverRegistry.registerArgumentResolver(argumentName, suggestionResolver);
 	}
-
+	
 	/**
 	 * Sets the usage verifier to a new instance
 	 *
@@ -328,26 +330,26 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public void setUsageVerifier(UsageVerifier<C> usageVerifier) {
 		this.verifier = usageVerifier;
 	}
-
-
+	
+	
 	@ApiStatus.Internal
 	private Command<C> search(Command<C> sub, String name) {
 		if (sub.hasName(name)) {
 			return sub;
 		}
-
+		
 		for (Command<C> other : sub.getSubCommands()) {
-
+			
 			if (other.hasName(name)) {
 				return other;
 			} else {
 				return search(other, name);
 			}
 		}
-
+		
 		return null;
 	}
-
+	
 	/**
 	 * Registers a caption
 	 *
@@ -357,7 +359,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public void registerCaption(Caption<C> caption) {
 		this.captionRegistry.registerCaption(caption);
 	}
-
+	
 	/**
 	 * Sends a caption to the source
 	 *
@@ -375,7 +377,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	                        @Nullable CommandUsage<C> usage) {
 		this.sendCaption(key, command, source, context, usage, null);
 	}
-
+	
 	/**
 	 * Sends a caption to the source
 	 *
@@ -399,7 +401,26 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		}
 		source.reply(CAPTION_EXECUTION_ERROR_PREFIX.append(caption.asComponent(this, command, source, context, usage)));
 	}
-
+	
+	/**
+	 * Sends a {@link Caption} that requires dynamic input
+	 * through it's constructor
+	 *
+	 * @param source  the command source
+	 * @param context the context of the command
+	 * @param caption the caption to send
+	 */
+	@Override
+	public void sendDynamicCaption(CommandSource<C> source,
+	                               Context<C> context,
+	                               Caption<C> caption) {
+		ResolvedContext<C> resolvedContext = (ResolvedContext<C>) context;
+		source.reply(CAPTION_EXECUTION_ERROR_PREFIX.append(
+						caption.asComponent(this, resolvedContext.getOwningCommand(), source,
+										context, resolvedContext.getDetectedUsage())
+		));
+	}
+	
 	/**
 	 * Dispatches and executes a command with certain raw arguments
 	 *
@@ -409,13 +430,13 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	 */
 	@Override
 	public void dispatch(C sender, String commandName, String... rawInput) {
-
+		
 		ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
 		CommandSource<C> commandSource = wrapSender(sender);
-
+		
 		Context<C> plainContext = getContextFactory()
-				  .createContext(this, commandSource, commandName, rawArguments);
-
+						.createContext(this, commandSource, commandName, rawArguments);
+		
 		try {
 			handleExecution(commandSource, plainContext);
 		} catch (Exception ex) {
@@ -425,46 +446,46 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 				exception.handle(plainContext);
 		}
 	}
-
-
+	
+	
 	private void handleExecution(CommandSource<C> source, Context<C> context) throws CommandException {
-
+		
 		Command<C> command = getCommand(context.getCommandUsed());
 		if (command == null) {
 			source.reply("Unknown command !");
 			return;
 		}
-
+		
 		if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
 			sendCaption(CaptionKey.NO_PERMISSION, command, source, context, null);
 			return;
 		}
-
+		
 		context.extractCommandFlags(command);
-
+		
 		CommandUsageLookup<C>.SearchResult searchResult = command.lookup(this)
-				  .searchUsage(context);
-
+						.searchUsage(context);
+		
 		if (searchResult.getCommandUsage() == null || context.getArguments().isEmpty()) {
 			CommandUsage<C> defaultUsage = command.getDefaultUsage();
 			defaultUsage.getExecution().execute(source, context);
 			return;
 		}
-
+		
 		//executing usage
 		CommandUsage<C> usage = searchResult.getCommandUsage();
 		if (!getPermissionResolver().hasUsagePermission(source, usage)) {
 			sendCaption(CaptionKey.NO_PERMISSION, command, source, context, null);
 			return;
 		}
-
+		
 		if (searchResult.getResult() == CommandUsageLookup.Result.FOUND_COMPLETE)
 			executeUsage(command, source, context, usage);
 		else
 			sendCaption(CaptionKey.INVALID_SYNTAX, command, source, context, usage);
-
+		
 	}
-
+	
 	private void executeUsage(Command<C> command,
 	                          CommandSource<C> source,
 	                          Context<C> context,
@@ -474,12 +495,12 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 			return;
 		}
 		usage.getCooldownHandler().registerExecutionMoment(source);
-
+		
 		ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(this, command, context);
 		resolvedContext.resolve(this, usage);
 		usage.getExecution().execute(source, resolvedContext);
 	}
-
+	
 	/**
 	 * @param command the data about the command being written in the chat box
 	 * @param sender  the sender writing the command
@@ -491,7 +512,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 		CommandSource<C> source = wrapSender(sender);
 		return command.getAutoCompleter().autoComplete(this, source, args);
 	}
-
+	
 	/**
 	 * Gets all registered commands
 	 *
@@ -501,7 +522,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public Collection<? extends Command<C>> getRegisteredCommands() {
 		return commands.values();
 	}
-
+	
 	/**
 	 * @return The template for showing help
 	 */
@@ -509,7 +530,7 @@ public abstract class AbstractCommandDispatcher<C> implements CommandDispatcher<
 	public @NotNull HelpTemplate getHelpTemplate() {
 		return template;
 	}
-
+	
 	/**
 	 * Set the help template to use
 	 *

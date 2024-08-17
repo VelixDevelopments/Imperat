@@ -10,13 +10,14 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class DefaultTemplate implements HelpTemplate {
-
-
+	
+	
 	private UsageFormatter formatter = new DefaultFormatter();
 	private UsagesDisplayer displayer = UsagesDisplayer.plain();
-
-	public DefaultTemplate() {}
-
+	
+	public DefaultTemplate() {
+	}
+	
 	/**
 	 * @return the header
 	 */
@@ -24,7 +25,7 @@ public class DefaultTemplate implements HelpTemplate {
 	public Component getHeader(Command<?> command) {
 		return Messages.getMsg("<dark_gray><bold><strikethrough>=================== <dark_green>" + command.getName() + "'s help</dark_green> ===================");
 	}
-
+	
 	/**
 	 * @return the footer
 	 */
@@ -32,7 +33,7 @@ public class DefaultTemplate implements HelpTemplate {
 	public Component getFooter(Command<?> command) {
 		return Messages.getMsg("<dark_gray><bold><strikethrough>======================================");
 	}
-
+	
 	/**
 	 * The usage formatter for the help-template
 	 *
@@ -42,7 +43,7 @@ public class DefaultTemplate implements HelpTemplate {
 	public UsageFormatter getUsageFormatter() {
 		return formatter;
 	}
-
+	
 	/**
 	 * sets the usage help-formatter
 	 *
@@ -52,7 +53,7 @@ public class DefaultTemplate implements HelpTemplate {
 	public void setUsageFormatter(UsageFormatter formatter) {
 		this.formatter = formatter;
 	}
-
+	
 	/**
 	 * @return the usages displayer
 	 */
@@ -60,7 +61,7 @@ public class DefaultTemplate implements HelpTemplate {
 	public UsagesDisplayer getUsagesDisplayer() {
 		return displayer;
 	}
-
+	
 	/**
 	 * Sets the usages displayer instance
 	 * to a new one
@@ -71,6 +72,6 @@ public class DefaultTemplate implements HelpTemplate {
 	public void setUsagesDisplayer(UsagesDisplayer displayer) {
 		this.displayer = displayer;
 	}
-
-
+	
+	
 }

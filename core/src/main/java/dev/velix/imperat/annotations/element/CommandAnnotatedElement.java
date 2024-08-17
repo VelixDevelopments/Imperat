@@ -8,39 +8,40 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 
 public class CommandAnnotatedElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> {
-
+	
 	private final @NotNull AnnotationMap map = new AnnotationMap();
-
+	
 	@Getter
 	private final @NotNull E element;
-
+	
 	public CommandAnnotatedElement(
-			  @NotNull CommandAnnotationRegistry registry,
-			  @NotNull E element
+					@NotNull CommandAnnotationRegistry registry,
+					@NotNull E element
 	) {
 		this.element = element;
 		this.load(registry);
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private <A extends Annotation> void load(@NotNull CommandAnnotationRegistry registry) {
-		for(Annotation annotation : element.getDeclaredAnnotations()) {
-         Class<A> clazz = (Class<A>) annotation.getClass();
-			if(registry.isRegistered(annotation.getClass()))
+		for (Annotation annotation : element.getDeclaredAnnotations()) {
+			Class<A> clazz = (Class<A>) annotation.annotationType();
+			if (registry.isRegistered(clazz)) {
 				map.set(annotation);
-			else if(registry.hasReplacerFor(clazz)) {
+			} else if (registry.hasReplacerFor(clazz)) {
 				AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);
 				assert replacer != null;
-				replacer.replace((A)annotation)
-						  .forEach(map::set);
+				replacer.replace((A) annotation)
+								.forEach(map::set);
 			}
-
+			
 		}
 	}
-
+	
 	/**
 	 * Returns this element's annotation for the specified type if
 	 * such an annotation is <em>present</em>, else null.
@@ -52,11 +53,12 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
 	 * @throws NullPointerException if the given annotation class is null
 	 * @since 1.5
 	 */
-	@Override @SuppressWarnings("unchecked")
+	@Override
+	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(@NotNull Class<T> annotationClass) {
 		return (T) map.get(annotationClass);
 	}
-
+	
 	/**
 	 * Returns annotations that are <em>present</em> on this element.
 	 * <p>
@@ -73,7 +75,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
 	public Annotation[] getAnnotations() {
 		return map.values().toArray(new Annotation[0]);
 	}
-
+	
 	/**
 	 * Returns annotations that are <em>directly present</em> on this element.
 	 * This method ignores inherited annotations.
@@ -91,8 +93,8 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
 	public Annotation[] getDeclaredAnnotations() {
 		return map.values().toArray(new Annotation[0]);
 	}
-
-
+	
+	
 	/**
 	 * Returns an iterator over elements of type {@code T}.
 	 *
@@ -102,5 +104,16 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
 	@Override
 	public Iterator<Annotation> iterator() {
 		return map.values().iterator();
+	}
+	
+	@Override
+	public String toString() {
+		if (element instanceof Method method) {
+			return method.getName();
+		}
+		if (element instanceof Class<?> clazz) {
+			return clazz.getSimpleName();
+		}
+		return element.toString();
 	}
 }

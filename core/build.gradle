@@ -10,6 +10,11 @@ dependencies {
     implementation 'org.ow2.asm:asm-commons:9.2'
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 test {
     useJUnitPlatform()
 }
@@ -31,7 +36,7 @@ static String platform(KyoriModule platform, String version) {
 enum KyoriModule {
 
     API("api"), MINI_MESSAGE("text-minimessage"), BUKKIT("platform-bukkit"),
-    BUNGEE("platfoorm-bungeecord"), SPONGE("platform-spongeapi");
+    BUNGEE("platform-bungeecord"), SPONGE("platform-spongeapi");
 
     private final String display
 

@@ -8,21 +8,21 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Method;
 
 public final class MethodHelpExecution<C> implements HelpExecution<C> {
-
+	
 	private final Method method;
 	private final MethodCaller.BoundMethodCaller caller;
-
+	
 	public MethodHelpExecution(Object proxy, Method method) {
 		this.method = method;
 		try {
 			this.caller = DefaultMethodCallerFactory.INSTANCE
-					  .createFor(method).bindTo(proxy);
+							.createFor(method).bindTo(proxy);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
 	}
-
-
+	
+	
 	/**
 	 * Displays a help menu showing all possible syntaxes
 	 *
@@ -34,7 +34,7 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
 	public void help(CommandSource<C> source,
 	                 CommandHelp<C> help,
 	                 @Nullable Integer page) {
-
+		
 		int length = method.getParameterCount();
 		if (length == 3) {
 			assert page != null;
@@ -42,6 +42,6 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
 		} else {
 			caller.call(source, help);
 		}
-
+		
 	}
 }

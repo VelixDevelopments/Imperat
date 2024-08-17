@@ -28,10 +28,11 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 
 public final class DefaultMethodCallerFactory implements MethodCallerFactory {
-
-    public static final DefaultMethodCallerFactory INSTANCE = new DefaultMethodCallerFactory();
-
-    @Override public @NotNull MethodCaller createFor(@NotNull Method method) throws Throwable {
-        return MethodCallerFactory.methodHandles().createFor(method);
-    }
+	
+	public static final DefaultMethodCallerFactory INSTANCE = new DefaultMethodCallerFactory();
+	
+	@Override
+	public @NotNull MethodCaller createFor(@NotNull Method method) throws Throwable {
+		return MethodCallerFactory.methodHandles().createFor(method);
+	}
 }

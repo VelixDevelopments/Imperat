@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
 public final class DefaultFormatter implements UsageFormatter {
-
-
+	
+	
 	/**
 	 * Displays the usage by converting it into
 	 * an adventure component
@@ -33,7 +33,7 @@ public final class DefaultFormatter implements UsageFormatter {
 		String msg = "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
 		return Messages.getMsg(msg);
 	}
-
+	
 	/**
 	 * Formats a single syntax, this is used
 	 * only in the {@link TreeDisplayer}
@@ -46,5 +46,5 @@ public final class DefaultFormatter implements UsageFormatter {
 		String msg = "<green>" + formattedUsage;
 		return Messages.getMsg(msg);
 	}
-
+	
 }
