@@ -16,8 +16,7 @@ final class TokenIterator implements Iterator<Character> {
 	private final String source;
 	private int position = -1;
 	
-	
-	public TokenIterator(String input) {
+	TokenIterator(String input) {
 		this.source = input;
 	}
 	

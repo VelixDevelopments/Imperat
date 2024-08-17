@@ -11,16 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BukkitTestCommand implements TabExecutor {
-
+	
 	@Override
 	public boolean onCommand(CommandSender commandSender,
 	                         Command command, String label, String[] args) {
-
+		
 		if (args.length == 0) {
 			commandSender.sendMessage("/group help");
 			return false;
 		}
-
+		
 		//group <group>
 		Group group = GroupRegistry.getInstance().getData(args[0]).orElse(null);
 		if (group == null) {
@@ -29,7 +29,7 @@ public class BukkitTestCommand implements TabExecutor {
 		}
 		// /group <group> setperm <permission>
 		// /group <group> setprefix <prefix>
-
+		
 		if (args.length == 3) {
 			String value = args[2];
 			switch (args[1]) {
@@ -46,7 +46,7 @@ public class BukkitTestCommand implements TabExecutor {
 		}
 		return true;
 	}
-
+	
 	@Override
 	public List<String> onTabComplete(CommandSender commandSender, Command command, String label, String[] args) {
 		List<String> arrayList = new ArrayList<>();
@@ -56,14 +56,14 @@ public class BukkitTestCommand implements TabExecutor {
 			}
 			return arrayList;
 		}
-
+		
 		if (args.length == 2) {
 			arrayList.add("setprefix");
 			arrayList.add("setperm");
 			return arrayList;
 		}
-
+		
 		return arrayList;
 	}
-
+	
 }

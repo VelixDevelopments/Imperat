@@ -12,7 +12,6 @@ public final class StringUtils {
 	/**
 	 * General utilities for string operations
 	 */
-	
 	private StringUtils() {
 	}
 	

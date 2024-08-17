@@ -12,6 +12,10 @@ import java.lang.reflect.Parameter;
 @ApiStatus.Internal
 public final class MethodVerifier {
 	
+	private MethodVerifier() {
+	
+	}
+	
 	public static boolean isMethodAcceptable(Method method) {
 		if (method.getDeclaredAnnotations().length == 0
 						|| method.getParameterCount() == 0) return false;
@@ -21,20 +25,19 @@ public final class MethodVerifier {
 	public static <C> void verifyMethod(CommandDispatcher<C> dispatcher,
 	                                    Class<?> clazz, Method method, boolean verifyDefault) {
 		if (method.getReturnType() != void.class && Modifier.isPublic(method.getModifiers())) {
-			throw new IllegalStateException("In class '" + clazz.getName() + "', this public method '" + method.getName() + "' is not a void method");
+			throw methodError(clazz, method, "a return type (should be void)");
 		}
 		Parameter[] methodParams = method.getParameters();
 		if (methodParams.length == 0) {
-			throw new IllegalStateException("In class '" + clazz.getName() + "', this method '" + method.getName() + "' has no parameters !");
+			throw methodError(clazz, method, "no parameters");
 		}
 		
 		if (!dispatcher.canBeSender(methodParams[0].getType())) {
-			throw new IllegalStateException("In class '" + clazz.getName() + "', unsuitable command-sender type '" + methodParams[0].getType().getName() + "' in method '" + method.getName() + "' , make sure your command sender is the first parameter");
+			throw methodError(clazz, method, "unsuitable command-sender type '" + methodParams[0].getType().getName());
 		}
 		
-		
 		if (verifyDefault && methodParams.length > 1) {
-			throw new UnsupportedOperationException("In class '" + clazz.getName() + "', default-usage method '" + method.getName() + "' has more than 1 parameter !");
+			throw methodError(clazz, method, "been treated as default-usage while having more than 1 input-parameter !");
 		}
 		
 	}
@@ -61,12 +64,26 @@ public final class MethodVerifier {
 			paramsCount++;
 		}
 		if (paramsCount > 1) {
-			throw new IllegalStateException("In class '" + clazz.getName() + "', Found help method '" + method.getName() + "' with more than one parameter types !");
+			throw helpMethodError(clazz, method, "more than one parameter types");
 		}
 		
 		if (commandHelpParam == null) {
-			throw new IllegalStateException("In class '" + clazz.getName() + "', Found help method '" + method.getName() + "' without parameter type of " + CommandHelp.class.getName());
+			throw helpMethodError(clazz, method, "no CommandHelp parameter");
 		}
+		
+	}
+	
+	private static IllegalStateException helpMethodError(Class<?> clazz, Method method, String msg) {
+		return methodError(clazz, method,
+						msg + " while being treated as Help-Method");
+	}
+	
+	private static IllegalStateException methodError(Class<?> clazz, Method method, String msg) {
+		return new IllegalStateException(
+						String.format("Method '%s' In class '%s' has "+ msg,
+										method.getName(), clazz.getName()
+						)
+		);
 	}
 	
 }

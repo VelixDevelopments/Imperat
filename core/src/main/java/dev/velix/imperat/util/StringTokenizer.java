@@ -11,6 +11,8 @@ public final class StringTokenizer {
 	private static final char CHAR_SINGLE_QUOTE = '\'';
 	private static final char CHAR_DOUBLE_QUOTE = '"';
 	
+	private StringTokenizer() {}
+	
 	public static ArgumentQueue parseToQueue(String argumentsInOneLine) {
 		if (argumentsInOneLine.isEmpty())
 			return ArgumentQueue.empty();

@@ -2,6 +2,8 @@ package dev.velix.imperat.util;
 
 public final class TypeUtility {
 	
+	private TypeUtility() {}
+	
 	public static boolean isInteger(String string) {
 		if (string == null) return false;
 		try {
