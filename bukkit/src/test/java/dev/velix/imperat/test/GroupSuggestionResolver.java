@@ -19,7 +19,7 @@ public class GroupSuggestionResolver implements SuggestionResolver<CommandSender
 	public Class<Group> getType() {
 		return Group.class;
 	}
-
+	
 	/**
 	 * @param command             the running command
 	 * @param source              the sender of the command
@@ -33,8 +33,8 @@ public class GroupSuggestionResolver implements SuggestionResolver<CommandSender
 	public List<String> autoComplete(Command<CommandSender> command, CommandSender source,
 	                                 ArgumentQueue queue, UsageParameter parameterToComplete, @Nullable CompletionArg argToComplete) {
 		return GroupRegistry.getInstance().getAll()
-				  .stream().map(Group::getName)
-				  .collect(Collectors.toList());
+						.stream().map(Group::getName)
+						.collect(Collectors.toList());
 	}
-
+	
 }

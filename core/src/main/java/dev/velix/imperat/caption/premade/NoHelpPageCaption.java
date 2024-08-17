@@ -23,7 +23,7 @@ public class NoHelpPageCaption<C> implements Caption<C> {
 	public @NotNull CaptionKey getKey() {
 		return CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION;
 	}
-
+	
 	/**
 	 * @param dispatcher    the command dispatcher
 	 * @param command       the command
@@ -41,6 +41,6 @@ public class NoHelpPageCaption<C> implements Caption<C> {
 	                                      @Nullable CommandUsage<C> usage,
 	                                      @Nullable Exception exception) {
 		return Messages.getMsg(Messages.NO_HELP_PAGE_AVAILABLE, Placeholder.parsed("page",
-				  Objects.requireNonNull(context.getArgument("page"))));
+						Objects.requireNonNull(context.getArgument("page"))));
 	}
 }

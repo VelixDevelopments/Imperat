@@ -6,11 +6,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 public final class ContextResolveException extends CommandException {
-
+	
 	public ContextResolveException(String msg) {
 		super(msg);
 	}
-
+	
 	/**
 	 * Handles the exception
 	 *
@@ -19,6 +19,6 @@ public final class ContextResolveException extends CommandException {
 	@Override
 	public <C> void handle(Context<C> context) {
 		context.getCommandSource()
-				  .reply(Component.text(msg, NamedTextColor.RED));
+						.reply(Component.text(msg, NamedTextColor.RED));
 	}
 }

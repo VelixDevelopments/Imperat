@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandFlag {
-
+	
 	/**
 	 * The main name of the flag
 	 *
@@ -18,24 +18,24 @@ public interface CommandFlag {
 	 */
 	@NotNull
 	String name();
-
+	
 	/**
 	 * @return the alias of the flag
 	 */
 	@NotNull
 	String alias();
-
+	
 	default boolean hasAlias(String alias) {
 		return alias().equalsIgnoreCase(alias);
 	}
-
+	
 	static CommandFlag create(String name, String alias) {
 		return new CommandFlagImpl(name, alias);
 	}
-
-
+	
+	
 	record CommandFlagImpl(String name, String alias)
-			  implements CommandFlag {
+					implements CommandFlag {
 	}
-
+	
 }

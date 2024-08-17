@@ -12,7 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandExecution<C> {
-
+	
 	/**
 	 * Executes the command's actions
 	 *
@@ -21,5 +21,5 @@ public interface CommandExecution<C> {
 	 */
 	void execute(CommandSource<C> commandSource,
 	             ExecutionContext context);
-
+	
 }

@@ -8,13 +8,13 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public final class EnumValueResolver<C, E extends Enum<E>> implements ValueResolver<C, E> {
-
+	
 	private final Class<E> enumType;
-
+	
 	public EnumValueResolver(Class<E> enumType) {
 		this.enumType = enumType;
 	}
-
+	
 	/**
 	 * @param source  the source of the command
 	 * @param context the context for the command

@@ -28,27 +28,27 @@ import java.util.*;
  */
 @ApiStatus.Internal
 public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
-
+	
 	private final Command<C> commandUsed;
 	private Command<C> lastCommand;
 	private CommandUsage<C> usage;
-
+	
 	private final Context<C> context;
-
+	
 	//per command/subcommand because the class 'Command' can be also treated as a sub command
 	private final Map<Command<C>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
-
+	
 	//all resolved arguments EXCEPT for subcommands and flags.
 	private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
-
-
+	
+	
 	ResolvedContextImpl(Command<C> commandUsed,
 	                    Context<C> context) {
 		this.commandUsed = commandUsed;
 		this.lastCommand = commandUsed;
 		this.context = context;
 	}
-
+	
 	/**
 	 * @return The owning parent-command for all of these arguments
 	 */
@@ -56,7 +56,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public Command<C> getOwningCommand() {
 		return commandUsed;
 	}
-
+	
 	/**
 	 * the command used in the context
 	 *
@@ -66,7 +66,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public @NotNull String getCommandUsed() {
 		return context.getCommandUsed();
 	}
-
+	
 	/**
 	 * Fetches the arguments of a command/subcommand that got resolved
 	 * except for the arguments that represent the literal/subcommand name arguments
@@ -79,10 +79,10 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public @Nullable ResolvedArgument getResolvedArgument(Command<C> command, String name) {
 		Map<String, ResolvedArgument> resolvedArgs = resolvedArgumentsPerCommand.get(command);
 		if (resolvedArgs == null) return null;
-
+		
 		return resolvedArgs.get(name);
 	}
-
+	
 	/**
 	 * @param command the command/subcommand with certain args
 	 * @return the command/subcommand's resolved args in as new array-list
@@ -93,7 +93,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 		if (argMap == null) return Collections.emptyList();
 		return new ArrayList<>(argMap.values());
 	}
-
+	
 	/**
 	 * @return all {@link Command} that have been used in this context
 	 */
@@ -101,7 +101,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public @NotNull Collection<? extends Command<C>> getCommandsUsed() {
 		return resolvedArgumentsPerCommand.keySet();
 	}
-
+	
 	/**
 	 * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
 	 * NOTE: the flags are NOT included as a resolved argument, it's treated in a different way
@@ -110,7 +110,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public Collection<? extends ResolvedArgument> getResolvedArguments() {
 		return allResolvedArgs.values();
 	}
-
+	
 	/**
 	 * Fetches a resolved argument's value
 	 *
@@ -125,7 +125,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 		if (argument == null) return null;
 		return (T) argument.value();
 	}
-
+	
 	/**
 	 * @return the command source of the command
 	 * @see CommandSource
@@ -134,7 +134,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public @NotNull CommandSource<C> getCommandSource() {
 		return context.getCommandSource();
 	}
-
+	
 	/**
 	 * @return the arguments entered by the
 	 * @see ArgumentQueue
@@ -143,7 +143,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public @NotNull ArgumentQueue getArguments() {
 		return context.getArguments();
 	}
-
+	
 	/**
 	 * @param flagName the name of the flag to check if it's used or not
 	 * @return The flag whether it has been used or not in this command context
@@ -151,9 +151,9 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	@Override
 	public boolean getFlag(String flagName) {
 		return getFlagExtractor().getExtractedFlags()
-				  .getData(flagName).isPresent();
+						.getData(flagName).isPresent();
 	}
-
+	
 	/**
 	 * The class responsible for extracting/reading flags
 	 * that has been used in the command context {@link CommandFlagExtractor}
@@ -164,7 +164,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public @NotNull CommandFlagExtractor<C> getFlagExtractor() {
 		return context.getFlagExtractor();
 	}
-
+	
 	/**
 	 * @return the number of flags extracted
 	 * by {@link CommandFlagExtractor}
@@ -173,7 +173,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public int flagsUsedCount() {
 		return context.flagsUsedCount();
 	}
-
+	
 	/**
 	 * Resolves the arguments from the given plain input {@link Context}
 	 *
@@ -186,15 +186,15 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 		this.usage = usage;
 		this.lastCommand = handler.getCommand();
 	}
-
-
+	
+	
 	@Override
 	public <T> void resolveArgument(Command<C> command,
 	                                @Nullable String raw,
 	                                int index,
 	                                UsageParameter parameter,
 	                                @Nullable T value) {
-
+		
 		final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
 		resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
 			if (existingResolvedArgs != null) {
@@ -207,7 +207,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 		});
 		allResolvedArgs.put(parameter.getName(), argument);
 	}
-
+	
 	/**
 	 * Fetches the last used resolved command
 	 * of a resolved context !
@@ -218,7 +218,7 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public @NotNull Command<C> getLastUsedCommand() {
 		return lastCommand;
 	}
-
+	
 	/**
 	 * @return The used usage to use it to resolve commands
 	 */
@@ -226,5 +226,5 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public CommandUsage<C> getDetectedUsage() {
 		return usage;
 	}
-
+	
 }

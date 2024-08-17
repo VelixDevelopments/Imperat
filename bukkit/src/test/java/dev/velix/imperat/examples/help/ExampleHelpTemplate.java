@@ -9,10 +9,10 @@ import dev.velix.imperat.help.templates.DefaultFormatter;
 import net.kyori.adventure.text.Component;
 
 public final class ExampleHelpTemplate implements HelpTemplate {
-
+	
 	private UsagesDisplayer displayer = UsagesDisplayer.plain();
 	private UsageFormatter formatter = new DefaultFormatter();
-
+	
 	/**
 	 * @param command the command
 	 * @return the header
@@ -20,10 +20,10 @@ public final class ExampleHelpTemplate implements HelpTemplate {
 	@Override
 	public Component getHeader(Command<?> command) {
 		return Messages.getMsg(
-				  "<dark_gray><bold><strikethrough>=================== <dark_green>" + command.getName() + "'s help</dark_green> ==================="
+						"<dark_gray><bold><strikethrough>=================== <dark_green>" + command.getName() + "'s help</dark_green> ==================="
 		);
 	}
-
+	
 	/**
 	 * @param command the command
 	 * @return the footer
@@ -32,7 +32,7 @@ public final class ExampleHelpTemplate implements HelpTemplate {
 	public Component getFooter(Command<?> command) {
 		return Messages.getMsg("<dark_gray><bold><strikethrough>===============================================");
 	}
-
+	
 	/**
 	 * The usage formatter for the help-template
 	 *
@@ -42,7 +42,7 @@ public final class ExampleHelpTemplate implements HelpTemplate {
 	public UsageFormatter getUsageFormatter() {
 		return formatter;
 	}
-
+	
 	/**
 	 * sets the usage help-formatter
 	 *
@@ -52,7 +52,7 @@ public final class ExampleHelpTemplate implements HelpTemplate {
 	public void setUsageFormatter(UsageFormatter formatter) {
 		this.formatter = formatter;
 	}
-
+	
 	/**
 	 * @return the usages displayer
 	 */
@@ -60,7 +60,7 @@ public final class ExampleHelpTemplate implements HelpTemplate {
 	public UsagesDisplayer getUsagesDisplayer() {
 		return displayer;
 	}
-
+	
 	/**
 	 * Sets the usages displayer instance
 	 * to a new one
@@ -71,5 +71,5 @@ public final class ExampleHelpTemplate implements HelpTemplate {
 	public void setUsagesDisplayer(UsagesDisplayer displayer) {
 		this.displayer = displayer;
 	}
-
+	
 }

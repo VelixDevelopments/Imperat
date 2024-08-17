@@ -13,22 +13,22 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandFlagExtractor<C> {
-
-
+	
+	
 	/**
 	 * @param rawArgument the raw argument
 	 * @return whether the raw argument is considered a flag
 	 */
 	boolean isArgumentFlag(String rawArgument);
-
+	
 	/**
 	 * @param command    the command's data
 	 * @param rawArgFlag the raw flag used in the command execution
 	 * @return whether this flag is registered and known to be usable for this command
 	 */
 	boolean isKnownFlag(Command<C> command, String rawArgFlag);
-
-
+	
+	
 	/**
 	 * Extracts the flags used in this argument queue
 	 * <p>
@@ -41,7 +41,7 @@ public interface CommandFlagExtractor<C> {
 	 * @param queue   the queue to use for extracting the flags
 	 */
 	void extract(@NotNull Command<C> command, @NotNull ArgumentQueue queue);
-
+	
 	/**
 	 * Extracts the flags
 	 * using the cached context
@@ -52,11 +52,11 @@ public interface CommandFlagExtractor<C> {
 	default void extract(@NotNull Command<C> command, @NotNull Context<C> context) {
 		extract(command, context.getArguments());
 	}
-
+	
 	/**
 	 * @return the flags that has been extract
 	 * by the method {@link CommandFlagExtractor#extract(Command, ArgumentQueue)}
 	 */
 	Registry<String, CommandFlag> getExtractedFlags();
-
+	
 }

@@ -12,18 +12,18 @@ import java.util.Objects;
 
 @ApiStatus.Internal
 public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C> {
-
-
+	
+	
 	private final FlagRegistry flagRegistry;
-
+	
 	CommandFlagExtractorImpl() {
 		this.flagRegistry = new FlagRegistry();
 	}
-
+	
 	public static <C> CommandFlagExtractorImpl<C> createNative() {
 		return new CommandFlagExtractorImpl<>();
 	}
-
+	
 	/**
 	 * @param rawArgument the raw argument
 	 * @return whether the raw argument is considered a flag
@@ -32,7 +32,7 @@ public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C
 	public boolean isArgumentFlag(String rawArgument) {
 		return rawArgument != null && rawArgument.startsWith("-");
 	}
-
+	
 	/**
 	 * @param command    the command's data
 	 * @param rawArgFlag the raw flag used in the command execution
@@ -43,11 +43,11 @@ public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C
 		if (!isArgumentFlag(rawArgFlag)) return false;
 		String flagAliasUsed = getFlagAliasUsed(rawArgFlag);
 		return command.getKnownFlags()
-				  .search((name, flag) -> flag.hasAlias(flagAliasUsed))
-				  .isPresent();
+						.search((name, flag) -> flag.hasAlias(flagAliasUsed))
+						.isPresent();
 	}
-
-
+	
+	
 	/**
 	 * Extracts the flags used in this argument queue
 	 * <p>
@@ -62,22 +62,22 @@ public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C
 	public void extract(@NotNull Command<C> command,
 	                    @NotNull ArgumentQueue queue) {
 		try {
-
+			
 			queue.stream()
-					  .filter((flagArg) -> isKnownFlag(command, flagArg))
-					  .map((flagArg) -> {
-						  String flagAliasUsed = getFlagAliasUsed(flagArg);
-						  return command.getKnownFlags()
-									 .searchFlagAlias(flagAliasUsed).orElse(null);
-					  })
-					  .filter(Objects::nonNull)
-					  .forEach((flag) -> flagRegistry.setData(flag.name(), flag));
-
+							.filter((flagArg) -> isKnownFlag(command, flagArg))
+							.map((flagArg) -> {
+								String flagAliasUsed = getFlagAliasUsed(flagArg);
+								return command.getKnownFlags()
+												.searchFlagAlias(flagAliasUsed).orElse(null);
+							})
+							.filter(Objects::nonNull)
+							.forEach((flag) -> flagRegistry.setData(flag.name(), flag));
+			
 		} catch (Exception exc) {
 			throw new RuntimeException(exc);
 		}
 	}
-
+	
 	/**
 	 * @return the flags that has been extract
 	 * by the method {@link CommandFlagExtractor#extract(Command, ArgumentQueue)}
@@ -86,8 +86,8 @@ public final class CommandFlagExtractorImpl<C> implements CommandFlagExtractor<C
 	public Registry<String, CommandFlag> getExtractedFlags() {
 		return flagRegistry;
 	}
-
-
+	
+	
 	private String getFlagAliasUsed(String rawFlagArg) {
 		return rawFlagArg.substring(1);
 	}

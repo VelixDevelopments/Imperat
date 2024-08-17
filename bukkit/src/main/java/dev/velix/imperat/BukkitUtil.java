@@ -9,11 +9,11 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 class BukkitUtil {
-
+	
 	private BukkitUtil() {
-
+	
 	}
-
+	
 	public static Class<?> getCraftServer() {
 
 		/*if(ReflectionUtil.isUseNewSpigotPackaging()) {
@@ -30,6 +30,7 @@ class BukkitUtil {
 			throw new RuntimeException(e);
 		}
 	}
+	
 	@SuppressWarnings("unchecked")
 	public static Map<String, org.bukkit.command.Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException {
 		Class<?> craftServer = getCraftServer();
@@ -41,5 +42,5 @@ class BukkitUtil {
 		hashMapCommandsField.setAccessible(true);
 		return (Map<String, Command>) hashMapCommandsField.get(commandMap);
 	}
-
+	
 }

@@ -17,17 +17,17 @@ import java.util.function.Supplier;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ContextFactory<C> {
-
+	
 	default @NotNull Context<C> createContext(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull CommandSource<C> commandSource,
-			  @NotNull String command,
-			  @NotNull ArgumentQueue queue
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull CommandSource<C> commandSource,
+					@NotNull String command,
+					@NotNull ArgumentQueue queue
 	) {
 		return createContext(dispatcher, commandSource,
-				  command, queue, CommandFlagExtractorImpl::createNative);
+						command, queue, CommandFlagExtractorImpl::createNative);
 	}
-
+	
 	/**
 	 * @param dispatcher            the dispatcher
 	 * @param commandSource         the sender/source of this command execution
@@ -38,13 +38,13 @@ public interface ContextFactory<C> {
 	 */
 	@NotNull
 	Context<C> createContext(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull CommandSource<C> commandSource,
-			  @NotNull String command,
-			  @NotNull ArgumentQueue queue,
-			  @NotNull Supplier<CommandFlagExtractor<C>> flagExtractorSupplier
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull CommandSource<C> commandSource,
+					@NotNull String command,
+					@NotNull ArgumentQueue queue,
+					@NotNull Supplier<CommandFlagExtractor<C>> flagExtractorSupplier
 	);
-
+	
 	/**
 	 * @param command      the command that's running
 	 * @param plainContext the context plain
@@ -55,5 +55,5 @@ public interface ContextFactory<C> {
 	                                         @NotNull Command<C> command,
 	                                         @NotNull Context<C> plainContext
 	);
-
+	
 }

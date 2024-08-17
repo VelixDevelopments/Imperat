@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Group {
-
+	
 	private final String name;
-
+	
 }

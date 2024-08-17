@@ -11,8 +11,8 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class ExampleUsageFormatter implements UsageFormatter {
-
-
+	
+	
 	/**
 	 * Displays the usage by converting it into
 	 * an adventure component
@@ -31,7 +31,7 @@ public class ExampleUsageFormatter implements UsageFormatter {
 		String msg = "<green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
 		return Messages.getMsg(msg);
 	}
-
+	
 	/**
 	 * Formats a single syntax, this is used
 	 * only in the {@link TreeDisplayer}

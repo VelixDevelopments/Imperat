@@ -10,14 +10,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Command {
-
+	
 	/**
 	 * @return The names of this command
 	 * first element is the unique name of the command
 	 * others are going to be considered the aliases
 	 */
 	@NotNull String[] value();
-
+	
 	/**
 	 * @return Whether to ignore the permission checks
 	 * while auto-completing or not

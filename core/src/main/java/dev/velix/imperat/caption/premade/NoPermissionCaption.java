@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import static dev.velix.imperat.caption.Messages.getMsg;
 
 public final class NoPermissionCaption<C> implements Caption<C> {
-
+	
 	/**
 	 * @return the key
 	 */
@@ -23,7 +23,7 @@ public final class NoPermissionCaption<C> implements Caption<C> {
 	public @NotNull CaptionKey getKey() {
 		return CaptionKey.NO_PERMISSION;
 	}
-
+	
 	/**
 	 * @param dispatcher    the dispatcher
 	 * @param commandSource the source
@@ -33,12 +33,12 @@ public final class NoPermissionCaption<C> implements Caption<C> {
 	 */
 	@Override
 	public @NotNull Component asComponent(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull Command<C> command,
-			  @NotNull CommandSource<C> commandSource,
-			  @NotNull Context<C> context,
-			  @Nullable CommandUsage<C> usage,
-			  @Nullable Exception exception
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull Command<C> command,
+					@NotNull CommandSource<C> commandSource,
+					@NotNull Context<C> context,
+					@Nullable CommandUsage<C> usage,
+					@Nullable Exception exception
 	) {
 		return getMsg(Messages.NO_PERMISSION);
 	}

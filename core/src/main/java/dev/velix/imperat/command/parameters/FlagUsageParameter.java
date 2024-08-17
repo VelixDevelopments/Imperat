@@ -7,20 +7,20 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 final class FlagUsageParameter extends InputParameter {
-
-
+	
+	
 	FlagUsageParameter(String flagName) {
 		super(flagName, CommandFlag.class,
-				  true, true, false, null);
+						true, true, false, null);
 	}
-
+	
 	@Override
 	public <C> String format(Command<C> command) {
 		CommandFlag commandFlag = command.getKnownFlags().getData(this.getName())
-				  .orElse(null);
+						.orElse(null);
 		if (commandFlag == null) return "N/A";
 		return StringUtils.normalizedParameterFormatting(
-				  "-" + commandFlag.alias(), isOptional()
+						"-" + commandFlag.alias(), isOptional()
 		);
 	}
 }

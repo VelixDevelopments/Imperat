@@ -7,5 +7,5 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 public record ResolvedArgument(@Nullable String raw, UsageParameter parameter,
                                int index, @Nullable Object value) {
-
+	
 }

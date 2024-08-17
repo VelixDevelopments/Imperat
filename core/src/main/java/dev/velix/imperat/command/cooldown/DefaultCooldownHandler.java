@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class DefaultCooldownHandler<C> implements CooldownHandler<C> {
-
+	
 	private final Map<C, Long> lastTimeExecuted = new HashMap<>();
 	private final CommandUsage<C> usage;
-
+	
 	public DefaultCooldownHandler(CommandUsage<C> usage) {
 		this.usage = usage;
 	}
-
-
+	
+	
 	/**
 	 * Sets the last time of execution to this
 	 * current moment using {@link System#currentTimeMillis()}
@@ -27,7 +27,7 @@ public final class DefaultCooldownHandler<C> implements CooldownHandler<C> {
 	public void registerExecutionMoment(CommandSource<C> source) {
 		lastTimeExecuted.put(source.getOrigin(), System.currentTimeMillis());
 	}
-
+	
 	/**
 	 * The required of a usage
 	 *
@@ -37,7 +37,7 @@ public final class DefaultCooldownHandler<C> implements CooldownHandler<C> {
 	public Optional<UsageCooldown> getUsageCooldown() {
 		return Optional.ofNullable(usage.getCooldown());
 	}
-
+	
 	/**
 	 * Unregisters the user's cached cooldown
 	 * when it's expired !
@@ -48,7 +48,7 @@ public final class DefaultCooldownHandler<C> implements CooldownHandler<C> {
 	public void removeCooldown(CommandSource<C> source) {
 		lastTimeExecuted.remove(source.getOrigin());
 	}
-
+	
 	/**
 	 * Fetches the last time the command source
 	 * executed a specific command usage

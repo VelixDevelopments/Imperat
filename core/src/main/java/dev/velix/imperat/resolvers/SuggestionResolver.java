@@ -18,12 +18,12 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface SuggestionResolver<C, T> {
-
+	
 	/**
 	 * @return Type of data the suggestion is resolving
 	 */
 	Class<T> getType();
-
+	
 	/**
 	 * @param command             the running command
 	 * @param source              the sender of the command
@@ -38,5 +38,5 @@ public interface SuggestionResolver<C, T> {
 	                          ArgumentQueue queue,
 	                          UsageParameter parameterToComplete,
 	                          @Nullable CompletionArg argToComplete);
-
+	
 }

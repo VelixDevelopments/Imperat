@@ -14,22 +14,22 @@ import org.bukkit.Bukkit;
 @Permission("command.broadcast")
 @Description("A broadcast command")
 public final class BroadcastCommand {
-
-
+	
+	
 	@DefaultUsage //usage without args
 	public void example(BukkitCommandSource source) {
 		source.reply("/broadcast <message...>");
 	}
-
-
+	
+	
 	@Usage
 	@Description("broadcasts a message")
 	public void example(BukkitCommandSource source, @Named("message") @Greedy String msg) {
 		// /broadcast <msg...>
 		for (var player : Bukkit.getOnlinePlayers())
 			player.sendMessage(msg);
-
+		
 		source.reply("Broadcast has been sent !");
 	}
-
+	
 }

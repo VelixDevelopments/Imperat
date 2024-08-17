@@ -22,7 +22,7 @@ public final class NoHelpCaption<C> implements Caption<C> {
 	public @NotNull CaptionKey getKey() {
 		return CaptionKey.NO_HELP_AVAILABLE_CAPTION;
 	}
-
+	
 	/**
 	 * @param dispatcher    the command dispatcher
 	 * @param command       the command
@@ -40,13 +40,13 @@ public final class NoHelpCaption<C> implements Caption<C> {
 	                                      @Nullable CommandUsage<C> usage,
 	                                      @Nullable Exception exception) {
 		Command<C> cmdUsed;
-		if(context instanceof ResolvedContext<C> resolvedContext) {
+		if (context instanceof ResolvedContext<C> resolvedContext) {
 			cmdUsed = resolvedContext.getLastUsedCommand();
-		}else {
+		} else {
 			cmdUsed = command;
 		}
 		return Messages.getMsg(Messages.NO_HELP_AVAILABLE,
-				  Placeholder.parsed("command", cmdUsed.getName()));
+						Placeholder.parsed("command", cmdUsed.getName()));
 	}
-
+	
 }

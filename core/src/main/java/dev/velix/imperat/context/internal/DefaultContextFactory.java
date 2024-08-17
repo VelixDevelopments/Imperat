@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class DefaultContextFactory<C> implements ContextFactory<C> {
-
-
+	
+	
 	/**
 	 * @param commandSource         the sender/source of this command execution
 	 * @param command               the command label used
@@ -22,15 +22,15 @@ public class DefaultContextFactory<C> implements ContextFactory<C> {
 	 */
 	@Override
 	public @NotNull Context<C> createContext(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull CommandSource<C> commandSource,
-			  @NotNull String command,
-			  @NotNull ArgumentQueue queue,
-			  @NotNull Supplier<CommandFlagExtractor<C>> flagExtractorSupplier
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull CommandSource<C> commandSource,
+					@NotNull String command,
+					@NotNull ArgumentQueue queue,
+					@NotNull Supplier<CommandFlagExtractor<C>> flagExtractorSupplier
 	) {
 		return new ContextImpl<>(commandSource, command, queue, flagExtractorSupplier);
 	}
-
+	
 	/**
 	 * @param command      the command that's running
 	 * @param plainContext the context plain
@@ -39,14 +39,14 @@ public class DefaultContextFactory<C> implements ContextFactory<C> {
 	 */
 	@Override
 	public ResolvedContext<C> createResolvedContext(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull Command<C> command,
-			  @NotNull Context<C> plainContext
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull Command<C> command,
+					@NotNull Context<C> plainContext
 	) {
-
+		
 		return new ResolvedContextImpl<>(
-				  command,
-				  plainContext
+						command,
+						plainContext
 		);
 	}
 }

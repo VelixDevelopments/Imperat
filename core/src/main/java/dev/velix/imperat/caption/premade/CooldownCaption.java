@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.TimeUnit;
 
 public final class CooldownCaption<C> implements Caption<C> {
-
+	
 	/**
 	 * @return the key
 	 */
@@ -26,7 +26,7 @@ public final class CooldownCaption<C> implements Caption<C> {
 	public @NotNull CaptionKey getKey() {
 		return CaptionKey.COOLDOWN;
 	}
-
+	
 	/**
 	 * @param dispatcher    the dispatcher
 	 * @param command       the command
@@ -38,30 +38,30 @@ public final class CooldownCaption<C> implements Caption<C> {
 	 */
 	@Override
 	public @NotNull Component asComponent(
-			  @NotNull CommandDispatcher<C> dispatcher,
-			  @NotNull Command<C> command,
-			  @NotNull CommandSource<C> commandSource,
-			  @NotNull Context<C> context,
-			  @Nullable CommandUsage<C> usage,
-			  @Nullable Exception exception
+					@NotNull CommandDispatcher<C> dispatcher,
+					@NotNull Command<C> command,
+					@NotNull CommandSource<C> commandSource,
+					@NotNull Context<C> context,
+					@Nullable CommandUsage<C> usage,
+					@Nullable Exception exception
 	) {
 		if (usage == null || usage.getCooldown() == null) {
 			return Component.empty();
 		}
 		return Messages.getMsg(Messages.COOL_DOWN_WAIT,
-				  Placeholder.parsed("time", formatTime(commandSource, usage)));
+						Placeholder.parsed("time", formatTime(commandSource, usage)));
 	}
-
+	
 	private String formatTime(CommandSource<C> source, CommandUsage<C> usage) {
 		return formatTime(source, usage.getCooldown(), usage.getCooldownHandler());
 	}
-
+	
 	private String formatTime(CommandSource<C> source,
 	                          UsageCooldown cooldown,
 	                          CooldownHandler<C> cooldownHandler) {
 		return formatTime(cooldown, cooldownHandler.getLastTimeExecuted(source).orElse(-1L));
 	}
-
+	
 	private String formatTime(UsageCooldown cooldown, long lastTimeExecuted) {
 		long timePassed = System.currentTimeMillis() - lastTimeExecuted;
 		long remaining = cooldown.toMillis() - timePassed;
