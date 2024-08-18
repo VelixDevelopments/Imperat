@@ -1,19 +1,29 @@
 package dev.velix.imperat.help;
 
+import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.annotations.MethodCommandExecutor;
+import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.context.Context;
 import dev.velix.imperat.util.reflection.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.reflection.MethodCaller;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Method;
+import java.util.List;
 
 public final class MethodHelpExecution<C> implements HelpExecution<C> {
 	
+	private final CommandDispatcher<C> dispatcher;
 	private final Method method;
 	private final MethodCaller.BoundMethodCaller caller;
+	private final List<UsageParameter> params;
 	
-	public MethodHelpExecution(Object proxy, Method method) {
+	public MethodHelpExecution(CommandDispatcher<C> dispatcher,
+	                           Object proxy, Method method,
+	                           List<UsageParameter> params) {
+		this.dispatcher = dispatcher;
 		this.method = method;
+		this.params = params;
 		try {
 			this.caller = DefaultMethodCallerFactory.INSTANCE
 							.createFor(method).bindTo(proxy);
@@ -21,7 +31,6 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
 			throw new RuntimeException(e);
 		}
 	}
-	
 	
 	/**
 	 * Displays a help menu showing all possible syntaxes
@@ -32,16 +41,24 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
 	 */
 	@Override
 	public void help(CommandSource<C> source,
+									 Context<C> context,
 	                 CommandHelp<C> help,
 	                 @Nullable Integer page) {
 		
-		int length = method.getParameterCount();
-		if (length == 3) {
-			assert page != null;
-			caller.call(source, help, page);
-		} else {
-			caller.call(source, help);
+		Object[] instances = MethodCommandExecutor.loadParameterInstances(dispatcher, params, source,
+						context, method, help);
+		System.out.println("INSTANCES SIZE= " + instances.length);
+		for(Object object : instances) {
+			System.out.println("HELLO");
+			if(object ==  null) {
+				System.out.println("OBJECT IS NULL");
+				continue;
+			}
+			System.out.println("INSTANCE -> " + object.getClass().getSimpleName());
 		}
-		
+		System.out.println("THEN");
+		caller.call(instances);
 	}
+	
+
 }

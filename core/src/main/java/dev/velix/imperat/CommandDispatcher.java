@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
@@ -41,8 +40,6 @@ import java.util.List;
 public interface CommandDispatcher<C> {
 	
 	Logger LOGGER = LoggerFactory.getLogger(CommandDispatcher.class);
-	
-
 	
 	/**
 	 * @return The command prefix
@@ -406,15 +403,15 @@ public interface CommandDispatcher<C> {
 	
 	
 	static void debug(String msg, Object... args) {
-		LOGGER.info(msg, args);
+		LOGGER.info(String.format(msg, args));
 	}
 	
 	static void warning(String msg, Object... args){
 		LOGGER.warn(msg, args);
 	}
 	
-	static void throwError(Throwable ex) {
-		LOGGER.atError().setCause(ex).log();
+	static void error(Throwable ex) {
+		LOGGER.error(ex.getMessage(), ex);
 	}
 	
 	static void traceError(Throwable ex) {

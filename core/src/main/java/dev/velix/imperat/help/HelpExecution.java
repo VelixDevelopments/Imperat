@@ -1,6 +1,7 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.context.Context;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,5 +21,6 @@ public interface HelpExecution<C> {
 	 * @param help   the help object
 	 * @param page   the page of the help menu
 	 */
-	void help(CommandSource<C> source, CommandHelp<C> help, @Nullable Integer page);
+	void help(CommandSource<C> source, Context<C> context,
+	          CommandHelp<C> help, @Nullable Integer page);
 }

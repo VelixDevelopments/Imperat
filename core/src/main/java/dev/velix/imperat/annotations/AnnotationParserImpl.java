@@ -6,6 +6,8 @@ import dev.velix.imperat.annotations.element.ElementKey;
 import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
+import dev.velix.imperat.annotations.types.methods.Help;
+import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.exceptions.UnknownCommandClass;
@@ -40,6 +42,7 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 	@Override
 	public <T> void parseCommandClass(T instance) {
 		Class<T> instanceClazz = (Class<T>) instance.getClass();
+		CommandDispatcher.debug("Parsing type %s", instanceClazz.getName());
 		AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
 		var elementKey = getKey(AnnotationLevel.CLASS, instanceClazz);
 		
@@ -53,20 +56,16 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 		AnnotationDataCreator<dev.velix.imperat.command.Command<C>, Command> creator = dataRegistry.getDataCreator(Command.class);
 		assert creator != null;
 		dev.velix.imperat.command.Command<C> commandObject = creator.create(instanceClazz, commandAnnotation, element);
-		dataRegistry.injectForElement(instanceClazz, commandObject, commandObject, element);
+		dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, element);
 		
-		Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods()).sorted((m1, m2) -> {
-			if (m1.isAnnotationPresent(Usage.class) && m2.isAnnotationPresent(Usage.class)) {
-				return 0;
-			} else if (m1.isAnnotationPresent(Usage.class)) {
-				return -1;
-			} else {
-				return 1;
-			}
-		}).collect(Collectors.toCollection(LinkedHashSet::new));
+		Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods())
+						.sorted((m1, m2) -> getMethodPriority(m1)-getMethodPriority(m2))
+						.collect(Collectors.toCollection(LinkedHashSet::new));
 		
 		for (Method method : methods) {
+			CommandDispatcher.debug("Checking method " + method.getName());
 			if (!MethodVerifier.isMethodAcceptable(method)) continue;
+			CommandDispatcher.debug("Passed method %s", method.getName());
 			MethodVerifier.verifyMethod(dispatcher, instanceClazz, method, method.isAnnotationPresent(DefaultUsage.class));
 			
 			var methodKey = getKey(AnnotationLevel.METHOD, method);
@@ -74,14 +73,14 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 			assert methodElement != null;
 			
 			if (!methodElement.isAnnotationPresent(Usage.class)) {
-				dataRegistry.injectForElement(instanceClazz, commandObject, commandObject, methodElement);
+				dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, methodElement);
 				continue;
 			}
 			Usage usageAnnotation = methodElement.getAnnotation(Usage.class);
 			AnnotationDataCreator<CommandUsage.Builder<C>, Usage> usageDataCreator = dataRegistry.getDataCreator(Usage.class);
 			assert usageDataCreator != null;
 			CommandUsage.Builder<C> usageBuilder = usageDataCreator.create(instanceClazz, usageAnnotation, methodElement);
-			dataRegistry.injectForElement(instanceClazz, commandObject, usageBuilder, methodElement);
+			dataRegistry.injectForElement(instance, instanceClazz, commandObject, usageBuilder, methodElement);
 			commandObject.addUsage(usageBuilder.build());
 		}
 		
@@ -107,4 +106,19 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 		return annotationRegistry;
 	}
 	
+	private int getMethodPriority(Method method) {
+		if(method.isAnnotationPresent(DefaultUsage.class)) {
+			return -1;
+		}
+		else if(method.isAnnotationPresent(Usage.class)) {
+			return 0;
+		}
+		else if(method.isAnnotationPresent(Help.class)) {
+			return 1;
+		}
+		else if(method.isAnnotationPresent(SubCommand.class)) {
+			return 2+method.getParameterCount();
+		}
+		return 10;
+	}
 }

@@ -130,13 +130,13 @@ public final class AnnotationFactory {
 	 * @return The annotation's hashcode.
 	 */
 	private static String toString(Class<? extends Annotation> type, Map<String, Object> members) {
-		StringBuilder sb = new StringBuilder().append("@").append(type.getName()).append("(");
+		StringBuilder sb = new StringBuilder().append('@').append(type.getName()).append('(');
 		StringJoiner joiner = new StringJoiner(", ");
 		for (Map.Entry<String, Object> entry : members.entrySet()) {
 			joiner.add(entry.getKey() + "=" + deepToString(entry.getValue()));
 		}
 		sb.append(joiner);
-		return sb.append(")").toString();
+		return sb.append(')').toString();
 	}
 	
 	private static String deepToString(Object arg) {

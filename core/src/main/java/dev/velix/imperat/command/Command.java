@@ -16,8 +16,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -343,10 +341,11 @@ public interface Command<C> extends UsageParameter {
 	 */
 	@SuppressWarnings("unchecked")
 	default void addHelpCommand(CommandDispatcher<C> dispatcher,
+															List<UsageParameter> params,
 	                            HelpExecution<C> helpExecution) {
-		List<UsageParameter> params = new ArrayList<>();
-		if (dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
-			params.add(UsageParameter.optional("page", Integer.class, OptionalValueSupplier.of(1)));
+		if(params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
+			params.add(UsageParameter.optional("page", Integer.class,
+							OptionalValueSupplier.of(1)));
 		}
 		
 		addSubCommandUsage(
@@ -354,12 +353,13 @@ public interface Command<C> extends UsageParameter {
 						CommandUsage.<C>builder()
 										.parameters(params)
 										.execute((sender, context) -> {
+											CommandDispatcher.debug("Executing help !");
 											Integer page = context.getArgument("page");
 											CommandHelp<C> help = dispatcher.createCommandHelp(this,
 															(Context<C>) context, ((ResolvedContext<C>) context).getDetectedUsage());
-											helpExecution.help(sender, help, page);
+											helpExecution.help(sender, (Context<C>) context, help, page);
 										}).build(),
-						true
+						false
 		);
 	}
 	

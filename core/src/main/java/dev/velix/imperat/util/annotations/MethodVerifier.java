@@ -19,7 +19,8 @@ public final class MethodVerifier {
 	public static boolean isMethodAcceptable(Method method) {
 		if (method.getDeclaredAnnotations().length == 0
 						|| method.getParameterCount() == 0) return false;
-		return Modifier.isPublic(method.getModifiers());
+		return Modifier.isPublic(method.getModifiers())
+						&& method.getReturnType() == void.class;
 	}
 	
 	public static <C> void verifyMethod(CommandDispatcher<C> dispatcher,
@@ -55,12 +56,12 @@ public final class MethodVerifier {
 		for (Parameter parameter : method.getParameters()) {
 			if (dispatcher.canBeSender(parameter.getType()) ||
 							mainUsage.hasParamType(parameter.getType())) {
-				
-				if (CommandHelp.class.isAssignableFrom(parameter.getType()))
-					commandHelpParam = parameter;
-				
 				continue;
 			}
+			
+			if (CommandHelp.class.isAssignableFrom(parameter.getType()))
+				commandHelpParam = parameter;
+			
 			paramsCount++;
 		}
 		if (paramsCount > 1) {

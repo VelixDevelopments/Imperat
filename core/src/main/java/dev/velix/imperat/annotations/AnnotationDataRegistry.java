@@ -13,6 +13,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.MethodHelpExecution;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.Registry;
@@ -51,12 +52,12 @@ final class AnnotationDataRegistry<C> extends
 		);
 		registerDataCreator(Usage.class, (proxy, annotation, element) -> {
 			Method method = (Method) element.getElement();
-			var params = loadParameters(annotationRegistry, dispatcher, null, null, method);
+			var params = loadParameters(annotationRegistry, dispatcher, null, null, method, false);
 			return CommandUsage.<C>builder()
 							.parameters(params);
 		});
 		
-		registerCommandInjector(DefaultUsage.class, (proxy, command, toLoad, element, annotation) -> {
+		registerCommandInjector(DefaultUsage.class, (pI, proxy, command, toLoad, element, annotation) -> {
 			Method method = (Method) element.getElement();
 			if (element.isAnnotationPresent(Usage.class) || element.isAnnotationPresent(SubCommand.class)) {
 				throw new IllegalArgumentException("A default usage in method '" + method.getName() + "' in class '" + proxy.getName() + "'");
@@ -67,17 +68,25 @@ final class AnnotationDataRegistry<C> extends
 		});
 		registerSubCmdInjector(annotationRegistry, dispatcher);
 		
-		registerCommandInjector(Help.class, ((proxy, command, toLoad, element, annotation) -> {
-			MethodVerifier.verifyHelpMethod(dispatcher, toLoad.getMainUsage(), proxy,
-							(Method) element.getElement());
-			command.addHelpCommand(dispatcher,
-							new MethodHelpExecution<>(proxy, (Method) element.getElement()));
+		registerCommandInjector(Help.class, ((pI, proxy, command, toLoad, element, annotation) -> {
+			MethodVerifier.verifyHelpMethod(dispatcher, toLoad.getMainUsage(), proxy, (Method) element.getElement());
+			Method method = (Method) element.getElement();
+			for(var param : toLoad.getMainUsage().getParameters()) {
+				System.out.println("PARAM-MAIN= " + param.getName() + ":" + param.getType().getName());
+			}
+			var subCommandParams = loadParameters(annotationRegistry, dispatcher, null, toLoad.getMainUsage(), method, true);
+			
+			List<UsageParameter> parameters = new ArrayList<>(command.getMainUsage().getParameters());
+			parameters.addAll(subCommandParams);
+			
+			toLoad.addHelpCommand(dispatcher, subCommandParams,
+							new MethodHelpExecution<>(dispatcher, pI, method, parameters));
 		}));
 		
 		//TODO register for @DefaultValue @DefaultValueProvider
 		
-		registerUsageInjector(Cooldown.class, (proxy, command, toLoad, element, annotation) -> toLoad.cooldown(loadCooldown(element)));
-		registerInjector(Permission.class, (proxy, command, toLoad, element, annotation) -> {
+		registerUsageInjector(Cooldown.class, (pI, proxy, command, toLoad, element, annotation) -> toLoad.cooldown(loadCooldown(element)));
+		registerInjector(Permission.class, (pI, proxy, command, toLoad, element, annotation) -> {
 			command.setPermission(annotation.value());
 			if (toLoad instanceof CommandUsage.Builder<?> builder) {
 				builder.permission(annotation.value());
@@ -85,10 +94,10 @@ final class AnnotationDataRegistry<C> extends
 				command.setPermission(annotation.value());
 			}
 		});
-		registerInjector(Description.class, ((proxy, command, toLoad, element, annotation) -> {
+		registerInjector(Description.class, ((pI, proxy, command, toLoad, element, annotation) -> {
 			command.setDescription(annotation.value());
-			if (toLoad instanceof CommandUsage<?> usage) {
-				usage.setDescription(annotation.value());
+			if (toLoad instanceof CommandUsage.Builder<?> usage) {
+				usage.description(annotation.value());
 			} else {
 				command.setDescription(annotation.value());
 			}
@@ -96,7 +105,7 @@ final class AnnotationDataRegistry<C> extends
 	}
 	
 	private void registerSubCmdInjector(AnnotationRegistry annotationRegistry, CommandDispatcher<C> dispatcher) {
-		registerCommandInjector(SubCommand.class, (proxy, command, toLoad, element, annotation) -> {
+		registerCommandInjector(SubCommand.class, (pI, proxy, command, toLoad, element, annotation) -> {
 			Method method = (Method) element.getElement();
 			
 			if (element.isAnnotationPresent(Usage.class)) {
@@ -113,7 +122,7 @@ final class AnnotationDataRegistry<C> extends
 							.subList(1, values.length));
 			
 			var mainUsage = command.getMainUsage();
-			List<UsageParameter> methodUsageParameters = this.loadParameters(annotationRegistry, dispatcher, annotation, mainUsage, method);
+			List<UsageParameter> methodUsageParameters = this.loadParameters(annotationRegistry, dispatcher, annotation, mainUsage, method, false);
 			
 			UsageCooldown cooldown = loadCooldown(element);
 			String desc = element.isAnnotationPresent(Description.class) ? element.getAnnotation(Description.class).value() : "N/A";
@@ -169,6 +178,7 @@ final class AnnotationDataRegistry<C> extends
 	
 	@SuppressWarnings("unchecked")
 	public <A extends Annotation, O> void injectForElement(
+					@NotNull Object proxyInstance,
 					@NotNull Class<?> proxy,
 					@NotNull Command<C> command,
 					@NotNull O toLoad,
@@ -179,7 +189,7 @@ final class AnnotationDataRegistry<C> extends
 			AnnotationDataInjector<O, C, A> injector =
 							(AnnotationDataInjector<O, C, A>) getInjector(annotation.annotationType());
 			if (injector == null) continue;
-			injector.inject(proxy, command, toLoad,
+			injector.inject(proxyInstance, proxy, command, toLoad,
 							element, (A) annotation);
 		}
 		
@@ -189,19 +199,25 @@ final class AnnotationDataRegistry<C> extends
 	                                            CommandDispatcher<C> dispatcher,
 	                                            @Nullable SubCommand subCommand,
 	                                            @Nullable CommandUsage<C> mainUsage,
-	                                            Method method) {
+	                                            Method method,
+	                                            boolean help) {
 		
 		List<UsageParameter> usageParameters = new ArrayList<>();
 		for (Parameter parameter : method.getParameters()) {
 			if (dispatcher.canBeSender(parameter.getType())) continue;
+			if(help && CommandHelp.class.isAssignableFrom(parameter.getType())){
+				continue;
+			}
 			
 			UsageParameter usageParameter = getParameter(registry, parameter);
 			if (usageParameter != null) {
-				if (dispatcher.hasContextResolver(parameter.getType())) continue;
-				if (subCommand != null && mainUsage != null && mainUsage
-								.hasParameter((param) -> param.equals(usageParameter))) {
+				if (dispatcher.hasContextResolver(parameter.getType())
+								|| ((subCommand != null || help) && mainUsage != null && mainUsage
+								.hasParameter((param) -> param.equals(usageParameter)))
+				) {
 					continue;
 				}
+				
 				usageParameters.add(usageParameter);
 			}
 		}
@@ -209,7 +225,7 @@ final class AnnotationDataRegistry<C> extends
 	}
 	
 	
-	private <T> UsageParameter getParameter(
+	private <T, P extends UsageParameter> P getParameter(
 					AnnotationRegistry registry,
 					Parameter parameter
 	) {
@@ -236,7 +252,7 @@ final class AnnotationDataRegistry<C> extends
 		
 		
 		if (flag != null) 
-			return AnnotatedParameter.flag(name, null);
+			return (P) AnnotatedParameter.flag(name, null);
 		
 		OptionalValueSupplier<C, T> optionalValueSupplier = null;
 		if (optional) {
@@ -245,7 +261,7 @@ final class AnnotationDataRegistry<C> extends
 			optionalValueSupplier = deduceOptionalValueSupplier(parameter, defaultValueAnnotation, provider);
 		}
 		
-		return AnnotatedParameter.input(name, parameter.getType(),
+		return (P) AnnotatedParameter.input(name, parameter.getType(),
 						optional, greedy, new ParameterCommandElement(registry, name, parameter),
 						optionalValueSupplier);
 	}

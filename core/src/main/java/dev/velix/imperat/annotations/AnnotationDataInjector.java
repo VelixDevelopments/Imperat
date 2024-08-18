@@ -21,6 +21,7 @@ public interface AnnotationDataInjector<O, C, A extends Annotation> {
 	 * Injects the command-related object using the annotation
 	 * data that is loaded using {@link AnnotationReader}
 	 *
+	 * @param proxyInstance the instance of the class being  registered as a command class
 	 * @param proxy      class being registered as a command class
 	 * @param command    the created command instance owning
 	 *                   the plain class to load
@@ -29,6 +30,7 @@ public interface AnnotationDataInjector<O, C, A extends Annotation> {
 	 * @param annotation the annotation to load
 	 */
 	void inject(
+					Object proxyInstance,
 					Class<?> proxy,
 					@NotNull Command<C> command,
 					@NotNull O toLoad,

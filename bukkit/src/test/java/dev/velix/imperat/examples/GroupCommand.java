@@ -31,9 +31,12 @@ public final class GroupCommand {
 	}
 	
 	@Help
-	public void group(BukkitCommandSource source,
-	                  @Named("group") Group group,
-	                  BukkitCommandHelp help) {
+	public void groupHelp(
+					BukkitCommandSource source,
+					@Named("group") Group group,
+					BukkitCommandHelp help
+	) {
+		System.out.println("INSIDE METHOD HELP");
 		source.reply("Group entered= " + group.getName());
 		help.display(source);
 	}

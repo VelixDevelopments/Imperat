@@ -6,6 +6,7 @@ import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.command.parameters.UsageParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.util.reflection.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.reflection.MethodCaller;
 import org.jetbrains.annotations.ApiStatus;
@@ -41,14 +42,25 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Object[] loadParameterInstances(CommandSource<C> source, ExecutionContext context, Method method) {
+	public static <C> Object[] loadParameterInstances(CommandDispatcher<C> dispatcher,
+																										 List<? extends UsageParameter> fullParameters,
+	                                                   CommandSource<C> source,
+	                                                   ExecutionContext context,
+	                                                   Method method,
+	                                                  @Nullable CommandHelp<C> commandHelp) {
 		Parameter[] parameters = method.getParameters();
 		Object[] paramsInstances = new Object[parameters.length];
 		
 		paramsInstances[0] = source;
 		
-		for (int i = 1, p = 0; i < paramsInstances.length; i++, p++) {
+		for (int i = 1, p = 0; i < parameters.length; i++, p++) {
 			Parameter actualParameter = parameters[i];
+			
+			if(commandHelp != null && CommandHelp.class.isAssignableFrom(actualParameter.getType())) {
+				paramsInstances[i] = commandHelp;
+				p--;
+				continue;
+			}
 			
 			var factory = dispatcher.getContextResolverFactory();
 			var contextResolver = factory.create(actualParameter);
@@ -57,20 +69,18 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 				paramsInstances[i] = contextResolver.resolve((Context<C>) context, actualParameter);
 				continue;
 			}
+			
 			contextResolver = dispatcher.getContextResolver(actualParameter.getType());
 			if (contextResolver != null) {
 				paramsInstances[i] = contextResolver.resolve((Context<C>) context, actualParameter);
-			}
-
-
-			/*if(helpAnnotation != null && actualParameter.getType() == CommandHelp.class) {
-				paramsInstances[i] = dispatcher.createCommandHelp(command, (Context<C>) context, null);
-				p--;
 				continue;
-			}*/
+			}
 			
 			UsageParameter parameter = getUsageParam(fullParameters, p);
-			if (parameter == null) continue;
+			
+			if (parameter == null)
+				continue;
+			
 			paramsInstances[i] = parameter.isFlag() ?
 							context.getFlag(parameter.getName())
 							: context.getArgument(parameter.getName());
@@ -88,15 +98,15 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 	@Override
 	public void execute(CommandSource<C> commandSource,
 	                    ExecutionContext context) {
-		boundMethodCaller.call(loadParameterInstances(commandSource, context, method));
+		boundMethodCaller.call(
+						loadParameterInstances(dispatcher, fullParameters,
+										commandSource, context, method, null)
+		);
 	}
 	
-	private @Nullable UsageParameter getUsageParam(List<? extends UsageParameter> params, int index) {
-		try {
-			return params.get(index);
-		} catch (Exception ex) {
-			return null;
-		}
+	private static @Nullable UsageParameter getUsageParam(List<? extends UsageParameter> params, int index) {
+		if(index < 0 || index >= params.size()) return null;
+		return params.get(index);
 	}
 	
 }
