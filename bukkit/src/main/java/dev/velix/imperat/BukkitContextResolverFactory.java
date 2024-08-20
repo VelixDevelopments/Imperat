@@ -5,4 +5,5 @@ import org.bukkit.command.CommandSender;
 
 public interface BukkitContextResolverFactory extends ContextResolverFactory<CommandSender> {
 
+
 }
