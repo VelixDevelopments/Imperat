@@ -21,39 +21,39 @@ import java.util.List;
 @ApiStatus.AvailableSince("1.0.0")
 @FunctionalInterface
 public interface UsagesDisplayer {
-	
-	/**
-	 * Displays all usages together to
-	 * the {@link CommandSource}
-	 * <p>
-	 * It has 2 pre-made implementations
-	 *
-	 * @param dispatcher the command dispatcher
-	 * @param command    the command that owns all the usages
-	 * @param source     the command sender
-	 * @param formatter  the formatter {@link UsageFormatter}
-	 * @param usages     the usages to display
-	 * @param <C>        the command-sender type
-	 * @see PlainDisplayer
-	 * @see TreeDisplayer
-	 */
-	<C> void display(
-					CommandDispatcher<C> dispatcher,
-					Command<C> command,
-					CommandSource<C> source,
-					UsageFormatter formatter,
-					List<CommandUsage<C>> usages
-	);
-	
-	static UsagesDisplayer plain() {
-		return new PlainDisplayer();
-	}
-	
-	static UsagesDisplayer tree() {
-		return new TreeDisplayer();
-	}
-	
-	static UsagesDisplayer custom(UsagesDisplayer displayer) {
-		return displayer;
-	}
+
+    /**
+     * Displays all usages together to
+     * the {@link CommandSource}
+     * <p>
+     * It has 2 pre-made implementations
+     *
+     * @param dispatcher the command dispatcher
+     * @param command    the command that owns all the usages
+     * @param source     the command sender
+     * @param formatter  the formatter {@link UsageFormatter}
+     * @param usages     the usages to display
+     * @param <C>        the command-sender type
+     * @see PlainDisplayer
+     * @see TreeDisplayer
+     */
+    <C> void display(
+            CommandDispatcher<C> dispatcher,
+            Command<C> command,
+            CommandSource<C> source,
+            UsageFormatter formatter,
+            List<CommandUsage<C>> usages
+    );
+
+    static UsagesDisplayer plain() {
+        return new PlainDisplayer();
+    }
+
+    static UsagesDisplayer tree() {
+        return new TreeDisplayer();
+    }
+
+    static UsagesDisplayer custom(UsagesDisplayer displayer) {
+        return displayer;
+    }
 }

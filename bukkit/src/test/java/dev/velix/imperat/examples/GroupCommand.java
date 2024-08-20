@@ -14,48 +14,48 @@ import dev.velix.imperat.test.Group;
 
 @Command("group")
 public final class GroupCommand {
-	
-	@DefaultUsage
-	public void defaultUsage(BukkitCommandSource source) {
-		//default execution = no args
-		source.reply("/group <group>");
-	}
-	
-	@Usage
-	public void mainUsage(BukkitCommandSource source, @Named("group") Group group) {
-		//when he does "/group <group>"
-		source.reply("entered group name= " + group.getName());
-	}
-	
-	@Help
-	public void groupHelp(
-					BukkitCommandSource source,
-					@Named("group") Group group,
-					BukkitCommandHelp help
-	) {
-		System.out.println("INSIDE METHOD HELP");
-		source.reply("Group entered= " + group.getName());
-		help.display(source);
-	}
-	
-	@SubCommand(value = "setperm")
-	@Permission("command.group.setperm")
-	public void setPermission(BukkitCommandSource source,
-	                          @Named("group") Group group,
-	                          @Named("permission") String permission) {
-		// /group <group> setperm <permission>
-		source.reply("You have set permission '" + permission
-						+ "' to group '" + group.getName() + "'");
-	}
-	
-	@SubCommand("setprefix")
-	@Permission("command.group.setprefix")
-	public void setPrefix(
-					BukkitCommandSource source,
-					@Named("group") Group group,
-					@Named("prefix") String prefix
-	) {
-		// /group <group> setprefix <prefix>
-		source.reply("You have set prefix '" + prefix + "' to group '" + group.getName() + "'");
-	}
+
+    @DefaultUsage
+    public void defaultUsage(BukkitCommandSource source) {
+        //default execution = no args
+        source.reply("/group <group>");
+    }
+
+    @Usage
+    public void mainUsage(BukkitCommandSource source, @Named("group") Group group) {
+        //when he does "/group <group>"
+        source.reply("entered group name= " + group.getName());
+    }
+
+    @Help
+    public void groupHelp(
+            BukkitCommandSource source,
+            @Named("group") Group group,
+            BukkitCommandHelp help
+    ) {
+        System.out.println("INSIDE METHOD HELP");
+        source.reply("Group entered= " + group.getName());
+        help.display(source);
+    }
+
+    @SubCommand(value = "setperm")
+    @Permission("command.group.setperm")
+    public void setPermission(BukkitCommandSource source,
+                              @Named("group") Group group,
+                              @Named("permission") String permission) {
+        // /group <group> setperm <permission>
+        source.reply("You have set permission '" + permission
+                + "' to group '" + group.getName() + "'");
+    }
+
+    @SubCommand("setprefix")
+    @Permission("command.group.setprefix")
+    public void setPrefix(
+            BukkitCommandSource source,
+            @Named("group") Group group,
+            @Named("prefix") String prefix
+    ) {
+        // /group <group> setprefix <prefix>
+        source.reply("You have set prefix '" + prefix + "' to group '" + group.getName() + "'");
+    }
 }

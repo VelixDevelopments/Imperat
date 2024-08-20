@@ -18,42 +18,42 @@ import java.util.Arrays;
  * @param <E> type of element that contain annotations
  */
 public interface ElementVisitor<E extends AnnotatedElement> {
-	
-	/**
-	 * Loads the element unique key from the element type
-	 *
-	 * @param element the element
-	 * @return the element unique key
-	 */
-	ElementKey loadKey(E element);
-	
-	/**
-	 * Visits the annotation container and an element in
-	 * the class to parse, allowing for more flexibility.
-	 * so it adds a behaviour without modifying the internals of {@link AnnotationContainer}
-	 * by going through {@link AnnotationContainer#accept(ElementVisitor, CommandAnnotatedElement)}
-	 *
-	 * @param container the container
-	 * @param element   the element
-	 */
-	default void visit(AnnotationContainer container, @NotNull CommandAnnotatedElement<E> element) {
-		var key = loadKey(element.getElement());
-		container.addElement(key, element);
-	}
-	
-	static ElementVisitor<Class<?>> classes() {
-		return (element) -> ElementKey.of(element.getName());
-	}
-	
-	static ElementVisitor<Method> methods() {
-		return (element) -> new ElementKey(element.getName(),
-						Arrays.stream(element.getParameterTypes())
-										.map(Class::getName).toArray(String[]::new));
-	}
-	
-	static ElementVisitor<Parameter> parameters() {
-		return (param) -> new ElementKey(param.getName(),
-						param.getType().getName());
-	}
-	
+
+    /**
+     * Loads the element unique key from the element type
+     *
+     * @param element the element
+     * @return the element unique key
+     */
+    ElementKey loadKey(E element);
+
+    /**
+     * Visits the annotation container and an element in
+     * the class to parse, allowing for more flexibility.
+     * so it adds a behaviour without modifying the internals of {@link AnnotationContainer}
+     * by going through {@link AnnotationContainer#accept(ElementVisitor, CommandAnnotatedElement)}
+     *
+     * @param container the container
+     * @param element   the element
+     */
+    default void visit(AnnotationContainer container, @NotNull CommandAnnotatedElement<E> element) {
+        var key = loadKey(element.getElement());
+        container.addElement(key, element);
+    }
+
+    static ElementVisitor<Class<?>> classes() {
+        return (element) -> ElementKey.of(element.getName());
+    }
+
+    static ElementVisitor<Method> methods() {
+        return (element) -> new ElementKey(element.getName(),
+                Arrays.stream(element.getParameterTypes())
+                        .map(Class::getName).toArray(String[]::new));
+    }
+
+    static ElementVisitor<Parameter> parameters() {
+        return (param) -> new ElementKey(param.getName(),
+                param.getType().getName());
+    }
+
 }

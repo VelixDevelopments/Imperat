@@ -7,25 +7,25 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public final class DefaultPaginatedTemplate extends DefaultTemplate implements PaginatedHelpTemplate {
-	
-	private final int syntaxesPerPage;
-	
-	public DefaultPaginatedTemplate(
-					int syntaxesPerPage) {
-		super();
-		this.syntaxesPerPage = syntaxesPerPage;
-	}
-	
-	
-	@Override
-	public int syntaxesPerPage() {
-		return syntaxesPerPage;
-	}
-	
-	@Override
-	public Component pagesHeaderComponent(int currentPage, int maxPage) {
-		return Messages.getMsg("<gold>(<yellow>" +
-						currentPage + "<gray>/</gray>" + maxPage + "</yellow>)");
-	}
-	
+
+    private final int syntaxesPerPage;
+
+    public DefaultPaginatedTemplate(
+            int syntaxesPerPage) {
+        super();
+        this.syntaxesPerPage = syntaxesPerPage;
+    }
+
+
+    @Override
+    public int syntaxesPerPage() {
+        return syntaxesPerPage;
+    }
+
+    @Override
+    public Component pagesHeaderComponent(int currentPage, int maxPage) {
+        return Messages.getMsg("<gold>(<yellow>" +
+                currentPage + "<gray>/</gray>" + maxPage + "</yellow>)");
+    }
+
 }

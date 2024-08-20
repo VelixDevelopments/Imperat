@@ -16,12 +16,12 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ValueResolver<C, T> {
-	
-	/**
-	 * @param source  the source of the command
-	 * @param context the context for the command
-	 * @param raw     the required parameter of the command.
-	 * @return the resolved output from the input object
-	 */
-	T resolve(CommandSource<C> source, Context<C> context, String raw) throws CommandException;
+
+    /**
+     * @param source  the source of the command
+     * @param context the context for the command
+     * @param raw     the required parameter of the command.
+     * @return the resolved output from the input object
+     */
+    T resolve(CommandSource<C> source, Context<C> context, String raw) throws CommandException;
 }

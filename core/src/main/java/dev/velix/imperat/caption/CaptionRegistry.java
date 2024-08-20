@@ -16,26 +16,26 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public final class CaptionRegistry<C> extends Registry<CaptionKey, Caption<C>> {
-	
-	private CaptionRegistry() {
-		super();
-		this.registerCaption(new NoPermissionCaption<>());
-		this.registerCaption(new CooldownCaption<>());
-		this.registerCaption(new InvalidSyntaxCaption<>());
-		this.registerCaption(new NoHelpCaption<>());
-		this.registerCaption(new NoHelpPageCaption<>());
-	}
-	
-	public static <C> CaptionRegistry<C> createDefault() {
-		return new CaptionRegistry<>();
-	}
-	
-	public @Nullable Caption<C> getCaption(CaptionKey key) {
-		return getData(key).orElse(null);
-	}
-	
-	public void registerCaption(Caption<C> caption) {
-		this.setData(caption.getKey(), caption);
-	}
-	
+
+    private CaptionRegistry() {
+        super();
+        this.registerCaption(new NoPermissionCaption<>());
+        this.registerCaption(new CooldownCaption<>());
+        this.registerCaption(new InvalidSyntaxCaption<>());
+        this.registerCaption(new NoHelpCaption<>());
+        this.registerCaption(new NoHelpPageCaption<>());
+    }
+
+    public static <C> CaptionRegistry<C> createDefault() {
+        return new CaptionRegistry<>();
+    }
+
+    public @Nullable Caption<C> getCaption(CaptionKey key) {
+        return getData(key).orElse(null);
+    }
+
+    public void registerCaption(Caption<C> caption) {
+        this.setData(caption.getKey(), caption);
+    }
+
 }

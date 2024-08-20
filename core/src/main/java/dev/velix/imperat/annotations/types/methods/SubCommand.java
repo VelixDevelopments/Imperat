@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface SubCommand {
-	
-	String[] value();
-	
-	boolean attachDirectly() default false;
+
+    String[] value();
+
+    boolean attachDirectly() default false;
 }

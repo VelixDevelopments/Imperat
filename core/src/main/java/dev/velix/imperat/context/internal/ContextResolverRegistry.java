@@ -11,27 +11,27 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 @ApiStatus.AvailableSince("1.0.0")
 public final class ContextResolverRegistry<C> extends Registry<Class<?>, ContextResolver<C, ?>> {
-	
-	private ContextResolverFactory<C> factory;
-	
-	private ContextResolverRegistry() {
-		super();
-		factory = (parameter ->
-						getResolver(parameter.getType()));
-	}
-	
-	public static <C> ContextResolverRegistry<C> createDefault() {
-		return new ContextResolverRegistry<>();
-	}
-	
-	public <T> void registerResolver(Class<T> clazz, ContextResolver<C, T> resolver) {
-		setData(clazz, resolver);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public <T> @Nullable ContextResolver<C, T> getResolver(Class<T> type) {
-		return (ContextResolver<C, T>) getData(type).orElse(null);
-	}
-	
-	
+
+    private ContextResolverFactory<C> factory;
+
+    private ContextResolverRegistry() {
+        super();
+        factory = (parameter ->
+                getResolver(parameter.getType()));
+    }
+
+    public static <C> ContextResolverRegistry<C> createDefault() {
+        return new ContextResolverRegistry<>();
+    }
+
+    public <T> void registerResolver(Class<T> clazz, ContextResolver<C, T> resolver) {
+        setData(clazz, resolver);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable ContextResolver<C, T> getResolver(Class<T> type) {
+        return (ContextResolver<C, T>) getData(type).orElse(null);
+    }
+
+
 }

@@ -12,26 +12,26 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Context<C> extends ExecutionContext {
-	
-	/**
-	 * the command used in the context
-	 *
-	 * @return the command used
-	 */
-	@NotNull
-	String getCommandUsed();
-	
-	
-	/**
-	 * @return the command source of the command
-	 * @see CommandSource
-	 */
-	@NotNull
-	CommandSource<C> getCommandSource();
-	
-	
-	/**
-	 * @return the number of flags extracted
-	 */
-	int flagsUsedCount();
+
+    /**
+     * the command used in the context
+     *
+     * @return the command used
+     */
+    @NotNull
+    String getCommandUsed();
+
+
+    /**
+     * @return the command source of the command
+     * @see CommandSource
+     */
+    @NotNull
+    CommandSource<C> getCommandSource();
+
+
+    /**
+     * @return the number of flags extracted
+     */
+    int flagsUsedCount();
 }

@@ -13,14 +13,14 @@ import org.jetbrains.annotations.Nullable;
 @FunctionalInterface
 @ApiStatus.AvailableSince("1.0.0")
 public interface HelpExecution<C> {
-	
-	/**
-	 * Displays a help menu showing all possible syntaxes
-	 *
-	 * @param source the source of this execution
-	 * @param help   the help object
-	 * @param page   the page of the help menu
-	 */
-	void help(CommandSource<C> source, Context<C> context,
-	          CommandHelp<C> help, @Nullable Integer page);
+
+    /**
+     * Displays a help menu showing all possible syntaxes
+     *
+     * @param source the source of this execution
+     * @param help   the help object
+     * @param page   the page of the help menu
+     */
+    void help(CommandSource<C> source, Context<C> context,
+              CommandHelp<C> help, @Nullable Integer page);
 }

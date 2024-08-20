@@ -15,6 +15,7 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 
 /**
@@ -29,245 +30,245 @@ import java.util.*;
  */
 @ApiStatus.Internal
 final class ResolvedContextImpl<C> implements ResolvedContext<C> {
-	
-	private final CommandDispatcher<C> dispatcher;
-	
-	private final Command<C> commandUsed;
-	private Command<C> lastCommand;
-	private final CommandUsage<C> usage;
-	
-	private final Context<C> context;
-	
-	private final FlagRegistry flagRegistry = new FlagRegistry();
-	
-	//per command/subcommand because the class 'Command' can be also treated as a sub command
-	private final Map<Command<C>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
-	
-	//all resolved arguments EXCEPT for subcommands and flags.
-	private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
-	
-	
-	ResolvedContextImpl(CommandDispatcher<C> dispatcher,
-	                    Command<C> commandUsed,
-	                    Context<C> context,
-	                    CommandUsage<C> usage) {
-		this.dispatcher = dispatcher;
-		this.commandUsed = commandUsed;
-		this.lastCommand = commandUsed;
-		this.context = context;
-		this.usage = usage;
-	}
-	
-	
-	/**
-	 * @return The owning parent-command for all of these arguments
-	 */
-	@Override
-	public Command<C> getOwningCommand() {
-		return commandUsed;
-	}
-	
-	/**
-	 * the command used in the context
-	 *
-	 * @return the command used
-	 */
-	@Override
-	public @NotNull String getCommandUsed() {
-		return context.getCommandUsed();
-	}
-	
-	/**
-	 * Fetches the arguments of a command/subcommand that got resolved
-	 * except for the arguments that represent the literal/subcommand name arguments
-	 *
-	 * @param command the command/subcommand owning the argument
-	 * @param name    the name of the argument
-	 * @return the argument resolved from raw into a value
-	 */
-	@Override
-	public @Nullable ResolvedArgument getResolvedArgument(Command<C> command, String name) {
-		Map<String, ResolvedArgument> resolvedArgs = resolvedArgumentsPerCommand.get(command);
-		if (resolvedArgs == null) return null;
-		
-		return resolvedArgs.get(name);
-	}
-	
-	/**
-	 * @param command the command/subcommand with certain args
-	 * @return the command/subcommand's resolved args in as new array-list
-	 */
-	@Override
-	public List<ResolvedArgument> getResolvedArguments(Command<C> command) {
-		Map<String, ResolvedArgument> argMap = resolvedArgumentsPerCommand.get(command);
-		if (argMap == null) return Collections.emptyList();
-		return new ArrayList<>(argMap.values());
-	}
-	
-	/**
-	 * @return all {@link Command} that have been used in this context
-	 */
-	@Override
-	public @NotNull Collection<? extends Command<C>> getCommandsUsed() {
-		return resolvedArgumentsPerCommand.keySet();
-	}
-	
-	/**
-	 * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
-	 * NOTE: the flags are NOT included as a resolved argument, it's treated in a different way
-	 */
-	@Override
-	public Collection<? extends ResolvedArgument> getResolvedArguments() {
-		return allResolvedArgs.values();
-	}
-	
-	/**
-	 * Fetches a resolved argument's value
-	 *
-	 * @param name the name of the command
-	 * @return the value of the resolved argument
-	 * @see ResolvedArgument
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> @Nullable T getArgument(String name) {
-		ResolvedArgument argument = allResolvedArgs.get(name.toLowerCase());
-		if (argument == null) return null;
-		return (T) argument.value();
-	}
-	
-	/**
-	 * @return the command source of the command
-	 * @see CommandSource
-	 */
-	@Override
-	public @NotNull CommandSource<C> getCommandSource() {
-		return context.getCommandSource();
-	}
-	
-	/**
-	 * @return the arguments entered by the
-	 * @see ArgumentQueue
-	 */
-	@Override
-	public @NotNull ArgumentQueue getArguments() {
-		return context.getArguments();
-	}
-	
-	/**
-	 * @param flagName the name of the flag to check if it's used or not
-	 * @return The flag whether it has been used or not in this command context
-	 */
-	@Override
-	public ResolvedFlag getFlag(String flagName) {
-		return flagRegistry.getData(flagName).orElse(null);
-	}
-	
-	/**
-	 * Fetches the flag input value
-	 * returns null if the flag is a {@link CommandSwitch}
-	 * OR if the value hasn't been resolved somehow
-	 *
-	 * @param flagName the flag name
-	 * @return the resolved value of the flag input
-	 */
-	@Override @SuppressWarnings("unchecked")
-	public <T> @Nullable T getFlagValue(String flagName) {
-		ResolvedFlag flag = getFlag(flagName);
-		if(flag == null){
-			System.out.println("NO FLAG RESOLVED");
-			return null;
-		}
-		System.out.println("FLAG VALUE IS THE PROBLEM");
-		return (T) flag.value();
-	}
-	
-	/**
-	 * @return the number of flags extracted
-	 */
-	@Override
-	public int flagsUsedCount() {
-		return flagRegistry.size();
-	}
-	
-	/**
-	 * Resolves the arguments from the given plain input {@link Context}
-	 *
-	 */
-	@Override
-	public void resolve() throws CommandException {
-		SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
-		long start = System.currentTimeMillis();
-		handler.resolve(dispatcher, this);
-		System.out.println("Took " + (System.currentTimeMillis()-start));
-		this.lastCommand = handler.getCommand();
-	}
-	
-	
-	@Override
-	public <T> void resolveArgument(Command<C> command,
-	                                @Nullable String raw,
-	                                int index,
-	                                CommandParameter parameter,
-	                                @Nullable T value) throws CommandException {
-		
-		if(value != null && TypeUtility.isNumericType(value.getClass())
-						&& parameter instanceof NumericParameter numericParameter
-						&& !numericParameter.matchesRange((Double) value)) {
-			
-			NumericRange range = numericParameter.getRange();
-			throw new NumberOutOfRangeException(numericParameter, (Double) value,  range);
-		}
-		
-		final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
-		resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
-			if (existingResolvedArgs != null) {
-				existingResolvedArgs.put(parameter.getName(), argument);
-				return existingResolvedArgs;
-			}
-			Map<String, ResolvedArgument> args = new LinkedHashMap<>();
-			args.put(parameter.getName(), argument);
-			return args;
-		});
-		allResolvedArgs.put(parameter.getName(), argument);
-	}
-	
-	/**
-	 * Resolves flag the in the context
-	 *
-	 * @param flagRaw        the flag itself raw input
-	 * @param flagInputRaw   the flag's value if present
-	 * @param flagInputValue the input value resolved using {@link ValueResolver}
-	 * @param flagDetected   the optional flag-parameter detected
-	 */
-	@Override
-	public void resolveFlag(
-					String flagRaw,
-					@Nullable String flagInputRaw,
-					@Nullable Object flagInputValue,
-					CommandFlag flagDetected
-	) {
-		flagRegistry.setData(flagDetected.name(),
-						new ResolvedFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue));
-	}
-	
-	/**
-	 * Fetches the last used resolved command
-	 * of a resolved context !
-	 *
-	 * @return the last used command/subcommand
-	 */
-	@Override
-	public @NotNull Command<C> getLastUsedCommand() {
-		return lastCommand;
-	}
-	
-	/**
-	 * @return The used usage to use it to resolve commands
-	 */
-	@Override
-	public CommandUsage<C> getDetectedUsage() {
-		return usage;
-	}
-	
+
+    private final CommandDispatcher<C> dispatcher;
+
+    private final Command<C> commandUsed;
+    private Command<C> lastCommand;
+    private final CommandUsage<C> usage;
+
+    private final Context<C> context;
+
+    private final FlagRegistry flagRegistry = new FlagRegistry();
+
+    //per command/subcommand because the class 'Command' can be also treated as a sub command
+    private final Map<Command<C>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
+
+    //all resolved arguments EXCEPT for subcommands and flags.
+    private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
+
+
+    ResolvedContextImpl(CommandDispatcher<C> dispatcher,
+                        Command<C> commandUsed,
+                        Context<C> context,
+                        CommandUsage<C> usage) {
+        this.dispatcher = dispatcher;
+        this.commandUsed = commandUsed;
+        this.lastCommand = commandUsed;
+        this.context = context;
+        this.usage = usage;
+    }
+
+
+    /**
+     * @return The owning parent-command for all of these arguments
+     */
+    @Override
+    public Command<C> getOwningCommand() {
+        return commandUsed;
+    }
+
+    /**
+     * the command used in the context
+     *
+     * @return the command used
+     */
+    @Override
+    public @NotNull String getCommandUsed() {
+        return context.getCommandUsed();
+    }
+
+    /**
+     * Fetches the arguments of a command/subcommand that got resolved
+     * except for the arguments that represent the literal/subcommand name arguments
+     *
+     * @param command the command/subcommand owning the argument
+     * @param name    the name of the argument
+     * @return the argument resolved from raw into a value
+     */
+    @Override
+    public @Nullable ResolvedArgument getResolvedArgument(Command<C> command, String name) {
+        Map<String, ResolvedArgument> resolvedArgs = resolvedArgumentsPerCommand.get(command);
+        if (resolvedArgs == null) return null;
+
+        return resolvedArgs.get(name);
+    }
+
+    /**
+     * @param command the command/subcommand with certain args
+     * @return the command/subcommand's resolved args in as new array-list
+     */
+    @Override
+    public List<ResolvedArgument> getResolvedArguments(Command<C> command) {
+        Map<String, ResolvedArgument> argMap = resolvedArgumentsPerCommand.get(command);
+        if (argMap == null) return Collections.emptyList();
+        return new ArrayList<>(argMap.values());
+    }
+
+    /**
+     * @return all {@link Command} that have been used in this context
+     */
+    @Override
+    public @NotNull Collection<? extends Command<C>> getCommandsUsed() {
+        return resolvedArgumentsPerCommand.keySet();
+    }
+
+    /**
+     * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
+     * NOTE: the flags are NOT included as a resolved argument, it's treated in a different way
+     */
+    @Override
+    public Collection<? extends ResolvedArgument> getResolvedArguments() {
+        return allResolvedArgs.values();
+    }
+
+    /**
+     * Fetches a resolved argument's value
+     *
+     * @param name the name of the command
+     * @return the value of the resolved argument
+     * @see ResolvedArgument
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable T getArgument(String name) {
+        ResolvedArgument argument = allResolvedArgs.get(name.toLowerCase());
+        if (argument == null) return null;
+        return (T) argument.value();
+    }
+
+    /**
+     * @return the command source of the command
+     * @see CommandSource
+     */
+    @Override
+    public @NotNull CommandSource<C> getCommandSource() {
+        return context.getCommandSource();
+    }
+
+    /**
+     * @return the arguments entered by the
+     * @see ArgumentQueue
+     */
+    @Override
+    public @NotNull ArgumentQueue getArguments() {
+        return context.getArguments();
+    }
+
+    /**
+     * @param flagName the name of the flag to check if it's used or not
+     * @return The flag whether it has been used or not in this command context
+     */
+    @Override
+    public ResolvedFlag getFlag(String flagName) {
+        return flagRegistry.getData(flagName).orElse(null);
+    }
+
+    /**
+     * Fetches the flag input value
+     * returns null if the flag is a {@link CommandSwitch}
+     * OR if the value hasn't been resolved somehow
+     *
+     * @param flagName the flag name
+     * @return the resolved value of the flag input
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable T getFlagValue(String flagName) {
+        ResolvedFlag flag = getFlag(flagName);
+        if (flag == null) {
+            System.out.println("NO FLAG RESOLVED");
+            return null;
+        }
+        System.out.println("FLAG VALUE IS THE PROBLEM");
+        return (T) flag.value();
+    }
+
+    /**
+     * @return the number of flags extracted
+     */
+    @Override
+    public int flagsUsedCount() {
+        return flagRegistry.size();
+    }
+
+    /**
+     * Resolves the arguments from the given plain input {@link Context}
+     */
+    @Override
+    public void resolve() throws CommandException {
+        SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
+        long start = System.currentTimeMillis();
+        handler.resolve(dispatcher, this);
+        System.out.println("Took " + (System.currentTimeMillis() - start));
+        this.lastCommand = handler.getCommand();
+    }
+
+
+    @Override
+    public <T> void resolveArgument(Command<C> command,
+                                    @Nullable String raw,
+                                    int index,
+                                    CommandParameter parameter,
+                                    @Nullable T value) throws CommandException {
+
+        if (value != null && TypeUtility.isNumericType(value.getClass())
+                && parameter instanceof NumericParameter numericParameter
+                && !numericParameter.matchesRange((Double) value)) {
+
+            NumericRange range = numericParameter.getRange();
+            throw new NumberOutOfRangeException(numericParameter, (Double) value, range);
+        }
+
+        final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
+        resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
+            if (existingResolvedArgs != null) {
+                existingResolvedArgs.put(parameter.getName(), argument);
+                return existingResolvedArgs;
+            }
+            Map<String, ResolvedArgument> args = new LinkedHashMap<>();
+            args.put(parameter.getName(), argument);
+            return args;
+        });
+        allResolvedArgs.put(parameter.getName(), argument);
+    }
+
+    /**
+     * Resolves flag the in the context
+     *
+     * @param flagRaw        the flag itself raw input
+     * @param flagInputRaw   the flag's value if present
+     * @param flagInputValue the input value resolved using {@link ValueResolver}
+     * @param flagDetected   the optional flag-parameter detected
+     */
+    @Override
+    public void resolveFlag(
+            String flagRaw,
+            @Nullable String flagInputRaw,
+            @Nullable Object flagInputValue,
+            CommandFlag flagDetected
+    ) {
+        flagRegistry.setData(flagDetected.name(),
+                new ResolvedFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue));
+    }
+
+    /**
+     * Fetches the last used resolved command
+     * of a resolved context !
+     *
+     * @return the last used command/subcommand
+     */
+    @Override
+    public @NotNull Command<C> getLastUsedCommand() {
+        return lastCommand;
+    }
+
+    /**
+     * @return The used usage to use it to resolve commands
+     */
+    @Override
+    public CommandUsage<C> getDetectedUsage() {
+        return usage;
+    }
+
 }

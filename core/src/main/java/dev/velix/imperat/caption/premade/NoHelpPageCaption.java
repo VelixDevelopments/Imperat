@@ -16,31 +16,31 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public class NoHelpPageCaption<C> implements Caption<C> {
-	/**
-	 * @return the key
-	 */
-	@Override
-	public @NotNull CaptionKey getKey() {
-		return CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION;
-	}
-	
-	/**
-	 * @param dispatcher    the command dispatcher
-	 * @param command       the command
-	 * @param commandSource the source
-	 * @param context       the context
-	 * @param usage         the command usage, can be null if it hasn't been resolved yet
-	 * @param exception     the exception, may be null if no exception provided
-	 * @return The message in the form of a component
-	 */
-	@Override
-	public @NotNull Component asComponent(@NotNull CommandDispatcher<C> dispatcher,
-	                                      @NotNull Command<C> command,
-	                                      @NotNull CommandSource<C> commandSource,
-	                                      @NotNull Context<C> context,
-	                                      @Nullable CommandUsage<C> usage,
-	                                      @Nullable Exception exception) {
-		return Messages.getMsg(Messages.NO_HELP_PAGE_AVAILABLE, Placeholder.parsed("page",
-						Objects.requireNonNull(context.getArgument("page"))));
-	}
+    /**
+     * @return the key
+     */
+    @Override
+    public @NotNull CaptionKey getKey() {
+        return CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION;
+    }
+
+    /**
+     * @param dispatcher    the command dispatcher
+     * @param command       the command
+     * @param commandSource the source
+     * @param context       the context
+     * @param usage         the command usage, can be null if it hasn't been resolved yet
+     * @param exception     the exception, may be null if no exception provided
+     * @return The message in the form of a component
+     */
+    @Override
+    public @NotNull Component asComponent(@NotNull CommandDispatcher<C> dispatcher,
+                                          @NotNull Command<C> command,
+                                          @NotNull CommandSource<C> commandSource,
+                                          @NotNull Context<C> context,
+                                          @Nullable CommandUsage<C> usage,
+                                          @Nullable Exception exception) {
+        return Messages.getMsg(Messages.NO_HELP_PAGE_AVAILABLE, Placeholder.parsed("page",
+                Objects.requireNonNull(context.getArgument("page"))));
+    }
 }

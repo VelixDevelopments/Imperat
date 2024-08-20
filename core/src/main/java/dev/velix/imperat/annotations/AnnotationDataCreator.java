@@ -8,17 +8,17 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 
 interface AnnotationDataCreator<O, A extends Annotation> {
-	
-	/**
-	 * Creates a data instance from the annotation
-	 *
-	 * @param annotation the annotation
-	 * @return the object to create such as {@link Command} {@link CommandUsage}
-	 */
-	@NotNull
-	O create(Object proxyInstance,
-	         Class<?> proxy,
-	         A annotation,
-	         CommandAnnotatedElement<?> element);
-	
+
+    /**
+     * Creates a data instance from the annotation
+     *
+     * @param annotation the annotation
+     * @return the object to create such as {@link Command} {@link CommandUsage}
+     */
+    @NotNull
+    O create(Object proxyInstance,
+             Class<?> proxy,
+             A annotation,
+             CommandAnnotatedElement<?> element);
+
 }

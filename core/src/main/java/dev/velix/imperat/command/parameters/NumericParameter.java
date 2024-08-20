@@ -7,22 +7,22 @@ import org.jetbrains.annotations.Nullable;
  * inputs if they are ranged from min to max using {@link NumericRange}
  */
 public interface NumericParameter extends CommandParameter {
-	
-	/**
-	 * @return The actual range of the numeric parameter
-	 * returns null if no range is specified !
-	 */
-	@Nullable
-	NumericRange getRange();
-	
-	default boolean hasRange() {
-		return getRange() != null;
-	}
-	
-	default boolean matchesRange(double value) {
-		var range = getRange();
-		return range != null &&
-						value >= range.min() && value <= range.max();
-	}
-	
+
+    /**
+     * @return The actual range of the numeric parameter
+     * returns null if no range is specified !
+     */
+    @Nullable
+    NumericRange getRange();
+
+    default boolean hasRange() {
+        return getRange() != null;
+    }
+
+    default boolean matchesRange(double value) {
+        var range = getRange();
+        return range != null &&
+                value >= range.min() && value <= range.max();
+    }
+
 }

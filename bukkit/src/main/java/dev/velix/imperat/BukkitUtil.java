@@ -9,12 +9,12 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 class BukkitUtil {
-	
-	private BukkitUtil() {
-	
-	}
-	
-	public static Class<?> getCraftServer() throws ClassNotFoundException {
+
+    private BukkitUtil() {
+
+    }
+
+    public static Class<?> getCraftServer() throws ClassNotFoundException {
 
 		/*if(ReflectionUtil.isUseNewSpigotPackaging()) {
 			// >= Minecraft 1.17
@@ -24,19 +24,19 @@ class BukkitUtil {
 			// This method is also marked as @Deprecated !
 			return ReflectionUtil.getNmsClass("EntityHuman");
 		}*/
-		return ReflectionUtil.getBukkitClass("CraftServer");
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static Map<String, org.bukkit.command.Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
-		Class<?> craftServer = getCraftServer();
-		Field commandMapField = craftServer.getDeclaredField("commandMap");
-		commandMapField.setAccessible(true);
-		CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-		// Get the commands registered in the command map
-		Field hashMapCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
-		hashMapCommandsField.setAccessible(true);
-		return (Map<String, Command>) hashMapCommandsField.get(commandMap);
-	}
-	
+        return ReflectionUtil.getBukkitClass("CraftServer");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, org.bukkit.command.Command> getCommandMap() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
+        Class<?> craftServer = getCraftServer();
+        Field commandMapField = craftServer.getDeclaredField("commandMap");
+        commandMapField.setAccessible(true);
+        CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
+        // Get the commands registered in the command map
+        Field hashMapCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+        hashMapCommandsField.setAccessible(true);
+        return (Map<String, Command>) hashMapCommandsField.get(commandMap);
+    }
+
 }

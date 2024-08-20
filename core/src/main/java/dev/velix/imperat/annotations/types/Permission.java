@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Permission {
-	
-	/**
-	 * @return the permission
-	 */
-	String value();
-	
+
+    /**
+     * @return the permission
+     */
+    String value();
+
 }

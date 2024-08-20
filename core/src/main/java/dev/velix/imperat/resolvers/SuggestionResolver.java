@@ -18,25 +18,25 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface SuggestionResolver<C, T> {
-	
-	/**
-	 * @return Type of data the suggestion is resolving
-	 */
-	Class<T> getType();
-	
-	/**
-	 * @param command             the running command
-	 * @param source              the sender of the command
-	 * @param queue               the argument raw input
-	 * @param parameterToComplete the parameter of the arg to complete
-	 * @param argToComplete       the current raw argument/input that's being requested
-	 *                            to complete
-	 * @return the auto-completed suggestions of the current argument
-	 */
-	List<String> autoComplete(Command<C> command,
-	                          C source,
-	                          ArgumentQueue queue,
-	                          CommandParameter parameterToComplete,
-	                          @Nullable CompletionArg argToComplete);
-	
+
+    /**
+     * @return Type of data the suggestion is resolving
+     */
+    Class<T> getType();
+
+    /**
+     * @param command             the running command
+     * @param source              the sender of the command
+     * @param queue               the argument raw input
+     * @param parameterToComplete the parameter of the arg to complete
+     * @param argToComplete       the current raw argument/input that's being requested
+     *                            to complete
+     * @return the auto-completed suggestions of the current argument
+     */
+    List<String> autoComplete(Command<C> command,
+                              C source,
+                              ArgumentQueue queue,
+                              CommandParameter parameterToComplete,
+                              @Nullable CompletionArg argToComplete);
+
 }

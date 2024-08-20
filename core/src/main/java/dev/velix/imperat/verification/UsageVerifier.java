@@ -23,24 +23,23 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageVerifier<C> {
-	
-	
-	/**
-	 * @param usage the usage
-	 * @return Verifies the usage to be acceptable
-	 */
-	boolean verify(CommandUsage<C> usage);
-	
-	/**
-	 * @param usage1 the first usage
-	 * @param usage2 the second usage
-	 * @return whether both usages are similar
-	 * and/or share similar indistinguishable parameters or syntax
-	 */
-	boolean areAmbiguous(CommandUsage<C> usage1, CommandUsage<C> usage2);
-	
-	static <C> UsageVerifier<C> defaultVerifier() {
-		return new DefaultUsageVerifier<>();
-	}
-	
+
+    /**
+     * @param usage the usage
+     * @return Verifies the usage to be acceptable
+     */
+    boolean verify(CommandUsage<C> usage);
+
+    /**
+     * @param firstUsage  the first usage
+     * @param secondUsage the second usage
+     * @return whether both usages are similar
+     * and/or share similar indistinguishable parameters or syntax
+     */
+    boolean areAmbiguous(CommandUsage<C> firstUsage, CommandUsage<C> secondUsage);
+
+    static <C> UsageVerifier<C> defaultVerifier() {
+        return new DefaultUsageVerifier<>();
+    }
+
 }

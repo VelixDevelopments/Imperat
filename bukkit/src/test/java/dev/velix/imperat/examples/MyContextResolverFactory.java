@@ -12,27 +12,27 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Parameter;
 
 public final class MyContextResolverFactory implements BukkitContextResolverFactory {
-	
-	
-	/**
-	 * Creates a context resolver based on the parameter
-	 *
-	 * @param parameter the parameter
-	 * @return the {@link ContextResolver} specific for that parameter
-	 */
-	@Override
-	public @Nullable ContextResolver<CommandSender, ?> create(@NotNull Parameter parameter) {
-		
-		if(!parameter.isAnnotationPresent(MyCustomAnnotation2.class)) {
-			return null;
-		}
-		
-		return (context, methodParam)-> {
-			var source = context.getCommandSource();
-			if(source.isConsole()) return null;
-			return GuildRegistry.getInstance()
-							.getUserGuild(source.as(Player.class).getUniqueId());
-		};
-	}
-	
+
+
+    /**
+     * Creates a context resolver based on the parameter
+     *
+     * @param parameter the parameter
+     * @return the {@link ContextResolver} specific for that parameter
+     */
+    @Override
+    public @Nullable ContextResolver<CommandSender, ?> create(@NotNull Parameter parameter) {
+
+        if (!parameter.isAnnotationPresent(MyCustomAnnotation2.class)) {
+            return null;
+        }
+
+        return (context, methodParam) -> {
+            var source = context.getCommandSource();
+            if (source.isConsole()) return null;
+            return GuildRegistry.getInstance()
+                    .getUserGuild(source.as(Player.class).getUniqueId());
+        };
+    }
+
 }
