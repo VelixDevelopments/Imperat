@@ -1,6 +1,7 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.context.internal.ResolvedArgument;
+import dev.velix.imperat.context.internal.ResolvedFlag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +25,19 @@ public interface ExecutionContext {
 	 * @param flagName the name of the flag to check if it's used or not
 	 * @return The flag whether it has been used or not in this command context
 	 */
-	boolean getFlag(String flagName);
+	ResolvedFlag getFlag(String flagName);
+	
+	
+	/**
+	 * Fetches the flag input value
+	 * returns null if the flag is a {@link CommandSwitch}
+	 * OR if the value hasn't been resolved somehow
+	 *
+	 * @param flagName the flag name
+	 * @return the resolved value of the flag input
+	 * @param <T> the type of the flag value resolved
+	 */
+	@Nullable <T> T getFlagValue(String flagName);
 	
 	/**
 	 * Fetches a resolved argument's value

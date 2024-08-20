@@ -4,7 +4,7 @@ import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -90,7 +90,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 		AutoCompleteList results = new AutoCompleteList();
 		for (CommandUsage<C> usage : closestUsages) {
 			if (index < 0 || index >= usage.getMaxLength()) continue;
-			UsageParameter parameter = usage.getParameters().get(index);
+			CommandParameter parameter = usage.getParameters().get(index);
 			if (parameter.isCommand()) {
 				if (!command.isIgnoringACPerms() &&
 								!permResolver.hasPermission(sender, parameter.asCommand().getPermission()))
@@ -103,7 +103,9 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 					results.addAll(resolver.autoComplete(command, sender.getOrigin(),
 									queue, parameter, currentArg));
 				}
+				
 			}
+			
 		}
 		
 		return results.getResults();
@@ -116,16 +118,18 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 						.findUsages((usage) -> {
 							if (args.length >= usage.getMaxLength()) {
 								for (int i = 0; i < usage.getMaxLength(); i++) {
-									UsageParameter parameter = usage.getParameters().get(i);
+									CommandParameter parameter = usage.getParameters().get(i);
 									if (!parameter.isCommand()) continue;
 									
 									if (i >= args.length) return false;
 									String corresponding = args[i];
-									if (!parameter.asCommand().hasName(corresponding))
+									if (corresponding != null && !corresponding.isEmpty() &&
+													!parameter.asCommand().hasName(corresponding))
 										return false;
 								}
+								return true;
 							}
-							return usage.getMaxLength() >= args.length;
+							return args.length <= usage.getMaxLength();
 						});
 	}
 	

@@ -7,7 +7,7 @@ import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
@@ -22,8 +22,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
@@ -38,8 +36,6 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandDispatcher<C> {
-	
-	Logger LOGGER = LoggerFactory.getLogger(CommandDispatcher.class);
 	
 	/**
 	 * @return The command prefix
@@ -90,7 +86,7 @@ public interface CommandDispatcher<C> {
 	 * @param parameter the parameter
 	 * @return the command from the parameter's name
 	 */
-	default @Nullable Command<C> getCommand(UsageParameter parameter) {
+	default @Nullable Command<C> getCommand(CommandParameter parameter) {
 		return getCommand(parameter.getName());
 	}
 	
@@ -155,15 +151,15 @@ public interface CommandDispatcher<C> {
 	<T> ContextResolver<C, T> getContextResolver(Class<T> resolvingContextType);
 	
 	/**
-	 * Fetches the {@link ContextResolver} suitable for the {@link UsageParameter}
+	 * Fetches the {@link ContextResolver} suitable for the {@link CommandParameter}
 	 *
-	 * @param usageParameter the parameter of a command's usage
+	 * @param commandParameter the parameter of a command's usage
 	 * @param <T>            the type of value that will be resolved by {@link ValueResolver}
 	 * @return the context resolver for this parameter's value type
 	 */
 	@SuppressWarnings("unchecked")
-	default <T> ContextResolver<C, T> getContextResolver(UsageParameter usageParameter) {
-		return (ContextResolver<C, T>) getContextResolver(usageParameter.getType());
+	default <T> ContextResolver<C, T> getContextResolver(CommandParameter commandParameter) {
+		return (ContextResolver<C, T>) getContextResolver(commandParameter.getType());
 	}
 	
 	/**
@@ -187,15 +183,15 @@ public interface CommandDispatcher<C> {
 	<T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType);
 	
 	/**
-	 * Fetches the {@link ValueResolver} suitable for the {@link UsageParameter}
+	 * Fetches the {@link ValueResolver} suitable for the {@link CommandParameter}
 	 *
-	 * @param usageParameter the parameter of a command's usage
+	 * @param commandParameter the parameter of a command's usage
 	 * @param <T>            the type of value that will be resolved by {@link ValueResolver}
 	 * @return the value resolver for this parameter's value type
 	 */
 	@SuppressWarnings("unchecked")
-	default <T> ValueResolver<C, T> getValueResolver(UsageParameter usageParameter) {
-		return (ValueResolver<C, T>) getValueResolver(usageParameter.getType());
+	default <T> ValueResolver<C, T> getValueResolver(CommandParameter commandParameter) {
+		return (ValueResolver<C, T>) getValueResolver(commandParameter.getType());
 	}
 	
 	/**
@@ -222,7 +218,7 @@ public interface CommandDispatcher<C> {
 	 * @return the {@link SuggestionResolver} instance for that type
 	 */
 	@SuppressWarnings("unchecked")
-	default @Nullable <T> SuggestionResolver<C, T> getSuggestionResolver(UsageParameter parameter) {
+	default @Nullable <T> SuggestionResolver<C, T> getSuggestionResolver(CommandParameter parameter) {
 		SuggestionResolver<C, T> argResolver = getArgumentSuggestionResolver(parameter.getName());
 		
 		if (argResolver != null) {
@@ -402,21 +398,4 @@ public interface CommandDispatcher<C> {
 	void shutdownPlatform();
 	
 	
-	static void debug(String msg, Object... args) {
-		LOGGER.info(String.format(msg, args));
-	}
-	
-	static void warning(String msg, Object... args){
-		LOGGER.warn(msg, args);
-	}
-	
-	static void error(Throwable ex) {
-		LOGGER.error(ex.getMessage(), ex);
-	}
-	
-	static void traceError(Throwable ex) {
-		LOGGER.trace(ex.getMessage(), ex);
-	}
-
-
 }

@@ -1,8 +1,6 @@
 package dev.velix.imperat.annotations.parameters;
 
-import dev.velix.imperat.annotations.element.ParameterCommandElement;
-import dev.velix.imperat.command.parameters.UsageParameter;
-import dev.velix.imperat.resolvers.OptionalValueSupplier;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,8 +12,14 @@ import java.util.Collection;
  * from using annotation parser
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface AnnotatedParameter extends UsageParameter {
+public interface AnnotatedParameter extends CommandParameter {
 	
+	/**
+	 * Get the instance of specific annotation
+	 * @param clazz the type of annotation
+	 * @return the specific instance of an annotation of a certain type {@linkplain A}
+	 * @param <A> the type of the annotation
+	 */
 	@Nullable
 	<A extends Annotation> A getAnnotation(Class<A> clazz);
 	
@@ -23,20 +27,10 @@ public interface AnnotatedParameter extends UsageParameter {
 		return getAnnotation(clazz) != null;
 	}
 	
+	/**
+	 * @return the annotations associated with this parameter
+	 */
 	Collection<? extends Annotation> getAnnotations();
 	
-	static AnnotatedParameter flag(String flag, ParameterCommandElement element) {
-		return new AnnotatedFlagParameter(flag, element);
-	}
-	
-	static <C, T> AnnotatedParameter input(String name,
-	                                       Class<?> type,
-	                                       boolean optional,
-	                                       boolean greedy,
-	                                       ParameterCommandElement parameter,
-	                                       OptionalValueSupplier<C, T> valueSupplier) {
-		return new AnnotatedNormalParameter(name, type, optional,
-						greedy, valueSupplier, parameter);
-	}
 	
 }

@@ -1,8 +1,12 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.CommandFlag;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.coordinator.CommandCoordinator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,24 +50,39 @@ public interface CommandUsage<C> {
 	void setDescription(String desc);
 	
 	/**
-	 * Adds parameters to the usage
-	 *
-	 * @param params the parameters to add
+	 * Checks whether the raw input is a flag
+	 * registered by this usage
+	 * @param input the raw input
+	 * @return Whether the input is a flag and is registered in the usage
 	 */
-	void addParameters(UsageParameter... params);
+	boolean hasFlag(String input);
+	
+	/**
+	 * Fetches the flag from the input
+	 * @param rawInput the input
+	 * @return the flag from the raw input, null if it cannot be a flag
+	 */
+	@Nullable CommandFlag getFlagFromRaw(String rawInput);
 	
 	/**
 	 * Adds parameters to the usage
 	 *
 	 * @param params the parameters to add
 	 */
-	void addParameters(List<UsageParameter> params);
+	void addParameters(CommandParameter... params);
+	
+	/**
+	 * Adds parameters to the usage
+	 *
+	 * @param params the parameters to add
+	 */
+	void addParameters(List<CommandParameter> params);
 	
 	/**
 	 * @return the parameters for this usages
-	 * @see UsageParameter
+	 * @see CommandParameter
 	 */
-	List<UsageParameter> getParameters();
+	List<CommandParameter> getParameters();
 	
 	/**
 	 * @return the execution for this usage
@@ -81,7 +100,7 @@ public interface CommandUsage<C> {
 	 * @return the merged command usage !
 	 */
 	default CommandUsage<C> merge(CommandUsage<C> usage) {
-		List<UsageParameter> parameters = new ArrayList<>(this.getParameters());
+		List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
 		parameters.addAll(usage.getParameters());
 		
 		return CommandUsage.<C>builder()
@@ -105,7 +124,7 @@ public interface CommandUsage<C> {
 	 * @return the merged command usage !
 	 */
 	default CommandUsage<C> mergeWithCommand(Command<C> subCommand, CommandUsage<C> usage) {
-		List<UsageParameter> parameters = new ArrayList<>(this.getParameters());
+		List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
 		parameters.add(subCommand);
 		parameters.addAll(usage.getParameters());
 		
@@ -120,7 +139,7 @@ public interface CommandUsage<C> {
 	static <C> String format(Command<C> command, CommandUsage<C> usage) {
 		StringBuilder builder = new StringBuilder(command.getName()).append(' ');
 		int i = 0;
-		for (UsageParameter parameter : usage.getParameters()) {
+		for (CommandParameter parameter : usage.getParameters()) {
 			builder.append(parameter.format(command));
 			if (i != usage.getParameters().size() - 1) {
 				builder.append(' ');
@@ -158,17 +177,17 @@ public interface CommandUsage<C> {
 	 * Searches for a parameter with specific type
 	 *
 	 * @param parameterPredicate the parameter condition
-	 * @return whether this usage has atLeast on {@link UsageParameter} with specific condition
+	 * @return whether this usage has atLeast on {@link CommandParameter} with specific condition
 	 * or not
 	 */
-	boolean hasParameter(Predicate<UsageParameter> parameterPredicate);
+	boolean hasParameter(Predicate<CommandParameter> parameterPredicate);
 	
 	/**
 	 * @param parameterPredicate the condition
 	 * @return the parameter to get using a condition
 	 */
 	@Nullable
-	UsageParameter getParameter(Predicate<UsageParameter> parameterPredicate);
+	CommandParameter getParameter(Predicate<CommandParameter> parameterPredicate);
 	
 	/**
 	 * @return The cool down for this usage {@link UsageCooldown}
@@ -202,17 +221,42 @@ public interface CommandUsage<C> {
 		return getParameters().isEmpty();
 	}
 	
+	/**
+	 * @return the coordinator for execution of the command
+	 */
+	CommandCoordinator<C> getCoordinator();
+	
+	/**
+	 * Sets the command coordinator
+	 * @param commandCoordinator the coordinator to set
+	 */
+	void setCoordinator(CommandCoordinator<C> commandCoordinator);
+	
+	/**
+	 * Executes the usage's actions
+	 * using the supplied {@link CommandCoordinator}
+	 *
+	 * @param source the command source/sender
+	 * @param context the context of the command
+	 */
+	void execute(CommandSource<C> source, Context<C> context);
 	
 	class Builder<C> {
 		
 		private CommandExecution<C> execution;
 		private String description = "N/A";
 		private String permission = null;
-		private final List<UsageParameter> parameters = new ArrayList<>();
+		private final List<CommandParameter> parameters = new ArrayList<>();
 		private UsageCooldown cooldown = null;
+		private CommandCoordinator<C> commandCoordinator = CommandCoordinator.sync();
 		
 		Builder() {
 		
+		}
+		
+		public Builder<C> coordinator(CommandCoordinator<C> commandCoordinator) {
+			this.commandCoordinator = commandCoordinator;
+			return this;
 		}
 		
 		public Builder<C> execute(CommandExecution<C> execution) {
@@ -242,9 +286,9 @@ public interface CommandUsage<C> {
 			return this;
 		}
 		
-		public Builder<C> parameters(UsageParameter... params) {
+		public Builder<C> parameters(CommandParameter... params) {
 			int index = 0;
-			for (UsageParameter parameter : params) {
+			for (CommandParameter parameter : params) {
 				parameter.setPosition(index);
 				this.parameters.add(parameter);
 				index++;
@@ -252,9 +296,9 @@ public interface CommandUsage<C> {
 			return this;
 		}
 		
-		public Builder<C> parameters(List<UsageParameter> params) {
+		public Builder<C> parameters(List<CommandParameter> params) {
 			for (int i = 0; i < params.size(); i++) {
-				UsageParameter parameter = params.get(i);
+				CommandParameter parameter = params.get(i);
 				parameter.setPosition(i);
 				this.parameters.add(parameter);
 			}
@@ -263,6 +307,7 @@ public interface CommandUsage<C> {
 		
 		public CommandUsage<C> build() {
 			CommandUsageImpl<C> impl = new CommandUsageImpl<>(execution);
+			impl.setCoordinator(commandCoordinator);
 			impl.setPermission(permission);
 			impl.setDescription(description);
 			impl.setCooldown(cooldown);

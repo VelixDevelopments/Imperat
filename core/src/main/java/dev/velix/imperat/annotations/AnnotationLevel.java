@@ -2,7 +2,7 @@ package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.ElementVisitor;
-import dev.velix.imperat.annotations.element.ParameterCommandElement;
+import dev.velix.imperat.annotations.element.MethodParameterElement;
 import dev.velix.imperat.annotations.types.parameters.Named;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -64,7 +64,7 @@ enum AnnotationLevel {
 			Set<AnnotatedElement> elements = new HashSet<>();
 			for (Method method : target.getDeclaredMethods()) {
 				for (Parameter parameter : method.getParameters()) {
-					ParameterCommandElement element = new ParameterCommandElement(registry, getParamName(parameter), parameter);
+					MethodParameterElement element = new MethodParameterElement(registry, getParamName(parameter), parameter);
 					elements.add(element);
 				}
 			}

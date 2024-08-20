@@ -1,10 +1,11 @@
 package dev.velix.imperat;
 
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.examples.BanCommand;
 import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
+import dev.velix.imperat.examples.MyContextResolverFactory;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.test.*;
@@ -52,6 +53,8 @@ public final class Test extends JavaPlugin implements Listener {
 					  .getGroup(sender.as(Player.class).getUniqueId());
 		});*/
 		
+		dispatcher.registerContextResolverFactory(new MyContextResolverFactory());
+		
 		dispatcher.registerContextResolver(Guild.class, (context, parameter) -> {
 			var sender = context.getCommandSource();
 			if (sender.isConsole()) {
@@ -61,8 +64,18 @@ public final class Test extends JavaPlugin implements Listener {
 							.getUserGuild(sender.as(Player.class).getUniqueId());
 		});
 		
+		/*dispatcher.registerAnnotationReplacer(MyCustomAnnotation.class, (annotation)-> {
+			var cmdAnn = AnnotationFactory.create(Command.class, "value" , new String[]{"group", "rank"});
+			var permission = AnnotationFactory.create(Permission.class, "value", "command.group");
+			var desc = AnnotationFactory.create(Description.class, "value",
+							"Main command for managing groups/ranks");
+			
+			return List.of(cmdAnn, permission, desc);
+		});*/
+		//TODO test @Range
 		dispatcher.registerCommand(new GuildCommand());
 		dispatcher.registerCommand(new GroupCommand());
+		dispatcher.registerCommand(new BanCommand());
 		debugCommands();
 	}
 	
@@ -74,7 +87,7 @@ public final class Test extends JavaPlugin implements Listener {
 	
 	
 	private void debugCommands() {
-		for (Command<CommandSender> command : dispatcher.getRegisteredCommands()) {
+		for (var command : dispatcher.getRegisteredCommands()) {
 			System.out.println("Command '" + command.getName() + "' has usages: ");
 			for (CommandUsage<CommandSender> usage : command.getUsages()) {
 				System.out.println("- " + CommandUsage.format(command, usage));

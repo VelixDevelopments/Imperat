@@ -9,7 +9,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.PARAMETER})
 public @interface Flag {
 	
-	String value();
+	String[] value();
 	
+	
+	Class<?> inputType() default String.class;
 	
 }

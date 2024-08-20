@@ -1,8 +1,7 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
-import dev.velix.imperat.context.internal.FlagRegistry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +24,6 @@ final class CommandImpl<C> implements Command<C> {
 	
 	private CommandUsage<C> defaultUsage;
 	
-	private final FlagRegistry flagRegistry;
 	
 	private final Command<C> parent;
 	private final Map<String, Command<C>> children = new HashMap<>();
@@ -41,7 +39,6 @@ final class CommandImpl<C> implements Command<C> {
 	CommandImpl(@Nullable Command<C> parent, String name) {
 		this.parent = parent;
 		this.name = name;
-		this.flagRegistry = new FlagRegistry();
 		setDefaultUsageExecution((source, context) -> {});
 		this.autoCompleter = AutoCompleter.createNative(this);
 	}
@@ -111,6 +108,16 @@ final class CommandImpl<C> implements Command<C> {
 		this.position = position;
 	}
 	
+	/**
+	 * Casts the parameter to a flag parameter
+	 *
+	 * @return the parameter as a flag
+	 */
+	@Override
+	public FlagParameter asFlagParameter() {
+		throw new UnsupportedOperationException("A command cannot be treated as a flag !");
+	}
+	
 	
 	/**
 	 * @return the aliases for this commands
@@ -150,24 +157,12 @@ final class CommandImpl<C> implements Command<C> {
 	}
 	
 	/**
-	 * The flags that are  registered
-	 * to be usable in this command's syntax
-	 *
-	 * @return the registered flags for this command
-	 */
-	@Override
-	public @NotNull FlagRegistry getKnownFlags() {
-		return flagRegistry;
-	}
-	
-	/**
 	 * Adds a usage to the command
 	 *
 	 * @param usage the usage {@link CommandUsage} of the command
 	 */
 	@Override
 	public void addUsage(CommandUsage<C> usage) {
-		CommandDispatcher.debug("Identified usage = '%s'", CommandUsage.format(this, usage));
 		usages.add(usage);
 	}
 	

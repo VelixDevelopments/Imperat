@@ -4,16 +4,17 @@ import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.UsageParameter;
-import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.CommandFlagExtractor;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.command.parameters.NumericParameter;
+import dev.velix.imperat.command.parameters.NumericRange;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exceptions.context.NumberOutOfRangeException;
+import dev.velix.imperat.resolvers.ValueResolver;
+import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.*;
 
 /**
@@ -27,13 +28,17 @@ import java.util.*;
  * @param <C> the sender type
  */
 @ApiStatus.Internal
-public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
+final class ResolvedContextImpl<C> implements ResolvedContext<C> {
+	
+	private final CommandDispatcher<C> dispatcher;
 	
 	private final Command<C> commandUsed;
 	private Command<C> lastCommand;
-	private CommandUsage<C> usage;
+	private final CommandUsage<C> usage;
 	
 	private final Context<C> context;
+	
+	private final FlagRegistry flagRegistry = new FlagRegistry();
 	
 	//per command/subcommand because the class 'Command' can be also treated as a sub command
 	private final Map<Command<C>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
@@ -42,12 +47,17 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
 	
 	
-	ResolvedContextImpl(Command<C> commandUsed,
-	                    Context<C> context) {
+	ResolvedContextImpl(CommandDispatcher<C> dispatcher,
+	                    Command<C> commandUsed,
+	                    Context<C> context,
+	                    CommandUsage<C> usage) {
+		this.dispatcher = dispatcher;
 		this.commandUsed = commandUsed;
 		this.lastCommand = commandUsed;
 		this.context = context;
+		this.usage = usage;
 	}
+	
 	
 	/**
 	 * @return The owning parent-command for all of these arguments
@@ -149,41 +159,47 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	 * @return The flag whether it has been used or not in this command context
 	 */
 	@Override
-	public boolean getFlag(String flagName) {
-		return getFlagExtractor().getExtractedFlags()
-						.getData(flagName).isPresent();
+	public ResolvedFlag getFlag(String flagName) {
+		return flagRegistry.getData(flagName).orElse(null);
 	}
 	
 	/**
-	 * The class responsible for extracting/reading flags
-	 * that has been used in the command context {@link CommandFlagExtractor}
+	 * Fetches the flag input value
+	 * returns null if the flag is a {@link CommandSwitch}
+	 * OR if the value hasn't been resolved somehow
 	 *
-	 * @return the command flag extractor instance
+	 * @param flagName the flag name
+	 * @return the resolved value of the flag input
 	 */
-	@Override
-	public @NotNull CommandFlagExtractor<C> getFlagExtractor() {
-		return context.getFlagExtractor();
+	@Override @SuppressWarnings("unchecked")
+	public <T> @Nullable T getFlagValue(String flagName) {
+		ResolvedFlag flag = getFlag(flagName);
+		if(flag == null){
+			System.out.println("NO FLAG RESOLVED");
+			return null;
+		}
+		System.out.println("FLAG VALUE IS THE PROBLEM");
+		return (T) flag.value();
 	}
 	
 	/**
 	 * @return the number of flags extracted
-	 * by {@link CommandFlagExtractor}
 	 */
 	@Override
 	public int flagsUsedCount() {
-		return context.flagsUsedCount();
+		return flagRegistry.size();
 	}
 	
 	/**
 	 * Resolves the arguments from the given plain input {@link Context}
 	 *
-	 * @param dispatcher the dispatcher handling all commands
 	 */
 	@Override
-	public void resolve(CommandDispatcher<C> dispatcher, CommandUsage<C> usage) throws CommandException {
+	public void resolve() throws CommandException {
 		SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
+		long start = System.currentTimeMillis();
 		handler.resolve(dispatcher, this);
-		this.usage = usage;
+		System.out.println("Took " + (System.currentTimeMillis()-start));
 		this.lastCommand = handler.getCommand();
 	}
 	
@@ -192,8 +208,16 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 	public <T> void resolveArgument(Command<C> command,
 	                                @Nullable String raw,
 	                                int index,
-	                                UsageParameter parameter,
-	                                @Nullable T value) {
+	                                CommandParameter parameter,
+	                                @Nullable T value) throws CommandException {
+		
+		if(value != null && TypeUtility.isNumericType(value.getClass())
+						&& parameter instanceof NumericParameter numericParameter
+						&& !numericParameter.matchesRange((Double) value)) {
+			
+			NumericRange range = numericParameter.getRange();
+			throw new NumberOutOfRangeException(numericParameter, (Double) value,  range);
+		}
 		
 		final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
 		resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
@@ -206,6 +230,25 @@ public final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 			return args;
 		});
 		allResolvedArgs.put(parameter.getName(), argument);
+	}
+	
+	/**
+	 * Resolves flag the in the context
+	 *
+	 * @param flagRaw        the flag itself raw input
+	 * @param flagInputRaw   the flag's value if present
+	 * @param flagInputValue the input value resolved using {@link ValueResolver}
+	 * @param flagDetected   the optional flag-parameter detected
+	 */
+	@Override
+	public void resolveFlag(
+					String flagRaw,
+					@Nullable String flagInputRaw,
+					@Nullable Object flagInputValue,
+					CommandFlag flagDetected
+	) {
+		flagRegistry.setData(flagDetected.name(),
+						new ResolvedFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue));
 	}
 	
 	/**

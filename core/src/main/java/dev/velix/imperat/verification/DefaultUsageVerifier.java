@@ -2,7 +2,7 @@ package dev.velix.imperat.verification;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import org.jetbrains.annotations.ApiStatus;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 		
 		int greedyCount = 0;
 		for (int i = 0; i < usage.getMaxLength(); i++) {
-			UsageParameter param = usage.getParameters().get(i);
+			CommandParameter param = usage.getParameters().get(i);
 			if (param.isGreedy()) greedyCount++;
 		}
 		
@@ -34,11 +34,11 @@ final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 			return false;
 		}
 		
-		UsageParameter firstParameter = usage.getParameters().get(0);
+		CommandParameter firstParameter = usage.getParameters().get(0);
 		boolean firstArgIsRequired = firstParameter != null
 						&& !firstParameter.isOptional();
 		
-		UsageParameter greedyParam = usage.getParameter(UsageParameter::isGreedy);
+		CommandParameter greedyParam = usage.getParameter(CommandParameter::isGreedy);
 		if (greedyParam == null)
 			return firstArgIsRequired;
 		
@@ -61,10 +61,10 @@ final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 						&& usage2.hasParamType(Command.class);
 		
 		if (sameLength && hasSubCommands) {
-			List<UsageParameter> parameterList1 = new ArrayList<>(usage1.getParameters());
+			List<CommandParameter> parameterList1 = new ArrayList<>(usage1.getParameters());
 			parameterList1.removeIf((param) -> !param.isCommand());
 			
-			List<UsageParameter> parameterList2 = new ArrayList<>(usage2.getParameters());
+			List<CommandParameter> parameterList2 = new ArrayList<>(usage2.getParameters());
 			parameterList2.removeIf((param) -> !param.isCommand());
 			
 			return parameterList1.equals(parameterList2);

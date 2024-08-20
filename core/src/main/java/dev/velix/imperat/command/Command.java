@@ -1,12 +1,11 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDebugger;
 import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
-import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.internal.FlagRegistry;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
@@ -22,11 +21,10 @@ import java.util.List;
 
 /**
  * Represents a wrapper for the actual command's data
- *
  * @param <C> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface Command<C> extends UsageParameter {
+public interface Command<C> extends CommandParameter {
 	
 	/**
 	 * @return The name of the command
@@ -85,9 +83,9 @@ public interface Command<C> extends UsageParameter {
 	 * @return the default value if it's input is not present
 	 * in case of the parameter being optional
 	 */
-	@Override
-	default @Nullable <CS> OptionalValueSupplier<CS, ?> getDefaultValueSupplier() {
-		return OptionalValueSupplier.of(getName());
+	@Override @SuppressWarnings("unchecked")
+	default @Nullable <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
+		return (OptionalValueSupplier<T>) OptionalValueSupplier.of(getName());
 	}
 	
 	/**
@@ -109,15 +107,6 @@ public interface Command<C> extends UsageParameter {
 	 * @param execution sets what happens when there's no parameters
 	 */
 	void setDefaultUsageExecution(CommandExecution<C> execution);
-	
-	/**
-	 * The flags that are  registered
-	 * to be usable in this command's syntax
-	 *
-	 * @return the registered flags for this command
-	 */
-	@NotNull
-	FlagRegistry getKnownFlags();
 	
 	
 	/**
@@ -173,10 +162,10 @@ public interface Command<C> extends UsageParameter {
 	 *                       <p>
 	 *                       if you have the command's default usage '/group' for example
 	 *                       and then you add the usage with attachDirectly being true, the usage
-	 *                       added will be in the form of "/command yoursubcommand param1 param2"
+	 *                       added will be in the form of "/command your subcommand param1 param2"
 	 *                       However, if you set attachDirectly to false, this will merge all the command's usages
 	 *                       automatically with the subcommand's usage, so if your command has a usage of '/command param1'
-	 *                       then the final usage will be : "/command param1 yoursubcommand param2, param3"
+	 *                       then the final usage will be : "/command param1 your subcommand param2, param3"
 	 *
 	 *                       </p>
 	 */
@@ -241,18 +230,6 @@ public interface Command<C> extends UsageParameter {
 	 */
 	@NotNull
 	Collection<? extends Command<C>> getSubCommands();
-	
-	
-	/**
-	 * Adds a flag to this command
-	 *
-	 * @param flagName the flag's unique id/name to add to the command
-	 * @param alias    the alias for this flag
-	 */
-	default void addFlag(String flagName, String alias) {
-		getKnownFlags().setData(flagName, CommandFlag.create(flagName, alias));
-	}
-	
 	
 	default CommandUsageLookup<C> lookup(CommandDispatcher<C> dispatcher) {
 		return new CommandUsageLookup<>(dispatcher, this);
@@ -341,10 +318,10 @@ public interface Command<C> extends UsageParameter {
 	 */
 	@SuppressWarnings("unchecked")
 	default void addHelpCommand(CommandDispatcher<C> dispatcher,
-															List<UsageParameter> params,
+															List<CommandParameter> params,
 	                            HelpExecution<C> helpExecution) {
 		if(params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
-			params.add(UsageParameter.optional("page", Integer.class,
+			params.add(CommandParameter.optional("page", Integer.class,
 							OptionalValueSupplier.of(1)));
 		}
 		
@@ -353,7 +330,7 @@ public interface Command<C> extends UsageParameter {
 						CommandUsage.<C>builder()
 										.parameters(params)
 										.execute((sender, context) -> {
-											CommandDispatcher.debug("Executing help !");
+											CommandDebugger.debug("Executing help !");
 											Integer page = context.getArgument("page");
 											CommandHelp<C> help = dispatcher.createCommandHelp(this,
 															(Context<C>) context, ((ResolvedContext<C>) context).getDetectedUsage());

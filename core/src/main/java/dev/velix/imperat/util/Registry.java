@@ -64,4 +64,7 @@ public class Registry<K, V> {
 	}
 	
 	
+	public int size() {
+		return data.size();
+	}
 }

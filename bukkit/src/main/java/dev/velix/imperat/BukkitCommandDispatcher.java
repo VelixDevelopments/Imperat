@@ -12,6 +12,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -37,11 +38,12 @@ public final class BukkitCommandDispatcher extends BaseCommandDispatcher<Command
 	private BukkitCommandDispatcher(Plugin plugin, AudienceProvider audienceProvider) {
 		super();
 		this.plugin = plugin;
+		CommandDebugger.setLogger(plugin.getLogger());
 		this.provider = audienceProvider == null ? BukkitAudiences.create(plugin) : audienceProvider;
 		try {
 			commandMap = BukkitUtil.getCommandMap();
 		} catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
-			CommandDispatcher.debug("Failed to fetch bukkit command-map, disabling plugin '%s'", plugin.getName());
+			CommandDebugger.debug("Failed to fetch bukkit command-map, disabling plugin '%s'", plugin.getName());
 			throw new IllegalAccessError(e.getMessage());
 		}
 		registerValueResolvers();
@@ -139,6 +141,9 @@ public final class BukkitCommandDispatcher extends BaseCommandDispatcher<Command
 			if (player != null) return player;
 			throw new ContextResolveException("Player '" + raw + "' is offline or invalid");
 		}));
+		
+		this.registerValueResolver(OfflinePlayer.class,
+						(source, context ,raw)-> Bukkit.getOfflinePlayer(raw));
 		
 		this.registerValueResolver(World.class, (source, context, raw) -> {
 			World world = Bukkit.getWorld(raw.toLowerCase());

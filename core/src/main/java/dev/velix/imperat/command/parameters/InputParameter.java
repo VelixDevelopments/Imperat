@@ -7,17 +7,17 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class InputParameter implements UsageParameter {
+public abstract class InputParameter implements CommandParameter {
 	
-	private final String name;
-	private int index;
-	private final Class<?> type;
-	private final boolean optional, flag, greedy;
-	private final OptionalValueSupplier<?, ?> optionalValueSupplier;
+	protected final String name;
+	protected int index;
+	protected final Class<?> type;
+	protected final boolean optional, flag, greedy;
+	protected final OptionalValueSupplier<?> optionalValueSupplier;
 	
 	protected InputParameter(String name, Class<?> type,
 	                         boolean optional, boolean flag, boolean greedy,
-	                         OptionalValueSupplier<?, ?> optionalValueSupplier) {
+	                         OptionalValueSupplier<?> optionalValueSupplier) {
 		this.name = name;
 		this.type = type;
 		this.optional = optional;
@@ -67,8 +67,8 @@ public abstract class InputParameter implements UsageParameter {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public <C> OptionalValueSupplier<C, ?> getDefaultValueSupplier() {
-		return (OptionalValueSupplier<C, ?>) optionalValueSupplier;
+	public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
+		return (OptionalValueSupplier<T>) optionalValueSupplier;
 	}
 	
 	/**
@@ -85,6 +85,16 @@ public abstract class InputParameter implements UsageParameter {
 	@Override
 	public boolean isFlag() {
 		return flag;
+	}
+	
+	/**
+	 * Casts the parameter to a flag parameter
+	 *
+	 * @return the parameter as a flag
+	 */
+	@Override
+	public FlagParameter asFlagParameter() {
+		return (FlagParameter) this;
 	}
 	
 	/**

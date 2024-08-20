@@ -10,7 +10,7 @@ import java.lang.reflect.Parameter;
  * Represents a context resolver factory
  * that is responsible for creating {@link ContextResolver}
  *
- * @param <C>
+ * @param <C> the command-sender type
  */
 public interface ContextResolverFactory<C> {
 	

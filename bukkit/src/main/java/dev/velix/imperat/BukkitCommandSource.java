@@ -53,7 +53,6 @@ public final class BukkitCommandSource implements CommandSource<CommandSender> {
 	 */
 	@Override
 	public void reply(Component component) {
-		//TODO implement
 		Audience audience = isConsole() ? audiences.console()
 						: audiences.player(((Player) sender).getUniqueId());
 		audience.sendMessage(component);

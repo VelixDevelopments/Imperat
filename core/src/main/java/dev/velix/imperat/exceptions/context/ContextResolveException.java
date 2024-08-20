@@ -5,7 +5,7 @@ import dev.velix.imperat.exceptions.CommandException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public final class ContextResolveException extends CommandException {
+public class ContextResolveException extends CommandException {
 	
 	public ContextResolveException(String msg) {
 		super(msg);

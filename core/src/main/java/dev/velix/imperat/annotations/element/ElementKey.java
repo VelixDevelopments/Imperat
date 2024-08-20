@@ -1,8 +1,11 @@
 package dev.velix.imperat.annotations.element;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.Arrays;
 import java.util.Objects;
 
+@ApiStatus.Internal
 public record ElementKey(String id, String... signatureParamTypes) {
 		public static ElementKey of(String id) {
 			return new ElementKey(id);

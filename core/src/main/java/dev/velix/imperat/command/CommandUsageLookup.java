@@ -1,7 +1,7 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import lombok.Data;
@@ -56,14 +56,14 @@ public final class CommandUsageLookup<C> {
 	                                   CommandUsage<C> usage) {
 		
 		ArgumentQueue rawArgs = context.getArguments().copy();
-		List<UsageParameter> parameters = usage.getParameters();
+		List<CommandParameter> parameters = usage.getParameters();
 		
 		int i = 0;
 		while (!rawArgs.isEmpty()) {
 			if (i >= parameters.size()) break;
 			
 			final String raw = rawArgs.poll();
-			final UsageParameter parameter = parameters.get(i);
+			final CommandParameter parameter = parameters.get(i);
 			
 			if (parameter.isFlag())
 				continue;
@@ -89,7 +89,7 @@ public final class CommandUsageLookup<C> {
 		int maxExpectedLength = usage.getMaxLength();
 		int minExpectedLength = usage.getMinLength();
 		
-		UsageParameter lastParameter = usage.getParameters().get(maxExpectedLength - 1);
+		CommandParameter lastParameter = usage.getParameters().get(maxExpectedLength - 1);
 		if (lastParameter.isGreedy()) {
 			final int minMaxDiff = maxExpectedLength - minExpectedLength;
 			int paramPos = lastParameter.getPosition() - minMaxDiff;

@@ -2,16 +2,20 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.context.CommandFlag;
+import dev.velix.imperat.default_suppliers.BooleanValueSupplier;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Represents the command parameter required
  * by the usage of the command itself
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface UsageParameter {
+public interface CommandParameter {
 	
 	/**
 	 * @return the name of the parameter
@@ -41,7 +45,7 @@ public interface UsageParameter {
 	 * @return the default value if it's input is not present
 	 * in case of the parameter being optional
 	 */
-	<C> OptionalValueSupplier<C, ?> getDefaultValueSupplier();
+	<T> OptionalValueSupplier<T> getDefaultValueSupplier();
 	
 	/**
 	 * @return whether this is an optional argument
@@ -76,6 +80,12 @@ public interface UsageParameter {
 	Command<?> asCommand();
 	
 	/**
+	 * Casts the parameter to a flag parameter
+	 * @return the parameter as a flag
+	 */
+	FlagParameter asFlagParameter();
+	
+	/**
 	 * @return Whether this usage parameter has been constructed
 	 * using the annotations through methods or not
 	 */
@@ -103,36 +113,45 @@ public interface UsageParameter {
 	<C> String format(Command<C> command);
 	
 	
-	static <T> UsageParameter required(String name, Class<T> clazz) {
-		return new NormalUsageParameter(name, clazz, false, false, null);
+	static <T> CommandParameter input(String name, Class<T> type, boolean optional, boolean greedy, OptionalValueSupplier<T> valueSupplier) {
+		return new NormalCommandParameter(name, type, optional, greedy, valueSupplier);
 	}
 	
-	static <C, T> UsageParameter optional(String name, Class<T> clazz, @Nullable OptionalValueSupplier<C, T> defaultValue) {
-		return new NormalUsageParameter(name, clazz, true, false, defaultValue);
+	static <T> CommandParameter required(String name, Class<T> clazz) {
+		return new NormalCommandParameter(name, clazz, false, false, null);
 	}
 	
-	static <C> UsageParameter greedy(String name, boolean optional, @Nullable OptionalValueSupplier<C, String> defaultValue) {
-		return new NormalUsageParameter(name, String.class, optional, true, defaultValue);
+	
+	static <T> CommandParameter optional(String name, Class<T> clazz, @Nullable OptionalValueSupplier<T> defaultValue) {
+		return new NormalCommandParameter(name, clazz, true, false, defaultValue);
 	}
 	
-	static UsageParameter requiredText(String name) {
+	static CommandParameter greedy(String name, boolean optional, @Nullable OptionalValueSupplier<String> defaultValue) {
+		return new NormalCommandParameter(name, String.class, optional, true, defaultValue);
+	}
+	
+	static CommandParameter requiredText(String name) {
 		return required(name, String.class);
 	}
 	
-	static UsageParameter requiredInt(String name) {
+	static CommandParameter requiredInt(String name) {
 		return required(name, Integer.class);
 	}
 	
-	static UsageParameter requiredLong(String name) {
+	static CommandParameter requiredLong(String name) {
 		return required(name, Long.class);
 	}
 	
-	static UsageParameter requiredDouble(String name) {
+	static CommandParameter requiredDouble(String name) {
 		return required(name, Double.class);
 	}
 	
-	static UsageParameter flag(String flagName) {
-		return new FlagUsageParameter(flagName);
+	static FlagParameter flag(String flagName, List<String> aliases, Class<?> inputType, OptionalValueSupplier<?> supplier) {
+		return new FlagCommandParameter(flagName, aliases, inputType, supplier);
+	}
+	
+	static FlagParameter switchParam(String flagName, List<String> aliases) {
+		return new FlagCommandParameter(CommandFlag.createSwitch(flagName, aliases), new BooleanValueSupplier());
 	}
 	
 	

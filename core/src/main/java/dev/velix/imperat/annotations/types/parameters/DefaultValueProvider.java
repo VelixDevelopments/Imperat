@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.PARAMETER})
 public @interface DefaultValueProvider {
 	
-	Class<? extends OptionalValueSupplier<?, ?>> value();
+	Class<? extends OptionalValueSupplier<?>> value();
 }

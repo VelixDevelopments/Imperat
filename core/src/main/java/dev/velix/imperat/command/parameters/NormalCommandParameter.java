@@ -4,13 +4,13 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.util.StringUtils;
 
-final class NormalUsageParameter extends InputParameter {
+class NormalCommandParameter extends InputParameter {
 	
-	NormalUsageParameter(String name,
-	                     Class<?> type,
-	                     boolean optional,
-	                     boolean greedy,
-	                     OptionalValueSupplier<?, ?> valueSupplier) {
+	NormalCommandParameter(String name,
+	                       Class<?> type,
+	                       boolean optional,
+	                       boolean greedy,
+	                       OptionalValueSupplier<?> valueSupplier) {
 		super(name, type, optional, false, greedy, valueSupplier);
 	}
 	

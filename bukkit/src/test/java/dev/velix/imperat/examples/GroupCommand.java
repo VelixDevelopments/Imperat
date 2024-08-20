@@ -4,7 +4,6 @@ package dev.velix.imperat.examples;
 import dev.velix.imperat.BukkitCommandHelp;
 import dev.velix.imperat.BukkitCommandSource;
 import dev.velix.imperat.annotations.types.Command;
-import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Help;
@@ -13,9 +12,7 @@ import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Named;
 import dev.velix.imperat.test.Group;
 
-@Command({"group", "rank"})
-@Permission("command.group")
-@Description("Main command for managing groups/ranks")
+@Command("group")
 public final class GroupCommand {
 	
 	@DefaultUsage
@@ -61,14 +58,4 @@ public final class GroupCommand {
 		// /group <group> setprefix <prefix>
 		source.reply("You have set prefix '" + prefix + "' to group '" + group.getName() + "'");
 	}
-
-	/*@SubCommand(value = "info")
-	public void info(BukkitCommandSource source, Group group) {
-		if(source.isConsole()) {
-			source.reply("You can't do that, only players can !");
-			return;
-		}
-		source.reply("Showing info about group: " + group.getName());
-	}*/
-	
 }

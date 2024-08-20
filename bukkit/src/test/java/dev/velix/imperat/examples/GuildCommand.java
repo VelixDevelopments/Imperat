@@ -5,6 +5,7 @@ import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.parameters.Named;
+import dev.velix.imperat.examples.custom_annotations.MyCustomAnnotation2;
 import dev.velix.imperat.test.Guild;
 import dev.velix.imperat.test.GuildInvite;
 import dev.velix.imperat.test.GuildRegistry;
@@ -33,7 +34,11 @@ public class GuildCommand {
 	}
 	
 	@SubCommand("disband")
-	public void disband(BukkitCommandSource source, Guild guild) {
+	public void disband(BukkitCommandSource source, @MyCustomAnnotation2 Guild guild) {
+		if(guild == null) {
+			source.reply("HAHA YOU HAVE NO GUILD LLL");
+			return;
+		}
 		GuildRegistry.getInstance().removeGuild(guild);
 		source.reply("You have disbanded your guild successfully !!");
 	}
@@ -42,7 +47,7 @@ public class GuildCommand {
 	public void invite(
 					@NotNull BukkitCommandSource source,
 					@Named("player") Player player,
-					@NotNull Guild guild
+					@NotNull  Guild guild
 	) {
 		Player sourcePlayer = source.asPlayer();
 		guild.sendInvite(sourcePlayer, player);

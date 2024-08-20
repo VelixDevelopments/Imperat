@@ -1,12 +1,12 @@
 package dev.velix.imperat.resolvers;
 
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 
-public interface OptionalValueSupplier<C, T> {
+public interface OptionalValueSupplier<T> {
 	
 	@SuppressWarnings("unchecked")
-	static <C, T> OptionalValueSupplier<C, T> of(T def) {
+	static <T> OptionalValueSupplier<T> of(T def) {
 		return new OptionalValueSupplier<>() {
 			@Override
 			public Class<T> getValueType() {
@@ -14,7 +14,7 @@ public interface OptionalValueSupplier<C, T> {
 			}
 			
 			@Override
-			public T supply(Context<C> context) {
+			public <C> T supply(Context<C> context) {
 				return def;
 			}
 		};
@@ -27,11 +27,11 @@ public interface OptionalValueSupplier<C, T> {
 	
 	/**
 	 * Supplies a default-value for optional
-	 * usage parameters {@link UsageParameter}
+	 * usage parameters {@link CommandParameter}
 	 *
 	 * @param context the context
 	 * @return the resolved default value
 	 */
-	T supply(Context<C> context);
+	<C> T supply(Context<C> context);
 	
 }

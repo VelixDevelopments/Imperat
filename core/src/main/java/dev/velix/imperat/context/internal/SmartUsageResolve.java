@@ -3,12 +3,11 @@ package dev.velix.imperat.context.internal;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.UsageParameter;
-import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.TokenParseException;
+import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.resolvers.OptionalValueSupplier;
 import dev.velix.imperat.resolvers.ValueResolver;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,6 @@ import lombok.Data;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
@@ -25,6 +23,7 @@ import java.util.function.Predicate;
 @ApiStatus.Internal
 final class SmartUsageResolve<C> {
 	
+	@Getter
 	private final Command<C> mainCommand;
 	
 	@Getter
@@ -40,7 +39,6 @@ final class SmartUsageResolve<C> {
 		this.mainCommand = command;
 		this.command = command;
 		this.usage = usage;
-		
 	}
 	
 	static <C> SmartUsageResolve<C> create(
@@ -50,10 +48,10 @@ final class SmartUsageResolve<C> {
 		return new SmartUsageResolve<>(command, usage);
 	}
 	
-	
+	@SuppressWarnings("unchecked")
 	void resolve(CommandDispatcher<C> dispatcher, ResolvedContext<C> context) throws CommandException {
 		
-		final List<UsageParameter> parameterList = new ArrayList<>(usage.getParameters());
+		final List<CommandParameter> parameterList = new ArrayList<>(usage.getParameters());
 		final ArgumentQueue raws = context.getArguments().copy();
 		
 		int lengthWithoutFlags = (int) usage.getParameters()
@@ -61,42 +59,102 @@ final class SmartUsageResolve<C> {
 						.count();
 		
 		while (position.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
-			
-			UsageParameter currentParameter = position.peekParameter(parameterList);
+			CommandParameter currentParameter = position.peekParameter(parameterList);
 			assert currentParameter != null;
-			if (currentParameter.isFlag()) {
-				//debug("Found flag param '%s' at %s", currentParameter.getName(), position.parameter);
-				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-				continue;
-			}
 			
 			String currentRaw = position.peekRaw(raws);
+			//CommandDebugger.debug("Current raw= '%s' at %s" , currentRaw, position.raw);
 			if (currentRaw == null) {
+				
+				
+				//CommandDebugger.debug("Filling empty optional args");
 				for (int i = position.parameter; i < parameterList.size(); i++) {
-					UsageParameter parameter = position.peekParameter(parameterList);
-					assert parameter != null;
-					if (!parameter.isOptional()) {
+					final CommandParameter optionalEmptyParameter = position.peekParameter(parameterList);
+					assert optionalEmptyParameter != null;
+					//debug("Parameter at %s = %s", i, parameter.format(command));
+					if (!optionalEmptyParameter.isOptional()) {
 						//cannot happen if no bugs, but just in case
-						throw new IllegalStateException(String.format(
-										"Missing required parameters to be filled '%s'", parameter.format(command))
+						throw new ContextResolveException(String.format(
+										"Missing required parameters to be filled '%s'", optionalEmptyParameter.format(command))
 						);
 					}
+					
 					//all parameters from here must be optional
 					//adding the absent optional args with their default values
-					context.resolveArgument(command, null, position.parameter,
-									currentParameter, getDefaultValue(context, currentParameter));
+					
+					if(optionalEmptyParameter.isFlag()) {
+						CommandFlag flag = optionalEmptyParameter.asFlagParameter().getFlag();
+						Object value = null;
+						if (flag instanceof CommandSwitch) value = false;
+						else if(optionalEmptyParameter.asFlagParameter().getDefaultValueSupplier() != null){
+							value = optionalEmptyParameter.asFlagParameter()
+											.getDefaultValueSupplier().supply((Context<Object>) context);
+						}
+						
+						context.resolveFlag(null, null, value, flag);
+					}else {
+						context.resolveArgument(command, null, position.parameter, optionalEmptyParameter, getDefaultValue(context, optionalEmptyParameter));
+					}
 					position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 				}
 				//System.out.println("Closed at position= " + position);
 				break;
 			}
-			//debug("Raw= %s at %s", currentRaw, position.raw);
 			
-			if (context.getFlagExtractor().isKnownFlag(mainCommand, currentRaw)) {
-				//debug("Found flag raw '%s' at %s", currentRaw, position.raw);
-				position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
+			CommandFlag flag = usage.getFlagFromRaw(currentRaw);
+			if (flag != null && currentParameter.isFlag()) {
+				//CommandDebugger.debug("Found flag raw '%s' at %s", currentRaw, position.raw);
+				//shifting raw only
+				//check if it's switch
+				if(flag instanceof CommandSwitch) {
+					//input-value is true because the flag is present
+ 					context.resolveFlag(currentRaw, null, true, flag);
+				}else {
+					//shifting again to get the expected value
+					position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
+					String flagValueInput = position.peekRaw(raws);
+					Object flagDefaultValue = getDefaultValue(context, currentParameter);
+					if(flagValueInput == null) {
+						
+						if(flagDefaultValue == null)
+							throw new ContextResolveException(String.format(
+											"Missing required flag value-input to be filled '%s'", flag.format())
+							);
+						
+						context.resolveFlag(currentRaw, null, flagDefaultValue, flag);
+						position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+						continue;
+					}
+					
+					ValueResolver<C, ?> valueResolver = dispatcher.getValueResolver(flag.inputType());
+					if(valueResolver == null) {
+						throw new ContextResolveException("Cannot find resolver for flag with input type '" + flag.name() + "'");
+					}
+					context.resolveFlag(
+									currentRaw,
+									flagValueInput,
+									getResult(valueResolver, context, flagValueInput),
+									flag
+					);
+				}
+				
+				position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
 				continue;
 			}
+			else if(flag == null && currentParameter.isFlag()) {
+				assert currentParameter.isFlag();
+				
+				context.resolveFlag(
+								null,
+								null,
+								getDefaultValue(context, currentParameter),
+								currentParameter.asFlagParameter().getFlag()
+				);
+				
+				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+				continue;
+			}
+			
 			
 			if (currentParameter.isCommand()) {
 				
@@ -107,7 +165,7 @@ final class SmartUsageResolve<C> {
 				if (parameterSubCmd.hasName(currentRaw)) {
 					this.command = parameterSubCmd;
 				} else {
-					throw new IllegalArgumentException("Unknown sub-command '" + currentRaw + "'");
+					throw new ContextResolveException("Unknown sub-command '" + currentRaw + "'");
 				}
 				
 				position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
@@ -117,7 +175,7 @@ final class SmartUsageResolve<C> {
 			//argument input
 			ValueResolver<C, ?> resolver = dispatcher.getValueResolver(currentParameter);
 			if (resolver == null)
-				throw new IllegalStateException("Cannot find resolver for type '" + currentParameter.getType().getName() + "'");
+				throw new ContextResolveException("Cannot find resolver for type '" + currentParameter.getType().getName() + "'");
 			
 			if (currentParameter.isOptional()) {
 				//debug("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
@@ -141,7 +199,7 @@ final class SmartUsageResolve<C> {
 	                             ValueResolver<C, ?> resolver,
 	                             ArgumentQueue raws,
 	                             String currentRaw,
-	                             UsageParameter currentParameter) throws CommandException {
+	                             CommandParameter currentParameter) throws CommandException {
 		Object resolveResult;
 		if (currentParameter.isGreedy()) {
 			
@@ -170,9 +228,9 @@ final class SmartUsageResolve<C> {
 	private void resolveOptional(ResolvedContext<C> context,
 	                             ValueResolver<C, ?> resolver,
 	                             ArgumentQueue raws,
-	                             List<UsageParameter> parameterList,
+	                             List<CommandParameter> parameterList,
 	                             String currentRaw,
-	                             UsageParameter currentParameter,
+	                             CommandParameter currentParameter,
 	                             int lengthWithoutFlags) throws CommandException {
 		if (raws.size() < lengthWithoutFlags) {
 			int diff = lengthWithoutFlags - raws.size();
@@ -182,7 +240,7 @@ final class SmartUsageResolve<C> {
 			if (!position.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
 				
 				if (diff > 1) {
-					UsageParameter nextParam = getNextParam(position.parameter + 1, parameterList, (param) -> !param.isOptional());
+					CommandParameter nextParam = getNextParam(position.parameter + 1, parameterList, (param) -> !param.isOptional());
 					if (nextParam == null) {
 						position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 						return;
@@ -208,31 +266,31 @@ final class SmartUsageResolve<C> {
 				//shifting the parameters && raw again, so it can start after the new shift
 				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
 			}
-		} else {
+			return;
+		}
+		
+		Object resolveResult;
+		if (currentParameter.isGreedy()) {
 			
-			Object resolveResult;
-			if (currentParameter.isGreedy()) {
-				
-				StringBuilder builder = new StringBuilder();
-				for (int i = position.raw; i < raws.size(); i++) {
-					builder.append(position.peekRaw(raws)).append(' ');
-					position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
-				}
-				
-				if (builder.isEmpty()) {
-					throw new TokenParseException("Failed to parse greedy argument '"
-									+ currentParameter.format(command) + "'");
-				}
-				resolveResult = builder.toString();
-				
-				position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-				context.resolveArgument(command, currentRaw, position.parameter,
-								currentParameter, resolveResult);
-			} else {
-				resolveResult = getResult(resolver, context, currentRaw);
-				context.resolveArgument(command, currentRaw, position.parameter, currentParameter, resolveResult);
-				position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+			StringBuilder builder = new StringBuilder();
+			for (int i = position.raw; i < raws.size(); i++) {
+				builder.append(position.peekRaw(raws)).append(' ');
+				position.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
 			}
+			
+			if (builder.isEmpty()) {
+				throw new TokenParseException("Failed to parse greedy argument '"
+								+ currentParameter.format(command) + "'");
+			}
+			resolveResult = builder.toString();
+			
+			position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+			context.resolveArgument(command, currentRaw, position.parameter,
+							currentParameter, resolveResult);
+		} else {
+			resolveResult = getResult(resolver, context, currentRaw);
+			context.resolveArgument(command, currentRaw, position.parameter, currentParameter, resolveResult);
+			position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
 		}
 		
 	}
@@ -242,8 +300,8 @@ final class SmartUsageResolve<C> {
 	}
 	
 	
-	private @Nullable UsageParameter getNextParam(int start, List<UsageParameter> parameters,
-	                                              Predicate<UsageParameter> parameterCondition) {
+	private @Nullable CommandParameter getNextParam(int start, List<CommandParameter> parameters,
+	                                                Predicate<CommandParameter> parameterCondition) {
 		if (start >= parameters.size()) return null;
 		for (int i = start; i < parameters.size(); i++) {
 			if (parameterCondition.test(parameters.get(i)))
@@ -253,9 +311,8 @@ final class SmartUsageResolve<C> {
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public @Nullable <T> T getDefaultValue(Context<C> context, UsageParameter parameter) {
-		OptionalValueSupplier<C, T> optionalSupplier = (OptionalValueSupplier<C, T>) parameter.getDefaultValueSupplier();
+	private @Nullable <T> T getDefaultValue(Context<C> context, CommandParameter parameter) {
+		OptionalValueSupplier<T> optionalSupplier = parameter.getDefaultValueSupplier();
 		T defaultValue = null;
 		if (optionalSupplier != null) {
 			defaultValue = optionalSupplier.supply(context);
@@ -286,12 +343,12 @@ final class SmartUsageResolve<C> {
 		}
 		
 		public boolean canContinue(ShiftTarget target,
-		                           List<UsageParameter> parameters,
+		                           List<CommandParameter> parameters,
 		                           ArgumentQueue queue) {
 			return target.canContinue(this, parameters.size(), queue.size());
 		}
 		
-		public @Nullable UsageParameter peekParameter(List<UsageParameter> parameters) {
+		public @Nullable CommandParameter peekParameter(List<CommandParameter> parameters) {
 			return parameters.get(this.parameter);
 		}
 		
@@ -312,7 +369,7 @@ final class SmartUsageResolve<C> {
 				return parameter == maxParams - 1 && raw == maxRaws - 1;
 		}
 		
-		public boolean isLast(ShiftTarget shiftTarget, List<UsageParameter> params, ArgumentQueue raws) {
+		public boolean isLast(ShiftTarget shiftTarget, List<CommandParameter> params, ArgumentQueue raws) {
 			return isLast(shiftTarget, params.size(), raws.size());
 		}
 	}
@@ -339,9 +396,9 @@ final class SmartUsageResolve<C> {
 		ALL((pos, maxRaw, maxParameter) ->
 						pos.raw < maxRaw && pos.parameter < maxParameter);
 		
-		private final PositionContinuation canContinueCheck;
+		private final PositionShiftCondition canContinueCheck;
 		
-		ShiftTarget(PositionContinuation canContinueCheck) {
+		ShiftTarget(PositionShiftCondition canContinueCheck) {
 			this.canContinueCheck = canContinueCheck;
 		}
 		
@@ -351,7 +408,7 @@ final class SmartUsageResolve<C> {
 	}
 	
 	@FunctionalInterface
-	interface PositionContinuation {
+	interface PositionShiftCondition {
 		boolean canContinue(Position position, int maxRaw, int maxParameter);
 	}
 	

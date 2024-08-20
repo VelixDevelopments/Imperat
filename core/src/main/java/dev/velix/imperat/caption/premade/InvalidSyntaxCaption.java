@@ -8,7 +8,7 @@ import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.BaseCommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -53,14 +53,14 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
 		} else {
 			final int last = context.getArguments().size() - 1;
 			
-			List<UsageParameter> params = new ArrayList<>(usage.getParameters())
+			List<CommandParameter> params = new ArrayList<>(usage.getParameters())
 							.stream()
 							.filter((param) -> !param.isOptional() && param.getPosition() > last)
 							.toList();
 			
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < params.size(); i++) {
-				UsageParameter param = params.get(i);
+				CommandParameter param = params.get(i);
 				assert !param.isOptional();
 				builder.append(param.format(command));
 				if (i != params.size() - 1)

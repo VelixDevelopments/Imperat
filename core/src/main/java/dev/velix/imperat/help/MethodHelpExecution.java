@@ -3,7 +3,7 @@ package dev.velix.imperat.help;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.annotations.MethodCommandExecutor;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.util.reflection.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.reflection.MethodCaller;
@@ -16,11 +16,11 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
 	private final CommandDispatcher<C> dispatcher;
 	private final Method method;
 	private final MethodCaller.BoundMethodCaller caller;
-	private final List<UsageParameter> params;
+	private final List<CommandParameter> params;
 	
 	public MethodHelpExecution(CommandDispatcher<C> dispatcher,
 	                           Object proxy, Method method,
-	                           List<UsageParameter> params) {
+	                           List<CommandParameter> params) {
 		this.dispatcher = dispatcher;
 		this.method = method;
 		this.params = params;

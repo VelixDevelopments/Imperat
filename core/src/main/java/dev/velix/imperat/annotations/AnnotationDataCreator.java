@@ -16,7 +16,8 @@ interface AnnotationDataCreator<O, A extends Annotation> {
 	 * @return the object to create such as {@link Command} {@link CommandUsage}
 	 */
 	@NotNull
-	O create(Class<?> proxy,
+	O create(Object proxyInstance,
+	         Class<?> proxy,
 	         A annotation,
 	         CommandAnnotatedElement<?> element);
 	

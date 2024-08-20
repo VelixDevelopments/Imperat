@@ -1,11 +1,11 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.UsageParameter;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.resolvers.ValueResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,11 +34,8 @@ public interface ResolvedContext<C> extends Context<C> {
 	
 	/**
 	 * Resolves the arguments from the given plain input {@link Context}
-	 *
-	 * @param dispatcher the dispatcher handling all commands
-	 * @param usage      the usage that were determined suitable for resolving the args
 	 */
-	void resolve(CommandDispatcher<C> dispatcher, CommandUsage<C> usage) throws CommandException;
+	void resolve() throws CommandException;
 	
 	/**
 	 * Fetches the arguments of a command/subcommand that got resolved
@@ -83,8 +80,20 @@ public interface ResolvedContext<C> extends Context<C> {
 	<T> void resolveArgument(Command<C> command,
 	                         @Nullable String raw,
 	                         int index,
-	                         UsageParameter parameter,
-	                         @Nullable T value);
+	                         CommandParameter parameter,
+	                         @Nullable T value) throws CommandException;
+	
+	/**
+	 * Resolves flag the in the context
+	 * @param flagRaw the flag itself raw input
+	 * @param flagInputRaw the flag's value if present
+	 * @param flagInputValue the flag's input value resolved by {@link ValueResolver}
+	 * @param flagDetected the optional flag-parameter detected
+	 */
+	void resolveFlag(String flagRaw,
+									 @Nullable String flagInputRaw,
+									 @Nullable Object flagInputValue,
+	                 CommandFlag flagDetected);
 	
 	/**
 	 * Fetches the last used resolved command

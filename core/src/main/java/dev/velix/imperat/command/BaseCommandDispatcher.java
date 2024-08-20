@@ -1,5 +1,6 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDebugger;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.annotations.*;
@@ -94,7 +95,7 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 			}
 			commands.put(command.getName().toLowerCase(), command);
 		} catch (RuntimeException ex) {
-			CommandDispatcher.traceError(ex);
+			CommandDebugger.error(BaseCommandDispatcher.class, "registerCommand(Command command)", ex);
 			shutdownPlatform();
 		}
 		
@@ -450,9 +451,25 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 		
 		try {
 			handleExecution(commandSource, plainContext);
-		} catch (CommandException ex) {
-			ex.handle(plainContext);
+		} catch (Throwable ex) {
+			
+			Throwable current = ex;
+			if(current instanceof CommandException commandException) {
+				commandException.handle(plainContext);
+			}
+			else {
+				while (current != null && !(current instanceof CommandException)) {
+					current = current.getCause();
+				}
+				if(current != null) {
+					((CommandException)current).handle(plainContext);
+				}else {
+					CommandDebugger.error(BaseCommandDispatcher.class, "dispatch", ex);
+				}
+			}
+			
 		}
+		
 	}
 	
 	
@@ -469,14 +486,16 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 			return;
 		}
 		
-		context.extractCommandFlags(command);
+		//context.extractCommandFlags(command);
 		
 		CommandUsageLookup<C>.SearchResult searchResult = command.lookup(this)
 						.searchUsage(context);
 		
-		if (searchResult.getCommandUsage() == null || context.getArguments().isEmpty()) {
+		if ((searchResult.getCommandUsage() == null
+						&& searchResult.getResult() == CommandUsageLookup.Result.FOUND_INCOMPLETE)
+						|| context.getArguments().isEmpty()) {
 			CommandUsage<C> defaultUsage = command.getDefaultUsage();
-			defaultUsage.getExecution().execute(source, context);
+			defaultUsage.execute(source, context);
 			return;
 		}
 		
@@ -497,16 +516,15 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 	private void executeUsage(Command<C> command,
 	                          CommandSource<C> source,
 	                          Context<C> context,
-	                          CommandUsage<C> usage) throws CommandException {
+	                          final CommandUsage<C> usage) throws CommandException {
 		if (usage.getCooldownHandler().hasCooldown(source)) {
 			sendCaption(CaptionKey.COOLDOWN, command, source, context, usage);
 			return;
 		}
 		usage.getCooldownHandler().registerExecutionMoment(source);
-		
-		ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(this, command, context);
-		resolvedContext.resolve(this, usage);
-		usage.getExecution().execute(source, resolvedContext);
+		ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(this, command, context, usage);
+		resolvedContext.resolve();
+		usage.execute(source, resolvedContext);
 	}
 	
 	/**

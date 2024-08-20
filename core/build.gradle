@@ -8,11 +8,6 @@ dependencies {
     implementation kyori(KyoriModule.MINI_MESSAGE)
     implementation 'org.ow2.asm:asm:9.2'
     implementation 'org.ow2.asm:asm-commons:9.2'
-
-    compileOnly 'org.slf4j:slf4j-api:2.0.16'
-
-    testImplementation 'org.slf4j:slf4j-api:2.0.16'
-    testImplementation 'ch.qos.logback:logback-classic:1.5.7'
 }
 
 java {

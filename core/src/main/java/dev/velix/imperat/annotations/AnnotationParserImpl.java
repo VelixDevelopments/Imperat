@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 	
 	private final AnnotationRegistry annotationRegistry;
-	private final AnnotationDataRegistry<C> dataRegistry;
+	private final AnnotationHandlerRegistry<C> dataRegistry;
 	
 	AnnotationParserImpl(CommandDispatcher<C> dispatcher) {
 		super(dispatcher);
 		this.annotationRegistry = new AnnotationRegistry();
-		this.dataRegistry = new AnnotationDataRegistry<>(annotationRegistry, dispatcher);
+		this.dataRegistry = new AnnotationHandlerRegistry<>(annotationRegistry, dispatcher);
 	}
 	
 	private <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, E element) {
@@ -42,7 +42,6 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 	@Override
 	public <T> void parseCommandClass(T instance) {
 		Class<T> instanceClazz = (Class<T>) instance.getClass();
-		CommandDispatcher.debug("Parsing type %s", instanceClazz.getName());
 		AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
 		var elementKey = getKey(AnnotationLevel.CLASS, instanceClazz);
 		
@@ -55,7 +54,7 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 		
 		AnnotationDataCreator<dev.velix.imperat.command.Command<C>, Command> creator = dataRegistry.getDataCreator(Command.class);
 		assert creator != null;
-		dev.velix.imperat.command.Command<C> commandObject = creator.create(instanceClazz, commandAnnotation, element);
+		dev.velix.imperat.command.Command<C> commandObject = creator.create(instance, instanceClazz, commandAnnotation, element);
 		dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, element);
 		
 		Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods())
@@ -63,9 +62,7 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 						.collect(Collectors.toCollection(LinkedHashSet::new));
 		
 		for (Method method : methods) {
-			CommandDispatcher.debug("Checking method " + method.getName());
 			if (!MethodVerifier.isMethodAcceptable(method)) continue;
-			CommandDispatcher.debug("Passed method %s", method.getName());
 			MethodVerifier.verifyMethod(dispatcher, instanceClazz, method, method.isAnnotationPresent(DefaultUsage.class));
 			
 			var methodKey = getKey(AnnotationLevel.METHOD, method);
@@ -79,7 +76,7 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 			Usage usageAnnotation = methodElement.getAnnotation(Usage.class);
 			AnnotationDataCreator<CommandUsage.Builder<C>, Usage> usageDataCreator = dataRegistry.getDataCreator(Usage.class);
 			assert usageDataCreator != null;
-			CommandUsage.Builder<C> usageBuilder = usageDataCreator.create(instanceClazz, usageAnnotation, methodElement);
+			CommandUsage.Builder<C> usageBuilder = usageDataCreator.create(instance, instanceClazz, usageAnnotation, methodElement);
 			dataRegistry.injectForElement(instance, instanceClazz, commandObject, usageBuilder, methodElement);
 			commandObject.addUsage(usageBuilder.build());
 		}
@@ -121,4 +118,5 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 		}
 		return 10;
 	}
+	
 }

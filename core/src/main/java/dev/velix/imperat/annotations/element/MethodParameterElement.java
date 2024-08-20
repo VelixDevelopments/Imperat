@@ -8,13 +8,13 @@ import java.lang.reflect.Parameter;
 
 @ApiStatus.Internal
 @Getter
-public final class ParameterCommandElement extends CommandAnnotatedElement<Parameter> {
+public final class MethodParameterElement extends CommandAnnotatedElement<Parameter> {
 	
 	private final String name;
 	
-	public ParameterCommandElement(AnnotationRegistry registry,
-	                               String parameterName,
-	                               Parameter element) {
+	public MethodParameterElement(AnnotationRegistry registry,
+	                              String parameterName,
+	                              Parameter element) {
 		super(registry, element);
 		this.name = parameterName;
 	}
