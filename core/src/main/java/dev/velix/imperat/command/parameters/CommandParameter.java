@@ -3,8 +3,9 @@ package dev.velix.imperat.command.parameters;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.CommandFlag;
-import dev.velix.imperat.supplier.defaults.BooleanValueSupplier;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.supplier.defaults.BooleanValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,8 @@ import java.util.List;
  * by the usage of the command itself
  */
 @ApiStatus.AvailableSince("1.0.0")
+@SuppressWarnings("unused")
+
 public interface CommandParameter {
 
     /**
@@ -57,8 +60,14 @@ public interface CommandParameter {
      * @return checks whether this parameter is a flag
      */
     boolean isFlag();
-
-
+    
+    /**
+     * Casts the parameter to a flag parameter
+     *
+     * @return the parameter as a flag
+     */
+    FlagParameter asFlagParameter();
+    
     /**
      * @return checks whether this parameter
      * consumes all the args input after it.
@@ -80,13 +89,6 @@ public interface CommandParameter {
     Command<?> asCommand();
 
     /**
-     * Casts the parameter to a flag parameter
-     *
-     * @return the parameter as a flag
-     */
-    FlagParameter asFlagParameter();
-
-    /**
      * @return Whether this usage parameter has been constructed
      * using the annotations through methods or not
      */
@@ -103,7 +105,19 @@ public interface CommandParameter {
     default AnnotatedParameter asAnnotated() {
         return (AnnotatedParameter) this;
     }
-
+    
+    /**
+     * Fetches the suggestion resolver linked to this
+     * command parameter.
+     *
+     * @return the {@link SuggestionResolver} for resolving suggestion
+     * @param <C> the command-sender type
+     * @param <T> the type of value to be resolved
+     */
+    @Nullable
+    <C, T> SuggestionResolver<C, T> getSuggestionResolver();
+    
+    
     /**
      * Formats the usage parameter
      * using the command
@@ -114,46 +128,116 @@ public interface CommandParameter {
     <C> String format(Command<C> command);
 
 
-    static <T> CommandParameter input(String name, Class<T> type, boolean optional, boolean greedy, OptionalValueSupplier<T> valueSupplier) {
-        return new NormalCommandParameter(name, type, optional, greedy, valueSupplier);
+    static <C, T> CommandParameter input(
+            String name,
+            Class<T> type,
+            boolean optional,
+            boolean greedy,
+            OptionalValueSupplier<T> valueSupplier,
+            SuggestionResolver<C, T> suggestionResolver
+    ) {
+        return new NormalCommandParameter(name, type, optional, greedy, valueSupplier, suggestionResolver);
     }
 
-    static <T> CommandParameter required(String name, Class<T> clazz) {
-        return new NormalCommandParameter(name, clazz, false, false, null);
+    static <C, T> CommandParameter required(String name, Class<T> clazz,
+                                         SuggestionResolver<C, T> suggestionResolver) {
+        return new NormalCommandParameter(name, clazz, false, false, null, suggestionResolver);
     }
 
 
-    static <T> CommandParameter optional(String name, Class<T> clazz, @Nullable OptionalValueSupplier<T> defaultValue) {
-        return new NormalCommandParameter(name, clazz, true, false, defaultValue);
+    static <C, T> CommandParameter optional(
+            String name, Class<T> clazz,
+            @Nullable OptionalValueSupplier<T> defaultValue,
+            SuggestionResolver<C, T> suggestionResolver
+    ) {
+        return new NormalCommandParameter(name, clazz, true, false, defaultValue, suggestionResolver);
     }
 
-    static CommandParameter greedy(String name, boolean optional, @Nullable OptionalValueSupplier<String> defaultValue) {
-        return new NormalCommandParameter(name, String.class, optional, true, defaultValue);
+    static <C> CommandParameter greedy(
+            String name,
+            boolean optional,
+            @Nullable OptionalValueSupplier<String> defaultValue,
+            SuggestionResolver<C, String> suggestionResolver
+    ) {
+        return new NormalCommandParameter(
+                name, String.class, optional,
+                true, defaultValue, suggestionResolver
+        );
     }
 
-    static CommandParameter requiredText(String name) {
-        return required(name, String.class);
+    static <C> CommandParameter requiredText(String name, SuggestionResolver<C, String> suggestionResolver) {
+        return required(name, String.class, suggestionResolver);
     }
 
-    static CommandParameter requiredInt(String name) {
-        return required(name, Integer.class);
+    static <C> CommandParameter requiredInt(String name, SuggestionResolver<C, Integer> suggestionResolver) {
+        return required(name, Integer.class, suggestionResolver);
     }
 
-    static CommandParameter requiredLong(String name) {
-        return required(name, Long.class);
+    static <C> CommandParameter requiredLong(String name, SuggestionResolver<C, Long> suggestionResolver) {
+        return required(name, Long.class, suggestionResolver);
     }
 
-    static CommandParameter requiredDouble(String name) {
-        return required(name, Double.class);
+    static <C> CommandParameter requiredDouble(String name, SuggestionResolver<C, Double> suggestionResolver) {
+        return required(name, Double.class, suggestionResolver);
     }
 
-    static FlagParameter flag(String flagName, List<String> aliases, Class<?> inputType, OptionalValueSupplier<?> supplier) {
+    static FlagParameter flag(
+            String flagName,
+            List<String> aliases,
+            Class<?> inputType,
+            OptionalValueSupplier<?> supplier
+    ) {
         return new FlagCommandParameter(flagName, aliases, inputType, supplier);
     }
 
     static FlagParameter switchParam(String flagName, List<String> aliases) {
         return new FlagCommandParameter(CommandFlag.createSwitch(flagName, aliases), new BooleanValueSupplier());
     }
-
-
+    
+    
+    static <T> CommandParameter input(
+            String name,
+            Class<T> type,
+            boolean optional,
+            boolean greedy,
+            OptionalValueSupplier<T> valueSupplier
+    ) {
+        return input(name, type, optional, greedy, valueSupplier, null);
+    }
+    
+    static <T> CommandParameter required(String name, Class<T> clazz) {
+        return required(name, clazz, null);
+    }
+    
+    static <T> CommandParameter optional(
+            String name, Class<T> clazz,
+            @Nullable OptionalValueSupplier<T> defaultValue
+    ) {
+        return optional(name, clazz, defaultValue,null);
+    }
+    
+    static CommandParameter greedy(
+            String name,
+            boolean optional,
+            @Nullable OptionalValueSupplier<String> defaultValue
+    ) {
+        return greedy(name, optional, defaultValue, null);
+    }
+    
+    static CommandParameter requiredText(String name) {
+        return requiredText(name, null);
+    }
+    
+    static CommandParameter requiredInt(String name) {
+        return requiredInt(name,null);
+    }
+    
+    static CommandParameter requiredLong(String name) {
+        return requiredLong(name, null);
+    }
+    
+    static CommandParameter requiredDouble(String name) {
+        return requiredDouble(name, null);
+    }
+    
 }

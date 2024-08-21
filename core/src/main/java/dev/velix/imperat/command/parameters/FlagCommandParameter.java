@@ -17,13 +17,13 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
 
     FlagCommandParameter(String flagName, List<String> aliases, Class<?> inputType, OptionalValueSupplier<?> supplier) {
         super(flagName, CommandFlag.class,
-                true, true, false, null);
+                true, true, false, null, null);
         flag = CommandFlag.create(flagName, aliases, inputType);
         this.supplier = supplier;
     }
 
     FlagCommandParameter(CommandSwitch commandSwitch, OptionalValueSupplier<?> supplier) {
-        super(commandSwitch.name(), CommandSwitch.class, true, true, false, null);
+        super(commandSwitch.name(), CommandSwitch.class, true, true, false, null, null);
         this.flag = commandSwitch;
         this.supplier = supplier;
     }

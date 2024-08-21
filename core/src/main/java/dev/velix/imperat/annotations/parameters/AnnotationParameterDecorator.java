@@ -19,7 +19,8 @@ public final class AnnotationParameterDecorator extends InputParameter implement
 
     AnnotationParameterDecorator(CommandParameter parameter, MethodParameterElement element) {
         super(parameter.getName(), parameter.getType(), parameter.isOptional(),
-                parameter.isFlag(), parameter.isGreedy(), parameter.getDefaultValueSupplier());
+                parameter.isFlag(), parameter.isGreedy(), parameter.getDefaultValueSupplier(),
+                parameter.getSuggestionResolver());
         this.parameter = parameter;
         this.element = element;
     }

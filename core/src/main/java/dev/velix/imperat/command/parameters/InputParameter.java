@@ -1,8 +1,10 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -14,16 +16,17 @@ public abstract class InputParameter implements CommandParameter {
     protected final Class<?> type;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
-
+    protected final SuggestionResolver<?, ?> suggestionResolver;
     protected InputParameter(String name, Class<?> type,
                              boolean optional, boolean flag, boolean greedy,
-                             OptionalValueSupplier<?> optionalValueSupplier) {
+                             OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
         this.name = name;
         this.type = type;
         this.optional = optional;
         this.flag = flag;
         this.greedy = greedy;
         this.optionalValueSupplier = optionalValueSupplier;
+	      this.suggestionResolver = suggestionResolver;
     }
 
     /**
@@ -115,7 +118,21 @@ public abstract class InputParameter implements CommandParameter {
     public Command<?> asCommand() {
         throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
     }
-
+    
+    
+    /**
+     * Fetches the suggestion resolver linked to this
+     * command parameter.
+     *
+     * @return the {@link SuggestionResolver} for resolving suggestion
+     */
+    @Override @SuppressWarnings("unchecked")
+    public @Nullable <C, T> SuggestionResolver<C, T> getSuggestionResolver() {
+        return (SuggestionResolver<C, T>) suggestionResolver;
+    }
+    
+    
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -2,6 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -118,8 +119,20 @@ final class CommandImpl<C> implements Command<C> {
     public FlagParameter asFlagParameter() {
         throw new UnsupportedOperationException("A command cannot be treated as a flag !");
     }
-
-
+    
+    /**
+     * Fetches the suggestion resolver linked to this
+     * command parameter.
+     *
+     * @return the {@link SuggestionResolver} for resolving suggestion
+     */
+    @Override @SuppressWarnings("unchecked")
+    public @Nullable <CS, T> SuggestionResolver<CS, T> getSuggestionResolver() {
+        return (SuggestionResolver<CS, T>) SuggestionResolver.plain(Command.class,
+                List.of(this.getName()));
+    }
+    
+    
     /**
      * @return the aliases for this commands
      */

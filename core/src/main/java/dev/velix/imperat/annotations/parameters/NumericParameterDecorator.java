@@ -13,9 +13,12 @@ public final class NumericParameterDecorator extends InputParameter implements N
     private final NumericRange range;
 
     NumericParameterDecorator(CommandParameter parameter, NumericRange range) {
-        super(parameter.getName(), parameter.getType(),
+        super(
+                parameter.getName(), parameter.getType(),
                 parameter.isOptional(), parameter.isFlag(),
-                parameter.isFlag(), parameter.getDefaultValueSupplier());
+                parameter.isFlag(), parameter.getDefaultValueSupplier(),
+                parameter.getSuggestionResolver()
+        );
         this.parameter = parameter;
         this.range = range;
     }
@@ -23,15 +26,6 @@ public final class NumericParameterDecorator extends InputParameter implements N
     public static NumericParameterDecorator decorate(CommandParameter parameter, NumericRange range) {
         return new NumericParameterDecorator(parameter, range);
     }
-	
-	/*private void handleIfNumeric() {
-		if(!TypeUtility.isNumericType(type) || !element.isAnnotationPresent(Range.class)) {
-			range = null;
-		}else {
-			Range annotation = element.getAnnotation(Range.class);
-			range = new NumericRange(annotation.min(), annotation.max());
-		}
-	}*/
 
     /**
      * Formats the usage parameter

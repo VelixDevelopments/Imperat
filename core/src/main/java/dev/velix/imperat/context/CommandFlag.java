@@ -10,6 +10,10 @@ import java.util.List;
 /**
  * Represents a flag that has been parsed/read/loaded from a
  * context of a command entered by the {@link CommandSource}
+ *
+ * A flag has merely 2 types:
+ * 1) A true flag is a flag that has an input value next to it in the raw input
+ * 2) A {@link CommandSwitch}
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandFlag {
