@@ -2,11 +2,13 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -24,7 +26,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
                           @NotNull Command<CommandSender> command) {
         super(
                 command.getName(),
-                command.getDefaultUsage().getDescription(),
+                command.getDescription(),
                 CommandUsage.format(command, command.getDefaultUsage()),
                 command.getAliases()
         );
@@ -51,7 +53,26 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     public @NotNull Plugin getPlugin() {
         return (Plugin) dispatcher.getPlatform();
     }
-
+    
+    @Nullable
+    @Override
+    public String getPermission() {
+        return super.getPermission();
+    }
+    
+    @NotNull
+    @Override
+    public String getDescription() {
+        return super.getDescription();
+    }
+    
+    @NotNull
+    @Override
+    public String getUsage() {
+        return super.getUsage();
+    }
+    
+    
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender,
                                              @NotNull String alias,

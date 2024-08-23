@@ -9,6 +9,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.help.CommandHelp;
@@ -314,6 +315,16 @@ public interface CommandDispatcher<C> {
 	                 Context<C> context,
 	                 @Nullable CommandUsage<C> usage
 	);
+	
+	default void sendCaption(CaptionKey key, @NotNull ResolvedContext<C> resolvedContext) {
+		sendCaption(
+						key,
+						resolvedContext.getOwningCommand(),
+						resolvedContext.getCommandSource(),
+						resolvedContext,
+						resolvedContext.getDetectedUsage()
+		);
+	}
 	
 	/**
 	 * Sends a {@link Caption} that requires dynamic input

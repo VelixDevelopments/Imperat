@@ -4,14 +4,14 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.BukkitSuggestionResolver;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GroupSuggestionResolver implements SuggestionResolver<CommandSender, Group> {
+public class GroupSuggestionResolver implements BukkitSuggestionResolver<Group> {
     /**
      * @return Type of data the suggestion is resolving
      */
@@ -33,7 +33,7 @@ public class GroupSuggestionResolver implements SuggestionResolver<CommandSender
     public List<String> autoComplete(Command<CommandSender> command, CommandSender source,
                                      ArgumentQueue queue, CommandParameter parameterToComplete, @Nullable CompletionArg argToComplete) {
         return GroupRegistry.getInstance().getAll()
-                .stream().map(Group::getName)
+                .stream().map(Group::name)
                 .collect(Collectors.toList());
     }
 

@@ -23,6 +23,7 @@ import dev.velix.imperat.exceptions.InvalidCommandUsageException;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.help.templates.DefaultTemplate;
 import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Preconditions;
@@ -65,7 +66,9 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 	
 	private AnnotationParser<C> annotationParser;
 	
-	protected BaseCommandDispatcher() {
+	protected PermissionResolver<C> permissionResolver;
+	
+	protected BaseCommandDispatcher(PermissionResolver<C> permissionResolver) {
 		contextFactory = ContextFactory.defaultFactory();
 		contextResolverRegistry = ContextResolverRegistry.createDefault();
 		valueResolverRegistry = ValueResolverRegistry.createDefault();
@@ -73,6 +76,7 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 		verifier = UsageVerifier.defaultVerifier();
 		captionRegistry = CaptionRegistry.createDefault();
 		annotationParser = AnnotationParser.defaultParser(this);
+		this.permissionResolver = permissionResolver;
 	}
 	
 	/**
@@ -129,6 +133,14 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * @return {@link PermissionResolver} for the dispatcher
+	 */
+	@Override
+	public PermissionResolver<C> getPermissionResolver() {
+		return permissionResolver;
 	}
 	
 	/**

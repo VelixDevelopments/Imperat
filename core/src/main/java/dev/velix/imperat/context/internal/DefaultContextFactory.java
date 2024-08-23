@@ -44,7 +44,6 @@ class DefaultContextFactory<C> implements ContextFactory<C> {
             @NotNull Context<C> plainContext,
             @NotNull CommandUsage<C> usage
     ) {
-
         return new ResolvedContextImpl<>(
                 dispatcher,
                 command,

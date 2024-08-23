@@ -24,11 +24,11 @@ public final class BanCommand {
     public void banPlayer(
             BukkitCommandSource source,
             @Named("player") OfflinePlayer player,
-            @Flag(value = "ip", inputType = Boolean.class) @DefaultValueProvider(BooleanValueSupplier.class) boolean silent,
+            @Switch({"silent", "s"}) boolean silent,
             @Named("duration") @Optional @Nullable String duration,
             @Named("reason") @Optional @DefaultValue("Breaking server laws") @Greedy String reason
     ) {
-        System.out.println("IP= " + silent);
+        System.out.println("is Silent = " + silent);
         //TODO actual ban logic
         String durationFormat = duration == null ? "FOREVER" : "for " + duration;
         String msg = "Banning " + player.getName() + " " + durationFormat + " due to " + reason;

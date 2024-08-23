@@ -53,6 +53,12 @@ public abstract class CommandHelp<C> {
             PaginatedHelpTemplate template,
             int page
     ) {
+        if(template == null) {
+            dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
+                    command, source, context, usage, null);
+            return;
+        }
+        
         PaginatedText<CommandUsage<C>> text = new PaginatedText<>(template.syntaxesPerPage());
 
         for (var usage : command.getUsages()) {
@@ -84,6 +90,12 @@ public abstract class CommandHelp<C> {
     }
 
     private void displayNormal(CommandSource<C> source) {
+        if(template == null) {
+            dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
+                    command, source, context, usage, null);
+            return;
+        }
+        
         final int maxUsages = command.getUsages().size();
         if (maxUsages == 0) {
             dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,

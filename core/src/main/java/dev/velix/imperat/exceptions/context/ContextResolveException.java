@@ -7,8 +7,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 public class ContextResolveException extends CommandException {
 
-    public ContextResolveException(String msg) {
-        super(msg);
+    public ContextResolveException(String msg, Object... args) {
+        super(String.format(msg, args));
     }
 
     /**

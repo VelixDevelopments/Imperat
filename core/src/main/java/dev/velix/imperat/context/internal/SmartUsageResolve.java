@@ -15,7 +15,6 @@ import lombok.Data;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
@@ -66,8 +65,6 @@ final class SmartUsageResolve<C> {
             String currentRaw = position.peekRaw(raws);
             //CommandDebugger.debug("Current raw= '%s' at %s" , currentRaw, position.raw);
             if (currentRaw == null) {
-
-
                 //CommandDebugger.debug("Filling empty optional args");
                 for (int i = position.parameter; i < parameterList.size(); i++) {
                     final CommandParameter optionalEmptyParameter = position.peekParameter(parameterList);
@@ -134,7 +131,7 @@ final class SmartUsageResolve<C> {
                     context.resolveFlag(
                             currentRaw,
                             flagValueInput,
-                            getResult(valueResolver, context, flagValueInput),
+                            getResult(valueResolver, context, flagValueInput, currentParameter),
                             flag
                     );
                 }
@@ -195,11 +192,13 @@ final class SmartUsageResolve<C> {
 
     }
 
-    private void resolveRequired(ResolvedContext<C> context,
-                                 ValueResolver<C, ?> resolver,
-                                 ArgumentQueue raws,
-                                 String currentRaw,
-                                 CommandParameter currentParameter) throws CommandException {
+    private void resolveRequired(
+            ResolvedContext<C> context,
+            ValueResolver<C, ?> resolver,
+            ArgumentQueue raws,
+            String currentRaw,
+            CommandParameter currentParameter
+    ) throws CommandException {
         Object resolveResult;
         if (currentParameter.isGreedy()) {
 
@@ -217,7 +216,7 @@ final class SmartUsageResolve<C> {
 
             position.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
         } else {
-            resolveResult = this.getResult(resolver, context, currentRaw);
+            resolveResult = this.getResult(resolver, context, currentRaw, currentParameter);
             position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         }
 
@@ -225,17 +224,19 @@ final class SmartUsageResolve<C> {
                 currentParameter, resolveResult);
     }
 
-    private void resolveOptional(ResolvedContext<C> context,
-                                 ValueResolver<C, ?> resolver,
-                                 ArgumentQueue raws,
-                                 List<CommandParameter> parameterList,
-                                 String currentRaw,
-                                 CommandParameter currentParameter,
-                                 int lengthWithoutFlags) throws CommandException {
+    private void resolveOptional(
+            ResolvedContext<C> context,
+            ValueResolver<C, ?> resolver,
+            ArgumentQueue raws,
+            List<CommandParameter> parameterList,
+            String currentRaw,
+            CommandParameter currentParameter,
+            int lengthWithoutFlags
+    ) throws CommandException {
         if (raws.size() < lengthWithoutFlags) {
             int diff = lengthWithoutFlags - raws.size();
 
-            Object resolveResult = getResult(resolver, context, currentRaw);
+            Object resolveResult = getResult(resolver, context, currentRaw, currentParameter);
 
             if (!position.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
 
@@ -288,15 +289,15 @@ final class SmartUsageResolve<C> {
             context.resolveArgument(command, currentRaw, position.parameter,
                     currentParameter, resolveResult);
         } else {
-            resolveResult = getResult(resolver, context, currentRaw);
+            resolveResult = getResult(resolver, context, currentRaw, currentParameter);
             context.resolveArgument(command, currentRaw, position.parameter, currentParameter, resolveResult);
             position.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         }
 
     }
 
-    private <T> T getResult(ValueResolver<C, T> resolver, Context<C> context, String raw) throws CommandException {
-        return resolver.resolve(context.getCommandSource(), context, raw);
+    private <T> T getResult(ValueResolver<C, T> resolver, Context<C> context, String raw, CommandParameter currentParameter) throws CommandException {
+        return resolver.resolve(context.getCommandSource(), context, raw, currentParameter);
     }
 
 

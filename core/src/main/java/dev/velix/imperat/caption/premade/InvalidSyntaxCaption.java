@@ -50,30 +50,30 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
             //UNKNOWN USAGE
             return Messages.getMsg(Messages.INVALID_SYNTAX_UNKNOWN_USAGE,
                     Placeholder.parsed("raw_args", context.getArguments().join(" ")));
-        } else {
-            final int last = context.getArguments().size() - 1;
-
-            List<CommandParameter> params = new ArrayList<>(usage.getParameters())
-                    .stream()
-                    .filter((param) -> !param.isOptional() && param.getPosition() > last)
-                    .toList();
-
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < params.size(); i++) {
-                CommandParameter param = params.get(i);
-                assert !param.isOptional();
-                builder.append(param.format(command));
-                if (i != params.size() - 1)
-                    builder.append(' ');
-
-            }
-            //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
-            return Messages.getMsg(Messages.INVALID_SYNTAX_INCOMPLETE_USAGE,
-                            Placeholder.parsed("required_args", builder.toString()))
-                    .appendNewline()
-                    .append(BaseCommandDispatcher.FULL_SYNTAX_PREFIX).append(
-                            Messages.getMsg(Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE, Placeholder.parsed("usage", dispatcher.commandPrefix() + CommandUsage.format(command, usage)))
-                    );
         }
+        final int last = context.getArguments().size() - 1;
+
+        List<CommandParameter> params = new ArrayList<>(usage.getParameters())
+                .stream()
+                .filter((param) -> !param.isOptional() && param.getPosition() > last)
+                .toList();
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < params.size(); i++) {
+            CommandParameter param = params.get(i);
+            assert !param.isOptional();
+            builder.append(param.format(command));
+            if (i != params.size() - 1)
+                builder.append(' ');
+
+        }
+        //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
+        return Messages.getMsg(Messages.INVALID_SYNTAX_INCOMPLETE_USAGE,
+                        Placeholder.parsed("required_args", builder.toString()))
+                .appendNewline()
+                .append(BaseCommandDispatcher.FULL_SYNTAX_PREFIX).append(
+                        Messages.getMsg(Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE, Placeholder.parsed("usage", dispatcher.commandPrefix() + CommandUsage.format(command, usage)))
+                );
+        
     }
 }

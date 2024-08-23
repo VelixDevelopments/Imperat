@@ -14,11 +14,9 @@ public interface Messages {
 
     MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
-
     String NO_PERMISSION = "<red> You don't have permission to do that !";
 
     String COOL_DOWN_WAIT = "<red> Please wait for <time> to execute that again !";
-    //TODO add more
 
     String INVALID_SYNTAX_UNKNOWN_USAGE = "<yellow> Unknown command usage '<blue><raw_args></blue>' is unknown !";
 

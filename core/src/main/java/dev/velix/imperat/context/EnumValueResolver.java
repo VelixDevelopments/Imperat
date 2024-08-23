@@ -1,6 +1,7 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.resolvers.ValueResolver;
@@ -22,7 +23,10 @@ public final class EnumValueResolver<C, E extends Enum<E>> implements ValueResol
      * @return the resolved output from the input object
      */
     @Override
-    public E resolve(CommandSource<C> source, Context<C> context, String raw) throws CommandException {
+    public E resolve(CommandSource<C> source,
+                     Context<C> context,
+                     String raw, CommandParameter parameter
+    ) throws CommandException {
         try {
             return Enum.valueOf(enumType, raw.toUpperCase());
         } catch (EnumConstantNotPresentException ex) {

@@ -16,29 +16,29 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
 
     private ValueResolverRegistry() {
         super();
-        registerResolver(String.class, ((source, context, raw) -> raw));
-        registerResolver(Integer.class, (source, context, raw) -> {
+        registerResolver(String.class, ((source, context, raw, parameter) -> raw));
+        registerResolver(Integer.class, (source, context, raw, parameter) -> {
             if (TypeUtility.isInteger(raw)) {
                 return Integer.parseInt(raw);
             } else {
                 throw exception(context, raw, Integer.class);
             }
         });
-        registerResolver(Long.class, (source, context, raw) -> {
+        registerResolver(Long.class, (source, context, raw, parameter) -> {
             if (TypeUtility.isLong(raw)) {
                 return Long.parseLong(raw);
             } else {
                 throw exception(context, raw, Long.class);
             }
         });
-        registerResolver(Boolean.class, (source, context, raw) -> {
+        registerResolver(Boolean.class, (source, context, raw, parameter) -> {
             if (TypeUtility.isBoolean(raw)) {
                 return Boolean.valueOf(raw);
             } else {
                 throw exception(context, raw, Boolean.class);
             }
         });
-        registerResolver(Double.class, (source, context, raw) -> {
+        registerResolver(Double.class, (source, context, raw, parameter) -> {
             if (TypeUtility.isDouble(raw)) {
                 return Double.parseDouble(raw);
             } else {

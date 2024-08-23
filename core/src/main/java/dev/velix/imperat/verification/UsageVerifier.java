@@ -8,7 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
  * to be added to the command
  *
  * <p>
- * Rule(s) to follow when creating a usage:
+ * Rule(s) recommended to follow when creating a usage:
  * <p>
  * 1) A usage MUST have AT LEAST ONE required parameter at the beginning before any other
  * parameters whether optional or required
