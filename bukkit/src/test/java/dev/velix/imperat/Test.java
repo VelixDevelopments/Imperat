@@ -1,7 +1,9 @@
 package dev.velix.imperat;
 
 
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.examples.BanCommand;
 import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
@@ -30,12 +32,30 @@ public final class Test extends JavaPlugin implements Listener {
 		testImperat();
 	}
 	
+	private void testBuilderImperat() {
+		var command = Command.createCommand("example");
+		command.setDefaultUsageExecution((source, context)-> {
+			source.reply("This is just an example with no arguments entered");
+		});
+		
+		command.addUsage(CommandUsage.builder()
+						.parameters(
+							CommandParameter.requiredInt("firstArg")
+						)
+						.execute((source, context) -> {
+							Integer firstArg  = context.getArgument("firstArg");
+							source.reply("Entered required number= " + firstArg);
+						})
+						.build()
+		);
+	}
+	
 	private void testImperat() {
 		dispatcher = BukkitCommandDispatcher.create(this);
 		
 		dispatcher.setHelpTemplate(new ExampleHelpTemplate());
 		
-		dispatcher.registerValueResolver(Group.class, ((source, context, raw) -> {
+		dispatcher.registerValueResolver(Group.class, ((source, context, raw, parameter) -> {
 			Optional<Group> container = GroupRegistry.getInstance().getData(raw);
 			return container.orElseThrow(() ->
 							new ContextResolveException("Invalid group '" + raw + "'"));
@@ -63,6 +83,7 @@ public final class Test extends JavaPlugin implements Listener {
 							.getUserGuild(sender.as(Player.class).getUniqueId());
 		});
 		
+		
 		/*dispatcher.registerAnnotationReplacer(MyCustomAnnotation.class, (annotation)-> {
 			var cmdAnn = AnnotationFactory.create(Command.class, "value" , new String[]{"group", "rank"});
 			var permission = AnnotationFactory.create(Permission.class, "value", "command.group");
@@ -76,6 +97,24 @@ public final class Test extends JavaPlugin implements Listener {
 		dispatcher.registerCommand(new GroupCommand());
 		dispatcher.registerCommand(new BanCommand());
 		debugCommands();
+	}
+	
+	private void classicGroupCmd() {
+		
+		Command<CommandSender> senderCommand = Command.createCommand("group");
+		senderCommand.setDefaultUsageExecution((source, context)-> {
+			source.reply("/group <group>");
+		});
+		
+		senderCommand.addUsage(
+						CommandUsage.<CommandSender>builder()
+						.parameters(CommandParameter.required("group", Group.class))
+						.execute((source, context)-> {
+							Group group = context.getArgument("group");
+							assert group != null;
+							source.reply("entered group name= " + group.name());
+						}).build());
+		
 	}
 	
 	@EventHandler
