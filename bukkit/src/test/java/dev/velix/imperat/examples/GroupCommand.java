@@ -56,7 +56,6 @@ public final class GroupCommand {
             @Named("group") Group group,
             BukkitCommandHelp help
     ) {
-        System.out.println("INSIDE METHOD HELP");
         source.reply("Group entered= " + group.name());
         help.display(source);
     }

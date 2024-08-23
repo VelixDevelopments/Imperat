@@ -33,7 +33,6 @@ public final class Test extends JavaPlugin implements Listener {
 		//testBukkit();
 		this.getServer().getPluginManager().registerEvents(this, this);
 		testImperat();
-		dispatcher.registerNamedSuggestionResolver("groups", new GroupSuggestionResolver());
 	}
 	
 	private void testBuilderImperat() {
