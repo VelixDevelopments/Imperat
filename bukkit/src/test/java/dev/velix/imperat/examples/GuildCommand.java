@@ -5,10 +5,9 @@ import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.parameters.Named;
-import dev.velix.imperat.examples.custom_annotations.MyCustomAnnotation2;
-import dev.velix.imperat.test.Guild;
-import dev.velix.imperat.test.GuildInvite;
-import dev.velix.imperat.test.GuildRegistry;
+import dev.velix.imperat.test.guild.Guild;
+import dev.velix.imperat.test.guild.GuildInvite;
+import dev.velix.imperat.test.guild.GuildRegistry;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,12 +33,16 @@ public class GuildCommand {
     }
 
     @SubCommand("disband")
-    public void disband(BukkitCommandSource source, @MyCustomAnnotation2 Guild guild) {
+    public void disband(BukkitCommandSource source, Guild guild) {
         if (guild == null) {
             source.reply("HAHA YOU HAVE NO GUILD LLL");
+            //user has no guild
+            //do something,
+            // or you can process it
+            // to do something in the ContextResolver by making use of custom exceptions
             return;
         }
-        GuildRegistry.getInstance().removeGuild(guild);
+        guild.disband();
         source.reply("You have disbanded your guild successfully !!");
     }
 

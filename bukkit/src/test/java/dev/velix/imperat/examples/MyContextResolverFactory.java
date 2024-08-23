@@ -3,10 +3,9 @@ package dev.velix.imperat.examples;
 import dev.velix.imperat.BukkitContextResolverFactory;
 import dev.velix.imperat.examples.custom_annotations.MyCustomAnnotation2;
 import dev.velix.imperat.resolvers.ContextResolver;
-import dev.velix.imperat.test.GuildRegistry;
+import dev.velix.imperat.test.guild.GuildRegistry;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Parameter;
@@ -21,9 +20,9 @@ public final class MyContextResolverFactory implements BukkitContextResolverFact
      * @return the {@link ContextResolver} specific for that parameter
      */
     @Override
-    public @Nullable ContextResolver<CommandSender, ?> create(@NotNull Parameter parameter) {
+    public @Nullable ContextResolver<CommandSender, ?> create(@Nullable Parameter parameter) {
 
-        if (!parameter.isAnnotationPresent(MyCustomAnnotation2.class)) {
+        if (parameter == null || !parameter.isAnnotationPresent(MyCustomAnnotation2.class)) {
             return null;
         }
 

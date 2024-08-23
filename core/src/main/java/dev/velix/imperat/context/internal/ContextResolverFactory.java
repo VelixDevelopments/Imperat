@@ -18,18 +18,18 @@ public interface ContextResolverFactory<C> {
     /**
      * Creates a context resolver based on the parameter
      *
-     * @param parameter the parameter
+     * @param parameter the parameter (null if used classic way)
      * @return the {@link ContextResolver} specific for that parameter
      */
     @Nullable
-    ContextResolver<C, ?> create(@NotNull Parameter parameter);
+    ContextResolver<C, ?> create(@Nullable Parameter parameter);
 
 
     static <C, T> @NotNull ContextResolverFactory<C> of(
             Class<T> clazz,
             ContextResolver<C, T> resolver
     ) {
-        return (p) -> p.getType().isAssignableFrom(clazz) ? resolver : null;
+        return (p) -> p != null && p.getType().isAssignableFrom(clazz) ? resolver : null;
     }
 
 }

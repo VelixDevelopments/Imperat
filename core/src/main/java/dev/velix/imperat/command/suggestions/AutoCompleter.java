@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Represents a class that's responsible for
- * Handling all auto-completion process during
+ * Handling all auto-completion processes during
  * tab-completion per one command, regardless of the sender type
  */
 @ApiStatus.AvailableSince("1.0.0")

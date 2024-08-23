@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This includes all non-literal arguments(which take the  form of literal arguments)
+ * This includes all non-literal arguments (which take the form of literal arguments)
  * this fetches all parameters that got resolved into a value and caches it for
  * further use during command executions.
  * <p>
@@ -62,7 +62,7 @@ public interface ResolvedContext<C> extends Context<C> {
 
     /**
      * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
-     * NOTE: the flags are NOT included as a resolved argument, it's treated in a different way
+     * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
     Collection<? extends ResolvedArgument> getResolvedArguments();
 
@@ -98,7 +98,7 @@ public interface ResolvedContext<C> extends Context<C> {
 
     /**
      * Fetches the last used resolved command
-     * of a resolved context !
+     * of a resolved context!
      *
      * @return the last used command/subcommand
      */

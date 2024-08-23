@@ -8,7 +8,7 @@ import dev.velix.imperat.annotations.types.methods.Help;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.*;
-import dev.velix.imperat.util.ClassMap;
+import dev.velix.imperat.util.collections.ClassMap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

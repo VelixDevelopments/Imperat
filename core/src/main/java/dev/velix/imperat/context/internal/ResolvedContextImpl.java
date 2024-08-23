@@ -4,12 +4,13 @@ import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
-import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.context.NumberOutOfRangeException;
+import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
@@ -46,8 +47,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
     //all resolved arguments EXCEPT for subcommands and flags.
     private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
-
-
+    
     ResolvedContextImpl(CommandDispatcher<C> dispatcher,
                         Command<C> commandUsed,
                         Context<C> context,
@@ -96,7 +96,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
     /**
      * @param command the command/subcommand with certain args
-     * @return the command/subcommand's resolved args in as new array-list
+     * @return the command/subcommand's resolved args in as a new array-list
      */
     @Override
     public List<ResolvedArgument> getResolvedArguments(Command<C> command) {
@@ -115,7 +115,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
     /**
      * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
-     * NOTE: the flags are NOT included as a resolved argument, it's treated in a different way
+     * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
     @Override
     public Collection<? extends ResolvedArgument> getResolvedArguments() {
@@ -136,7 +136,34 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         if (argument == null) return null;
         return (T) argument.value();
     }
-
+    
+    /**
+     * Fetches the argument/input resolved by the context
+     * using {@link ContextResolver}
+     *
+     * @param type type of argument to return
+     * @return the argument/input resolved by the context
+     */
+    @Override @SuppressWarnings("unchecked")
+    public <T> @Nullable T getContextResolvedArgument(Class<T> type) {
+        var factory = dispatcher.getContextResolverFactory();
+        if(factory == null) {
+            var cr = dispatcher.getContextResolver(type);
+            if(cr == null) return null;
+            try {
+                return cr.resolve(this, null);
+            } catch (CommandException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+        ContextResolver<C, T> factoryCr = (ContextResolver<C, T>) factory.create(null);
+        try {
+            return factoryCr == null ? null : factoryCr.resolve(this, null);
+        } catch (CommandException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+    
     /**
      * @return the command source of the command
      * @see CommandSource
@@ -147,7 +174,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     }
 
     /**
-     * @return the arguments entered by the
+     * @return the arguments entered by the command sender
      * @see ArgumentQueue
      */
     @Override
@@ -198,9 +225,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     @Override
     public void resolve() throws CommandException {
         SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
-        long start = System.currentTimeMillis();
         handler.resolve(dispatcher, this);
-        System.out.println("Took " + (System.currentTimeMillis() - start));
         this.lastCommand = handler.getCommand();
     }
 
@@ -254,7 +279,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
     /**
      * Fetches the last used resolved command
-     * of a resolved context !
+     * of a resolved context!
      *
      * @return the last used command/subcommand
      */

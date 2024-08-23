@@ -2,6 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -20,6 +21,6 @@ public interface CommandExecution<C> {
      * @param context       the context of the command
      */
     void execute(CommandSource<C> commandSource,
-                 ExecutionContext context);
+                 ExecutionContext context) throws CommandException;
 
 }

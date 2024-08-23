@@ -1,4 +1,4 @@
-package dev.velix.imperat.test;
+package dev.velix.imperat.test.guild;
 
 import dev.velix.imperat.util.Registry;
 import org.jetbrains.annotations.Nullable;

@@ -1,4 +1,4 @@
-package dev.velix.imperat.test;
+package dev.velix.imperat.test.guild;
 
 import org.bukkit.entity.Player;
 

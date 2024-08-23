@@ -12,6 +12,7 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
+import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.resolvers.ContextResolver;
@@ -407,6 +408,27 @@ public interface CommandDispatcher<C> {
 	
 	
 	void shutdownPlatform();
+	
+	static <C> void handleException(final Context<C> context, final Class<?> owningClass,
+	                                final String methodName, final Throwable error) {
+		
+		Throwable current = error;
+		if(current instanceof CommandException commandException) {
+			commandException.handle(context);
+			return;
+		}
+		
+		do {
+			current = current.getCause();
+		}while (current != null && !(current instanceof CommandException));
+	
+		if(current != null) {
+			((CommandException)current).handle(context);
+		}else {
+			CommandDebugger.error(owningClass, methodName, error);
+		}
+		
+	}
 	
 	
 }

@@ -1,6 +1,7 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
+import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -128,7 +129,7 @@ public interface CommandParameter {
     <C> String format(Command<C> command);
 
 
-    static <C, T> CommandParameter input(
+    static <C, T> CommandParameter of(
             String name,
             Class<T> type,
             boolean optional,
@@ -169,16 +170,16 @@ public interface CommandParameter {
         return required(name, String.class, suggestionResolver);
     }
 
-    static <C> CommandParameter requiredInt(String name, SuggestionResolver<C, Integer> suggestionResolver) {
-        return required(name, Integer.class, suggestionResolver);
+    static <C> CommandParameter requiredInt(String name, SuggestionResolver<C, Integer> suggestionResolver, @Nullable NumericRange range) {
+        return NumericParameterDecorator.decorate(required(name, Integer.class, suggestionResolver), range);
     }
 
-    static <C> CommandParameter requiredLong(String name, SuggestionResolver<C, Long> suggestionResolver) {
-        return required(name, Long.class, suggestionResolver);
+    static <C> CommandParameter requiredLong(String name, SuggestionResolver<C, Long> suggestionResolver, @Nullable NumericRange range) {
+        return NumericParameterDecorator.decorate(required(name, Long.class, suggestionResolver), range);
     }
 
-    static <C> CommandParameter requiredDouble(String name, SuggestionResolver<C, Double> suggestionResolver) {
-        return required(name, Double.class, suggestionResolver);
+    static <C> CommandParameter requiredDouble(String name, SuggestionResolver<C, Double> suggestionResolver, @Nullable NumericRange range) {
+        return NumericParameterDecorator.decorate(required(name, Double.class, suggestionResolver), range);
     }
 
     static FlagParameter flag(
@@ -195,14 +196,14 @@ public interface CommandParameter {
     }
     
     
-    static <T> CommandParameter input(
+    static <T> CommandParameter of(
             String name,
             Class<T> type,
             boolean optional,
             boolean greedy,
             OptionalValueSupplier<T> valueSupplier
     ) {
-        return input(name, type, optional, greedy, valueSupplier, null);
+        return of(name, type, optional, greedy, valueSupplier, null);
     }
     
     static <T> CommandParameter required(String name, Class<T> clazz) {
@@ -228,16 +229,17 @@ public interface CommandParameter {
         return requiredText(name, null);
     }
     
+    //TODO more overloading for each parameter
     static CommandParameter requiredInt(String name) {
-        return requiredInt(name,null);
+        return requiredInt(name, null, null);
     }
     
     static CommandParameter requiredLong(String name) {
-        return requiredLong(name, null);
+        return requiredLong(name, null, null);
     }
     
     static CommandParameter requiredDouble(String name) {
-        return requiredDouble(name, null);
+        return requiredDouble(name, null, null);
     }
     
 }

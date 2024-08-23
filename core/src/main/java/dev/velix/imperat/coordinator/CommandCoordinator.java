@@ -1,6 +1,6 @@
 package dev.velix.imperat.coordinator;
 
-import dev.velix.imperat.CommandDebugger;
+import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.context.Context;
@@ -24,7 +24,7 @@ public interface CommandCoordinator<C> {
             try {
                 execution.execute(source, context);
             } catch (Exception ex) {
-                CommandDebugger.error(CommandCoordinator.class, "sync-lambda", ex);
+                CommandDispatcher.handleException(context, CommandCoordinator.class, "sync-lambda", ex);
             }
         };
     }
@@ -35,12 +35,13 @@ public interface CommandCoordinator<C> {
             if (executorService == null) {
                 executorService = ForkJoinPool.commonPool();
             }
-            CompletableFuture.runAsync(() -> execution.execute(source, context), executorService)
-                    .exceptionally((throwable) -> {
-                        CommandDebugger.error(CommandCoordinator.class,
-                                "async-lambda", throwable);
-                        return null;
-                    });
+            CompletableFuture.runAsync(() -> {
+					            try {
+						            execution.execute(source, context);
+					            } catch (Exception e) {
+                          CommandDispatcher.handleException(context, CommandCoordinator.class, "async-lambda", e);
+                      }
+				            }, executorService);
         });
     }
 

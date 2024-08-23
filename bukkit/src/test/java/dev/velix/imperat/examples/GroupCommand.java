@@ -10,6 +10,7 @@ import dev.velix.imperat.annotations.types.methods.Help;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Named;
+import dev.velix.imperat.annotations.types.parameters.SuggestionProvider;
 import dev.velix.imperat.test.Group;
 
 @Command("group")
@@ -22,7 +23,7 @@ public final class GroupCommand {
     }
 
     @Usage
-    public void mainUsage(BukkitCommandSource source, @Named("group") Group group) {
+    public void mainUsage(BukkitCommandSource source, @Named("group") @SuggestionProvider("groups") Group group) {
         //when he does "/group <group>"
         source.reply("entered group name= " + group.name());
     }

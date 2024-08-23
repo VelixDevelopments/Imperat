@@ -8,6 +8,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.ResolvedFlag;
+import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.reflection.DefaultMethodCallerFactory;
@@ -52,7 +53,7 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
                                                       CommandSource<C> source,
                                                       ExecutionContext context,
                                                       Method method,
-                                                      @Nullable CommandHelp<C> commandHelp) {
+                                                      @Nullable CommandHelp<C> commandHelp) throws CommandException {
         Parameter[] parameters = method.getParameters();
         Object[] paramsInstances = new Object[parameters.length];
 
@@ -114,7 +115,7 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
      */
     @Override
     public void execute(CommandSource<C> commandSource,
-                        ExecutionContext context) {
+                        ExecutionContext context) throws CommandException {
 
         var instances = loadParameterInstances(dispatcher, fullParameters,
                 commandSource, context, method, null);

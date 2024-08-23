@@ -1,4 +1,4 @@
-package dev.velix.imperat.test;
+package dev.velix.imperat.test.guild;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +30,9 @@ public final class Guild {
 
     public void sendInvite(Player inviter, Player target) {
         //TODO implement
-
+    }
+    
+    public void disband() {
+        GuildRegistry.getInstance().removeGuild(this);
     }
 }

@@ -338,15 +338,14 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 	
 	/**
 	 * Registers a suggestion resolver linked
-	 * directly to the argument only , not the general
-	 * type of this argument
+	 * directly to a unique name
 	 *
-	 * @param argumentName       the argument name
+	 * @param name       the unique name/id of the suggestion resolver
 	 * @param suggestionResolver the suggestion resolver to register
 	 */
 	@Override
-	public <T> void registerNamedSuggestionResolver(String argumentName, SuggestionResolver<C, T> suggestionResolver) {
-		suggestionResolverRegistry.registerNamedResolver(argumentName, suggestionResolver);
+	public <T> void registerNamedSuggestionResolver(String name, SuggestionResolver<C, T> suggestionResolver) {
+		suggestionResolverRegistry.registerNamedResolver(name, suggestionResolver);
 	}
 	
 	/**
@@ -468,22 +467,7 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 		try {
 			handleExecution(commandSource, plainContext);
 		} catch (Throwable ex) {
-			
-			Throwable current = ex;
-			if(current instanceof CommandException commandException) {
-				commandException.handle(plainContext);
-			}
-			else {
-				while (current != null && !(current instanceof CommandException)) {
-					current = current.getCause();
-				}
-				if(current != null) {
-					((CommandException)current).handle(plainContext);
-				}else {
-					CommandDebugger.error(BaseCommandDispatcher.class, "dispatch", ex);
-				}
-			}
-			
+			CommandDispatcher.handleException(plainContext, BaseCommandDispatcher.class, "dispatch", ex);
 		}
 		
 	}

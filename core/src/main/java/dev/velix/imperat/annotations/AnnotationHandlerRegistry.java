@@ -304,7 +304,7 @@ final class AnnotationHandlerRegistry<C> extends
 		
 		CommandParameter param =
 						AnnotationParameterDecorator.decorate(
-										CommandParameter.input(
+										CommandParameter.of(
 														name, (Class<T>)parameter.getType(),
 														optional, greedy, optionalValueSupplier, suggestionResolver
 										), element

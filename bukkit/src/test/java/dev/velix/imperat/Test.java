@@ -10,9 +10,12 @@ import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.MyContextResolverFactory;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
-import dev.velix.imperat.test.*;
+import dev.velix.imperat.test.Group;
+import dev.velix.imperat.test.GroupRegistry;
+import dev.velix.imperat.test.GroupSuggestionResolver;
+import dev.velix.imperat.test.guild.Guild;
+import dev.velix.imperat.test.guild.GuildContextResolver;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -30,6 +33,7 @@ public final class Test extends JavaPlugin implements Listener {
 		//testBukkit();
 		this.getServer().getPluginManager().registerEvents(this, this);
 		testImperat();
+		dispatcher.registerNamedSuggestionResolver("groups", new GroupSuggestionResolver());
 	}
 	
 	private void testBuilderImperat() {
@@ -74,15 +78,6 @@ public final class Test extends JavaPlugin implements Listener {
 		
 		dispatcher.registerContextResolverFactory(new MyContextResolverFactory());
 		
-		dispatcher.registerContextResolver(Guild.class, (context, parameter) -> {
-			var sender = context.getCommandSource();
-			if (sender.isConsole()) {
-				return null;
-			}
-			return GuildRegistry.getInstance()
-							.getUserGuild(sender.as(Player.class).getUniqueId());
-		});
-		
 		
 		/*dispatcher.registerAnnotationReplacer(MyCustomAnnotation.class, (annotation)-> {
 			var cmdAnn = AnnotationFactory.create(Command.class, "value" , new String[]{"group", "rank"});
@@ -93,6 +88,9 @@ public final class Test extends JavaPlugin implements Listener {
 			return List.of(cmdAnn, permission, desc);
 		});*/
 		//TODO test @Range
+		
+		dispatcher.registerContextResolver(Guild.class, new GuildContextResolver());
+		
 		dispatcher.registerCommand(new GuildCommand());
 		dispatcher.registerCommand(new GroupCommand());
 		dispatcher.registerCommand(new BanCommand());
@@ -115,6 +113,27 @@ public final class Test extends JavaPlugin implements Listener {
 							source.reply("entered group name= " + group.name());
 						}).build());
 		
+	}
+	
+	private void classicGuildCmd() {
+		Command<CommandSender> guildCmd = Command.createCommand("guild");
+		guildCmd.addSubCommandUsage("disband", CommandUsage.<CommandSender>builder()
+										.parameters() //no parameters in usage '/guild disband'
+										.execute((source, context)-> {
+											//getting our context resolved Guild object's instance
+											Guild guild = context.getContextResolvedArgument(Guild.class);
+											if(guild == null) {
+												//user has no guild
+												//do something,
+												// or you can process it
+												// to do something in the ContextResolver by making use of custom exceptions
+												return;
+											}
+											guild.disband();
+											source.reply("You have disbanded your guild successfully !!");
+										})
+										.build()
+	);
 	}
 	
 	@EventHandler
