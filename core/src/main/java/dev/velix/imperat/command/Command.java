@@ -104,7 +104,7 @@ public interface Command<C> extends CommandParameter {
     CommandUsage<C> getDefaultUsage();
 
     /**
-     * @param execution sets what happens when there's no parameters
+     * @param execution sets what happens when there are no parameters
      */
     void setDefaultUsageExecution(CommandExecution<C> execution);
 
