@@ -38,16 +38,16 @@ public interface HelpTemplate {
     void setUsageFormatter(UsageFormatter formatter);
 
     /**
-     * @return the usages displayer
+     * @return the usage displayer
      */
-    UsagesDisplayer getUsagesDisplayer();
+    UsageDisplayer getUsagesDisplayer();
 
     /**
-     * Sets the usages displayer instance
+     * Sets the usage displayer instance
      * to a new one
      *
      * @param displayer the displayer instance to set
      */
-    void setUsagesDisplayer(UsagesDisplayer displayer);
+    void setUsageDisplayer(UsageDisplayer displayer);
 
 }

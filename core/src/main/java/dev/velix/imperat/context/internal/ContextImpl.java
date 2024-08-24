@@ -4,6 +4,7 @@ import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.resolvers.ContextResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -86,8 +87,20 @@ final class ContextImpl<C> implements Context<C> {
     public <T> @Nullable T getArgument(String name) {
         throw new UnsupportedOperationException();
     }
-
-
+    
+    /**
+     * Fetches the argument/input resolved by the context
+     * using {@link ContextResolver}
+     *
+     * @param type type of argument to return
+     * @return the argument/input resolved by the context
+     */
+    @Override
+    public <T> @Nullable T getContextResolvedArgument(Class<T> type) {
+        throw new UnsupportedOperationException();
+    }
+    
+    
     /**
      * @return the number of flags extracted
      */

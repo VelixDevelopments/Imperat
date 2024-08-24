@@ -2,6 +2,7 @@ package dev.velix.imperat.context;
 
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.context.internal.ResolvedFlag;
+import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,6 +55,12 @@ public interface ExecutionContext {
      */
     <T> @Nullable T getArgument(String name);
 
+    default <T> @NotNull T getArgumentOr(String name, T value) {
+        final T argValue = getArgument(name);
+        if(argValue != null)return argValue;
+        return value;
+    }
+    
     default String getRawArgument(int index) {
         if (index >= getArguments().size() || index < 0) return null;
         return getArguments().get(index);
@@ -69,5 +76,5 @@ public interface ExecutionContext {
      * @return the argument/input that is resolved by the context
      * @param <T> the type of this argument parsed value
      */
-    <T> @Nullable T getContextResolvedArgument(Class<T> type);
+    <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException;
 }

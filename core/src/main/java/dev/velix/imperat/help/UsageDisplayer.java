@@ -20,13 +20,13 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 @FunctionalInterface
-public interface UsagesDisplayer {
+public interface UsageDisplayer {
 
     /**
      * Displays all usages together to
      * the {@link CommandSource}
      * <p>
-     * It has 2 pre-made implementations
+     * It has two pre-made implementations
      *
      * @param dispatcher the command dispatcher
      * @param command    the command that owns all the usages
@@ -45,15 +45,15 @@ public interface UsagesDisplayer {
             List<CommandUsage<C>> usages
     );
 
-    static UsagesDisplayer plain() {
+    static UsageDisplayer plain() {
         return new PlainDisplayer();
     }
 
-    static UsagesDisplayer tree() {
+    static UsageDisplayer tree() {
         return new TreeDisplayer();
     }
 
-    static UsagesDisplayer custom(UsagesDisplayer displayer) {
+    static UsageDisplayer custom(UsageDisplayer displayer) {
         return displayer;
     }
 }

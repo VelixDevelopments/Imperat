@@ -4,7 +4,7 @@ import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.help.UsageFormatter;
-import dev.velix.imperat.help.UsagesDisplayer;
+import dev.velix.imperat.help.UsageDisplayer;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -13,7 +13,7 @@ public class DefaultTemplate implements HelpTemplate {
 
 
     private UsageFormatter formatter = new DefaultFormatter();
-    private UsagesDisplayer displayer = UsagesDisplayer.plain();
+    private UsageDisplayer displayer = UsageDisplayer.plain();
 
     public DefaultTemplate() {
     }
@@ -55,21 +55,21 @@ public class DefaultTemplate implements HelpTemplate {
     }
 
     /**
-     * @return the usages displayer
+     * @return the usage displayer
      */
     @Override
-    public UsagesDisplayer getUsagesDisplayer() {
+    public UsageDisplayer getUsagesDisplayer() {
         return displayer;
     }
 
     /**
-     * Sets the usages displayer instance
+     * Sets the usage displayer instance
      * to a new one
      *
      * @param displayer the displayer instance to set
      */
     @Override
-    public void setUsagesDisplayer(UsagesDisplayer displayer) {
+    public void setUsageDisplayer(UsageDisplayer displayer) {
         this.displayer = displayer;
     }
 

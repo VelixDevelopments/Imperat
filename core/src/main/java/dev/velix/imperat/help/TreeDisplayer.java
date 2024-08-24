@@ -17,7 +17,7 @@ import java.util.List;
 @ApiStatus.Internal
 @ApiStatus.Experimental
 @Unstable
-public final class TreeDisplayer implements UsagesDisplayer {
+final class TreeDisplayer implements UsageDisplayer {
 
     private final static Component BRANCH_DOWN = Component.text("┠", NamedTextColor.DARK_GRAY);
     private final static Component BRANCH_FORWARDS = Component.text("-", NamedTextColor.DARK_GRAY);
@@ -82,18 +82,18 @@ public final class TreeDisplayer implements UsagesDisplayer {
 
 
         if (sub == null) {
-            source.reply(formatter.formatUsage(dispatcher, command, usage, last));
+            source.reply(formatter.formatUsageLine(dispatcher, command, usage, last));
             return;
         }
 
-        source.reply(formatter.formatUsage(format));
+        source.reply(formatter.formatUsageOnly(format));
 
         int max = sub.getUsages().size();
         int i = 0;
         for (CommandUsage<C> commandUsage : sub.getUsages()) {
             var formatInfo = formatUsageTillSub(dispatcher, command, commandUsage);
             source.reply(BRANCH_DOWN.append(BRANCH_FORWARDS)
-                    .append(formatter.formatUsage(formatInfo.right())));
+                    .append(formatter.formatUsageOnly(formatInfo.right())));
             if (commandUsage.hasParamType(Command.class)) {
                 displayUsage(dispatcher, command, source, commandUsage,
                         formatInfo.left(), formatter, formatInfo.right(), i == max - 1);

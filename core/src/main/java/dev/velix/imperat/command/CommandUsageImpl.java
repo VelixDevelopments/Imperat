@@ -36,10 +36,18 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     private final CommandExecution<C> execution;
     private CommandCoordinator<C> commandCoordinator;
 
+    
+    private final boolean help;
+    
     CommandUsageImpl(CommandExecution<C> execution) {
+        this(execution, false);
+    }
+    
+    CommandUsageImpl(CommandExecution<C> execution, boolean help) {
         this.execution = execution;
         this.cooldownHandler = new DefaultCooldownHandler<>(this);
         this.commandCoordinator = CommandCoordinator.sync();
+        this.help = help;
     }
 
     /**
@@ -287,7 +295,12 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public void execute(CommandSource<C> source, Context<C> context) {
         commandCoordinator.coordinate(source, context, this.execution);
     }
-
+    
+    @Override
+    public boolean isHelp() {
+        return help;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

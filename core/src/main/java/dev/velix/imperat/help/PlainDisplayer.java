@@ -9,7 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 
 @ApiStatus.Internal
-public final class PlainDisplayer implements UsagesDisplayer {
+final class PlainDisplayer implements UsageDisplayer {
 
     PlainDisplayer() {
 
@@ -24,7 +24,7 @@ public final class PlainDisplayer implements UsagesDisplayer {
 
         for (int i = 0; i < commandUsages.size(); i++) {
             var usage = commandUsages.get(i);
-            var comp = formatter.formatUsage(dispatcher, command, usage, i == commandUsages.size() - 1);
+            var comp = formatter.formatUsageLine(dispatcher, command, usage, i == commandUsages.size() - 1);
             source.reply(comp);
         }
     }

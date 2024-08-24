@@ -17,7 +17,7 @@ final class CommandImpl<C> implements Command<C> {
     private String permission = null;
     private String description = "N/A";
 
-    private int position = -1;
+    private final int position;
 
     private boolean suppressACPermissionChecks = false;
 
@@ -38,13 +38,16 @@ final class CommandImpl<C> implements Command<C> {
 
     //sub-command constructor
     CommandImpl(@Nullable Command<C> parent, String name) {
+        this(parent, 0, name);
+    }
+    
+    CommandImpl(@Nullable Command<C> parent, int position, String name) {
         this.parent = parent;
+        this.position = position;
         this.name = name;
-        setDefaultUsageExecution((source, context) -> {
-        });
+        setDefaultUsageExecution((source, context) -> {});
         this.autoCompleter = AutoCompleter.createNative(this);
     }
-
 
     /**
      * @return the name of the command
@@ -73,7 +76,7 @@ final class CommandImpl<C> implements Command<C> {
     }
 
     /**
-     * @return The  description of a command
+     * @return The description of a command
      */
     @Override
     public @NotNull String getDescription() {
@@ -107,7 +110,7 @@ final class CommandImpl<C> implements Command<C> {
      */
     @Override
     public void setPosition(int position) {
-        this.position = position;
+        throw new UnsupportedOperationException("You can't modify the position of a command");
     }
 
     /**
@@ -161,7 +164,7 @@ final class CommandImpl<C> implements Command<C> {
     }
 
     /**
-     * @param execution sets what happens when there's no parameters
+     * @param execution sets what happens when there are no parameters
      */
     @Override
     public void setDefaultUsageExecution(CommandExecution<C> execution) {

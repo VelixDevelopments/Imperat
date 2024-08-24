@@ -145,23 +145,15 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
      * @return the argument/input resolved by the context
      */
     @Override @SuppressWarnings("unchecked")
-    public <T> @Nullable T getContextResolvedArgument(Class<T> type) {
+    public <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException {
         var factory = dispatcher.getContextResolverFactory();
         if(factory == null) {
             var cr = dispatcher.getContextResolver(type);
             if(cr == null) return null;
-            try {
-                return cr.resolve(this, null);
-            } catch (CommandException exception) {
-                throw new RuntimeException(exception);
-            }
+            return cr.resolve(this, null);
         }
         ContextResolver<C, T> factoryCr = (ContextResolver<C, T>) factory.create(null);
-        try {
-            return factoryCr == null ? null : factoryCr.resolve(this, null);
-        } catch (CommandException exception) {
-            throw new RuntimeException(exception);
-        }
+        return factoryCr == null ? null : factoryCr.resolve(this, null);
     }
     
     /**

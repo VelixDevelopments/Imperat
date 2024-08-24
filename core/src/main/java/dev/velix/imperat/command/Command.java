@@ -1,6 +1,5 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandDebugger;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
@@ -15,14 +14,12 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Represents a wrapper for the actual command's data
- *
  * @param <C> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
@@ -127,7 +124,7 @@ public interface Command<C> extends CommandParameter {
     Collection<? extends CommandUsage<C>> getUsages();
 
     /**
-     * @return the usage that doesn't include any subcommands , only
+     * @return the usage that doesn't include any subcommands, only
      * parameters
      */
     @NotNull
@@ -178,10 +175,10 @@ public interface Command<C> extends CommandParameter {
                                     boolean attachDirectly) {
 
         Command<C> mapped = getSubCommand(subCommand.toLowerCase());
-        Command<C> subCmd = mapped == null ? Command.createCommand(this, subCommand) : mapped;
-        subCmd.addAliases(aliases);
-        subCmd.addUsage(usage);
-
+        if(mapped != null) {
+            throw new UnsupportedOperationException("You can't add an already existing sub-command '" + subCommand + "' to command '" + this.getName() + "'");
+        }
+        
         int position;
         if (attachDirectly) {
             position = getPosition() + 1;
@@ -189,13 +186,21 @@ public interface Command<C> extends CommandParameter {
             CommandUsage<C> main = getMainUsage();
             position = this.getPosition() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
         }
-
-        subCmd.setPosition(position);
+        
+        //creating subcommand to modify
+        Command<C> subCmd = Command.createCommand(this, position, subCommand);
+        subCmd.addAliases(aliases);
+        subCmd.addUsage(usage);
+        //subCmd.setPosition(position);
+        
+        //adding subcommand
         addSubCommand(subCmd);
-
+        
         final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
-        final CommandUsage<C> combo = prime.mergeWithCommand(subCmd, usage);
-        this.addUsage(combo);
+        //adding the merged command usage
+        this.addUsage(
+                prime.mergeWithCommand(subCmd, usage)
+        );
     }
 
     default void addSubCommandUsage(String subCommand,
@@ -306,7 +311,7 @@ public interface Command<C> extends CommandParameter {
     boolean isIgnoringACPerms();
 
     /**
-     * if true , it will ignore permission checks
+     * if true, it will ignore permission checks
      * on the auto-completion of command and sub commands
      * <p>
      * otherwise, it will perform permission checks and
@@ -333,12 +338,12 @@ public interface Command<C> extends CommandParameter {
                 CommandUsage.<C>builder()
                         .parameters(params)
                         .execute((sender, context) -> {
-                            CommandDebugger.debug("Executing help !");
+                            //CommandDebugger.debug("Executing help !");
                             Integer page = context.getArgument("page");
                             CommandHelp<C> help = dispatcher.createCommandHelp(this,
                                     (Context<C>) context, ((ResolvedContext<C>) context).getDetectedUsage());
                             helpExecution.help(sender, (Context<C>) context, help, page);
-                        }).build(),
+                        }).buildAsHelp(),
                 false
         );
     }
@@ -350,5 +355,9 @@ public interface Command<C> extends CommandParameter {
     static <C> Command<C> createCommand(@Nullable Command<C> parent, @NotNull String name) {
         return new CommandImpl<>(parent, name);
     }
-
+    
+    static <C> Command<C> createCommand(@Nullable Command<C> parent, int position, @NotNull String name) {
+        return new CommandImpl<>(parent, position, name);
+    }
+    
 }

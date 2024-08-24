@@ -24,11 +24,11 @@ public interface UsageFormatter {
      * @param dispatcher the dispatcher
      * @param command    the command
      * @param usage      the usage to display
-     * @param isLast     is it the last usage
+     * @param isLast     is it the last usage?
      * @param <C>        the sender-type
      * @return the usage component
      */
-    <C> Component formatUsage(
+    <C> Component formatUsageLine(
             @NotNull CommandDispatcher<C> dispatcher,
             Command<C> command,
             CommandUsage<C> usage,
@@ -42,5 +42,5 @@ public interface UsageFormatter {
      * @param formattedUsage the format of the usage syntax
      * @return the format component of the usage
      */
-    Component formatUsage(String formattedUsage);
+    Component formatUsageOnly(String formattedUsage);
 }

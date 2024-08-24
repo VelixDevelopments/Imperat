@@ -7,7 +7,6 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.examples.BanCommand;
 import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
-import dev.velix.imperat.examples.MyContextResolverFactory;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.test.Group;
@@ -75,8 +74,6 @@ public final class Test extends JavaPlugin implements Listener {
 					  .getGroup(sender.as(Player.class).getUniqueId());
 		});*/
 		
-		dispatcher.registerContextResolverFactory(new MyContextResolverFactory());
-		
 		
 		/*dispatcher.registerAnnotationReplacer(MyCustomAnnotation.class, (annotation)-> {
 			var cmdAnn = AnnotationFactory.create(Command.class, "value" , new String[]{"group", "rank"});
@@ -95,6 +92,7 @@ public final class Test extends JavaPlugin implements Listener {
 		dispatcher.registerCommand(new BanCommand());
 		debugCommands();
 	}
+	
 	
 	private void classicGroupCmd() {
 		

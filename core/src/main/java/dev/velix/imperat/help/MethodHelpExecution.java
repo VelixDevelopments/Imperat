@@ -5,10 +5,10 @@ import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.annotations.MethodCommandExecutor;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.util.reflection.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.reflection.MethodCaller;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -44,11 +44,11 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
     public void help(CommandSource<C> source,
                      Context<C> context,
                      CommandHelp<C> help,
-                     @Nullable Integer page) {
+                     @Nullable Integer page) throws CommandException {
 
         Object[] instances = MethodCommandExecutor.loadParameterInstances(dispatcher, params, source,
                 context, method, help);
-        System.out.println("INSTANCES SIZE= " + instances.length);
+        /*System.out.println("INSTANCES SIZE= " + instances.length);
         for (Object object : instances) {
             System.out.println("HELLO");
             if (object == null) {
@@ -57,7 +57,8 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
             }
             System.out.println("INSTANCE -> " + object.getClass().getSimpleName());
         }
-        System.out.println("THEN");
+        System.out.println("THEN");*/
+        
         caller.call(instances);
     }
 

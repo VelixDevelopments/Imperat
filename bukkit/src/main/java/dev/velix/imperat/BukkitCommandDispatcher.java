@@ -49,7 +49,7 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         try {
             commandMap = BukkitUtil.getCommandMap();
         } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
-            CommandDebugger.debug("Failed to fetch bukkit command-map, disabling plugin '%s'", plugin.getName());
+            CommandDebugger.warning("Failed to fetch bukkit command-map, disabling plugin '%s'", plugin.getName());
             throw new IllegalAccessError(e.getMessage());
         }
         registerValueResolvers();

@@ -60,28 +60,27 @@ public abstract class CommandHelp<C> {
         }
         
         PaginatedText<CommandUsage<C>> text = new PaginatedText<>(template.syntaxesPerPage());
-
+        
         for (var usage : command.getUsages()) {
             if (usage.isDefault()) continue;
             text.add(usage);
         }
 
         text.paginate();
-
         if (text.getMaxPages() == 0) {
             dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
                     command, source, context, usage, null);
             return;
         }
-
-        source.reply(template.fullHeader(command, page, text.getMaxPages()));
-        TextPage<CommandUsage<C>> textPage = text.getPage(page - 1);
+        
+        TextPage<CommandUsage<C>> textPage = text.getPage(page);
 
         if (textPage == null) {
             dispatcher.sendCaption(CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION,
                     command, source, context, usage, null);
             return;
         }
+        source.reply(template.fullHeader(command, page, text.getMaxPages()));
 
         template.getUsagesDisplayer().display(dispatcher, command, source,
                 template.getUsageFormatter(), textPage.asList());

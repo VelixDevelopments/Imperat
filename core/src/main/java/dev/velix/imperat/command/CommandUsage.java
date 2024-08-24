@@ -123,7 +123,7 @@ public interface CommandUsage<C> {
      *
      * @param subCommand the subcommand owning that usage
      * @param usage      the usage to merge with
-     * @return the merged command usage !
+     * @return the merged command usage!
      */
     default CommandUsage<C> mergeWithCommand(Command<C> subCommand, CommandUsage<C> usage) {
         List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
@@ -134,7 +134,7 @@ public interface CommandUsage<C> {
                 .cooldown(usage.getCooldown())
                 .parameters(parameters)
                 .execute(usage.getExecution())
-                .build();
+                .build(usage.isHelp());
     }
 
 
@@ -243,7 +243,9 @@ public interface CommandUsage<C> {
      * @param context the context of the command
      */
     void execute(CommandSource<C> source, Context<C> context);
-
+    
+    boolean isHelp();
+    
     class Builder<C> {
 
         private CommandExecution<C> execution;
@@ -292,7 +294,9 @@ public interface CommandUsage<C> {
         public Builder<C> parameters(CommandParameter... params) {
             int index = 0;
             for (CommandParameter parameter : params) {
-                parameter.setPosition(index);
+                if(!parameter.isCommand()) {
+                    parameter.setPosition(index);
+                }
                 this.parameters.add(parameter);
                 index++;
             }
@@ -302,14 +306,15 @@ public interface CommandUsage<C> {
         public Builder<C> parameters(List<CommandParameter> params) {
             for (int i = 0; i < params.size(); i++) {
                 CommandParameter parameter = params.get(i);
+                if(parameter.isCommand()) continue;
                 parameter.setPosition(i);
                 this.parameters.add(parameter);
             }
             return this;
         }
 
-        public CommandUsage<C> build() {
-            CommandUsageImpl<C> impl = new CommandUsageImpl<>(execution);
+        private CommandUsage<C> build(boolean help) {
+            CommandUsageImpl<C> impl = new CommandUsageImpl<>(execution, help);
             impl.setCoordinator(commandCoordinator);
             impl.setPermission(permission);
             impl.setDescription(description);
@@ -317,6 +322,15 @@ public interface CommandUsage<C> {
             impl.addParameters(parameters);
             return impl;
         }
-
+        
+        
+        public CommandUsage<C> build() {
+            return build(false);
+        }
+        
+        public CommandUsage<C> buildAsHelp() {
+            return build(true);
+        }
+ 
     }
 }

@@ -15,13 +15,15 @@ public interface PaginatedHelpTemplate extends HelpTemplate {
      * per page
      */
     int syntaxesPerPage();
-
+    
     /**
-     * @return the pages header component
+     * The header of the paginated help template
+     *
+     * @param command the command
+     * @param page the page
+     * @param maxPages the max number of pages
+     *
+     * @return the paginated header
      */
-    Component pagesHeaderComponent(int page, int maxPages);
-
-    default Component fullHeader(Command<?> command, int page, int maxPages) {
-        return getHeader(command).append(pagesHeaderComponent(page, maxPages));
-    }
+   Component fullHeader(Command<?> command, int page, int maxPages);
 }
