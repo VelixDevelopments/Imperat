@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.BaseCommandDispatcher;
 import dev.velix.imperat.command.Command;
@@ -37,6 +38,8 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
     private final AudienceProvider provider;
     
     private Map<String, org.bukkit.command.Command> bukkitOGMapping;
+    
+    private BukkitBrigadierManager brigadierManager;
     
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
     
@@ -170,6 +173,9 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         }else {
             BukkitUtil.COMMAND_MAP.register(command.getName(), internalCmd);
         }
+        if(brigadierManager != null) {
+            brigadierManager.registerBukkitCommand(internalCmd, command);
+        }
     }
     
 
@@ -209,6 +215,11 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             }
             return LEGACY_COMPONENT_SERIALIZER.deserialize(raw);
         });
+    }
+
+    public void applyBrigadier() {
+        brigadierManager = BukkitBrigadierManager.load(this);
+        //TODO apply on all currently registered commands
     }
     
     @SuppressWarnings("unchecked")

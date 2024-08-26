@@ -27,7 +27,7 @@ public final class BrigadierNode {
 	}
 	
 	public BrigadierNode addChild(BrigadierNode node) {
-		node.addChild(node);
+		this.node.addChild(node.toInternalNode());
 		return this;
 	}
 	
