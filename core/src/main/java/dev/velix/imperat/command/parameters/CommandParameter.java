@@ -241,5 +241,13 @@ public interface CommandParameter {
     static CommandParameter requiredDouble(String name) {
         return requiredDouble(name, null, null);
     }
+	
+	  default NumericParameterDecorator asNumeric() {
+        return (NumericParameterDecorator) this;
+    }
+    
+    default boolean isNumeric() {
+        return this instanceof NumericParameterDecorator;
+    }
     
 }

@@ -22,7 +22,7 @@ public interface NumericParameter extends CommandParameter {
     default boolean matchesRange(double value) {
         var range = getRange();
         return range != null &&
-                value >= range.min() && value <= range.max();
+                value >= range.getMin() && value <= range.getMax();
     }
 
 }

@@ -1,6 +1,10 @@
 package dev.velix.imperat;
 
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -9,6 +13,7 @@ import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
+import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.test.Group;
 import dev.velix.imperat.test.GroupRegistry;
 import dev.velix.imperat.test.GroupSuggestionResolver;
@@ -36,10 +41,13 @@ public final class Test extends JavaPlugin implements Listener {
 	
 	private void testBuilderImperat() {
 		var command = Command.createCommand("example");
+		command.addAliases("example2", "example3", "example4", "example5");
+		command.setPermission("command.example.permission");
+		command.setDescription("This is an example command !");
+		
 		command.setDefaultUsageExecution((source, context)-> {
 			source.reply("This is just an example with no arguments entered");
 		});
-		
 		command.addUsage(CommandUsage.builder()
 						.parameters(
 							CommandParameter.requiredInt("firstArg")
@@ -50,10 +58,48 @@ public final class Test extends JavaPlugin implements Listener {
 						})
 						.build()
 		);
+		
+		command.addSubCommandUsage("sub1", CommandUsage.builder()
+						.parameters(CommandParameter.optional("value", Double.class, OptionalValueSupplier.of(-1D)))
+						.execute((source, context)-> {
+							
+							//you can get previously used arguments from the main command usage
+							Integer firstArg = context.getArgument("firstArg");
+							source.reply("Entered firstArg= " + firstArg);
+							
+							Double value = context.getArgument("value");
+							assert value != null; //optional arg cant be null, it has a default value supplier
+							source.reply("Double value entered= " + value);
+						})
+						.build());
+	}
+	
+	
+	private void testBrigadierCommodore() {
+		LiteralCommandNode<?> timeCommand = LiteralArgumentBuilder.literal("time")
+						.then(LiteralArgumentBuilder.literal("set")
+										.then(LiteralArgumentBuilder.literal("day"))
+										.then(LiteralArgumentBuilder.literal("noon"))
+										.then(LiteralArgumentBuilder.literal("night"))
+										.then(LiteralArgumentBuilder.literal("midnight"))
+										.then(RequiredArgumentBuilder.argument("time", IntegerArgumentType.integer()))
+						)
+						.then(LiteralArgumentBuilder.literal("add")
+										.then(RequiredArgumentBuilder.argument("time", IntegerArgumentType.integer()))
+						)
+						.then(LiteralArgumentBuilder.literal("query")
+										.then(LiteralArgumentBuilder.literal("daytime"))
+										.then(LiteralArgumentBuilder.literal("gametime"))
+										.then(LiteralArgumentBuilder.literal("day"))
+						).build();
+		dispatcher.testRegisterCommodore(timeCommand);
 	}
 	
 	private void testImperat() {
 		dispatcher = BukkitCommandDispatcher.create(this);
+		dispatcher.applyBrigadier();
+		testBrigadierCommodore();
+		
 		
 		dispatcher.setHelpTemplate(new ExampleHelpTemplate());
 		

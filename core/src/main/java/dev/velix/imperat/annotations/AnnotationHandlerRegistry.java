@@ -314,7 +314,7 @@ final class AnnotationHandlerRegistry<C> extends
 						&& element.isAnnotationPresent(Range.class)) {
 			Range annotation = element.getAnnotation(Range.class);
 			param = NumericParameterDecorator.decorate(
-							param, new NumericRange(annotation.min(), annotation.max())
+							param, NumericRange.of(annotation.min(), annotation.max())
 			);
 		}
 		

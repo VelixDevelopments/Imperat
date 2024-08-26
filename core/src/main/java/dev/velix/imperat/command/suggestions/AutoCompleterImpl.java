@@ -98,7 +98,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 
                 results.add(parameter.getName());
             } else {
-                SuggestionResolver<C, ?> resolver = dispatcher.getNamedSuggestionResolver(parameter);
+                SuggestionResolver<C, ?> resolver = dispatcher.getParameterSuggestionResolver(parameter);
                 if (resolver != null) {
                     results.addAll(resolver.autoComplete(command, sender.getOrigin(),
                             queue, parameter, currentArg));

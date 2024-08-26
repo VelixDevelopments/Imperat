@@ -1,9 +1,12 @@
 package dev.velix.imperat;
 
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.BaseCommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.commodore.Commodore;
+import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.help.CommandHelp;
@@ -24,14 +27,19 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Map;
 import java.util.UUID;
 
 public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender> {
 
     private final Plugin plugin;
-    private final Map<String, org.bukkit.command.Command> commandMap;
     private final AudienceProvider provider;
+    
+    private Map<String, org.bukkit.command.Command> bukkitOGMapping;
+    
+    private BrigadierWrapper<CommandSender> brigadierWrapper;
+    private Commodore commodore;
     
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
     
@@ -41,17 +49,19 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             .hexCharacter('#')
             .build();
 
+    @SuppressWarnings("unchecked")
     private BukkitCommandDispatcher(Plugin plugin, AudienceProvider audienceProvider, @NotNull PermissionResolver<CommandSender> permissionResolver) {
         super(permissionResolver);
         this.plugin = plugin;
         CommandDebugger.setLogger(plugin.getLogger());
-        this.provider = audienceProvider == null ? BukkitAudiences.create(plugin) : audienceProvider;
-        try {
-            commandMap = BukkitUtil.getCommandMap();
-        } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
-            CommandDebugger.warning("Failed to fetch bukkit command-map, disabling plugin '%s'", plugin.getName());
-            throw new IllegalAccessError(e.getMessage());
+        if(BukkitUtil.KNOWN_COMMANDS != null) {
+            try {
+                bukkitOGMapping = (Map<String, org.bukkit.command.Command>) BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
+            } catch (IllegalAccessException e) {
+                CommandDebugger.warning("Failed to access the internal command map");
+            }
         }
+        this.provider = audienceProvider == null ? BukkitAudiences.create(plugin) : audienceProvider;
         registerValueResolvers();
     }
     
@@ -157,7 +167,20 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
     @Override
     public final void registerCommand(Command<CommandSender> command) {
         super.registerCommand(command);
-        commandMap.put(command.getName(), new InternalBukkitCommand(this, command));
+        var internalCmd = new InternalBukkitCommand(this, command);
+        if(BukkitUtil.KNOWN_COMMANDS != null) {
+            bukkitOGMapping.put(command.getName(), internalCmd);
+        }else {
+            BukkitUtil.COMMAND_MAP.register(command.getName(), internalCmd);
+        }
+        if(brigadierWrapper != null) {
+            commodore.register(internalCmd, brigadierWrapper.wrapCommandToNode(command));
+        }
+    }
+    
+    public void testRegisterCommodore(LiteralCommandNode<?> node) {
+        var testInternal = new InternalBukkitCommand(this, Command.createCommand("time"));
+        commodore.register(testInternal, node);
     }
     
 
@@ -199,4 +222,8 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         });
     }
 
+    public void applyBrigadier() {
+        commodore = CommodoreProvider.getCommodore(plugin);
+        brigadierWrapper = new BrigadierWrapper<>(commodore, this);
+    }
 }

@@ -306,8 +306,9 @@ public interface CommandUsage<C> {
         public Builder<C> parameters(List<CommandParameter> params) {
             for (int i = 0; i < params.size(); i++) {
                 CommandParameter parameter = params.get(i);
-                if(parameter.isCommand()) continue;
-                parameter.setPosition(i);
+                if (!parameter.isCommand()) {
+                    parameter.setPosition(i);
+                }
                 this.parameters.add(parameter);
             }
             return this;

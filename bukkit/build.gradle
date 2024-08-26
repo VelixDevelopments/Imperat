@@ -15,19 +15,30 @@ repositories {
     }
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url = 'https://oss.sonatype.org/content/repositories/central' }
+    maven {
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
 
 }
 dependencies {
+
+    compileOnly lombok()
+    annotationProcessor lombok()
+
     implementation project(":core")
     implementation 'dev.array21:bukkit-reflection-util:1.3.1'
+
+    compileOnly("com.mojang:brigadier:1.0.18")
+    compileOnly 'org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT'
+
+    compileOnly("io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
+
 
     compileOnly kyori(KyoriModule.API)
     compileOnly kyori(KyoriModule.MINI_MESSAGE)
     compileOnly kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
 
-    compileOnly lombok()
-    annotationProcessor lombok()
-    compileOnly 'org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT'
     // The full Spigot server with no shadowing. Requires mavenLocal.
     testImplementation project(":core")
     testCompileOnly lombok()
@@ -37,6 +48,8 @@ dependencies {
     testImplementation kyori(KyoriModule.MINI_MESSAGE)
     testImplementation kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
     testCompileOnly('org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT')
+    testCompileOnly("com.mojang:brigadier:1.0.18")
+
 }
 
 
@@ -58,7 +71,7 @@ tasks.register('bukkit', ShadowJar) {
     archiveClassifier.set("tests")
     from sourceSets.main.output, sourceSets.test.output
     configurations = [project.configurations.testRuntimeClasspath]
-    setDestinationDirectory(file("C:\\Users\\Bergo\\Desktop\\spigot test server 1.8.8\\plugins"))
+    setDestinationDirectory(file("C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot 1.19.2\\plugins"))
     relocate("dev.array21.bukkitreflectionlib", "dev.velix.imperat.util.reflection")
 }
 

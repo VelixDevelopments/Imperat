@@ -1,5 +1,6 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.CommandDebugger;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -69,6 +72,10 @@ public interface Command<C> extends CommandParameter {
      */
     void addAliases(List<String> aliases);
 
+    default void addAliases(String... aliases) {
+        addAliases(Arrays.asList(aliases));
+    }
+    
     /**
      * Sets the position of this command in a syntax
      * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -76,7 +83,9 @@ public interface Command<C> extends CommandParameter {
      * @param position the position to set
      */
     @ApiStatus.Internal
-    void setPosition(int position);
+    default void setPosition(int position) {
+        throw new UnsupportedOperationException("You can't modify the position of a command");
+    }
 
     /**
      * @return the default value if it's input is not present
@@ -169,6 +178,7 @@ public interface Command<C> extends CommandParameter {
      *
      *                       </p>
      */
+    //TODO create subcommand builder
     default void addSubCommandUsage(String subCommand,
                                     List<String> aliases,
                                     CommandUsage<C> usage,
@@ -197,9 +207,12 @@ public interface Command<C> extends CommandParameter {
         addSubCommand(subCmd);
         
         final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
+        final CommandUsage<C> combo = prime.mergeWithCommand(subCmd, usage);
         //adding the merged command usage
+        
+        CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
         this.addUsage(
-                prime.mergeWithCommand(subCmd, usage)
+                combo
         );
     }
 

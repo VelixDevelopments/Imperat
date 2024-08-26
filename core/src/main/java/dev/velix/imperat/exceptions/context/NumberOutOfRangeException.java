@@ -16,12 +16,12 @@ public class NumberOutOfRangeException extends ContextResolveException {
 
     private static String formatRange(NumericRange range) {
         StringBuilder builder = new StringBuilder();
-        if (range.min() != Double.MIN_VALUE && range.max() != Double.MAX_VALUE)
-            builder.append("within").append(range.min()).append('-').append(range.max());
-        else if (range.min() != Double.MIN_VALUE)
-            builder.append("at least '").append(range.min()).append("'");
-        else if (range.max() != Double.MAX_VALUE)
-            builder.append("at most '").append(range.max()).append("'");
+        if (range.getMin() != Double.MIN_VALUE && range.getMax() != Double.MAX_VALUE)
+            builder.append("within").append(range.getMin()).append('-').append(range.getMax());
+        else if (range.getMin() != Double.MIN_VALUE)
+            builder.append("at least '").append(range.getMax()).append("'");
+        else if (range.getMax() != Double.MAX_VALUE)
+            builder.append("at most '").append(range.getMax()).append("'");
         else
             builder.append("(Open range)");
 

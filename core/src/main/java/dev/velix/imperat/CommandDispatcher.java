@@ -221,7 +221,7 @@ public interface CommandDispatcher<C> {
 	 * @return the {@link SuggestionResolver} instance for that type
 	 */
 	@SuppressWarnings("unchecked")
-	default @Nullable <T> SuggestionResolver<C, T> getNamedSuggestionResolver(CommandParameter parameter) {
+	default @Nullable <T> SuggestionResolver<C, T> getParameterSuggestionResolver(CommandParameter parameter) {
 		SuggestionResolver<C, T> parameterSpecificResolver = parameter.getSuggestionResolver();
 		if(parameterSpecificResolver == null)
 			return getNamedSuggestionResolver((Class<T>) parameter.getType());
