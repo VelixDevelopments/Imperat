@@ -1,6 +1,7 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.Description;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -14,18 +15,28 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
 
     private final CommandFlag flag;
     private final OptionalValueSupplier<?> supplier;
-
-    FlagCommandParameter(String flagName, List<String> aliases, Class<?> inputType, OptionalValueSupplier<?> supplier) {
-        super(flagName, CommandFlag.class,
+    
+    FlagCommandParameter(String flagName, List<String> aliases, Description description, Class<?> inputType, OptionalValueSupplier<?> supplier) {
+        super(flagName, CommandFlag.class, description,
                 true, true, false, null, null);
         flag = CommandFlag.create(flagName, aliases, inputType);
         this.supplier = supplier;
     }
 
-    FlagCommandParameter(CommandSwitch commandSwitch, OptionalValueSupplier<?> supplier) {
-        super(commandSwitch.name(), CommandSwitch.class, true, true, false, null, null);
+    FlagCommandParameter(CommandSwitch commandSwitch, Description description, OptionalValueSupplier<?> supplier) {
+        super(commandSwitch.name(), CommandSwitch.class, description,
+                true, true, false,
+                null, null);
         this.flag = commandSwitch;
         this.supplier = supplier;
+    }
+    
+    FlagCommandParameter(String flagName, List<String> aliases, Class<?> inputType, OptionalValueSupplier<?> supplier) {
+        this(flagName, aliases, Description.EMPTY, inputType, supplier);
+    }
+    
+    FlagCommandParameter(CommandSwitch commandSwitch, OptionalValueSupplier<?> supplier) {
+        this(commandSwitch, Description.EMPTY, supplier);
     }
 
     @Override

@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.velix.imperat'
+version = 'unspecified'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://libraries.minecraft.net"
+    }
+}
+
+dependencies {
+    compileOnly lombok()
+    annotationProcessor lombok()
+
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    annotationProcessor('org.jetbrains:annotations:24.1.0')
+
+    implementation project(":core")
+    implementation 'dev.array21:bukkit-reflection-util:1.3.1'
+
+    compileOnly("com.mojang:brigadier:1.0.18")
+
+}
+
+
+static String lombok() {
+    return 'org.projectlombok:lombok:1.18.34'
+}

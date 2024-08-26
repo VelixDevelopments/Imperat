@@ -362,6 +362,14 @@ public interface CommandDispatcher<C> {
 	 */
 	void dispatch(C sender, String commandName, String... rawInput);
 	
+	/**
+	 * Dispatches and executes a command with certain raw arguments
+	 *
+	 * @param sender      the sender/executor of this command
+	 * @param commandName the name of the command to execute
+	 * @param rawArgsOneLine  the command's args input
+	 */
+	void dispatch(C sender, String commandName, String rawArgsOneLine);
 	
 	/**
 	 * @return the platform of the module

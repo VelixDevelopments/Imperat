@@ -1,18 +1,16 @@
 package dev.velix.imperat;
 
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.BaseCommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.commodore.Commodore;
-import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.BukkitPermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.Preconditions;
+import dev.velix.imperat.util.TypeUtility;
 import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
@@ -21,6 +19,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -28,6 +27,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,9 +37,6 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
     private final AudienceProvider provider;
     
     private Map<String, org.bukkit.command.Command> bukkitOGMapping;
-    
-    private BrigadierWrapper<CommandSender> brigadierWrapper;
-    private Commodore commodore;
     
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
     
@@ -127,7 +124,7 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
      * @return the platform of the module
      */
     @Override
-    public Object getPlatform() {
+    public Plugin getPlatform() {
         return plugin;
     }
 
@@ -173,14 +170,6 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         }else {
             BukkitUtil.COMMAND_MAP.register(command.getName(), internalCmd);
         }
-        if(brigadierWrapper != null) {
-            commodore.register(internalCmd, brigadierWrapper.wrapCommandToNode(command));
-        }
-    }
-    
-    public void testRegisterCommodore(LiteralCommandNode<?> node) {
-        var testInternal = new InternalBukkitCommand(this, Command.createCommand("time"));
-        commodore.register(testInternal, node);
     }
     
 
@@ -221,9 +210,9 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             return LEGACY_COMPONENT_SERIALIZER.deserialize(raw);
         });
     }
-
-    public void applyBrigadier() {
-        commodore = CommodoreProvider.getCommodore(plugin);
-        brigadierWrapper = new BrigadierWrapper<>(commodore, this);
+    
+    @SuppressWarnings("unchecked")
+    public static Class<? extends Entity> getSelectedEntity(@NotNull Type selectorType) {
+        return (Class<? extends Entity>) TypeUtility.getInsideGeneric(selectorType, Entity.class);
     }
 }

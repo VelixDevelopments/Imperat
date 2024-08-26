@@ -75,6 +75,10 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     static ArgumentQueue parse(String[] rawArguments) {
         return StringTokenizer.parseToQueue(String.join(" ", rawArguments));
     }
+    
+    static ArgumentQueue parse(String string) {
+        return StringTokenizer.parseToQueue(string);
+    }
 
     /**
      * @return a new, empty {@link ArgumentQueue}.

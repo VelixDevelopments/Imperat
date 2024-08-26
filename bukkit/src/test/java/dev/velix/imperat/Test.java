@@ -1,15 +1,10 @@
 package dev.velix.imperat;
 
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.examples.BanCommand;
-import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
@@ -75,30 +70,10 @@ public final class Test extends JavaPlugin implements Listener {
 	}
 	
 	
-	private void testBrigadierCommodore() {
-		LiteralCommandNode<?> timeCommand = LiteralArgumentBuilder.literal("time")
-						.then(LiteralArgumentBuilder.literal("set")
-										.then(LiteralArgumentBuilder.literal("day"))
-										.then(LiteralArgumentBuilder.literal("noon"))
-										.then(LiteralArgumentBuilder.literal("night"))
-										.then(LiteralArgumentBuilder.literal("midnight"))
-										.then(RequiredArgumentBuilder.argument("time", IntegerArgumentType.integer()))
-						)
-						.then(LiteralArgumentBuilder.literal("add")
-										.then(RequiredArgumentBuilder.argument("time", IntegerArgumentType.integer()))
-						)
-						.then(LiteralArgumentBuilder.literal("query")
-										.then(LiteralArgumentBuilder.literal("daytime"))
-										.then(LiteralArgumentBuilder.literal("gametime"))
-										.then(LiteralArgumentBuilder.literal("day"))
-						).build();
-		dispatcher.testRegisterCommodore(timeCommand);
-	}
 	
 	private void testImperat() {
 		dispatcher = BukkitCommandDispatcher.create(this);
-		dispatcher.applyBrigadier();
-		testBrigadierCommodore();
+		//testBrigadierCommodore();
 		
 		
 		dispatcher.setHelpTemplate(new ExampleHelpTemplate());
@@ -134,7 +109,7 @@ public final class Test extends JavaPlugin implements Listener {
 		dispatcher.registerContextResolver(Guild.class, new GuildContextResolver());
 		
 		dispatcher.registerCommand(new GuildCommand());
-		dispatcher.registerCommand(new GroupCommand());
+		//dispatcher.registerCommand(new GroupCommand());
 		dispatcher.registerCommand(new BanCommand());
 		debugCommands();
 	}

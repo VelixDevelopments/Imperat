@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 @ApiStatus.Internal
@@ -15,7 +16,7 @@ final class CommandImpl<C> implements Command<C> {
 
     private final String name;
     private String permission = null;
-    private String description = "N/A";
+    private Description description = Description.EMPTY;
 
     private final int position;
 
@@ -79,7 +80,7 @@ final class CommandImpl<C> implements Command<C> {
      * @return The description of a command
      */
     @Override
-    public @NotNull String getDescription() {
+    public @NotNull Description getDescription() {
         return description;
     }
 
@@ -90,7 +91,7 @@ final class CommandImpl<C> implements Command<C> {
      */
     @Override
     public void setDescription(String description) {
-        this.description = description;
+        this.description = Description.of(description);
     }
 
 
@@ -112,7 +113,12 @@ final class CommandImpl<C> implements Command<C> {
     public void setPosition(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
-
+    
+    @Override
+    public Type getGenericType() {
+        return getType();
+    }
+    
     /**
      * Casts the parameter to a flag parameter
      *

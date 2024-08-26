@@ -1,11 +1,13 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.Description;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 
 @ApiStatus.Internal
@@ -17,18 +19,35 @@ public abstract class InputParameter implements CommandParameter {
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final SuggestionResolver<?, ?> suggestionResolver;
+    protected final Description description;
+    
+    
     protected InputParameter(String name, Class<?> type,
+                             Description description,
                              boolean optional, boolean flag, boolean greedy,
                              OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
         this.name = name;
         this.type = type;
+        this.description = description;
         this.optional = optional;
         this.flag = flag;
         this.greedy = greedy;
         this.optionalValueSupplier = optionalValueSupplier;
 	      this.suggestionResolver = suggestionResolver;
     }
-
+    
+    protected InputParameter(String name, Class<?> type,
+                             boolean optional, boolean flag, boolean greedy,
+                             OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
+        this.name = name;
+        this.type = type;
+        this.description = Description.EMPTY;
+        this.optional = optional;
+        this.flag = flag;
+        this.greedy = greedy;
+        this.optionalValueSupplier = optionalValueSupplier;
+        this.suggestionResolver = suggestionResolver;
+    }
     /**
      * @return the name of the parameter
      */
@@ -124,14 +143,22 @@ public abstract class InputParameter implements CommandParameter {
      * Fetches the suggestion resolver linked to this
      * command parameter.
      *
-     * @return the {@link SuggestionResolver} for resolving suggestion
+     * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Override @SuppressWarnings("unchecked")
     public @Nullable <C, T> SuggestionResolver<C, T> getSuggestionResolver() {
         return (SuggestionResolver<C, T>) suggestionResolver;
     }
     
+    @Override
+    public Type getGenericType() {
+        return getType();
+    }
     
+    @Override
+    public Description getDescription() {
+        return description;
+    }
     
     @Override
     public boolean equals(Object o) {

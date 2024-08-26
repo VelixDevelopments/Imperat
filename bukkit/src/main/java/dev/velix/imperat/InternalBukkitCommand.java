@@ -2,7 +2,6 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
@@ -26,7 +25,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
                           @NotNull Command<CommandSender> command) {
         super(
                 command.getName(),
-                command.getDescription(),
+                command.getDescription().toString(),
                 CommandUsage.format(command, command.getDefaultUsage()),
                 command.getAliases()
         );
@@ -51,7 +50,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
 
     @Override
     public @NotNull Plugin getPlugin() {
-        return (Plugin) dispatcher.getPlatform();
+        return dispatcher.getPlatform();
     }
     
     @Nullable

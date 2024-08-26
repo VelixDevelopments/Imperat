@@ -472,6 +472,10 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 		
 	}
 	
+	@Override
+	public void dispatch(C sender, String commandName, String rawArgsOneLine) {
+		dispatch(sender, commandName, rawArgsOneLine.split(" "));
+	}
 	
 	private void handleExecution(CommandSource<C> source, Context<C> context) throws CommandException {
 		

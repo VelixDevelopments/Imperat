@@ -3,6 +3,7 @@ package dev.velix.imperat.command.parameters;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.Description;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -10,6 +11,7 @@ import dev.velix.imperat.supplier.defaults.BooleanValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -44,7 +46,19 @@ public interface CommandParameter {
      * @return the value type of this parameter
      */
     Class<?> getType();
-
+    
+    /**
+     * Get GenericType
+     * @return the full type of parameter if it has generic types
+     */
+    Type getGenericType();
+    
+    /**
+     * Get the description of a parameter
+     * @return the description of a parameter
+     */
+    Description getDescription();
+    
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional
@@ -249,5 +263,6 @@ public interface CommandParameter {
     default boolean isNumeric() {
         return this instanceof NumericParameterDecorator;
     }
-    
+	
+
 }

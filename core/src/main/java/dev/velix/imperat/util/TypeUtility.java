@@ -2,6 +2,8 @@ package dev.velix.imperat.util;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,5 +78,13 @@ public final class TypeUtility {
         var t1 = isPrimitive(type1) ? primitiveToBoxed(type1) : type1;
         var t2 = isPrimitive(type2) ? primitiveToBoxed(type2) : type2;
         return t1.getName().equals(t2.getName());
+    }
+    
+    public static Type getInsideGeneric(Type genericType, Type fallback) {
+        try {
+            return ((ParameterizedType) genericType).getActualTypeArguments()[0];
+        } catch (ClassCastException e) {
+            return fallback;
+        }
     }
 }

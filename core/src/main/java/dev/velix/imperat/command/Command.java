@@ -47,10 +47,10 @@ public interface Command<C> extends CommandParameter {
     void setPermission(@Nullable String permission);
 
     /**
-     * @return The  description of a command
+     * @return The description of a command
      */
     @NotNull
-    String getDescription();
+    Description getDescription();
 
     /**
      * Sets the description of a command
