@@ -3,6 +3,7 @@ package dev.velix.imperat.resolvers;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.internal.sur.Pivot;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -17,10 +18,14 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.AvailableSince("1.0.0")
 public interface ValueResolver<C, T> {
 
+    
+    //TODO add argument queue for change of position
+    
     /**
      * @param source  the source of the command
      * @param context the context for the command
      * @param raw     the required raw of the command.
+     * @param pivot   the pivot for controlling the position of raws and parameters
      * @param parameter the parameter corresponding to the raw
      * @return the resolved output from the input object
      */
@@ -28,6 +33,7 @@ public interface ValueResolver<C, T> {
             CommandSource<C> source,
             Context<C> context,
             String raw,
+            Pivot pivot,
             CommandParameter parameter
     ) throws CommandException;
 }

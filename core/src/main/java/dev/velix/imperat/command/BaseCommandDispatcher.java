@@ -300,7 +300,7 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public @Nullable <T> SuggestionResolver<C, T> getNamedSuggestionResolver(Class<T> clazz) {
+	public @Nullable <T> SuggestionResolver<C, T> getSuggestionResolverByType(Class<T> clazz) {
 		return (SuggestionResolver<C, T>) suggestionResolverRegistry.getResolver(clazz);
 	}
 	
@@ -331,7 +331,6 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 	 * @param name the name of the argument
 	 * @return the {@link SuggestionResolver} instance for that argument
 	 */
-	@Override
 	public @Nullable <T> SuggestionResolver<C, T> getNamedSuggestionResolver(String name) {
 		return suggestionResolverRegistry.getResolverByName(name);
 	}

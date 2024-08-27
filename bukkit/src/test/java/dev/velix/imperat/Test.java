@@ -77,7 +77,7 @@ public final class Test extends JavaPlugin implements Listener {
 		
 		dispatcher.setHelpTemplate(new ExampleHelpTemplate());
 		
-		dispatcher.registerValueResolver(Group.class, ((source, context, raw, parameter) -> {
+		dispatcher.registerValueResolver(Group.class, ((source, context, raw, pivot, parameter) -> {
 			Optional<Group> container = GroupRegistry.getInstance().getData(raw);
 			return container.orElseThrow(() ->
 							new ContextResolveException("Invalid group '" + raw + "'"));

@@ -63,6 +63,7 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         }
         this.provider = audienceProvider == null ? BukkitAudiences.create(plugin) : audienceProvider;
         registerValueResolvers();
+        registerSuggestionResolvers();
     }
     
     /**
@@ -174,7 +175,6 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             BukkitUtil.COMMAND_MAP.register(command.getName(), internalCmd);
         }
         if(brigadierManager != null) {
-            System.out.println("BrigadierManager is not null !");
             brigadierManager.registerBukkitCommand(internalCmd, command);
         }
     }
@@ -182,26 +182,26 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
 
     protected void registerValueResolvers() {
 
-        this.registerValueResolver(Player.class, ((source, context, raw, parameter) -> {
+        this.registerValueResolver(Player.class, ((source, context, raw, pivot, parameter) -> {
             Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;
             throw new ContextResolveException("Player '" + raw + "' is offline or invalid");
         }));
 
-        this.registerValueResolver(OfflinePlayer.class, (source, context, raw, parameter) -> {
+        this.registerValueResolver(OfflinePlayer.class, (source, context, raw, pivot, parameter) -> {
 	        if(raw.length() > 16) {
               throw new ContextResolveException("Invalid or Unknown offline player '%s'", raw);
           }
           return Bukkit.getOfflinePlayer(raw);
         });
 
-        this.registerValueResolver(World.class, (source, context, raw, parameter) -> {
+        this.registerValueResolver(World.class, (source, context, raw, pivot, parameter) -> {
             World world = Bukkit.getWorld(raw.toLowerCase());
             if (world != null) return world;
             throw new ContextResolveException("Invalid world '%s'", raw);
         });
 
-        registerValueResolver(UUID.class, (source, context, raw, parameter)-> {
+        registerValueResolver(UUID.class, (source, context, raw, pivot, parameter)-> {
             try {
 	            return UUID.fromString(raw);
             }catch (IllegalArgumentException ex) {
@@ -209,7 +209,7 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             }
         });
         
-        registerValueResolver(Component.class, (source, context, raw, parameter) -> {
+        registerValueResolver(Component.class, (source, context, raw, pivot, parameter) -> {
             String result = Messages.MINI_MESSAGE.stripTags(raw);
             if (result.length() == raw.length()) {
                 return Messages.getMsg(raw);
@@ -217,7 +217,10 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             return LEGACY_COMPONENT_SERIALIZER.deserialize(raw);
         });
     }
-
+    private void registerSuggestionResolvers() {
+        registerSuggestionResolver(BukkitSuggestionResolvers.PLAYER);
+        registerSuggestionResolver(BukkitSuggestionResolvers.OFFLINE_PLAYER);
+    }
     public void applyBrigadier() {
         brigadierManager = BukkitBrigadierManager.load(this);
         //TODO apply on all currently registered commands

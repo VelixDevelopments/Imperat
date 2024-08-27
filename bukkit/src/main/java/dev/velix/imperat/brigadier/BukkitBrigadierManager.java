@@ -128,13 +128,13 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		for(Command<CommandSender> sub : command.getSubCommands()) {
 			//CommandDebugger.debug("Found child '%s' for parent '%s'", sub.getName(), command.getName());
 			//last = parseCommand(sub, last);
-			last.addChild(parseSubCommand(sub, last));
+			parseSubCommand(sub, last);
 		}
 		
 		return root;
 	}
 	
-	private BrigadierNode parseSubCommand(Command<CommandSender> command, BrigadierNode lastParent) {
+	private void parseSubCommand(Command<CommandSender> command, BrigadierNode lastParent) {
 		BrigadierNode literalSub = BrigadierNode.create(literal(command.getName()));
 		lastParent.addChild(literalSub);
 		lastParent = literalSub;
@@ -146,40 +146,44 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		
 		for(CommandParameter parameter : mainUsage.getParameters()) {
 			//CommandDebugger.debug("Attempting to add args to %s", command.getName());
+			if(parameter.isCommand()) {
+				continue;
+			}
 			BrigadierNode child = parseParameter(command, mainUsage, parameter);
 			lastParent.addChild(child);
 			lastParent = child;
 		}
 		
 		//parse other inner children
-		for(var sub : command.getSubCommands()) {
-			lastParent.addChild(parseSubCommand(sub, lastParent));
-		}
+		/*for(var sub : command.getSubCommands()) {
+			parseSubCommand(sub, lastParent);
+		}*/
 		
-		return lastParent;
 	}
 	
 	
 	private BrigadierNode parseParameter(Command<CommandSender> command,
 	                                     CommandUsage<CommandSender> usage,
 	                                     CommandParameter parameter) {
-		//CommandDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.getName() , command.getName());
-		//CommandDebugger.debug("Entering usage '%s'", CommandUsage.format(command, usage));
+		CommandDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.getName() , command.getName());
+		CommandDebugger.debug("Entering usage '%s'", CommandUsage.format(command, usage));
 		if(parameter.isFlag()) {
-			
+			CommandDebugger.debug("Found flag parameter");
 			FlagParameter flagParameter = parameter.asFlagParameter();
 			CommandFlag flag = flagParameter.getFlag();
 			
 			//TODO find a better workaround for aliases of the flag
-			var node = BrigadierNode.create(literal("-" + flag.name()))
-							.suggest((context, suggestionsBuilder)-> {
+			var node = BrigadierNode.create(argument("-" + flag.name(), StringArgumentType.word()))
+							.suggest((context, suggestionBuilder)-> {
+								suggestionBuilder.suggest("-" + flag.name());
 								for(String alias : flag.aliases()) {
-									suggestionsBuilder = suggestionsBuilder.suggest("-" + alias);
+									suggestionBuilder.suggest("-" + alias);
 								}
-								return suggestionsBuilder.buildFuture();
+								return suggestionBuilder.buildFuture();
 							});
 			
 			if(!flagParameter.isSwitch()) {
+				System.out.println("NOT SWITCH");
 				var flagInputArgType = getArgumentType(flagParameter);
 				BrigadierNode flagInputNode = BrigadierNode.create(argument("value", flagInputArgType));
 				node.addChild(flagInputNode);
@@ -226,12 +230,10 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		return (context, builder) -> {
 			SuggestionResolver<CommandSender, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
 			if(suggestionResolver == null) {
-				return builder.buildFuture();
+				return null;
 			}
 			
 			try {
-				
-			
 				
 				CommandSender actor = this.wrapCommandSource(context.getSource());
 				String tooltipMessage = parameter.getDescription() == Description.EMPTY ? parameter.format() : parameter.getDescription().toString();

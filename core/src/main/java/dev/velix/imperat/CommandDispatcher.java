@@ -224,7 +224,7 @@ public interface CommandDispatcher<C> {
 	default @Nullable <T> SuggestionResolver<C, T> getParameterSuggestionResolver(CommandParameter parameter) {
 		SuggestionResolver<C, T> parameterSpecificResolver = parameter.getSuggestionResolver();
 		if(parameterSpecificResolver == null)
-			return getNamedSuggestionResolver((Class<T>) parameter.getType());
+			return getSuggestionResolverByType((Class<T>) parameter.getType());
 		else
 			return parameterSpecificResolver;
 	}
@@ -239,7 +239,7 @@ public interface CommandDispatcher<C> {
 	 * @return the {@link SuggestionResolver} instance for that type
 	 */
 	@Nullable
-	<T> SuggestionResolver<C, T> getNamedSuggestionResolver(Class<T> clazz);
+	<T> SuggestionResolver<C, T> getSuggestionResolverByType(Class<T> clazz);
 	
 	/**
 	 * Fetches the suggestion provider/resolver that is registered by its unique name
