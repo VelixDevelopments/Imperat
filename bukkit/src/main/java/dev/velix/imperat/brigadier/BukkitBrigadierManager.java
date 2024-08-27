@@ -4,17 +4,18 @@ import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.velix.imperat.*;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.commodore.Commodore;
 import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static com.mojang.brigadier.builder.RequiredArgumentBuilder.argument;
 import static dev.velix.imperat.commodore.CommodoreProvider.isSupported;
 
@@ -70,7 +72,19 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 					Class<T> type,
 					ArgumentTypeResolver argumentTypeResolver
 	) {
-		resolvers.add((param)-> param.getType() == type ? argumentTypeResolver.resolveArgType(param) : null);
+		resolvers.add((param)-> {
+			if(param.isFlag()) {
+				
+				FlagParameter flagParameter = param.asFlagParameter();
+				if(flagParameter.isSwitch()) {
+					return argumentTypeResolver.resolveArgType(flagParameter);
+				}
+				
+				return param.getType() == flagParameter.getFlag().inputType()
+								? argumentTypeResolver.resolveArgType(param) : null;
+			}
+			return param.getType() == type ? argumentTypeResolver.resolveArgType(param) : null;
+		});
 	}
 	
 	@Override
@@ -88,7 +102,6 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		return getStringArgType(parameter);
 	}
 	
-
 	
 	private StringArgumentType getStringArgType(CommandParameter parameter) {
 		if(parameter.isGreedy()) return StringArgumentType.greedyString();
@@ -97,7 +110,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 	
 	@Override
 	public BrigadierNode parseCommandIntoNode(Command<CommandSender> command) {
-		BrigadierNode root = BrigadierNode.create(LiteralArgumentBuilder.literal(command.getName()));
+		BrigadierNode root = BrigadierNode.create(literal(command.getName()));
 		//CommandDebugger.debug("Parsing %s '%s'", (command.isSubCommand() ? "sub-command" : "command"), command.getName());
 		//input
 		CommandUsage<CommandSender> mainUsage = command.getMainUsage();
@@ -105,11 +118,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		BrigadierNode last = root;
 		
 		for(CommandParameter parameter : mainUsage.getParameters()) {
-			if(parameter.isFlag()) {
-				//TODO deal with it later on, continue for now
-				continue;
-			}
-			//else we parse an actual brigadier argument
+			//we parse an actual brigadier argument
 			//CommandDebugger.debug("Attempting to add args to %s", command.getName());
 			last = parseParameter(command, mainUsage, parameter);
 			root.addChild(last);
@@ -119,14 +128,14 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		for(Command<CommandSender> sub : command.getSubCommands()) {
 			//CommandDebugger.debug("Found child '%s' for parent '%s'", sub.getName(), command.getName());
 			//last = parseCommand(sub, last);
-			last.addChild(parseCommand(sub, last));
+			last.addChild(parseSubCommand(sub, last));
 		}
 		
 		return root;
 	}
 	
-	private BrigadierNode parseCommand(Command<CommandSender> command, BrigadierNode lastParent) {
-		BrigadierNode literalSub = BrigadierNode.create(LiteralArgumentBuilder.literal(command.getName()));
+	private BrigadierNode parseSubCommand(Command<CommandSender> command, BrigadierNode lastParent) {
+		BrigadierNode literalSub = BrigadierNode.create(literal(command.getName()));
 		lastParent.addChild(literalSub);
 		lastParent = literalSub;
 		
@@ -136,12 +145,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		//CommandDebugger.debug("Main usage '%s'", CommandUsage.format(command, mainUsage));
 		
 		for(CommandParameter parameter : mainUsage.getParameters()) {
-			if(parameter.isFlag()) {
-				//TODO deal with it later on, continue for now
-				continue;
-			}
 			//CommandDebugger.debug("Attempting to add args to %s", command.getName());
-			
 			BrigadierNode child = parseParameter(command, mainUsage, parameter);
 			lastParent.addChild(child);
 			lastParent = child;
@@ -149,7 +153,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		
 		//parse other inner children
 		for(var sub : command.getSubCommands()) {
-			lastParent.addChild(parseCommand(sub, lastParent));
+			lastParent.addChild(parseSubCommand(sub, lastParent));
 		}
 		
 		return lastParent;
@@ -161,6 +165,31 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 	                                     CommandParameter parameter) {
 		//CommandDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.getName() , command.getName());
 		//CommandDebugger.debug("Entering usage '%s'", CommandUsage.format(command, usage));
+		if(parameter.isFlag()) {
+			
+			FlagParameter flagParameter = parameter.asFlagParameter();
+			CommandFlag flag = flagParameter.getFlag();
+			
+			//TODO find a better workaround for aliases of the flag
+			var node = BrigadierNode.create(literal("-" + flag.name()))
+							.suggest((context, suggestionsBuilder)-> {
+								for(String alias : flag.aliases()) {
+									suggestionsBuilder = suggestionsBuilder.suggest("-" + alias);
+								}
+								return suggestionsBuilder.buildFuture();
+							});
+			
+			if(!flagParameter.isSwitch()) {
+				var flagInputArgType = getArgumentType(flagParameter);
+				BrigadierNode flagInputNode = BrigadierNode.create(argument("value", flagInputArgType));
+				node.addChild(flagInputNode);
+				return flagInputNode;
+			}
+			
+			return node;
+		}
+		
+		
 		ArgumentType<?> argumentType = this.getArgumentType(parameter);
 		//CommandDebugger.debug("Found arg type = " + argumentType.getClass().getSimpleName());
 		//CommandDebugger.debug("Parameter position = '%s' , with usage max= '%s'", parameter.getPosition(), usage.getMaxLength());
@@ -195,7 +224,15 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 			return null;
 
 		return (context, builder) -> {
+			SuggestionResolver<CommandSender, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
+			if(suggestionResolver == null) {
+				return builder.buildFuture();
+			}
+			
 			try {
+				
+			
+				
 				CommandSender actor = this.wrapCommandSource(context.getSource());
 				String tooltipMessage = parameter.getDescription() == Description.EMPTY ? parameter.format() : parameter.getDescription().toString();
 				Message tooltip = new LiteralMessage(tooltipMessage);
@@ -205,8 +242,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 								input.startsWith("/") ? input.substring(1) : input
 				);
 				CompletionArg arg = new CompletionArg(args.getLast(), args.size()-1);
-				
-				SuggestionResolver<CommandSender, ?> suggestionResolver = parameter.getSuggestionResolver();
+
 				suggestionResolver
 								.autoComplete(command,
 												actor, args, parameter, arg

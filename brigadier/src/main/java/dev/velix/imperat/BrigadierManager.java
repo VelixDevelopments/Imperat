@@ -5,6 +5,11 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A class that manages parsing {@link Command}
+ * into brigadier {@link BrigadierNode}
+ * @param <C> the command-source type
+ */
 public interface BrigadierManager<C> {
 	
 	/**
