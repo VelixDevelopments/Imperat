@@ -134,13 +134,10 @@ public interface CommandParameter {
     
     
     /**
-     * Formats the usage parameter
-     * using the command
-     *
-     * @param command The command owning this parameter
+     * Formats the usage parameter*
      * @return the formatted parameter
      */
-    <C> String format(Command<C> command);
+    <C> String format();
 
 
     static <C, T> CommandParameter of(

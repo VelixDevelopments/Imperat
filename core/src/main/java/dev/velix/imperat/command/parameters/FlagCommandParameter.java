@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.CommandSwitch;
@@ -40,7 +39,7 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
     }
 
     @Override
-    public <C> String format(Command<C> command) {
+    public String format() {
         return flag.format();
     }
 

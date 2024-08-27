@@ -5,6 +5,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.examples.BanCommand;
+import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
@@ -69,8 +70,6 @@ public final class Test extends JavaPlugin implements Listener {
 						.build());
 	}
 	
-	
-	
 	private void testImperat() {
 		dispatcher = BukkitCommandDispatcher.create(this);
 		//testBrigadierCommodore();
@@ -108,9 +107,12 @@ public final class Test extends JavaPlugin implements Listener {
 		
 		dispatcher.registerContextResolver(Guild.class, new GuildContextResolver());
 		
+		dispatcher.applyBrigadier();
+		
 		dispatcher.registerCommand(new GuildCommand());
-		//dispatcher.registerCommand(new GroupCommand());
+		dispatcher.registerCommand(new GroupCommand());
 		dispatcher.registerCommand(new BanCommand());
+		
 		debugCommands();
 	}
 	

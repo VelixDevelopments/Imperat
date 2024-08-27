@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -33,7 +32,7 @@ class NormalCommandParameter extends InputParameter {
      * @return the formatted parameter
      */
     @Override
-    public <C> String format(Command<C> command) {
+    public String format() {
         var content = getName();
         if (isGreedy())
             content += "...";

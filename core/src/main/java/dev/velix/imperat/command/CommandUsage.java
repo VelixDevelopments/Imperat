@@ -142,7 +142,7 @@ public interface CommandUsage<C> {
         StringBuilder builder = new StringBuilder(command.getName()).append(' ');
         int i = 0;
         for (CommandParameter parameter : usage.getParameters()) {
-            builder.append(parameter.format(command));
+            builder.append(parameter.format());
             if (i != usage.getParameters().size() - 1) {
                 builder.append(' ');
             }

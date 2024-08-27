@@ -62,7 +62,7 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
         for (int i = 0; i < params.size(); i++) {
             CommandParameter param = params.get(i);
             assert !param.isOptional();
-            builder.append(param.format(command));
+            builder.append(param.format());
             if (i != params.size() - 1)
                 builder.append(' ');
 

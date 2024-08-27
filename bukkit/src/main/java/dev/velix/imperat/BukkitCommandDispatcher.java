@@ -174,6 +174,7 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             BukkitUtil.COMMAND_MAP.register(command.getName(), internalCmd);
         }
         if(brigadierManager != null) {
+            System.out.println("BrigadierManager is not null !");
             brigadierManager.registerBukkitCommand(internalCmd, command);
         }
     }

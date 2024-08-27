@@ -176,6 +176,6 @@ public abstract class InputParameter implements CommandParameter {
 
     @Override
     public String toString() {
-        return format(null);
+        return format();
     }
 }

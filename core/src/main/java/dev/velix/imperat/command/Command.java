@@ -309,7 +309,7 @@ public interface Command<C> extends CommandParameter {
      * @return the formatted parameter
      */
     @Override
-    default <CC> String format(Command<CC> owningCommand) {
+    default  String format() {
         return getName();
     }
 

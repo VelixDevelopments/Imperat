@@ -26,6 +26,7 @@ import dev.velix.imperat.util.annotations.MethodVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -139,6 +140,11 @@ final class AnnotationHandlerRegistry<C> extends
 			var mainUsage = command.getMainUsage();
 			List<CommandParameter> methodCommandParameters = this.loadParameters(annotationRegistry, dispatcher, annotation, mainUsage, proxy, method, false);
 			
+			//merging the command's main usage params with subcommand's parameters to use them in the method to be invoked
+			List<CommandParameter> fullParams = new ArrayList<>(mainUsage.getParameters().size() + methodCommandParameters.size());
+			fullParams.addAll(mainUsage.getParameters());
+			fullParams.addAll(methodCommandParameters);
+			
 			UsageCooldown cooldown = loadCooldown(element);
 			String desc = element.isAnnotationPresent(Description.class) ? element.getAnnotation(Description.class).value() : "N/A";
 			String permission = element.isAnnotationPresent(Permission.class) ? element.getAnnotation(Permission.class).value() : null;
@@ -151,7 +157,7 @@ final class AnnotationHandlerRegistry<C> extends
 											.permission(permission)
 											.cooldown(cooldown)
 											.execute(new MethodCommandExecutor<>(pI, dispatcher, method,
-															methodCommandParameters)).build(),
+															fullParams)).build(),
 							annotation.attachDirectly()
 			);
 		});
@@ -228,12 +234,16 @@ final class AnnotationHandlerRegistry<C> extends
 			}
 			
 			CommandParameter commandParameter = getParameter(dispatcher, registry, proxyClass, method, parameter);
-			if (dispatcher.hasContextResolver(parameter.getType())
-							|| ((subCommand != null || help) && mainUsage != null && mainUsage
-							.hasParameter((param) -> param.equals(commandParameter)))
-			) {
-				continue;
+			
+			if(dispatcher.hasContextResolver(parameter.getType())) continue;
+			
+			if(subCommand != null || help) {
+				if(mainUsage != null && mainUsage
+								.hasParameter((param) -> param.equals(commandParameter))) {
+					continue;
+				}
 			}
+			
 			commandParameters.add(commandParameter);
 		}
 		return commandParameters;

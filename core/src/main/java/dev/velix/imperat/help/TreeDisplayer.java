@@ -58,7 +58,7 @@ final class TreeDisplayer implements UsageDisplayer {
         Command<C> lastSub = null;
         for (var param : usage.getParameters()) {
             builder.append(' ')
-                    .append(param.format(command));
+                    .append(param.format());
             if (param.isCommand()) {
                 lastSub = (Command<C>) param.asCommand();
                 break;

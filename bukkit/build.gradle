@@ -1,5 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
+String DESTINATION_1_8 = "C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot test server 1.8.8\\plugins"
+String DESTINATION_1_19 = "C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot 1.19.2\\plugins"
+String DESTINATION_1_17 = "C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot 1.17.1\\plugins"
+
 repositories {
     mavenCentral()
     mavenLocal()
@@ -75,7 +79,7 @@ tasks.register('bukkit', ShadowJar) {
     archiveClassifier.set("tests")
     from sourceSets.main.output, sourceSets.test.output
     configurations = [project.configurations.testRuntimeClasspath]
-    setDestinationDirectory(file("C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot 1.19.2\\plugins"))
+    setDestinationDirectory(file(DESTINATION_1_17))
     relocate("dev.array21.bukkitreflectionlib", "dev.velix.imperat.util.reflection")
 }
 

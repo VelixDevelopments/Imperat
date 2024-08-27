@@ -73,7 +73,7 @@ final class SmartUsageResolve<C> {
                     if (!optionalEmptyParameter.isOptional()) {
                         //cannot happen if no bugs, but just in case
                         throw new ContextResolveException(String.format(
-                                "Missing required parameters to be filled '%s'", optionalEmptyParameter.format(command))
+                                "Missing required parameters to be filled '%s'", optionalEmptyParameter.format())
                         );
                     }
 
@@ -210,7 +210,7 @@ final class SmartUsageResolve<C> {
 
             if (builder.isEmpty()) {
                 throw new TokenParseException("Failed to parse greedy argument '"
-                        + currentParameter.format(command) + "'");
+                        + currentParameter.format() + "'");
             }
             resolveResult = builder.toString();
 
@@ -281,7 +281,7 @@ final class SmartUsageResolve<C> {
 
             if (builder.isEmpty()) {
                 throw new TokenParseException("Failed to parse greedy argument '"
-                        + currentParameter.format(command) + "'");
+                        + currentParameter.format() + "'");
             }
             resolveResult = builder.toString();
 

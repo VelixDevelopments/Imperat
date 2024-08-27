@@ -20,6 +20,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,46 +95,91 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		else return StringArgumentType.string();
 	}
 	
-	@Override @SuppressWarnings("unchecked")
+	@Override
 	public BrigadierNode parseCommandIntoNode(Command<CommandSender> command) {
 		BrigadierNode root = BrigadierNode.create(LiteralArgumentBuilder.literal(command.getName()));
-		
+		//CommandDebugger.debug("Parsing %s '%s'", (command.isSubCommand() ? "sub-command" : "command"), command.getName());
 		//input
 		CommandUsage<CommandSender> mainUsage = command.getMainUsage();
+		
+		BrigadierNode last = root;
+		
 		for(CommandParameter parameter : mainUsage.getParameters()) {
 			if(parameter.isFlag()) {
 				//TODO deal with it later on, continue for now
 				continue;
 			}
-			if(parameter.isCommand()) {
-				root.addChild(parseCommandIntoNode((Command<CommandSender>) parameter.asCommand()));
-				continue;
-			}
 			//else we parse an actual brigadier argument
-			root.addChild(parseParameter(command, mainUsage, parameter));
+			//CommandDebugger.debug("Attempting to add args to %s", command.getName());
+			last = parseParameter(command, mainUsage, parameter);
+			root.addChild(last);
 		}
 		
+		//CommandDebugger.debug("Trying to add children for command '%s'", command.getName());
 		for(Command<CommandSender> sub : command.getSubCommands()) {
-			root.addChild(parseCommandIntoNode(sub));
+			//CommandDebugger.debug("Found child '%s' for parent '%s'", sub.getName(), command.getName());
+			//last = parseCommand(sub, last);
+			last.addChild(parseCommand(sub, last));
 		}
 		
 		return root;
 	}
 	
-	
-	private BrigadierNode parseParameter(Command<CommandSender> command, CommandUsage<CommandSender> usage,
-	                                     CommandParameter parameter) {
+	private BrigadierNode parseCommand(Command<CommandSender> command, BrigadierNode lastParent) {
+		BrigadierNode literalSub = BrigadierNode.create(LiteralArgumentBuilder.literal(command.getName()));
+		lastParent.addChild(literalSub);
+		lastParent = literalSub;
 		
+		//CommandDebugger.debug("Parsing %s '%s'", (command.isSubCommand() ? "sub-command" : "command"), command.getName());
+		//input
+		CommandUsage<CommandSender> mainUsage = command.getMainUsage();
+		//CommandDebugger.debug("Main usage '%s'", CommandUsage.format(command, mainUsage));
+		
+		for(CommandParameter parameter : mainUsage.getParameters()) {
+			if(parameter.isFlag()) {
+				//TODO deal with it later on, continue for now
+				continue;
+			}
+			//CommandDebugger.debug("Attempting to add args to %s", command.getName());
+			
+			BrigadierNode child = parseParameter(command, mainUsage, parameter);
+			lastParent.addChild(child);
+			lastParent = child;
+		}
+		
+		//parse other inner children
+		for(var sub : command.getSubCommands()) {
+			lastParent.addChild(parseCommand(sub, lastParent));
+		}
+		
+		return lastParent;
+	}
+	
+	
+	private BrigadierNode parseParameter(Command<CommandSender> command,
+	                                     CommandUsage<CommandSender> usage,
+	                                     CommandParameter parameter) {
+		//CommandDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.getName() , command.getName());
+		//CommandDebugger.debug("Entering usage '%s'", CommandUsage.format(command, usage));
 		ArgumentType<?> argumentType = this.getArgumentType(parameter);
-		boolean isLast = parameter.getPosition() == usage.getMaxLength() - 1;
+		//CommandDebugger.debug("Found arg type = " + argumentType.getClass().getSimpleName());
+		//CommandDebugger.debug("Parameter position = '%s' , with usage max= '%s'", parameter.getPosition(), usage.getMaxLength());
+		
+		int max = command.isSubCommand() ? usage.getMaxLength() : usage.getMaxLength()-1;
+		boolean isLast = parameter.getPosition() == max;
+		
+		//CommandDebugger.debug("isLast= " + isLast);
 		
 		BrigadierNode node = BrigadierNode.create(argument(parameter.getName(), argumentType));
+		
+		//CommandDebugger.debug("Resolving suggestions");
 		node.withRequirement((sender)-> true)
 				.suggest(createSuggestionProvider(command, parameter));
 		
-		if (isLast)
+		if (isLast) {
+			//CommandDebugger.debug("Setting execution !");
 			node.withExecution(dispatcher, this);
-		
+		}
 		return node;
 	}
 	
@@ -151,11 +197,11 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 		return (context, builder) -> {
 			try {
 				CommandSender actor = this.wrapCommandSource(context.getSource());
-				String tooltipMessage = parameter.getDescription() == Description.EMPTY ? parameter.getName() : parameter.getDescription().toString();
+				String tooltipMessage = parameter.getDescription() == Description.EMPTY ? parameter.format() : parameter.getDescription().toString();
 				Message tooltip = new LiteralMessage(tooltipMessage);
 				String input = context.getInput();
 				
-				ArgumentQueue args = ArgumentQueue.parse(
+				ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
 								input.startsWith("/") ? input.substring(1) : input
 				);
 				CompletionArg arg = new CompletionArg(args.getLast(), args.size()-1);
@@ -166,10 +212,10 @@ public final class BukkitBrigadierManager implements BrigadierManager<CommandSen
 												actor, args, parameter, arg
 								)
 								.stream()
-								.filter(c -> c.toLowerCase().startsWith(args.getLast().toLowerCase()))
-								.sorted(String.CASE_INSENSITIVE_ORDER)
+								.filter(c -> c.toLowerCase().startsWith(arg.arg().toLowerCase()))
 								.distinct()
-								.forEach(c -> builder.suggest(c, tooltip));
+								.sorted(String.CASE_INSENSITIVE_ORDER)
+								.forEach(suggestionResult -> builder.suggest(suggestionResult, tooltip));
 				
 			} catch (Throwable e) {
 				e.printStackTrace();

@@ -1,7 +1,6 @@
 package dev.velix.imperat.annotations.parameters;
 
 import dev.velix.imperat.annotations.element.MethodParameterElement;
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.InputParameter;
@@ -55,15 +54,12 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     }
 
     /**
-     * Formats the usage parameter
-     * using the command
-     *
-     * @param command The command owning this parameter
+     * Formats the usage parameter*
      * @return the formatted parameter
      */
     @Override
-    public <C> String format(Command<C> command) {
-        return parameter.format(command);
+    public String format() {
+        return parameter.format();
     }
 
     /**

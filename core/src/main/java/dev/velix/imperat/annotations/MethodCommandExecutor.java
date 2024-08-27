@@ -10,7 +10,6 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.ResolvedFlag;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.CommandHelp;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.reflection.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.reflection.MethodCaller;
 import org.jetbrains.annotations.ApiStatus;
@@ -27,13 +26,13 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
     private final CommandDispatcher<C> dispatcher;
     private final Method method;
     private final MethodCaller.BoundMethodCaller boundMethodCaller;
-    private final List<? extends CommandParameter> fullParameters;
+    private final List<CommandParameter> fullParameters;
     //private final Help helpAnnotation;
 
     public MethodCommandExecutor(Object proxy,
                                  CommandDispatcher<C> dispatcher,
                                  Method method,
-                                 List<? extends CommandParameter> fullParameters
+                                 List<CommandParameter> fullParameters
             /*Help help*/) {
         this.proxy = proxy;
         this.dispatcher = dispatcher;
@@ -49,7 +48,7 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 
     @SuppressWarnings("unchecked")
     public static <C> Object[] loadParameterInstances(CommandDispatcher<C> dispatcher,
-                                                      List<? extends CommandParameter> fullParameters,
+                                                      List<CommandParameter> fullParameters,
                                                       CommandSource<C> source,
                                                       ExecutionContext context,
                                                       Method method,
@@ -61,7 +60,6 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 
         for (int i = 1, p = 0; i < parameters.length; i++, p++) {
             Parameter actualParameter = parameters[i];
-
             if (commandHelp != null && CommandHelp.class.isAssignableFrom(actualParameter.getType())) {
                 paramsInstances[i] = commandHelp;
                 p--;
@@ -72,6 +70,7 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
             var contextResolver = factory.create(actualParameter);
 
             if (contextResolver != null) {
+                System.out.println("PARAMETER AT " + p  + "GOT CONTEXT RESOLVED");
                 paramsInstances[i] = contextResolver.resolve((Context<C>) context, actualParameter);
                 continue;
             }
@@ -83,7 +82,6 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
             }
 
             CommandParameter parameter = getUsageParam(fullParameters, p);
-
             if (parameter == null)
                 continue;
 
@@ -91,14 +89,7 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
                 ResolvedFlag value = context.getFlag(parameter.getName());
                 paramsInstances[i] = value.value();
             } else {
-
                 Object value = context.getArgument(parameter.getName());
-                if (value == null && parameter.isOptional()) {
-                    OptionalValueSupplier<?> valueSupplier = parameter.getDefaultValueSupplier();
-                    if (valueSupplier != null) {
-                        value = valueSupplier.supply((Context<C>) context);
-                    }
-                }
                 paramsInstances[i] = value;
             }
 
@@ -119,6 +110,7 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 
         var instances = loadParameterInstances(dispatcher, fullParameters,
                 commandSource, context, method, null);
+        
         try {
             boundMethodCaller.call(instances);
         } catch (Exception ex) {

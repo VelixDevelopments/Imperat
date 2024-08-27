@@ -1,6 +1,5 @@
 package dev.velix.imperat.annotations.parameters;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.InputParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
@@ -31,12 +30,11 @@ public final class NumericParameterDecorator extends InputParameter implements N
      * Formats the usage parameter
      * using the command
      *
-     * @param command The command owning this parameter
      * @return the formatted parameter
      */
     @Override
-    public <C> String format(Command<C> command) {
-        return parameter.format(command);
+    public String format() {
+        return parameter.format();
     }
 
     /**
