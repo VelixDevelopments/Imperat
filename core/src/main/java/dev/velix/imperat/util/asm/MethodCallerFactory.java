@@ -21,48 +21,35 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package dev.velix.imperat.util.reflection;
+package dev.velix.imperat.util.asm;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Method;
 
 /**
- * A high-level wrapper, responsible for invoking methods reflectively.
+ * Factory for creating {@link MethodCaller}s for methods.
  */
-public interface MethodCaller {
+public interface MethodCallerFactory {
 
     /**
-     * Calls the method of this caller
+     * Creates a new {@link MethodCaller} for the specified method.
      *
-     * @param instance  Instance to call from. Can be null
-     * @param arguments Invoking arguments
-     * @return The return result
+     * @param method Method to create for
+     * @return The reflective method caller
+     * @throws Throwable Any exceptions during creation
      */
-    Object call(@Nullable Object instance, Object... arguments);
+    @NotNull
+    MethodCaller createFor(@NotNull Method method) throws Throwable;
 
     /**
-     * Binds this caller to the specified instance. Calls from the bound method
-     * caller will no longer need an instance to call from.
+     * Returns a {@link MethodCallerFactory} that uses the new
+     * method handles API to create method callers.
      *
-     * @param instance Instance to invoke from. Can be null in case of static
-     *                 methods.
-     * @return The bound method caller
+     * @return The default method caller factory.
      */
-    default BoundMethodCaller bindTo(@Nullable Object instance) {
-        return arguments -> call(instance, arguments);
+    static @NotNull MethodCallerFactory methodHandles() {
+        return MethodHandlesCallerFactory.INSTANCE;
     }
 
-    /**
-     * Represents a {@link MethodCaller} that is attached to an instance
-     */
-    interface BoundMethodCaller {
-
-        /**
-         * Calls the method of this caller
-         *
-         * @param arguments Invoking arguments
-         * @return The return result
-         */
-        Object call(@NotNull Object... arguments);
-    }
 }

@@ -1,4 +1,4 @@
-package dev.velix.imperat.util.reflection;
+package dev.velix.imperat.util.asm;
 
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;

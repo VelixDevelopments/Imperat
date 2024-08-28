@@ -10,8 +10,8 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.ResolvedFlag;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.CommandHelp;
-import dev.velix.imperat.util.reflection.DefaultMethodCallerFactory;
-import dev.velix.imperat.util.reflection.MethodCaller;
+import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
+import dev.velix.imperat.util.asm.MethodCaller;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
