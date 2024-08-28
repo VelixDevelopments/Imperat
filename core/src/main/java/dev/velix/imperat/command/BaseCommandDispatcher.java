@@ -458,6 +458,7 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 	public void dispatch(C sender, String commandName, String... rawInput) {
 		
 		ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
+		//CommandDebugger.debug("Raw input = '%s'", String.join(",", rawArguments));
 		CommandSource<C> commandSource = wrapSender(sender);
 		
 		Context<C> plainContext = getContextFactory()

@@ -23,5 +23,7 @@ public final class NumericRange{
 		return new NumericRange(Double.MIN_VALUE, max);
 	}
 	
-	
+	public boolean matches(double value) {
+		return value >= min && value <= max;
+	}
 }

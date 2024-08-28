@@ -69,7 +69,7 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
 
     @SuppressWarnings("unchecked")
     public <T> ValueResolver<C, T> getResolver(Class<T> type) {
-        return (ValueResolver<C, T>) getData(type).orElse(null);
+        return (ValueResolver<C, T>) getData(TypeUtility.primitiveToBoxed(type)).orElse(null);
     }
 
 }

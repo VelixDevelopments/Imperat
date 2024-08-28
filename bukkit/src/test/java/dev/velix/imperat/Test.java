@@ -5,6 +5,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.examples.BanCommand;
+import dev.velix.imperat.examples.ExampleCommand;
 import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
@@ -109,11 +110,27 @@ public final class Test extends JavaPlugin implements Listener {
 		
 		//dispatcher.applyBrigadier();
 		
+		dispatcher.registerCommand(new ExampleCommand());
+		//classicExample();
 		dispatcher.registerCommand(new GuildCommand());
 		dispatcher.registerCommand(new GroupCommand());
 		dispatcher.registerCommand(new BanCommand());
 		
 		debugCommands();
+	}
+	
+	private void classicExample() {
+		
+		Command<CommandSender> example = Command.createCommand("example");
+		example.addUsage(CommandUsage.<CommandSender>builder()
+						.parameters(CommandParameter.requiredInt("firstArg"))
+						.execute((source, context)-> {
+							int firstArg = context.getArgumentOr("firstArg", -1);
+							source.reply("Entered arg= " + firstArg);
+						})
+						.build());
+		
+		dispatcher.registerCommand(example);
 	}
 	
 	

@@ -16,7 +16,7 @@ public final class ExampleCommand {
 	
 	@Usage
 	public void exampleOneArg(BukkitCommandSource source, @Named("firstArg") int firstArg) {
-		source.reply("Entered required number= " + firstArg);
+		source.reply("Entered required num= " + firstArg);
 	}
 	
 }

@@ -1,9 +1,10 @@
 package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.command.numeric_comparators.NumericComparator;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents a behaviour that deals with numeric
+ * Represents a behavior that deals with numeric
  * inputs if they are ranged from min to max using {@link NumericRange}
  */
 public interface NumericParameter extends CommandParameter {
@@ -19,10 +20,9 @@ public interface NumericParameter extends CommandParameter {
         return getRange() != null;
     }
 
-    default boolean matchesRange(double value) {
+    default <N extends Number> boolean matchesRange(N value) {
         var range = getRange();
-        return range != null &&
-                value >= range.getMin() && value <= range.getMax();
+        return range != null && NumericComparator.of(value).isWithin(value, range);
     }
 
 }

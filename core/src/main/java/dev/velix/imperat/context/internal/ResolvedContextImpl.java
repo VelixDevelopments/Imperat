@@ -1,5 +1,6 @@
 package dev.velix.imperat.context.internal;
 
+import dev.velix.imperat.CommandDebugger;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
@@ -133,7 +134,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getArgument(String name) {
-        ResolvedArgument argument = allResolvedArgs.get(name.toLowerCase());
+        ResolvedArgument argument = allResolvedArgs.get(name);
         if (argument == null) return null;
         return (T) argument.value();
     }
@@ -197,10 +198,8 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     public <T> @Nullable T getFlagValue(String flagName) {
         ResolvedFlag flag = getFlag(flagName);
         if (flag == null) {
-            System.out.println("NO FLAG RESOLVED");
             return null;
         }
-        System.out.println("FLAG VALUE IS THE PROBLEM");
         return (T) flag.value();
     }
 
@@ -219,7 +218,15 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     public void resolve() throws CommandException {
         SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
         handler.resolve(dispatcher, this);
+        
+        System.out.println("Resolved args: ");
+        for(var ra : allResolvedArgs.values()) {
+            CommandDebugger.debug("- " + ra.toString());
+        }
+        
         this.lastCommand = handler.getCommand();
+        
+        
     }
 
 
@@ -232,12 +239,13 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
         if (value != null && TypeUtility.isNumericType(value.getClass())
                 && parameter instanceof NumericParameter numericParameter
-                && !numericParameter.matchesRange((Double) value)) {
+                && numericParameter.hasRange()
+                && !numericParameter.matchesRange((Number) value)) {
 
             NumericRange range = numericParameter.getRange();
-            throw new NumberOutOfRangeException(numericParameter, (Double) value, range);
+            throw new NumberOutOfRangeException(numericParameter, (Number) value, range);
         }
-
+        System.out.println("ADDING");
         final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
         resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
             if (existingResolvedArgs != null) {

@@ -7,7 +7,7 @@ public class NumberOutOfRangeException extends ContextResolveException {
 
     public NumberOutOfRangeException(
             final NumericParameter parameter,
-            final double value,
+            final Number value,
             final NumericRange range
     ) {
         super("Value '" + value + "' entered for parameter '"
