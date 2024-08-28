@@ -75,11 +75,27 @@ compileJava {
     options.compilerArgs += ["-parameters"]
 }
 
-tasks.register('bukkit', ShadowJar) {
+tasks.register('bukkit-1.8', ShadowJar) {
+    archiveClassifier.set("tests")
+    from sourceSets.main.output, sourceSets.test.output
+    configurations = [project.configurations.testRuntimeClasspath]
+    setDestinationDirectory(file(DESTINATION_1_8))
+    relocate("dev.array21.bukkitreflectionlib", "dev.velix.imperat.util.reflection")
+}
+
+tasks.register('bukkit-1.17.1', ShadowJar) {
     archiveClassifier.set("tests")
     from sourceSets.main.output, sourceSets.test.output
     configurations = [project.configurations.testRuntimeClasspath]
     setDestinationDirectory(file(DESTINATION_1_17))
+    relocate("dev.array21.bukkitreflectionlib", "dev.velix.imperat.util.reflection")
+}
+
+tasks.register('bukkit-1.19.2', ShadowJar) {
+    archiveClassifier.set("tests")
+    from sourceSets.main.output, sourceSets.test.output
+    configurations = [project.configurations.testRuntimeClasspath]
+    setDestinationDirectory(file(DESTINATION_1_19))
     relocate("dev.array21.bukkitreflectionlib", "dev.velix.imperat.util.reflection")
 }
 
