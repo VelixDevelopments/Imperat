@@ -1,6 +1,5 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.EnumValueResolver;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.resolvers.ValueResolver;
@@ -21,28 +20,28 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
             if (TypeUtility.isInteger(raw)) {
                 return Integer.parseInt(raw);
             } else {
-                throw exception(context, raw, Integer.class);
+                throw exception(raw, Integer.class);
             }
         });
         registerResolver(Long.class, (source, context, raw, pivot, parameter) -> {
             if (TypeUtility.isLong(raw)) {
                 return Long.parseLong(raw);
             } else {
-                throw exception(context, raw, Long.class);
+                throw exception(raw, Long.class);
             }
         });
         registerResolver(Boolean.class, (source, context, raw, pivot, parameter) -> {
             if (TypeUtility.isBoolean(raw)) {
                 return Boolean.valueOf(raw);
             } else {
-                throw exception(context, raw, Boolean.class);
+                throw exception(raw, Boolean.class);
             }
         });
         registerResolver(Double.class, (source, context, raw, pivot, parameter) -> {
             if (TypeUtility.isDouble(raw)) {
                 return Double.parseDouble(raw);
             } else {
-                throw exception(context, raw, Double.class);
+                throw exception(raw, Double.class);
             }
         });
         registerEnumResolver(TimeUnit.class);
@@ -52,11 +51,11 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
         return new ValueResolverRegistry<>();
     }
 
-    private ContextResolveException exception(Context<C> context,
-                                              String raw,
+    private ContextResolveException exception(String raw,
                                               Class<?> clazzRequired) {
-        return new ContextResolveException("Error while parsing " + context.getCommandUsed()
-                + "'s argument input '" + raw + "' , it's NOT any type of " + clazzRequired.getSimpleName());
+        return new ContextResolveException(
+                "Error while parsing argument '%s', It's not a valid %s", raw, clazzRequired.getSimpleName()
+        );
     }
 
     public <T> void registerResolver(Class<T> clazz, ValueResolver<C, T> resolver) {
