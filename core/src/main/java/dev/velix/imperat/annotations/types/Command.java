@@ -13,7 +13,7 @@ public @interface Command {
 
     /**
      * @return The names of this command
-     * first element is the unique name of the command
+     * The first element is the unique name of the command
      * others are going to be considered the aliases
      */
     @NotNull String[] value();

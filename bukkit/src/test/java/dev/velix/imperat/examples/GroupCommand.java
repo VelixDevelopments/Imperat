@@ -23,7 +23,10 @@ public final class GroupCommand {
     }
 
     @Usage
-    public void mainUsage(BukkitCommandSource source, @Named("group") @SuggestionProvider("groups") Group group) {
+    public void mainUsage(
+            BukkitCommandSource source,
+            @Named("group") @SuggestionProvider("groups") Group group
+    ) {
         //when he does "/group <group>"
         source.reply("entered group name= " + group.name());
     }
