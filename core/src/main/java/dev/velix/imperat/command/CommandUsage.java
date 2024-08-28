@@ -85,7 +85,15 @@ public interface CommandUsage<C> {
      * @see CommandParameter
      */
     List<CommandParameter> getParameters();
-
+    
+    
+    /**
+     * Fetches the parameter at the index
+     * @param index the index of the parameter
+     * @return the parameter at specified index/position
+     */
+    @Nullable CommandParameter getParameter(int index);
+    
     /**
      * @return the execution for this usage
      */
@@ -99,7 +107,7 @@ public interface CommandUsage<C> {
      * and takes the target's execution as well
      *
      * @param usage the usage to merge with
-     * @return the merged command usage !
+     * @return the merged command usage!
      */
     default CommandUsage<C> merge(CommandUsage<C> usage) {
         List<CommandParameter> parameters = new ArrayList<>(this.getParameters());

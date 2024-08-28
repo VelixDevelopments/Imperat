@@ -15,17 +15,18 @@ import java.util.function.Predicate;
 public final class CommandUsageLookup<C> {
 
     private final CommandDispatcher<C> dispatcher;
-    private final Command<C> primeCommand;
-
+    private final List<CommandUsage<C>> usages;
+    
     CommandUsageLookup(CommandDispatcher<C> dispatcher,
                        Command<C> command) {
         this.dispatcher = dispatcher;
-        this.primeCommand = command;
+        this.usages = new ArrayList<>(command.getUsages());
+        usages.sort(UsageComparator.getInstance());
     }
 
 
     public SearchResult searchUsage(Context<C> context) {
-        for (CommandUsage<C> commandUsage : primeCommand.getUsages()) {
+        for (CommandUsage<C> commandUsage : this.usages) {
             if (usageMatchesContext(context, commandUsage))
                 return new SearchResult(commandUsage, Result.FOUND_COMPLETE);
             else if (commandUsage.hasParamType(Command.class) && checkResolvedLogic(context, commandUsage))
@@ -37,7 +38,7 @@ public final class CommandUsageLookup<C> {
 
     public List<CommandUsage<C>> findUsages(Predicate<CommandUsage<C>> predicate) {
         List<CommandUsage<C>> usages = new ArrayList<>();
-        for (CommandUsage<C> usage : primeCommand.getUsages()) {
+        for (CommandUsage<C> usage : this.usages) {
             if (predicate.test(usage)) {
                 usages.add(usage);
             }
@@ -48,7 +49,8 @@ public final class CommandUsageLookup<C> {
     private boolean usageMatchesContext(Context<C> context, CommandUsage<C> usage) {
         //1-arguments length check from both sides (raw and resolved)
         //2- compare raw and resolved parameters
-        return checkLength(context.getArguments(), usage) && checkResolvedLogic(context, usage);
+        return checkLength(context.getArguments(), usage)
+                && checkResolvedLogic(context, usage);
     }
 
     @SuppressWarnings("unchecked")
@@ -56,15 +58,15 @@ public final class CommandUsageLookup<C> {
                                        CommandUsage<C> usage) {
 
         ArgumentQueue rawArgs = context.getArguments().copy();
-        List<CommandParameter> parameters = usage.getParameters();
 
         int i = 0;
         while (!rawArgs.isEmpty()) {
-            if (i >= parameters.size()) break;
+            if (i >= usage.getMaxLength()) break;
 
             final String raw = rawArgs.poll();
-            final CommandParameter parameter = parameters.get(i);
-
+            final CommandParameter parameter = usage.getParameter(i);
+            if(parameter == null) break;
+            
             if (parameter.isFlag())
                 continue;
 

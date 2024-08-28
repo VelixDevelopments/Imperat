@@ -53,10 +53,8 @@ public final class GroupCommand {
     @Help
     public void groupHelp(
             BukkitCommandSource source,
-            @Named("group") Group group,
             BukkitCommandHelp help
     ) {
-        source.reply("Group entered= " + group.name());
         help.display(source);
     }
 }

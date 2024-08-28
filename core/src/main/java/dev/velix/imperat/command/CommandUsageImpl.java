@@ -157,7 +157,13 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public List<CommandParameter> getParameters() {
         return parameters;
     }
-
+    
+    @Override
+    public @Nullable CommandParameter getParameter(int index) {
+        if(index < 0 || index >= parameters.size()) return null;
+        return parameters.get(index);
+    }
+    
     /**
      * @return the execution for this command
      */

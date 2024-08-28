@@ -56,7 +56,21 @@ final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 
             return parameterList1.equals(parameterList2);
         }
-
+        
+        if(sameLength) {
+            final int capacity = firstUsage.getMinLength();
+            for (int i = 0; i < capacity; i++) {
+                CommandParameter firstUsageParameter = firstUsage.getParameter(i);
+                CommandParameter secondUsageParameter = secondUsage.getParameter(i);
+                if(firstUsageParameter == null || secondUsageParameter == null) break;
+                
+                if( (firstUsageParameter.isCommand() && !secondUsageParameter.isCommand())
+                        || (!firstUsageParameter.isCommand() && secondUsageParameter.isCommand()) )  {
+                    return false;
+                }
+            }
+        }
+        
         return sameLength;
     }
 

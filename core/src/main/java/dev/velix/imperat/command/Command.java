@@ -357,7 +357,7 @@ public interface Command<C> extends CommandParameter {
                                     (Context<C>) context, ((ResolvedContext<C>) context).getDetectedUsage());
                             helpExecution.help(sender, (Context<C>) context, help, page);
                         }).buildAsHelp(),
-                false
+                true
         );
     }
 

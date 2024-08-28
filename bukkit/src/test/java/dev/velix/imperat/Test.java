@@ -107,7 +107,7 @@ public final class Test extends JavaPlugin implements Listener {
 		
 		dispatcher.registerContextResolver(Guild.class, new GuildContextResolver());
 		
-		dispatcher.applyBrigadier();
+		//dispatcher.applyBrigadier();
 		
 		dispatcher.registerCommand(new GuildCommand());
 		dispatcher.registerCommand(new GroupCommand());
