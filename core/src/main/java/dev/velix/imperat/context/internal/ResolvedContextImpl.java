@@ -1,6 +1,5 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.CommandDebugger;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.CommandSource;
 import dev.velix.imperat.command.Command;
@@ -218,15 +217,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     public void resolve() throws CommandException {
         SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
         handler.resolve(dispatcher, this);
-        
-        System.out.println("Resolved args: ");
-        for(var ra : allResolvedArgs.values()) {
-            CommandDebugger.debug("- " + ra.toString());
-        }
-        
         this.lastCommand = handler.getCommand();
-        
-        
     }
 
 
@@ -245,7 +236,6 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
             NumericRange range = numericParameter.getRange();
             throw new NumberOutOfRangeException(numericParameter, (Number) value, range);
         }
-        System.out.println("ADDING");
         final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
         resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
             if (existingResolvedArgs != null) {

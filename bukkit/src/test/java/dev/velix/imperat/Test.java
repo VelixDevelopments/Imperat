@@ -104,7 +104,6 @@ public final class Test extends JavaPlugin implements Listener {
 			
 			return List.of(cmdAnn, permission, desc);
 		});*/
-		//TODO test @Range
 		
 		dispatcher.registerContextResolver(Guild.class, new GuildContextResolver());
 		

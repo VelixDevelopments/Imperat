@@ -17,9 +17,6 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ValueResolver<C, T> {
-
-    
-    //TODO add argument queue for change of position
     
     /**
      * @param source  the source of the command

@@ -11,15 +11,15 @@ public class NumberOutOfRangeException extends ContextResolveException {
             final NumericRange range
     ) {
         super("Value '" + value + "' entered for parameter '"
-                + parameter.getName() + "' must be " + formatRange(range));
+                + parameter.format() + "' must be " + formatRange(range));
     }
 
     private static String formatRange(NumericRange range) {
         StringBuilder builder = new StringBuilder();
         if (range.getMin() != Double.MIN_VALUE && range.getMax() != Double.MAX_VALUE)
-            builder.append("within").append(range.getMin()).append('-').append(range.getMax());
+            builder.append("within ").append(range.getMin()).append('-').append(range.getMax());
         else if (range.getMin() != Double.MIN_VALUE)
-            builder.append("at least '").append(range.getMax()).append("'");
+            builder.append("at least '").append(range.getMin()).append("'");
         else if (range.getMax() != Double.MAX_VALUE)
             builder.append("at most '").append(range.getMax()).append("'");
         else

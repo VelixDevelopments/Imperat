@@ -1,6 +1,5 @@
 package dev.velix.imperat.context.internal.sur;
 
-import dev.velix.imperat.CommandDebugger;
 import dev.velix.imperat.CommandDispatcher;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
@@ -13,6 +12,7 @@ import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -214,7 +214,7 @@ public final class SmartUsageResolve<C> {
 			resolveResult = this.getResult(resolver, context, currentRaw, currentParameter);
 			pivot.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
 		}
-		CommandDebugger.debug("Resolving required param '%s' with value '%s'", currentParameter.format(), resolveResult);
+		//CommandDebugger.debug("Resolving required param '%s' with value '%s'", currentParameter.format(), resolveResult);
 		context.resolveArgument(command, currentRaw, pivot.parameter,
 						currentParameter, resolveResult);
 	}

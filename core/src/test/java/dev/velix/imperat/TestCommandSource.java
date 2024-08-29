@@ -44,7 +44,7 @@ public class TestCommandSource implements CommandSource<TestSender> {
      */
     @Override
     public void reply(Component component) {
-        //TODO later
+    
     }
 
     /**
@@ -55,11 +55,7 @@ public class TestCommandSource implements CommandSource<TestSender> {
         return false;
     }
 
-    /**
-     * @param clazz
-     * @param <T>
-     * @return
-     */
+    
     @Override
     public <T> T as(Class<T> clazz) {
         return null;

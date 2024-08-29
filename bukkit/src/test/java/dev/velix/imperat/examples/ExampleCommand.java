@@ -5,6 +5,7 @@ import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Named;
+import dev.velix.imperat.annotations.types.parameters.Range;
 
 @Command("example")
 public final class ExampleCommand {
@@ -15,7 +16,7 @@ public final class ExampleCommand {
 	}
 	
 	@Usage
-	public void exampleOneArg(BukkitCommandSource source, @Named("firstArg") int firstArg) {
+	public void exampleOneArg(BukkitCommandSource source, @Named("firstArg") @Range(min = 5, max = 10) int firstArg) {
 		source.reply("Entered required num= " + firstArg);
 	}
 	
