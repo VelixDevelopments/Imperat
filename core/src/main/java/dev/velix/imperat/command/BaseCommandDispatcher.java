@@ -525,7 +525,7 @@ public abstract class BaseCommandDispatcher<C> implements CommandDispatcher<C> {
 			sendCaption(CaptionKey.COOLDOWN, command, source, context, usage);
 			return;
 		}
-		usage.getCooldownHandler().registerExecutionMoment(source);
+		usage.getCooldownHandler().registerExecutionMoment(source); //TODO make a generic pre-processor
 		ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(this, command, context, usage);
 		resolvedContext.resolve();
 		usage.execute(source, resolvedContext);

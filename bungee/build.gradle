@@ -1,19 +1,46 @@
-plugins {
-    id 'java'
-}
-
-group = 'dev.zafrias.imperat'
-version = '1.0-SNAPSHOT'
-
 repositories {
     mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation project(":core")
+
+    compileOnly kyori(KyoriModule.API)
+    compileOnly kyori(KyoriModule.MINI_MESSAGE)
+    compileOnly platform(KyoriModule.BUNGEE, "4.3.4")
+    compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
+
 }
 
-test {
-    useJUnitPlatform()
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+static String kyori(KyoriModule module) {
+    return platform(module, "4.17.0")
+}
+
+static String platform(KyoriModule platform, String version) {
+    "net.kyori:adventure-" + platform.getDisplay() + ":" + version
+}
+
+enum KyoriModule {
+
+    API("api"), MINI_MESSAGE("text-minimessage"), BUKKIT("platform-bukkit"),
+    BUNGEE("platform-bungeecord"), SPONGE("platform-spongeapi");
+
+    private final String display
+
+    KyoriModule(String display) {
+        this.display = display
+    }
+
+    String getDisplay() {
+        return display
+    }
 }

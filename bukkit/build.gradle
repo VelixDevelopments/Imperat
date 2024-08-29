@@ -60,6 +60,10 @@ dependencies {
 
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 processTestResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
