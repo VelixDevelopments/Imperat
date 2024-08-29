@@ -17,7 +17,7 @@ public class GroupSuggestionResolver implements BukkitSuggestionResolver<Group> 
     public Class<Group> getType() {
         return Group.class;
     }
-    
+
     @Override
     public List<String> autoComplete(Command<CommandSender> command, CommandSender source,
                                      ArgumentQueue queue, CommandParameter parameterToComplete, @Nullable CompletionArg argToComplete) {

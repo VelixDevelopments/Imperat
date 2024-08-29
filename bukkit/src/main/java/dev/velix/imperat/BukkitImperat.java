@@ -2,7 +2,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.caption.Messages;
-import dev.velix.imperat.command.BaseCommandDispatcher;
+import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
@@ -32,17 +32,17 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.UUID;
 
-public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender> {
+public class BukkitImperat extends BaseImperat<CommandSender> {
 
     private final Plugin plugin;
     private final AudienceProvider provider;
-    
+
     private Map<String, org.bukkit.command.Command> bukkitOGMapping;
-    
+
     private BukkitBrigadierManager brigadierManager;
-    
+
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
-    
+
     private final static LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder()
             .character('&')
             .hexColors()
@@ -50,11 +50,11 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             .build();
 
     @SuppressWarnings("unchecked")
-    private BukkitCommandDispatcher(Plugin plugin, AudienceProvider audienceProvider, @NotNull PermissionResolver<CommandSender> permissionResolver) {
+    private BukkitImperat(Plugin plugin, AudienceProvider audienceProvider, @NotNull PermissionResolver<CommandSender> permissionResolver) {
         super(permissionResolver);
         this.plugin = plugin;
         CommandDebugger.setLogger(plugin.getLogger());
-        if(BukkitUtil.KNOWN_COMMANDS != null) {
+        if (BukkitUtil.KNOWN_COMMANDS != null) {
             try {
                 bukkitOGMapping = (Map<String, org.bukkit.command.Command>) BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
             } catch (IllegalAccessException e) {
@@ -65,35 +65,36 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         registerValueResolvers();
         registerSuggestionResolvers();
     }
-    
+
     /**
      * Creates a bukkit command dispatcher instance
-     * @param plugin the plugin
-     * @param audiences the kyori adventure audience provider
+     *
+     * @param plugin             the plugin
+     * @param audiences          the kyori adventure audience provider
      * @param permissionResolver the permission resolver
-     * @param override whether to override the existing instance in the bukkit server
-     *                 or just use an already existing instance in the server loaded
-     *                 from any other plugin
+     * @param override           whether to override the existing instance in the bukkit server
+     *                           or just use an already existing instance in the server loaded
+     *                           from any other plugin
      * @return the new or existing bukkit command dispatcher instance in the bukkit server
      */
-    public static BukkitCommandDispatcher create(
+    public static BukkitImperat create(
             @NotNull Plugin plugin,
             @Nullable AudienceProvider audiences,
             @NotNull PermissionResolver<CommandSender> permissionResolver,
             boolean override
     ) {
         Preconditions.notNull(plugin, "plugin cannot be null !");
-        RegisteredServiceProvider<BukkitCommandDispatcher> provider =
-                Bukkit.getServicesManager().getRegistration(BukkitCommandDispatcher.class);
+        RegisteredServiceProvider<BukkitImperat> provider =
+                Bukkit.getServicesManager().getRegistration(BukkitImperat.class);
         if (provider == null || override) {
-            BukkitCommandDispatcher dispatcher = new BukkitCommandDispatcher(plugin, audiences, permissionResolver);
-            Bukkit.getServicesManager().register(BukkitCommandDispatcher.class, dispatcher, plugin, ServicePriority.Normal);
+            BukkitImperat dispatcher = new BukkitImperat(plugin, audiences, permissionResolver);
+            Bukkit.getServicesManager().register(BukkitImperat.class, dispatcher, plugin, ServicePriority.Normal);
             return dispatcher;
         }
         return provider.getProvider();
     }
-    
-    public static BukkitCommandDispatcher create(
+
+    public static BukkitImperat create(
             @NotNull Plugin plugin,
             @Nullable AudienceProvider audiences,
             @NotNull PermissionResolver<CommandSender> permissionResolver
@@ -101,17 +102,18 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         return create(plugin, audiences, permissionResolver, false);
     }
 
-    public static BukkitCommandDispatcher create(Plugin plugin, @Nullable AudienceProvider audienceProvider) {
+    public static BukkitImperat create(Plugin plugin, @Nullable AudienceProvider audienceProvider) {
         return create(plugin, audienceProvider, DEFAULT_PERMISSION_RESOLVER);
     }
-    public static BukkitCommandDispatcher create(Plugin plugin, @NotNull PermissionResolver<CommandSender> permissionResolver) {
+
+    public static BukkitImperat create(Plugin plugin, @NotNull PermissionResolver<CommandSender> permissionResolver) {
         return create(plugin, null, permissionResolver);
     }
-    
-    public static BukkitCommandDispatcher create(Plugin plugin) {
+
+    public static BukkitImperat create(Plugin plugin) {
         return create(plugin, null, DEFAULT_PERMISSION_RESOLVER);
     }
-    
+
 
     /**
      * Wraps the sender into a built-in command-sender type
@@ -120,8 +122,8 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
      * @return the wrapped command-sender type
      */
     @Override
-    public CommandSource<CommandSender> wrapSender(CommandSender sender) {
-        return new BukkitCommandSource(sender, provider);
+    public Source<CommandSender> wrapSender(CommandSender sender) {
+        return new BukkitSource(sender, provider);
     }
 
     /**
@@ -169,16 +171,16 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
     public final void registerCommand(Command<CommandSender> command) {
         super.registerCommand(command);
         var internalCmd = new InternalBukkitCommand(this, command);
-        if(BukkitUtil.KNOWN_COMMANDS != null) {
+        if (BukkitUtil.KNOWN_COMMANDS != null) {
             bukkitOGMapping.put(command.getName(), internalCmd);
-        }else {
+        } else {
             BukkitUtil.COMMAND_MAP.register(command.getName(), internalCmd);
         }
-        if(brigadierManager != null) {
+        if (brigadierManager != null) {
             brigadierManager.registerBukkitCommand(internalCmd, command);
         }
     }
-    
+
 
     protected void registerValueResolvers() {
 
@@ -189,10 +191,10 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
         }));
 
         this.registerValueResolver(OfflinePlayer.class, (source, context, raw, pivot, parameter) -> {
-	        if(raw.length() > 16) {
-              throw new ContextResolveException("Invalid or Unknown offline player '%s'", raw);
-          }
-          return Bukkit.getOfflinePlayer(raw);
+            if (raw.length() > 16) {
+                throw new ContextResolveException("Invalid or Unknown offline player '%s'", raw);
+            }
+            return Bukkit.getOfflinePlayer(raw);
         });
 
         this.registerValueResolver(World.class, (source, context, raw, pivot, parameter) -> {
@@ -201,14 +203,14 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             throw new ContextResolveException("Invalid world '%s'", raw);
         });
 
-        registerValueResolver(UUID.class, (source, context, raw, pivot, parameter)-> {
+        registerValueResolver(UUID.class, (source, context, raw, pivot, parameter) -> {
             try {
-	            return UUID.fromString(raw);
-            }catch (IllegalArgumentException ex) {
+                return UUID.fromString(raw);
+            } catch (IllegalArgumentException ex) {
                 throw new ContextResolveException("Invalid uuid-format '%s'", raw);
             }
         });
-        
+
         registerValueResolver(Component.class, (source, context, raw, pivot, parameter) -> {
             String result = Messages.MINI_MESSAGE.stripTags(raw);
             if (result.length() == raw.length()) {
@@ -217,15 +219,17 @@ public class BukkitCommandDispatcher extends BaseCommandDispatcher<CommandSender
             return LEGACY_COMPONENT_SERIALIZER.deserialize(raw);
         });
     }
+
     private void registerSuggestionResolvers() {
         registerSuggestionResolver(BukkitSuggestionResolvers.PLAYER);
         registerSuggestionResolver(BukkitSuggestionResolvers.OFFLINE_PLAYER);
     }
+
     public void applyBrigadier() {
         brigadierManager = BukkitBrigadierManager.load(this);
         //TODO apply on all currently registered commands
     }
-    
+
     @SuppressWarnings("unchecked")
     public static Class<? extends Entity> getSelectedEntity(@NotNull Type selectorType) {
         return (Class<? extends Entity>) TypeUtility.getInsideGeneric(selectorType, Entity.class);

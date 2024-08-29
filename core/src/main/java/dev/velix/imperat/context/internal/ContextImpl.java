@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Context;
@@ -12,15 +12,15 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 final class ContextImpl<C> implements Context<C> {
 
-    private final CommandSource<C> commandSource;
+    private final Source<C> source;
     private final String command;
     private final ArgumentQueue args;
 
     ContextImpl(
-            CommandSource<C> commandSource,
+            Source<C> source,
             String command,
             ArgumentQueue args) {
-        this.commandSource = commandSource;
+        this.source = source;
         this.command = command;
         this.args = args;
     }
@@ -38,11 +38,11 @@ final class ContextImpl<C> implements Context<C> {
 
     /**
      * @return the command source of the command
-     * @see CommandSource
+     * @see Source
      */
     @Override
-    public @NotNull CommandSource<C> getCommandSource() {
-        return commandSource;
+    public @NotNull Source<C> getSource() {
+        return source;
     }
 
     /**
@@ -87,7 +87,7 @@ final class ContextImpl<C> implements Context<C> {
     public <T> @Nullable T getArgument(String name) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Fetches the argument/input resolved by the context
      * using {@link ContextResolver}
@@ -99,8 +99,8 @@ final class ContextImpl<C> implements Context<C> {
     public <T> @Nullable T getContextResolvedArgument(Class<T> type) {
         throw new UnsupportedOperationException();
     }
-    
-    
+
+
     /**
      * @return the number of flags extracted
      */

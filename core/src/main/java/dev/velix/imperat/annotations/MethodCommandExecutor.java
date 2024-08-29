@@ -1,8 +1,8 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.CommandDebugger;
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
@@ -23,14 +23,14 @@ import java.util.List;
 public final class MethodCommandExecutor<C> implements CommandExecution<C> {
 
     private final Object proxy;
-    private final CommandDispatcher<C> dispatcher;
+    private final Imperat<C> dispatcher;
     private final Method method;
     private final MethodCaller.BoundMethodCaller boundMethodCaller;
     private final List<CommandParameter> fullParameters;
     //private final Help helpAnnotation;
 
     public MethodCommandExecutor(Object proxy,
-                                 CommandDispatcher<C> dispatcher,
+                                 Imperat<C> dispatcher,
                                  Method method,
                                  List<CommandParameter> fullParameters
             /*Help help*/) {
@@ -47,9 +47,9 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <C> Object[] loadParameterInstances(CommandDispatcher<C> dispatcher,
+    public static <C> Object[] loadParameterInstances(Imperat<C> dispatcher,
                                                       List<CommandParameter> fullParameters,
-                                                      CommandSource<C> source,
+                                                      Source<C> source,
                                                       ExecutionContext context,
                                                       Method method,
                                                       @Nullable CommandHelp<C> commandHelp) throws CommandException {
@@ -70,7 +70,7 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
             var contextResolver = factory.create(actualParameter);
 
             if (contextResolver != null) {
-                System.out.println("PARAMETER AT " + p  + "GOT CONTEXT RESOLVED");
+                System.out.println("PARAMETER AT " + p + "GOT CONTEXT RESOLVED");
                 paramsInstances[i] = contextResolver.resolve((Context<C>) context, actualParameter);
                 continue;
             }
@@ -101,16 +101,16 @@ public final class MethodCommandExecutor<C> implements CommandExecution<C> {
     /**
      * Executes the command's actions
      *
-     * @param commandSource the source/sender of this command
-     * @param context       the context of the command
+     * @param source  the source/sender of this command
+     * @param context the context of the command
      */
     @Override
-    public void execute(CommandSource<C> commandSource,
+    public void execute(Source<C> source,
                         ExecutionContext context) throws CommandException {
 
         var instances = loadParameterInstances(dispatcher, fullParameters,
-                commandSource, context, method, null);
-        
+                source, context, method, null);
+
         try {
             boundMethodCaller.call(instances);
         } catch (Exception ex) {

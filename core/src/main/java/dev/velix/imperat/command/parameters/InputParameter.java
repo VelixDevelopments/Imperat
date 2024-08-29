@@ -20,8 +20,8 @@ public abstract class InputParameter implements CommandParameter {
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final SuggestionResolver<?, ?> suggestionResolver;
     protected final Description description;
-    
-    
+
+
     protected InputParameter(String name, Class<?> type,
                              Description description,
                              boolean optional, boolean flag, boolean greedy,
@@ -33,9 +33,9 @@ public abstract class InputParameter implements CommandParameter {
         this.flag = flag;
         this.greedy = greedy;
         this.optionalValueSupplier = optionalValueSupplier;
-	      this.suggestionResolver = suggestionResolver;
+        this.suggestionResolver = suggestionResolver;
     }
-    
+
     protected InputParameter(String name, Class<?> type,
                              boolean optional, boolean flag, boolean greedy,
                              OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
@@ -48,6 +48,7 @@ public abstract class InputParameter implements CommandParameter {
         this.optionalValueSupplier = optionalValueSupplier;
         this.suggestionResolver = suggestionResolver;
     }
+
     /**
      * @return the name of the parameter
      */
@@ -137,29 +138,30 @@ public abstract class InputParameter implements CommandParameter {
     public Command<?> asCommand() {
         throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
     }
-    
-    
+
+
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
      *
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
-    @Override @SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public @Nullable <C, T> SuggestionResolver<C, T> getSuggestionResolver() {
         return (SuggestionResolver<C, T>) suggestionResolver;
     }
-    
+
     @Override
     public Type getGenericType() {
         return getType();
     }
-    
+
     @Override
     public Description getDescription() {
         return description;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

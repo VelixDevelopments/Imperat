@@ -79,7 +79,7 @@ public final class TypeUtility {
         var t2 = isPrimitive(type2) ? primitiveToBoxed(type2) : type2;
         return t1.getName().equals(t2.getName());
     }
-    
+
     public static Type getInsideGeneric(Type genericType, Type fallback) {
         try {
             return ((ParameterizedType) genericType).getActualTypeArguments()[0];

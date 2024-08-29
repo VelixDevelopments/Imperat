@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 
 public final class BukkitCommandHelp extends CommandHelp<CommandSender> {
 
-    private BukkitCommandHelp(BukkitCommandDispatcher dispatcher,
+    private BukkitCommandHelp(BukkitImperat dispatcher,
                               Command<CommandSender> command,
                               Context<CommandSender> context,
                               CommandUsage<CommandSender> usage) {
@@ -16,7 +16,7 @@ public final class BukkitCommandHelp extends CommandHelp<CommandSender> {
     }
 
     public static BukkitCommandHelp create(
-            BukkitCommandDispatcher dispatcher,
+            BukkitImperat dispatcher,
             Command<CommandSender> command,
             Context<CommandSender> context,
             CommandUsage<CommandSender> usage

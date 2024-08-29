@@ -1,6 +1,6 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import net.kyori.adventure.text.Component;
@@ -29,7 +29,7 @@ public interface UsageFormatter {
      * @return the usage component
      */
     <C> Component formatUsageLine(
-            @NotNull CommandDispatcher<C> dispatcher,
+            @NotNull Imperat<C> dispatcher,
             Command<C> command,
             CommandUsage<C> usage,
             boolean isLast

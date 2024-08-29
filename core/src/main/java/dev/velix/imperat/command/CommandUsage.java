@@ -1,6 +1,6 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -85,15 +85,16 @@ public interface CommandUsage<C> {
      * @see CommandParameter
      */
     List<CommandParameter> getParameters();
-    
-    
+
+
     /**
      * Fetches the parameter at the index
+     *
      * @param index the index of the parameter
      * @return the parameter at specified index/position
      */
     @Nullable CommandParameter getParameter(int index);
-    
+
     /**
      * @return the execution for this usage
      */
@@ -250,10 +251,10 @@ public interface CommandUsage<C> {
      * @param source  the command source/sender
      * @param context the context of the command
      */
-    void execute(CommandSource<C> source, Context<C> context);
-    
+    void execute(Source<C> source, Context<C> context);
+
     boolean isHelp();
-    
+
     class Builder<C> {
 
         private CommandExecution<C> execution;
@@ -302,7 +303,7 @@ public interface CommandUsage<C> {
         public Builder<C> parameters(CommandParameter... params) {
             int index = 0;
             for (CommandParameter parameter : params) {
-                if(!parameter.isCommand()) {
+                if (!parameter.isCommand()) {
                     parameter.setPosition(index);
                 }
                 this.parameters.add(parameter);
@@ -331,15 +332,15 @@ public interface CommandUsage<C> {
             impl.addParameters(parameters);
             return impl;
         }
-        
-        
+
+
         public CommandUsage<C> build() {
             return build(false);
         }
-        
+
         public CommandUsage<C> buildAsHelp() {
             return build(true);
         }
- 
+
     }
 }

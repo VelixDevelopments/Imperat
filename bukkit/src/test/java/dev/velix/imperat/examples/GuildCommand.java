@@ -1,6 +1,6 @@
 package dev.velix.imperat.examples;
 
-import dev.velix.imperat.BukkitCommandSource;
+import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
@@ -20,12 +20,12 @@ public class GuildCommand {
     private final Map<UUID, Set<GuildInvite>> invites = new HashMap<>();
 
     @DefaultUsage
-    public void defaultUsage(BukkitCommandSource source) {
+    public void defaultUsage(BukkitSource source) {
         source.reply("No args input !");
     }
 
     @SubCommand("create")
-    public void create(BukkitCommandSource source, @Named("guild") String guildName) {
+    public void create(BukkitSource source, @Named("guild") String guildName) {
         Guild newGuild = new Guild(guildName);
         newGuild.addMember(source.asPlayer().getUniqueId());
         GuildRegistry.getInstance().registerGuild(newGuild);
@@ -33,7 +33,7 @@ public class GuildCommand {
     }
 
     @SubCommand("disband")
-    public void disband(BukkitCommandSource source, Guild guild) {
+    public void disband(BukkitSource source, Guild guild) {
         if (guild == null) {
             source.reply("HAHA YOU HAVE NO GUILD LLL");
             //user has no guild
@@ -48,7 +48,7 @@ public class GuildCommand {
 
     @SubCommand("invite")
     public void invite(
-            @NotNull BukkitCommandSource source,
+            @NotNull BukkitSource source,
             @Named("player") Player player,
             @NotNull Guild guild
     ) {
@@ -73,7 +73,7 @@ public class GuildCommand {
 
     @SubCommand("accept")
     public void accept(
-            @NotNull BukkitCommandSource source,
+            @NotNull BukkitSource source,
             @Nullable Guild sourceGuild,
             @Named("inviter") Player inviter
     ) {

@@ -23,7 +23,7 @@ public final class DefaultPaginatedTemplate extends DefaultTemplate implements P
     public int syntaxesPerPage() {
         return syntaxesPerPage;
     }
-    
+
     @Override
     public Component fullHeader(Command<?> command, int page, int maxPages) {
         return Messages.getMsg(
@@ -32,8 +32,8 @@ public final class DefaultPaginatedTemplate extends DefaultTemplate implements P
                 , Placeholder.component("pages_header", pagesHeaderComponent(page, maxPages))
         );
     }
-    
-    
+
+
     private Component pagesHeaderComponent(int currentPage, int maxPage) {
         return Messages.getMsg("<gold>(<yellow>" +
                 currentPage + "<gray>/</gray>" + maxPage + "</yellow>)");

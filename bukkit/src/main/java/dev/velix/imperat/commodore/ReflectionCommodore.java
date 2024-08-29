@@ -169,24 +169,24 @@ final class ReflectionCommodore extends AbstractCommodore implements Commodore {
 
         this.plugin.getServer().getPluginManager().registerEvents(new CommandDataSendListener(command, permissionTest), this.plugin);
     }
-    
+
     /**
      * Listens for server (re)loads, and re-adds all registered nodes to the dispatcher.
      */
-        private record ServerReloadListener(ReflectionCommodore commodore) implements Listener {
-        
+    private record ServerReloadListener(ReflectionCommodore commodore) implements Listener {
+
         @SuppressWarnings({"rawtypes", "unchecked"})
-            @EventHandler
-            public void onLoad(ServerLoadEvent e) {
-                CommandDispatcher dispatcher = this.commodore.getDispatcher();
-                RootCommandNode root = dispatcher.getRoot();
-            
+        @EventHandler
+        public void onLoad(ServerLoadEvent e) {
+            CommandDispatcher dispatcher = this.commodore.getDispatcher();
+            RootCommandNode root = dispatcher.getRoot();
+
             for (LiteralCommandNode<?> node : this.commodore.registeredNodes) {
-                    removeChild(root, node.getName());
-                    root.addChild(node);
-                }
+                removeChild(root, node.getName());
+                root.addChild(node);
             }
         }
+    }
 
     /**
      * Removes minecraft namespaced argument data, & data for players without permission to view the

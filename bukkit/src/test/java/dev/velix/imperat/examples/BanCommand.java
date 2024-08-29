@@ -1,6 +1,6 @@
 package dev.velix.imperat.examples;
 
-import dev.velix.imperat.BukkitCommandSource;
+import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
@@ -17,13 +17,13 @@ import org.jetbrains.annotations.Nullable;
 public final class BanCommand {
 
     @DefaultUsage
-    public void showUsage(BukkitCommandSource source) {
+    public void showUsage(BukkitSource source) {
         source.reply("/ban <player> [-silent] [duration] [reason...]");
     }
 
     @Usage
     public void banPlayer(
-            BukkitCommandSource source,
+            BukkitSource source,
             @Named("player") OfflinePlayer player,
             @Switch({"silent", "s"}) boolean silent,
             @Named("duration") @Optional @Nullable String duration,

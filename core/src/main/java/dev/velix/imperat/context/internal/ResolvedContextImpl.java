@@ -1,7 +1,7 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -33,7 +33,7 @@ import java.util.*;
 @ApiStatus.Internal
 final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
-    private final CommandDispatcher<C> dispatcher;
+    private final Imperat<C> dispatcher;
 
     private final Command<C> commandUsed;
     private Command<C> lastCommand;
@@ -48,8 +48,8 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
 
     //all resolved arguments EXCEPT for subcommands and flags.
     private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
-    
-    ResolvedContextImpl(CommandDispatcher<C> dispatcher,
+
+    ResolvedContextImpl(Imperat<C> dispatcher,
                         Command<C> commandUsed,
                         Context<C> context,
                         CommandUsage<C> usage) {
@@ -137,7 +137,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         if (argument == null) return null;
         return (T) argument.value();
     }
-    
+
     /**
      * Fetches the argument/input resolved by the context
      * using {@link ContextResolver}
@@ -145,25 +145,26 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
      * @param type type of argument to return
      * @return the argument/input resolved by the context
      */
-    @Override @SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException {
         var factory = dispatcher.getContextResolverFactory();
-        if(factory == null) {
+        if (factory == null) {
             var cr = dispatcher.getContextResolver(type);
-            if(cr == null) return null;
+            if (cr == null) return null;
             return cr.resolve(this, null);
         }
         ContextResolver<C, T> factoryCr = (ContextResolver<C, T>) factory.create(null);
         return factoryCr == null ? null : factoryCr.resolve(this, null);
     }
-    
+
     /**
      * @return the command source of the command
-     * @see CommandSource
+     * @see Source
      */
     @Override
-    public @NotNull CommandSource<C> getCommandSource() {
-        return context.getCommandSource();
+    public @NotNull Source<C> getSource() {
+        return context.getSource();
     }
 
     /**

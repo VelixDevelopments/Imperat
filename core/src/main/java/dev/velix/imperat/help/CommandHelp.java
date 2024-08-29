@@ -1,7 +1,7 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
@@ -15,14 +15,14 @@ import java.util.ArrayList;
 @ApiStatus.AvailableSince("1.0.0")
 public abstract class CommandHelp<C> {
 
-    private final CommandDispatcher<C> dispatcher;
+    private final Imperat<C> dispatcher;
     private final Context<C> context;
     private final Command<C> command;
     private final CommandUsage<C> usage;
     private final HelpTemplate template;
 
     public CommandHelp(
-            CommandDispatcher<C> dispatcher,
+            Imperat<C> dispatcher,
             Command<C> command,
             Context<C> context,
             CommandUsage<C> usage
@@ -34,11 +34,11 @@ public abstract class CommandHelp<C> {
         this.usage = usage;
     }
 
-    public void display(CommandSource<C> source) {
+    public void display(Source<C> source) {
         display(source, 1);
     }
 
-    public void display(CommandSource<C> source, int page) {
+    public void display(Source<C> source, int page) {
 
         if (template instanceof PaginatedHelpTemplate paginatedTemplate) {
             displayPaginated(source, paginatedTemplate, page);
@@ -49,18 +49,18 @@ public abstract class CommandHelp<C> {
     }
 
     private void displayPaginated(
-            CommandSource<C> source,
+            Source<C> source,
             PaginatedHelpTemplate template,
             int page
     ) {
-        if(template == null) {
+        if (template == null) {
             dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
                     command, source, context, usage, null);
             return;
         }
-        
+
         PaginatedText<CommandUsage<C>> text = new PaginatedText<>(template.syntaxesPerPage());
-        
+
         for (var usage : command.getUsages()) {
             if (usage.isDefault()) continue;
             text.add(usage);
@@ -72,7 +72,7 @@ public abstract class CommandHelp<C> {
                     command, source, context, usage, null);
             return;
         }
-        
+
         TextPage<CommandUsage<C>> textPage = text.getPage(page);
 
         if (textPage == null) {
@@ -88,13 +88,13 @@ public abstract class CommandHelp<C> {
         source.reply(template.getFooter(command));
     }
 
-    private void displayNormal(CommandSource<C> source) {
-        if(template == null) {
+    private void displayNormal(Source<C> source) {
+        if (template == null) {
             dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
                     command, source, context, usage, null);
             return;
         }
-        
+
         final int maxUsages = command.getUsages().size();
         if (maxUsages == 0) {
             dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,

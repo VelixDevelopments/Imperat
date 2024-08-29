@@ -18,7 +18,7 @@ public interface ContextResolver<C, T> {
 
     //TODO make a registry for custom annotations that are used in the parameters
     //TODO and then replace `Parameter` with `ParameterCommandElement` with added method `hasCustomAnnotation`
-    
+
     /**
      * Resolves a parameter's default value
      * if it has been not input by the user

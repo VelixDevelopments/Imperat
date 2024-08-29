@@ -1,6 +1,6 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
@@ -36,13 +36,13 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     private final CommandExecution<C> execution;
     private CommandCoordinator<C> commandCoordinator;
 
-    
+
     private final boolean help;
-    
+
     CommandUsageImpl(CommandExecution<C> execution) {
         this(execution, false);
     }
-    
+
     CommandUsageImpl(CommandExecution<C> execution, boolean help) {
         this.execution = execution;
         this.cooldownHandler = new DefaultCooldownHandler<>(this);
@@ -157,13 +157,13 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public List<CommandParameter> getParameters() {
         return parameters;
     }
-    
+
     @Override
     public @Nullable CommandParameter getParameter(int index) {
-        if(index < 0 || index >= parameters.size()) return null;
+        if (index < 0 || index >= parameters.size()) return null;
         return parameters.get(index);
     }
-    
+
     /**
      * @return the execution for this command
      */
@@ -298,15 +298,15 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
      * @param context the context of the command
      */
     @Override
-    public void execute(CommandSource<C> source, Context<C> context) {
+    public void execute(Source<C> source, Context<C> context) {
         commandCoordinator.coordinate(source, context, this.execution);
     }
-    
+
     @Override
     public boolean isHelp() {
         return help;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

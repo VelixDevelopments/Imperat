@@ -19,14 +19,14 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface SuggestionResolver<C, T> {
-    
+
     static <C, T> SuggestionResolver<C, T> plain(Class<T> type, List<String> results) {
         return new SuggestionResolver<>() {
             @Override
             public Class<T> getType() {
                 return type;
             }
-            
+
             @Override
             public List<String> autoComplete(Command<C> command,
                                              C source,
@@ -37,11 +37,11 @@ public interface SuggestionResolver<C, T> {
             }
         };
     }
-    
+
     static <C, T> SuggestionResolver<C, T> plain(Class<T> type, String... results) {
         return plain(type, Arrays.asList(results));
     }
-    
+
     /**
      * @return Type of data the suggestion is resolving
      */

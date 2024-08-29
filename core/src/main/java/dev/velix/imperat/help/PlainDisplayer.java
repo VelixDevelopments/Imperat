@@ -1,7 +1,7 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,9 +16,9 @@ final class PlainDisplayer implements UsageDisplayer {
     }
 
     @Override
-    public <C> void display(CommandDispatcher<C> dispatcher,
+    public <C> void display(Imperat<C> dispatcher,
                             Command<C> command,
-                            CommandSource<C> source,
+                            Source<C> source,
                             UsageFormatter formatter,
                             List<CommandUsage<C>> commandUsages) {
 

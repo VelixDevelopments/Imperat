@@ -1,7 +1,7 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.annotations.MethodCommandExecutor;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
@@ -9,17 +9,18 @@ import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
 public final class MethodHelpExecution<C> implements HelpExecution<C> {
 
-    private final CommandDispatcher<C> dispatcher;
+    private final Imperat<C> dispatcher;
     private final Method method;
     private final MethodCaller.BoundMethodCaller caller;
     private final List<CommandParameter> params;
 
-    public MethodHelpExecution(CommandDispatcher<C> dispatcher,
+    public MethodHelpExecution(Imperat<C> dispatcher,
                                Object proxy, Method method,
                                List<CommandParameter> params) {
         this.dispatcher = dispatcher;
@@ -41,7 +42,7 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
      * @param page   the page of the help menu
      */
     @Override
-    public void help(CommandSource<C> source,
+    public void help(Source<C> source,
                      Context<C> context,
                      CommandHelp<C> help,
                      @Nullable Integer page) throws CommandException {
@@ -58,7 +59,7 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
             System.out.println("INSTANCE -> " + object.getClass().getSimpleName());
         }
         System.out.println("THEN");*/
-        
+
         caller.call(instances);
     }
 

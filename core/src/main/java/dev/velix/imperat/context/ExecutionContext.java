@@ -13,12 +13,12 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ExecutionContext {
-    
+
     /**
      * @return the command label used originally
      */
     String getCommandUsed();
-    
+
     /**
      * @return the arguments entered by the
      * @see ArgumentQueue
@@ -57,24 +57,23 @@ public interface ExecutionContext {
 
     default <T> @NotNull T getArgumentOr(String name, T value) {
         final T argValue = getArgument(name);
-        if(argValue != null)return argValue;
+        if (argValue != null) return argValue;
         return value;
     }
-    
+
     default String getRawArgument(int index) {
         if (index >= getArguments().size() || index < 0) return null;
         return getArguments().get(index);
     }
 
-    
+
     /**
      * Fetches the argument/input that is resolved by the context
      * using {@link dev.velix.imperat.resolvers.ContextResolver}
      *
      * @param type type of argument to return
-     *
+     * @param <T>  the type of this argument parsed value
      * @return the argument/input that is resolved by the context
-     * @param <T> the type of this argument parsed value
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException;
 }

@@ -46,19 +46,21 @@ public interface CommandParameter {
      * @return the value type of this parameter
      */
     Class<?> getType();
-    
+
     /**
      * Get GenericType
+     *
      * @return the full type of parameter if it has generic types
      */
     Type getGenericType();
-    
+
     /**
      * Get the description of a parameter
+     *
      * @return the description of a parameter
      */
     Description getDescription();
-    
+
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional
@@ -75,14 +77,14 @@ public interface CommandParameter {
      * @return checks whether this parameter is a flag
      */
     boolean isFlag();
-    
+
     /**
      * Casts the parameter to a flag parameter
      *
      * @return the parameter as a flag
      */
     FlagParameter asFlagParameter();
-    
+
     /**
      * @return checks whether this parameter
      * consumes all the args input after it.
@@ -120,21 +122,22 @@ public interface CommandParameter {
     default AnnotatedParameter asAnnotated() {
         return (AnnotatedParameter) this;
     }
-    
+
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
      *
-     * @return the {@link SuggestionResolver} for resolving suggestion
      * @param <C> the command-sender type
      * @param <T> the type of value to be resolved
+     * @return the {@link SuggestionResolver} for resolving suggestion
      */
     @Nullable
     <C, T> SuggestionResolver<C, T> getSuggestionResolver();
-    
-    
+
+
     /**
      * Formats the usage parameter*
+     *
      * @return the formatted parameter
      */
     <C> String format();
@@ -152,7 +155,7 @@ public interface CommandParameter {
     }
 
     static <C, T> CommandParameter required(String name, Class<T> clazz,
-                                         SuggestionResolver<C, T> suggestionResolver) {
+                                            SuggestionResolver<C, T> suggestionResolver) {
         return new NormalCommandParameter(name, clazz, false, false, null, suggestionResolver);
     }
 
@@ -205,8 +208,8 @@ public interface CommandParameter {
     static FlagParameter switchParam(String flagName, List<String> aliases) {
         return new FlagCommandParameter(CommandFlag.createSwitch(flagName, aliases), new BooleanValueSupplier());
     }
-    
-    
+
+
     static <T> CommandParameter of(
             String name,
             Class<T> type,
@@ -216,18 +219,18 @@ public interface CommandParameter {
     ) {
         return of(name, type, optional, greedy, valueSupplier, null);
     }
-    
+
     static <T> CommandParameter required(String name, Class<T> clazz) {
         return required(name, clazz, null);
     }
-    
+
     static <T> CommandParameter optional(
             String name, Class<T> clazz,
             @Nullable OptionalValueSupplier<T> defaultValue
     ) {
-        return optional(name, clazz, defaultValue,null);
+        return optional(name, clazz, defaultValue, null);
     }
-    
+
     static CommandParameter greedy(
             String name,
             boolean optional,
@@ -235,31 +238,31 @@ public interface CommandParameter {
     ) {
         return greedy(name, optional, defaultValue, null);
     }
-    
+
     static CommandParameter requiredText(String name) {
         return requiredText(name, null);
     }
-    
+
     //TODO more overloading for each parameter
     static CommandParameter requiredInt(String name) {
         return requiredInt(name, null, null);
     }
-    
+
     static CommandParameter requiredLong(String name) {
         return requiredLong(name, null, null);
     }
-    
+
     static CommandParameter requiredDouble(String name) {
         return requiredDouble(name, null, null);
     }
-	
-	  default NumericParameterDecorator asNumeric() {
+
+    default NumericParameterDecorator asNumeric() {
         return (NumericParameterDecorator) this;
     }
-    
+
     default boolean isNumeric() {
         return this instanceof NumericParameterDecorator;
     }
-	
+
 
 }

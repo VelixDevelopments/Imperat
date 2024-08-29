@@ -14,7 +14,7 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
 
     private final CommandFlag flag;
     private final OptionalValueSupplier<?> supplier;
-    
+
     FlagCommandParameter(String flagName, List<String> aliases, Description description, Class<?> inputType, OptionalValueSupplier<?> supplier) {
         super(flagName, CommandFlag.class, description,
                 true, true, false, null, null);
@@ -29,11 +29,11 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
         this.flag = commandSwitch;
         this.supplier = supplier;
     }
-    
+
     FlagCommandParameter(String flagName, List<String> aliases, Class<?> inputType, OptionalValueSupplier<?> supplier) {
         this(flagName, aliases, Description.EMPTY, inputType, supplier);
     }
-    
+
     FlagCommandParameter(CommandSwitch commandSwitch, OptionalValueSupplier<?> supplier) {
         this(commandSwitch, Description.EMPTY, supplier);
     }

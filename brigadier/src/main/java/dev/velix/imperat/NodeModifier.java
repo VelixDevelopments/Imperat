@@ -4,26 +4,27 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
+
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
 final class NodeModifier {
 
     private static final Field COMMAND_NODE;
-    
+
     private final static Field REQUIREMENT;
-    
+
     private final static Field SUGGESTIONS;
-    
+
 
     static {
         try {
             COMMAND_NODE = CommandNode.class.getDeclaredField("command");
             COMMAND_NODE.setAccessible(true);
-            
+
             REQUIREMENT = CommandNode.class.getDeclaredField("requirement");
             REQUIREMENT.setAccessible(true);
-            
+
             SUGGESTIONS = ArgumentCommandNode.class.getDeclaredField("customSuggestions");
             SUGGESTIONS.setAccessible(true);
         } catch (NoSuchFieldException e) {

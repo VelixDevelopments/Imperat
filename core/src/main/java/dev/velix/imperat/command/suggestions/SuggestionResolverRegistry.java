@@ -10,34 +10,34 @@ import java.util.Map;
 
 @ApiStatus.Internal
 public final class SuggestionResolverRegistry<C> extends Registry<Class<?>, SuggestionResolver<C, ?>> {
-	
-	private final Map<String, SuggestionResolver<C, ?>> resolversPerName;
-	
-	private SuggestionResolverRegistry() {
-		super();
-		resolversPerName = new HashMap<>();
-	}
-	
-	public static <C> SuggestionResolverRegistry<C> createDefault() {
-		return new SuggestionResolverRegistry<>();
-	}
-	
-	public <T> void registerResolver(SuggestionResolver<C, T> suggestionResolver) {
-		setData(suggestionResolver.getType(), suggestionResolver);
-	}
-	
-	public <T> void registerNamedResolver(String name,
-	                                      SuggestionResolver<C, T> suggestionResolver) {
-		resolversPerName.put(name, suggestionResolver);
-	}
-	
-	public @Nullable <T> SuggestionResolver<C, ?> getResolver(Class<T> clazz) {
-		return getData(clazz).orElse(null);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public @Nullable <T> SuggestionResolver<C, T> getResolverByName(String name) {
-		return (SuggestionResolver<C, T>) resolversPerName.get(name);
-	}
-	
+
+    private final Map<String, SuggestionResolver<C, ?>> resolversPerName;
+
+    private SuggestionResolverRegistry() {
+        super();
+        resolversPerName = new HashMap<>();
+    }
+
+    public static <C> SuggestionResolverRegistry<C> createDefault() {
+        return new SuggestionResolverRegistry<>();
+    }
+
+    public <T> void registerResolver(SuggestionResolver<C, T> suggestionResolver) {
+        setData(suggestionResolver.getType(), suggestionResolver);
+    }
+
+    public <T> void registerNamedResolver(String name,
+                                          SuggestionResolver<C, T> suggestionResolver) {
+        resolversPerName.put(name, suggestionResolver);
+    }
+
+    public @Nullable <T> SuggestionResolver<C, ?> getResolver(Class<T> clazz) {
+        return getData(clazz).orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public @Nullable <T> SuggestionResolver<C, T> getResolverByName(String name) {
+        return (SuggestionResolver<C, T>) resolversPerName.get(name);
+    }
+
 }

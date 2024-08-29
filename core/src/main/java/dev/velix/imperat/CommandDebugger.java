@@ -28,7 +28,7 @@ public final class CommandDebugger {
     public static void error(Class<?> owningClass, String name, Throwable ex) {
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s'", owningClass.getName(), name), ex);
     }
-    
+
     public static void debugParameters(String msg, List<CommandParameter> parameters) {
         LOGGER.log(Level.INFO, String.format(msg, parameters.stream().map(CommandParameter::format)
                 .collect(Collectors.joining(","))));

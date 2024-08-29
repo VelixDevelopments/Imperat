@@ -1,6 +1,6 @@
 package dev.velix.imperat.examples;
 
-import dev.velix.imperat.BukkitCommandSource;
+import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
@@ -17,14 +17,14 @@ public final class BroadcastCommand {
 
 
     @DefaultUsage //usage without args
-    public void example(BukkitCommandSource source) {
+    public void example(BukkitSource source) {
         source.reply("/broadcast <message...>");
     }
 
 
     @Usage
     @Description("broadcasts a message")
-    public void example(BukkitCommandSource source, @Named("message") @Greedy String msg) {
+    public void example(BukkitSource source, @Named("message") @Greedy String msg) {
         // /broadcast <msg...>
         for (var player : Bukkit.getOnlinePlayers())
             player.sendMessage(msg);

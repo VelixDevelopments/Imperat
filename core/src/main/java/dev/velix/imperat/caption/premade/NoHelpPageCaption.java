@@ -1,7 +1,7 @@
 package dev.velix.imperat.caption.premade;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
@@ -23,26 +23,26 @@ public class NoHelpPageCaption<C> implements Caption<C> {
     }
 
     /**
-     * @param dispatcher    the command dispatcher
-     * @param command       the command
-     * @param commandSource the source
-     * @param context       the context
-     * @param usage         the command usage can be null if it hasn't been resolved yet
-     * @param exception     the exception may be null if no exception provided
+     * @param dispatcher the command dispatcher
+     * @param command    the command
+     * @param source     the source
+     * @param context    the context
+     * @param usage      the command usage can be null if it hasn't been resolved yet
+     * @param exception  the exception may be null if no exception provided
      * @return The message in the form of a component
      */
     @Override
-    public @NotNull Component asComponent(@NotNull CommandDispatcher<C> dispatcher,
+    public @NotNull Component asComponent(@NotNull Imperat<C> dispatcher,
                                           @NotNull Command<C> command,
-                                          @NotNull CommandSource<C> commandSource,
+                                          @NotNull Source<C> source,
                                           @NotNull Context<C> context,
                                           @Nullable CommandUsage<C> usage,
                                           @Nullable Exception exception) {
-        
-        if(usage == null || !usage.isHelp()) {
+
+        if (usage == null || !usage.isHelp()) {
             throw new IllegalCallerException("Called NoHelpPageCaption in wrong the wrong sequence/part of the code");
         }
-        
+
         int page = context.getArgumentOr("page", 1);
         return Messages.getMsg(Messages.NO_HELP_PAGE_AVAILABLE, Placeholder.parsed("page", String.valueOf(page)));
     }

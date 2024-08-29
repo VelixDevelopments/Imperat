@@ -41,12 +41,13 @@ final class CommandImpl<C> implements Command<C> {
     CommandImpl(@Nullable Command<C> parent, String name) {
         this(parent, 0, name);
     }
-    
+
     CommandImpl(@Nullable Command<C> parent, int position, String name) {
         this.parent = parent;
         this.position = position;
         this.name = name;
-        setDefaultUsageExecution((source, context) -> {});
+        setDefaultUsageExecution((source, context) -> {
+        });
         this.autoCompleter = AutoCompleter.createNative(this);
     }
 
@@ -113,12 +114,12 @@ final class CommandImpl<C> implements Command<C> {
     public void setPosition(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
-    
+
     @Override
     public Type getGenericType() {
         return getType();
     }
-    
+
     /**
      * Casts the parameter to a flag parameter
      *
@@ -128,20 +129,21 @@ final class CommandImpl<C> implements Command<C> {
     public FlagParameter asFlagParameter() {
         throw new UnsupportedOperationException("A command cannot be treated as a flag !");
     }
-    
+
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
      *
      * @return the {@link SuggestionResolver} for resolving suggestion
      */
-    @Override @SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public @Nullable <CS, T> SuggestionResolver<CS, T> getSuggestionResolver() {
         return (SuggestionResolver<CS, T>) SuggestionResolver.plain(Command.class,
                 List.of(this.getName()));
     }
-    
-    
+
+
     /**
      * @return the aliases for this commands
      */

@@ -34,11 +34,11 @@ public final class StringTokenizer {
 
     private static String nextArg(TokenIterator iterator, Character character) throws TokenParseException {
         StringBuilder argBuilder = new StringBuilder();
-        
+
         assert character != null;
         boolean quoted = (character == CHAR_DOUBLE_QUOTE || character == CHAR_SINGLE_QUOTE);
         parseString(iterator, character, argBuilder, quoted);
-        
+
         return argBuilder.toString();
     }
 
@@ -48,17 +48,17 @@ public final class StringTokenizer {
                                     final boolean quoted) throws TokenParseException {
         // Consume the start quotation character
         Character character;
-        if(quoted ) {
-            if(!iterator.hasNext()) {
+        if (quoted) {
+            if (!iterator.hasNext()) {
                 builder.append(start);
                 return;
             }
             character = iterator.next();
-        }else {
+        } else {
             character = start;
         }
-        
-        
+
+
         builder.append(character);
 
         while (iterator.hasNext()) {

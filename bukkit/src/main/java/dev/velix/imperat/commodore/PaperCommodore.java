@@ -57,8 +57,8 @@ final class PaperCommodore extends AbstractCommodore implements Commodore, Liste
         Objects.requireNonNull(node, "node");
         this.commands.add(new CommodoreCommand(node, null));
     }
-    
-    
+
+
     @Override
     public void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
@@ -97,18 +97,18 @@ final class PaperCommodore extends AbstractCommodore implements Commodore, Liste
             }
         }
     }
-    
+
     private record CommodoreCommand(LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
-        
+
         @SuppressWarnings({"unchecked", "rawtypes"})
-            public void apply(Player player, RootCommandNode<?> root) {
-                if (this.permissionTest != null && !this.permissionTest.test(player)) {
-                    return;
-                }
-                removeChild(root, this.node.getName());
-                root.addChild((CommandNode) this.node);
+        public void apply(Player player, RootCommandNode<?> root) {
+            if (this.permissionTest != null && !this.permissionTest.test(player)) {
+                return;
             }
+            removeChild(root, this.node.getName());
+            root.addChild((CommandNode) this.node);
         }
+    }
 
     static void ensureSetup() {
         // do nothing - this is only called to trigger the static initializer

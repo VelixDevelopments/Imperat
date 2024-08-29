@@ -1,6 +1,6 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,6 +22,6 @@ public interface HelpExecution<C> {
      * @param help   the help object
      * @param page   the page of the help menu
      */
-    void help(CommandSource<C> source, Context<C> context,
+    void help(Source<C> source, Context<C> context,
               CommandHelp<C> help, @Nullable Integer page) throws CommandException;
 }

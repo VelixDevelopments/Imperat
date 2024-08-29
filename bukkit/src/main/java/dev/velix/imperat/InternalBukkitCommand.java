@@ -15,13 +15,13 @@ import java.util.List;
 final class InternalBukkitCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
 
     @NotNull
-    private final BukkitCommandDispatcher dispatcher;
+    private final BukkitImperat dispatcher;
 
     @NotNull
     private final Command<CommandSender> command;
 
 
-    InternalBukkitCommand(@NotNull BukkitCommandDispatcher dispatcher,
+    InternalBukkitCommand(@NotNull BukkitImperat dispatcher,
                           @NotNull Command<CommandSender> command) {
         super(
                 command.getName(),
@@ -52,26 +52,26 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     public @NotNull Plugin getPlugin() {
         return dispatcher.getPlatform();
     }
-    
+
     @Nullable
     @Override
     public String getPermission() {
         return super.getPermission();
     }
-    
+
     @NotNull
     @Override
     public String getDescription() {
         return super.getDescription();
     }
-    
+
     @NotNull
     @Override
     public String getUsage() {
         return super.getUsage();
     }
-    
-    
+
+
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender,
                                              @NotNull String alias,

@@ -31,7 +31,7 @@ public final class Guild {
     public void sendInvite(Player inviter, Player target) {
         //TODO implement
     }
-    
+
     public void disband() {
         GuildRegistry.getInstance().removeGuild(this);
     }

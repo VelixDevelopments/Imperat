@@ -1,7 +1,7 @@
 package dev.velix.imperat.command.suggestions;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -28,8 +28,8 @@ public interface AutoCompleter<C> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    List<String> autoComplete(CommandDispatcher<C> dispatcher,
-                              CommandSource<C> sender, String[] args);
+    List<String> autoComplete(Imperat<C> dispatcher,
+                              Source<C> sender, String[] args);
 
     /**
      * Autocompletes an argument from the whole position of the
@@ -41,8 +41,8 @@ public interface AutoCompleter<C> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    List<String> autoCompleteArgument(CommandDispatcher<C> dispatcher,
-                                      CommandSource<C> sender, CompletionArg currentArg, String[] args);
+    List<String> autoCompleteArgument(Imperat<C> dispatcher,
+                                      Source<C> sender, CompletionArg currentArg, String[] args);
 
     static <C> AutoCompleter<C> createNative(Command<C> command) {
         return new AutoCompleterImpl<>(command);

@@ -1,6 +1,6 @@
 package dev.velix.imperat.help.templates;
 
-import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
@@ -26,7 +26,7 @@ public final class DefaultFormatter implements UsageFormatter {
      * @return the usage component
      */
     @Override
-    public <C> Component formatUsageLine(@NotNull CommandDispatcher<C> dispatcher, Command<C> command, CommandUsage<C> usage, boolean isLast) {
+    public <C> Component formatUsageLine(@NotNull Imperat<C> dispatcher, Command<C> command, CommandUsage<C> usage, boolean isLast) {
         String format = dispatcher.commandPrefix() + CommandUsage.format(command, usage);
         String msg = "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
         return Messages.getMsg(msg);

@@ -1,7 +1,7 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.ArgumentQueue;
@@ -25,16 +25,16 @@ public interface ContextFactory<C> {
 
 
     /**
-     * @param dispatcher    the dispatcher
-     * @param commandSource the sender/source of this command execution
-     * @param command       the command label used
-     * @param queue         the args input
-     * @return new context from the command and args used by {@link CommandSource}
+     * @param dispatcher the dispatcher
+     * @param source     the sender/source of this command execution
+     * @param command    the command label used
+     * @param queue      the args input
+     * @return new context from the command and args used by {@link Source}
      */
     @NotNull
     Context<C> createContext(
-            @NotNull CommandDispatcher<C> dispatcher,
-            @NotNull CommandSource<C> commandSource,
+            @NotNull Imperat<C> dispatcher,
+            @NotNull Source<C> source,
             @NotNull String command,
             @NotNull ArgumentQueue queue
     );
@@ -48,7 +48,7 @@ public interface ContextFactory<C> {
      * later on parsing it into the execution
      */
     ResolvedContext<C> createResolvedContext(
-            @NotNull CommandDispatcher<C> dispatcher,
+            @NotNull Imperat<C> dispatcher,
             @NotNull Command<C> command,
             @NotNull Context<C> plainContext,
             @NotNull CommandUsage<C> usage

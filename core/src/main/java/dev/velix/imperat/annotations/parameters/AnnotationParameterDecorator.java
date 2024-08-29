@@ -55,6 +55,7 @@ public final class AnnotationParameterDecorator extends InputParameter implement
 
     /**
      * Formats the usage parameter*
+     *
      * @return the formatted parameter
      */
     @Override
@@ -71,10 +72,10 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     public FlagParameter asFlagParameter() {
         return parameter.asFlagParameter();
     }
-    
+
     @Override
     public Type getGenericType() {
         return element.getElement().getParameterizedType();
     }
-    
+
 }

@@ -1,6 +1,6 @@
 package dev.velix.imperat.command.cooldown;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.CommandUsage;
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public final class DefaultCooldownHandler<C> implements CooldownHandler<C> {
      * @param source the command sender executing the {@link CommandUsage}
      */
     @Override
-    public void registerExecutionMoment(CommandSource<C> source) {
+    public void registerExecutionMoment(Source<C> source) {
         lastTimeExecuted.put(source.getOrigin(), System.currentTimeMillis());
     }
 
@@ -45,7 +45,7 @@ public final class DefaultCooldownHandler<C> implements CooldownHandler<C> {
      * @param source the command-sender
      */
     @Override
-    public void removeCooldown(CommandSource<C> source) {
+    public void removeCooldown(Source<C> source) {
         lastTimeExecuted.remove(source.getOrigin());
     }
 
@@ -57,7 +57,7 @@ public final class DefaultCooldownHandler<C> implements CooldownHandler<C> {
      * @return the last time the sender executed {@link CommandUsage}
      */
     @Override
-    public Optional<Long> getLastTimeExecuted(CommandSource<C> source) {
+    public Optional<Long> getLastTimeExecuted(Source<C> source) {
         return Optional.ofNullable(lastTimeExecuted.get(source.getOrigin()));
     }
 }

@@ -1,7 +1,7 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import org.jetbrains.annotations.ApiStatus;
@@ -24,7 +24,7 @@ public interface UsageDisplayer {
 
     /**
      * Displays all usages together to
-     * the {@link CommandSource}
+     * the {@link Source}
      * <p>
      * It has two pre-made implementations
      *
@@ -38,9 +38,9 @@ public interface UsageDisplayer {
      * @see TreeDisplayer
      */
     <C> void display(
-            CommandDispatcher<C> dispatcher,
+            Imperat<C> dispatcher,
             Command<C> command,
-            CommandSource<C> source,
+            Source<C> source,
             UsageFormatter formatter,
             List<CommandUsage<C>> usages
     );

@@ -1,7 +1,7 @@
 package dev.velix.imperat.caption.premade;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
@@ -25,17 +25,17 @@ public final class NoPermissionCaption<C> implements Caption<C> {
     }
 
     /**
-     * @param dispatcher    the dispatcher
-     * @param commandSource the source
-     * @param context       the context
-     * @param exception     the exception, may be null if no exception provided
+     * @param dispatcher the dispatcher
+     * @param source     the source
+     * @param context    the context
+     * @param exception  the exception, may be null if no exception provided
      * @return The message in the form of a component
      */
     @Override
     public @NotNull Component asComponent(
-            @NotNull CommandDispatcher<C> dispatcher,
+            @NotNull Imperat<C> dispatcher,
             @NotNull Command<C> command,
-            @NotNull CommandSource<C> commandSource,
+            @NotNull Source<C> source,
             @NotNull Context<C> context,
             @Nullable CommandUsage<C> usage,
             @Nullable Exception exception

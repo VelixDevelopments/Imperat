@@ -27,7 +27,7 @@ public final class MyContextResolverFactory implements BukkitContextResolverFact
         }
 
         return (context, methodParam) -> {
-            var source = context.getCommandSource();
+            var source = context.getSource();
             if (source.isConsole()) return null;
             return GuildRegistry.getInstance()
                     .getUserGuild(source.as(Player.class).getUniqueId());

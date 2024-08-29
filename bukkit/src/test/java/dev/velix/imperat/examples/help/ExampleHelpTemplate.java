@@ -13,7 +13,7 @@ public class ExampleHelpTemplate implements HelpTemplate {
 
     private UsageDisplayer displayer = UsageDisplayer.plain();
     private UsageFormatter formatter = new DefaultFormatter();
-    
+
     @Override
     public Component getHeader(Command<?> command) {
         return Messages.getMsg(
@@ -22,27 +22,27 @@ public class ExampleHelpTemplate implements HelpTemplate {
         );
     }
 
-    
+
     @Override
     public Component getFooter(Command<?> command) {
         return Messages.getMsg("<dark_gray><bold><strikethrough>===============================================");
     }
-    
+
     @Override
     public UsageFormatter getUsageFormatter() {
         return formatter;
     }
-    
+
     @Override
     public void setUsageFormatter(UsageFormatter formatter) {
         this.formatter = formatter;
     }
-    
+
     @Override
     public UsageDisplayer getUsagesDisplayer() {
         return displayer;
     }
-    
+
     @Override
     public void setUsageDisplayer(UsageDisplayer displayer) {
         this.displayer = displayer;

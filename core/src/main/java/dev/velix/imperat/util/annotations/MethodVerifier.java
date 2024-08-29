@@ -1,6 +1,6 @@
 package dev.velix.imperat.util.annotations;
 
-import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.help.CommandHelp;
 import org.jetbrains.annotations.ApiStatus;
@@ -23,7 +23,7 @@ public final class MethodVerifier {
                 && method.getReturnType() == void.class;
     }
 
-    public static <C> void verifyMethod(CommandDispatcher<C> dispatcher,
+    public static <C> void verifyMethod(Imperat<C> dispatcher,
                                         Class<?> clazz, Method method, boolean verifyDefault) {
         if (method.getReturnType() != void.class && Modifier.isPublic(method.getModifiers())) {
             throw methodError(clazz, method, "a return type (should be void)");
@@ -44,7 +44,7 @@ public final class MethodVerifier {
     }
 
     public static <C> void verifyHelpMethod(
-            CommandDispatcher<C> dispatcher,
+            Imperat<C> dispatcher,
             CommandUsage<C> mainUsage,
             Class<?> clazz, Method method
     ) {

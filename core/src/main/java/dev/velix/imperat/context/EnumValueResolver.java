@@ -1,6 +1,6 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.internal.sur.Pivot;
 import dev.velix.imperat.exceptions.CommandException;
@@ -16,9 +16,9 @@ public final class EnumValueResolver<C, E extends Enum<E>> implements ValueResol
     public EnumValueResolver(Class<E> enumType) {
         this.enumType = enumType;
     }
-    
+
     @Override
-    public E resolve(CommandSource<C> source,
+    public E resolve(Source<C> source,
                      Context<C> context,
                      String raw,
                      Pivot pivot,

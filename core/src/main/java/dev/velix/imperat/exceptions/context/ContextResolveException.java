@@ -18,7 +18,7 @@ public class ContextResolveException extends CommandException {
      */
     @Override
     public <C> void handle(Context<C> context) {
-        context.getCommandSource()
+        context.getSource()
                 .reply(Component.text(msg, NamedTextColor.RED));
     }
 

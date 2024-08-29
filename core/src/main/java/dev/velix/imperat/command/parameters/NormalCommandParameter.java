@@ -16,7 +16,7 @@ class NormalCommandParameter extends InputParameter {
                            SuggestionResolver<?, ?> suggestionResolver) {
         super(name, type, description, optional, false, greedy, valueSupplier, suggestionResolver);
     }
-    
+
     NormalCommandParameter(String name,
                            Class<?> type,
                            boolean optional,
@@ -25,7 +25,7 @@ class NormalCommandParameter extends InputParameter {
                            SuggestionResolver<?, ?> suggestionResolver) {
         super(name, type, Description.EMPTY, optional, false, greedy, valueSupplier, suggestionResolver);
     }
-    
+
     /**
      * Formats the usage parameter
      *

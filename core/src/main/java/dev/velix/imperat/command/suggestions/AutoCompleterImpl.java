@@ -1,7 +1,7 @@
 package dev.velix.imperat.command.suggestions;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -51,8 +51,8 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
      * @return the auto-completed results
      */
     @Override
-    public List<String> autoComplete(CommandDispatcher<C> dispatcher,
-                                     CommandSource<C> sender, String[] args) {
+    public List<String> autoComplete(Imperat<C> dispatcher,
+                                     Source<C> sender, String[] args) {
         CompletionArg argToComplete = getLastArg(args);
         return autoCompleteArgument(dispatcher, sender, argToComplete, args);
     }
@@ -69,8 +69,8 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
      * @return the auto-completed results
      */
     @Override
-    public List<String> autoCompleteArgument(CommandDispatcher<C> dispatcher,
-                                             CommandSource<C> sender,
+    public List<String> autoCompleteArgument(Imperat<C> dispatcher,
+                                             Source<C> sender,
                                              CompletionArg currentArg,
                                              String[] args) {
 
@@ -112,7 +112,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
     }
 
 
-    private List<CommandUsage<C>> getClosestUsages(CommandDispatcher<C> dispatcher, String[] args) {
+    private List<CommandUsage<C>> getClosestUsages(Imperat<C> dispatcher, String[] args) {
 
         return command.lookup(dispatcher)
                 .findUsages((usage) -> {

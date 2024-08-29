@@ -56,9 +56,9 @@ abstract class AbstractCommodore implements Commodore {
     protected static final Field CHILDREN_FIELD;
     protected static final Field LITERALS_FIELD;
     protected static final Field ARGUMENTS_FIELD;
-    
+
     private static final Method GET_COMMAND_SENDER_METHOD;
-    
+
     // An array of the CommandNode fields above: [#children, #literals, #arguments]
     protected static final Field[] CHILDREN_FIELDS;
 
@@ -74,7 +74,7 @@ abstract class AbstractCommodore implements Commodore {
                 commandListenerWrapper = BukkitUtil.ClassesRefUtil.mcClass("commands.CommandListenerWrapper");
             else
                 commandListenerWrapper = BukkitUtil.ClassesRefUtil.nmsClass("CommandListenerWrapper");
-            
+
             CUSTOM_SUGGESTIONS_FIELD = ArgumentCommandNode.class.getDeclaredField("customSuggestions");
             CUSTOM_SUGGESTIONS_FIELD.setAccessible(true);
 
@@ -88,17 +88,21 @@ abstract class AbstractCommodore implements Commodore {
             for (Field field : CHILDREN_FIELDS) {
                 field.setAccessible(true);
             }
-            
+
             GET_COMMAND_SENDER_METHOD = commandListenerWrapper.getDeclaredMethod("getBukkitSender");
             GET_COMMAND_SENDER_METHOD.setAccessible(true);
 
             // should never be called
             // if ReflectionCommodore: bukkit handling should override
             // if PaperCommodore: this is only sent to the client, not used for actual command handling
-            DUMMY_COMMAND = (ctx) -> { throw new UnsupportedOperationException(); };
+            DUMMY_COMMAND = (ctx) -> {
+                throw new UnsupportedOperationException();
+            };
             // should never be called - only used in clientbound root node, and the server impl will pass anything through
             // SuggestionProviders#safelySwap (swap it for the ASK_SERVER provider) before sending
-            DUMMY_SUGGESTION_PROVIDER = (context, builder) -> { throw new UnsupportedOperationException(); };
+            DUMMY_SUGGESTION_PROVIDER = (context, builder) -> {
+                throw new UnsupportedOperationException();
+            };
 
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
@@ -116,7 +120,7 @@ abstract class AbstractCommodore implements Commodore {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Override
     public CommandSender wrapNMSCommandSource(Object nmsCmdSource) {
         Preconditions.notNull(nmsCmdSource, "Source from NMS cannot be null");
@@ -126,7 +130,7 @@ abstract class AbstractCommodore implements Commodore {
             throw new RuntimeException(e);
         }
     }
-    
+
     protected static void setRequiredHackyFieldsRecursively(CommandNode<?> node, SuggestionProvider<?> suggestionProvider) {
         // set command execution function so the server sets the executable flag on the command
         try {
@@ -136,8 +140,8 @@ abstract class AbstractCommodore implements Commodore {
         }
 
         if (suggestionProvider != null && node instanceof ArgumentCommandNode<?, ?> argumentNode) {
-	        
-	        // set the custom suggestion provider field so tab completions work
+
+            // set the custom suggestion provider field so tab completions work
             try {
                 CUSTOM_SUGGESTIONS_FIELD.set(argumentNode, suggestionProvider);
             } catch (IllegalAccessException e) {

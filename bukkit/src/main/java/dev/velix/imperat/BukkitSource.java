@@ -6,12 +6,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public final class BukkitCommandSource implements CommandSource<CommandSender> {
+public final class BukkitSource implements Source<CommandSender> {
 
     private final CommandSender sender;
     private final AudienceProvider audiences;
 
-    public BukkitCommandSource(CommandSender sender, AudienceProvider audiences) {
+    public BukkitSource(CommandSender sender, AudienceProvider audiences) {
         this.sender = sender;
         this.audiences = audiences;
     }

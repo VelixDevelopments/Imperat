@@ -2,11 +2,11 @@ package dev.velix.imperat;
 
 import net.kyori.adventure.text.Component;
 
-public class TestCommandSource implements CommandSource<TestSender> {
+public class TestSource implements Source<TestSender> {
 
     private final TestSender sender;
 
-    TestCommandSource(TestSender sender) {
+    TestSource(TestSender sender) {
         this.sender = sender;
     }
 
@@ -44,7 +44,7 @@ public class TestCommandSource implements CommandSource<TestSender> {
      */
     @Override
     public void reply(Component component) {
-    
+
     }
 
     /**
@@ -55,7 +55,7 @@ public class TestCommandSource implements CommandSource<TestSender> {
         return false;
     }
 
-    
+
     @Override
     public <T> T as(Class<T> clazz) {
         return null;

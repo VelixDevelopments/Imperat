@@ -1,11 +1,11 @@
 package dev.velix.imperat.caption.premade;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
-import dev.velix.imperat.command.BaseCommandDispatcher;
+import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -28,19 +28,19 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
     }
 
     /**
-     * @param dispatcher    the dispatcher
-     * @param command       the command
-     * @param commandSource the source
-     * @param context       the context
-     * @param usage         the command usage, can be null if it hasn't been resolved yet
-     * @param exception     the exception, may be null if no exception provided
+     * @param dispatcher the dispatcher
+     * @param command    the command
+     * @param source     the source
+     * @param context    the context
+     * @param usage      the command usage, can be null if it hasn't been resolved yet
+     * @param exception  the exception, may be null if no exception provided
      * @return The message in the form of a component
      */
     @Override
     public @NotNull Component asComponent(
-            @NotNull CommandDispatcher<C> dispatcher,
+            @NotNull Imperat<C> dispatcher,
             @NotNull Command<C> command,
-            @NotNull CommandSource<C> commandSource,
+            @NotNull Source<C> source,
             @NotNull Context<C> context,
             @Nullable CommandUsage<C> usage,
             @Nullable Exception exception
@@ -71,9 +71,9 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
         return Messages.getMsg(Messages.INVALID_SYNTAX_INCOMPLETE_USAGE,
                         Placeholder.parsed("required_args", builder.toString()))
                 .appendNewline()
-                .append(BaseCommandDispatcher.FULL_SYNTAX_PREFIX).append(
+                .append(BaseImperat.FULL_SYNTAX_PREFIX).append(
                         Messages.getMsg(Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE, Placeholder.parsed("usage", dispatcher.commandPrefix() + CommandUsage.format(command, usage)))
                 );
-        
+
     }
 }

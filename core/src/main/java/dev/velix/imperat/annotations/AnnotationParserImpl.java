@@ -1,6 +1,6 @@
 package dev.velix.imperat.annotations;
 
-import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.ElementKey;
 import dev.velix.imperat.annotations.element.ElementVisitor;
@@ -29,7 +29,7 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
     private final AnnotationRegistry annotationRegistry;
     private final AnnotationHandlerRegistry<C> dataRegistry;
 
-    AnnotationParserImpl(CommandDispatcher<C> dispatcher) {
+    AnnotationParserImpl(Imperat<C> dispatcher) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
         this.dataRegistry = new AnnotationHandlerRegistry<>(annotationRegistry, dispatcher);

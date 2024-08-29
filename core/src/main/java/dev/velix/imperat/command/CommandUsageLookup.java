@@ -1,6 +1,6 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
@@ -14,10 +14,10 @@ import java.util.function.Predicate;
 @ApiStatus.Internal
 public final class CommandUsageLookup<C> {
 
-    private final CommandDispatcher<C> dispatcher;
+    private final Imperat<C> dispatcher;
     private final List<CommandUsage<C>> usages;
-    
-    CommandUsageLookup(CommandDispatcher<C> dispatcher,
+
+    CommandUsageLookup(Imperat<C> dispatcher,
                        Command<C> command) {
         this.dispatcher = dispatcher;
         this.usages = new ArrayList<>(command.getUsages());
@@ -65,8 +65,8 @@ public final class CommandUsageLookup<C> {
 
             final String raw = rawArgs.poll();
             final CommandParameter parameter = usage.getParameter(i);
-            if(parameter == null) break;
-            
+            if (parameter == null) break;
+
             if (parameter.isFlag())
                 continue;
 

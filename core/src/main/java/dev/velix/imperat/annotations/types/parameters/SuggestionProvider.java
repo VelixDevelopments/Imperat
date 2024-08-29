@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface SuggestionProvider {
 
-	String value();
+    String value();
 
 }

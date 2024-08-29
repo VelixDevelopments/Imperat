@@ -4,6 +4,7 @@ package dev.velix.imperat.context;
  * Represents a flag that returns a value of type boolean
  * which represents merely whether its present in the syntax input or not
  * so they have no input value unlike true flags
+ *
  * @see CommandFlag
  */
 public interface CommandSwitch extends CommandFlag {

@@ -1,7 +1,7 @@
 package dev.velix.imperat.caption;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
@@ -23,19 +23,19 @@ public interface Caption<C> {
     CaptionKey getKey();
 
     /**
-     * @param dispatcher    the command dispatcher
-     * @param command       the command being triggered originally
-     * @param commandSource the source
-     * @param context       the context
-     * @param usage         the command usage, can be null if it hasn't been resolved yet
-     * @param exception     the exception, may be null if no exception provided
+     * @param dispatcher the command dispatcher
+     * @param command    the command being triggered originally
+     * @param source     the source
+     * @param context    the context
+     * @param usage      the command usage, can be null if it hasn't been resolved yet
+     * @param exception  the exception, may be null if no exception provided
      * @return The message in the form of a component
      */
     @NotNull
     Component asComponent(
-            @NotNull CommandDispatcher<C> dispatcher,
+            @NotNull Imperat<C> dispatcher,
             @NotNull Command<C> command,
-            @NotNull CommandSource<C> commandSource,
+            @NotNull Source<C> source,
             @NotNull Context<C> context,
             @Nullable CommandUsage<C> usage,
             @Nullable Exception exception
@@ -43,14 +43,14 @@ public interface Caption<C> {
 
 
     default @NotNull Component asComponent(
-            @NotNull CommandDispatcher<C> dispatcher,
+            @NotNull Imperat<C> dispatcher,
             @NotNull Command<C> command,
-            @NotNull CommandSource<C> commandSource,
+            @NotNull Source<C> source,
             @NotNull Context<C> context,
             @Nullable CommandUsage<C> usage
 
     ) {
-        return asComponent(dispatcher, command, commandSource, context, usage, null);
+        return asComponent(dispatcher, command, source, context, usage, null);
     }
 
 }

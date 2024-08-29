@@ -62,14 +62,14 @@ public final class Pivot {
     public boolean isLast(ShiftTarget shiftTarget, List<CommandParameter> params, ArgumentQueue raws) {
         return isLast(shiftTarget, params.size(), raws.size());
     }
-    
+
     public @Nullable String nextRaw(ArgumentQueue queue) {
         shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
         return peekRaw(queue);
     }
-    
+
     public <C> @Nullable String nextRaw(Context<C> context) {
         return nextRaw(context.getArguments());
     }
-    
+
 }

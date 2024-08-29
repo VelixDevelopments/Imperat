@@ -2,20 +2,20 @@ package dev.velix.imperat.context.internal.sur;
 
 public enum ShiftTarget {
 
-  RAW_ONLY((pos, maxParam, maxRaw) -> pos.getRaw() < maxRaw),
+    RAW_ONLY((pos, maxParam, maxRaw) -> pos.getRaw() < maxRaw),
 
-  PARAMETER_ONLY((pos, maxParam, maxRaw) -> pos.getParameter() < maxParam),
+    PARAMETER_ONLY((pos, maxParam, maxRaw) -> pos.getParameter() < maxParam),
 
-  ALL((pos, maxRaw, maxParameter) ->
-          pos.getRaw() < maxRaw && pos.getParameter() < maxParameter);
+    ALL((pos, maxRaw, maxParameter) ->
+            pos.getRaw() < maxRaw && pos.getParameter() < maxParameter);
 
-  private final PositionShiftCondition canContinueCheck;
+    private final PositionShiftCondition canContinueCheck;
 
-  ShiftTarget(PositionShiftCondition canContinueCheck) {
-      this.canContinueCheck = canContinueCheck;
-  }
+    ShiftTarget(PositionShiftCondition canContinueCheck) {
+        this.canContinueCheck = canContinueCheck;
+    }
 
-  boolean canContinue(Pivot pivot, int maxParam, int maxRaw) {
-      return canContinueCheck.canContinue(pivot, maxParam, maxRaw);
-  }
+    boolean canContinue(Pivot pivot, int maxParam, int maxRaw) {
+        return canContinueCheck.canContinue(pivot, maxParam, maxRaw);
+    }
 }

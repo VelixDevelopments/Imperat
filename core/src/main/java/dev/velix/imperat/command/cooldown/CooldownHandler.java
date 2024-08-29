@@ -1,6 +1,6 @@
 package dev.velix.imperat.command.cooldown;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.CommandUsage;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -22,7 +22,7 @@ public interface CooldownHandler<C> {
      *
      * @param source the command sender executing the {@link CommandUsage}
      */
-    void registerExecutionMoment(CommandSource<C> source);
+    void registerExecutionMoment(Source<C> source);
 
     /**
      * The required of a usage
@@ -39,7 +39,7 @@ public interface CooldownHandler<C> {
      * @return whether there's a current cooldown
      * on the usage for the command sender
      */
-    default boolean hasCooldown(CommandSource<C> source) {
+    default boolean hasCooldown(Source<C> source) {
         UsageCooldown usageCooldown = getUsageCooldown().orElse(null);
         if (usageCooldown == null) {
             return false;
@@ -61,7 +61,7 @@ public interface CooldownHandler<C> {
      *
      * @param source the command-sender
      */
-    void removeCooldown(CommandSource<C> source);
+    void removeCooldown(Source<C> source);
 
 
     /**
@@ -71,5 +71,5 @@ public interface CooldownHandler<C> {
      * @param source the command sender
      * @return the last time the sender executed {@link CommandUsage}
      */
-    Optional<Long> getLastTimeExecuted(CommandSource<C> source);
+    Optional<Long> getLastTimeExecuted(Source<C> source);
 }

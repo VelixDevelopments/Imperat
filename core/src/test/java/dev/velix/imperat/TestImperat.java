@@ -1,16 +1,16 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.command.BaseCommandDispatcher;
+import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.PermissionResolver;
 
-public final class TestCommandDispatcher extends BaseCommandDispatcher<TestSender> {
+public final class TestImperat extends BaseImperat<TestSender> {
 
-    TestCommandDispatcher() {
-        super();
+    TestImperat() {
+        super((source, permission) -> false);
     }
 
     @Override
@@ -33,8 +33,8 @@ public final class TestCommandDispatcher extends BaseCommandDispatcher<TestSende
      * @return the wrapped command-sender type
      */
     @Override
-    public CommandSource<TestSender> wrapSender(TestSender sender) {
-        return new TestCommandSource(sender);
+    public Source<TestSender> wrapSender(TestSender sender) {
+        return new TestSource(sender);
     }
 
     /**

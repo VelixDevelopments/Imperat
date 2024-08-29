@@ -1,7 +1,7 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.CommandDispatcher;
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.util.Pair;
@@ -28,9 +28,9 @@ final class TreeDisplayer implements UsageDisplayer {
 
     @Override
     public <C> void display(
-            CommandDispatcher<C> dispatcher,
+            Imperat<C> dispatcher,
             Command<C> command,
-            CommandSource<C> source,
+            Source<C> source,
             UsageFormatter formatter,
             List<CommandUsage<C>> usages
     ) {
@@ -51,7 +51,7 @@ final class TreeDisplayer implements UsageDisplayer {
 
 
     @SuppressWarnings("unchecked")
-    private <C> Pair<String, Command<C>> formatUsageTillSub(CommandDispatcher<C> dispatcher,
+    private <C> Pair<String, Command<C>> formatUsageTillSub(Imperat<C> dispatcher,
                                                             Command<C> command,
                                                             CommandUsage<C> usage) {
         StringBuilder builder = new StringBuilder(dispatcher.commandPrefix() + command.getName());
@@ -70,9 +70,9 @@ final class TreeDisplayer implements UsageDisplayer {
 
 
     private <C> void displayUsage(
-            CommandDispatcher<C> dispatcher,
+            Imperat<C> dispatcher,
             Command<C> command,
-            CommandSource<C> source,
+            Source<C> source,
             CommandUsage<C> usage,
             @Nullable Command<C> sub,
             UsageFormatter formatter,

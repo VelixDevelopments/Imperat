@@ -1,6 +1,6 @@
 package dev.velix.imperat.resolvers;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import org.jetbrains.annotations.ApiStatus;
@@ -19,9 +19,9 @@ public interface PermissionResolver<C> {
      * @param permission the permission
      * @return whether this command source/sender has a specific permission
      */
-    boolean hasPermission(@NotNull CommandSource<C> source, @Nullable String permission);
+    boolean hasPermission(@NotNull Source<C> source, @Nullable String permission);
 
-    default boolean hasUsagePermission(CommandSource<C> source, @Nullable CommandUsage<C> usage) {
+    default boolean hasUsagePermission(Source<C> source, @Nullable CommandUsage<C> usage) {
         if (usage == null) {
             return true;
         }

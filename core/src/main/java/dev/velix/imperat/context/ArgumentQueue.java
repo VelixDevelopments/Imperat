@@ -1,6 +1,6 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.context.internal.SortedArgumentQueue;
 import dev.velix.imperat.util.StringTokenizer;
 import org.jetbrains.annotations.ApiStatus;
@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Represents a custom data structure made specifically
- * for handling the arguments entered by the {@link CommandSource}
+ * for handling the arguments entered by the {@link Source}
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
@@ -75,12 +75,13 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     static ArgumentQueue parse(String[] rawArguments) {
         return StringTokenizer.parseToQueue(String.join(" ", rawArguments));
     }
-    
+
     static ArgumentQueue parse(String string) {
         return StringTokenizer.parseToQueue(string);
     }
+
     static ArgumentQueue parseAutoCompletion(String string) {
-        if(string.isEmpty()) {
+        if (string.isEmpty()) {
             return StringTokenizer.parseToQueue(" ");
         }
         return parse(string);

@@ -1,7 +1,7 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.CommandDebugger;
-import dev.velix.imperat.CommandDispatcher;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.context.Context;
@@ -23,6 +23,7 @@ import java.util.List;
 
 /**
  * Represents a wrapper for the actual command's data
+ *
  * @param <C> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
@@ -75,7 +76,7 @@ public interface Command<C> extends CommandParameter {
     default void addAliases(String... aliases) {
         addAliases(Arrays.asList(aliases));
     }
-    
+
     /**
      * Sets the position of this command in a syntax
      * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -185,10 +186,10 @@ public interface Command<C> extends CommandParameter {
                                     boolean attachDirectly) {
 
         Command<C> mapped = getSubCommand(subCommand.toLowerCase());
-        if(mapped != null) {
+        if (mapped != null) {
             throw new UnsupportedOperationException("You can't add an already existing sub-command '" + subCommand + "' to command '" + this.getName() + "'");
         }
-        
+
         int position;
         if (attachDirectly) {
             position = getPosition() + 1;
@@ -196,20 +197,20 @@ public interface Command<C> extends CommandParameter {
             CommandUsage<C> main = getMainUsage();
             position = this.getPosition() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
         }
-        
+
         //creating subcommand to modify
         Command<C> subCmd = Command.createCommand(this, position, subCommand);
         subCmd.addAliases(aliases);
         subCmd.addUsage(usage);
         //subCmd.setPosition(position);
-        
+
         //adding subcommand
         addSubCommand(subCmd);
-        
+
         final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
         final CommandUsage<C> combo = prime.mergeWithCommand(subCmd, usage);
         //adding the merged command usage
-        
+
         CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
         this.addUsage(
                 combo
@@ -252,7 +253,7 @@ public interface Command<C> extends CommandParameter {
     @NotNull
     Collection<? extends Command<C>> getSubCommands();
 
-    default CommandUsageLookup<C> lookup(CommandDispatcher<C> dispatcher) {
+    default CommandUsageLookup<C> lookup(Imperat<C> dispatcher) {
         return new CommandUsageLookup<>(dispatcher, this);
     }
 
@@ -309,7 +310,7 @@ public interface Command<C> extends CommandParameter {
      * @return the formatted parameter
      */
     @Override
-    default  String format() {
+    default String format() {
         return getName();
     }
 
@@ -338,7 +339,7 @@ public interface Command<C> extends CommandParameter {
      * Adds help as a sub-command to the command chain
      */
     @SuppressWarnings("unchecked")
-    default void addHelpCommand(CommandDispatcher<C> dispatcher,
+    default void addHelpCommand(Imperat<C> dispatcher,
                                 List<CommandParameter> params,
                                 HelpExecution<C> helpExecution) {
         if (params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
@@ -368,9 +369,9 @@ public interface Command<C> extends CommandParameter {
     static <C> Command<C> createCommand(@Nullable Command<C> parent, @NotNull String name) {
         return new CommandImpl<>(parent, name);
     }
-    
+
     static <C> Command<C> createCommand(@Nullable Command<C> parent, int position, @NotNull String name) {
         return new CommandImpl<>(parent, position, name);
     }
-    
+
 }

@@ -8,10 +8,10 @@ import org.jetbrains.annotations.ApiStatus;
  * of a command being executed
  * may be a console, a player in a game, etc...
  *
- * @param <C> the command source type
+ * @param <O> the command source type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface CommandSource<C> {
+public interface Source<O> {
 
     /**
      * @return name of command source
@@ -21,7 +21,7 @@ public interface CommandSource<C> {
     /**
      * @return The original command sender type instance
      */
-    C getOrigin();
+    O getOrigin();
 
     /**
      * Replies to the command sender with a string message
@@ -43,5 +43,9 @@ public interface CommandSource<C> {
      */
     boolean isConsole();
 
-    <T> T as(Class<T> clazz);
+    @SuppressWarnings("unchecked")
+    default <T> T as(Class<T> clazz) {
+        return (T) this.getOrigin();
+    }
+
 }

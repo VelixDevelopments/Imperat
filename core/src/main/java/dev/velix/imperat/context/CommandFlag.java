@@ -1,6 +1,6 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.CommandSource;
+import dev.velix.imperat.Source;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * Represents a flag that has been parsed/read/loaded from a
- * context of a command entered by the {@link CommandSource}
- *
+ * context of a command entered by the {@link Source}
+ * <p>
  * A flag has merely 2 types:
  * 1) A true flag is a flag that has an input value next to it in the raw input
  * 2) A {@link CommandSwitch}

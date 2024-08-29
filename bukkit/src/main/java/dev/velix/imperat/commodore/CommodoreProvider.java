@@ -38,8 +38,9 @@ public final class CommodoreProvider {
     private CommodoreProvider() {
         throw new AssertionError();
     }
-    
+
     private static boolean SUPPORTED;
+
     static {
         try {
             Class.forName("com.mojang.brigadier.CommandDispatcher");
@@ -49,9 +50,9 @@ public final class CommodoreProvider {
             SUPPORTED = false;
         }
     }
-    
+
     private static @Nullable Commodore load(Plugin plugin) {
-        if(!SUPPORTED) {
+        if (!SUPPORTED) {
             return null;
         }
 
@@ -97,7 +98,7 @@ public final class CommodoreProvider {
      * @param plugin the plugin
      * @return the commodore instance
      * @throws BrigadierUnsupportedException if brigadier is not {@link #isSupported() supported}
-     * by the server.
+     *                                       by the server.
      */
     public static Commodore getCommodore(Plugin plugin) throws BrigadierUnsupportedException {
         Objects.requireNonNull(plugin, "plugin");
@@ -105,10 +106,10 @@ public final class CommodoreProvider {
         if (commodore == null) {
             throw new BrigadierUnsupportedException(
                     "Brigadier is not supported by the server. " +
-                    "Set -Dcommodore.debug=true for debug info."
+                            "Set -Dcommodore.debug=true for debug info."
             );
         }
         return commodore;
     }
-    
+
 }
