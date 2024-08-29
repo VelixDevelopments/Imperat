@@ -113,7 +113,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @param command the annotated command instance to parse
      */
     @Override
-    public <T> void registerCommand(T command) {
+    public void registerCommand(Object command) {
         annotationParser.parseCommandClass(command);
     }
 

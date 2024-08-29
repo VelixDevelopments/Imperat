@@ -14,7 +14,7 @@ import org.jetbrains.annotations.ApiStatus;
 public interface Source<O> {
 
     /**
-     * @return name of command source
+     * @return name of a command source
      */
     String getName();
 

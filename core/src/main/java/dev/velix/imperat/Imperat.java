@@ -57,9 +57,8 @@ public interface Imperat<C> {
      * annotations using a parser
      *
      * @param command the annotated command instance to parse
-     * @param <T>     the type of this class instance
      */
-    <T> void registerCommand(T command);
+    void registerCommand(Object command);
 
     /**
      * Changes the instance of {@link AnnotationParser}
