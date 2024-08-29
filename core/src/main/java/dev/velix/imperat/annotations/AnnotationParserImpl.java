@@ -40,7 +40,7 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
     }
 
     @Override
-    public <T> void parseCommandClass(T instance) {
+    public <T> dev.velix.imperat.command.Command<C> parseCommandClass(T instance) {
         Class<T> instanceClazz = (Class<T>) instance.getClass();
         AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
         var elementKey = getKey(AnnotationLevel.CLASS, instanceClazz);
@@ -80,12 +80,12 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
             dataRegistry.injectForElement(instance, instanceClazz, commandObject, usageBuilder, methodElement);
             commandObject.addUsage(usageBuilder.build());
         }
-
-        dispatcher.registerCommand(commandObject);
-
-        for (Class<?> inner : instanceClazz.getDeclaredClasses()) {
+        
+        /*for (Class<?> inner : instanceClazz.getDeclaredClasses()) {
             parseCommandClass(inner);
-        }
+        }*/
+        
+        return commandObject;
     }
 
     /**

@@ -27,7 +27,7 @@ public abstract class AnnotationParser<C> {
      * @param instance the instance of the command class
      * @param <T>      the type of annotated command class to parse
      */
-    public abstract <T> void parseCommandClass(T instance);
+    public abstract <T> Command<C> parseCommandClass(T instance);
 
     /**
      * Registers {@link AnnotationReplacer}
