@@ -11,6 +11,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -108,7 +109,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
 
         }
 
-        return results.getResults();
+        return new ArrayList<>(results.getResults());
     }
 
 
