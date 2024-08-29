@@ -81,7 +81,7 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
             return Collections.emptyList();
         }
 
-        ArgumentQueue queue = ArgumentQueue.parse(args);
+        ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(args);
         List<CommandUsage<C>> closestUsages = getClosestUsages(dispatcher, args);
         int index = currentArg.index();
         if (index == -1)

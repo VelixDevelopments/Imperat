@@ -79,7 +79,11 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     static ArgumentQueue parse(String string) {
         return StringTokenizer.parseToQueue(string);
     }
-
+    
+    static ArgumentQueue parseAutoCompletion(String[] rawArguments) {
+        return parseAutoCompletion(String.join(" ", rawArguments));
+    }
+    
     static ArgumentQueue parseAutoCompletion(String string) {
         if (string.isEmpty()) {
             return StringTokenizer.parseToQueue(" ");
