@@ -1,8 +1,7 @@
-package dev.velix.imperat.coordinator;
+package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.Source;
-import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.context.Context;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -7,7 +7,6 @@ import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.coordinator.CommandCoordinator;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -15,7 +15,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
-import dev.velix.imperat.coordinator.CommandCoordinator;
+import dev.velix.imperat.command.CommandCoordinator;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.MethodHelpExecution;
 import dev.velix.imperat.resolvers.SuggestionResolver;
