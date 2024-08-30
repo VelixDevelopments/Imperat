@@ -63,7 +63,7 @@ public final class BukkitSource implements Source<CommandSender> {
     }
     
     
-    private void reply(Component component) {
+    public void reply(Component component) {
         Audience audience = isConsole() ? audiences.console()
                 : audiences.player(((Player) sender).getUniqueId());
         audience.sendMessage(component);
