@@ -5,7 +5,6 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
@@ -354,8 +353,7 @@ public interface Command<C> extends CommandParameter {
                         .execute((sender, context) -> {
                             //CommandDebugger.debug("Executing help !");
                             Integer page = context.getArgument("page");
-                            CommandHelp<C> help = dispatcher.createCommandHelp(this,
-                                    (Context<C>) context, ((ResolvedContext<C>) context).getDetectedUsage());
+                            CommandHelp<C> help = dispatcher.createCommandHelp(this, (Context<C>) context);
                             helpExecution.help(sender, (Context<C>) context, help, page);
                         }).buildAsHelp(),
                 true

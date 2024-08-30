@@ -3,14 +3,12 @@ package dev.velix.imperat.help;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a class responsible for formatting
- * each single {@link CommandUsage} into
- * adventure components {@link Component}
+ * each single {@link CommandUsage}
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageFormatter {
@@ -28,7 +26,7 @@ public interface UsageFormatter {
      * @param <C>        the sender-type
      * @return the usage component
      */
-    <C> Component formatUsageLine(
+    <C> String formatUsageLine(
             @NotNull Imperat<C> dispatcher,
             Command<C> command,
             CommandUsage<C> usage,
@@ -42,5 +40,5 @@ public interface UsageFormatter {
      * @param formattedUsage the format of the usage syntax
      * @return the format component of the usage
      */
-    Component formatUsageOnly(String formattedUsage);
+    String formatUsageOnly(String formattedUsage);
 }

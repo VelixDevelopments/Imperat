@@ -1,11 +1,9 @@
 package dev.velix.imperat.help.templates;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.help.UsageFormatter;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,10 +24,9 @@ public final class DefaultFormatter implements UsageFormatter {
      * @return the usage component
      */
     @Override
-    public <C> Component formatUsageLine(@NotNull Imperat<C> dispatcher, Command<C> command, CommandUsage<C> usage, boolean isLast) {
+    public <C> String formatUsageLine(@NotNull Imperat<C> dispatcher, Command<C> command, CommandUsage<C> usage, boolean isLast) {
         String format = dispatcher.commandPrefix() + CommandUsage.format(command, usage);
-        String msg = "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
-        return Messages.getMsg(msg);
+	      return "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
     }
 
     /**
@@ -40,9 +37,8 @@ public final class DefaultFormatter implements UsageFormatter {
      * @return the format component of the usage
      */
     @Override
-    public Component formatUsageOnly(String formattedUsage) {
-        String msg = "<green>" + formattedUsage;
-        return Messages.getMsg(msg);
+    public String formatUsageOnly(String formattedUsage) {
+	    return "<green>" + formattedUsage;
     }
 
 }

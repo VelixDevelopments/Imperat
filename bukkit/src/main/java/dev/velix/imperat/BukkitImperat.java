@@ -1,10 +1,8 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
-import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.help.CommandHelp;
@@ -15,6 +13,7 @@ import dev.velix.imperat.util.TypeUtility;
 import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -37,6 +36,8 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
     private final Plugin plugin;
     private final AudienceProvider provider;
 
+    final static MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    
     private Map<String, org.bukkit.command.Command> bukkitOGMapping;
 
     private BukkitBrigadierManager brigadierManager;
@@ -123,7 +124,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
      */
     @Override
     public Source<CommandSender> wrapSender(CommandSender sender) {
-        return new BukkitSource(sender, provider);
+        return new BukkitSource(this, sender, provider);
     }
 
     /**
@@ -139,16 +140,14 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
      *
      * @param command       the command
      * @param context       the context
-     * @param detectedUsage the usage
      * @return {@link CommandHelp} for the command usage used in a certain context
      */
     @Override
     public CommandHelp<CommandSender> createCommandHelp(
             Command<CommandSender> command,
-            Context<CommandSender> context,
-            CommandUsage<CommandSender> detectedUsage
+            Context<CommandSender> context
     ) {
-        return BukkitCommandHelp.create(this, command, context, detectedUsage);
+        return BukkitCommandHelp.create(this, command, context);
     }
 
     @Override
@@ -212,9 +211,9 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
         });
 
         registerValueResolver(Component.class, (source, context, raw, pivot, parameter) -> {
-            String result = Messages.MINI_MESSAGE.stripTags(raw);
+            String result = MINI_MESSAGE.stripTags(raw);
             if (result.length() == raw.length()) {
-                return Messages.getMsg(raw);
+                return MINI_MESSAGE.deserialize(raw);
             }
             return LEGACY_COMPONENT_SERIALIZER.deserialize(raw);
         });

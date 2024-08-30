@@ -1,10 +1,7 @@
 package dev.velix.imperat.examples.help;
 
-import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
 public final class ExamplePaginatedHelpTemplate
         extends ExampleHelpTemplate implements PaginatedHelpTemplate {
@@ -15,19 +12,14 @@ public final class ExamplePaginatedHelpTemplate
     }
 
     @Override
-    public Component fullHeader(Command<?> command, int page, int maxPages) {
-        return Messages.getMsg(
-                "<dark_gray><bold><strikethrough>=================== <dark_green>"
-                        + command.getName() + "'s help <pages_header> </dark_green>==================="
-                , Placeholder.component("pages_header", pagesHeaderComponent(page, maxPages))
-        );
+    public String fullHeader(Command<?> command, int page, int maxPages) {
+        return "<dark_gray><bold><strikethrough>=================== <dark_green>"
+                        + command.getName() + "'s help " + pagesHeaderComponent(page, maxPages) + " </dark_green>===================";
     }
 
 
-    private Component pagesHeaderComponent(int page, int maxPages) {
-        return Messages.getMsg("<dark_gray>(</dark_gray> <green><page><gray>/</gray><max_pages> <dark_gray>)</dark_gray>",
-                Placeholder.parsed("page", String.valueOf(page)),
-                Placeholder.parsed("max_pages", String.valueOf(maxPages)));
+    private String pagesHeaderComponent(int page, int maxPages) {
+        return "<dark_gray>(</dark_gray> <green>" + page + "<gray>/</gray>" + maxPages + " <dark_gray>)</dark_gray>";
     }
 
 }

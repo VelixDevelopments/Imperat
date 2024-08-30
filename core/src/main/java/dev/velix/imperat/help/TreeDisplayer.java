@@ -6,8 +6,6 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.util.Pair;
 import dev.velix.imperat.util.api.Unstable;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +17,8 @@ import java.util.List;
 @Unstable
 final class TreeDisplayer implements UsageDisplayer {
 
-    private final static Component BRANCH_DOWN = Component.text("┠", NamedTextColor.DARK_GRAY);
-    private final static Component BRANCH_FORWARDS = Component.text("-", NamedTextColor.DARK_GRAY);
+    private final static String BRANCH_DOWN = "<dark_gray>┠</dark_gray>";
+    private final static String BRANCH_FORWARDS = "<dark_gray>-</dark_gray>";
 
     TreeDisplayer() {
 
@@ -92,8 +90,9 @@ final class TreeDisplayer implements UsageDisplayer {
         int i = 0;
         for (CommandUsage<C> commandUsage : sub.getUsages()) {
             var formatInfo = formatUsageTillSub(dispatcher, command, commandUsage);
-            source.reply(BRANCH_DOWN.append(BRANCH_FORWARDS)
-                    .append(formatter.formatUsageOnly(formatInfo.right())));
+            source.reply(BRANCH_DOWN + BRANCH_FORWARDS +
+				            formatter.formatUsageOnly(formatInfo.right())
+            );
             if (commandUsage.hasParamType(Command.class)) {
                 displayUsage(dispatcher, command, source, commandUsage,
                         formatInfo.left(), formatter, formatInfo.right(), i == max - 1);

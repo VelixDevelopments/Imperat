@@ -6,10 +6,8 @@ import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.exceptions.CommandException;
@@ -289,18 +287,13 @@ public interface Imperat<C> {
     /**
      * Sends a caption to the source
      *
-     * @param source    the command sender
      * @param context   the context of the command
-     * @param usage     the usage of the command, null if not resolved yet
      * @param exception the error
      * @param key       the id/key of the caption
      */
     void sendCaption(
             CaptionKey key,
-            @NotNull Command<C> command,
-            Source<C> source,
             Context<C> context,
-            @Nullable CommandUsage<C> usage,
             @Nullable Exception exception
     );
 
@@ -309,27 +302,12 @@ public interface Imperat<C> {
      * Sends a caption to the source
      *
      * @param key     the id/key of the caption
-     * @param command the command detected
-     * @param source  the command sender
      * @param context the context of the command
      */
     void sendCaption(
             CaptionKey key,
-            @NotNull Command<C> command,
-            Source<C> source,
-            Context<C> context,
-            @Nullable CommandUsage<C> usage
+            Context<C> context
     );
-
-    default void sendCaption(CaptionKey key, @NotNull ResolvedContext<C> resolvedContext) {
-        sendCaption(
-                key,
-                resolvedContext.getOwningCommand(),
-                resolvedContext.getSource(),
-                resolvedContext,
-                resolvedContext.getDetectedUsage()
-        );
-    }
 
     /**
      * Sends a {@link Caption} that requires dynamic input
@@ -340,6 +318,13 @@ public interface Imperat<C> {
      * @param caption the caption to send
      */
     void sendDynamicCaption(Source<C> source, Context<C> context, Caption<C> caption);
+    
+    /**
+     * Sends a caption that represents an execution error
+     * @param key the caption key
+     * @param context the context
+     */
+    void sendExecutionError(CaptionKey key, Context<C> context);
 
     /**
      * Wraps the sender into a built-in command-sender type
@@ -356,7 +341,8 @@ public interface Imperat<C> {
      * @return whether the type can be a command sender
      */
     boolean canBeSender(Class<?> type);
-
+    
+    
     /**
      * Dispatches and executes a command with certain raw arguments
      *
@@ -413,10 +399,9 @@ public interface Imperat<C> {
      *
      * @param command       the command
      * @param context       the context
-     * @param detectedUsage the usage
      * @return {@link CommandHelp} for the command usage used in a certain context
      */
-    CommandHelp<C> createCommandHelp(Command<C> command, Context<C> context, CommandUsage<C> detectedUsage);
+    CommandHelp<C> createCommandHelp(Command<C> command, Context<C> context);
 
     void shutdownPlatform();
 

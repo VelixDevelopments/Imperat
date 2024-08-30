@@ -13,7 +13,7 @@ import java.util.List;
  * displayed to the command sender.
  * <p>
  * This class is only responsible for organizing the
- * formatted usages NOT for formatting the usages
+ * formatted usages, NOT for formatting the usages
  * <p>
  * Formatting the usages is the mere responsibility
  * of the class {@link UsageFormatter}

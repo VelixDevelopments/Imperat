@@ -4,8 +4,10 @@ compileJava.options.compilerArgs += ["-parameters"]
 dependencies {
     compileOnly lombok()
     annotationProcessor lombok()
-    implementation kyori(KyoriModule.API)
-    implementation kyori(KyoriModule.MINI_MESSAGE)
+
+    compileOnly "org.jetbrains:annotations:24.1.0"
+    annotationProcessor "org.jetbrains:annotations:24.1.0"
+
     implementation 'org.ow2.asm:asm:9.2'
     implementation 'org.ow2.asm:asm-commons:9.2'
 }
@@ -24,28 +26,4 @@ static String lombok() {
     return 'org.projectlombok:lombok:1.18.34'
 }
 
-
-static String kyori(KyoriModule module) {
-    return platform(module, "4.17.0")
-}
-
-static String platform(KyoriModule platform, String version) {
-    "net.kyori:adventure-" + platform.getDisplay() + ":" + version
-}
-
-enum KyoriModule {
-
-    API("api"), MINI_MESSAGE("text-minimessage"), BUKKIT("platform-bukkit"),
-    BUNGEE("platform-bungeecord"), SPONGE("platform-spongeapi");
-
-    private final String display
-
-    KyoriModule(String display) {
-        this.display = display
-    }
-
-    String getDisplay() {
-        return display
-    }
-}
 

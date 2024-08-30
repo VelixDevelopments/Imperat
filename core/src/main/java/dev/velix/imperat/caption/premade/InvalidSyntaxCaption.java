@@ -1,17 +1,14 @@
 package dev.velix.imperat.caption.premade;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.Source;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.BaseImperat;
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import dev.velix.imperat.context.ResolvedContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,28 +26,22 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
 
     /**
      * @param dispatcher the dispatcher
-     * @param command    the command
-     * @param source     the source
      * @param context    the context
-     * @param usage      the command usage, can be null if it hasn't been resolved yet
-     * @param exception  the exception, may be null if no exception provided
+     * @param exception  the exception may be null if no exception provided
      * @return The message in the form of a component
      */
     @Override
-    public @NotNull Component asComponent(
+    public @NotNull String getMessage(
             @NotNull Imperat<C> dispatcher,
-            @NotNull Command<C> command,
-            @NotNull Source<C> source,
             @NotNull Context<C> context,
-            @Nullable CommandUsage<C> usage,
             @Nullable Exception exception
     ) {
-
-        if (usage == null) {
-            //UNKNOWN USAGE
-            return Messages.getMsg(Messages.INVALID_SYNTAX_UNKNOWN_USAGE,
-                    Placeholder.parsed("raw_args", context.getArguments().join(" ")));
+        
+        if(!(context instanceof ResolvedContext<C> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
+            return Messages.INVALID_SYNTAX_UNKNOWN_USAGE
+                    .replace("raw_args", context.getArguments().join(" "));
         }
+        var usage = resolvedContext.getDetectedUsage();
         final int last = context.getArguments().size() - 1;
 
         List<CommandParameter> params = new ArrayList<>(usage.getParameters())
@@ -68,12 +59,10 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
 
         }
         //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
-        return Messages.getMsg(Messages.INVALID_SYNTAX_INCOMPLETE_USAGE,
-                        Placeholder.parsed("required_args", builder.toString()))
-                .appendNewline()
-                .append(BaseImperat.FULL_SYNTAX_PREFIX).append(
-                        Messages.getMsg(Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE, Placeholder.parsed("usage", dispatcher.commandPrefix() + CommandUsage.format(command, usage)))
-                );
+        return (Messages.INVALID_SYNTAX_INCOMPLETE_USAGE + "\n" + BaseImperat.FULL_SYNTAX_PREFIX + Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE)
+                .replace("<required_args>", builder.toString())
+                .replace("<usage>", dispatcher.commandPrefix()
+                        + CommandUsage.format(resolvedContext.getOwningCommand(), usage));
 
     }
 }

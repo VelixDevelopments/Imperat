@@ -24,7 +24,7 @@ final class PlainDisplayer implements UsageDisplayer {
 
         for (int i = 0; i < commandUsages.size(); i++) {
             var usage = commandUsages.get(i);
-            var comp = formatter.formatUsageLine(dispatcher, command, usage, i == commandUsages.size() - 1);
+            String comp = formatter.formatUsageLine(dispatcher, command, usage, i == commandUsages.size() - 1);
             source.reply(comp);
         }
     }

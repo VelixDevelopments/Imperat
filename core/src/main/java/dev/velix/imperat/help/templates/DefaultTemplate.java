@@ -1,11 +1,9 @@
 package dev.velix.imperat.help.templates;
 
-import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.help.UsageFormatter;
 import dev.velix.imperat.help.UsageDisplayer;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -22,16 +20,16 @@ public class DefaultTemplate implements HelpTemplate {
      * @return the header
      */
     @Override
-    public Component getHeader(Command<?> command) {
-        return Messages.getMsg("<dark_gray><bold><strikethrough>=================== <dark_green>" + command.getName() + "'s help</dark_green> ===================");
+    public String getHeader(Command<?> command) {
+        return "<dark_gray><bold><strikethrough>=================== <dark_green>" + command.getName() + "'s help</dark_green> ===================";
     }
 
     /**
      * @return the footer
      */
     @Override
-    public Component getFooter(Command<?> command) {
-        return Messages.getMsg("<dark_gray><bold><strikethrough>======================================");
+    public String getFooter(Command<?> command) {
+        return "<dark_gray><bold><strikethrough>======================================";
     }
 
     /**

@@ -2,8 +2,6 @@ package dev.velix.imperat.exceptions.context;
 
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.CommandException;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 public class ContextResolveException extends CommandException {
 
@@ -18,8 +16,7 @@ public class ContextResolveException extends CommandException {
      */
     @Override
     public <C> void handle(Context<C> context) {
-        context.getSource()
-                .reply(Component.text(msg, NamedTextColor.RED));
+        context.getSource().reply("<red>" + msg);
     }
 
 }

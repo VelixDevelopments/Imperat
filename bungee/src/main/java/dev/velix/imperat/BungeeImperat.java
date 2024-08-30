@@ -2,7 +2,6 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
@@ -79,10 +78,9 @@ public final class BungeeImperat extends BaseImperat<CommandSender> {
     @Override
     public CommandHelp<CommandSender> createCommandHelp(
             Command<CommandSender> command,
-            Context<CommandSender> context,
-            CommandUsage<CommandSender> detectedUsage
+            Context<CommandSender> context
     ) {
-        return BungeeCommandHelp.create(this, command, context, detectedUsage);
+        return BungeeCommandHelp.create(this, command, context);
     }
 
     @Override

@@ -8,7 +8,6 @@ import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.CaptionRegistry;
-import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
@@ -28,7 +27,6 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.verification.UsageVerifier;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,9 +40,9 @@ import java.util.Map;
 @ApiStatus.Internal
 public abstract class BaseImperat<C> implements Imperat<C> {
 
-    public final static Component START_PREFIX = Messages.getMsg("<dark_gray><bold>[<gold>!</gold>]</bold></dark_gray> ");
-    public final static Component CAPTION_EXECUTION_ERROR_PREFIX = START_PREFIX.append(Messages.getMsg("<red><bold>Execution error:</bold></red> "));
-    public final static Component FULL_SYNTAX_PREFIX = START_PREFIX.append(Messages.getMsg("<dark_aqua>Full syntax:</dark_aqua> "));
+    public final static String START_PREFIX = "<dark_gray><bold>[<gold>!</gold>]</bold></dark_gray> ";
+    public final static String CAPTION_EXECUTION_ERROR_PREFIX = START_PREFIX + "<red><bold>Execution error:</bold></red> ";
+    public final static String FULL_SYNTAX_PREFIX = START_PREFIX + "<dark_aqua>Full syntax:</dark_aqua> ";
 
     public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
 
@@ -389,43 +387,33 @@ public abstract class BaseImperat<C> implements Imperat<C> {
     /**
      * Sends a caption to the source
      *
-     * @param command the command
      * @param key     the id/key of the caption
-     * @param source  the command sender
      * @param context the context of the command
-     * @param usage   the usage of the command
      */
     @Override
     public void sendCaption(CaptionKey key,
-                            @NotNull Command<C> command,
-                            Source<C> source,
-                            Context<C> context,
-                            @Nullable CommandUsage<C> usage) {
-        this.sendCaption(key, command, source, context, usage, null);
+                            Context<C> context) {
+        this.sendCaption(key, context, null);
     }
+
 
     /**
      * Sends a caption to the source
      *
      * @param key       the id/key of the caption
-     * @param command   the command
-     * @param source    the command sender
      * @param context   the context of the command
-     * @param usage     the usage of the command, null if not resolved yet
      * @param exception the error if present
      */
     @Override
     public void sendCaption(CaptionKey key,
-                            @NotNull Command<C> command,
-                            Source<C> source,
                             Context<C> context,
-                            @Nullable CommandUsage<C> usage,
                             @Nullable Exception exception) {
         Caption<C> caption = captionRegistry.getCaption(key);
         if (caption == null) {
             throw new IllegalStateException(String.format("Unregistered caption from key '%s'", key.id()));
         }
-        source.reply(CAPTION_EXECUTION_ERROR_PREFIX.append(caption.asComponent(this, command, source, context, usage)));
+        Source<C> source = context.getSource();
+        source.reply(caption, context);
     }
 
     /**
@@ -440,13 +428,19 @@ public abstract class BaseImperat<C> implements Imperat<C> {
     public void sendDynamicCaption(Source<C> source,
                                    Context<C> context,
                                    Caption<C> caption) {
-        ResolvedContext<C> resolvedContext = (ResolvedContext<C>) context;
-        source.reply(CAPTION_EXECUTION_ERROR_PREFIX.append(
-                caption.asComponent(this, resolvedContext.getOwningCommand(), source,
-                        context, resolvedContext.getDetectedUsage())
-        ));
+        source.reply(caption, context);
     }
-
+    
+    @Override
+    public void sendExecutionError(CaptionKey key, Context<C> context) {
+        Caption<C> caption = captionRegistry.getCaption(key);
+        if (caption == null) {
+            throw new IllegalStateException(String.format("Unregistered caption from key '%s'", key.id()));
+        }
+        Source<C> source = context.getSource();
+        source.reply(CAPTION_EXECUTION_ERROR_PREFIX, caption, context);
+    }
+    
     /**
      * Dispatches and executes a command with certain raw arguments
      *
@@ -486,7 +480,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         }
 
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
-            sendCaption(CaptionKey.NO_PERMISSION, command, source, context, null);
+            sendExecutionError(CaptionKey.NO_PERMISSION, context);
             return;
         }
 
@@ -506,14 +500,14 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         //executing usage
         CommandUsage<C> usage = searchResult.getCommandUsage();
         if (!getPermissionResolver().hasUsagePermission(source, usage)) {
-            sendCaption(CaptionKey.NO_PERMISSION, command, source, context, null);
+            sendExecutionError(CaptionKey.NO_PERMISSION, context);
             return;
         }
 
         if (searchResult.getResult() == CommandUsageLookup.Result.FOUND_COMPLETE)
             executeUsage(command, source, context, usage);
         else
-            sendCaption(CaptionKey.INVALID_SYNTAX, command, source, context, usage);
+            sendExecutionError(CaptionKey.INVALID_SYNTAX, context);
 
     }
 
@@ -522,7 +516,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
                               Context<C> context,
                               final CommandUsage<C> usage) throws CommandException {
         if (usage.getCooldownHandler().hasCooldown(source)) {
-            sendCaption(CaptionKey.COOLDOWN, command, source, context, usage);
+            sendExecutionError(CaptionKey.COOLDOWN, context);
             return;
         }
         usage.getCooldownHandler().registerExecutionMoment(source); //TODO make a generic pre-processor

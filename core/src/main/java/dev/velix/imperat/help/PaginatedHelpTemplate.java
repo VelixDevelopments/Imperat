@@ -1,7 +1,6 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.command.Command;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -24,5 +23,5 @@ public interface PaginatedHelpTemplate extends HelpTemplate {
      * @param maxPages the max number of pages
      * @return the paginated header
      */
-    Component fullHeader(Command<?> command, int page, int maxPages);
+    String fullHeader(Command<?> command, int page, int maxPages);
 }

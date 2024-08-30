@@ -18,20 +18,17 @@ public abstract class CommandHelp<C> {
     private final Imperat<C> dispatcher;
     private final Context<C> context;
     private final Command<C> command;
-    private final CommandUsage<C> usage;
     private final HelpTemplate template;
 
     public CommandHelp(
             Imperat<C> dispatcher,
             Command<C> command,
-            Context<C> context,
-            CommandUsage<C> usage
+            Context<C> context
     ) {
         this.dispatcher = dispatcher;
         this.command = command;
         this.template = dispatcher.getHelpTemplate();
         this.context = context;
-        this.usage = usage;
     }
 
     public void display(Source<C> source) {
@@ -54,8 +51,7 @@ public abstract class CommandHelp<C> {
             int page
     ) {
         if (template == null) {
-            dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
-                    command, source, context, usage, null);
+            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
             return;
         }
 
@@ -68,16 +64,14 @@ public abstract class CommandHelp<C> {
 
         text.paginate();
         if (text.getMaxPages() == 0) {
-            dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
-                    command, source, context, usage, null);
+            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
             return;
         }
 
         TextPage<CommandUsage<C>> textPage = text.getPage(page);
 
         if (textPage == null) {
-            dispatcher.sendCaption(CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION,
-                    command, source, context, usage, null);
+            dispatcher.sendExecutionError(CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION, context);
             return;
         }
         source.reply(template.fullHeader(command, page, text.getMaxPages()));
@@ -90,15 +84,13 @@ public abstract class CommandHelp<C> {
 
     private void displayNormal(Source<C> source) {
         if (template == null) {
-            dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
-                    command, source, context, usage, null);
+            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
             return;
         }
 
         final int maxUsages = command.getUsages().size();
         if (maxUsages == 0) {
-            dispatcher.sendCaption(CaptionKey.NO_HELP_AVAILABLE_CAPTION,
-                    command, source, context, usage, null);
+            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
             return;
         }
 

@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
-import net.kyori.adventure.text.Component;
+import dev.velix.imperat.caption.Caption;
+import dev.velix.imperat.context.Context;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -25,19 +26,28 @@ public interface Source<O> {
 
     /**
      * Replies to the command sender with a string message
-     * this message is auto translated into a minimessage
+     * This message is parsed using minimessage format for platforms
+     * that can integrate with Kyori-Adventure chat-components.
      *
      * @param message the message
      */
     void reply(String message);
-
+    
     /**
-     * Replies to the command sender with a chat component
-     *
-     * @param component the chat component
+     * Replies to the command sender with a caption message
+     * @param caption the {@link Caption} to send
+     * @param context the {@link Context} to use
      */
-    void reply(Component component);
-
+    void reply(Caption<O> caption, Context<O> context);
+    
+    /**
+     * Replies to command sender with a caption message
+     * @param prefix the prefix before the caption message
+     * @param caption the caption
+     * @param context the context
+     */
+    void reply(String prefix, Caption<O> caption, Context<O> context);
+    
     /**
      * @return Whether the command source is from the console
      */

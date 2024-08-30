@@ -5,13 +5,11 @@ import dev.velix.imperat.Source;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.context.Context;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import dev.velix.imperat.context.ResolvedContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,29 +27,26 @@ public final class CooldownCaption<C> implements Caption<C> {
 
     /**
      * @param dispatcher the dispatcher
-     * @param command    the command
-     * @param usage      the usage
-     * @param source     the source
      * @param context    the context
-     * @param exception  the exception, may be null if no exception provided
+     * @param exception  the exception may be null if no exception provided
      * @return The message in the form of a component
      */
     @Override
-    public @NotNull Component asComponent(
+    public @NotNull String getMessage(
             @NotNull Imperat<C> dispatcher,
-            @NotNull Command<C> command,
-            @NotNull Source<C> source,
             @NotNull Context<C> context,
-            @Nullable CommandUsage<C> usage,
             @Nullable Exception exception
     ) {
-        if (usage == null || usage.getCooldown() == null) {
-            return Component.empty();
+        if (!(context instanceof ResolvedContext<C> resolvedContext)) {
+            return "";
         }
-        return Messages.getMsg(Messages.COOL_DOWN_WAIT,
-                Placeholder.parsed("time", formatTime(source, usage)));
+        var usage = resolvedContext.getDetectedUsage();
+        if (usage == null || usage.getCooldown() == null) {
+            return "";
+        }
+        return Messages.COOL_DOWN_WAIT.replace("<time>", formatTime(context.getSource(), usage));
     }
-
+    
     private String formatTime(Source<C> source, CommandUsage<C> usage) {
         return formatTime(source, usage.getCooldown(), usage.getCooldownHandler());
     }

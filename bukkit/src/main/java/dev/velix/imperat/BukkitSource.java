@@ -1,5 +1,7 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.caption.Caption;
+import dev.velix.imperat.context.Context;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.text.Component;
@@ -8,10 +10,13 @@ import org.bukkit.entity.Player;
 
 public final class BukkitSource implements Source<CommandSender> {
 
+    private final BukkitImperat imperat;
     private final CommandSender sender;
     private final AudienceProvider audiences;
 
-    public BukkitSource(CommandSender sender, AudienceProvider audiences) {
+    public BukkitSource(BukkitImperat imperat,
+                        CommandSender sender, AudienceProvider audiences) {
+        this.imperat = imperat;
         this.sender = sender;
         this.audiences = audiences;
     }
@@ -44,16 +49,21 @@ public final class BukkitSource implements Source<CommandSender> {
      */
     @Override
     public void reply(String message) {
-        sender.sendMessage(message);
+        reply(BukkitImperat.MINI_MESSAGE.deserialize(message));
     }
-
-    /**
-     * Replies to the command sender with a chat component
-     *
-     * @param component the chat component
-     */
+    
     @Override
-    public void reply(Component component) {
+    public void reply(Caption<CommandSender> caption, Context<CommandSender> context) {
+        reply(caption.getMessage(imperat, context));
+    }
+    
+    @Override
+    public void reply(String prefix, Caption<CommandSender> caption, Context<CommandSender> context) {
+        reply(prefix + caption.getMessage(imperat, context));
+    }
+    
+    
+    private void reply(Component component) {
         Audience audience = isConsole() ? audiences.console()
                 : audiences.player(((Player) sender).getUniqueId());
         audience.sendMessage(component);

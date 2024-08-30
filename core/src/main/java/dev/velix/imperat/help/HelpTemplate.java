@@ -1,7 +1,6 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.command.Command;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -15,13 +14,13 @@ public interface HelpTemplate {
      * @param command the command
      * @return the header
      */
-    Component getHeader(Command<?> command);
+    String getHeader(Command<?> command);
 
     /**
      * @param command the command
      * @return the footer
      */
-    Component getFooter(Command<?> command);
+    String getFooter(Command<?> command);
 
     /**
      * The usage formatter for the help-template
