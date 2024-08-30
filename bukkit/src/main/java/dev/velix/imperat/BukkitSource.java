@@ -22,7 +22,7 @@ public final class BukkitSource implements Source<CommandSender> {
     }
 
     /**
-     * @return name of command source
+     * @return name of a command source
      */
     @Override
     public String getName() {
