@@ -92,12 +92,13 @@ final class AutoCompleterImpl<C> implements AutoCompleter<C> {
         for (CommandUsage<C> usage : closestUsages) {
             if (index < 0 || index >= usage.getMaxLength()) continue;
             CommandParameter parameter = usage.getParameters().get(index);
+            if(!command.isIgnoringACPerms() && !permResolver.hasPermission(sender, parameter.getPermission())) {
+                continue;
+            }
             if (parameter.isCommand()) {
-                if (!command.isIgnoringACPerms() &&
-                        !permResolver.hasPermission(sender, parameter.asCommand().getPermission()))
-                    continue;
-
                 results.add(parameter.getName());
+                parameter.asCommand().getAliases()
+                        .forEach(results::add);
             } else {
                 SuggestionResolver<C, ?> resolver = dispatcher.getParameterSuggestionResolver(parameter);
                 if (resolver != null) {
