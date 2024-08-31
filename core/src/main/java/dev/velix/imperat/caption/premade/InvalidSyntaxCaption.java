@@ -39,7 +39,7 @@ public final class InvalidSyntaxCaption<C> implements Caption<C> {
         
         if(!(context instanceof ResolvedContext<C> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
             return Messages.INVALID_SYNTAX_UNKNOWN_USAGE
-                    .replace("raw_args", context.getArguments().join(" "));
+                    .replace("<raw_args>", context.getArguments().join(" "));
         }
         var usage = resolvedContext.getDetectedUsage();
         final int last = context.getArguments().size() - 1;

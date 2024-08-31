@@ -4,12 +4,14 @@ import dev.velix.imperat.Source;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.ParameterBuilder;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Context;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -297,6 +299,13 @@ public interface CommandUsage<C> {
                 this.description = description;
             }
             return this;
+        }
+        
+        @SafeVarargs
+        public final Builder<C> parameters(ParameterBuilder<C, ?>... builders) {
+            return parameters(
+                    Arrays.stream(builders).map(ParameterBuilder::build).toList()
+            );
         }
 
         public Builder<C> parameters(CommandParameter... params) {

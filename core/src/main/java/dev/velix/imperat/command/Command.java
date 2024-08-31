@@ -342,8 +342,12 @@ public interface Command<C> extends CommandParameter {
                                 List<CommandParameter> params,
                                 HelpExecution<C> helpExecution) {
         if (params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
-            params.add(CommandParameter.optional("page", Integer.class,
-                    OptionalValueSupplier.of(1)));
+            params.add(
+                    CommandParameter.optionalInt("page")
+                            .description("help-page")
+                            .defaultValue(1)
+                            .build()
+            );
         }
 
         addSubCommandUsage(

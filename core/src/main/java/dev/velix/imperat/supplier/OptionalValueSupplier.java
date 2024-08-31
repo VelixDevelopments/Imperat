@@ -7,6 +7,7 @@ public interface OptionalValueSupplier<T> {
 
     @SuppressWarnings("unchecked")
     static <T> OptionalValueSupplier<T> of(T def) {
+        if(def == null)return null;
         return new OptionalValueSupplier<>() {
             @Override
             public Class<T> getValueType() {

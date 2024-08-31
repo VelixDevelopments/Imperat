@@ -17,7 +17,7 @@ public enum MinecraftArgumentType {
     /**
      * A selector, player name, or UUID.
      * <p>
-     * Parameters:
+     * ParameterBuilder:
      * - boolean single
      * - boolean playerOnly
      */

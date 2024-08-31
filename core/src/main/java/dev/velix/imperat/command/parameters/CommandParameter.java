@@ -1,28 +1,23 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
-import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
-import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
-import dev.velix.imperat.supplier.defaults.BooleanValueSupplier;
+import dev.velix.imperat.util.Preconditions;
+import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Type;
-import java.util.List;
 
 /**
  * Represents the command parameter required
  * by the usage of the command itself
  */
 @ApiStatus.AvailableSince("1.0.0")
-@SuppressWarnings("unused")
-
 public interface CommandParameter {
-
+    
     /**
      * @return the name of the parameter
      */
@@ -129,7 +124,7 @@ public interface CommandParameter {
      *
      * @param <C> the command-sender type
      * @param <T> the type of value to be resolved
-     * @return the {@link SuggestionResolver} for resolving suggestion
+     * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Nullable
     <C, T> SuggestionResolver<C, T> getSuggestionResolver();
@@ -140,129 +135,109 @@ public interface CommandParameter {
      *
      * @return the formatted parameter
      */
-    <C> String format();
-
-
+    String format();
+    
     static <C, T> CommandParameter of(
             String name,
             Class<T> type,
+            Description description,
             boolean optional,
             boolean greedy,
             OptionalValueSupplier<T> valueSupplier,
             SuggestionResolver<C, T> suggestionResolver
     ) {
-        return new NormalCommandParameter(name, type, optional, greedy, valueSupplier, suggestionResolver);
-    }
-
-    static <C, T> CommandParameter required(String name, Class<T> clazz,
-                                            SuggestionResolver<C, T> suggestionResolver) {
-        return new NormalCommandParameter(name, clazz, false, false, null, suggestionResolver);
-    }
-
-
-    static <C, T> CommandParameter optional(
-            String name, Class<T> clazz,
-            @Nullable OptionalValueSupplier<T> defaultValue,
-            SuggestionResolver<C, T> suggestionResolver
-    ) {
-        return new NormalCommandParameter(name, clazz, true, false, defaultValue, suggestionResolver);
-    }
-
-    static <C> CommandParameter greedy(
-            String name,
-            boolean optional,
-            @Nullable OptionalValueSupplier<String> defaultValue,
-            SuggestionResolver<C, String> suggestionResolver
-    ) {
+        Preconditions.notNull(name, "name cannot be null !");
+        Preconditions.notNull(type, "type cannot be null ");
+        Preconditions.checkArgument(!TypeUtility.matches(type, Object.class), "Type cannot be `Object`");
+        
         return new NormalCommandParameter(
-                name, String.class, optional,
-                true, defaultValue, suggestionResolver
+                name, type, description, optional,
+                greedy, valueSupplier, suggestionResolver
         );
     }
-
-    static <C> CommandParameter requiredText(String name, SuggestionResolver<C, String> suggestionResolver) {
-        return required(name, String.class, suggestionResolver);
+    
+    static <C, T> ParameterBuilder<C, T> required(String name, Class<T> type) {
+        return new ParameterBuilder<>(name, type, false);
+    }
+    
+    static <C> ParameterBuilder<C, Integer> requiredInt(String name) {
+        return required(name, Integer.class);
+    }
+    
+    static <C> ParameterBuilder<C, Long> requiredLong(String name) {
+        return required(name, Long.class);
+    }
+    
+    static <C> ParameterBuilder<C, Double> requiredDouble(String name) {
+        return required(name, Double.class);
+    }
+    
+    static <C> ParameterBuilder<C, Float> requiredFloat(String name) {
+        return required(name, Float.class);
+    }
+    
+    static <C> ParameterBuilder<C, Boolean> requiredBoolean(String name) {
+        return required(name, Boolean.class);
+    }
+    
+    static <C> ParameterBuilder<C, String> requiredText(String name) {
+        return required(name, String.class);
+    }
+    
+    static <C> ParameterBuilder<C, String> requiredGreedy(String name) {
+        return new ParameterBuilder<>(name, String.class, false, true);
+    }
+    
+    static <C, T> ParameterBuilder<C, T> optional(String name, Class<T> type) {
+        return new ParameterBuilder<>(name, type, true);
+    }
+    
+    static <C> ParameterBuilder<C, Integer> optionalInt(String name) {
+        return optional(name, Integer.class);
+    }
+    
+    static <C> ParameterBuilder<C, Long> optionalLong(String name) {
+        return optional(name, Long.class);
+    }
+    
+    static <C> ParameterBuilder<C, Double> optionalDouble(String name) {
+        return optional(name, Double.class);
+    }
+    
+    static <C> ParameterBuilder<C, Float> optionalFloat(String name) {
+        return optional(name, Float.class);
+    }
+    
+    static <C> ParameterBuilder<C, Boolean> optionalBoolean(String name) {
+        return optional(name, Boolean.class);
+    }
+    
+    static <C> ParameterBuilder<C, String> optionalText(String name) {
+        return optional(name, String.class);
     }
 
-    static <C> CommandParameter requiredInt(String name, SuggestionResolver<C, Integer> suggestionResolver, @Nullable NumericRange range) {
-        return NumericParameterDecorator.decorate(required(name, Integer.class, suggestionResolver), range);
+    
+    static <C> ParameterBuilder<C, String> optionalGreedy(String name) {
+        return new ParameterBuilder<>(name, String.class, true, true);
     }
-
-    static <C> CommandParameter requiredLong(String name, SuggestionResolver<C, Long> suggestionResolver, @Nullable NumericRange range) {
-        return NumericParameterDecorator.decorate(required(name, Long.class, suggestionResolver), range);
-    }
-
-    static <C> CommandParameter requiredDouble(String name, SuggestionResolver<C, Double> suggestionResolver, @Nullable NumericRange range) {
-        return NumericParameterDecorator.decorate(required(name, Double.class, suggestionResolver), range);
-    }
-
-    static FlagParameter flag(
-            String flagName,
-            List<String> aliases,
-            Class<?> inputType,
-            OptionalValueSupplier<?> supplier
-    ) {
-        return new FlagCommandParameter(flagName, aliases, inputType, supplier);
-    }
-
-    static FlagParameter switchParam(String flagName, List<String> aliases) {
-        return new FlagCommandParameter(CommandFlag.createSwitch(flagName, aliases), new BooleanValueSupplier());
-    }
-
-
-    static <T> CommandParameter of(
+    
+    static <C, T> FlagBuilder<C, T> flag(
             String name,
-            Class<T> type,
-            boolean optional,
-            boolean greedy,
-            OptionalValueSupplier<T> valueSupplier
+            Class<T> inputType
     ) {
-        return of(name, type, optional, greedy, valueSupplier, null);
+        return FlagBuilder.ofFlag(name, inputType);
     }
-
-    static <T> CommandParameter required(String name, Class<T> clazz) {
-        return required(name, clazz, null);
+    
+    static <C> FlagBuilder<C, Boolean> flagSwitch(String name) {
+        return FlagBuilder.ofSwitch(name);
     }
-
-    static <T> CommandParameter optional(
-            String name, Class<T> clazz,
-            @Nullable OptionalValueSupplier<T> defaultValue
-    ) {
-        return optional(name, clazz, defaultValue, null);
-    }
-
-    static CommandParameter greedy(
-            String name,
-            boolean optional,
-            @Nullable OptionalValueSupplier<String> defaultValue
-    ) {
-        return greedy(name, optional, defaultValue, null);
-    }
-
-    static CommandParameter requiredText(String name) {
-        return requiredText(name, null);
-    }
-
-    //TODO more overloading for each parameter
-    static CommandParameter requiredInt(String name) {
-        return requiredInt(name, null, null);
-    }
-
-    static CommandParameter requiredLong(String name) {
-        return requiredLong(name, null, null);
-    }
-
-    static CommandParameter requiredDouble(String name) {
-        return requiredDouble(name, null, null);
-    }
-
-    default NumericParameterDecorator asNumeric() {
-        return (NumericParameterDecorator) this;
-    }
-
+    
     default boolean isNumeric() {
-        return this instanceof NumericParameterDecorator;
+        return TypeUtility.isNumericType(this.getType());
     }
-
-
+    
+    default NumericParameter asNumeric() {
+        return (NumericParameter) this;
+    }
+    
 }

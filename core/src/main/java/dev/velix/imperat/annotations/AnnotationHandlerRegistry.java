@@ -289,7 +289,13 @@ final class AnnotationHandlerRegistry<C> extends
         if (greedy && parameter.getType() != String.class) {
             throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy type '" + parameter.getType().getName() + "'");
         }
-
+        
+        dev.velix.imperat.command.Description desc = dev.velix.imperat.command.Description.EMPTY;
+        if(element.isAnnotationPresent(Description.class)) {
+            desc = dev.velix.imperat.command.Description
+                    .of(element.getAnnotation(Description.class).value());
+        }
+        
         OptionalValueSupplier<T> optionalValueSupplier = null;
         if (optional) {
             DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
@@ -300,13 +306,20 @@ final class AnnotationHandlerRegistry<C> extends
         if (flag != null) {
             String[] flagAliases = flag.value();
             return AnnotationParameterDecorator.decorate(
-                    CommandParameter.flag(name, getAllExceptFirst(flagAliases), flag.inputType(), optionalValueSupplier),
+                    CommandParameter.flag(name, (Class<T>)flag.inputType())
+                            .aliases(getAllExceptFirst(flagAliases))
+                            .flagDefaultInputValue(optionalValueSupplier)
+                            .description(desc)
+                            .build(),
                     element
             );
         } else if (switchAnnotation != null) {
             String[] switchAliases = switchAnnotation.value();
             return AnnotationParameterDecorator.decorate(
-                    CommandParameter.switchParam(name, getAllExceptFirst(switchAliases)),
+                    CommandParameter.flagSwitch(name)
+                            .aliases(getAllExceptFirst(switchAliases))
+                            .description(desc)
+                            .build(),
                     element
             );
         }
@@ -314,7 +327,7 @@ final class AnnotationHandlerRegistry<C> extends
         CommandParameter param =
                 AnnotationParameterDecorator.decorate(
                         CommandParameter.of(
-                                name, (Class<T>) parameter.getType(),
+                                name, (Class<T>) parameter.getType(), desc,
                                 optional, greedy, optionalValueSupplier, suggestionResolver
                         ), element
                 );

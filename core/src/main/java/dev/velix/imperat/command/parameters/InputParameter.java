@@ -35,19 +35,7 @@ public abstract class InputParameter implements CommandParameter {
         this.optionalValueSupplier = optionalValueSupplier;
         this.suggestionResolver = suggestionResolver;
     }
-
-    protected InputParameter(String name, Class<?> type,
-                             boolean optional, boolean flag, boolean greedy,
-                             OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
-        this.name = name;
-        this.type = type;
-        this.description = Description.EMPTY;
-        this.optional = optional;
-        this.flag = flag;
-        this.greedy = greedy;
-        this.optionalValueSupplier = optionalValueSupplier;
-        this.suggestionResolver = suggestionResolver;
-    }
+    
 
     /**
      * @return the name of the parameter

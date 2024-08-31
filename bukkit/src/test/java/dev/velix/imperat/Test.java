@@ -57,7 +57,10 @@ public final class Test extends JavaPlugin implements Listener {
         );
 
         command.addSubCommandUsage("sub1", CommandUsage.builder()
-                .parameters(CommandParameter.optional("value", Double.class, OptionalValueSupplier.of(-1D)))
+                .parameters(
+                        CommandParameter.optionalDouble("value")
+                        .defaultValue(OptionalValueSupplier.of(-1D))
+                )
                 .execute((source, context) -> {
 
                     //you can get previously used arguments from the main command usage
@@ -154,7 +157,6 @@ public final class Test extends JavaPlugin implements Listener {
     private void classicGuildCmd() {
         Command<CommandSender> guildCmd = Command.createCommand("guild");
         guildCmd.addSubCommandUsage("disband", CommandUsage.<CommandSender>builder()
-                .parameters() //no parameters in usage '/guild disband'
                 .execute((source, context) -> {
                     //getting our context resolved Guild object's instance
                     Guild guild = context.getContextResolvedArgument(Guild.class);

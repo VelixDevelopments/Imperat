@@ -13,7 +13,7 @@ public final class NumericParameterDecorator extends InputParameter implements N
 
     NumericParameterDecorator(CommandParameter parameter, NumericRange range) {
         super(
-                parameter.getName(), parameter.getType(),
+                parameter.getName(), parameter.getType(), parameter.getDescription(),
                 parameter.isOptional(), parameter.isFlag(),
                 parameter.isFlag(), parameter.getDefaultValueSupplier(),
                 parameter.getSuggestionResolver()
@@ -39,7 +39,7 @@ public final class NumericParameterDecorator extends InputParameter implements N
 
     /**
      * @return The actual range of the numeric parameter
-     * returns null if no range is specified !
+     * returns null if no range is specified!
      */
     @Override
     public @Nullable NumericRange getRange() {

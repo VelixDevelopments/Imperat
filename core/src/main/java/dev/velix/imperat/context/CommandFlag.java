@@ -46,10 +46,6 @@ public interface CommandFlag {
         return new CommandFlagImpl(name, alias, inputType);
     }
 
-    static CommandSwitch createSwitch(String name, List<String> aliases) {
-        return new CommandSwitchImpl(CommandFlag.create(name, aliases, null));
-    }
-
     default String format() {
 
         String display = this.name();
@@ -62,27 +58,6 @@ public interface CommandFlag {
     record CommandFlagImpl(String name, List<String> aliases, Class<?> inputType)
             implements CommandFlag {
     }
-
-    record CommandSwitchImpl(CommandFlag flag) implements CommandSwitch {
-
-        /**
-         * The main name of the flag
-         *
-         * @return the name(unique) of the flag
-         */
-        @Override
-        public @NotNull String name() {
-            return flag.name();
-        }
-
-        /**
-         * @return the alias of the flag
-         */
-        @Override
-        public @NotNull List<String> aliases() {
-            return flag.aliases();
-        }
-
-    }
+    
 
 }
