@@ -48,7 +48,13 @@ public interface CommandParameter {
      * @return the full type of parameter if it has generic types
      */
     Type getGenericType();
-
+    
+    /**
+     * The permission for this parameter
+     * @return the parameter permission
+     */
+    @Nullable String getPermission();
+    
     /**
      * Get the description of a parameter
      *
@@ -140,6 +146,7 @@ public interface CommandParameter {
     static <C, T> CommandParameter of(
             String name,
             Class<T> type,
+            @Nullable String permission,
             Description description,
             boolean optional,
             boolean greedy,
@@ -151,7 +158,7 @@ public interface CommandParameter {
         Preconditions.checkArgument(!TypeUtility.matches(type, Object.class), "Type cannot be `Object`");
         
         return new NormalCommandParameter(
-                name, type, description, optional,
+                name, type, permission, description, optional,
                 greedy, valueSupplier, suggestionResolver
         );
     }

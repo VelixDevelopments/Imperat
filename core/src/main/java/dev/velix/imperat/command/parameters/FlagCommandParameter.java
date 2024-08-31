@@ -6,6 +6,7 @@ import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -17,33 +18,31 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
 
     FlagCommandParameter(
             CommandFlag flag,
+            String permission,
             Description description,
             OptionalValueSupplier<?> valueSupplier
     ) {
-        this(flag.name(), flag.aliases(), description, flag.inputType(), valueSupplier);
+        this(flag.name(), permission, flag.aliases(), description, flag.inputType(), valueSupplier);
     }
     
-    FlagCommandParameter(String flagName, List<String> aliases, Description description, Class<?> inputType, OptionalValueSupplier<?> supplier) {
-        super(flagName, CommandFlag.class, description,
+    FlagCommandParameter(String flagName, @Nullable String permission, List<String> aliases, Description description, Class<?> inputType, OptionalValueSupplier<?> supplier) {
+        super(flagName, CommandFlag.class, permission, description,
                 true, true, false, null, null);
         flag = CommandFlag.create(flagName, aliases, inputType);
         this.supplier = supplier;
     }
 
-    FlagCommandParameter(CommandSwitch commandSwitch, Description description, OptionalValueSupplier<?> supplier) {
-        super(commandSwitch.name(), CommandSwitch.class, description,
+    FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission,
+                         Description description, OptionalValueSupplier<?> supplier) {
+        super(commandSwitch.name(), CommandSwitch.class, permission, description,
                 true, true, false,
                 null, null);
         this.flag = commandSwitch;
         this.supplier = supplier;
     }
 
-    FlagCommandParameter(String flagName, List<String> aliases, Class<?> inputType, OptionalValueSupplier<?> supplier) {
-        this(flagName, aliases, Description.EMPTY, inputType, supplier);
-    }
-
-    FlagCommandParameter(CommandSwitch commandSwitch, OptionalValueSupplier<?> supplier) {
-        this(commandSwitch, Description.EMPTY, supplier);
+    FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission, OptionalValueSupplier<?> supplier) {
+        this(commandSwitch, permission, Description.EMPTY, supplier);
     }
 
     @Override

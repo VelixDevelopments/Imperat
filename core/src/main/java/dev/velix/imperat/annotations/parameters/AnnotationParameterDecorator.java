@@ -18,7 +18,8 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     private final MethodParameterElement element;
 
     AnnotationParameterDecorator(CommandParameter parameter, MethodParameterElement element) {
-        super(parameter.getName(), parameter.getType(), parameter.getDescription(), parameter.isOptional(),
+        super(parameter.getName(), parameter.getType(), parameter.getPermission(),
+                parameter.getDescription(), parameter.isOptional(),
                 parameter.isFlag(), parameter.isGreedy(), parameter.getDefaultValueSupplier(),
                 parameter.getSuggestionResolver());
         this.parameter = parameter;

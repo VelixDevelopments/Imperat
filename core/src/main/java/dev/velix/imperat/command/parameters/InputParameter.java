@@ -13,7 +13,7 @@ import java.util.Objects;
 @ApiStatus.Internal
 public abstract class InputParameter implements CommandParameter {
 
-    protected final String name;
+    protected final String name, permission;
     protected int index;
     protected final Class<?> type;
     protected final boolean optional, flag, greedy;
@@ -23,11 +23,13 @@ public abstract class InputParameter implements CommandParameter {
 
 
     protected InputParameter(String name, Class<?> type,
+                             @Nullable String permission,
                              Description description,
                              boolean optional, boolean flag, boolean greedy,
                              OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
         this.name = name;
         this.type = type;
+        this.permission = permission;
         this.description = description;
         this.optional = optional;
         this.flag = flag;
@@ -71,7 +73,16 @@ public abstract class InputParameter implements CommandParameter {
     public Class<?> getType() {
         return type;
     }
-
+    
+    /**
+     * The permission for this parameter
+     * @return the parameter permission
+     */
+    @Override
+    public @Nullable String getPermission() {
+        return permission;
+    }
+    
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional

@@ -296,6 +296,11 @@ final class AnnotationHandlerRegistry<C> extends
                     .of(element.getAnnotation(Description.class).value());
         }
         
+        String permission = null;
+        if(element.isAnnotationPresent(Permission.class)) {
+            permission = element.getAnnotation(Permission.class).value();
+        }
+        
         OptionalValueSupplier<T> optionalValueSupplier = null;
         if (optional) {
             DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
@@ -306,19 +311,21 @@ final class AnnotationHandlerRegistry<C> extends
         if (flag != null) {
             String[] flagAliases = flag.value();
             return AnnotationParameterDecorator.decorate(
-                    CommandParameter.flag(name, (Class<T>)flag.inputType())
+                    CommandParameter.<C, T>flag(name, (Class<T>)flag.inputType())
                             .aliases(getAllExceptFirst(flagAliases))
                             .flagDefaultInputValue(optionalValueSupplier)
                             .description(desc)
+                            .permission(permission)
                             .build(),
                     element
             );
         } else if (switchAnnotation != null) {
             String[] switchAliases = switchAnnotation.value();
             return AnnotationParameterDecorator.decorate(
-                    CommandParameter.flagSwitch(name)
+                    CommandParameter.<C>flagSwitch(name)
                             .aliases(getAllExceptFirst(switchAliases))
                             .description(desc)
+                            .permission(permission)
                             .build(),
                     element
             );
@@ -327,7 +334,7 @@ final class AnnotationHandlerRegistry<C> extends
         CommandParameter param =
                 AnnotationParameterDecorator.decorate(
                         CommandParameter.of(
-                                name, (Class<T>) parameter.getType(), desc,
+                                name, (Class<T>) parameter.getType(), permission, desc,
                                 optional, greedy, optionalValueSupplier, suggestionResolver
                         ), element
                 );

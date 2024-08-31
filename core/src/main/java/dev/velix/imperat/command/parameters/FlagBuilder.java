@@ -55,11 +55,11 @@ public final class FlagBuilder<C, T> extends ParameterBuilder<C, CommandFlag> {
 		
 		if(inputType != null) {
 			CommandFlag flag = CommandFlag.create(name, aliases, inputType);
-			return new FlagCommandParameter(flag, description, defaultValueSupplier);
+			return new FlagCommandParameter(flag, permission, description, defaultValueSupplier);
 		}
 		else {
 			CommandSwitch commandSwitch = CommandSwitch.create(name, aliases);
-			return new FlagCommandParameter(commandSwitch, null);
+			return new FlagCommandParameter(commandSwitch, permission, null);
 		}
 	}
 	

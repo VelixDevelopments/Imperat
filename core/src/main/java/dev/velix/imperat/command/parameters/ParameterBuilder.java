@@ -14,6 +14,7 @@ public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 	private final boolean optional;
 	private final boolean greedy;
 	
+	protected String permission = null;
 	protected Description description = Description.EMPTY;
 	private OptionalValueSupplier<T> valueSupplier = null;
 	private SuggestionResolver<C, T> suggestionResolver = null;
@@ -29,6 +30,11 @@ public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 		this(name, type, optional, false);
 	}
 
+	
+	public ParameterBuilder<C, T> permission(@Nullable String permission) {
+		this.permission = permission;
+		return this;
+	}
 	
 	public ParameterBuilder<C, T> description(@NotNull Description description) {
 		Preconditions.notNull(description, "description cannot be null !");
@@ -60,7 +66,7 @@ public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 	
 	public CommandParameter build() {
 		return CommandParameter.of(
-						name, type, description,
+						name, type, permission, description,
 						optional, greedy, valueSupplier,
 						suggestionResolver
 		);
