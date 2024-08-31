@@ -1,6 +1,6 @@
 package dev.velix.imperat.resolvers;
 
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import org.jetbrains.annotations.ApiStatus;

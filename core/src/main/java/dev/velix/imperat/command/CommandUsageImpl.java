@@ -1,6 +1,7 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.Source;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
@@ -293,12 +294,13 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
      * Executes the usage's actions
      * using the supplied {@link CommandCoordinator}
      *
+     * @param imperat the api
      * @param source  the command source/sender
      * @param context the context of the command
      */
     @Override
-    public void execute(Source<C> source, Context<C> context) {
-        commandCoordinator.coordinate(source, context, this.execution);
+    public void execute(Imperat<C> imperat, Source<C> source, Context<C> context) {
+        commandCoordinator.coordinate(imperat, source, context, this.execution);
     }
 
     @Override

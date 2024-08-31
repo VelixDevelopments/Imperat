@@ -2,6 +2,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.util.CommandDebugger;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
@@ -76,7 +77,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender,
                                              @NotNull String alias,
                                              String[] args) throws IllegalArgumentException {
-        return dispatcher.suggest(command, sender, args);
+        return dispatcher.autoComplete(command, sender, args);
     }
 
 }

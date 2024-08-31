@@ -1,4 +1,4 @@
-package dev.velix.imperat;
+package dev.velix.imperat.util;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 

@@ -1,6 +1,6 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;

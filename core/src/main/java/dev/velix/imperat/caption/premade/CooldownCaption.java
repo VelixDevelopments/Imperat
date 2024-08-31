@@ -1,7 +1,7 @@
 package dev.velix.imperat.caption.premade;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;

@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Context;

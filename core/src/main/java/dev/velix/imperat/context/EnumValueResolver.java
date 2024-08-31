@@ -1,6 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.Source;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.internal.sur.Pivot;
 import dev.velix.imperat.exceptions.CommandException;

@@ -1,6 +1,7 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.Source;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -249,10 +250,11 @@ public interface CommandUsage<C> {
      * Executes the usage's actions
      * using the supplied {@link CommandCoordinator}
      *
+     * @param imperat the api
      * @param source  the command source/sender
      * @param context the context of the command
      */
-    void execute(Source<C> source, Context<C> context);
+    void execute(Imperat<C> imperat, Source<C> source, Context<C> context);
 
     boolean isHelp();
 

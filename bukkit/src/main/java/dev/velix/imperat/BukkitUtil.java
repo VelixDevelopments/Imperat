@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 import dev.array21.bukkitreflectionlib.ReflectionUtil;
+import dev.velix.imperat.util.CommandDebugger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;

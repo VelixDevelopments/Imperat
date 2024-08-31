@@ -34,7 +34,7 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
             CommandSender sender,
             String[] args
     ) {
-        return bungeeCommandDispatcher.suggest(bungeeCommand, sender, args);
+        return bungeeCommandDispatcher.autoComplete(bungeeCommand, sender, args);
     }
 
 }

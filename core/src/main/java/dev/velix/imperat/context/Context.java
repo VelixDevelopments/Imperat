@@ -1,6 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 

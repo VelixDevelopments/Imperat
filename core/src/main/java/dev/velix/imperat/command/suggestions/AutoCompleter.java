@@ -1,7 +1,7 @@
 package dev.velix.imperat.command.suggestions;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.ApiStatus;
 

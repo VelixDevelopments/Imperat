@@ -1,6 +1,8 @@
 package dev.velix.imperat;
 
-import net.kyori.adventure.text.Component;
+import dev.velix.imperat.caption.Caption;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 
 public class TestSource implements Source<TestSender> {
 
@@ -36,17 +38,31 @@ public class TestSource implements Source<TestSender> {
     public void reply(String message) {
         sender.sendMsg(message);
     }
-
+    
     /**
-     * Replies to the command sender with a chat component
+     * Replies to the command sender with a caption message
      *
-     * @param component the chat component
+     * @param caption the {@link Caption} to send
+     * @param context the {@link Context} to use
      */
     @Override
-    public void reply(Component component) {
-
+    public void reply(Caption<TestSender> caption, Context<TestSender> context) {
+    
     }
-
+    
+    /**
+     * Replies to command sender with a caption message
+     *
+     * @param prefix  the prefix before the caption message
+     * @param caption the caption
+     * @param context the context
+     */
+    @Override
+    public void reply(String prefix, Caption<TestSender> caption, Context<TestSender> context) {
+    
+    }
+    
+    
     /**
      * @return Whether the command source is from the console
      */

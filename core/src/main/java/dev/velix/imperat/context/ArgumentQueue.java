@@ -1,6 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.Source;
 import dev.velix.imperat.context.internal.SortedArgumentQueue;
 import dev.velix.imperat.util.StringTokenizer;
 import org.jetbrains.annotations.ApiStatus;

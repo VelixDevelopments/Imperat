@@ -1,8 +1,14 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandDebugger;
+import dev.velix.imperat.command.processors.CommandPostProcessor;
+import dev.velix.imperat.command.processors.CommandPreProcessor;
+import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
+import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
+import dev.velix.imperat.exceptions.ExecutionFailure;
+import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.CommandExceptionHandler;
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.annotations.AnnotationParser;
 import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
@@ -32,16 +38,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ApiStatus.Internal
 public abstract class BaseImperat<C> implements Imperat<C> {
 
     public final static String START_PREFIX = "<dark_gray><bold>[<gold>!</gold>]</bold></dark_gray> ";
-    public final static String CAPTION_EXECUTION_ERROR_PREFIX = START_PREFIX + "<red><bold>Execution error:</bold></red> ";
     public final static String FULL_SYNTAX_PREFIX = START_PREFIX + "<dark_aqua>Full syntax:</dark_aqua> ";
 
     public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
@@ -56,6 +58,9 @@ public abstract class BaseImperat<C> implements Imperat<C> {
 
     private final SuggestionResolverRegistry<C> suggestionResolverRegistry;
 
+    private final List<CommandPreProcessor<C>> preProcessors = new ArrayList<>();
+    private final List<CommandPostProcessor<C>> postProcessors = new ArrayList<>();
+    
     private @NotNull UsageVerifier<C> verifier;
 
     private final CaptionRegistry<C> captionRegistry;
@@ -65,7 +70,8 @@ public abstract class BaseImperat<C> implements Imperat<C> {
     private AnnotationParser<C> annotationParser;
 
     protected PermissionResolver<C> permissionResolver;
-
+    
+    
     protected BaseImperat(PermissionResolver<C> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory();
         contextResolverRegistry = ContextResolverRegistry.createDefault();
@@ -75,6 +81,13 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         captionRegistry = CaptionRegistry.createDefault();
         annotationParser = AnnotationParser.defaultParser(this);
         this.permissionResolver = permissionResolver;
+        registerProcessors();
+    }
+    
+    private void registerProcessors() {
+        registerPreProcessor(new UsagePermissionProcessor<>());
+        registerPreProcessor(new UsageCooldownProcessor<>());
+        //TODO register creative built-in processors in the future
     }
 
     /**
@@ -373,7 +386,53 @@ public abstract class BaseImperat<C> implements Imperat<C> {
 
         return null;
     }
-
+    
+    /**
+     * Registers a command pre-processor
+     *
+     * @param preProcessor the pre-processor to register
+     */
+    @Override
+    public void registerPreProcessor(CommandPreProcessor<C> preProcessor) {
+        Preconditions.notNull(preProcessor, "Pre-processor cannot be null");
+        preProcessors.add(preProcessor);
+    }
+    
+    /**
+     * Registers a command post-processor
+     *
+     * @param postProcessor the post-processor to register
+     */
+    @Override
+    public void registerPostProcessor(CommandPostProcessor<C> postProcessor) {
+        Preconditions.notNull(postProcessor, "Post-processor cannot be null");
+        postProcessors.add(postProcessor);
+    }
+    
+    /**
+     * Registers a command pre-processor
+     *
+     * @param priority     the priority for the processor
+     * @param preProcessor the pre-processor to register
+     */
+    @Override
+    public void registerPreProcessor(int priority, CommandPreProcessor<C> preProcessor) {
+        Preconditions.notNull(preProcessor, "Pre-processor cannot be null");
+        preProcessors.add(priority, preProcessor);
+    }
+    
+    /**
+     * Registers a command post-processor
+     *
+     * @param priority      the priority for the processor
+     * @param postProcessor the post-processor to register
+     */
+    @Override
+    public void registerPostProcessor(int priority, CommandPostProcessor<C> postProcessor) {
+        Preconditions.notNull(postProcessor, "Post-processor cannot be null");
+        postProcessors.add(priority, postProcessor);
+    }
+    
     /**
      * Registers a caption
      *
@@ -381,6 +440,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      */
     @Override
     public void registerCaption(Caption<C> caption) {
+        Preconditions.notNull(caption, "Caption cannot be null");
         this.captionRegistry.registerCaption(caption);
     }
 
@@ -395,7 +455,6 @@ public abstract class BaseImperat<C> implements Imperat<C> {
                             Context<C> context) {
         this.sendCaption(key, context, null);
     }
-
 
     /**
      * Sends a caption to the source
@@ -415,30 +474,16 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         Source<C> source = context.getSource();
         source.reply(caption, context);
     }
-
+    
     /**
-     * Sends a {@link Caption} that requires dynamic input
-     * through it's constructor
+     * Fetches the caption from a caption key
      *
-     * @param source  the command source
-     * @param context the context of the command
-     * @param caption the caption to send
+     * @param key the key
+     * @return the caption to get
      */
     @Override
-    public void sendDynamicCaption(Source<C> source,
-                                   Context<C> context,
-                                   Caption<C> caption) {
-        source.reply(caption, context);
-    }
-    
-    @Override
-    public void sendExecutionError(CaptionKey key, Context<C> context) {
-        Caption<C> caption = captionRegistry.getCaption(key);
-        if (caption == null) {
-            throw new IllegalStateException(String.format("Unregistered caption from key '%s'", key.id()));
-        }
-        Source<C> source = context.getSource();
-        source.reply(CAPTION_EXECUTION_ERROR_PREFIX, caption, context);
+    public @Nullable Caption<C> getCaption(@NotNull CaptionKey key) {
+        return captionRegistry.getCaption(key);
     }
     
     /**
@@ -461,7 +506,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         try {
             handleExecution(source, plainContext);
         } catch (Throwable ex) {
-            Imperat.handleException(plainContext, BaseImperat.class, "dispatch", ex);
+            CommandExceptionHandler.handleException(this, plainContext, BaseImperat.class, "dispatch", ex);
         }
 
     }
@@ -480,12 +525,9 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         }
 
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
-            sendExecutionError(CaptionKey.NO_PERMISSION, context);
-            return;
+            throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
         }
-
-        //context.extractCommandFlags(command);
-
+        
         CommandUsageLookup<C>.SearchResult searchResult = command.lookup(this)
                 .searchUsage(context);
 
@@ -493,36 +535,72 @@ public abstract class BaseImperat<C> implements Imperat<C> {
                 && searchResult.getResult() == CommandUsageLookup.Result.FOUND_INCOMPLETE)
                 || context.getArguments().isEmpty()) {
             CommandUsage<C> defaultUsage = command.getDefaultUsage();
-            defaultUsage.execute(source, context);
+            defaultUsage.execute(this, source, context);
             return;
         }
 
         //executing usage
         CommandUsage<C> usage = searchResult.getCommandUsage();
-        if (!getPermissionResolver().hasUsagePermission(source, usage)) {
-            sendExecutionError(CaptionKey.NO_PERMISSION, context);
-            return;
-        }
-
+        
         if (searchResult.getResult() == CommandUsageLookup.Result.FOUND_COMPLETE)
             executeUsage(command, source, context, usage);
         else
-            sendExecutionError(CaptionKey.INVALID_SYNTAX, context);
-
+            throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
     }
 
     private void executeUsage(Command<C> command,
                               Source<C> source,
                               Context<C> context,
                               final CommandUsage<C> usage) throws CommandException {
-        if (usage.getCooldownHandler().hasCooldown(source)) {
-            sendExecutionError(CaptionKey.COOLDOWN, context);
-            return;
-        }
-        usage.getCooldownHandler().registerExecutionMoment(source); //TODO make a generic pre-processor
+        
+        preProcess(command, context, usage);
+        
         ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(this, command, context, usage);
         resolvedContext.resolve();
-        usage.execute(source, resolvedContext);
+        
+        postProcess(command, resolvedContext, usage);
+        
+        usage.execute(this, source, resolvedContext);
+    }
+    
+    //TODO improve (DRY)
+    private void preProcess(
+            @NotNull Command<C> command,
+            @NotNull Context<C> context,
+            @NotNull CommandUsage<C> usage
+    ) {
+        for(CommandPreProcessor<C> preProcessor : preProcessors) {
+            try {
+                preProcessor.process(this, command, context, usage);
+            }catch (Throwable ex) {
+                CommandExceptionHandler.handleException(
+                        this,
+                        context, preProcessor.getClass(),
+                        "CommandPreProcessor#process", ex
+                );
+                break;
+            }
+        }
+    }
+    
+    //TODO improve (DRY)
+    private void postProcess(
+            @NotNull Command<C> command,
+            @NotNull ResolvedContext<C> context,
+            @NotNull CommandUsage<C> usage
+    ) {
+        for(CommandPostProcessor<C> postProcessor : postProcessors) {
+            try {
+                postProcessor.process(this, command, context, usage);
+            }catch (Throwable ex) {
+                CommandExceptionHandler.handleException(
+                        this,
+                        context, postProcessor.getClass(),
+                        "CommandPostProcessor#process", ex
+                );
+                break;
+            }
+        }
     }
 
     /**
@@ -532,7 +610,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @return the suggestions at the current position
      */
     @Override
-    public List<String> suggest(Command<C> command, C sender, String[] args) {
+    public List<String> autoComplete(Command<C> command, C sender, String[] args) {
         Source<C> source = wrapSender(sender);
         return command.getAutoCompleter().autoComplete(this, source, args);
     }

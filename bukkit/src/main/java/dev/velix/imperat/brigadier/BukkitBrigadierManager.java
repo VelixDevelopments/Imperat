@@ -17,6 +17,7 @@ import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.util.CommandDebugger;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

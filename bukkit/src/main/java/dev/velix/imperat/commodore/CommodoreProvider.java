@@ -25,7 +25,7 @@
 
 package dev.velix.imperat.commodore;
 
-import dev.velix.imperat.CommandDebugger;
+import dev.velix.imperat.util.CommandDebugger;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 

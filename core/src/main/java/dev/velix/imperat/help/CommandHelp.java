@@ -1,11 +1,13 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.exceptions.ExecutionFailure;
+import dev.velix.imperat.util.CommandExceptionHandler;
 import dev.velix.imperat.util.text.PaginatedText;
 import dev.velix.imperat.util.text.TextPage;
 import org.jetbrains.annotations.ApiStatus;
@@ -31,16 +33,20 @@ public abstract class CommandHelp<C> {
         this.context = context;
     }
 
-    public void display(Source<C> source) {
+    public void display(Source<C> source){
         display(source, 1);
     }
 
     public void display(Source<C> source, int page) {
 
-        if (template instanceof PaginatedHelpTemplate paginatedTemplate) {
-            displayPaginated(source, paginatedTemplate, page);
-        } else {
-            displayNormal(source);
+        try {
+            if (template instanceof PaginatedHelpTemplate paginatedTemplate) {
+                displayPaginated(source, paginatedTemplate, page);
+            } else {
+                displayNormal(source);
+            }
+        }catch (Throwable ex) {
+            CommandExceptionHandler.handleException(dispatcher, context, this.getClass(), "display(source, page)", ex);
         }
 
     }
@@ -49,10 +55,9 @@ public abstract class CommandHelp<C> {
             Source<C> source,
             PaginatedHelpTemplate template,
             int page
-    ) {
+    ) throws ExecutionFailure {
         if (template == null) {
-            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
-            return;
+            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
 
         PaginatedText<CommandUsage<C>> text = new PaginatedText<>(template.syntaxesPerPage());
@@ -64,15 +69,13 @@ public abstract class CommandHelp<C> {
 
         text.paginate();
         if (text.getMaxPages() == 0) {
-            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
-            return;
+            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
 
         TextPage<CommandUsage<C>> textPage = text.getPage(page);
 
         if (textPage == null) {
-            dispatcher.sendExecutionError(CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION, context);
-            return;
+            throw new ExecutionFailure(CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION);
         }
         source.reply(template.fullHeader(command, page, text.getMaxPages()));
 
@@ -82,16 +85,14 @@ public abstract class CommandHelp<C> {
         source.reply(template.getFooter(command));
     }
 
-    private void displayNormal(Source<C> source) {
+    private void displayNormal(Source<C> source) throws ExecutionFailure {
         if (template == null) {
-            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
-            return;
+            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
 
         final int maxUsages = command.getUsages().size();
         if (maxUsages == 0) {
-            dispatcher.sendExecutionError(CaptionKey.NO_HELP_AVAILABLE_CAPTION, context);
-            return;
+            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
 
         source.reply(template.getHeader(command));

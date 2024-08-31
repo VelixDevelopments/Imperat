@@ -3,6 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
@@ -67,7 +68,7 @@ public final class BungeeImperat extends BaseImperat<CommandSender> {
 
     @Override
     public Source<CommandSender> wrapSender(CommandSender sender) {
-        return new BungeeSource(provider, sender);
+        return new BungeeSource(this, provider, sender);
     }
 
     @Override

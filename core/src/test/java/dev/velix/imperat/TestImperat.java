@@ -2,8 +2,8 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.PermissionResolver;
 
@@ -44,19 +44,7 @@ public final class TestImperat extends BaseImperat<TestSender> {
     public Object getPlatform() {
         return null;
     }
-
-    /**
-     * Creates an instance of {@link CommandHelp}
-     *
-     * @param command       the command
-     * @param context       the context
-     * @param detectedUsage the usage
-     * @return {@link CommandHelp} for the command usage used in a certain context
-     */
-    @Override
-    public CommandHelp<TestSender> createCommandHelp(Command<TestSender> command, Context<TestSender> context, CommandUsage<TestSender> detectedUsage) {
-        return null;
-    }
+    
 
     /**
      *
@@ -64,5 +52,20 @@ public final class TestImperat extends BaseImperat<TestSender> {
     @Override
     public void shutdownPlatform() {
 
+    }
+    
+    /**
+     * Creates an instance of {@link CommandHelp}
+     *
+     * @param command the command
+     * @param context the context
+     * @return {@link CommandHelp} for the command usage used in a certain context
+     */
+    @Override
+    public CommandHelp<TestSender> createCommandHelp(
+            Command<TestSender> command,
+            Context<TestSender> context
+    ) {
+        return null;
     }
 }

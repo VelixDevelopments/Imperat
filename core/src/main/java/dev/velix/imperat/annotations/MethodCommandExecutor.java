@@ -1,8 +1,8 @@
 package dev.velix.imperat.annotations;
 
-import dev.velix.imperat.CommandDebugger;
+import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;

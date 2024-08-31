@@ -1,6 +1,6 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.CommandDebugger;
+import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;

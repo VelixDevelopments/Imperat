@@ -1,6 +1,9 @@
 package dev.velix.imperat;
 
 
+import dev.velix.imperat.annotations.AnnotationFactory;
+import dev.velix.imperat.annotations.types.Description;
+import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -8,6 +11,7 @@ import dev.velix.imperat.examples.BanCommand;
 import dev.velix.imperat.examples.ExampleCommand;
 import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
+import dev.velix.imperat.examples.custom_annotations.MyCommand;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -22,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
@@ -99,14 +104,16 @@ public final class Test extends JavaPlugin implements Listener {
 		});*/
 		
 		
-		/*dispatcher.registerAnnotationReplacer(MyCustomAnnotation.class, (annotation)-> {
-			var cmdAnn = AnnotationFactory.create(Command.class, "value" , new String[]{"group", "rank"});
-			var permission = AnnotationFactory.create(Permission.class, "value", "command.group");
-			var desc = AnnotationFactory.create(Description.class, "value",
-							"Main command for managing groups/ranks");
-			
-			return List.of(cmdAnn, permission, desc);
-		});*/
+        dispatcher.registerAnnotationReplacer(MyCommand.class, (annotation)-> {
+          var cmd = AnnotationFactory.create(
+                  dev.velix.imperat.annotations.types.Command.class,
+                  "value" , new String[]{"name", "alias"});
+          var permission = AnnotationFactory.create(Permission.class, "value", "command.group");
+          var desc = AnnotationFactory.create(Description.class, "value",
+                  "Main command for managing groups/ranks");
+          
+          return List.of(cmd, permission, desc);
+        });
 
         dispatcher.registerContextResolver(Guild.class, new GuildContextResolver());
 

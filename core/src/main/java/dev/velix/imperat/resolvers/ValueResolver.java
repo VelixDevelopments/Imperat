@@ -1,6 +1,6 @@
 package dev.velix.imperat.resolvers;
 
-import dev.velix.imperat.Source;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.internal.sur.Pivot;
