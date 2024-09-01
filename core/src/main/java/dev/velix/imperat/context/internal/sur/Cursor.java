@@ -38,17 +38,6 @@ public final class Cursor {
         return target.canContinue(this, parameters.size(), queue.size());
     }
 
-    public @Nullable CommandParameter peekParameter(List<CommandParameter> parameters) {
-        return parameters.get(this.parameter);
-    }
-
-    public @Nullable String peekRaw(ArgumentQueue raws) {
-        try {
-            return raws.get(raw);
-        } catch (Exception ex) {
-            return null;
-        }
-    }
 
     public boolean isLast(ShiftTarget shiftTarget, int maxParams, int maxRaws) {
         if (shiftTarget == ShiftTarget.PARAMETER_ONLY)
@@ -61,6 +50,19 @@ public final class Cursor {
 
     public boolean isLast(ShiftTarget shiftTarget, List<CommandParameter> params, ArgumentQueue raws) {
         return isLast(shiftTarget, params.size(), raws.size());
+    }
+    
+    
+    public @Nullable CommandParameter peekParameter(List<CommandParameter> parameters) {
+        return parameters.get(this.parameter);
+    }
+    
+    public @Nullable String peekRaw(ArgumentQueue raws) {
+        try {
+            return raws.get(raw);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     public @Nullable String nextRaw(ArgumentQueue queue) {
