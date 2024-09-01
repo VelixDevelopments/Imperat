@@ -26,7 +26,7 @@ public final class SmartUsageResolve<C> {
 
     private final CommandUsage<C> usage;
 
-    private final Pivot pivot = new Pivot(0, 0);
+    private final Cursor cursor = new Cursor(0, 0);
 
     SmartUsageResolve(Command<C> command,
                       CommandUsage<C> usage) {
@@ -53,16 +53,16 @@ public final class SmartUsageResolve<C> {
                 .stream().filter((param) -> !param.isFlag())
                 .count();
 
-        while (pivot.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
-            CommandParameter currentParameter = pivot.peekParameter(parameterList);
+        while (cursor.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
+            CommandParameter currentParameter = cursor.peekParameter(parameterList);
             assert currentParameter != null;
 
-            String currentRaw = pivot.peekRaw(raws);
+            String currentRaw = cursor.peekRaw(raws);
             //CommandDebugger.debug("Current raw= '%s' at %s" , currentRaw, position.raw);
             if (currentRaw == null) {
                 //CommandDebugger.debug("Filling empty optional args");
-                for (int i = pivot.parameter; i < parameterList.size(); i++) {
-                    final CommandParameter optionalEmptyParameter = pivot.peekParameter(parameterList);
+                for (int i = cursor.parameter; i < parameterList.size(); i++) {
+                    final CommandParameter optionalEmptyParameter = cursor.peekParameter(parameterList);
                     assert optionalEmptyParameter != null;
                     //debug("Parameter at %s = %s", i, parameter.format(command));
                     if (!optionalEmptyParameter.isOptional()) {
@@ -86,9 +86,9 @@ public final class SmartUsageResolve<C> {
 
                         context.resolveFlag(null, null, value, flag);
                     } else {
-                        context.resolveArgument(command, null, pivot.parameter, optionalEmptyParameter, getDefaultValue(context, optionalEmptyParameter));
+                        context.resolveArgument(command, null, cursor.parameter, optionalEmptyParameter, getDefaultValue(context, optionalEmptyParameter));
                     }
-                    pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+                    cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                 }
                 //System.out.println("Closed at position= " + position);
                 break;
@@ -104,8 +104,8 @@ public final class SmartUsageResolve<C> {
                     context.resolveFlag(currentRaw, null, true, flag);
                 } else {
                     //shifting again to get the expected value
-                    pivot.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
-                    String flagValueInput = pivot.peekRaw(raws);
+                    cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
+                    String flagValueInput = cursor.peekRaw(raws);
                     Object flagDefaultValue = getDefaultValue(context, currentParameter);
                     if (flagValueInput == null) {
 
@@ -115,7 +115,7 @@ public final class SmartUsageResolve<C> {
                             );
 
                         context.resolveFlag(currentRaw, null, flagDefaultValue, flag);
-                        pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+                        cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                         continue;
                     }
 
@@ -131,7 +131,7 @@ public final class SmartUsageResolve<C> {
                     );
                 }
 
-                pivot.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+                cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
                 continue;
             } else if (flag == null && currentParameter.isFlag()) {
                 assert currentParameter.isFlag();
@@ -143,7 +143,7 @@ public final class SmartUsageResolve<C> {
                         currentParameter.asFlagParameter().getFlag()
                 );
 
-                pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+                cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                 continue;
             }
 
@@ -160,7 +160,7 @@ public final class SmartUsageResolve<C> {
                     throw new ContextResolveException("Unknown sub-command '" + currentRaw + "'");
                 }
 
-                pivot.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+                cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
                 continue;
             }
 
@@ -198,9 +198,9 @@ public final class SmartUsageResolve<C> {
         if (currentParameter.isGreedy()) {
 
             StringBuilder builder = new StringBuilder();
-            for (int i = pivot.raw; i < raws.size(); i++) {
-                builder.append(pivot.peekRaw(raws)).append(' ');
-                pivot.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
+            for (int i = cursor.raw; i < raws.size(); i++) {
+                builder.append(cursor.peekRaw(raws)).append(' ');
+                cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
             }
 
             if (builder.isEmpty()) {
@@ -209,13 +209,13 @@ public final class SmartUsageResolve<C> {
             }
             resolveResult = builder.toString();
 
-            pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+            cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
         } else {
             resolveResult = this.getResult(resolver, context, currentRaw, currentParameter);
-            pivot.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+            cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         }
         //CommandDebugger.debug("Resolving required param '%s' with value '%s'", currentParameter.format(), resolveResult);
-        context.resolveArgument(command, currentRaw, pivot.parameter,
+        context.resolveArgument(command, currentRaw, cursor.parameter,
                 currentParameter, resolveResult);
     }
 
@@ -233,34 +233,34 @@ public final class SmartUsageResolve<C> {
 
             Object resolveResult = getResult(resolver, context, currentRaw, currentParameter);
 
-            if (!pivot.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
+            if (!cursor.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
 
                 if (diff > 1) {
-                    CommandParameter nextParam = getNextParam(pivot.parameter + 1, parameterList, (param) -> !param.isOptional());
+                    CommandParameter nextParam = getNextParam(cursor.parameter + 1, parameterList, (param) -> !param.isOptional());
                     if (nextParam == null) {
-                        pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+                        cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                         return;
                     }
-                    context.resolveArgument(command, currentRaw, pivot.parameter,
+                    context.resolveArgument(command, currentRaw, cursor.parameter,
                             currentParameter, getDefaultValue(context, currentParameter));
 
-                    context.resolveArgument(command, currentRaw, pivot.parameter + 1,
+                    context.resolveArgument(command, currentRaw, cursor.parameter + 1,
                             nextParam, resolveResult);
 
-                    pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+                    cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                 } else {
-                    context.resolveArgument(command, currentRaw, pivot.parameter,
+                    context.resolveArgument(command, currentRaw, cursor.parameter,
                             currentParameter, resolveResult);
-                    pivot.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+                    cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
                 }
 
             } else {
 
-                context.resolveArgument(command, currentRaw, pivot.parameter,
+                context.resolveArgument(command, currentRaw, cursor.parameter,
                         currentParameter, getDefaultValue(context, currentParameter));
 
                 //shifting the parameters && raw again, so it can start after the new shift
-                pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+                cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
             }
             return;
         }
@@ -269,9 +269,9 @@ public final class SmartUsageResolve<C> {
         if (currentParameter.isGreedy()) {
 
             StringBuilder builder = new StringBuilder();
-            for (int i = pivot.raw; i < raws.size(); i++) {
-                builder.append(pivot.peekRaw(raws)).append(' ');
-                pivot.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
+            for (int i = cursor.raw; i < raws.size(); i++) {
+                builder.append(cursor.peekRaw(raws)).append(' ');
+                cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
             }
 
             if (builder.isEmpty()) {
@@ -280,19 +280,19 @@ public final class SmartUsageResolve<C> {
             }
             resolveResult = builder.toString();
 
-            pivot.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-            context.resolveArgument(command, currentRaw, pivot.parameter,
+            cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+            context.resolveArgument(command, currentRaw, cursor.parameter,
                     currentParameter, resolveResult);
         } else {
             resolveResult = getResult(resolver, context, currentRaw, currentParameter);
-            context.resolveArgument(command, currentRaw, pivot.parameter, currentParameter, resolveResult);
-            pivot.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+            context.resolveArgument(command, currentRaw, cursor.parameter, currentParameter, resolveResult);
+            cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         }
 
     }
 
     private <T> T getResult(ValueResolver<C, T> resolver, Context<C> context, String raw, CommandParameter currentParameter) throws CommandException {
-        return resolver.resolve(context.getSource(), context, raw, pivot, currentParameter);
+        return resolver.resolve(context.getSource(), context, raw, cursor, currentParameter);
     }
 
 

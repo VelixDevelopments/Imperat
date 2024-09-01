@@ -12,7 +12,7 @@ import java.util.function.IntUnaryOperator;
 
 @Data
 @AllArgsConstructor
-public final class Pivot {
+public final class Cursor {
 
     int parameter, raw;
 

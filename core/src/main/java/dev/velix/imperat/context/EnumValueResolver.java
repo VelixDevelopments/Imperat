@@ -1,7 +1,7 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.internal.sur.Pivot;
+import dev.velix.imperat.context.internal.sur.Cursor;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.resolvers.ValueResolver;
@@ -20,7 +20,7 @@ public final class EnumValueResolver<C, E extends Enum<E>> implements ValueResol
     public E resolve(Source<C> source,
                      Context<C> context,
                      String raw,
-                     Pivot pivot,
+                     Cursor cursor,
                      CommandParameter parameter
     ) throws CommandException {
         try {

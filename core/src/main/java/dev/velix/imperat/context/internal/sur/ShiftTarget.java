@@ -15,7 +15,7 @@ public enum ShiftTarget {
         this.canContinueCheck = canContinueCheck;
     }
 
-    boolean canContinue(Pivot pivot, int maxParam, int maxRaw) {
-        return canContinueCheck.canContinue(pivot, maxParam, maxRaw);
+    boolean canContinue(Cursor cursor, int maxParam, int maxRaw) {
+        return canContinueCheck.canContinue(cursor, maxParam, maxRaw);
     }
 }

@@ -3,7 +3,7 @@ package dev.velix.imperat.test;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.internal.sur.Pivot;
+import dev.velix.imperat.context.internal.sur.Cursor;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.resolvers.BukkitValueResolver;
@@ -17,7 +17,7 @@ public final class GroupValueResolver implements BukkitValueResolver<Group> {
             Source<CommandSender> source,
             Context<CommandSender> context,
             String raw,
-            Pivot pivot,
+            Cursor cursor,
             CommandParameter parameter
     ) throws CommandException {
 
