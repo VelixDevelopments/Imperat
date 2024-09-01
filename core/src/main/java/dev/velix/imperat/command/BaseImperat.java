@@ -58,8 +58,8 @@ public abstract class BaseImperat<C> implements Imperat<C> {
 
     private final SuggestionResolverRegistry<C> suggestionResolverRegistry;
 
-    private final List<CommandPreProcessor<C>> preProcessors = new ArrayList<>();
-    private final List<CommandPostProcessor<C>> postProcessors = new ArrayList<>();
+    private final List<CommandPreProcessor<C>> globalPreProcessors = new ArrayList<>();
+    private final List<CommandPostProcessor<C>> globalPostProcessors = new ArrayList<>();
     
     private @NotNull UsageVerifier<C> verifier;
 
@@ -85,8 +85,8 @@ public abstract class BaseImperat<C> implements Imperat<C> {
     }
     
     private void registerProcessors() {
-        registerPreProcessor(new UsagePermissionProcessor<>());
-        registerPreProcessor(new UsageCooldownProcessor<>());
+        registerGlobalPreProcessor(new UsagePermissionProcessor<>());
+        registerGlobalPreProcessor(new UsageCooldownProcessor<>());
         //TODO register creative built-in processors in the future
     }
 
@@ -393,9 +393,9 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @param preProcessor the pre-processor to register
      */
     @Override
-    public void registerPreProcessor(CommandPreProcessor<C> preProcessor) {
+    public void registerGlobalPreProcessor(CommandPreProcessor<C> preProcessor) {
         Preconditions.notNull(preProcessor, "Pre-processor cannot be null");
-        preProcessors.add(preProcessor);
+        globalPreProcessors.add(preProcessor);
     }
     
     /**
@@ -404,9 +404,9 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @param postProcessor the post-processor to register
      */
     @Override
-    public void registerPostProcessor(CommandPostProcessor<C> postProcessor) {
+    public void registerGlobalPostProcessor(CommandPostProcessor<C> postProcessor) {
         Preconditions.notNull(postProcessor, "Post-processor cannot be null");
-        postProcessors.add(postProcessor);
+        globalPostProcessors.add(postProcessor);
     }
     
     /**
@@ -416,9 +416,9 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @param preProcessor the pre-processor to register
      */
     @Override
-    public void registerPreProcessor(int priority, CommandPreProcessor<C> preProcessor) {
+    public void registerGlobalPreProcessor(int priority, CommandPreProcessor<C> preProcessor) {
         Preconditions.notNull(preProcessor, "Pre-processor cannot be null");
-        preProcessors.add(priority, preProcessor);
+        globalPreProcessors.add(priority, preProcessor);
     }
     
     /**
@@ -428,9 +428,9 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @param postProcessor the post-processor to register
      */
     @Override
-    public void registerPostProcessor(int priority, CommandPostProcessor<C> postProcessor) {
+    public void registerGlobalPostProcessor(int priority, CommandPostProcessor<C> postProcessor) {
         Preconditions.notNull(postProcessor, "Post-processor cannot be null");
-        postProcessors.add(priority, postProcessor);
+        globalPostProcessors.add(priority, postProcessor);
     }
     
     /**
@@ -553,12 +553,20 @@ public abstract class BaseImperat<C> implements Imperat<C> {
                               Context<C> context,
                               final CommandUsage<C> usage) throws CommandException {
         
+        //global pre-processing
         preProcess(command, context, usage);
+        
+        //per command pre-processing
+        command.preProcess(this, context, usage);
         
         ResolvedContext<C> resolvedContext = contextFactory.createResolvedContext(this, command, context, usage);
         resolvedContext.resolve();
         
+        //global post-processing
         postProcess(command, resolvedContext, usage);
+        
+        //per command post-processing
+        command.postProcess(this, resolvedContext, usage);
         
         usage.execute(this, source, resolvedContext);
     }
@@ -569,7 +577,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
             @NotNull Context<C> context,
             @NotNull CommandUsage<C> usage
     ) {
-        for(CommandPreProcessor<C> preProcessor : preProcessors) {
+        for(CommandPreProcessor<C> preProcessor : globalPreProcessors) {
             try {
                 preProcessor.process(this, command, context, usage);
             }catch (Throwable ex) {
@@ -589,7 +597,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
             @NotNull ResolvedContext<C> context,
             @NotNull CommandUsage<C> usage
     ) {
-        for(CommandPostProcessor<C> postProcessor : postProcessors) {
+        for(CommandPostProcessor<C> postProcessor : globalPostProcessors) {
             try {
                 postProcessor.process(this, command, context, usage);
             }catch (Throwable ex) {

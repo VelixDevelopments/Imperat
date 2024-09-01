@@ -3,8 +3,12 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
+import dev.velix.imperat.command.processors.CommandPostProcessor;
+import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
@@ -33,11 +37,14 @@ final class CommandImpl<C> implements Command<C> {
 
     private CommandUsage<C> defaultUsage;
 
-
+    private @Nullable CommandPreProcessor<C> preProcessor;
+    private @Nullable CommandPostProcessor<C> postProcessor;
+    
     private final Command<C> parent;
     private final Map<String, Command<C>> children = new HashMap<>();
-    private final AutoCompleter<C> autoCompleter;
     private final Set<CommandUsage<C>> usages = new LinkedHashSet<>();
+    
+    private final AutoCompleter<C> autoCompleter;
 
 
     CommandImpl(String name) {
@@ -121,7 +128,55 @@ final class CommandImpl<C> implements Command<C> {
     public void setPosition(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
-
+    
+    /**
+     * Sets a pre-processor for the command
+     *
+     * @param preProcessor the pre-processor for the command
+     */
+    @Override
+    public void setPreProcessor(@NotNull CommandPreProcessor<C> preProcessor) {
+        this.preProcessor = preProcessor;
+    }
+    
+    /**
+     * Executes the pre-processing instructions in {@link CommandPreProcessor}
+     *
+     * @param api     the api
+     * @param context the context
+     * @param usage   the usage detected being used
+     */
+    @Override
+    public void preProcess(@NotNull Imperat<C> api, @NotNull Context<C> context, @NotNull CommandUsage<C> usage) throws CommandException {
+        if(this.preProcessor != null){
+            preProcessor.process(api, this, context, usage);
+        }
+    }
+    
+    /**
+     * Sets a post-processor for the command
+     *
+     * @param postProcessor the post-processor for the command
+     */
+    @Override
+    public void setPostProcessor(@NotNull CommandPostProcessor<C> postProcessor) {
+        this.postProcessor = postProcessor;
+    }
+    
+    /**
+     * Executes the post-processing instructions in {@link CommandPostProcessor}
+     *
+     * @param api     the api
+     * @param context the context
+     * @param usage   the usage detected being used
+     */
+    @Override
+    public void postProcess(@NotNull Imperat<C> api, @NotNull ResolvedContext<C> context, @NotNull CommandUsage<C> usage) throws CommandException {
+        if(this.postProcessor != null) {
+            this.postProcessor.process(api, this, context, usage);
+        }
+    }
+    
     @Override
     public Type getGenericType() {
         return getType();
@@ -141,7 +196,7 @@ final class CommandImpl<C> implements Command<C> {
      * Fetches the suggestion resolver linked to this
      * command parameter.
      *
-     * @return the {@link SuggestionResolver} for resolving suggestion
+     * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Override
     @SuppressWarnings("unchecked")

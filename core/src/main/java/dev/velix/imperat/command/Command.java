@@ -2,7 +2,12 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.processors.CommandPostProcessor;
+import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.ListUtils;
@@ -10,7 +15,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -100,6 +104,34 @@ public interface Command<C> extends CommandParameter {
     default boolean hasName(String name) {
         return this.getName().equalsIgnoreCase(name) || ListUtils.contains(this.getAliases(), name);
     }
+    
+    /**
+     * Sets a pre-processor for the command
+     * @param preProcessor the pre-processor for the command
+     */
+    void setPreProcessor(@NotNull CommandPreProcessor<C> preProcessor);
+    
+    /**
+     * Executes the pre-processing instructions in {@link CommandPreProcessor}
+     * @param api the api
+     * @param context the context
+     * @param usage the usage detected being used
+     */
+    void preProcess(@NotNull Imperat<C> api, @NotNull Context<C> context, @NotNull CommandUsage<C> usage) throws CommandException;
+    
+    /**
+     * Sets a post-processor for the command
+     * @param postProcessor the post-processor for the command
+     */
+    void setPostProcessor(@NotNull CommandPostProcessor<C> postProcessor);
+    
+    /**
+     * Executes the post-processing instructions in {@link CommandPostProcessor}
+     * @param api the api
+     * @param context the context
+     * @param usage the usage detected being used
+     */
+    void postProcess(@NotNull Imperat<C> api, @NotNull ResolvedContext<C> context, @NotNull CommandUsage<C> usage) throws CommandException;
 
     /**
      * @return the default usage of the command
@@ -140,7 +172,7 @@ public interface Command<C> extends CommandParameter {
      * that handles all auto-completes for this command
      */
     AutoCompleter<C> getAutoCompleter();
-
+    
     /**
      * @return the parent command of this sub-command
      */

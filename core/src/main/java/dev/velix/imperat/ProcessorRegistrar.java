@@ -9,13 +9,13 @@ public sealed interface ProcessorRegistrar<C> permits Imperat {
 	 * Registers a command pre-processor
 	 * @param preProcessor the pre-processor to register
 	 */
-	void registerPreProcessor(CommandPreProcessor<C> preProcessor);
+	void registerGlobalPreProcessor(CommandPreProcessor<C> preProcessor);
 	
 	/**
 	 * Registers a command post-processor
 	 * @param postProcessor the post-processor to register
 	 */
-	void registerPostProcessor(CommandPostProcessor<C> postProcessor);
+	void registerGlobalPostProcessor(CommandPostProcessor<C> postProcessor);
 	
 	
 	/**
@@ -23,13 +23,13 @@ public sealed interface ProcessorRegistrar<C> permits Imperat {
 	 * @param priority the priority for the processor
 	 * @param preProcessor the pre-processor to register
 	 */
-	void registerPreProcessor(int priority, CommandPreProcessor<C> preProcessor);
+	void registerGlobalPreProcessor(int priority, CommandPreProcessor<C> preProcessor);
 	
 	/**
 	 * Registers a command post-processor
 	 * @param priority the priority for the processor
 	 * @param postProcessor the post-processor to register
 	 */
-	void registerPostProcessor(int priority, CommandPostProcessor<C> postProcessor);
+	void registerGlobalPostProcessor(int priority, CommandPostProcessor<C> postProcessor);
 	
 }
