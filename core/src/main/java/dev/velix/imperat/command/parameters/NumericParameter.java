@@ -1,6 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
-import dev.velix.imperat.command.numeric_comparators.NumericComparator;
+import dev.velix.imperat.command.NumericComparator;
 import org.jetbrains.annotations.Nullable;
 
 /**

@@ -1,4 +1,4 @@
-package dev.velix.imperat.command.numeric_comparators;
+package dev.velix.imperat.command;
 
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.util.Preconditions;
