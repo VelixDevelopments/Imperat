@@ -3,6 +3,7 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.util.CommandDebugger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -238,10 +239,68 @@ final class CommandImpl<C> implements Command<C> {
     public void addSubCommand(Command<C> command) {
         children.put(command.getName(), command);
     }
-
+    
+    /**
+     * Creates and adds a new sub-command (if it doesn't exist) then add
+     * the {@link CommandUsage} to the sub-command
+     *
+     * @param subCommand     the sub-command's unique name
+     * @param aliases        of the subcommand
+     * @param usage          the usage
+     * @param attachDirectly whether the sub command's usage will be attached to
+     *                       the main/default usage of the command directly or not
+     *                       <p>
+     *                       if you have the command's default usage '/group' for example
+     *                       and then you add the usage with attachDirectly being true, the usage
+     *                       added will be in the form of "/command your subcommand param1 param2"
+     *                       However, if you set attachDirectly to false, this will merge all the command's usages
+     *                       automatically with the subcommand's usage, so if your command has a usage of '/command param1'
+     *                       then the final usage will be : "/command param1 your subcommand param2, param3"
+     *
+     *                       </p>
+     */
+    @Override
+    public void addSubCommandUsage(
+            String subCommand,
+            List<String> aliases,
+            CommandUsage<C> usage,
+            boolean attachDirectly
+    ) {
+        Command<C> mapped = getSubCommand(subCommand.toLowerCase());
+        if (mapped != null) {
+            throw new UnsupportedOperationException("You can't add an already existing sub-command '" + subCommand + "' to command '" + this.getName() + "'");
+        }
+        
+        int position;
+        if (attachDirectly) {
+            position = getPosition() + 1;
+        } else {
+            CommandUsage<C> main = getMainUsage();
+            position = this.getPosition() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
+        }
+        
+        //creating subcommand to modify
+        Command<C> subCmd = Command.createCommand(this, position, subCommand);
+        subCmd.addAliases(aliases);
+        subCmd.addUsage(usage);
+        //subCmd.setPosition(position);
+        
+        //adding subcommand
+        addSubCommand(subCmd);
+        
+        final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
+        final CommandUsage<C> combo = prime.mergeWithCommand(subCmd, usage);
+        //adding the merged command usage
+        
+        CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+        this.addUsage(
+                combo
+        );
+    }
+    
     /**
      * @param name the name of the wanted sub-command
-     * @return the sub-command of specific name directly from
+     * @return the sub-command of a specific name directly from
      * this instance of a command, meaning that
      * it won't go deeply in search for sub-command
      */
@@ -280,7 +339,7 @@ final class CommandImpl<C> implements Command<C> {
     }
 
     /**
-     * if true , it will ignore permission checks
+     * if true, it will ignore permission checks
      * on the auto-completion of command and sub commands
      * <p>
      * otherwise, it will perform permission checks and

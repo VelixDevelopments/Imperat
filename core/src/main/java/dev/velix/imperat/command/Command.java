@@ -1,6 +1,5 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
@@ -179,42 +178,10 @@ public interface Command<C> extends CommandParameter {
      *                       </p>
      */
     //TODO create subcommand builder
-    default void addSubCommandUsage(String subCommand,
+    void addSubCommandUsage(String subCommand,
                                     List<String> aliases,
                                     CommandUsage<C> usage,
-                                    boolean attachDirectly) {
-
-        Command<C> mapped = getSubCommand(subCommand.toLowerCase());
-        if (mapped != null) {
-            throw new UnsupportedOperationException("You can't add an already existing sub-command '" + subCommand + "' to command '" + this.getName() + "'");
-        }
-
-        int position;
-        if (attachDirectly) {
-            position = getPosition() + 1;
-        } else {
-            CommandUsage<C> main = getMainUsage();
-            position = this.getPosition() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
-        }
-
-        //creating subcommand to modify
-        Command<C> subCmd = Command.createCommand(this, position, subCommand);
-        subCmd.addAliases(aliases);
-        subCmd.addUsage(usage);
-        //subCmd.setPosition(position);
-
-        //adding subcommand
-        addSubCommand(subCmd);
-
-        final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
-        final CommandUsage<C> combo = prime.mergeWithCommand(subCmd, usage);
-        //adding the merged command usage
-
-        CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
-        this.addUsage(
-                combo
-        );
-    }
+                                    boolean attachDirectly);
 
     default void addSubCommandUsage(String subCommand,
                                     List<String> aliases,
