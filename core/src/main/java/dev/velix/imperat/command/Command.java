@@ -3,10 +3,7 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpExecution;
-import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.ListUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -303,33 +300,14 @@ public interface Command<C> extends CommandParameter {
 
     /**
      * Adds help as a sub-command to the command chain
+     * @param dispatcher the api
+     * @param params the parameters of the help command
+     * @param helpExecution the help execution
      */
-    @SuppressWarnings("unchecked")
-    default void addHelpCommand(Imperat<C> dispatcher,
+    void addHelpCommand(Imperat<C> dispatcher,
                                 List<CommandParameter> params,
-                                HelpExecution<C> helpExecution) {
-        if (params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
-            params.add(
-                    CommandParameter.optionalInt("page")
-                            .description("help-page")
-                            .defaultValue(1)
-                            .build()
-            );
-        }
-
-        addSubCommandUsage(
-                "help",
-                CommandUsage.<C>builder()
-                        .parameters(params)
-                        .execute((sender, context) -> {
-                            //CommandDebugger.debug("Executing help !");
-                            Integer page = context.getArgument("page");
-                            CommandHelp<C> help = dispatcher.createCommandHelp(this, (Context<C>) context);
-                            helpExecution.help(sender, (Context<C>) context, help, page);
-                        }).buildAsHelp(),
-                true
-        );
-    }
+                                HelpExecution<C> helpExecution);
+    
 
     static <C> Command<C> createCommand(String name) {
         return createCommand(null, name);
