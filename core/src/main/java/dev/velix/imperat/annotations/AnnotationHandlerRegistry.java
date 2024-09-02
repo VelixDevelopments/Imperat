@@ -1,5 +1,6 @@
 package dev.velix.imperat.annotations;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.MethodParameterElement;
@@ -239,7 +240,7 @@ final class AnnotationHandlerRegistry<C> extends
 
             if (subCommand != null || help) {
                 if (mainUsage != null && mainUsage
-                        .hasParameter((param) -> param.equals(commandParameter))) {
+                        .hasParameters((param) -> param.equals(commandParameter))) {
                     continue;
                 }
             }
@@ -339,7 +340,7 @@ final class AnnotationHandlerRegistry<C> extends
                         ), element
                 );
 
-        if (TypeUtility.isNumericType(param.getType())
+        if (TypeUtility.isNumericType(TypeToken.of(param.getType()))
                 && element.isAnnotationPresent(Range.class)) {
             Range annotation = element.getAnnotation(Range.class);
             param = NumericParameterDecorator.decorate(

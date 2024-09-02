@@ -17,7 +17,7 @@ public interface AutoCompleter<C> {
     /**
      * @return The auto-completion command
      */
-    Command<C> getCommand();
+    Command<C> command();
 
     /**
      * Autocompletes an argument from the whole position of the

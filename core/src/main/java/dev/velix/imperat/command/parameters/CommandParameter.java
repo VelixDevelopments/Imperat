@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
@@ -40,14 +41,8 @@ public interface CommandParameter {
     /**
      * @return the value type of this parameter
      */
-    Class<?> getType();
-
-    /**
-     * Get GenericType
-     *
-     * @return the full type of parameter if it has generic types
-     */
-    Type getGenericType();
+    Type getType();
+    
     
     /**
      * The permission for this parameter
@@ -104,7 +99,7 @@ public interface CommandParameter {
      *
      * @return the parameter as a command
      */
-    Command<?> asCommand();
+    <C> Command<C> asCommand();
 
     /**
      * @return Whether this usage parameter has been constructed
@@ -240,7 +235,7 @@ public interface CommandParameter {
     }
     
     default boolean isNumeric() {
-        return TypeUtility.isNumericType(this.getType());
+        return TypeUtility.isNumericType(TypeToken.of(this.getType()));
     }
     
     default NumericParameter asNumeric() {

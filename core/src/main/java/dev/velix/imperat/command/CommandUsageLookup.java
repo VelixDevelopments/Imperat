@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @ApiStatus.Internal
+@Deprecated(forRemoval = true)
 public final class CommandUsageLookup<C> {
 
     private final Imperat<C> dispatcher;
@@ -21,7 +22,7 @@ public final class CommandUsageLookup<C> {
                        Command<C> command) {
         this.dispatcher = dispatcher;
         this.usages = new ArrayList<>(command.getUsages());
-        usages.sort(UsageComparator.getInstance());
+        //usages.sort(UsageComparator.getInstance());
     }
 
 
@@ -113,9 +114,14 @@ public final class CommandUsageLookup<C> {
     }
 
     @Data
-    public final class SearchResult {
-        private final CommandUsage<C> commandUsage;
+    public static final class SearchResult {
+        
+        private final CommandUsage<?> commandUsage;
         private final Result result;
+        
+        public static SearchResult of(CommandUsage<?> usage, Result result) {
+            return new SearchResult(usage, result);
+        }
     }
 
     public enum Result {

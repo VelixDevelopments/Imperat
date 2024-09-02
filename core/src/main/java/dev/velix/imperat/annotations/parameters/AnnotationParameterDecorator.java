@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     private final MethodParameterElement element;
 
     AnnotationParameterDecorator(CommandParameter parameter, MethodParameterElement element) {
-        super(parameter.getName(), parameter.getType(), parameter.getPermission(),
+        super(parameter.getName(), element.getElement().getParameterizedType(), parameter.getPermission(),
                 parameter.getDescription(), parameter.isOptional(),
                 parameter.isFlag(), parameter.isGreedy(), parameter.getDefaultValueSupplier(),
                 parameter.getSuggestionResolver());
@@ -72,11 +71,6 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     @Override
     public FlagParameter asFlagParameter() {
         return parameter.asFlagParameter();
-    }
-
-    @Override
-    public Type getGenericType() {
-        return element.getElement().getParameterizedType();
     }
 
 }

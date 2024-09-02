@@ -152,7 +152,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         if (factory == null) {
             var cr = dispatcher.getContextResolver(type);
             if (cr == null) return null;
-            return cr.resolve(this, null);
+            return (T) cr.resolve(this, null);
         }
         ContextResolver<C, T> factoryCr = (ContextResolver<C, T>) factory.create(null);
         return factoryCr == null ? null : factoryCr.resolve(this, null);

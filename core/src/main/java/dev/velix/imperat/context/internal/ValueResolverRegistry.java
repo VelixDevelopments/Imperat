@@ -7,10 +7,11 @@ import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
 @ApiStatus.Internal
-public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueResolver<C, ?>> {
+public final class ValueResolverRegistry<C> extends Registry<Type, ValueResolver<C, ?>> {
 
 
     private ValueResolverRegistry() {
@@ -58,8 +59,8 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
         );
     }
 
-    public <T> void registerResolver(Class<T> clazz, ValueResolver<C, T> resolver) {
-        setData(clazz, resolver);
+    public <T> void registerResolver(Type type, ValueResolver<C, T> resolver) {
+        setData(type, resolver);
     }
 
     public <E extends Enum<E>> void registerEnumResolver(Class<E> enumClass) {
@@ -67,7 +68,7 @@ public final class ValueResolverRegistry<C> extends Registry<Class<?>, ValueReso
     }
 
     @SuppressWarnings("unchecked")
-    public <T> ValueResolver<C, T> getResolver(Class<T> type) {
+    public <T> ValueResolver<C, T> getResolver(Type type) {
         return (ValueResolver<C, T>) getData(TypeUtility.primitiveToBoxed(type)).orElse(null);
     }
 

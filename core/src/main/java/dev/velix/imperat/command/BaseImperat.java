@@ -5,6 +5,8 @@ import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
 import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
 import dev.velix.imperat.exceptions.ExecutionFailure;
+import dev.velix.imperat.tree.Traverse;
+import dev.velix.imperat.tree.TraverseResult;
 import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.util.CommandExceptionHandler;
 import dev.velix.imperat.Imperat;
@@ -38,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.*;
 
 @ApiStatus.Internal
@@ -224,7 +227,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * a context-resolver
      */
     @Override
-    public boolean hasContextResolver(Class<?> type) {
+    public boolean hasContextResolver(Type type) {
         return getContextResolver(type) != null;
     }
 
@@ -254,7 +257,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @return the context resolver
      */
     @Override
-    public <T> @Nullable ContextResolver<C, T> getContextResolver(Class<T> resolvingContextType) {
+    public <T> @Nullable ContextResolver<C, T> getContextResolver(Type resolvingContextType) {
         return contextResolverRegistry.getResolver(resolvingContextType);
     }
 
@@ -265,7 +268,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @param resolver the resolver for this value
      */
     @Override
-    public <T> void registerContextResolver(Class<T> type,
+    public <T> void registerContextResolver(Type type,
                                             @NotNull ContextResolver<C, T> resolver) {
         contextResolverRegistry.registerResolver(type, resolver);
     }
@@ -278,7 +281,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @param resolver the resolver for this value
      */
     @Override
-    public <T> void registerValueResolver(Class<T> type, @NotNull ValueResolver<C, T> resolver) {
+    public <T> void registerValueResolver(Type type, @NotNull ValueResolver<C, T> resolver) {
         valueResolverRegistry.registerResolver(type, resolver);
     }
 
@@ -297,7 +300,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
      * @return the context resolver of a certain type
      */
     @Override
-    public @Nullable <T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType) {
+    public @Nullable <T> ValueResolver<C, T> getValueResolver(Type resolvingValueType) {
         return valueResolverRegistry.getResolver(resolvingValueType);
     }
 
@@ -497,7 +500,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
     public void dispatch(C sender, String commandName, String... rawInput) {
 
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
-        //CommandDebugger.debug("Raw input = '%s'", String.join(",", rawArguments));
+        //CommandDebugger.visualize("Raw input = '%s'", String.join(",", rawArguments));
         Source<C> source = wrapSender(sender);
 
         Context<C> plainContext = getContextFactory()
@@ -527,23 +530,30 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
         }
-        
-        CommandUsageLookup<C>.SearchResult searchResult = command.lookup(this)
-                .searchUsage(context);
 
-        if ((searchResult.getCommandUsage() == null
-                && searchResult.getResult() == CommandUsageLookup.Result.FOUND_INCOMPLETE)
-                || context.getArguments().isEmpty()) {
+        if (context.getArguments().isEmpty()) {
             CommandUsage<C> defaultUsage = command.getDefaultUsage();
             defaultUsage.execute(this, source, context);
             return;
         }
+        
+        Traverse searchResult = command.traverse(context);
 
         //executing usage
-        CommandUsage<C> usage = searchResult.getCommandUsage();
+        CommandUsage<C> usage = searchResult.toUsage(command);
         
-        if (searchResult.getResult() == CommandUsageLookup.Result.FOUND_COMPLETE)
+        if (searchResult.result() == TraverseResult.COMPLETE)
             executeUsage(command, source, context, usage);
+        else if(searchResult.result() == TraverseResult.INCOMPLETE) {
+            var lastParameter = searchResult.getLastParameter();
+            if(lastParameter.isCommand()) {
+                Command<C> sub = lastParameter.asCommand();
+                CommandUsage<C> defaultUsage = sub.getDefaultUsage();
+                executeUsage(command, source, context, defaultUsage);
+            }else {
+                throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
+            }
+        }
         else
             throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
     }

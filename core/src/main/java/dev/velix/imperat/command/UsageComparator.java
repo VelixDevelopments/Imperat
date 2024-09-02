@@ -3,12 +3,13 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 
 import java.util.Comparator;
+import java.util.List;
 
-final class UsageComparator implements Comparator<CommandUsage<?>> {
+final class UsageComparator implements Comparator<List<CommandParameter>> {
 
     private static UsageComparator instance;
 
-    public static UsageComparator getInstance() {
+    static UsageComparator getInstance() {
         if (instance == null) {
             instance = new UsageComparator();
             return instance;
@@ -17,13 +18,13 @@ final class UsageComparator implements Comparator<CommandUsage<?>> {
     }
 
     @Override
-    public int compare(CommandUsage<?> firstUsage, CommandUsage<?> secondUsage) {
+    public int compare(List<CommandParameter> firstUsage, List<CommandParameter> secondUsage) {
 
-        if (firstUsage.getMaxLength() == secondUsage.getMaxLength()) {
+        if (firstUsage.size() == secondUsage.size()) {
 
-            for (int i = 0; i < firstUsage.getMaxLength(); i++) {
-                CommandParameter p1 = firstUsage.getParameter(i);
-                CommandParameter p2 = secondUsage.getParameter(i);
+            for (int i = 0; i < firstUsage.size(); i++) {
+                CommandParameter p1 = firstUsage.get(i);
+                CommandParameter p2 = secondUsage.get(i);
                 if (p1 == null || p2 == null) break;
                 if (p1.isCommand() && !p2.isCommand()) {
                     return -1;
@@ -34,6 +35,6 @@ final class UsageComparator implements Comparator<CommandUsage<?>> {
 
         }
 
-        return firstUsage.getMaxLength() - secondUsage.getMaxLength();
+        return firstUsage.size() - secondUsage.size();
     }
 }

@@ -1,5 +1,7 @@
 package dev.velix.imperat.command;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
@@ -13,14 +15,16 @@ import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.tree.CommandTree;
+import dev.velix.imperat.tree.Traverse;
 import dev.velix.imperat.util.CommandDebugger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-
-import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 final class CommandImpl<C> implements Command<C> {
@@ -33,20 +37,23 @@ final class CommandImpl<C> implements Command<C> {
 
     private boolean suppressACPermissionChecks = false;
 
-    private final List<String> aliases = new ArrayList<>();
+    private final List<String> aliases = Lists.newArrayList();
 
+    private CommandUsage<C> mainUsage = null;
     private CommandUsage<C> defaultUsage;
 
     private @Nullable CommandPreProcessor<C> preProcessor;
     private @Nullable CommandPostProcessor<C> postProcessor;
     
     private final Command<C> parent;
-    private final Map<String, Command<C>> children = new HashMap<>();
-    private final Set<CommandUsage<C>> usages = new LinkedHashSet<>();
+    private final Map<String, Command<C>> children = Maps.newHashMap();
+    
+    private final Map<List<CommandParameter>, CommandUsage<C>> usages = Maps.newTreeMap(UsageComparator.getInstance());
     
     private final AutoCompleter<C> autoCompleter;
 
-
+    private final @Nullable CommandTree<C> commandTree;
+    
     CommandImpl(String name) {
         this(null, name);
     }
@@ -60,9 +67,9 @@ final class CommandImpl<C> implements Command<C> {
         this.parent = parent;
         this.position = position;
         this.name = name;
-        setDefaultUsageExecution((source, context) -> {
-        });
+        setDefaultUsageExecution((source, context) -> {});
         this.autoCompleter = AutoCompleter.createNative(this);
+        commandTree = parent != null ? null : CommandTree.create(this);
     }
 
     /**
@@ -129,6 +136,15 @@ final class CommandImpl<C> implements Command<C> {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
     
+    @Override
+    public @NotNull Traverse traverse(Context<C> context) {
+        if(commandTree != null) {
+            return commandTree.traverse(context.getArguments());
+        }else {
+            throw new IllegalCallerException("Cannot traverse a sub command !");
+        }
+    }
+    
     /**
      * Sets a pre-processor for the command
      *
@@ -176,12 +192,6 @@ final class CommandImpl<C> implements Command<C> {
             this.postProcessor.process(api, this, context, usage);
         }
     }
-    
-    @Override
-    public Type getGenericType() {
-        return getType();
-    }
-
     /**
      * Casts the parameter to a flag parameter
      *
@@ -250,28 +260,43 @@ final class CommandImpl<C> implements Command<C> {
      */
     @Override
     public void addUsage(CommandUsage<C> usage) {
-        usages.add(usage);
+        usages.put(usage.getParameters(), usage);
+        if(mainUsage == null && usage.getMinLength() >= 1 &&
+                !usage.hasParamType(Command.class)) {
+            mainUsage = usage;
+        }
+        if(commandTree != null)
+            commandTree.parseUsage(usage);
     }
-
+    
+    @Override
+    public @Nullable CommandUsage<C> getUsage(List<CommandParameter> parameters) {
+        return usages.get(parameters);
+    }
+    
     /**
      * @return all {@link CommandUsage} that were registered
      * to this command by the user
      */
     @Override
     public Collection<? extends CommandUsage<C>> getUsages() {
-        return usages;
+        return usages.values();
     }
-
+    
+    @Override
+    public Collection<? extends CommandUsage<C>> findUsages(Predicate<CommandUsage<C>> predicate) {
+        return usages.values().stream().filter(predicate)
+                .collect(Collectors.toList());
+    }
+    
     /**
-     * @return the usage that doesn't include any subcommands , only
+     * @return the usage that doesn't include any subcommands, only
      * parameters
      */
     @Override
     public @NotNull CommandUsage<C> getMainUsage() {
-        return usages.stream().filter((usage ->
-                        usage.getMinLength() >= 1 &&
-                                !usage.hasParamType(Command.class)))
-                .findFirst().orElse(defaultUsage);
+        return Optional.ofNullable(mainUsage)
+                .orElse(defaultUsage);
     }
 
     /**
@@ -436,7 +461,7 @@ final class CommandImpl<C> implements Command<C> {
                 CommandUsage.<C>builder()
                         .parameters(params)
                         .execute((sender, context) -> {
-                            //CommandDebugger.debug("Executing help !");
+                            //CommandDebugger.visualize("Executing help !");
                             Integer page = context.getArgument("page");
                             CommandHelp<C> help = dispatcher.createCommandHelp(this, (Context<C>) context);
                             helpExecution.help(sender, (Context<C>) context, help, page);

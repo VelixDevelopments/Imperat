@@ -15,14 +15,14 @@ public abstract class InputParameter implements CommandParameter {
 
     protected final String name, permission;
     protected int index;
-    protected final Class<?> type;
+    protected final Type type;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final SuggestionResolver<?, ?> suggestionResolver;
     protected final Description description;
 
 
-    protected InputParameter(String name, Class<?> type,
+    protected InputParameter(String name, Type type,
                              @Nullable String permission,
                              Description description,
                              boolean optional, boolean flag, boolean greedy,
@@ -70,7 +70,7 @@ public abstract class InputParameter implements CommandParameter {
      * @return the value type of this parameter
      */
     @Override
-    public Class<?> getType() {
+    public Type getType() {
         return type;
     }
     
@@ -127,14 +127,14 @@ public abstract class InputParameter implements CommandParameter {
     public boolean isGreedy() {
         if (this.type != String.class && greedy) {
             throw new IllegalStateException(
-                    String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type.getName())
+                    String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type.getTypeName())
             );
         }
         return greedy;
     }
 
     @Override
-    public Command<?> asCommand() {
+    public <C> Command<C> asCommand() {
         throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
     }
 
@@ -149,11 +149,6 @@ public abstract class InputParameter implements CommandParameter {
     @SuppressWarnings("unchecked")
     public @Nullable <C, T> SuggestionResolver<C, T> getSuggestionResolver() {
         return (SuggestionResolver<C, T>) suggestionResolver;
-    }
-
-    @Override
-    public Type getGenericType() {
-        return getType();
     }
 
     @Override

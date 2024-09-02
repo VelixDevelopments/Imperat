@@ -10,15 +10,19 @@ import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.tree.Traverse;
 import dev.velix.imperat.util.ListUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Represents a wrapper for the actual command's data
@@ -106,6 +110,15 @@ public interface Command<C> extends CommandParameter {
     }
     
     /**
+     * Traverses the {@link dev.velix.imperat.tree.CommandTree} linked to
+     * this command object, searching for the most suitable usage that
+     * best suites the context input by the user
+     *
+     * @param context the context of the execution
+     */
+    @NotNull Traverse traverse(Context<C> context);
+    
+    /**
      * Sets a pre-processor for the command
      * @param preProcessor the pre-processor for the command
      */
@@ -152,14 +165,26 @@ public interface Command<C> extends CommandParameter {
      * @param usage the usage {@link CommandUsage} of the command
      */
     void addUsage(CommandUsage<C> usage);
-
+    
+    /**
+     * Fetches the usage with specific sequence of parameters
+     * @param parameters the parameters
+     * @return the usage from its sequence of parameters, null if no usage has such a sequence of parameters
+     */
+    @Nullable CommandUsage<C> getUsage(List<CommandParameter> parameters);
 
     /**
      * @return All {@link CommandUsage} that were registered
      * to this command by the user
      */
     Collection<? extends CommandUsage<C>> getUsages();
-
+    
+    /**
+     * @param predicate the criteria
+     * @return a list of usages that match a certain criteria
+     */
+    Collection<? extends CommandUsage<C>> findUsages(Predicate<CommandUsage<C>> predicate);
+    
     /**
      * @return the usage that doesn't include any subcommands, only
      * parameters
@@ -247,11 +272,15 @@ public interface Command<C> extends CommandParameter {
      */
     @NotNull
     Collection<? extends Command<C>> getSubCommands();
-
-    default CommandUsageLookup<C> lookup(Imperat<C> dispatcher) {
-        return new CommandUsageLookup<>(dispatcher, this);
+    
+    default @Nullable CommandUsage<C> getUsage(Predicate<CommandUsage<C>> usagePredicate) {
+        for(var usage : getUsages()) {
+            if(usagePredicate.test(usage)) {
+                return usage;
+            }
+        }
+        return null;
     }
-
 
     default boolean hasParent() {
         return getParent() != null;
@@ -265,7 +294,7 @@ public interface Command<C> extends CommandParameter {
      * @return the value type of this parameter
      */
     @Override
-    default Class<?> getType() {
+    default Type getType() {
         return Command.class;
     }
 
@@ -294,14 +323,13 @@ public interface Command<C> extends CommandParameter {
         return false;
     }
 
-    @Override
-    default Command<C> asCommand() {
-        return this;
+    @Override @SuppressWarnings("all")
+    default <C> Command<C> asCommand() {
+        return (Command<C>) this;
     }
 
     /**
      * Formats the usage parameter
-     *
      * @return the formatted parameter
      */
     @Override
@@ -352,5 +380,5 @@ public interface Command<C> extends CommandParameter {
     static <C> Command<C> createCommand(@Nullable Command<C> parent, int position, @NotNull String name) {
         return new CommandImpl<>(parent, position, name);
     }
-
+	
 }

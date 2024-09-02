@@ -17,15 +17,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
+
+import static dev.velix.imperat.util.Patterns.DOUBLE_FLAG;
+import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 
 @ApiStatus.Internal
 final class CommandUsageImpl<C> implements CommandUsage<C> {
-
-    private final static Pattern SINGLE_FLAG = Pattern.compile("-([a-zA-Z]+)");
-    private final static Pattern DOUBLE_FLAG = Pattern.compile("--([a-zA-Z]+)");
-
-
+    
     private String permission = null;
     private String description = "N/A";
 
@@ -118,9 +116,8 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
 
         for (var param : parameters) {
             if (!param.isFlag()) continue;
-            CommandFlag flag = param.asFlagParameter().getFlag();
-            if (flag.name().equalsIgnoreCase(inputFlagAlias) ||
-                    flag.hasAlias(inputFlagAlias)) {
+            CommandFlag flag = param.asFlagParameter().getFlagData();
+            if (flag.acceptsInput(inputFlagAlias)) {
                 return flag;
             }
         }
@@ -214,7 +211,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
      * or not
      */
     @Override
-    public boolean hasParameter(Predicate<CommandParameter> parameterPredicate) {
+    public boolean hasParameters(Predicate<CommandParameter> parameterPredicate) {
         for (CommandParameter parameter : getParameters())
             if (parameterPredicate.test(parameter))
                 return true;
@@ -236,7 +233,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     }
 
     /**
-     * @return The cool down for this usage {@link UsageCooldown}
+     * @return The cooldown for this usage {@link UsageCooldown}
      * returns null if no cooldown has been set
      */
     @Override
@@ -307,7 +304,12 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public boolean isHelp() {
         return help;
     }
-
+    
+    @Override
+    public boolean hasParameters(List<CommandParameter> parameters) {
+        return this.parameters.equals(parameters);
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

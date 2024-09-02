@@ -52,6 +52,10 @@ public interface CommandFlag {
         return StringUtils.normalizedParameterFormatting("-" + display
                 + valueFormat, true);
     }
+    
+    default boolean acceptsInput(String input) {
+        return this.name().equalsIgnoreCase(input) || hasAlias(input);
+    }
 
 
     record CommandFlagImpl(String name, List<String> aliases, Class<?> inputType)

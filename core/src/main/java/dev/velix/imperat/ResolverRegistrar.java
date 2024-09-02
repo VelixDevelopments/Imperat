@@ -8,7 +8,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 public sealed interface ResolverRegistrar<C> permits Imperat {
@@ -34,7 +34,7 @@ public sealed interface ResolverRegistrar<C> permits Imperat {
 	 * @return whether the type has
 	 * a context-resolver
 	 */
-	boolean hasContextResolver(Class<?> type);
+	boolean hasContextResolver(Type type);
 	
 	/**
 	 * @return returns the factory for creation of
@@ -49,7 +49,7 @@ public sealed interface ResolverRegistrar<C> permits Imperat {
 	 * @param <T>                  the type of class
 	 * @return the context resolver
 	 */
-	<T> ContextResolver<C, T> getContextResolver(Class<T> resolvingContextType);
+	<T> ContextResolver<C, T> getContextResolver(Type resolvingContextType);
 	
 	/**
 	 * Fetches the {@link ContextResolver} suitable for the {@link CommandParameter}
@@ -58,9 +58,8 @@ public sealed interface ResolverRegistrar<C> permits Imperat {
 	 * @param <T>              the type of value that will be resolved by {@link ValueResolver}
 	 * @return the context resolver for this parameter's value type
 	 */
-	@SuppressWarnings("unchecked")
 	default <T> ContextResolver<C, T> getContextResolver(CommandParameter commandParameter) {
-		return (ContextResolver<C, T>) getContextResolver(commandParameter.getType());
+		return getContextResolver(commandParameter.getType());
 	}
 	
 	/**
@@ -71,7 +70,7 @@ public sealed interface ResolverRegistrar<C> permits Imperat {
 	 * @param <T>      the type of value being resolved from context
 	 */
 	<T>
-	void registerContextResolver(Class<T> type, @NotNull ContextResolver<C, T> resolver);
+	void registerContextResolver(Type type, @NotNull ContextResolver<C, T> resolver);
 	
 	/**
 	 * Fetches {@link ValueResolver} for a certain value
@@ -81,7 +80,7 @@ public sealed interface ResolverRegistrar<C> permits Imperat {
 	 * @return the value resolver of a certain type
 	 */
 	@Nullable
-	<T> ValueResolver<C, T> getValueResolver(Class<T> resolvingValueType);
+	<T> ValueResolver<C, T> getValueResolver(Type resolvingValueType);
 	
 	/**
 	 * Fetches the {@link ValueResolver} suitable for the {@link CommandParameter}
@@ -90,9 +89,8 @@ public sealed interface ResolverRegistrar<C> permits Imperat {
 	 * @param <T>              the type of value that will be resolved by {@link ValueResolver}
 	 * @return the value resolver for this parameter's value type
 	 */
-	@SuppressWarnings("unchecked")
 	default <T> ValueResolver<C, T> getValueResolver(CommandParameter commandParameter) {
-		return (ValueResolver<C, T>) getValueResolver(commandParameter.getType());
+		return getValueResolver(commandParameter.getType());
 	}
 	
 	/**
@@ -102,7 +100,7 @@ public sealed interface ResolverRegistrar<C> permits Imperat {
 	 * @param resolver the resolver for this value
 	 * @param <T>      the type of value being resolved from context
 	 */
-	<T> void registerValueResolver(Class<T> type, @NotNull ValueResolver<C, T> resolver);
+	<T> void registerValueResolver(Type type, @NotNull ValueResolver<C, T> resolver);
 	
 	/**
 	 * @return all currently registered {@link ValueResolver}

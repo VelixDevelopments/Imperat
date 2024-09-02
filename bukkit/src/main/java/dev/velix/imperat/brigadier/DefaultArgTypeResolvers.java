@@ -9,6 +9,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
+
 class DefaultArgTypeResolvers {
 
     public final static ArgumentTypeResolver STRING = (parameter -> {
@@ -20,10 +22,9 @@ class DefaultArgTypeResolvers {
 
     public final static ArgumentTypeResolver NUMERIC = (parameter) -> {
 
-        Class<?> type = parameter.getType();
         if (parameter.isNumeric()) {
             NumericRange range = parameter.asNumeric().getRange();
-            return numeric(type, range);
+            return numeric(parameter.getType(), range);
         }
 
         return null;
@@ -36,14 +37,14 @@ class DefaultArgTypeResolvers {
     public static final ArgumentTypeResolver PLAYER = parameter -> SINGLE_PLAYER;
 
     public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
-        Class<? extends Entity> type = BukkitImperat.getSelectedEntity(parameter.getGenericType());
+        Class<? extends Entity> type = BukkitImperat.getSelectedEntity(parameter.getType());
         if (Player.class.isAssignableFrom(type)) // EntitySelector<Player>
             return MULTI_PLAYER;
         return MULTI_ENTITY;
     };
 
     private static ArgumentType<? extends Number> numeric(
-            Class<?> type,
+            Type type,
             @Nullable NumericRange range) {
         if (TypeUtility.matches(type, int.class)) {
             return IntegerArgumentType.integer((int) getMin(range), (int) getMax(range));

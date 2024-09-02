@@ -20,6 +20,8 @@ import dev.velix.imperat.test.GroupRegistry;
 import dev.velix.imperat.test.GroupSuggestionResolver;
 import dev.velix.imperat.test.guild.Guild;
 import dev.velix.imperat.test.guild.GuildContextResolver;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -142,6 +144,47 @@ public final class Test extends JavaPlugin implements Listener {
         dispatcher.registerCommand(example);
     }
 
+    private void classicBanExample() {
+      Command<CommandSender> banCommand = Command.createCommand("ban");
+      banCommand.setPermission("command.ban");
+      banCommand.setDescription("Main command for banning players");
+      banCommand.setDefaultUsageExecution((source, context)-> {
+        source.reply("/ban <player> [-silent] [duration] [reason...]");
+      });
+      
+      final String defaultReason = "Breaking Server Laws";
+      banCommand.addUsage(
+              CommandUsage.<CommandSender>builder()
+                      .parameters(
+                              CommandParameter.required("player", OfflinePlayer.class),
+                              CommandParameter.flagSwitch("silent").aliases("-s"),
+                              CommandParameter.optionalText("duration"),
+                              CommandParameter.optionalGreedy("reason").defaultValue(defaultReason)
+                      )
+                      .execute((source, context)-> {
+                        OfflinePlayer player = context.getArgument("player");
+                        Boolean silent = context.getFlagValue("silent");
+                        if(silent == null) silent = false; //not needed but in case some bug happens out of nowhere
+                        
+                        String duration = context.getArgument("duration");
+                        String reason = context.getArgument("reason");
+                        
+                        String durationFormat = duration == null ? "FOREVER" : "for " + duration;
+	                      assert player != null;
+	                      String msg = "Banning " + player.getName() + " "
+                                + durationFormat + " due to " + reason;
+                        
+                        if (!silent)
+                          Bukkit.broadcastMessage(msg);
+                        else
+                          source.reply(msg);
+                        
+                      })
+                      .build()
+      );
+      
+    }
+    
 
     private void classicGroupCmd() {
 

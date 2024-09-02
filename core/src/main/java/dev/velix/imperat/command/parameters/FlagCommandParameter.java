@@ -54,7 +54,7 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
      * @return The flag's data
      */
     @Override
-    public @NotNull CommandFlag getFlag() {
+    public @NotNull CommandFlag getFlagData() {
         return flag;
     }
 

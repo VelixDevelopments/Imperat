@@ -9,7 +9,7 @@ public interface FlagParameter extends CommandParameter {
     /**
      * @return The flag's data
      */
-    @NotNull CommandFlag getFlag();
+    @NotNull CommandFlag getFlagData();
 
     /**
      * @return checks whether this parameter is a flag
@@ -20,6 +20,6 @@ public interface FlagParameter extends CommandParameter {
     }
 
     default boolean isSwitch() {
-        return getFlag() instanceof CommandSwitch;
+        return getFlagData() instanceof CommandSwitch;
     }
 }

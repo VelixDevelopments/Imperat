@@ -1,5 +1,6 @@
 package dev.velix.imperat.util;
 
+import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;
@@ -9,12 +10,12 @@ import java.util.Set;
 
 public final class TypeUtility {
 
-    static Set<Class<?>> NUMERIC_PRIMITIVES = Set.of(
+    static Set<Type> NUMERIC_PRIMITIVES = Set.of(
             short.class, byte.class, int.class,
             long.class, float.class, double.class
     );
 
-    static Map<Class<?>, Class<?>> PRIMITIVES_TO_BOXED = Map.of(
+    static Map<Type, Type> PRIMITIVES_TO_BOXED = Map.of(
             boolean.class, Boolean.class,
             short.class, Short.class,
             int.class, Integer.class,
@@ -41,7 +42,16 @@ public final class TypeUtility {
         if (string == null) return false;
         return Boolean.parseBoolean(string);
     }
-
+    
+    public static boolean isFloat(String input) {
+        try {
+            Float.parseFloat(input);
+            return true;
+        }catch (Exception ex) {
+            return false;
+        }
+    }
+    
     public static boolean isDouble(String str) {
         if (str == null) return false;
         try {
@@ -65,19 +75,23 @@ public final class TypeUtility {
     public static boolean isNumericType(Class<?> type) {
         return Number.class.isAssignableFrom(type) || (NUMERIC_PRIMITIVES.contains(type));
     }
+    
+    public static boolean isNumericType(TypeToken<?> token) {
+        return NUMERIC_PRIMITIVES.contains(token.unwrap().getType());
+    }
 
-    public static boolean isPrimitive(Class<?> type) {
+    public static boolean isPrimitive(Type type) {
         return PRIMITIVES_TO_BOXED.get(type) != null;
     }
 
-    public static @NotNull Class<?> primitiveToBoxed(Class<?> primitive) {
+    public static @NotNull Type primitiveToBoxed(Type primitive) {
         return PRIMITIVES_TO_BOXED.getOrDefault(primitive, primitive);
     }
 
-    public static <T> boolean matches(@NotNull Class<T> type1, @NotNull Class<?> type2) {
+    public static boolean matches(@NotNull Type type1, @NotNull Type type2) {
         var t1 = isPrimitive(type1) ? primitiveToBoxed(type1) : type1;
         var t2 = isPrimitive(type2) ? primitiveToBoxed(type2) : type2;
-        return t1.getName().equals(t2.getName());
+        return t1.equals(t2);
     }
 
     public static Type getInsideGeneric(Type genericType, Type fallback) {
@@ -87,4 +101,5 @@ public final class TypeUtility {
             return fallback;
         }
     }
+
 }

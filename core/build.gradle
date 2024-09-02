@@ -8,8 +8,12 @@ dependencies {
     compileOnly "org.jetbrains:annotations:24.1.0"
     annotationProcessor "org.jetbrains:annotations:24.1.0"
 
-    implementation 'org.ow2.asm:asm:9.2'
-    implementation 'org.ow2.asm:asm-commons:9.2'
+    api 'com.google.guava:guava:33.2.1-jre'
+    api 'org.ow2.asm:asm:9.2'
+    api 'org.ow2.asm:asm-commons:9.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 java {

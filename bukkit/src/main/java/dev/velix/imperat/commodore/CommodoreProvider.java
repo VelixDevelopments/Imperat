@@ -77,7 +77,7 @@ public final class CommodoreProvider {
     }
 
     private static void printDebugInfo(Throwable e) {
-        if (System.getProperty("commodore.debug") != null) {
+        if (System.getProperty("commodore.visualize") != null) {
             System.err.println("Exception while initialising commodore:");
             e.printStackTrace(System.err);
         }
@@ -106,7 +106,7 @@ public final class CommodoreProvider {
         if (commodore == null) {
             throw new BrigadierUnsupportedException(
                     "Brigadier is not supported by the server. " +
-                            "Set -Dcommodore.debug=true for debug info."
+                            "Set -Dcommodore.visualize=true for visualize info."
             );
         }
         return commodore;

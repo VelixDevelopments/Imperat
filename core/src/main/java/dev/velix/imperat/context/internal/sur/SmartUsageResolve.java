@@ -58,13 +58,13 @@ public final class SmartUsageResolve<C> {
             assert currentParameter != null;
 
             String currentRaw = cursor.peekRaw(raws);
-            //CommandDebugger.debug("Current raw= '%s' at %s" , currentRaw, position.raw);
+            //CommandDebugger.visualize("Current raw= '%s' at %s" , currentRaw, position.raw);
             if (currentRaw == null) {
-                //CommandDebugger.debug("Filling empty optional args");
+                //CommandDebugger.visualize("Filling empty optional args");
                 for (int i = cursor.parameter; i < parameterList.size(); i++) {
                     final CommandParameter optionalEmptyParameter = cursor.peekParameter(parameterList);
                     assert optionalEmptyParameter != null;
-                    //debug("Parameter at %s = %s", i, parameter.format(command));
+                    //visualize("Parameter at %s = %s", i, parameter.format(command));
                     if (!optionalEmptyParameter.isOptional()) {
                         //cannot happen if no bugs, but just in case
                         throw new ContextResolveException(String.format(
@@ -76,7 +76,7 @@ public final class SmartUsageResolve<C> {
                     //adding the absent optional args with their default values
 
                     if (optionalEmptyParameter.isFlag()) {
-                        CommandFlag flag = optionalEmptyParameter.asFlagParameter().getFlag();
+                        CommandFlag flag = optionalEmptyParameter.asFlagParameter().getFlagData();
                         Object value = null;
                         if (flag instanceof CommandSwitch) value = false;
                         else if (optionalEmptyParameter.asFlagParameter().getDefaultValueSupplier() != null) {
@@ -96,7 +96,7 @@ public final class SmartUsageResolve<C> {
 
             CommandFlag flag = usage.getFlagFromRaw(currentRaw);
             if (flag != null && currentParameter.isFlag()) {
-                //CommandDebugger.debug("Found flag raw '%s' at %s", currentRaw, position.raw);
+                //CommandDebugger.visualize("Found flag raw '%s' at %s", currentRaw, position.raw);
                 //shifting raw only
                 //check if it's switch
                 if (flag instanceof CommandSwitch) {
@@ -140,7 +140,7 @@ public final class SmartUsageResolve<C> {
                         null,
                         null,
                         getDefaultValue(context, currentParameter),
-                        currentParameter.asFlagParameter().getFlag()
+                        currentParameter.asFlagParameter().getFlagData()
                 );
 
                 cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
@@ -150,7 +150,7 @@ public final class SmartUsageResolve<C> {
 
             if (currentParameter.isCommand()) {
 
-                //debug("Found command %s at %s", currentParameter.getName(), position.parameter);
+                //visualize("Found command %s at %s", currentParameter.getName(), position.parameter);
 
                 @SuppressWarnings("unchecked")
                 Command<C> parameterSubCmd = (Command<C>) currentParameter;
@@ -167,18 +167,18 @@ public final class SmartUsageResolve<C> {
             //argument input
             ValueResolver<C, ?> resolver = dispatcher.getValueResolver(currentParameter);
             if (resolver == null)
-                throw new ContextResolveException("Cannot find resolver for type '" + currentParameter.getType().getName() + "'");
+                throw new ContextResolveException("Cannot find resolver for type '" + currentParameter.getType().getTypeName() + "'");
 
             if (currentParameter.isOptional()) {
-                //debug("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
-                //debug("raws-size= %s, usageMaxWithoutFlags= %s", raws.size() , (lengthWithoutFlags));
+                //visualize("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
+                //visualize("raws-size= %s, usageMaxWithoutFlags= %s", raws.size() , (lengthWithoutFlags));
                 //optional argument handling
                 resolveOptional(context, resolver, raws,
                         parameterList, currentRaw, currentParameter,
                         lengthWithoutFlags);
 
             } else {
-                //debug("Required parameter '%s' at position %s", currentParameter.getName(), position.parameter);
+                //visualize("Required parameter '%s' at position %s", currentParameter.getName(), position.parameter);
                 resolveRequired(context, resolver,
                         raws, currentRaw, currentParameter);
             }
@@ -214,7 +214,7 @@ public final class SmartUsageResolve<C> {
             resolveResult = this.getResult(resolver, context, currentRaw, currentParameter);
             cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         }
-        //CommandDebugger.debug("Resolving required param '%s' with value '%s'", currentParameter.format(), resolveResult);
+        //CommandDebugger.visualize("Resolving required param '%s' with value '%s'", currentParameter.format(), resolveResult);
         context.resolveArgument(command, currentRaw, cursor.parameter,
                 currentParameter, resolveResult);
     }
