@@ -168,7 +168,6 @@ public interface CommandParameter {
     static <C, T> ParameterBuilder<C, T> required(String name, TypeToken<T> type) {
         return new ParameterBuilder<>(name, type, false);
     }
-    
     static <C, T> ParameterBuilder<C, T> required(String name, Class<T> type) {
         return required(name, TypeToken.of(type));
     }

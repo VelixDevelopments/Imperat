@@ -1,14 +1,19 @@
 package dev.velix.imperat;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.tree.CommandTree;
-import dev.velix.imperat.tree.CommandTreeVisualizer;
-import dev.velix.imperat.tree.Traverse;
+import dev.velix.imperat.command.tree.CommandTree;
+import dev.velix.imperat.command.tree.CommandTreeVisualizer;
+import dev.velix.imperat.command.tree.Traverse;
 import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.verification.UsageVerifier;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 public class TestRun {
 
@@ -78,5 +83,24 @@ public class TestRun {
 		traverse.visualize();
 	}
  
+	@Test
+	public void testAmbiguity() {
+		
+		UsageVerifier<TestSender> verifier = UsageVerifier.typeTolerantVerifier();
+		
+		TypeToken<List<String>> ref = new TypeToken<>() {};
+		System.out.println("REF= " + ref.getType().getTypeName());
+		CommandUsage<TestSender> usage1 = CommandUsage.<TestSender>builder()
+						.parameters(
+										CommandParameter.requiredText("arg1")
+						).build();
+		
+		CommandUsage<TestSender> usage2 = CommandUsage.<TestSender>builder()
+						.parameters(
+										CommandParameter.requiredBoolean("arg2")
+						).build();
+		
+		Assertions.assertFalse(verifier.areAmbiguous(usage1, usage2));
+	}
 	
 }

@@ -2,11 +2,22 @@ package dev.velix.imperat.util;
 
 import com.google.common.reflect.TypeToken;
 
-public final class TypeRef<T> extends TypeToken<T> {
+import java.lang.reflect.Type;
+
+public final class TypeRef<T> {
 	
+	private final TypeToken<T> typeToken;
 	
-	public TypeRef() {
-		super(TypeRef.class);
+	{
+		typeToken = new TypeToken<>() {};
+	}
+	
+	public Type getType() {
+		return typeToken.getType();
+	}
+	
+	public Class<? super T> getRawType() {
+		return typeToken.getRawType();
 	}
 	
 }
