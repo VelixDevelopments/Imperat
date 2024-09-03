@@ -9,6 +9,7 @@ import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.CommandTreeVisualizer;
 import dev.velix.imperat.command.tree.Traverse;
 import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -101,6 +102,13 @@ public class TestRun {
 						).build();
 		
 		Assertions.assertFalse(verifier.areAmbiguous(usage1, usage2));
+	}
+	
+	@Test
+	public void testTypeWrap() {
+		TypeWrap<List<String>> typeWrap = new TypeWrap<>();
+		Assertions.assertEquals("java.util.List<java.lang.String>",
+						typeWrap.getType().getTypeName());
 	}
 	
 }
