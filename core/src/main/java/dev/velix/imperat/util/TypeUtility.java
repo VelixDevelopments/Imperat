@@ -1,12 +1,11 @@
 package dev.velix.imperat.util;
 
-import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class TypeUtility {
 
@@ -23,6 +22,16 @@ public final class TypeUtility {
             float.class, Float.class,
             double.class, Double.class,
             byte.class, Byte.class
+    );
+
+    static Map<Type, Type> BOXED_TO_PRIMITIVES = Map.of(
+            Boolean.class, boolean.class,
+            Short.class, short.class,
+            Integer.class, int.class,
+            Long.class, long.class,
+            Float.class, float.class,
+            Double.class, double.class,
+            Byte.class, byte.class
     );
 
     private TypeUtility() {
@@ -75,17 +84,25 @@ public final class TypeUtility {
     public static boolean isNumericType(Class<?> type) {
         return Number.class.isAssignableFrom(type) || (NUMERIC_PRIMITIVES.contains(type));
     }
-    
-    public static boolean isNumericType(TypeToken<?> token) {
+
+    public static boolean isNumericType(TypeWrap<?> token) {
         return NUMERIC_PRIMITIVES.contains(token.unwrap().getType());
     }
 
-    public static boolean isPrimitive(Type type) {
+    public static boolean isPrimitive(final Type type) {
         return PRIMITIVES_TO_BOXED.get(type) != null;
+    }
+
+    public static boolean isBoxed(final Type type) {
+        return BOXED_TO_PRIMITIVES.get(type) != null;
     }
 
     public static @NotNull Type primitiveToBoxed(Type primitive) {
         return PRIMITIVES_TO_BOXED.getOrDefault(primitive, primitive);
+    }
+
+    public static @NotNull Type boxedToPrimative(Type boxed) {
+        return BOXED_TO_PRIMITIVES.getOrDefault(boxed, boxed);
     }
 
     public static boolean matches(@NotNull Type type1, @NotNull Type type2) {
@@ -100,6 +117,44 @@ public final class TypeUtility {
         } catch (ClassCastException e) {
             return fallback;
         }
+    }
+
+    public static Type getComponentType(final Type type) {
+        final AtomicReference<Type> result = new AtomicReference<>();
+        new TypeVisitor() {
+            @Override
+            protected void visitGenericArrayType(GenericArrayType t) {
+                result.set(t.getGenericComponentType());
+            }
+
+            @Override
+            protected void visitClass(Class<?> t) {
+                result.set(t.getComponentType());
+            }
+
+            @Override
+            protected void visitTypeVariable(TypeVariable<?> t) {
+                result.set(subtypeOfComponentType(t.getBounds()));
+            }
+
+            @Override
+            protected void visitWildcardType(WildcardType t) {
+                result.set(subtypeOfComponentType(t.getUpperBounds()));
+            }
+
+            private Type subtypeOfComponentType(Type[] bounds) {
+                // Assuming you want the first bound for simplicity
+                return bounds.length > 0 ? bounds[0] : null;
+            }
+        }.visit(type);
+        return result.get();
+    }
+
+    static Class<?> getArrayClass(Class<?> componentType) {
+        // TODO(user): This is not the most efficient way to handle generic
+        // arrays, but is there another way to extract the array class in a
+        // non-hacky way (i.e. using String value class names- "[L...")?
+        return Array.newInstance(componentType, 0).getClass();
     }
 
 }

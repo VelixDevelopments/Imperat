@@ -1,10 +1,10 @@
 package dev.velix.imperat.resolvers;
 
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,13 +22,13 @@ import java.util.List;
 public interface SuggestionResolver<C, T> {
 
     static <C, T> SuggestionResolver<C, T> plain(Class<T> type, List<String> results) {
-        return plain(TypeToken.of(type), results);
+        return plain(TypeWrap.of(type), results);
     }
     
-    static <C, T> SuggestionResolver<C, T> plain(TypeToken<T> type, List<String> results) {
+    static <C, T> SuggestionResolver<C, T> plain(TypeWrap<T> type, List<String> results) {
         return new SuggestionResolver<>() {
             @Override
-            public TypeToken<T> getType() {
+            public TypeWrap<T> getType() {
                 return type;
             }
 
@@ -47,14 +47,14 @@ public interface SuggestionResolver<C, T> {
         return plain(type, Arrays.asList(results));
     }
 
-    static <C, T> SuggestionResolver<C, T> plain(TypeToken<T> type, String... results) {
+    static <C, T> SuggestionResolver<C, T> plain(TypeWrap<T> type, String... results) {
         return plain(type, Arrays.asList(results));
     }
 
     /**
      * @return Type of data the suggestion is resolving
      */
-    TypeToken<T> getType();
+    TypeWrap<T> getType();
 
     /**
      * @param command             the running command

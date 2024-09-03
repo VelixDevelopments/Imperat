@@ -1,10 +1,10 @@
 package dev.velix.imperat.command.parameters;
 
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,20 +15,20 @@ public abstract class InputParameter implements CommandParameter {
 
     protected final String name, permission;
     protected int index;
-    protected final TypeToken<?> typeToken;
+    protected final TypeWrap<?> typeWrap;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final SuggestionResolver<?, ?> suggestionResolver;
     protected final Description description;
 
 
-    protected InputParameter(String name, TypeToken<?> typeToken,
+    protected InputParameter(String name, TypeWrap<?> typeWrap,
                              @Nullable String permission,
                              Description description,
                              boolean optional, boolean flag, boolean greedy,
                              OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
         this.name = name;
-        this.typeToken = typeToken;
+        this.typeWrap = typeWrap;
         this.permission = permission;
         this.description = description;
         this.optional = optional;
@@ -67,10 +67,10 @@ public abstract class InputParameter implements CommandParameter {
     }
     
     @Override
-    public TypeToken<?> getTypeToken() {
-        return typeToken;
+    public TypeWrap<?> getTypeWrap() {
+        return typeWrap;
     }
-    
+
     /**
      * The permission for this parameter
      * @return the parameter permission
@@ -122,7 +122,7 @@ public abstract class InputParameter implements CommandParameter {
      */
     @Override
     public boolean isGreedy() {
-        if (this.typeToken.getType() != String.class && greedy) {
+        if (this.typeWrap.getType() != String.class && greedy) {
             throw new IllegalStateException(
                     String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, getType().getTypeName())
             );
@@ -159,12 +159,12 @@ public abstract class InputParameter implements CommandParameter {
         if (o == null || getClass() != o.getClass()) return false;
         InputParameter that = (InputParameter) o;
         return Objects.equals(name, that.name)
-                && Objects.equals(typeToken, that.typeToken);
+                && Objects.equals(typeWrap, that.typeWrap);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, typeToken);
+        return Objects.hash(name, typeWrap);
     }
 
     @Override

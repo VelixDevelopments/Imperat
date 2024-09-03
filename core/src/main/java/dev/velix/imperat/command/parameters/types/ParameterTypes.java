@@ -1,8 +1,7 @@
 package dev.velix.imperat.command.parameters.types;
 
-import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -13,7 +12,7 @@ public final class ParameterTypes {
 		throw new AssertionError();
 	}
 	
-	private final static Map<Type, ParameterType> PARAMETER_TYPES = Maps.newLinkedHashMapWithExpectedSize(6);
+	private final static Map<Type, ParameterType> PARAMETER_TYPES = new LinkedHashMap<>((int) Math.ceil(6 / 0.75));
 	
 	private final static ParameterType STRING_TYPE = new ParameterType() {
 		@Override
@@ -92,14 +91,13 @@ public final class ParameterTypes {
 	}
 	
 	public static ParameterType getParamType(Type type) {
-		TypeToken<?> token = TypeToken.of(type);
-		token = token.wrap();
+		TypeWrap<?> token = TypeWrap.of(type).wrap();
 	
-		if(token.isArray()) {
+		if (token.isArray()) {
 			return PARAMETER_TYPES.getOrDefault(Objects.requireNonNull(token.getComponentType()).getType(), STRING_TYPE);
-		}else if(token.isSubtypeOf(Collection.class)) {
+		} else if(token.isSubtypeOf(Collection.class)) {
 			return PARAMETER_TYPES.getOrDefault(token.getRawType(), STRING_TYPE);
-		}else {
+		} else {
 			return PARAMETER_TYPES.getOrDefault(type, STRING_TYPE);
 		}
 		

@@ -42,8 +42,6 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT")
     compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
 
-    api 'com.google.guava:guava:33.2.1-jre'
-
     compileOnly kyori(KyoriModule.API)
     compileOnly kyori(KyoriModule.MINI_MESSAGE)
     compileOnly kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")

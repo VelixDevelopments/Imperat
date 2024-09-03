@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters;
 
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
@@ -8,6 +7,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
@@ -41,13 +41,13 @@ public interface CommandParameter {
     /**
      * @return the value type-token of this parameter
      */
-    TypeToken<?> getTypeToken();
+    TypeWrap<?> getTypeWrap();
     
     /**
      * @return the value type of this parameter
      */
     default Type getType() {
-        return getTypeToken().getType();
+        return getTypeWrap().getType();
     }
     
     
@@ -147,7 +147,7 @@ public interface CommandParameter {
     
     static <C, T> CommandParameter of(
             String name,
-            TypeToken<T> type,
+            TypeWrap<T> type,
             @Nullable String permission,
             Description description,
             boolean optional,
@@ -165,11 +165,11 @@ public interface CommandParameter {
         );
     }
     
-    static <C, T> ParameterBuilder<C, T> required(String name, TypeToken<T> type) {
+    static <C, T> ParameterBuilder<C, T> required(String name, TypeWrap<T> type) {
         return new ParameterBuilder<>(name, type, false);
     }
     static <C, T> ParameterBuilder<C, T> required(String name, Class<T> type) {
-        return required(name, TypeToken.of(type));
+        return required(name, TypeWrap.of(type));
     }
   
     
@@ -202,12 +202,12 @@ public interface CommandParameter {
     }
 
     
-    static <C, T> ParameterBuilder<C, T> optional(String name, TypeToken<T> token) {
+    static <C, T> ParameterBuilder<C, T> optional(String name, TypeWrap<T> token) {
         return new ParameterBuilder<>(name, token, true);
     }
     
     static <C, T> ParameterBuilder<C, T> optional(String name, Class<T> type) {
-        return optional(name, TypeToken.of(type));
+        return optional(name, TypeWrap.of(type));
     }
     
     static <C> ParameterBuilder<C, Integer> optionalInt(String name) {
@@ -251,7 +251,7 @@ public interface CommandParameter {
     }
     
     default boolean isNumeric() {
-        return TypeUtility.isNumericType(TypeToken.of(this.getType()));
+        return TypeUtility.isNumericType(TypeWrap.of(this.getType()));
     }
     
     default NumericParameter asNumeric() {

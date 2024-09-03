@@ -1,6 +1,5 @@
 package dev.velix.imperat.command;
 
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
@@ -14,6 +13,7 @@ import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.command.tree.Traverse;
 import dev.velix.imperat.util.ListUtils;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -294,8 +294,8 @@ public interface Command<C> extends CommandParameter {
      * @return the value type of this parameter
      */
     @Override
-    default TypeToken<?> getTypeToken() {
-        return TypeToken.of(Command.class);
+    default TypeWrap<?> getTypeWrap() {
+        return TypeWrap.of(Command.class);
     }
 
     /**

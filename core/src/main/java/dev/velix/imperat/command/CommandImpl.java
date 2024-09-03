@@ -1,7 +1,5 @@
 package dev.velix.imperat.command;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
@@ -37,7 +35,7 @@ final class CommandImpl<C> implements Command<C> {
 
     private boolean suppressACPermissionChecks = false;
 
-    private final List<String> aliases = Lists.newArrayList();
+    private final List<String> aliases = new ArrayList<>();
 
     private CommandUsage<C> mainUsage = null;
     private CommandUsage<C> defaultUsage;
@@ -46,9 +44,9 @@ final class CommandImpl<C> implements Command<C> {
     private @Nullable CommandPostProcessor<C> postProcessor;
     
     private final Command<C> parent;
-    private final Map<String, Command<C>> children = Maps.newHashMap();
+    private final Map<String, Command<C>> children = new TreeMap<>();
     
-    private final Map<List<CommandParameter>, CommandUsage<C>> usages = Maps.newTreeMap(UsageComparator.getInstance());
+    private final Map<List<CommandParameter>, CommandUsage<C>> usages = new TreeMap<>(UsageComparator.getInstance());
     
     private final AutoCompleter<C> autoCompleter;
 

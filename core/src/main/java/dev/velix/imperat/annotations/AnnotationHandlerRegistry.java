@@ -1,6 +1,5 @@
 package dev.velix.imperat.annotations;
 
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.MethodParameterElement;
@@ -23,6 +22,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.annotations.MethodVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -335,12 +335,12 @@ final class AnnotationHandlerRegistry<C> extends
         CommandParameter param =
                 AnnotationParameterDecorator.decorate(
                         CommandParameter.of(
-                                name, TypeToken.of((Class<T>)parameter.getType()), permission, desc,
+                                name, TypeWrap.of((Class<T>)parameter.getType()), permission, desc,
                                 optional, greedy, optionalValueSupplier, suggestionResolver
                         ), element
                 );
 
-        if (TypeUtility.isNumericType(TypeToken.of(param.getType()))
+        if (TypeUtility.isNumericType(TypeWrap.of(param.getType()))
                 && element.isAnnotationPresent(Range.class)) {
             Range annotation = element.getAnnotation(Range.class);
             param = NumericParameterDecorator.decorate(

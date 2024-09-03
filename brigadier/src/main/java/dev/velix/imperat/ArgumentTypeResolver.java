@@ -1,8 +1,8 @@
 package dev.velix.imperat;
 
-import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.arguments.ArgumentType;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,10 +45,9 @@ public interface ArgumentTypeResolver {
      */
     static @NotNull ArgumentTypeResolver forHierarchyType(Class<?> type, ArgumentType<?> argumentType) {
         return parameter -> {
-            var token = TypeToken.of(parameter.getType());
-            var token2 = TypeToken.of(type);
-            return parameter.getType() == type
-                    || token.isSupertypeOf(token2) ? argumentType : null;
+            var token = TypeWrap.of(parameter.getType());
+            var token2 = TypeWrap.of(type);
+            return parameter.getType() == type || token.isSupertypeOf(token2) ? argumentType : null;
         };
     }
 }

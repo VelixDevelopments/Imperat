@@ -1,10 +1,10 @@
 package dev.velix.imperat.annotations.parameters;
 
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.annotations.element.MethodParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.InputParameter;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -18,7 +18,7 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     private final MethodParameterElement element;
 
     AnnotationParameterDecorator(CommandParameter parameter, MethodParameterElement element) {
-        super(parameter.getName(), TypeToken.of(element.getElement().getParameterizedType()), parameter.getPermission(),
+        super(parameter.getName(), TypeWrap.of(element.getElement().getParameterizedType()), parameter.getPermission(),
                 parameter.getDescription(), parameter.isOptional(),
                 parameter.isFlag(), parameter.isGreedy(), parameter.getDefaultValueSupplier(),
                 parameter.getSuggestionResolver());

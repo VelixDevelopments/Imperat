@@ -1,17 +1,17 @@
 package dev.velix.imperat.command.parameters;
 
-import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 	
 	protected final String name;
-	private final TypeToken<T> type;
+	private final TypeWrap<T> type;
 	private final boolean optional;
 	private final boolean greedy;
 	
@@ -20,7 +20,7 @@ public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 	private OptionalValueSupplier<T> valueSupplier = null;
 	private SuggestionResolver<C, T> suggestionResolver = null;
 	
-	ParameterBuilder(String name, TypeToken<T> type, boolean optional, boolean greedy) {
+	ParameterBuilder(String name, TypeWrap<T> type, boolean optional, boolean greedy) {
 		this.name = name;
 		this.type = type;
 		this.optional = optional;
@@ -28,12 +28,12 @@ public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 	}
 	
 	
-	ParameterBuilder(String name, TypeToken<T> type, boolean optional) {
+	ParameterBuilder(String name, TypeWrap<T> type, boolean optional) {
 		this(name, type, optional, false);
 	}
 	
 	ParameterBuilder(String name, Class<T> type, boolean optional, boolean greedy) {
-		this(name, TypeToken.of(type), optional, greedy);
+		this(name, TypeWrap.of(type), optional, greedy);
 	}
 	
 	
