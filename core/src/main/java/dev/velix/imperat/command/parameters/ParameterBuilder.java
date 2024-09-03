@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 	
 	protected final String name;
-	private final Class<T> type;
+	private final TypeToken<T> type;
 	private final boolean optional;
 	private final boolean greedy;
 	
@@ -19,17 +20,26 @@ public sealed class ParameterBuilder<C, T> permits FlagBuilder {
 	private OptionalValueSupplier<T> valueSupplier = null;
 	private SuggestionResolver<C, T> suggestionResolver = null;
 	
-	ParameterBuilder(String name, Class<T> type, boolean optional, boolean greedy) {
+	ParameterBuilder(String name, TypeToken<T> type, boolean optional, boolean greedy) {
 		this.name = name;
 		this.type = type;
 		this.optional = optional;
 		this.greedy = greedy;
 	}
 	
+	
+	ParameterBuilder(String name, TypeToken<T> type, boolean optional) {
+		this(name, type, optional, false);
+	}
+	
+	ParameterBuilder(String name, Class<T> type, boolean optional, boolean greedy) {
+		this(name, TypeToken.of(type), optional, greedy);
+	}
+	
+	
 	ParameterBuilder(String name, Class<T> type, boolean optional) {
 		this(name, type, optional, false);
 	}
-
 	
 	public ParameterBuilder<C, T> permission(@Nullable String permission) {
 		this.permission = permission;

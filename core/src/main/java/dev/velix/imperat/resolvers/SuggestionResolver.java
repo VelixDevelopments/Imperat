@@ -1,5 +1,6 @@
 package dev.velix.imperat.resolvers;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
@@ -21,9 +22,13 @@ import java.util.List;
 public interface SuggestionResolver<C, T> {
 
     static <C, T> SuggestionResolver<C, T> plain(Class<T> type, List<String> results) {
+        return plain(TypeToken.of(type), results);
+    }
+    
+    static <C, T> SuggestionResolver<C, T> plain(TypeToken<T> type, List<String> results) {
         return new SuggestionResolver<>() {
             @Override
-            public Class<T> getType() {
+            public TypeToken<T> getType() {
                 return type;
             }
 
@@ -37,15 +42,19 @@ public interface SuggestionResolver<C, T> {
             }
         };
     }
-
+    
     static <C, T> SuggestionResolver<C, T> plain(Class<T> type, String... results) {
+        return plain(type, Arrays.asList(results));
+    }
+
+    static <C, T> SuggestionResolver<C, T> plain(TypeToken<T> type, String... results) {
         return plain(type, Arrays.asList(results));
     }
 
     /**
      * @return Type of data the suggestion is resolving
      */
-    Class<T> getType();
+    TypeToken<T> getType();
 
     /**
      * @param command             the running command

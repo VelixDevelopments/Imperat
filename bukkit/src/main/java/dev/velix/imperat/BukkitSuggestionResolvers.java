@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
@@ -17,8 +18,8 @@ final class BukkitSuggestionResolvers {
 
     public final static BukkitSuggestionResolver<OfflinePlayer> OFFLINE_PLAYER = new BukkitSuggestionResolver<>() {
         @Override
-        public Class<OfflinePlayer> getType() {
-            return OfflinePlayer.class;
+        public TypeToken<OfflinePlayer> getType() {
+            return TypeToken.of(OfflinePlayer.class);
         }
 
         @Override
@@ -36,8 +37,8 @@ final class BukkitSuggestionResolvers {
 
     public final static BukkitSuggestionResolver<Player> PLAYER = new BukkitSuggestionResolver<>() {
         @Override
-        public Class<Player> getType() {
-            return Player.class;
+        public TypeToken<Player> getType() {
+            return TypeToken.of(Player.class);
         }
 
         @Override

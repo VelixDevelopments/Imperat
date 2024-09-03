@@ -1,4 +1,4 @@
-package dev.velix.imperat.tree;
+package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;

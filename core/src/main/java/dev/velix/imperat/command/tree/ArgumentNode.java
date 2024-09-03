@@ -1,4 +1,4 @@
-package dev.velix.imperat.tree;
+package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.types.ParameterType;

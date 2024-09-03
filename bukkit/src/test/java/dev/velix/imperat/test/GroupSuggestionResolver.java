@@ -1,5 +1,6 @@
 package dev.velix.imperat.test;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
@@ -14,8 +15,8 @@ import java.util.stream.Collectors;
 public class GroupSuggestionResolver implements BukkitSuggestionResolver<Group> {
 
     @Override
-    public Class<Group> getType() {
-        return Group.class;
+    public TypeToken<Group> getType() {
+        return TypeToken.of(Group.class);
     }
 
     @Override

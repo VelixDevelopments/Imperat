@@ -2,11 +2,8 @@ package dev.velix.imperat.brigadier;
 
 import com.mojang.brigadier.arguments.*;
 import dev.velix.imperat.ArgumentTypeResolver;
-import dev.velix.imperat.BukkitImperat;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.util.TypeUtility;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -36,12 +33,13 @@ class DefaultArgTypeResolvers {
 
     public static final ArgumentTypeResolver PLAYER = parameter -> SINGLE_PLAYER;
 
-    public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
+    //TODO add entity selector
+    /*public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
         Class<? extends Entity> type = BukkitImperat.getSelectedEntity(parameter.getType());
         if (Player.class.isAssignableFrom(type)) // EntitySelector<Player>
             return MULTI_PLAYER;
         return MULTI_ENTITY;
-    };
+    };*/
 
     private static ArgumentType<? extends Number> numeric(
             Type type,

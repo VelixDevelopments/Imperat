@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.CommandSwitch;
@@ -26,7 +27,7 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
     }
     
     FlagCommandParameter(String flagName, @Nullable String permission, List<String> aliases, Description description, Class<?> inputType, OptionalValueSupplier<?> supplier) {
-        super(flagName, CommandFlag.class, permission, description,
+        super(flagName, TypeToken.of(CommandFlag.class), permission, description,
                 true, true, false, null, null);
         flag = CommandFlag.create(flagName, aliases, inputType);
         this.supplier = supplier;
@@ -34,14 +35,18 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
 
     FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission,
                          Description description, OptionalValueSupplier<?> supplier) {
-        super(commandSwitch.name(), CommandSwitch.class, permission, description,
+        super(commandSwitch.name(), TypeToken.of(CommandSwitch.class), permission, description,
                 true, true, false,
                 null, null);
         this.flag = commandSwitch;
         this.supplier = supplier;
     }
 
-    FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission, OptionalValueSupplier<?> supplier) {
+    FlagCommandParameter(
+            CommandSwitch commandSwitch,
+            @Nullable String permission,
+            OptionalValueSupplier<?> supplier
+    ) {
         this(commandSwitch, permission, Description.EMPTY, supplier);
     }
 

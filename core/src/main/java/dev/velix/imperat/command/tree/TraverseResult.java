@@ -1,4 +1,4 @@
-package dev.velix.imperat.tree;
+package dev.velix.imperat.command.tree;
 
 public enum TraverseResult {
 	

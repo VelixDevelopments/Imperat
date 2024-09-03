@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -7,7 +8,6 @@ import dev.velix.imperat.supplier.OptionalValueSupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
 import java.util.Objects;
 
 @ApiStatus.Internal
@@ -15,20 +15,20 @@ public abstract class InputParameter implements CommandParameter {
 
     protected final String name, permission;
     protected int index;
-    protected final Type type;
+    protected final TypeToken<?> typeToken;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final SuggestionResolver<?, ?> suggestionResolver;
     protected final Description description;
 
 
-    protected InputParameter(String name, Type type,
+    protected InputParameter(String name, TypeToken<?> typeToken,
                              @Nullable String permission,
                              Description description,
                              boolean optional, boolean flag, boolean greedy,
                              OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
         this.name = name;
-        this.type = type;
+        this.typeToken = typeToken;
         this.permission = permission;
         this.description = description;
         this.optional = optional;
@@ -65,13 +65,10 @@ public abstract class InputParameter implements CommandParameter {
     public void setPosition(int position) {
         this.index = position;
     }
-
-    /**
-     * @return the value type of this parameter
-     */
+    
     @Override
-    public Type getType() {
-        return type;
+    public TypeToken<?> getTypeToken() {
+        return typeToken;
     }
     
     /**
@@ -125,9 +122,9 @@ public abstract class InputParameter implements CommandParameter {
      */
     @Override
     public boolean isGreedy() {
-        if (this.type != String.class && greedy) {
+        if (this.typeToken.getType() != String.class && greedy) {
             throw new IllegalStateException(
-                    String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type.getTypeName())
+                    String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, getType().getTypeName())
             );
         }
         return greedy;
@@ -162,12 +159,12 @@ public abstract class InputParameter implements CommandParameter {
         if (o == null || getClass() != o.getClass()) return false;
         InputParameter that = (InputParameter) o;
         return Objects.equals(name, that.name)
-                && Objects.equals(type, that.type);
+                && Objects.equals(typeToken, that.typeToken);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type);
+        return Objects.hash(name, typeToken);
     }
 
     @Override

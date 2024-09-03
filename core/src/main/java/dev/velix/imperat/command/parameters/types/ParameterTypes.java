@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.types;
 
+import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.util.TypeUtility;
 
@@ -12,7 +13,7 @@ public final class ParameterTypes {
 		throw new AssertionError();
 	}
 	
-	private final static Map<Type, ParameterType> PARAMETER_TYPES = new LinkedHashMap<>();
+	private final static Map<Type, ParameterType> PARAMETER_TYPES = Maps.newLinkedHashMapWithExpectedSize(6);
 	
 	private final static ParameterType STRING_TYPE = new ParameterType() {
 		@Override

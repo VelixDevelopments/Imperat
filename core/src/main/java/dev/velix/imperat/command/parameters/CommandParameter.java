@@ -37,11 +37,18 @@ public interface CommandParameter {
      */
     @ApiStatus.Internal
     void setPosition(int position);
-
+    
+    /**
+     * @return the value type-token of this parameter
+     */
+    TypeToken<?> getTypeToken();
+    
     /**
      * @return the value type of this parameter
      */
-    Type getType();
+    default Type getType() {
+        return getTypeToken().getType();
+    }
     
     
     /**
@@ -140,7 +147,7 @@ public interface CommandParameter {
     
     static <C, T> CommandParameter of(
             String name,
-            Class<T> type,
+            TypeToken<T> type,
             @Nullable String permission,
             Description description,
             boolean optional,
@@ -150,7 +157,7 @@ public interface CommandParameter {
     ) {
         Preconditions.notNull(name, "name cannot be null !");
         Preconditions.notNull(type, "type cannot be null ");
-        Preconditions.checkArgument(!TypeUtility.matches(type, Object.class), "Type cannot be `Object`");
+        Preconditions.checkArgument(!TypeUtility.matches(type.getType(), Object.class), "Type cannot be `Object`");
         
         return new NormalCommandParameter(
                 name, type, permission, description, optional,
@@ -158,9 +165,14 @@ public interface CommandParameter {
         );
     }
     
-    static <C, T> ParameterBuilder<C, T> required(String name, Class<T> type) {
+    static <C, T> ParameterBuilder<C, T> required(String name, TypeToken<T> type) {
         return new ParameterBuilder<>(name, type, false);
     }
+    
+    static <C, T> ParameterBuilder<C, T> required(String name, Class<T> type) {
+        return required(name, TypeToken.of(type));
+    }
+  
     
     static <C> ParameterBuilder<C, Integer> requiredInt(String name) {
         return required(name, Integer.class);
@@ -189,9 +201,14 @@ public interface CommandParameter {
     static <C> ParameterBuilder<C, String> requiredGreedy(String name) {
         return new ParameterBuilder<>(name, String.class, false, true);
     }
+
+    
+    static <C, T> ParameterBuilder<C, T> optional(String name, TypeToken<T> token) {
+        return new ParameterBuilder<>(name, token, true);
+    }
     
     static <C, T> ParameterBuilder<C, T> optional(String name, Class<T> type) {
-        return new ParameterBuilder<>(name, type, true);
+        return optional(name, TypeToken.of(type));
     }
     
     static <C> ParameterBuilder<C, Integer> optionalInt(String name) {

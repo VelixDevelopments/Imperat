@@ -1,23 +1,23 @@
 package dev.velix.imperat.command;
 
+import com.google.common.reflect.TypeToken;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
+import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
-import dev.velix.imperat.tree.Traverse;
+import dev.velix.imperat.command.tree.Traverse;
 import dev.velix.imperat.util.ListUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -110,7 +110,7 @@ public interface Command<C> extends CommandParameter {
     }
     
     /**
-     * Traverses the {@link dev.velix.imperat.tree.CommandTree} linked to
+     * Traverses the {@link CommandTree} linked to
      * this command object, searching for the most suitable usage that
      * best suites the context input by the user
      *
@@ -294,8 +294,8 @@ public interface Command<C> extends CommandParameter {
      * @return the value type of this parameter
      */
     @Override
-    default Type getType() {
-        return Command.class;
+    default TypeToken<?> getTypeToken() {
+        return TypeToken.of(Command.class);
     }
 
     /**

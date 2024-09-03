@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ApiStatus.Internal
-final class DefaultUsageVerifier<C> implements UsageVerifier<C> {
+class DefaultUsageVerifier<C> implements UsageVerifier<C> {
 
     DefaultUsageVerifier() {
     }
