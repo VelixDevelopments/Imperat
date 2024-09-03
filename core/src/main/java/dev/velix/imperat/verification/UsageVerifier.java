@@ -41,5 +41,7 @@ public interface UsageVerifier<C> {
     static <C> UsageVerifier<C> defaultVerifier() {
         return new DefaultUsageVerifier<>();
     }
-
+    static <C> UsageVerifier<C> typeTolerantVerifier() {
+        return new TypeTolerantUsageVerifier<>();
+    }
 }
