@@ -1,5 +1,9 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.adventure.AdventureProvider;
+import dev.velix.imperat.adventure.BukkitAdventure;
+import dev.velix.imperat.adventure.NoAdventure;
+import dev.velix.imperat.adventure.PaperAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
@@ -12,9 +16,8 @@ import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
-import net.kyori.adventure.platform.AudienceProvider;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.kyori.adventure.text.Component;
+import dev.velix.imperat.util.reflection.Reflections;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -36,7 +39,7 @@ import java.util.UUID;
 public class BukkitImperat extends BaseImperat<CommandSender> {
 
     private final Plugin plugin;
-    private final AudienceProvider provider;
+    private final AdventureProvider<CommandSender> provider;
 
     final static MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     
@@ -53,7 +56,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
             .build();
 
     @SuppressWarnings("unchecked")
-    private BukkitImperat(Plugin plugin, AudienceProvider audienceProvider, @NotNull PermissionResolver<CommandSender> permissionResolver) {
+    private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> provider, @NotNull PermissionResolver<CommandSender> permissionResolver) {
         super(permissionResolver);
         this.plugin = plugin;
         CommandDebugger.setLogger(plugin.getLogger());
@@ -64,7 +67,21 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
                 CommandDebugger.warning("Failed to access the internal command map");
             }
         }
-        this.provider = audienceProvider == null ? BukkitAudiences.create(plugin) : audienceProvider;
+
+        if (Reflections.findClass("net.kyori.adventure.audience.Audience")) {
+            if (provider != null) {
+                this.provider = provider;
+            } else if (Audience.class.isAssignableFrom(CommandSender.class)) {
+                this.provider = new PaperAdventure();
+            } else if (Reflections.findClass("net.kyori.adventure.platform.bukkit.BukkitAudiences")) {
+                this.provider = new BukkitAdventure(plugin);
+            } else {
+                this.provider = new NoAdventure();
+            }
+        } else {
+            this.provider = new NoAdventure();
+        }
+
         registerValueResolvers();
         registerSuggestionResolvers();
     }
@@ -73,7 +90,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
      * Creates a bukkit command dispatcher instance
      *
      * @param plugin             the plugin
-     * @param audiences          the kyori adventure audience provider
+     * @param audienceProvider          the kyori adventure audience provider
      * @param permissionResolver the permission resolver
      * @param override           whether to override the existing instance in the bukkit server
      *                           or just use an already existing instance in the server loaded
@@ -82,7 +99,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
      */
     public static BukkitImperat create(
             @NotNull Plugin plugin,
-            @Nullable AudienceProvider audiences,
+            @Nullable AdventureProvider<CommandSender> audienceProvider,
             @NotNull PermissionResolver<CommandSender> permissionResolver,
             boolean override
     ) {
@@ -90,7 +107,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
         RegisteredServiceProvider<BukkitImperat> provider =
                 Bukkit.getServicesManager().getRegistration(BukkitImperat.class);
         if (provider == null || override) {
-            BukkitImperat dispatcher = new BukkitImperat(plugin, audiences, permissionResolver);
+            BukkitImperat dispatcher = new BukkitImperat(plugin, audienceProvider, permissionResolver);
             Bukkit.getServicesManager().register(BukkitImperat.class, dispatcher, plugin, ServicePriority.Normal);
             return dispatcher;
         }
@@ -99,13 +116,13 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
 
     public static BukkitImperat create(
             @NotNull Plugin plugin,
-            @Nullable AudienceProvider audiences,
+            @Nullable AdventureProvider<CommandSender> audienceProvider,
             @NotNull PermissionResolver<CommandSender> permissionResolver
     ) {
-        return create(plugin, audiences, permissionResolver, false);
+        return create(plugin, audienceProvider, permissionResolver, false);
     }
 
-    public static BukkitImperat create(Plugin plugin, @Nullable AudienceProvider audienceProvider) {
+    public static BukkitImperat create(Plugin plugin, @Nullable AdventureProvider<CommandSender> audienceProvider) {
         return create(plugin, audienceProvider, DEFAULT_PERMISSION_RESOLVER);
     }
 
@@ -116,7 +133,6 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
     public static BukkitImperat create(Plugin plugin) {
         return create(plugin, null, DEFAULT_PERMISSION_RESOLVER);
     }
-
 
     /**
      * Wraps the sender into a built-in command-sender type
@@ -154,6 +170,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
 
     @Override
     public void shutdownPlatform() {
+        this.provider.close();
         Bukkit.getPluginManager().disablePlugin(plugin);
     }
 
@@ -184,11 +201,10 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
 
 
     protected void registerValueResolvers() {
-
         this.registerValueResolver(Player.class, ((source, context, raw, pivot, parameter) -> {
-            Player player = Bukkit.getPlayer(raw.toLowerCase());
+            final Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;
-            throw new ContextResolveException("Player '" + raw + "' is offline or invalid");
+            throw new ContextResolveException("A player with the name '" + raw + "' doesn't seem to be online");
         }));
 
         this.registerValueResolver(OfflinePlayer.class, (source, context, raw, pivot, parameter) -> {
@@ -201,7 +217,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
         this.registerValueResolver(World.class, (source, context, raw, pivot, parameter) -> {
             World world = Bukkit.getWorld(raw.toLowerCase());
             if (world != null) return world;
-            throw new ContextResolveException("Invalid world '%s'", raw);
+            throw new ContextResolveException("Unknown world '%s'", raw);
         });
 
         registerValueResolver(UUID.class, (source, context, raw, pivot, parameter) -> {
@@ -210,14 +226,6 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
             } catch (IllegalArgumentException ex) {
                 throw new ContextResolveException("Invalid uuid-format '%s'", raw);
             }
-        });
-
-        registerValueResolver(Component.class, (source, context, raw, pivot, parameter) -> {
-            String result = MINI_MESSAGE.stripTags(raw);
-            if (result.length() == raw.length()) {
-                return MINI_MESSAGE.deserialize(raw);
-            }
-            return LEGACY_COMPONENT_SERIALIZER.deserialize(raw);
         });
     }
 

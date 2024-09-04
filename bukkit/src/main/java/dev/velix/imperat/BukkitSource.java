@@ -1,11 +1,10 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.platform.AudienceProvider;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,13 +12,16 @@ public final class BukkitSource implements Source<CommandSender> {
 
     private final BukkitImperat imperat;
     private final CommandSender sender;
-    private final AudienceProvider audiences;
+    private final AdventureProvider<CommandSender> provider;
 
-    public BukkitSource(BukkitImperat imperat,
-                        CommandSender sender, AudienceProvider audiences) {
+    public BukkitSource(
+            final BukkitImperat imperat,
+            final CommandSender sender,
+            final AdventureProvider<CommandSender> provider
+    ) {
         this.imperat = imperat;
         this.sender = sender;
-        this.audiences = audiences;
+        this.provider = provider;
     }
 
     /**
@@ -62,12 +64,9 @@ public final class BukkitSource implements Source<CommandSender> {
     public void reply(String prefix, Caption<CommandSender> caption, Context<CommandSender> context) {
         reply(prefix + caption.getMessage(imperat, context));
     }
-    
-    
-    public void reply(Component component) {
-        Audience audience = isConsole() ? audiences.console()
-                : audiences.player(((Player) sender).getUniqueId());
-        audience.sendMessage(component);
+
+    public void reply(final ComponentLike component) {
+       provider.audience(sender).sendMessage(component);
     }
 
     /**
