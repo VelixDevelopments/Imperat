@@ -17,10 +17,10 @@ import java.util.Collection;
  * @author Mqzen
  */
 @ApiStatus.AvailableSince("1.0.0")
-interface AnnotationReader {
+public interface AnnotationReader {
 
     /**
-     * Get annotated element
+     * Get an annotated element
      * may be a parameter, method or even a class
      *
      * @param level the level

@@ -4,7 +4,7 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.ElementKey;
 import dev.velix.imperat.annotations.element.ElementVisitor;
-import dev.velix.imperat.annotations.types.Command;
+import dev.velix.imperat.annotations.types.classes.Command;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Help;
 import dev.velix.imperat.annotations.types.methods.SubCommand;
@@ -32,11 +32,57 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
     AnnotationParserImpl(Imperat<C> dispatcher) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
-        this.dataRegistry = new AnnotationHandlerRegistry<>(annotationRegistry, dispatcher);
+        this.dataRegistry = new AnnotationHandlerRegistry<>(this, annotationRegistry, dispatcher);
     }
 
     private <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, E element) {
         return ((ElementVisitor<E>) level.getVisitor()).loadKey(element);
+    }
+    
+    /**
+     * Parses annotated command class of type {@linkplain T}
+     * into {@link Command} then register it using {@link Imperat}
+     *
+     * @param commandAnnotation the command annotation loaded from the class
+     * @param instance          the instance of the command class
+     */
+    @Override
+    public <T> dev.velix.imperat.command.Command<C> parseCommandClass(
+            Command commandAnnotation,
+            AnnotationReader reader,
+            CommandAnnotatedElement<?> element,
+            T instance,
+            Class<T> instanceClazz
+    ) {
+        AnnotationDataCreator<dev.velix.imperat.command.Command<C>, Command> creator = dataRegistry.getDataCreator(Command.class);
+        assert creator != null;
+        dev.velix.imperat.command.Command<C> commandObject = creator.create(instance, instanceClazz, commandAnnotation, element);
+        dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, reader, element);
+        
+        Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods())
+                .sorted((m1, m2) -> getMethodPriority(m1) - getMethodPriority(m2))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        
+        for (Method method : methods) {
+            if (!MethodVerifier.isMethodAcceptable(method)) continue;
+            MethodVerifier.verifyMethod(dispatcher, instanceClazz, method, method.isAnnotationPresent(DefaultUsage.class));
+            
+            var methodKey = getKey(AnnotationLevel.METHOD, method);
+            CommandAnnotatedElement<Method> methodElement = (CommandAnnotatedElement<Method>) reader.getAnnotated(AnnotationLevel.METHOD, methodKey);
+            assert methodElement != null;
+            
+            if (!methodElement.isAnnotationPresent(Usage.class)) {
+                dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, reader, methodElement);
+                continue;
+            }
+            Usage usageAnnotation = methodElement.getAnnotation(Usage.class);
+            AnnotationDataCreator<CommandUsage.Builder<C>, Usage> usageDataCreator = dataRegistry.getDataCreator(Usage.class);
+            assert usageDataCreator != null;
+            CommandUsage.Builder<C> usageBuilder = usageDataCreator.create(instance, instanceClazz, usageAnnotation, methodElement);
+            dataRegistry.injectForElement(instance, instanceClazz, commandObject, usageBuilder, reader, methodElement);
+            commandObject.addUsage(usageBuilder.build());
+        }
+        return commandObject;
     }
 
     @Override
@@ -51,43 +97,15 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
         if (commandAnnotation == null) {
             throw new UnknownCommandClass(instanceClazz);
         }
-
-        AnnotationDataCreator<dev.velix.imperat.command.Command<C>, Command> creator = dataRegistry.getDataCreator(Command.class);
-        assert creator != null;
-        dev.velix.imperat.command.Command<C> commandObject = creator.create(instance, instanceClazz, commandAnnotation, element);
-        dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, element);
-
-        Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods())
-                .sorted((m1, m2) -> getMethodPriority(m1) - getMethodPriority(m2))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        for (Method method : methods) {
-            if (!MethodVerifier.isMethodAcceptable(method)) continue;
-            MethodVerifier.verifyMethod(dispatcher, instanceClazz, method, method.isAnnotationPresent(DefaultUsage.class));
-
-            var methodKey = getKey(AnnotationLevel.METHOD, method);
-            CommandAnnotatedElement<Method> methodElement = (CommandAnnotatedElement<Method>) reader.getAnnotated(AnnotationLevel.METHOD, methodKey);
-            assert methodElement != null;
-
-            if (!methodElement.isAnnotationPresent(Usage.class)) {
-                dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, methodElement);
-                continue;
-            }
-            Usage usageAnnotation = methodElement.getAnnotation(Usage.class);
-            AnnotationDataCreator<CommandUsage.Builder<C>, Usage> usageDataCreator = dataRegistry.getDataCreator(Usage.class);
-            assert usageDataCreator != null;
-            CommandUsage.Builder<C> usageBuilder = usageDataCreator.create(instance, instanceClazz, usageAnnotation, methodElement);
-            dataRegistry.injectForElement(instance, instanceClazz, commandObject, usageBuilder, methodElement);
-            commandObject.addUsage(usageBuilder.build());
-        }
-        
-        /*for (Class<?> inner : instanceClazz.getDeclaredClasses()) {
+         /*for (Class<?> inner : instanceClazz.getDeclaredClasses()) {
             parseCommandClass(inner);
         }*/
-        
-        return commandObject;
+        return parseCommandClass(commandAnnotation, reader, element, instance, instanceClazz);
+       
     }
+    
 
+    
     /**
      * Registers {@link AnnotationReplacer}
      *

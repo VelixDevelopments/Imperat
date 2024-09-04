@@ -3,7 +3,7 @@ package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitCommandHelp;
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.Command;
+import dev.velix.imperat.annotations.types.classes.Command;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Help;

@@ -1,4 +1,4 @@
-package dev.velix.imperat.annotations.types;
+package dev.velix.imperat.annotations.types.classes;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -17,11 +17,11 @@ public @interface Command {
      * others are going to be considered the aliases
      */
     @NotNull String[] value();
-
+    
     /**
      * @return Whether to ignore the permission checks
      * while auto-completing or not
-     * @see dev.velix.imperat.command.Command#ignoreACPermissions(boolean)
+     * @see Command#ignoreAutoCompletionPermission()
      */
     boolean ignoreAutoCompletionPermission() default false;
 }

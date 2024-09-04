@@ -14,11 +14,11 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * Represents a place where  the annotations
+ * Represents a place where the annotations
  * can be place
  */
 @ApiStatus.Internal
-enum AnnotationLevel {
+public enum AnnotationLevel {
 
 
     CLASS(ElementVisitor::classes) {

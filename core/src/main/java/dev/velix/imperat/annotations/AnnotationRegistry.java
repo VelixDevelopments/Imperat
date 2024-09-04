@@ -1,6 +1,6 @@
 package dev.velix.imperat.annotations;
 
-import dev.velix.imperat.annotations.types.Command;
+import dev.velix.imperat.annotations.types.classes.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;

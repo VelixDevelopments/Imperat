@@ -35,6 +35,7 @@ public interface AnnotationDataInjector<O, C, A extends Annotation> {
             Class<?> proxy,
             @NotNull Command<C> command,
             @NotNull O toLoad,
+            AnnotationReader reader,
             @NotNull CommandAnnotatedElement<?> element,
             @NotNull A annotation
     );

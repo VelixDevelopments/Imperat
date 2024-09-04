@@ -7,6 +7,7 @@ import dev.velix.imperat.annotations.parameters.AnnotationParameterDecorator;
 import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
+import dev.velix.imperat.annotations.types.classes.Inherit;
 import dev.velix.imperat.annotations.types.methods.*;
 import dev.velix.imperat.annotations.types.parameters.Optional;
 import dev.velix.imperat.annotations.types.parameters.*;
@@ -20,15 +21,14 @@ import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.MethodHelpExecution;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
-import dev.velix.imperat.util.Registry;
-import dev.velix.imperat.util.TypeUtility;
-import dev.velix.imperat.util.TypeWrap;
+import dev.velix.imperat.util.*;
 import dev.velix.imperat.util.annotations.MethodVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -45,12 +45,13 @@ final class AnnotationHandlerRegistry<C> extends
     private final Map<Class<? extends Annotation>, AnnotationDataCreator<?, ?>> dataCreators = new HashMap<>();
 
     public AnnotationHandlerRegistry(
+            AnnotationParser<C> parser,
             AnnotationRegistry annotationRegistry,
             Imperat<C> dispatcher
     ) {
         super(LinkedHashMap::new);
         registerDataCreator(
-                dev.velix.imperat.annotations.types.Command.class,
+                dev.velix.imperat.annotations.types.classes.Command.class,
                 (proxyInstance, proxy, commandAnnotation, element) -> {
                     final String[] values = commandAnnotation.value();
                     List<String> aliases = new ArrayList<>(Arrays.asList(values)
@@ -71,7 +72,12 @@ final class AnnotationHandlerRegistry<C> extends
                     .execute(new MethodCommandExecutor<>(proxyInstance, dispatcher, method, params));
         });
 
-        registerCommandInjector(DefaultUsage.class, (pI, proxy, command, toLoad, element, annotation) -> {
+        registerCommandInjector(Inherit.class, (proxyInstance, proxy,
+                                                command, toLoad, reader,
+                                                element, annotation) ->
+                handleInheritance(annotation, reader, parser, element, toLoad));
+        
+        registerCommandInjector(DefaultUsage.class, (pI, proxy, command, toLoad, reader, element, annotation) -> {
             Method method = (Method) element.getElement();
             if (element.isAnnotationPresent(Usage.class) || element.isAnnotationPresent(SubCommand.class)) {
                 throw new IllegalArgumentException("A default usage in method '" + method.getName() + "' in class '" + proxy.getName() + "'");
@@ -84,7 +90,7 @@ final class AnnotationHandlerRegistry<C> extends
 
         registerSubCmdInjector(annotationRegistry, dispatcher);
 
-        registerCommandInjector(Help.class, ((pI, proxy, command, toLoad, element, annotation) -> {
+        registerCommandInjector(Help.class, ((pI, proxy, command, toLoad, reader, element, annotation) -> {
             MethodVerifier.verifyHelpMethod(dispatcher, toLoad.getMainUsage(), proxy, (Method) element.getElement());
             Method method = (Method) element.getElement();
             var subCommandParams = loadParameters(annotationRegistry, dispatcher, null, toLoad.getMainUsage(), proxy, method, true);
@@ -97,12 +103,12 @@ final class AnnotationHandlerRegistry<C> extends
         }));
 
         registerUsageInjector(Async.class,
-                (pI, proxy, command, toLoad, element, annotation) -> toLoad.coordinator(CommandCoordinator.async()));
+                (pI, proxy, command, toLoad, reader, element, annotation) -> toLoad.coordinator(CommandCoordinator.async()));
 
-        registerUsageInjector(Cooldown.class, (pI, proxy, command, toLoad, element, annotation)
+        registerUsageInjector(Cooldown.class, (pI, proxy, command, toLoad, reader, element, annotation)
                 -> toLoad.cooldown(loadCooldown(element)));
 
-        registerInjector(Permission.class, (pI, proxy, command, toLoad, element, annotation) -> {
+        registerInjector(Permission.class, (pI, proxy, command, toLoad, reader, element, annotation) -> {
             command.setPermission(annotation.value());
             if (toLoad instanceof CommandUsage.Builder<?> builder) {
                 builder.permission(annotation.value());
@@ -111,7 +117,7 @@ final class AnnotationHandlerRegistry<C> extends
             }
         });
 
-        registerInjector(Description.class, ((pI, proxy, command, toLoad, element, annotation) -> {
+        registerInjector(Description.class, ((pI, proxy, command, toLoad, reader, element, annotation) -> {
             command.setDescription(annotation.value());
             if (toLoad instanceof CommandUsage.Builder<?> usage) {
                 usage.description(annotation.value());
@@ -120,11 +126,61 @@ final class AnnotationHandlerRegistry<C> extends
             }
         }));
     }
-
+    
+    private <T> void handleInheritance(
+            Inherit annotation,
+            AnnotationReader reader,
+            AnnotationParser<C> parser,
+            CommandAnnotatedElement<?> element,
+            Command<C> toLoad
+    ) {
+        Class<?>[] subClasses = annotation.value();
+        
+        //Injecting subcommands recursively
+        for(Class<?> subClass : subClasses) {
+            if(!subClass.isAnnotationPresent(SubCommand.class)) {
+                continue;
+            }
+            SubCommand subAnn = subClass.getAnnotation(SubCommand.class);
+            var subCmd = parser.parseCommandClass(
+                    subAnnotationToCmdAnnotation(subAnn),
+                    reader,
+				            element,
+                    (T)getSubCommandInstance(subClass),
+                    (Class<T>)subClass
+            );
+            toLoad.addSubCommand(subCmd, subAnn.attachDirectly());
+        }
+    }
+    private <T> T getSubCommandInstance(Class<T> subClass) {
+        try {
+            Constructor<?> constructor = subClass.getConstructor();
+            return (T) constructor.newInstance();
+        } catch (NoSuchMethodException |InvocationTargetException
+                 | InstantiationException | IllegalAccessException e) {
+            CommandDebugger.error(
+                    subClass, "constructor",
+                    e, "no empty public constructor"
+            );
+            throw new RuntimeException(e);
+        }
+	    
+    }
+    
+    private dev.velix.imperat.annotations.types.classes.Command subAnnotationToCmdAnnotation(SubCommand subAnn) {
+        return AnnotationFactory.create(dev.velix.imperat.annotations.types.classes.Command.class,
+                "value", subAnn.value(), "ignoreAutoCompletionChecks", subAnn.ignoreAutoCompletionChecks());
+    }
+    
     private void registerSubCmdInjector(AnnotationRegistry annotationRegistry, Imperat<C> dispatcher) {
-        registerCommandInjector(SubCommand.class, (pI, proxy, command, toLoad, element, annotation) -> {
+        registerCommandInjector(SubCommand.class, (pI, proxy, command, toLoad, reader, element, annotation) -> {
+            if(element.getElement() instanceof Class) {
+                //we will use the injector for @Inherit to load the subcommand
+                return;
+            }
+            
             Method method = (Method) element.getElement();
-
+            
             if (element.isAnnotationPresent(Usage.class)) {
                 logError(method, proxy, "@Usage and @SubCommand cannot be used together (only one of them is allowed per method)");
                 return;
@@ -206,6 +262,7 @@ final class AnnotationHandlerRegistry<C> extends
             @NotNull Class<?> proxy,
             @NotNull Command<C> command,
             @NotNull O toLoad,
+            @NotNull AnnotationReader reader,
             @NotNull CommandAnnotatedElement<?> element
     ) {
 
@@ -213,8 +270,7 @@ final class AnnotationHandlerRegistry<C> extends
             AnnotationDataInjector<O, C, A> injector =
                     (AnnotationDataInjector<O, C, A>) getInjector(annotation.annotationType());
             if (injector == null) continue;
-            injector.inject(proxyInstance, proxy, command, toLoad,
-                    element, (A) annotation);
+            injector.inject(proxyInstance, proxy, command, toLoad, reader, element, (A) annotation);
         }
 
     }

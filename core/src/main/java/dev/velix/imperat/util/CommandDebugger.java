@@ -40,6 +40,14 @@ public final class CommandDebugger {
         }
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s'", owningClass.getName(), name), ex);
     }
+    
+    public static void error(Class<?> owningClass, String name, Throwable ex, String message) {
+        if(LOGGER == null) {
+            System.out.println(String.format("Error in class '%s', in method '%s'", owningClass.getName(), name));
+            return;
+        }
+        LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s' due to '%s'", owningClass.getName(), name, message), ex);
+    }
 
     public static void debugParameters(String msg, List<CommandParameter> parameters) {
         if(LOGGER == null) {

@@ -70,7 +70,7 @@ public final class Test extends JavaPlugin implements Listener {
 		
         dispatcher.registerAnnotationReplacer(MyCommand.class, (annotation)-> {
           var cmd = AnnotationFactory.create(
-                  dev.velix.imperat.annotations.types.Command.class,
+                  dev.velix.imperat.annotations.types.classes.Command.class,
                   "value" , new String[]{"name", "alias"});
           var permission = AnnotationFactory.create(Permission.class, "value", "command.group");
           var desc = AnnotationFactory.create(Description.class, "value",
