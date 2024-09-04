@@ -7,7 +7,7 @@ import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.annotations.types.classes.Command;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Help;
-import dev.velix.imperat.annotations.types.methods.SubCommand;
+import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.exceptions.UnknownCommandClass;

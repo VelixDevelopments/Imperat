@@ -7,7 +7,7 @@ import dev.velix.imperat.annotations.types.classes.Command;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Help;
-import dev.velix.imperat.annotations.types.methods.SubCommand;
+import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Named;
 import dev.velix.imperat.annotations.types.parameters.SuggestionProvider;

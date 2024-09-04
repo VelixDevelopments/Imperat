@@ -7,6 +7,7 @@ import dev.velix.imperat.annotations.parameters.AnnotationParameterDecorator;
 import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
+import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.classes.Inherit;
 import dev.velix.imperat.annotations.types.methods.*;
 import dev.velix.imperat.annotations.types.parameters.Optional;

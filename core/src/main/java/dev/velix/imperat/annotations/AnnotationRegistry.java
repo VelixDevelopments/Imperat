@@ -5,7 +5,7 @@ import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Help;
-import dev.velix.imperat.annotations.types.methods.SubCommand;
+import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.*;
 import dev.velix.imperat.util.collections.ClassMap;
