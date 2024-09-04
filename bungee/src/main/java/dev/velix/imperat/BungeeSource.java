@@ -1,22 +1,21 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import net.kyori.adventure.platform.AudienceProvider;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public final class BungeeSource implements Source<CommandSender> {
 
     private final BungeeImperat imperat;
     private final CommandSender sender;
-    private final AudienceProvider provider;
+    private final AdventureProvider<CommandSender> provider;
 
-    public BungeeSource(BungeeImperat imperat, AudienceProvider provider, CommandSender sender) {
+    public BungeeSource(BungeeImperat imperat, AdventureProvider<CommandSender> provider, CommandSender sender) {
         this.imperat = imperat;
         this.provider = provider;
         this.sender = sender;
@@ -64,13 +63,9 @@ public final class BungeeSource implements Source<CommandSender> {
     public boolean isConsole() {
         return sender.equals(ProxyServer.getInstance().getConsole());
     }
-    
-    
-    public void reply(Component component) {
-        if (isConsole()) {
-            provider.console().sendMessage(component);
-        } else
-            provider.player(((ProxiedPlayer) sender).getUniqueId());
+
+    public void reply(final ComponentLike component) {
+        provider.audience(sender).sendMessage(component);
     }
 
 }
