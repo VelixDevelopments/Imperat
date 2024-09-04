@@ -32,6 +32,7 @@ dependencies {
     annotationProcessor lombok()
 
     implementation project(":core")
+    implementation project(":adventure")
     implementation project(":brigadier")
 
     compileOnly("com.mojang:brigadier:1.0.18")

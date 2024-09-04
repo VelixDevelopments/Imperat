@@ -1,5 +1,7 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.adventure.AdventureProvider;
+import dev.velix.imperat.adventure.NoAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Context;
@@ -7,7 +9,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
-import net.kyori.adventure.platform.AudienceProvider;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -18,20 +19,25 @@ public final class BungeeImperat extends BaseImperat<CommandSender> {
     private final static BungeePermissionResolver DEFAULT_PERMISSION_RESOLVER = new BungeePermissionResolver();
 
     private final Plugin plugin;
-    private final AudienceProvider provider;
+    private final AdventureProvider<CommandSender> provider;
 
-    private BungeeImperat(Plugin plugin,
-                          AudienceProvider provider,
-                          PermissionResolver<CommandSender> permissionResolver) {
+    private BungeeImperat(
+            final Plugin plugin,
+            final AdventureProvider<CommandSender> provider,
+            final PermissionResolver<CommandSender> permissionResolver
+    ) {
         super(permissionResolver);
         this.plugin = plugin;
-        this.provider = provider;
+        if (provider == null) {
+            this.provider = new NoAdventure<>();
+        } else {
+            this.provider = provider;
+        }
     }
-
 
     public static BungeeImperat create(
             @NotNull Plugin plugin,
-            @Nullable AudienceProvider audiences,
+            @Nullable AdventureProvider<CommandSender> audiences,
             @NotNull PermissionResolver<CommandSender> permissionResolver
     ) {
         return new BungeeImperat(plugin, audiences, permissionResolver);
@@ -39,7 +45,7 @@ public final class BungeeImperat extends BaseImperat<CommandSender> {
 
     public static BungeeImperat create(
             Plugin plugin,
-            @Nullable AudienceProvider audienceProvider
+            @Nullable AdventureProvider<CommandSender> audienceProvider
     ) {
         return create(plugin, audienceProvider, DEFAULT_PERMISSION_RESOLVER);
     }
