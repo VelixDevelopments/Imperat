@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly project(":core")
     compileOnlyApi kyori(KyoriModule.API)
 
     compileOnly 'org.jetbrains:annotations:24.1.0'

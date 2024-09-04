@@ -1,10 +1,43 @@
 package dev.velix.imperat.adventure;
 
+import dev.velix.imperat.context.Source;
 import net.kyori.adventure.audience.Audience;
 
+/**
+ * The {@code AdventureProvider} interface defines a mechanism for obtaining an
+ * {@link Audience} based on a given source or context. It is designed to
+ * facilitate communication or message broadcasting to a specific audience
+ * within the application, typically in a context like a game server or
+ * chat system where audiences are dynamically determined.
+ *
+ * @param <S> the type of the source from which the {@link Audience} can be derived
+ */
 public interface AdventureProvider<S> {
 
+    /**
+     * Obtains an {@link Audience} for the specified source.
+     *
+     * @param s the source from which the {@link Audience} is derived
+     * @return the {@link Audience} corresponding to the given source
+     */
     Audience audience(final S s);
+
+    /**
+     * Obtains an {@link Audience} for a given {@link Source} instance.
+     * This method delegates to {@link #audience(Object)} by retrieving the origin
+     * from the provided {@link Source}.
+     *
+     * @param source the {@link Source} instance from which the {@link Audience} is derived
+     * @return the {@link Audience} corresponding to the origin of the provided {@link Source}
+     */
+    default Audience audience(final Source<S> source) {
+        return this.audience(source.getOrigin());
+    }
+
+    /**
+     * Performs any necessary cleanup or resource management. By default, this method
+     * does nothing, but it can be overridden to provide specific close operations.
+     */
     default void close() {}
 
 }

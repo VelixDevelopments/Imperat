@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
+import dev.velix.imperat.adventure.BungeeAdventure;
 import dev.velix.imperat.adventure.NoAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
@@ -9,6 +10,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +30,12 @@ public final class BungeeImperat extends BaseImperat<CommandSender> {
     ) {
         super(permissionResolver);
         this.plugin = plugin;
-        if (provider == null) {
-            this.provider = new NoAdventure<>();
-        } else {
+        if (provider != null) {
             this.provider = provider;
+        } else if (Reflections.findClass("net.kyori.adventure.platform.bungeecord.BungeeAudiences")) {
+            this.provider = new BungeeAdventure(plugin);
+        } else {
+            this.provider = new NoAdventure<>();
         }
     }
 
@@ -92,6 +96,8 @@ public final class BungeeImperat extends BaseImperat<CommandSender> {
 
     @Override
     public void shutdownPlatform() {
-        plugin.onDisable();
+        this.provider.close();
+        this.plugin.onDisable();
     }
+
 }
