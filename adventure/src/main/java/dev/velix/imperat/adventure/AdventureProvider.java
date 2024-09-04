@@ -2,6 +2,7 @@ package dev.velix.imperat.adventure;
 
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.ComponentLike;
 
 /**
  * The {@code AdventureProvider} interface defines a mechanism for obtaining an
@@ -32,6 +33,28 @@ public interface AdventureProvider<S> {
      */
     default Audience audience(final Source<S> source) {
         return this.audience(source.getOrigin());
+    }
+
+    /**
+     * Sends a message to the {@link Audience} derived from the specified source.
+     *
+     * @param sender the source from which the {@link Audience} is derived
+     * @param component the message to be sent, represented by a {@link ComponentLike} instance
+     */
+    default void send(final S sender, final ComponentLike component) {
+        this.audience(sender).sendMessage(component);
+    }
+
+    /**
+     * Sends a message to the {@link Audience} derived from the specified {@link Source} instance.
+     * This method delegates to {@link #send(Object, ComponentLike)} by retrieving the origin
+     * from the provided {@link Source}.
+     *
+     * @param source the {@link Source} instance from which the {@link Audience} is derived
+     * @param component the message to be sent, represented by a {@link ComponentLike} instance
+     */
+    default void send(final Source<S> source, final ComponentLike component) {
+        this.send(source.getOrigin(), component);
     }
 
     /**

@@ -7,6 +7,7 @@ import dev.velix.imperat.context.Source;
 import net.kyori.adventure.text.ComponentLike;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public final class BungeeSource implements Source<CommandSender> {
@@ -35,7 +36,15 @@ public final class BungeeSource implements Source<CommandSender> {
     public void reply(String message) {
         sender.sendMessage(TextComponent.fromLegacyText(message));
     }
-    
+
+    public void reply(BaseComponent... message) {
+        sender.sendMessage(message);
+    }
+
+    public void reply(final ComponentLike component) {
+        provider.send(this, component);
+    }
+
     /**
      * Replies to the command sender with a caption message
      *
@@ -46,7 +55,7 @@ public final class BungeeSource implements Source<CommandSender> {
     public void reply(Caption<CommandSender> caption, Context<CommandSender> context) {
         reply(caption.getMessage(imperat, context));
     }
-    
+
     /**
      * Replies to command sender with a caption message
      *
@@ -58,14 +67,10 @@ public final class BungeeSource implements Source<CommandSender> {
     public void reply(String prefix, Caption<CommandSender> caption, Context<CommandSender> context) {
         reply(prefix + caption.getMessage(imperat, context));
     }
-    
+
     @Override
     public boolean isConsole() {
-        return sender.equals(ProxyServer.getInstance().getConsole());
-    }
-
-    public void reply(final ComponentLike component) {
-        provider.audience(sender).sendMessage(component);
+        return ProxyServer.getInstance().getConsole().equals(sender);
     }
 
 }
