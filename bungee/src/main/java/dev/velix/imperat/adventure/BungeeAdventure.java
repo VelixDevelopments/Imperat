@@ -18,4 +18,9 @@ public class BungeeAdventure implements AdventureProvider<CommandSender> {
         return audiences.sender(sender);
     }
 
+    @Override
+    public void close() {
+        this.audiences.close();
+    }
+
 }
