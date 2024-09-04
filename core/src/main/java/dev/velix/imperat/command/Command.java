@@ -26,7 +26,6 @@ import java.util.function.Predicate;
 
 /**
  * Represents a wrapper for the actual command's data
- *
  * @param <C> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
@@ -199,19 +198,25 @@ public interface Command<C> extends CommandParameter {
     AutoCompleter<C> getAutoCompleter();
     
     /**
+     * sets the parent command
+     * @param parent the parent to set.
+     */
+    void setParent(Command<C> parent);
+    
+    /**
      * @return the parent command of this sub-command
      */
     @Nullable
     Command<C> getParent();
-
+    
     /**
-     * The command to be added as a subcommand of this instance
-     *
-     * @param command the sub-command to be added
+     * Injects a created-subcommand directly into the parent's command usages.
+     * @param command the subcommand to inject
+     * @param attachDirectly  whether the sub command's usage will be attached to
+     *                        the main/default usage of the command directly or not
      */
-    void addSubCommand(Command<C> command);
-
-
+    void addSubCommand(Command<C> command, boolean attachDirectly);
+    
     /**
      * Creates and adds a new sub-command (if it doesn't exist) then add
      * the {@link CommandUsage} to the sub-command
@@ -228,7 +233,6 @@ public interface Command<C> extends CommandParameter {
      *                       However, if you set attachDirectly to false, this will merge all the command's usages
      *                       automatically with the subcommand's usage, so if your command has a usage of '/command param1'
      *                       then the final usage will be : "/command param1 your subcommand param2, param3"
-     *
      *                       </p>
      */
     //TODO create subcommand builder
@@ -369,16 +373,105 @@ public interface Command<C> extends CommandParameter {
                                 HelpExecution<C> helpExecution);
     
 
-    static <C> Command<C> createCommand(String name) {
-        return createCommand(null, name);
+    static <C> Command.Builder<C> create(String name) {
+        return create(null, name);
     }
 
-    static <C> Command<C> createCommand(@Nullable Command<C> parent, @NotNull String name) {
-        return new CommandImpl<>(parent, name);
+    static <C> Command.Builder<C> create(@Nullable Command<C> parent, @NotNull String name) {
+        return create(parent, 0, name);
     }
 
-    static <C> Command<C> createCommand(@Nullable Command<C> parent, int position, @NotNull String name) {
-        return new CommandImpl<>(parent, position, name);
+    static <C> Command.Builder<C> create(
+            @Nullable Command<C> parent,
+            int position,
+            @NotNull String name
+    ) {
+        return new Builder<>(parent, position, name);
+    }
+    
+    class Builder<C> {
+        
+        private final Command<C> cmd;
+        
+        Builder(@Nullable Command<C> parent, int position, String name) {
+            this.cmd = new CommandImpl<>(parent, position, name);
+        }
+        
+        public Builder<C> ignoreACPermissions(boolean ignore) {
+            this.cmd.ignoreACPermissions(ignore);
+            return this;
+        }
+        
+        public Builder<C> aliases(String... aliases) {
+            this.cmd.addAliases(aliases);
+            return this;
+        }
+        
+        public Builder<C> aliases(List<String> aliases) {
+            this.cmd.addAliases(aliases);
+            return this;
+        }
+        
+        public Builder<C> description(String description) {
+            this.cmd.setDescription(description);
+            return this;
+        }
+        
+        public Builder<C> description(Description description) {
+            return description(description.toString());
+        }
+        
+        public Builder<C> permission(String permission) {
+            this.cmd.setPermission(permission);
+            return this;
+        }
+        
+        public Builder<C> defaultExecution(CommandExecution<C> defaultExec) {
+            cmd.setDefaultUsageExecution(defaultExec);
+            return this;
+        }
+        
+        public Builder<C> usage(CommandUsage<C> usage) {
+            cmd.addUsage(usage);
+            return this;
+        }
+        
+        public Builder<C> subCommand(Command<C> subCommand, boolean attachDirectly) {
+            cmd.addSubCommand(subCommand, attachDirectly);
+            return this;
+        }
+        
+        public Builder<C> subCommand(Command<C> subCommand) {
+            return subCommand(subCommand, false);
+        }
+        
+        public Builder<C> subCommand(String name, CommandUsage<C> mainUsage, boolean attachDirectly) {
+            return subCommand(
+                    Command.<C>create(name)
+                            .usage(mainUsage)
+                            .build(),
+                    attachDirectly
+            );
+        }
+        
+        public Builder<C> subCommand(String name, CommandUsage<C> mainUsage) {
+            return subCommand(name, mainUsage, false);
+        }
+        
+        public Builder<C> preProcessor(CommandPreProcessor<C> preProcessor) {
+            cmd.setPreProcessor(preProcessor);
+            return this;
+        }
+        
+        public Builder<C> postProcessor(CommandPostProcessor<C> postProcessor) {
+            cmd.setPostProcessor(postProcessor);
+            return this;
+        }
+        
+        public Command<C> build() {
+            return cmd;
+        }
+        
     }
 	
 }

@@ -3,6 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.tree.TraverseResult;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.CommandTreeVisualizer;
@@ -20,74 +21,34 @@ public class TestRun {
     TestRun() {
     }
 
-    private Command<TestSender> groupCommand() {
-        Command<TestSender> command = Command.createCommand("test");
-        command.addUsage(CommandUsage.<TestSender>builder()
-                .parameters(CommandParameter.requiredText("group")).build());
-
-        command.addSubCommandUsage(
-                "setperm", CommandUsage.<TestSender>builder()
-                        .parameters(
-                                CommandParameter.requiredText("permission"),
-                                CommandParameter.optionalBoolean("value").defaultValue(false)
-                        ).build()
-        );
-
-        command.addSubCommandUsage(
-                "setprefix", CommandUsage.<TestSender>builder()
-                        .parameters(
-                                CommandParameter.requiredText("prefix")
-                        ).build()
-        );
-
-        command.addSubCommandUsage("help",
-                CommandUsage.<TestSender>builder()
-                        .parameters(
-                                CommandParameter.optionalInt("page").defaultValue(1)
-                        )
-                        .build(),
-                true);
-
-        return command;
-    }
-
-    private Command<TestSender> complexCommand() {
-        Command<TestSender> cmd = Command.createCommand("ot");
-        cmd.addUsage(CommandUsage.<TestSender>builder()
-                .parameters(
-                        CommandParameter.requiredText("r1"),
-                        CommandParameter.optionalText("o1"),
-                        CommandParameter.requiredText("r2"),
-                        CommandParameter.optionalText("o2")
-                )
-                .build());
-        return cmd;
-    }
-
-    @Test
-    public void testTreeLook() {
-
-        CommandTree<TestSender> tree = CommandTree.create(groupCommand());
+    private static Traverse testCmdTreeExecution(Command<TestSender> cmd, String input) {
+        CommandTree<TestSender> tree = CommandTree.create(cmd);
         tree.parseCommandUsages();
-
+        
         CommandDebugger.debug("Visualizing tree");
         CommandTreeVisualizer<TestSender> visualizer = CommandTreeVisualizer.of(tree);
         visualizer.visualize();
-
+        
         // command= /test
-        ArgumentQueue input = ArgumentQueue.parse("member setperm");
+        ArgumentQueue argumentQueue = ArgumentQueue.parse(input);
         CommandDebugger.debug("traversing...");
-
+        
         CommandDebugger.debug("Visualizing traversing result");
-        Traverse traverse = tree.traverse(input);
+        Traverse traverse = tree.traverse(argumentQueue);
         traverse.visualize();
+        
+        return traverse;
+    }
+    
+    @Test
+    public void testTypeWrap() {
+        final TypeWrap<List<String>> typeWrap = new TypeWrap<>() {};
+        Assertions.assertEquals("java.util.List<java.lang.String>", typeWrap.getType().getTypeName());
     }
 
     @Test
-    public void testAmbiguity() {
+    public void testTypeTolerantVerifierAmbiguity() {
         UsageVerifier<TestSender> verifier = UsageVerifier.typeTolerantVerifier();
-        TypeWrap<List<String>> ref = new TypeWrap<>() {};
-        System.out.println("REF= " + ref.getType().getTypeName());
 
         CommandUsage<TestSender> usage1 = CommandUsage.<TestSender>builder()
                 .parameters(
@@ -101,11 +62,10 @@ public class TestRun {
 
         Assertions.assertFalse(verifier.areAmbiguous(usage1, usage2));
     }
-
+    
     @Test
-    public void testTypeWrap() {
-        final TypeWrap<List<String>> typeWrap = new TypeWrap<>() {};
-        Assertions.assertEquals("java.util.List<java.lang.String>", typeWrap.getType().getTypeName());
+    public void testIncompleteSubCommand() {
+        Traverse traverse = testCmdTreeExecution(TestCommands.GROUP_CMD, "member setperm");
+        Assertions.assertEquals(TraverseResult.INCOMPLETE, traverse.result());
     }
-
 }

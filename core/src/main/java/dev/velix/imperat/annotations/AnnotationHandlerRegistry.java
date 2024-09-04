@@ -55,11 +55,11 @@ final class AnnotationHandlerRegistry<C> extends
                     final String[] values = commandAnnotation.value();
                     List<String> aliases = new ArrayList<>(Arrays.asList(values)
                             .subList(1, values.length));
-                    Command<C> cmd = Command.createCommand(values[0]);
-                    cmd.ignoreACPermissions(commandAnnotation.ignoreAutoCompletionPermission());
-                    cmd.addAliases(aliases);
-
-                    return cmd;
+                    
+                    return Command.<C>create(values[0])
+                            .ignoreACPermissions(commandAnnotation.ignoreAutoCompletionPermission())
+                            .aliases(aliases)
+                            .build();
                 }
         );
         registerDataCreator(Usage.class, (proxyInstance, proxy, annotation, element) -> {

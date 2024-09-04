@@ -267,6 +267,7 @@ public interface CommandUsage<C> {
      */
     boolean hasParameters(List<CommandParameter> parameters);
 	
+    @SuppressWarnings("all")
     class Builder<C> {
     
         private CommandExecution<C> execution;
@@ -341,7 +342,7 @@ public interface CommandUsage<C> {
             return this;
         }
     
-        private CommandUsage<C> build(boolean help) {
+        CommandUsage<C> build(boolean help) {
             CommandUsageImpl<C> impl = new CommandUsageImpl<>(execution, help);
             impl.setCoordinator(commandCoordinator);
             impl.setPermission(permission);

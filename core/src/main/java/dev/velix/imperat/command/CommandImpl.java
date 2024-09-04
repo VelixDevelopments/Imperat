@@ -43,7 +43,7 @@ final class CommandImpl<C> implements Command<C> {
     private @Nullable CommandPreProcessor<C> preProcessor;
     private @Nullable CommandPostProcessor<C> postProcessor;
     
-    private final Command<C> parent;
+    private Command<C> parent;
     private final Map<String, Command<C>> children = new TreeMap<>();
     
     private final Map<List<CommandParameter>, CommandUsage<C>> usages = new TreeMap<>(UsageComparator.getInstance());
@@ -305,7 +305,17 @@ final class CommandImpl<C> implements Command<C> {
     public AutoCompleter<C> getAutoCompleter() {
         return autoCompleter;
     }
-
+    
+    /**
+     * sets the parent command
+     *
+     * @param parent the parent to set.
+     */
+    @Override
+    public void setParent(Command<C> parent) {
+      this.parent = parent;
+    }
+    
     /**
      * @return Whether this command is a sub command or not
      */
@@ -313,15 +323,31 @@ final class CommandImpl<C> implements Command<C> {
     public @Nullable Command<C> getParent() {
         return parent;
     }
-
+    
+    private void registerSubCommand(Command<C> command) {
+        children.put(command.getName(), command);
+    }
+    
     /**
-     * The command to be added as a subcommand of this instance
+     * Injects a created-subcommand directly into the parent's command usages.
      *
-     * @param command the sub-command to be added
+     * @param command        the subcommand to inject
+     * @param attachDirectly whether the sub command's usage will be attached to
+     *                       the main/default usage of the command directly or not
      */
     @Override
-    public void addSubCommand(Command<C> command) {
-        children.put(command.getName(), command);
+    public void addSubCommand(Command<C> command, boolean attachDirectly) {
+        command.setParent(this);
+        registerSubCommand(command);
+        
+        final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
+        final CommandUsage<C> combo = prime.mergeWithCommand(command, command.getMainUsage());
+        //adding the merged command usage
+        
+        CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+        this.addUsage(
+                combo
+        );
     }
     
     /**
@@ -350,10 +376,6 @@ final class CommandImpl<C> implements Command<C> {
             CommandUsage<C> usage,
             boolean attachDirectly
     ) {
-        Command<C> mapped = getSubCommand(subCommand.toLowerCase());
-        if (mapped != null) {
-            throw new UnsupportedOperationException("You can't add an already existing sub-command '" + subCommand + "' to command '" + this.getName() + "'");
-        }
         
         int position;
         if (attachDirectly) {
@@ -364,22 +386,12 @@ final class CommandImpl<C> implements Command<C> {
         }
         
         //creating subcommand to modify
-        Command<C> subCmd = Command.createCommand(this, position, subCommand);
-        subCmd.addAliases(aliases);
-        subCmd.addUsage(usage);
-        //subCmd.setPosition(position);
-        
-        //adding subcommand
-        addSubCommand(subCmd);
-        
-        final CommandUsage<C> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
-        final CommandUsage<C> combo = prime.mergeWithCommand(subCmd, usage);
-        //adding the merged command usage
-        
-        CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
-        this.addUsage(
-                combo
-        );
+        Command<C> subCmd =
+                Command.create(this, position, subCommand.toLowerCase())
+                .aliases(aliases)
+                .usage(usage)
+                .build();
+        addSubCommand(subCmd, attachDirectly);
     }
     
     /**
