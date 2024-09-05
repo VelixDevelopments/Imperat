@@ -25,10 +25,10 @@ import java.lang.annotation.Annotation;
  */
 @SuppressWarnings("unused")
 public abstract class AnnotationDataInjector<O, S extends Source, A extends Annotation> {
-    
+
     protected final Imperat<S> dispatcher;
     private final InjectionContext context;
-    
+
     protected AnnotationDataInjector(
             Imperat<S> dispatcher,
             InjectionContext context
@@ -36,7 +36,7 @@ public abstract class AnnotationDataInjector<O, S extends Source, A extends Anno
         this.dispatcher = dispatcher;
         this.context = context;
     }
-    
+
     /**
      * The key for the injection
      *
@@ -45,7 +45,7 @@ public abstract class AnnotationDataInjector<O, S extends Source, A extends Anno
     public @NotNull InjectionContext getContext() {
         return context;
     }
-    
+
     /**
      * Injects the command-related object using the annotation
      * data that is loaded using {@link AnnotationReader}
@@ -70,6 +70,6 @@ public abstract class AnnotationDataInjector<O, S extends Source, A extends Anno
             @NotNull CommandAnnotatedElement<?> element,
             @NotNull A annotation
     );
-    
-    
+
+
 }

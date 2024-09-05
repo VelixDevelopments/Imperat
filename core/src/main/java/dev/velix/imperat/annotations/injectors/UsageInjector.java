@@ -27,7 +27,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 final class UsageInjector<S extends Source> extends AnnotationDataInjector<CommandUsage<S>, S, Usage> {
-    
+
     public UsageInjector(
             Imperat<S> dispatcher
     ) {
@@ -36,7 +36,7 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
                 InjectionContext.of(Usage.class, TypeWrap.of(CommandUsage.class), AnnotationLevel.METHOD)
         );
     }
-    
+
     @SuppressWarnings("unchecked")
     static <S extends Source, A extends Annotation> void injectOthers(
             ProxyCommand<S> proxyCommand,
@@ -57,7 +57,7 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
             }
         });
     }
-    
+
     @Override
     public <T> @NotNull CommandUsage<S> inject(
             ProxyCommand<S> proxyCommand,
@@ -69,24 +69,24 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
             @NotNull CommandAnnotatedElement<?> element,
             @NotNull Usage annotation
     ) {
-        
+
         Method method = (Method) element.getElement();
-        
+
         var parametersInfo = loadParameters(proxyCommand, injectorRegistry, annotationRegistry, reader, parser, method);
         final boolean isHelp = parametersInfo.left();
         final List<CommandParameter> params = parametersInfo.right();
-        
+
         var execution = isHelp ? new MethodHelpExecution<>(dispatcher, proxyCommand, method, parametersInfo.right())
                 : new MethodCommandExecutor<>(proxyCommand, dispatcher, method, params);
-        
+
         final CommandUsage<S> usage =
                 CommandUsage.<S>builder().parameters(params)
                         .execute(execution).build(isHelp);
-        
+
         injectOthers(proxyCommand, usage, reader, parser, injectorRegistry, annotationRegistry, element);
         return usage;
     }
-    
+
     private Pair<List<CommandParameter>, Boolean> loadParameters(
             ProxyCommand<S> proxyCommand,
             AnnotationInjectorRegistry<S> injectorRegistry,
@@ -95,7 +95,7 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
             AnnotationParser<S> parser,
             Method method
     ) {
-        
+
         List<CommandParameter> commandParameters = new ArrayList<>();
         CommandParameterInjector<S> paramInjector = injectorRegistry.<CommandParameter, Named, CommandParameterInjector<S>>
                         getInjector(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER)
@@ -114,10 +114,10 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
                     paramInjector.inject(proxyCommand, null, reader,
                             parser, annotationRegistry,
                             injectorRegistry, element, element.getAnnotation(Named.class));
-            
+
             commandParameters.add(commandParameter);
         }
         return new Pair<>(commandParameters, help);
     }
-    
+
 }

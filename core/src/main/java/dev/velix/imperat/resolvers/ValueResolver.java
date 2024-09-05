@@ -17,7 +17,7 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ValueResolver<S extends Source, T> {
-    
+
     /**
      * @param source    the source of the command
      * @param context   the context for the command

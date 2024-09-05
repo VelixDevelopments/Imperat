@@ -17,12 +17,12 @@ public interface AutoCompleter<S extends Source> {
     static <S extends Source> AutoCompleter<S> createNative(Command<S> command) {
         return new AutoCompleterImpl<>(command);
     }
-    
+
     /**
      * @return The auto-completion command
      */
     Command<S> command();
-    
+
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
@@ -34,7 +34,7 @@ public interface AutoCompleter<S extends Source> {
      */
     List<String> autoComplete(Imperat<S> dispatcher,
                               S sender, String[] args);
-    
+
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input

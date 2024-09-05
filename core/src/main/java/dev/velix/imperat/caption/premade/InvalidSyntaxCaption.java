@@ -24,7 +24,7 @@ public final class InvalidSyntaxCaption<S extends Source> implements Caption<S> 
     public @NotNull CaptionKey getKey() {
         return CaptionKey.INVALID_SYNTAX;
     }
-    
+
     /**
      * @param dispatcher the dispatcher
      * @param context    the context
@@ -37,19 +37,19 @@ public final class InvalidSyntaxCaption<S extends Source> implements Caption<S> 
             @NotNull Context<S> context,
             @Nullable Exception exception
     ) {
-        
+
         if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
             return Messages.INVALID_SYNTAX_UNKNOWN_USAGE
                     .replace("<raw_args>", context.getArguments().join(" "));
         }
         var usage = resolvedContext.getDetectedUsage();
         final int last = context.getArguments().size() - 1;
-        
+
         List<CommandParameter> params = new ArrayList<>(usage.getParameters())
                 .stream()
                 .filter((param) -> !param.isOptional() && param.getPosition() > last)
                 .toList();
-        
+
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < params.size(); i++) {
             CommandParameter param = params.get(i);
@@ -57,13 +57,13 @@ public final class InvalidSyntaxCaption<S extends Source> implements Caption<S> 
             builder.append(param.format());
             if (i != params.size() - 1)
                 builder.append(' ');
-            
+
         }
         //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
         return (Messages.INVALID_SYNTAX_INCOMPLETE_USAGE + "\n" + BaseImperat.FULL_SYNTAX_PREFIX + Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE)
                 .replace("<required_args>", builder.toString())
                 .replace("<usage>", dispatcher.commandPrefix()
                         + CommandUsage.format(resolvedContext.getOwningCommand(), usage));
-        
+
     }
 }

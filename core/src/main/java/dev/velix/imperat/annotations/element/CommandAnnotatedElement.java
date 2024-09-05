@@ -14,12 +14,12 @@ import java.util.Iterator;
 
 @ApiStatus.Internal
 public class CommandAnnotatedElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> {
-    
+
     private final @NotNull AnnotationMap map = new AnnotationMap();
-    
+
     @Getter
     private final @NotNull E element;
-    
+
     public CommandAnnotatedElement(
             @NotNull AnnotationRegistry registry,
             @NotNull E element
@@ -27,7 +27,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
         this.element = element;
         this.load(registry);
     }
-    
+
     @SuppressWarnings("unchecked")
     private <A extends Annotation> void load(@NotNull AnnotationRegistry registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
@@ -40,10 +40,10 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
                 replacer.replace((A) annotation)
                         .forEach(map::set);
             }
-            
+
         }
     }
-    
+
     /**
      * Returns this element's annotation for the specified type if
      * such an annotation is <em>present</em>, else null.
@@ -60,7 +60,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
     public <T extends Annotation> T getAnnotation(@NotNull Class<T> annotationClass) {
         return (T) map.get(annotationClass);
     }
-    
+
     /**
      * Returns annotations that are <em>present</em> on this element.
      * <p>
@@ -77,7 +77,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
     public Annotation[] getAnnotations() {
         return map.values().toArray(new Annotation[0]);
     }
-    
+
     /**
      * Returns annotations that are <em>directly present</em> on this element.
      * This method ignores inherited annotations.
@@ -95,8 +95,8 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
     public Annotation[] getDeclaredAnnotations() {
         return map.values().toArray(new Annotation[0]);
     }
-    
-    
+
+
     /**
      * Returns an iterator over elements of type {@code T}.
      *
@@ -107,7 +107,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
     public Iterator<Annotation> iterator() {
         return map.values().iterator();
     }
-    
+
     @Override
     public String toString() {
         if (element instanceof Method method) {

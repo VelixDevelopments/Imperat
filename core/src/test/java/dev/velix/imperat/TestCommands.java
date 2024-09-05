@@ -5,7 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 
 public final class TestCommands {
-    
+
     public final static Command<TestSender> GROUP_CMD = Command.<TestSender>create("group")
             .defaultExecution((source, context) -> {
                 source.reply("/group <group>");
@@ -37,15 +37,15 @@ public final class TestCommands {
             )
             //TODO fix the optional arg parsing not added in tree nodes
             .subCommand(Command.<TestSender>create("help").usage(
-                    CommandUsage.<TestSender>builder()
-                            .parameters(
-                                    CommandParameter.optionalInt("page").defaultValue(1)
-                            )
-                            .build()
+                            CommandUsage.<TestSender>builder()
+                                    .parameters(
+                                            CommandParameter.optionalInt("page").defaultValue(1)
+                                    )
+                                    .build()
                     ).build(), true
             )
             .build();
-    
+
     public final static Command<TestSender> MULTIPLE_OPTIONAL_CMD =
             Command.<TestSender>create("ot")
                     .usage(
@@ -59,6 +59,6 @@ public final class TestCommands {
                                     .build()
                     )
                     .build();
-    
-    
+
+
 }

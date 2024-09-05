@@ -19,43 +19,43 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public final class SmartUsageResolve<S extends Source> {
-    
+
     @Getter
     private final Command<S> mainCommand;
     private final CommandUsage<S> usage;
     private final Cursor cursor = new Cursor(0, 0);
     @Getter
     private Command<S> command;
-    
+
     SmartUsageResolve(Command<S> command,
                       CommandUsage<S> usage) {
-        
+
         this.mainCommand = command;
         this.command = command;
         this.usage = usage;
     }
-    
+
     public static <S extends Source> SmartUsageResolve<S> create(
             Command<S> command,
             CommandUsage<S> usage
     ) {
         return new SmartUsageResolve<>(command, usage);
     }
-    
+
     @SuppressWarnings("unchecked")
     public void resolve(Imperat<S> dispatcher, ResolvedContext<S> context) throws CommandException {
-        
+
         final List<CommandParameter> parameterList = new ArrayList<>(usage.getParameters());
         final ArgumentQueue raws = context.getArguments().copy();
-        
+
         int lengthWithoutFlags = (int) usage.getParameters()
                 .stream().filter((param) -> !param.isFlag())
                 .count();
-        
+
         while (cursor.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
             CommandParameter currentParameter = cursor.peekParameter(parameterList);
             assert currentParameter != null;
-            
+
             String currentRaw = cursor.peekRaw(raws);
             //CommandDebugger.visualize("Current raw= '%s' at %s" , currentRaw, position.raw);
             if (currentRaw == null) {
@@ -64,7 +64,7 @@ public final class SmartUsageResolve<S extends Source> {
                     final CommandParameter optionalEmptyParameter = getNextParameter(parameterList);
                     //all parameters from here must be optional
                     //adding the absent optional args with their default values
-                    
+
                     if (optionalEmptyParameter.isFlag()) {
                         CommandFlag flag = optionalEmptyParameter.asFlagParameter().getFlagData();
                         Object value = null;
@@ -73,7 +73,7 @@ public final class SmartUsageResolve<S extends Source> {
                             value = optionalEmptyParameter.asFlagParameter()
                                     .getDefaultValueSupplier().supply(context);
                         }
-                        
+
                         context.resolveFlag(null, null, value, flag);
                     } else {
                         context.resolveArgument(command, null, cursor.parameter, optionalEmptyParameter, getDefaultValue(context, optionalEmptyParameter));
@@ -83,7 +83,7 @@ public final class SmartUsageResolve<S extends Source> {
                 //System.out.println("Closed at position= " + position);
                 break;
             }
-            
+
             CommandFlag flag = usage.getFlagFromRaw(currentRaw);
             if (flag != null && currentParameter.isFlag()) {
                 //CommandDebugger.visualize("Found flag raw '%s' at %s", currentRaw, position.raw);
@@ -98,17 +98,17 @@ public final class SmartUsageResolve<S extends Source> {
                     String flagValueInput = cursor.peekRaw(raws);
                     Object flagDefaultValue = getDefaultValue(context, currentParameter);
                     if (flagValueInput == null) {
-                        
+
                         if (flagDefaultValue == null)
                             throw new ContextResolveException(String.format(
                                     "Missing required flag value-input to be filled '%s'", flag.format())
                             );
-                        
+
                         context.resolveFlag(currentRaw, null, flagDefaultValue, flag);
                         cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                         continue;
                     }
-                    
+
                     ValueResolver<S, ?> valueResolver = dispatcher.getValueResolver(flag.inputType());
                     if (valueResolver == null) {
                         throw new ContextResolveException("Cannot find resolver for flag with input type '" + flag.name() + "'");
@@ -120,28 +120,28 @@ public final class SmartUsageResolve<S extends Source> {
                             flag
                     );
                 }
-                
+
                 cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
                 continue;
             } else if (flag == null && currentParameter.isFlag()) {
                 assert currentParameter.isFlag();
-                
+
                 context.resolveFlag(
                         null,
                         null,
                         getDefaultValue(context, currentParameter),
                         currentParameter.asFlagParameter().getFlagData()
                 );
-                
+
                 cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                 continue;
             }
-            
-            
+
+
             if (currentParameter.isCommand()) {
-                
+
                 //visualize("Found command %s at %s", currentParameter.getName(), position.parameter);
-                
+
                 @SuppressWarnings("unchecked")
                 Command<S> parameterSubCmd = (Command<S>) currentParameter;
                 if (parameterSubCmd.hasName(currentRaw)) {
@@ -149,16 +149,16 @@ public final class SmartUsageResolve<S extends Source> {
                 } else {
                     throw new ContextResolveException("Unknown sub-command '" + currentRaw + "'");
                 }
-                
+
                 cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
                 continue;
             }
-            
+
             //argument input
             ValueResolver<S, ?> resolver = dispatcher.getValueResolver(currentParameter);
             if (resolver == null)
                 throw new ContextResolveException("Cannot find resolver for type '" + currentParameter.getType().getTypeName() + "'");
-            
+
             if (currentParameter.isOptional()) {
                 //visualize("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
                 //visualize("raws-size= %s, usageMaxWithoutFlags= %s", raws.size() , (lengthWithoutFlags));
@@ -166,17 +166,17 @@ public final class SmartUsageResolve<S extends Source> {
                 resolveOptional(context, resolver, raws,
                         parameterList, currentRaw, currentParameter,
                         lengthWithoutFlags);
-                
+
             } else {
                 //visualize("Required parameter '%s' at position %s", currentParameter.getName(), position.parameter);
                 resolveRequired(context, resolver,
                         raws, currentRaw, currentParameter);
             }
-            
+
         }
-        
+
     }
-    
+
     private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws ContextResolveException {
         final CommandParameter optionalEmptyParameter = cursor.peekParameter(parameterList);
         assert optionalEmptyParameter != null;
@@ -189,7 +189,7 @@ public final class SmartUsageResolve<S extends Source> {
         }
         return optionalEmptyParameter;
     }
-    
+
     private void resolveRequired(
             ResolvedContext<S> context,
             ValueResolver<S, ?> resolver,
@@ -199,19 +199,19 @@ public final class SmartUsageResolve<S extends Source> {
     ) throws CommandException {
         Object resolveResult;
         if (currentParameter.isGreedy()) {
-            
+
             StringBuilder builder = new StringBuilder();
             for (int i = cursor.raw; i < raws.size(); i++) {
                 builder.append(cursor.peekRaw(raws)).append(' ');
                 cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
             }
-            
+
             if (builder.isEmpty()) {
                 throw new TokenParseException("Failed to parse greedy argument '"
                         + currentParameter.format() + "'");
             }
             resolveResult = builder.toString();
-            
+
             cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
         } else {
             resolveResult = this.getResult(resolver, context, currentRaw, currentParameter);
@@ -221,7 +221,7 @@ public final class SmartUsageResolve<S extends Source> {
         context.resolveArgument(command, currentRaw, cursor.parameter,
                 currentParameter, resolveResult);
     }
-    
+
     private void resolveOptional(
             ResolvedContext<S> context,
             ValueResolver<S, ?> resolver,
@@ -233,11 +233,11 @@ public final class SmartUsageResolve<S extends Source> {
     ) throws CommandException {
         if (raws.size() < lengthWithoutFlags) {
             int diff = lengthWithoutFlags - raws.size();
-            
+
             Object resolveResult = getResult(resolver, context, currentRaw, currentParameter);
-            
+
             if (!cursor.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
-                
+
                 if (diff > 1) {
                     CommandParameter nextParam = getNextParam(cursor.parameter + 1, parameterList, (param) -> !param.isOptional());
                     if (nextParam == null) {
@@ -246,43 +246,43 @@ public final class SmartUsageResolve<S extends Source> {
                     }
                     context.resolveArgument(command, currentRaw, cursor.parameter,
                             currentParameter, getDefaultValue(context, currentParameter));
-                    
+
                     context.resolveArgument(command, currentRaw, cursor.parameter + 1,
                             nextParam, resolveResult);
-                    
+
                     cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                 } else {
                     context.resolveArgument(command, currentRaw, cursor.parameter,
                             currentParameter, resolveResult);
                     cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
                 }
-                
+
             } else {
-                
+
                 context.resolveArgument(command, currentRaw, cursor.parameter,
                         currentParameter, getDefaultValue(context, currentParameter));
-                
+
                 //shifting the parameters && raw again, so it can start after the new shift
                 cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
             }
             return;
         }
-        
+
         Object resolveResult;
         if (currentParameter.isGreedy()) {
-            
+
             StringBuilder builder = new StringBuilder();
             for (int i = cursor.raw; i < raws.size(); i++) {
                 builder.append(cursor.peekRaw(raws)).append(' ');
                 cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
             }
-            
+
             if (builder.isEmpty()) {
                 throw new TokenParseException("Failed to parse greedy argument '"
                         + currentParameter.format() + "'");
             }
             resolveResult = builder.toString();
-            
+
             cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
             context.resolveArgument(command, currentRaw, cursor.parameter,
                     currentParameter, resolveResult);
@@ -291,25 +291,25 @@ public final class SmartUsageResolve<S extends Source> {
             context.resolveArgument(command, currentRaw, cursor.parameter, currentParameter, resolveResult);
             cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         }
-        
+
     }
-    
+
     private <T> T getResult(ValueResolver<S, T> resolver, Context<S> context, String raw, CommandParameter currentParameter) throws CommandException {
         return resolver.resolve(context.getSource(), context, raw, cursor, currentParameter);
     }
-    
-    
+
+
     private @Nullable CommandParameter getNextParam(int start, List<CommandParameter> parameters,
                                                     Predicate<CommandParameter> parameterCondition) {
         if (start >= parameters.size()) return null;
         for (int i = start; i < parameters.size(); i++) {
             if (parameterCondition.test(parameters.get(i)))
                 return parameters.get(i);
-            
+
         }
         return null;
     }
-    
+
     private @Nullable <T> T getDefaultValue(Context<S> context, CommandParameter parameter) {
         OptionalValueSupplier<T> optionalSupplier = parameter.getDefaultValueSupplier();
         T defaultValue = null;
@@ -318,5 +318,5 @@ public final class SmartUsageResolve<S extends Source> {
         }
         return defaultValue;
     }
-    
+
 }

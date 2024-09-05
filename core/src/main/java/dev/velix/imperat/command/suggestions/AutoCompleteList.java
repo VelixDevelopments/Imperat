@@ -10,15 +10,15 @@ import java.util.Set;
 @Getter
 @ApiStatus.Internal
 final class AutoCompleteList {
-    
+
     private final Set<String> results = new LinkedHashSet<>();
-    
+
     public void add(String result) {
         results.add(result);
     }
-    
+
     public void addAll(List<String> results) {
         this.results.addAll(results);
     }
-    
+
 }

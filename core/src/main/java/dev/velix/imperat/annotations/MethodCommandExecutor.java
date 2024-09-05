@@ -17,14 +17,14 @@ import java.util.List;
 
 @ApiStatus.Internal
 public final class MethodCommandExecutor<S extends Source> implements CommandExecution<S> {
-    
+
     private final ProxyCommand<S> proxy;
     private final Imperat<S> dispatcher;
     private final Method method;
     private final MethodCaller.BoundMethodCaller boundMethodCaller;
     private final List<CommandParameter> fullParameters;
     //private final Help helpAnnotation;
-    
+
     public MethodCommandExecutor(ProxyCommand<S> proxyCommand,
                                  Imperat<S> dispatcher,
                                  Method method,
@@ -40,7 +40,7 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
         this.fullParameters = fullParameters;
         //this.helpAnnotation = help;
     }
-    
+
     /**
      * Executes the command's actions
      *
@@ -50,16 +50,16 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
     @Override
     public void execute(S source,
                         ExecutionContext<S> context) throws CommandException {
-        
+
         var instances = AnnotationHelper.loadParameterInstances(dispatcher, fullParameters,
                 source, context, method, null);
-        
+
         try {
             boundMethodCaller.call(instances);
         } catch (Exception ex) {
             CommandDebugger.error(proxy.getClass(), method.getName(), ex);
         }
-        
+
     }
-    
+
 }

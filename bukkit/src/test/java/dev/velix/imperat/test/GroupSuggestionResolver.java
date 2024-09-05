@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GroupSuggestionResolver implements BukkitSuggestionResolver<Group> {
-    
+
     @Override
     public TypeWrap<Group> getType() {
         return TypeWrap.of(Group.class);
     }
-    
+
     @Override
     public List<String> autoComplete(Command<BukkitSource> command, BukkitSource source,
                                      ArgumentQueue queue, CommandParameter parameterToComplete, @Nullable CompletionArg argToComplete) {
@@ -26,5 +26,5 @@ public class GroupSuggestionResolver implements BukkitSuggestionResolver<Group> 
                 .stream().map(Group::name)
                 .collect(Collectors.toList());
     }
-    
+
 }

@@ -19,11 +19,11 @@ import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings({"unchecked", "unused"})
 final class InheritanceInjector<S extends Source> extends AnnotationDataInjector<dev.velix.imperat.command.Command<S>, S, Inherit> {
-    
+
     public InheritanceInjector(Imperat<S> dispatcher) {
         super(dispatcher, InjectionContext.of(Inherit.class, TypeWrap.of(Command.class), AnnotationLevel.CLASS));
     }
-    
+
     @Override
     public @NotNull <T> Command<S> inject(
             @Nullable ProxyCommand<S> proxyCommand,
@@ -37,7 +37,7 @@ final class InheritanceInjector<S extends Source> extends AnnotationDataInjector
     ) {
         if (toLoad == null) throw new IllegalArgumentException("toLoad in injection of `@Inherit` is null");
         Class<?>[] subClasses = annotation.value();
-        
+
         //Injecting subcommands recursively
         for (Class<?> subClass : subClasses) {
             if (!subClass.isAnnotationPresent(SubCommand.class)) {
@@ -55,7 +55,7 @@ final class InheritanceInjector<S extends Source> extends AnnotationDataInjector
         }
         return toLoad;
     }
-    
+
     private <T> T getSubCommandInstance(Class<T> subClass) {
         try {
             Constructor<?> constructor = subClass.getConstructor();
@@ -68,12 +68,12 @@ final class InheritanceInjector<S extends Source> extends AnnotationDataInjector
             );
             throw new RuntimeException(e);
         }
-        
+
     }
-    
+
     private dev.velix.imperat.annotations.types.Command subAnnotationToCmdAnnotation(SubCommand subAnn) {
         return AnnotationFactory.create(dev.velix.imperat.annotations.types.Command.class,
                 "value", subAnn.value(), "ignoreAutoCompletionChecks", subAnn.ignoreAutoCompletionChecks());
     }
-    
+
 }

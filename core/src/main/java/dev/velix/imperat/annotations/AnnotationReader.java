@@ -18,11 +18,11 @@ import java.util.Collection;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface AnnotationReader {
-    
+
     static AnnotationReader read(AnnotationRegistry registry, Class<?> target) {
         return new AnnotationReaderImpl(registry, target);
     }
-    
+
     /**
      * Get an annotated element
      * may be a parameter, method or even a class
@@ -33,7 +33,7 @@ public interface AnnotationReader {
      */
     @Nullable
     AnnotatedElement getAnnotated(AnnotationLevel level, ElementKey key);
-    
+
     /**
      * Fetches all annotations registered within an element
      *
@@ -45,7 +45,7 @@ public interface AnnotationReader {
             AnnotationLevel level,
             ElementKey key
     );
-    
+
     /**
      * Fetches the annotation of an element
      *

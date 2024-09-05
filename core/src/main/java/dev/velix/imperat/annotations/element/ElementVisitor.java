@@ -18,22 +18,22 @@ import java.util.Arrays;
  * @param <E> type of element that contain annotations
  */
 public interface ElementVisitor<E extends AnnotatedElement> {
-    
+
     static ElementVisitor<Class<?>> classes() {
         return (element) -> ElementKey.of(element.getName());
     }
-    
+
     static ElementVisitor<Method> methods() {
         return (element) -> new ElementKey(element.getName(),
                 Arrays.stream(element.getParameterTypes())
                         .map(Class::getName).toArray(String[]::new));
     }
-    
+
     static ElementVisitor<Parameter> parameters() {
         return (param) -> new ElementKey(param.getName(),
                 param.getType().getName());
     }
-    
+
     /**
      * Loads the element unique key from the element type
      *
@@ -41,7 +41,7 @@ public interface ElementVisitor<E extends AnnotatedElement> {
      * @return the element unique key
      */
     ElementKey loadKey(E element);
-    
+
     /**
      * Visits the annotation container and an element in
      * the class to parse, allowing for more flexibility.
@@ -55,5 +55,5 @@ public interface ElementVisitor<E extends AnnotatedElement> {
         var key = loadKey(element.getElement());
         container.addElement(key, element);
     }
-    
+
 }

@@ -4,16 +4,16 @@ import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.resolvers.PermissionResolver;
 
 public final class TestImperat extends BaseImperat<TestSender> {
-    
+
     TestImperat() {
         super((source, permission) -> false);
     }
-    
+
     @Override
     public String commandPrefix() {
         return "";
     }
-    
+
     /**
      * @return {@link PermissionResolver} for the dispatcher
      */
@@ -21,7 +21,7 @@ public final class TestImperat extends BaseImperat<TestSender> {
     public PermissionResolver<TestSender> getPermissionResolver() {
         return null;
     }
-    
+
     /**
      * Wraps the sender into a built-in command-sender type
      *
@@ -32,7 +32,7 @@ public final class TestImperat extends BaseImperat<TestSender> {
     public TestSender wrapSender(Object sender) {
         return new TestSender(sender);
     }
-    
+
     /**
      * @return the platform of the module
      */
@@ -40,14 +40,14 @@ public final class TestImperat extends BaseImperat<TestSender> {
     public Object getPlatform() {
         return null;
     }
-    
-    
+
+
     /**
      *
      */
     @Override
     public void shutdownPlatform() {
-    
+
     }
-    
+
 }

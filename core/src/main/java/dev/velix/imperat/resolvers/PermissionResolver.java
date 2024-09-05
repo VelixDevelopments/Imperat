@@ -13,14 +13,14 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface PermissionResolver<S extends Source> {
-    
+
     /**
      * @param source     the source of the command (console or other)
      * @param permission the permission
      * @return whether this command source/sender has a specific permission
      */
     boolean hasPermission(@NotNull S source, @Nullable String permission);
-    
+
     default boolean hasUsagePermission(S source, @Nullable CommandUsage<S> usage) {
         if (usage == null) {
             return true;
@@ -33,5 +33,5 @@ public interface PermissionResolver<S extends Source> {
         }
         return true;
     }
-    
+
 }

@@ -6,11 +6,11 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.CommandException;
 
 public final class CommandExceptionHandler {
-    
+
     private CommandExceptionHandler() {
         throw new AssertionError();
     }
-    
+
     public static <S extends Source> void handleException(
             final Imperat<S> imperat,
             final Context<S> context,
@@ -23,18 +23,18 @@ public final class CommandExceptionHandler {
             commandException.handle(imperat, context);
             return;
         }
-        
+
         do {
             current = current.getCause();
         } while (current != null && !(current instanceof CommandException));
-        
+
         if (current != null) {
             ((CommandException) current).handle(imperat, context);
         } else {
             CommandDebugger.error(owningClass, methodName, error);
         }
-        
+
     }
-    
-    
+
+
 }

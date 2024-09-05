@@ -27,10 +27,10 @@ public final class UsagePermissionProcessor<S extends Source> implements Command
             CommandUsage<S> usage
     ) throws CommandException {
         var source = context.getSource();
-        
+
         if (!imperat.getPermissionResolver().hasUsagePermission(source, usage)) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
         }
-        
+
     }
 }

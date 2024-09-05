@@ -18,28 +18,28 @@ import java.util.function.Supplier;
  */
 @ApiStatus.Internal
 public enum AnnotationLevel {
-    
-    
+
+
     CLASS(ElementVisitor::classes) {
         @Override
         public boolean matches(AnnotatedElement element) {
             return element instanceof CommandAnnotatedElement<?> cmdElement
                     && cmdElement.getElement() instanceof Class<?>;
         }
-        
+
         @Override
         public Set<AnnotatedElement> getElements(AnnotationRegistry registry, Class<?> target) {
             return Set.of(new CommandAnnotatedElement<>(registry, target));
         }
     },
-    
+
     METHOD(ElementVisitor::methods) {
         @Override
         public boolean matches(AnnotatedElement element) {
             return element instanceof CommandAnnotatedElement<?> cmdElement
                     && cmdElement.getElement() instanceof Method;
         }
-        
+
         @Override
         public Set<AnnotatedElement> getElements(AnnotationRegistry registry,
                                                  Class<?> target) {
@@ -50,14 +50,14 @@ public enum AnnotationLevel {
             return elements;
         }
     },
-    
+
     PARAMETER(ElementVisitor::parameters) {
         @Override
         public boolean matches(AnnotatedElement element) {
             return element instanceof CommandAnnotatedElement<?> cmdElement
                     && cmdElement.getElement() instanceof Parameter;
         }
-        
+
         @Override
         public Set<AnnotatedElement> getElements(AnnotationRegistry registry, Class<?> target) {
             Set<AnnotatedElement> elements = new HashSet<>();
@@ -70,13 +70,13 @@ public enum AnnotationLevel {
             return elements;
         }
     },
-    
+
     WILDCARD(() -> null) {
         @Override
         public boolean matches(AnnotatedElement element) {
             return true;
         }
-        
+
         @Override
         public Set<? extends AnnotatedElement> getElements(
                 AnnotationRegistry registry,
@@ -90,20 +90,20 @@ public enum AnnotationLevel {
             return elements;
         }
     };
-    
-    
+
+
     private final Supplier<ElementVisitor<?>> supplier;
-    
+
     AnnotationLevel(Supplier<ElementVisitor<?>> visitorSupplier) {
         this.supplier = visitorSupplier;
     }
-    
+
     ElementVisitor<?> getVisitor() {
         return supplier.get();
     }
-    
+
     public abstract boolean matches(AnnotatedElement element);
-    
+
     public abstract Set<? extends AnnotatedElement> getElements(AnnotationRegistry registry,
                                                                 Class<?> target);
 }

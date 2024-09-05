@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class NoPermissionCaption<S extends Source> implements Caption<S> {
-    
+
     /**
      * @return the key
      */
@@ -18,7 +18,7 @@ public final class NoPermissionCaption<S extends Source> implements Caption<S> {
     public @NotNull CaptionKey getKey() {
         return CaptionKey.NO_PERMISSION;
     }
-    
+
     /**
      * @param dispatcher the dispatcher
      * @param context    the context

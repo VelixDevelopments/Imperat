@@ -16,18 +16,18 @@ import java.util.function.Supplier;
  * @param <T> the type of resolver's parameter
  */
 public interface ContextResolver<S extends Source, T> {
-    
+
     //TODO make a registry for custom annotations that are used in the parameters
     //TODO and then replace `Parameter` with `ParameterCommandElement` with added method `hasCustomAnnotation`
-    
+
     static <S extends Source, T> ContextResolver<S, T> of(T value) {
         return (c, p) -> value;
     }
-    
+
     static <S extends Source, T> ContextResolver<S, T> of(Supplier<T> supplier) {
         return of(supplier.get());
     }
-    
+
     /**
      * Resolves a parameter's default value
      * if it has been not input by the user
@@ -41,5 +41,5 @@ public interface ContextResolver<S extends Source, T> {
             @NotNull Context<S> context,
             @Nullable Parameter parameter
     ) throws CommandException;
-    
+
 }

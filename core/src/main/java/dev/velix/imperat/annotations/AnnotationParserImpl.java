@@ -26,20 +26,20 @@ import java.util.stream.Collectors;
 @ApiStatus.Internal
 @SuppressWarnings("unchecked")
 final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
-    
+
     private final AnnotationRegistry annotationRegistry;
     private final AnnotationInjectorRegistry<S> dataRegistry;
-    
+
     AnnotationParserImpl(Imperat<S> dispatcher) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
         this.dataRegistry = AnnotationInjectorRegistry.create(dispatcher);
     }
-    
+
     private <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, E element) {
         return ((ElementVisitor<E>) level.getVisitor()).loadKey(element);
     }
-    
+
     /**
      * Parses annotated command class of type {@linkplain T}
      * into {@link Command} then register it using {@link Imperat}
@@ -58,25 +58,25 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
         var proxyInjector = dataRegistry.getInjector(Command.class, new TypeWrap<dev.velix.imperat.command.Command<S>>() {
         }, AnnotationLevel.CLASS).orElseThrow();
         dev.velix.imperat.command.Command<S> commandObject = proxyInjector.inject(null, null, reader, this, annotationRegistry, dataRegistry, element, commandAnnotation);
-        
+
         ProxyCommand<S> proxyCommand = new ProxyCommand<>(instanceClazz, instance, commandObject);
-        
+
         //loading class-level annotations
         dataRegistry.injectForElement(proxyCommand, reader, this, annotationRegistry,
                 dataRegistry, element, AnnotationLevel.CLASS);
-        
+
         Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods())
                 .sorted((m1, m2) -> getMethodPriority(m1) - getMethodPriority(m2))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        
+
         for (Method method : methods) {
             if (!MethodVerifier.isMethodAcceptable(method)) continue;
             MethodVerifier.verifyMethod(dispatcher, instanceClazz, method);
-            
+
             var methodKey = getKey(AnnotationLevel.METHOD, method);
             CommandAnnotatedElement<Method> methodElement = (CommandAnnotatedElement<Method>) reader.getAnnotated(AnnotationLevel.METHOD, methodKey);
             assert methodElement != null;
-            
+
             //loading method-level annotations
             dataRegistry.injectForElement(
                     proxyCommand, reader, this, annotationRegistry,
@@ -85,13 +85,13 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
         }
         return commandObject;
     }
-    
+
     @Override
     public <T> dev.velix.imperat.command.Command<S> parseCommandClass(T instance) {
         Class<T> instanceClazz = (Class<T>) instance.getClass();
         AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
         var elementKey = getKey(AnnotationLevel.CLASS, instanceClazz);
-        
+
         CommandAnnotatedElement<Class<?>> element = (CommandAnnotatedElement<Class<?>>) reader.getAnnotated(AnnotationLevel.CLASS, elementKey);
         assert element != null;
         Command commandAnnotation = element.getAnnotation(Command.class);
@@ -102,10 +102,10 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
             parseCommandClass(inner);
         }*/
         return parseCommandClass(commandAnnotation, reader, element, instance, instanceClazz);
-        
+
     }
-    
-    
+
+
     /**
      * Registers {@link AnnotationReplacer}
      *
@@ -116,17 +116,17 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
         annotationRegistry.registerAnnotationReplacer(type, replacer);
     }
-    
+
     public AnnotationRegistry getRegistry() {
         return annotationRegistry;
     }
-    
+
     private int getMethodPriority(Method method) {
         int count = method.getParameterCount();
         if (AnnotationHelper.isMethodHelp(method)) {
             count--;
         }
-        
+
         if (method.isAnnotationPresent(Usage.class)) {
             //if default -> -1 else -> 0;
             return count == 1 ? -1 : 0;
@@ -135,6 +135,6 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
         }
         return 100;
     }
-    
-    
+
+
 }

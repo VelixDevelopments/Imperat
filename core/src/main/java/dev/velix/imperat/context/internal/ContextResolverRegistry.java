@@ -14,9 +14,9 @@ import java.lang.reflect.Type;
 @Setter
 @ApiStatus.AvailableSince("1.0.0")
 public final class ContextResolverRegistry<S extends Source> extends Registry<Type, ContextResolver<S, ?>> {
-    
+
     private ContextResolverFactory<S> factory;
-    
+
     private ContextResolverRegistry() {
         super();
         factory = (parameter ->
@@ -25,19 +25,19 @@ public final class ContextResolverRegistry<S extends Source> extends Registry<Ty
             return getResolver(parameter.getType());
         });
     }
-    
+
     public static <S extends Source> ContextResolverRegistry<S> createDefault() {
         return new ContextResolverRegistry<>();
     }
-    
+
     public <T> void registerResolver(Type type, ContextResolver<S, T> resolver) {
         setData(type, resolver);
     }
-    
+
     @SuppressWarnings("unchecked")
     public <T> @Nullable ContextResolver<S, T> getResolver(Type type) {
         return (ContextResolver<S, T>) getData(type).orElse(null);
     }
-    
-    
+
+
 }

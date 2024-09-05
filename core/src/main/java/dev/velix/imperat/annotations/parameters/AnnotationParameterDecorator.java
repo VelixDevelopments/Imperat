@@ -13,10 +13,10 @@ import java.util.Collection;
 import java.util.List;
 
 public final class AnnotationParameterDecorator extends InputParameter implements AnnotatedParameter {
-    
+
     private final CommandParameter parameter;
     private final MethodParameterElement element;
-    
+
     AnnotationParameterDecorator(CommandParameter parameter, MethodParameterElement element) {
         super(parameter.getName(), TypeWrap.of(element.getElement().getParameterizedType()), parameter.getPermission(),
                 parameter.getDescription(), parameter.isOptional(),
@@ -25,15 +25,15 @@ public final class AnnotationParameterDecorator extends InputParameter implement
         this.parameter = parameter;
         this.element = element;
     }
-    
+
     public static AnnotationParameterDecorator decorate(
             CommandParameter parameter,
             MethodParameterElement element
     ) {
         return new AnnotationParameterDecorator(parameter, element);
     }
-    
-    
+
+
     /**
      * Get the instance of specific annotation
      *
@@ -44,7 +44,7 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     public <A extends Annotation> @Nullable A getAnnotation(Class<A> clazz) {
         return element.getAnnotation(clazz);
     }
-    
+
     /**
      * @return the annotations associated with this parameter
      */
@@ -53,7 +53,7 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     public Collection<? extends Annotation> getAnnotations() {
         return List.of(element.getAnnotations());
     }
-    
+
     /**
      * Formats the usage parameter*
      *
@@ -63,7 +63,7 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     public String format() {
         return parameter.format();
     }
-    
+
     /**
      * Casts the parameter to a flag parameter
      *
@@ -73,5 +73,5 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     public FlagParameter asFlagParameter() {
         return parameter.asFlagParameter();
     }
-    
+
 }

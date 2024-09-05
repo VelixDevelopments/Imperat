@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
 public final class DefaultFormatter implements UsageFormatter {
-    
-    
+
+
     /**
      * Displays the usage by converting it into
      * an adventure component
@@ -29,7 +29,7 @@ public final class DefaultFormatter implements UsageFormatter {
         String format = dispatcher.commandPrefix() + CommandUsage.format(command, usage);
         return "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
     }
-    
+
     /**
      * Formats a single syntax, this is used
      * only in the TreeDisplayer
@@ -41,5 +41,5 @@ public final class DefaultFormatter implements UsageFormatter {
     public String formatUsageOnly(String formattedUsage) {
         return "<green>" + formattedUsage;
     }
-    
+
 }

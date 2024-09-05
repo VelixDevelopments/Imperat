@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public final class AnnotationFactory {
-    
+
     /**
      * Creates a new annotation with no values. Any default values will
      * automatically be used.
@@ -30,7 +30,7 @@ public final class AnnotationFactory {
     public static @NotNull <T extends Annotation> T create(@NotNull Class<T> type) {
         return create(type, Collections.emptyMap());
     }
-    
+
     /**
      * Creates a new annotation with the given map values. Any default values will
      * automatically be used if not specified in the map.
@@ -53,7 +53,7 @@ public final class AnnotationFactory {
                 new DynamicAnnotationHandler(type, members)
         ));
     }
-    
+
     /**
      * Creates a new annotation with the given map values. Any default values will
      * automatically be used if not specified in the map.
@@ -83,7 +83,7 @@ public final class AnnotationFactory {
                 new DynamicAnnotationHandler(type, values)
         ));
     }
-    
+
     /**
      * Implementation of {@link Annotation#hashCode()}.
      *
@@ -100,7 +100,7 @@ public final class AnnotationFactory {
         }
         return result;
     }
-    
+
     /**
      * Implementation of {@link Annotation#equals(Object)}.
      *
@@ -121,7 +121,7 @@ public final class AnnotationFactory {
         }
         return true;
     }
-    
+
     /**
      * Implementation of {@link Annotation#toString()}.
      *
@@ -138,15 +138,15 @@ public final class AnnotationFactory {
         sb.append(joiner);
         return sb.append(')').toString();
     }
-    
+
     private static String deepToString(Object arg) {
         String s = Arrays.deepToString(new Object[]{arg});
         return s.substring(1, s.length() - 1); // cut off the []
     }
-    
+
     private record DynamicAnnotationHandler(Class<? extends Annotation> annotationType,
                                             Map<String, Object> annotationMembers) implements InvocationHandler {
-        
+
         private DynamicAnnotationHandler(Class<? extends Annotation> annotationType, Map<String, Object> annotationMembers) {
             this.annotationType = annotationType;
             this.annotationMembers = new HashMap<>(annotationMembers);
@@ -154,7 +154,7 @@ public final class AnnotationFactory {
                 this.annotationMembers.putIfAbsent(method.getName(), method.getDefaultValue());
             }
         }
-        
+
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             switch (method.getName()) {
@@ -175,5 +175,5 @@ public final class AnnotationFactory {
             }
         }
     }
-    
+
 }

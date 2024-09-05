@@ -17,11 +17,11 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 final class DescriptionInjector<S extends Source> extends AnnotationDataInjector<DescriptionHolder, S, Description> {
-    
+
     public DescriptionInjector(Imperat<S> dispatcher, AnnotationLevel level) {
         super(dispatcher, InjectionContext.of(Description.class, TypeWrap.of(DescriptionHolder.class), level));
     }
-    
+
     @Override
     public @NotNull <T> DescriptionHolder inject(
             ProxyCommand<S> proxyCommand,
@@ -39,5 +39,5 @@ final class DescriptionInjector<S extends Source> extends AnnotationDataInjector
         toLoad.setDescription(annotation.value());
         return toLoad;
     }
-    
+
 }

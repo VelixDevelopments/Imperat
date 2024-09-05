@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @ApiStatus.Internal
 public abstract class InputParameter implements CommandParameter {
-    
+
     protected final String name;
     protected final TypeWrap<?> typeWrap;
     protected final boolean optional, flag, greedy;
@@ -22,8 +22,8 @@ public abstract class InputParameter implements CommandParameter {
     protected String permission;
     protected Description description;
     protected int index;
-    
-    
+
+
     protected InputParameter(String name, TypeWrap<?> typeWrap,
                              @Nullable String permission,
                              Description description,
@@ -39,8 +39,8 @@ public abstract class InputParameter implements CommandParameter {
         this.optionalValueSupplier = optionalValueSupplier;
         this.suggestionResolver = suggestionResolver;
     }
-    
-    
+
+
     /**
      * @return the name of the parameter
      */
@@ -48,7 +48,7 @@ public abstract class InputParameter implements CommandParameter {
     public String getName() {
         return name;
     }
-    
+
     /**
      * @return the index of this parameter
      */
@@ -56,7 +56,7 @@ public abstract class InputParameter implements CommandParameter {
     public int getPosition() {
         return index;
     }
-    
+
     /**
      * Sets the position of this parameter in a syntax
      * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -67,12 +67,12 @@ public abstract class InputParameter implements CommandParameter {
     public void setPosition(int position) {
         this.index = position;
     }
-    
+
     @Override
     public TypeWrap<?> getTypeWrap() {
         return typeWrap;
     }
-    
+
     /**
      * The permission for this parameter
      *
@@ -82,12 +82,12 @@ public abstract class InputParameter implements CommandParameter {
     public @Nullable String getPermission() {
         return permission;
     }
-    
+
     @Override
     public void setPermission(String permission) {
         this.permission = permission;
     }
-    
+
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional
@@ -97,7 +97,7 @@ public abstract class InputParameter implements CommandParameter {
     public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) optionalValueSupplier;
     }
-    
+
     /**
      * @return whether this is an optional argument
      */
@@ -105,7 +105,7 @@ public abstract class InputParameter implements CommandParameter {
     public boolean isOptional() {
         return optional;
     }
-    
+
     /**
      * @return checks whether this parameter is a flag
      */
@@ -113,7 +113,7 @@ public abstract class InputParameter implements CommandParameter {
     public boolean isFlag() {
         return flag;
     }
-    
+
     /**
      * Casts the parameter to a flag parameter
      *
@@ -123,7 +123,7 @@ public abstract class InputParameter implements CommandParameter {
     public FlagParameter asFlagParameter() {
         return (FlagParameter) this;
     }
-    
+
     /**
      * @return checks whether this parameter
      * consumes all the args input after it.
@@ -137,13 +137,13 @@ public abstract class InputParameter implements CommandParameter {
         }
         return greedy;
     }
-    
+
     @Override
     public <S extends Source> Command<S> asCommand() {
         throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
     }
-    
-    
+
+
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
@@ -155,17 +155,17 @@ public abstract class InputParameter implements CommandParameter {
     public @Nullable <S extends Source, T> SuggestionResolver<S, T> getSuggestionResolver() {
         return (SuggestionResolver<S, T>) suggestionResolver;
     }
-    
+
     @Override
     public Description getDescription() {
         return description;
     }
-    
+
     @Override
     public void setDescription(Description description) {
         this.description = description;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -174,12 +174,12 @@ public abstract class InputParameter implements CommandParameter {
         return Objects.equals(name, that.name)
                 && Objects.equals(typeWrap, that.typeWrap);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(name, typeWrap);
     }
-    
+
     @Override
     public String toString() {
         return format();

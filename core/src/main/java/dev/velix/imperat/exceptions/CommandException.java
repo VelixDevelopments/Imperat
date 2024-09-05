@@ -10,17 +10,17 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public abstract class CommandException extends Exception {
-    
+
     protected final String msg;
-    
+
     protected CommandException(String msg) {
         this.msg = msg;
     }
-    
+
     protected CommandException() {
         this("");
     }
-    
+
     /**
      * Handles the exception
      *
@@ -29,5 +29,5 @@ public abstract class CommandException extends Exception {
      * @param context the context
      */
     public abstract <S extends Source> void handle(Imperat<S> imperat, Context<S> context);
-    
+
 }

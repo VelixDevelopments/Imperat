@@ -16,12 +16,12 @@ import java.util.ArrayList;
 
 @ApiStatus.AvailableSince("1.0.0")
 public class CommandHelp<S extends Source> {
-    
+
     private final Imperat<S> dispatcher;
     private final Context<S> context;
     private final Command<S> command;
     private final HelpTemplate template;
-    
+
     public CommandHelp(
             Imperat<S> dispatcher,
             Command<S> command,
@@ -32,13 +32,13 @@ public class CommandHelp<S extends Source> {
         this.template = dispatcher.getHelpTemplate();
         this.context = context;
     }
-    
+
     public void display(S source) {
         display(source, 1);
     }
-    
+
     public void display(S source, int page) {
-        
+
         try {
             if (template instanceof PaginatedHelpTemplate paginatedTemplate) {
                 displayPaginated(source, paginatedTemplate, page);
@@ -48,9 +48,9 @@ public class CommandHelp<S extends Source> {
         } catch (Throwable ex) {
             CommandExceptionHandler.handleException(dispatcher, context, this.getClass(), "display(source, page)", ex);
         }
-        
+
     }
-    
+
     private void displayPaginated(
             S source,
             PaginatedHelpTemplate template,
@@ -59,47 +59,47 @@ public class CommandHelp<S extends Source> {
         if (template == null) {
             throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
-        
+
         PaginatedText<CommandUsage<S>> text = new PaginatedText<>(template.syntaxesPerPage());
-        
+
         for (var usage : command.getUsages()) {
             if (usage.isDefault()) continue;
             text.add(usage);
         }
-        
+
         text.paginate();
         if (text.getMaxPages() == 0) {
             throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
-        
+
         TextPage<CommandUsage<S>> textPage = text.getPage(page);
-        
+
         if (textPage == null) {
             throw new ExecutionFailure(CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION);
         }
         source.reply(template.fullHeader(command, page, text.getMaxPages()));
-        
+
         template.getUsagesDisplayer().display(dispatcher, command, source,
                 template.getUsageFormatter(), textPage.asList());
-        
+
         source.reply(template.getFooter(command));
     }
-    
+
     private void displayNormal(S source) throws ExecutionFailure {
         if (template == null) {
             throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
-        
+
         final int maxUsages = command.getUsages().size();
         if (maxUsages == 0) {
             throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
-        
+
         source.reply(template.getHeader(command));
         template.getUsagesDisplayer().display(dispatcher, command, source,
                 template.getUsageFormatter(), new ArrayList<>(command.getUsages()));
-        
+
         source.reply(template.getFooter(command));
     }
-    
+
 }

@@ -25,33 +25,33 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public final class AnnotationInjectorRegistry<S extends Source> extends Registry<InjectionContext, AnnotationDataInjector<?, S, ?>> {
-    
+
     private AnnotationInjectorRegistry(Imperat<S> dispatcher) {
         registerBasicInjectors(dispatcher);
     }
-    
+
     public static <S extends Source> AnnotationInjectorRegistry<S> create(Imperat<S> dispatcher) {
         return new AnnotationInjectorRegistry<>(dispatcher);
     }
-    
+
     public static void logError(Method method, Class<?> proxy, String msg) {
         throw new IllegalArgumentException(String.format(msg + " in method '%s' of class '%s'", method.getName(), proxy.getName()));
     }
-    
+
     private void registerBasicInjectors(Imperat<S> dispatcher) {
         TypeWrap<dev.velix.imperat.command.Command<S>> commandTypeWrap = new TypeWrap<>() {
         };
         TypeWrap<CommandUsage<S>> commandUsageTypeWrap = new TypeWrap<>() {
         };
-        
+
         registerInjector(Command.class, commandTypeWrap, AnnotationLevel.CLASS, new ProxyCommandInjector<>(dispatcher));
         registerInjector(Command.class, commandTypeWrap, AnnotationLevel.METHOD, new CommandMethodInjector<>(dispatcher));
-        
+
         registerInjector(Usage.class, commandUsageTypeWrap, AnnotationLevel.METHOD, new UsageInjector<>(dispatcher));
-        
+
         registerInjector(Cooldown.class, TypeWrap.of(CooldownHolder.class)
                 , AnnotationLevel.METHOD, new CooldownInjector<>(dispatcher));
-        
+
         registerInjector(Async.class, commandUsageTypeWrap, AnnotationLevel.METHOD, new AsyncInjector<>(dispatcher));
         //registering wildcards
         for (AnnotationLevel level : AnnotationLevel.values()) {
@@ -59,9 +59,9 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
             registerDescriptionInjector(dispatcher, level);
             registerPermissionInjector(dispatcher, level);
         }
-        
+
     }
-    
+
     private void registerDescriptionInjector(Imperat<S> dispatcher, AnnotationLevel level) {
         registerInjector(Description.class,
                 TypeWrap.of(DescriptionHolder.class),
@@ -69,7 +69,7 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
                 new DescriptionInjector<>(dispatcher, level)
         );
     }
-    
+
     private void registerPermissionInjector(Imperat<S> dispatcher, AnnotationLevel level) {
         registerInjector(
                 Permission.class,
@@ -77,7 +77,7 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
                 level, new PermissionInjector<>(dispatcher, level)
         );
     }
-    
+
     public <O, A extends Annotation> void registerInjector(
             Class<A> annotationType,
             TypeWrap<O> typeToLoad,
@@ -86,13 +86,13 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
     ) {
         this.setData(InjectionContext.of(annotationType, typeToLoad, level), injector);
     }
-    
+
     @SuppressWarnings("unchecked")
     public <O, A extends Annotation, I extends AnnotationDataInjector<O, S, A>>
     Optional<I> getInjector(Class<A> annotationType, TypeWrap<O> typeToLoad, AnnotationLevel level) {
         return (Optional<I>) getData(InjectionContext.of(annotationType, typeToLoad, level));
     }
-    
+
     public void forEachInjector(
             Predicate<AnnotationDataInjector<?, S, ?>> predicate,
             Consumer<AnnotationDataInjector<?, S, ?>> action
@@ -103,7 +103,7 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public <A extends Annotation, O> void injectForElement(
             ProxyCommand<S> proxyCommand,
@@ -114,7 +114,7 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
             @NotNull CommandAnnotatedElement<?> element,
             @NotNull AnnotationLevel level
     ) {
-        
+
         A mainAnn = (A) annotationRegistry.getMainAnnotation(element);
         if (mainAnn == null) {
             return;
@@ -127,6 +127,6 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
                             annotationRegistry, injectorRegistry, element, mainAnn);
                 }
         );
-        
+
     }
 }

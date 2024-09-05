@@ -10,7 +10,7 @@ import dev.velix.imperat.resolvers.BukkitValueResolver;
 import org.bukkit.entity.Player;
 
 public final class GroupValueResolver implements BukkitValueResolver<Group> {
-    
+
     @Override
     public Group resolve(
             BukkitSource source,
@@ -19,14 +19,14 @@ public final class GroupValueResolver implements BukkitValueResolver<Group> {
             Cursor cursor,
             CommandParameter parameter
     ) throws CommandException {
-        
+
         var sender = context.getSource();
         if (sender.isConsole()) {
             throw new ContextResolveException("Invalid group '%s'", raw);
         }
-        
+
         return GroupRegistry.getInstance()
                 .getGroup(sender.as(Player.class).getUniqueId());
-        
+
     }
 }

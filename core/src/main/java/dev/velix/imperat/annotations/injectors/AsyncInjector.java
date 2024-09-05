@@ -18,11 +18,11 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 final class AsyncInjector<S extends Source> extends AnnotationDataInjector<CommandUsage<S>, S, Async> {
-    
+
     public AsyncInjector(Imperat<S> dispatcher) {
         super(dispatcher, InjectionContext.of(Async.class, TypeWrap.of(CommandUsage.class), AnnotationLevel.METHOD));
     }
-    
+
     @Override
     public @NotNull <T> CommandUsage<S> inject(
             ProxyCommand<S> proxyCommand,

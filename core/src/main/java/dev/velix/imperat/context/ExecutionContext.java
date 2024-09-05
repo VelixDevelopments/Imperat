@@ -15,27 +15,27 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ExecutionContext<S extends Source> {
-    
+
     /**
      * @return the command label used originally
      */
     Command<S> getCommandUsed();
-    
+
     /**
      * @return the arguments entered by the
      * @see ArgumentQueue
      */
     @NotNull
     ArgumentQueue getArguments();
-    
-    
+
+
     /**
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
      */
     ResolvedFlag getFlag(String flagName);
-    
-    
+
+
     /**
      * Fetches the flag input value
      * returns null if the flag is a {@link CommandSwitch}
@@ -46,7 +46,7 @@ public interface ExecutionContext<S extends Source> {
      * @return the resolved value of the flag input
      */
     @Nullable <T> T getFlagValue(String flagName);
-    
+
     /**
      * Fetches a resolved argument's value
      *
@@ -56,19 +56,19 @@ public interface ExecutionContext<S extends Source> {
      * @see ResolvedArgument
      */
     <T> @Nullable T getArgument(String name);
-    
+
     default <T> @NotNull T getArgumentOr(String name, T value) {
         final T argValue = getArgument(name);
         if (argValue != null) return argValue;
         return value;
     }
-    
+
     default String getRawArgument(int index) {
         if (index >= getArguments().size() || index < 0) return null;
         return getArguments().get(index);
     }
-    
-    
+
+
     /**
      * Fetches the argument/input that is resolved by the context
      * using {@link dev.velix.imperat.resolvers.ContextResolver}
@@ -78,13 +78,13 @@ public interface ExecutionContext<S extends Source> {
      * @return the argument/input that is resolved by the context
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException;
-    
-    
+
+
     /**
      * Creates an instance of {@link CommandHelp}
      *
      * @return {@link CommandHelp} for the command usage used in a certain context
      */
     CommandHelp<S> createCommandHelp();
-    
+
 }

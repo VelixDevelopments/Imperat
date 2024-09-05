@@ -6,11 +6,11 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.CommandException;
 
 public class ContextResolveException extends CommandException {
-    
+
     public ContextResolveException(String msg, Object... args) {
         super(String.format(msg, args));
     }
-    
+
     /**
      * Handles the exception
      *
@@ -21,5 +21,5 @@ public class ContextResolveException extends CommandException {
     public <S extends Source> void handle(Imperat<S> imperat, Context<S> context) {
         context.getSource().reply("<red>" + msg);
     }
-    
+
 }

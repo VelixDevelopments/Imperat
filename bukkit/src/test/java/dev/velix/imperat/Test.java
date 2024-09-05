@@ -30,31 +30,31 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public final class Test extends JavaPlugin implements Listener {
-    
+
     private BukkitImperat dispatcher;
-    
+
     @Override
     public void onEnable() {
         //testBukkit();
         this.getServer().getPluginManager().registerEvents(this, this);
         testImperat();
     }
-    
-    
+
+
     private void testImperat() {
         dispatcher = BukkitImperat.create(this);
         //testBrigadierCommodore();
-        
-        
+
+
         dispatcher.setHelpTemplate(new ExampleHelpTemplate());
-        
+
         dispatcher.registerValueResolver(Group.class, ((source, context, raw, pivot, parameter) -> {
             Group group = GroupRegistry.getInstance().getData(raw).orElse(null);
             if (group == null)
                 throw new ContextResolveException("Invalid group '" + raw + "'");
             return group;
         }));
-        
+
         dispatcher.registerSuggestionResolver(new GroupSuggestionResolver());
         //dispatcher.registerCommand(new BroadcastCommand());
 		/*dispatcher.registerContextResolver(Group.class, (context, param)-> {
@@ -65,8 +65,8 @@ public final class Test extends JavaPlugin implements Listener {
 			return GroupRegistry.getInstance()
 					  .getGroup(sender.as(Player.class).getUniqueId());
 		});*/
-        
-        
+
+
         dispatcher.registerAnnotationReplacer(MyCommand.class, (annotation) -> {
             var cmd = AnnotationFactory.create(
                     dev.velix.imperat.annotations.types.Command.class,
@@ -74,25 +74,25 @@ public final class Test extends JavaPlugin implements Listener {
             var permission = AnnotationFactory.create(Permission.class, "value", "command.group");
             var desc = AnnotationFactory.create(Description.class, "value",
                     "Main command for managing groups/ranks");
-            
+
             return List.of(cmd, permission, desc);
         });
-        
+
         dispatcher.registerContextResolver(Guild.class, new GuildContextResolver());
-        
+
         //dispatcher.applyBrigadier();
-        
+
         dispatcher.registerCommand(new ExampleCommand());
         //classicExample();
         dispatcher.registerCommand(new GuildCommand());
         dispatcher.registerCommand(new GroupCommand());
         dispatcher.registerCommand(new BanCommand());
-        
+
         debugCommands();
     }
-    
+
     private void classicExample() {
-        
+
         Command<BukkitSource> example = Command.<BukkitSource>create("example")
                 .usage(CommandUsage.<BukkitSource>builder()
                         .parameters(CommandParameter.requiredInt("firstArg"))
@@ -102,13 +102,13 @@ public final class Test extends JavaPlugin implements Listener {
                         })
                         .build()
                 ).build();
-        
+
         dispatcher.registerCommand(example);
     }
-    
+
     private void classicBanExample() {
         final String defaultReason = "Breaking Server Laws";
-        
+
         Command<BukkitSource> command = BukkitCommand.create("ban")
                 .permission("command.ban")
                 .description("Main command for banning players")
@@ -128,30 +128,30 @@ public final class Test extends JavaPlugin implements Listener {
                                     Boolean silent = context.getFlagValue("silent");
                                     if (silent == null)
                                         silent = false; //not needed but in case some bug happens out of nowhere
-                                    
+
                                     String duration = context.getArgument("duration");
                                     String reason = context.getArgument("reason");
-                                    
+
                                     String durationFormat = duration == null ? "FOREVER" : "for " + duration;
                                     assert player != null;
                                     String msg = "Banning " + player.getName() + " "
                                             + durationFormat + " due to " + reason;
-                                    
+
                                     if (!silent)
                                         Bukkit.broadcastMessage(msg);
                                     else
                                         source.reply(msg);
-                                    
+
                                 })
                                 .build()
                 )
                 .build();
-        
+
     }
-    
-    
+
+
     private void classicGroupCmd() {
-        
+
         Command<BukkitSource> senderCommand = BukkitCommand.create("group")
                 .defaultExecution((source, context) -> {
                     source.reply("/group <group>");
@@ -166,9 +166,9 @@ public final class Test extends JavaPlugin implements Listener {
                                 }).build()
                 )
                 .build();
-        
+
     }
-    
+
     private void classicGuildCmd() {
         Command<BukkitSource> guildCmd = BukkitCommand.create("guild")
                 .subCommand(
@@ -191,16 +191,16 @@ public final class Test extends JavaPlugin implements Listener {
                                 ).build()
                 )
                 .build();
-        
+
     }
-    
+
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         var player = event.getPlayer();
         GroupRegistry.getInstance().setGroup(player.getUniqueId(), new Group("owner"));
     }
-    
-    
+
+
     private void debugCommands() {
         for (var command : dispatcher.getRegisteredCommands()) {
             System.out.println("Command '" + command.getName() + "' has usages: ");
@@ -209,5 +209,5 @@ public final class Test extends JavaPlugin implements Listener {
             }
         }
     }
-    
+
 }

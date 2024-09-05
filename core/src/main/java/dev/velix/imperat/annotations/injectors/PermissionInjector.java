@@ -17,11 +17,11 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 final class PermissionInjector<S extends Source> extends AnnotationDataInjector<PermissionHolder, S, Permission> {
-    
+
     public PermissionInjector(Imperat<S> dispatcher, AnnotationLevel level) {
         super(dispatcher, InjectionContext.of(Permission.class, TypeWrap.of(PermissionHolder.class), level));
     }
-    
+
     @Override
     public @NotNull <T> PermissionHolder inject(
             ProxyCommand<S> proxyCommand,
@@ -39,5 +39,5 @@ final class PermissionInjector<S extends Source> extends AnnotationDataInjector<
         toLoad.setPermission(annotation.value());
         return toLoad;
     }
-    
+
 }

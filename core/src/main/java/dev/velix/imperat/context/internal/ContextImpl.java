@@ -14,12 +14,12 @@ import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 final class ContextImpl<S extends Source> implements Context<S> {
-    
+
     private final Imperat<S> dispatcher;
     private final S source;
     private final Command<S> command;
     private final ArgumentQueue args;
-    
+
     ContextImpl(
             Imperat<S> dispatcher,
             Command<S> command,
@@ -30,8 +30,8 @@ final class ContextImpl<S extends Source> implements Context<S> {
         this.command = command;
         this.args = args;
     }
-    
-    
+
+
     /**
      * the command used in the context
      *
@@ -41,7 +41,7 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public @NotNull Command<S> getCommandUsed() {
         return command;
     }
-    
+
     /**
      * @return the command source of the command
      * @see Source
@@ -50,7 +50,7 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public @NotNull S getSource() {
         return source;
     }
-    
+
     /**
      * @return the arguments entered by the
      * @see ArgumentQueue
@@ -59,7 +59,7 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public @NotNull ArgumentQueue getArguments() {
         return args;
     }
-    
+
     /**
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
@@ -68,7 +68,7 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public ResolvedFlag getFlag(String flagName) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Fetches the flag input value
      * returns null if the flag is a {@link CommandSwitch}
@@ -81,7 +81,7 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public <T> @Nullable T getFlagValue(String flagName) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Fetches a resolved argument's value
      *
@@ -93,7 +93,7 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public <T> @Nullable T getArgument(String name) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Fetches the argument/input resolved by the context
      * using {@link ContextResolver}
@@ -105,14 +105,14 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public <T> @Nullable T getContextResolvedArgument(Class<T> type) {
         throw new UnsupportedOperationException();
     }
-    
-    
+
+
     @Override
     public CommandHelp<S> createCommandHelp() {
         return new CommandHelp<>(dispatcher, command, this);
     }
-    
-    
+
+
     /**
      * @return the number of flags extracted
      */
@@ -120,5 +120,5 @@ final class ContextImpl<S extends Source> implements Context<S> {
     public int flagsUsedCount() {
         throw new UnsupportedOperationException();
     }
-    
+
 }

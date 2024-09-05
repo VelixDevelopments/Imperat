@@ -24,7 +24,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public final class SubCommandInjector<S extends Source> extends AnnotationDataInjector<Command<S>, S, SubCommand> {
-    
+
     public SubCommandInjector(Imperat<S> dispatcher) {
         super(
                 dispatcher,
@@ -32,7 +32,7 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
                 }, AnnotationLevel.METHOD)
         );
     }
-    
+
     @Override
     public @NotNull <T> Command<S> inject(
             ProxyCommand<S> proxyCommand,
@@ -44,26 +44,26 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
             @NotNull CommandAnnotatedElement<?> element,
             @NotNull SubCommand annotation
     ) {
-        
+
         if (toLoad == null) {
             throw new IllegalArgumentException("toLoad ,in @Description injection, is null.");
         }
-        
+
         if (element.getElement() instanceof Class) {
             //we will use the injector for @Inherit to load the subcommand
             return toLoad;
         }
-        
+
         Method method = (Method) element.getElement();
-        
+
         final String[] values = annotation.value();
         List<String> aliases = new ArrayList<>(Arrays.asList(values)
                 .subList(1, values.length));
-        
+
         var mainUsage = toLoad.getMainUsage();
         List<CommandParameter> methodCommandParameters = this.loadParameters(proxyCommand, injectorRegistry,
                 annotationRegistry, reader, parser, mainUsage, method);
-        
+
         //merging the command's main usage params with subcommand's parameters to use them in the method to be invoked
         List<CommandParameter> fullParams = new ArrayList<>(mainUsage.getParameters().size() + methodCommandParameters.size());
         fullParams.addAll(mainUsage.getParameters());
@@ -77,16 +77,16 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
                 .parameters(methodCommandParameters)
                 .execute(new MethodCommandExecutor<>(proxyCommand, dispatcher, method,
                         fullParams)).build();
-        
+
         //injecting other data into the usage
         UsageInjector.injectOthers(proxyCommand, usage, reader, parser,
                 injectorRegistry, annotationRegistry, element);
-        
+
         toLoad.addSubCommandUsage(values[0], aliases, usage, annotation.attachDirectly());
-        
+
         return toLoad;
     }
-    
+
     private List<CommandParameter> loadParameters(
             ProxyCommand<S> proxyCommand,
             AnnotationInjectorRegistry<S> injectorRegistry,
@@ -96,27 +96,27 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
             @Nullable CommandUsage<S> mainUsage,
             Method method
     ) {
-        
+
         List<CommandParameter> commandParameters = new ArrayList<>();
         CommandParameterInjector<S> paramInjector = injectorRegistry.<CommandParameter, Named, CommandParameterInjector<S>>
                         getInjector(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER)
                 .orElseThrow();
-        
+
         for (Parameter parameter : method.getParameters()) {
             if (dispatcher.canBeSender(parameter.getType())) continue;
             if (dispatcher.hasContextResolver(parameter.getType())) continue;
-            
+
             MethodParameterElement element = new MethodParameterElement(annotationRegistry, parameter);
             CommandParameter commandParameter =
                     paramInjector.inject(proxyCommand, null, reader,
                             parser, annotationRegistry,
                             injectorRegistry, element, element.getAnnotation(Named.class));
-            
+
             if (mainUsage != null && mainUsage
                     .hasParameters((param) -> param.equals(commandParameter))) {
                 continue;
             }
-            
+
             commandParameters.add(commandParameter);
         }
         return commandParameters;

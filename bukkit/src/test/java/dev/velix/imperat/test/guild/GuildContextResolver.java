@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Parameter;
 
 public final class GuildContextResolver implements BukkitContextResolver<Guild> {
-    
+
     /**
      * Resolves a parameter's default value
      * if it has been not input by the user

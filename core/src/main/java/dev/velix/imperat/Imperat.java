@@ -27,36 +27,36 @@ public non-sealed interface Imperat<S extends Source> extends
         ProcessorRegistrar<S>, ResolverRegistrar<S>,
         CommandRegistrar<S>, CaptionRegistrar<S>,
         SourceWrapper<S>, CommandHelpHandler {
-    
+
     /**
      * @return the platform of the module
      */
     Object getPlatform();
-    
+
     /**
      * Shuts down the platform
      */
     void shutdownPlatform();
-    
+
     /**
      * @return The command prefix
      */
     String commandPrefix();
-    
+
     /**
      * @return the factory for creation of
      * command related contexts {@link Context}
      */
     ContextFactory<S> getContextFactory();
-    
+
     /**
      * sets the context factory {@link ContextFactory} for the contexts
      *
      * @param contextFactory the context factory to set
      */
     void setContextFactory(ContextFactory<S> contextFactory);
-    
-    
+
+
     /**
      * Changes the instance of {@link AnnotationParser}
      *
@@ -64,8 +64,8 @@ public non-sealed interface Imperat<S extends Source> extends
      */
     @Contract("null->fail")
     void setAnnotationParser(AnnotationParser<S> parser);
-    
-    
+
+
     /**
      * Registers annotation replacer
      *
@@ -77,15 +77,15 @@ public non-sealed interface Imperat<S extends Source> extends
             final Class<A> type,
             final AnnotationReplacer<A> replacer
     );
-    
+
     /**
      * Sets the usage verifier to a new instance
      *
      * @param usageVerifier the usage verifier to set
      */
     void setUsageVerifier(UsageVerifier<S> usageVerifier);
-    
-    
+
+
     /**
      * Dispatches and executes a command with certain raw arguments
      *
@@ -94,7 +94,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param rawInput    the command's args input
      */
     void dispatch(S sender, String commandName, String... rawInput);
-    
+
     /**
      * Dispatches and executes a command with certain raw arguments
      *
@@ -103,7 +103,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param rawArgsOneLine the command's args input
      */
     void dispatch(S sender, String commandName, String rawArgsOneLine);
-    
+
     /**
      * @param command the data about the command being written in the chat box
      * @param sender  the sender writing the command
@@ -111,5 +111,5 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the suggestions at the current position
      */
     List<String> autoComplete(Command<S> command, S sender, String[] args);
-    
+
 }

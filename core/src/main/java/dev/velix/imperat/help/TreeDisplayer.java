@@ -16,14 +16,14 @@ import java.util.List;
 @ApiStatus.Experimental
 @Unstable
 final class TreeDisplayer implements UsageDisplayer {
-    
+
     private final static String BRANCH_DOWN = "<dark_gray>┠</dark_gray>";
     private final static String BRANCH_FORWARDS = "<dark_gray>-</dark_gray>";
-    
+
     TreeDisplayer() {
-    
+
     }
-    
+
     @Override
     public <S extends Source> void display(
             Imperat<S> dispatcher,
@@ -32,22 +32,22 @@ final class TreeDisplayer implements UsageDisplayer {
             UsageFormatter formatter,
             List<CommandUsage<S>> usages
     ) {
-        
-        
+
+
         for (int i = 0; i < usages.size(); i++) {
             var usage = usages.get(i);
-            
+
             var formatInfo = formatUsageTillSub(dispatcher, command, usage);
-            
+
             var lastSub = formatInfo.left();
-            
+
             displayUsage(dispatcher, command, source, usage, lastSub,
                     formatter, formatInfo.right(), i == usages.size() - 1);
         }
-        
+
     }
-    
-    
+
+
     private <S extends Source> Pair<String, Command<S>> formatUsageTillSub(Imperat<S> dispatcher,
                                                                            Command<S> command,
                                                                            CommandUsage<S> usage) {
@@ -61,11 +61,11 @@ final class TreeDisplayer implements UsageDisplayer {
                 break;
             }
         }
-        
+
         return new Pair<>(builder.toString(), lastSub);
     }
-    
-    
+
+
     private <S extends Source> void displayUsage(
             Imperat<S> dispatcher,
             Command<S> command,
@@ -76,15 +76,15 @@ final class TreeDisplayer implements UsageDisplayer {
             @NotNull String format,
             boolean last
     ) {
-        
-        
+
+
         if (sub == null) {
             source.reply(formatter.formatUsageLine(dispatcher, command, usage, last));
             return;
         }
-        
+
         source.reply(formatter.formatUsageOnly(format));
-        
+
         int max = sub.getUsages().size();
         int i = 0;
         for (CommandUsage<S> commandUsage : sub.getUsages()) {
@@ -98,7 +98,7 @@ final class TreeDisplayer implements UsageDisplayer {
             }
             i++;
         }
-        
+
     }
-    
+
 }

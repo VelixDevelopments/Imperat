@@ -21,7 +21,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 final class CommandMethodInjector<S extends Source> extends AnnotationDataInjector<Command<S>, S, dev.velix.imperat.annotations.types.Command> {
-    
+
     public CommandMethodInjector(
             Imperat<S> imperat
     ) {
@@ -30,7 +30,7 @@ final class CommandMethodInjector<S extends Source> extends AnnotationDataInject
                 TypeWrap.of(Command.class), AnnotationLevel.METHOD)
         );
     }
-    
+
     @Override
     public <T> @NotNull Command<S> inject(
             ProxyCommand<S> proxyCommand,
@@ -42,17 +42,17 @@ final class CommandMethodInjector<S extends Source> extends AnnotationDataInject
             @NotNull CommandAnnotatedElement<?> element,
             dev.velix.imperat.annotations.types.@NotNull Command annotation
     ) {
-        
+
         final String[] values = annotation.value();
         List<String> aliases = new ArrayList<>(Arrays.asList(values)
                 .subList(1, values.length));
-        
+
         Method method = (Method) element.getElement();
-        
+
         Command.Builder<S> builder = Command.<S>create(values[0])
                 .ignoreACPermissions(annotation.ignoreAutoCompletionPermission())
                 .aliases(aliases);
-        
+
         if (method.getParameters().length == 1) {
             //default usage for that command.
             builder.defaultExecution(
@@ -64,8 +64,8 @@ final class CommandMethodInjector<S extends Source> extends AnnotationDataInject
                     .orElseThrow(() -> new IllegalStateException("Could not find injector for CommandUsage in CommandMethodInjector"));
             builder.usage(usageInjector.inject(proxyCommand, null, reader, parser, annotationRegistry, injectorRegistry, element, element.getAnnotation(Usage.class)));
         }
-        
+
         return builder.build();
     }
-    
+
 }

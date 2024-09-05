@@ -18,17 +18,17 @@ import java.util.List;
 
 @ApiStatus.Internal
 record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCompleter<S> {
-    
+
     private static @NotNull CompletionArg getLastArg(String[] args) {
         if (args.length == 0) return new CompletionArg(null, -1);
         int index = args.length - 1;
         String result = args[args.length - 1];
         if (result.isEmpty() || result.equals(" "))
             result = null;
-        
+
         return new CompletionArg(result, index);
     }
-    
+
     /**
      * @return The auto-completion command
      */
@@ -36,7 +36,7 @@ record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCo
     public Command<S> command() {
         return command;
     }
-    
+
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
@@ -52,8 +52,8 @@ record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCo
         CompletionArg argToComplete = getLastArg(args);
         return autoCompleteArgument(dispatcher, sender, argToComplete, args);
     }
-    
-    
+
+
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
@@ -69,20 +69,20 @@ record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCo
                                              S sender,
                                              CompletionArg currentArg,
                                              String[] args) {
-        
-        
+
+
         final PermissionResolver<S> permResolver = dispatcher.getPermissionResolver();
         if (!command.isIgnoringACPerms() &&
                 !permResolver.hasPermission(sender, command.getPermission())) {
             return Collections.emptyList();
         }
-        
+
         ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(args);
         var closestUsages = getClosestUsages(args);
         int index = currentArg.index();
         if (index == -1)
             index = 0;
-        
+
         AutoCompleteList results = new AutoCompleteList();
         for (CommandUsage<S> usage : closestUsages) {
             if (index < 0 || index >= usage.getMaxLength()) continue;
@@ -100,24 +100,24 @@ record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCo
                     results.addAll(resolver.autoComplete(command, sender,
                             queue, parameter, currentArg));
                 }
-                
+
             }
-            
+
         }
-        
+
         return new ArrayList<>(results.getResults());
     }
-    
-    
+
+
     private Collection<? extends CommandUsage<S>> getClosestUsages(String[] args) {
-        
+
         return command
                 .findUsages((usage) -> {
                     if (args.length >= usage.getMaxLength()) {
                         for (int i = 0; i < usage.getMaxLength(); i++) {
                             CommandParameter parameter = usage.getParameters().get(i);
                             if (!parameter.isCommand()) continue;
-                            
+
                             if (i >= args.length) return false;
                             String corresponding = args[i];
                             if (corresponding != null && !corresponding.isEmpty() &&
@@ -129,6 +129,6 @@ record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCo
                     return args.length <= usage.getMaxLength();
                 });
     }
-    
-    
+
+
 }

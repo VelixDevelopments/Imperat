@@ -18,7 +18,7 @@ public class NoHelpPageCaption<S extends Source> implements Caption<S> {
     public @NotNull CaptionKey getKey() {
         return CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION;
     }
-    
+
     /**
      * @param dispatcher the command dispatcher
      * @param context    the context
@@ -33,7 +33,7 @@ public class NoHelpPageCaption<S extends Source> implements Caption<S> {
                 || resolvedContext.getDetectedUsage().isHelp()) {
             throw new IllegalCallerException("Called NoHelpPageCaption in wrong the wrong sequence/part of the code");
         }
-        
+
         int page = context.getArgumentOr("page", 1);
         return Messages.NO_HELP_PAGE_AVAILABLE.replace("<page>", String.valueOf(page));
     }

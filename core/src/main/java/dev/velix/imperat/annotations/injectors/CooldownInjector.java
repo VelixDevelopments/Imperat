@@ -18,11 +18,11 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("unused")
 final class CooldownInjector<S extends Source> extends
         AnnotationDataInjector<CooldownHolder, S, Cooldown> {
-    
+
     public CooldownInjector(Imperat<S> dispatcher) {
         super(dispatcher, InjectionContext.of(Cooldown.class, TypeWrap.of(CooldownHolder.class), AnnotationLevel.METHOD));
     }
-    
+
     @Override
     public @NotNull <T> CooldownHolder inject(
             ProxyCommand<S> proxyCommand,
