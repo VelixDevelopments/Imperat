@@ -5,9 +5,7 @@ import dev.velix.imperat.adventure.BungeeAdventure;
 import dev.velix.imperat.adventure.NoAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.reflection.Reflections;
@@ -85,14 +83,7 @@ public final class BungeeImperat extends BaseImperat<CommandSender> {
     public Object getPlatform() {
         return plugin;
     }
-
-    @Override
-    public CommandHelp<CommandSender> createCommandHelp(
-            Command<CommandSender> command,
-            Context<CommandSender> context
-    ) {
-        return BungeeCommandHelp.create(this, command, context);
-    }
+    
 
     @Override
     public void shutdownPlatform() {
