@@ -8,7 +8,7 @@ import dev.velix.imperat.annotations.injectors.AnnotationInjectorRegistry;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.SubCommand;
-import dev.velix.imperat.annotations.types.methods.Usage;
+import dev.velix.imperat.annotations.types.Usage;
 import dev.velix.imperat.exceptions.UnknownCommandClass;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.annotations.MethodVerifier;

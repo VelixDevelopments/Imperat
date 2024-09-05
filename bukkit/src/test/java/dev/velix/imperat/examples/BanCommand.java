@@ -1,11 +1,8 @@
 package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.Command;
-import dev.velix.imperat.annotations.types.Description;
-import dev.velix.imperat.annotations.types.Permission;
-import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.annotations.types.parameters.*;
+import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.annotations.types.Usage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.Nullable;

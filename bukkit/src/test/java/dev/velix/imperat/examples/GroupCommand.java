@@ -4,9 +4,9 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Permission;
 import dev.velix.imperat.annotations.types.SubCommand;
-import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.annotations.types.parameters.Named;
-import dev.velix.imperat.annotations.types.parameters.SuggestionProvider;
+import dev.velix.imperat.annotations.types.Usage;
+import dev.velix.imperat.annotations.types.Named;
+import dev.velix.imperat.annotations.types.SuggestionProvider;
 import dev.velix.imperat.test.Group;
 
 @Command("group")

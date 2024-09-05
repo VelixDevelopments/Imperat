@@ -8,7 +8,7 @@ import dev.velix.imperat.annotations.AnnotationRegistry;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.injectors.context.InjectionContext;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
-import dev.velix.imperat.annotations.types.methods.Async;
+import dev.velix.imperat.annotations.types.Async;
 import dev.velix.imperat.command.CommandCoordinator;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.util.TypeWrap;

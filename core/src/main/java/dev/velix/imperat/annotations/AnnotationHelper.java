@@ -1,7 +1,7 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.types.parameters.*;
+import dev.velix.imperat.annotations.types.*;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;

@@ -1,4 +1,6 @@
-package dev.velix.imperat.annotations.types.parameters;
+package dev.velix.imperat.annotations.types;
+
+import dev.velix.imperat.supplier.OptionalValueSupplier;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,10 +9,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.PARAMETER})
-public @interface Range {
+public @interface DefaultValueProvider {
 
-    double min() default Double.MIN_VALUE;
-
-    double max() default Double.MAX_VALUE;
-
+    Class<? extends OptionalValueSupplier<?>> value();
 }

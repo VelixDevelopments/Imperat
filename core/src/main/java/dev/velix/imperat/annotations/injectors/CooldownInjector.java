@@ -8,7 +8,7 @@ import dev.velix.imperat.annotations.AnnotationRegistry;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.injectors.context.InjectionContext;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
-import dev.velix.imperat.annotations.types.methods.Cooldown;
+import dev.velix.imperat.annotations.types.Cooldown;
 import dev.velix.imperat.command.CooldownHolder;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;

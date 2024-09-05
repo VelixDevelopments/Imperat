@@ -4,9 +4,9 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
-import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.annotations.types.parameters.Greedy;
-import dev.velix.imperat.annotations.types.parameters.Named;
+import dev.velix.imperat.annotations.types.Usage;
+import dev.velix.imperat.annotations.types.Greedy;
+import dev.velix.imperat.annotations.types.Named;
 import org.bukkit.Bukkit;
 
 @Command("broadcast")

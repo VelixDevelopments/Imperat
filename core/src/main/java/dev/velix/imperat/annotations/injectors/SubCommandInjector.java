@@ -7,7 +7,7 @@ import dev.velix.imperat.annotations.element.MethodParameterElement;
 import dev.velix.imperat.annotations.injectors.context.InjectionContext;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
 import dev.velix.imperat.annotations.types.SubCommand;
-import dev.velix.imperat.annotations.types.parameters.Named;
+import dev.velix.imperat.annotations.types.Named;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;

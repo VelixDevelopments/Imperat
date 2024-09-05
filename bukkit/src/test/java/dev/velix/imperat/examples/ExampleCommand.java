@@ -2,9 +2,9 @@ package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.Command;
-import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.annotations.types.parameters.Named;
-import dev.velix.imperat.annotations.types.parameters.Range;
+import dev.velix.imperat.annotations.types.Usage;
+import dev.velix.imperat.annotations.types.Named;
+import dev.velix.imperat.annotations.types.Range;
 
 @Command("example")
 public final class ExampleCommand {

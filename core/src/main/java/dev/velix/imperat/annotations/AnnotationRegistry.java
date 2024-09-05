@@ -1,13 +1,9 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
-import dev.velix.imperat.annotations.types.Command;
-import dev.velix.imperat.annotations.types.Description;
-import dev.velix.imperat.annotations.types.Permission;
-import dev.velix.imperat.annotations.types.methods.Help;
-import dev.velix.imperat.annotations.types.SubCommand;
-import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.annotations.types.parameters.*;
+import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.annotations.types.Help;
+import dev.velix.imperat.annotations.types.Usage;
 import dev.velix.imperat.util.collections.ClassMap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;

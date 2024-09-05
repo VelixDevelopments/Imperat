@@ -1,4 +1,4 @@
-package dev.velix.imperat.annotations.types.methods;
+package dev.velix.imperat.annotations.types;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
