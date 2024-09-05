@@ -228,7 +228,6 @@ public interface Command<C> extends CommandParameter {
      *                       then the final usage will be : "/command param1 your subcommand param2, param3"
      *                       </p>
      */
-    //TODO create subcommand builder
     void addSubCommandUsage(String subCommand,
                                     List<String> aliases,
                                     CommandUsage<C> usage,

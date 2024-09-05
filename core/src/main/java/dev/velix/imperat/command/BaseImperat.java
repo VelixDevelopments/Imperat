@@ -502,9 +502,15 @@ public abstract class BaseImperat<C> implements Imperat<C> {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
         //CommandDebugger.visualize("Raw input = '%s'", String.join(",", rawArguments));
         Source<C> source = wrapSender(sender);
-
+        
+        Command<C> command = getCommand(commandName);
+        if (command == null) {
+            source.reply("Unknown command !");
+            return;
+        }
+        
         Context<C> plainContext = getContextFactory()
-                .createContext(this, source, commandName, rawArguments);
+                .createContext(this, source, command, rawArguments);
 
         try {
             handleExecution(source, plainContext);
@@ -520,13 +526,7 @@ public abstract class BaseImperat<C> implements Imperat<C> {
     }
 
     private void handleExecution(Source<C> source, Context<C> context) throws CommandException {
-
-        Command<C> command = getCommand(context.getCommandUsed());
-        if (command == null) {
-            source.reply("Unknown command !");
-            return;
-        }
-
+        Command<C> command = context.getCommandUsed();
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
         }

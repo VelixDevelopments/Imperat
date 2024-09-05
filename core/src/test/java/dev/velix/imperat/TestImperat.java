@@ -1,10 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.command.BaseImperat;
-import dev.velix.imperat.command.Command;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.PermissionResolver;
 
 public final class TestImperat extends BaseImperat<TestSender> {
@@ -54,18 +51,4 @@ public final class TestImperat extends BaseImperat<TestSender> {
 
     }
     
-    /**
-     * Creates an instance of {@link CommandHelp}
-     *
-     * @param command the command
-     * @param context the context
-     * @return {@link CommandHelp} for the command usage used in a certain context
-     */
-    @Override
-    public CommandHelp<TestSender> createCommandHelp(
-            Command<TestSender> command,
-            Context<TestSender> context
-    ) {
-        return null;
-    }
 }

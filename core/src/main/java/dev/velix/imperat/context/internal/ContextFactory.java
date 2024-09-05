@@ -35,7 +35,7 @@ public interface ContextFactory<C> {
     Context<C> createContext(
             @NotNull Imperat<C> dispatcher,
             @NotNull Source<C> source,
-            @NotNull String command,
+            @NotNull Command<C> command,
             @NotNull ArgumentQueue queue
     );
 

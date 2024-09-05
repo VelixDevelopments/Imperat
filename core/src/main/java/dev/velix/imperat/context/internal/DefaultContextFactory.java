@@ -25,10 +25,10 @@ class DefaultContextFactory<C> implements ContextFactory<C> {
     public @NotNull Context<C> createContext(
             @NotNull Imperat<C> dispatcher,
             @NotNull Source<C> source,
-            @NotNull String command,
+            @NotNull Command<C> command,
             @NotNull ArgumentQueue queue
     ) {
-        return new ContextImpl<>(source, command, queue);
+        return new ContextImpl<>(dispatcher, command, source, queue);
     }
 
     /**

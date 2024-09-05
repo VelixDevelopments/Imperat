@@ -13,13 +13,14 @@ import java.util.Objects;
 @ApiStatus.Internal
 public abstract class InputParameter implements CommandParameter {
 
-    protected final String name, permission;
+    protected final String name;
+    protected String permission;
+    protected Description description;
     protected int index;
     protected final TypeWrap<?> typeWrap;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final SuggestionResolver<?, ?> suggestionResolver;
-    protected final Description description;
 
 
     protected InputParameter(String name, TypeWrap<?> typeWrap,
@@ -78,6 +79,11 @@ public abstract class InputParameter implements CommandParameter {
     @Override
     public @Nullable String getPermission() {
         return permission;
+    }
+    
+    @Override
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
     
     /**
@@ -152,7 +158,12 @@ public abstract class InputParameter implements CommandParameter {
     public Description getDescription() {
         return description;
     }
-
+    
+    @Override
+    public void setDescription(Description description) {
+        this.description = description;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
