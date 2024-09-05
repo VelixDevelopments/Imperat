@@ -7,6 +7,7 @@ import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.command.tree.CommandTree;
+import dev.velix.imperat.command.tree.CommandTreeVisualizer;
 import dev.velix.imperat.command.tree.Traverse;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
@@ -35,6 +36,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private final Map<List<CommandParameter>, CommandUsage<S>> usages = new TreeMap<>(UsageComparator.getInstance());
     private final AutoCompleter<S> autoCompleter;
     private final @Nullable CommandTree<S> commandTree;
+    private final @NotNull CommandTreeVisualizer<S> visualizer;
     private String permission = null;
     private Description description = Description.EMPTY;
     private boolean suppressACPermissionChecks = false;
@@ -60,7 +62,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
         setDefaultUsageExecution((source, context) -> {
         });
         this.autoCompleter = AutoCompleter.createNative(this);
-        commandTree = parent != null ? null : CommandTree.create(this);
+        this.commandTree = parent != null ? null : CommandTree.create(this);
+        this.visualizer = CommandTreeVisualizer.of(commandTree);
     }
 
     /**
@@ -128,6 +131,11 @@ final class CommandImpl<S extends Source> implements Command<S> {
         } else {
             throw new IllegalCallerException("Cannot traverse a sub command !");
         }
+    }
+
+    @Override
+    public void visualize() {
+        visualizer.visualize();
     }
 
     /**
@@ -247,10 +255,12 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public void addUsage(CommandUsage<S> usage) {
         usages.put(usage.getParameters(), usage);
-        if (mainUsage == null && usage.getMinLength() >= 1 &&
+
+        if (mainUsage == null && usage.getMaxLength() >= 1 &&
                 !usage.hasParamType(Command.class)) {
             mainUsage = usage;
         }
+
         if (commandTree != null)
             commandTree.parseUsage(usage);
     }

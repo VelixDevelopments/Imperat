@@ -487,33 +487,35 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @param rawInput    the command's args input
      */
     @Override
-    public void dispatch(S source, String commandName, String... rawInput) {
+    public TraverseResult dispatch(S source, String commandName, String... rawInput) {
 
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
         //CommandDebugger.visualize("Raw input = '%s'", String.join(",", rawArguments));
         Command<S> command = getCommand(commandName);
         if (command == null) {
             source.reply("Unknown command !");
-            return;
+            return TraverseResult.UNKNOWN;
         }
 
         Context<S> plainContext = getContextFactory()
                 .createContext(this, source, command, rawArguments);
 
         try {
-            handleExecution(source, plainContext);
+            return handleExecution(source, plainContext);
         } catch (Throwable ex) {
             CommandExceptionHandler.handleException(this, plainContext, BaseImperat.class, "dispatch", ex);
+            ex.printStackTrace();
+            return TraverseResult.UNKNOWN;
         }
 
     }
 
     @Override
-    public void dispatch(S sender, String commandName, String rawArgsOneLine) {
-        dispatch(sender, commandName, rawArgsOneLine.split(" "));
+    public TraverseResult dispatch(S sender, String commandName, String rawArgsOneLine) {
+        return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
 
-    private void handleExecution(S source, Context<S> context) throws CommandException {
+    private TraverseResult handleExecution(S source, Context<S> context) throws CommandException {
         Command<S> command = context.getCommandUsed();
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
@@ -522,7 +524,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         if (context.getArguments().isEmpty()) {
             CommandUsage<S> defaultUsage = command.getDefaultUsage();
             defaultUsage.execute(this, source, context);
-            return;
+            return TraverseResult.INCOMPLETE;
         }
 
         Traverse searchResult = command.traverse(context);
@@ -543,6 +545,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             }
         } else
             throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
+
+        return searchResult.result();
     }
 
     private void executeUsage(Command<S> command,

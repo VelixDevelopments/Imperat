@@ -41,6 +41,10 @@ public final class TestCommands {
                                     .parameters(
                                             CommandParameter.optionalInt("page").defaultValue(1)
                                     )
+                                    .execute((source, context) -> {
+                                        Integer page = context.getArgument("page");
+                                        source.sendMsg("Help page= " + page);
+                                    })
                                     .build()
                     ).build(), true
             )

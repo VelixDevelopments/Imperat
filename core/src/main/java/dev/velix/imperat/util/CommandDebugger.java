@@ -20,7 +20,7 @@ public final class CommandDebugger {
 
     public static void debug(String msg, Object... args) {
         if (LOGGER == null) {
-            System.out.println(String.format(msg, args));
+            System.out.printf((msg) + "%n", args);
             return;
         }
         LOGGER.log(Level.INFO, String.format(msg, args));
@@ -28,7 +28,7 @@ public final class CommandDebugger {
 
     public static void warning(String msg, Object... args) {
         if (LOGGER == null) {
-            System.out.println(String.format(msg, args));
+            System.out.printf((msg) + "%n", args);
             return;
         }
         LOGGER.log(Level.WARNING, String.format(msg, args));
@@ -36,15 +36,16 @@ public final class CommandDebugger {
 
     public static void error(Class<?> owningClass, String name, Throwable ex) {
         if (LOGGER == null) {
-            System.out.println(String.format("Error in class '%s', in method '%s'", owningClass.getName(), name));
+            System.out.printf("Error in class '%s', in method '%s'%n", owningClass.getName(), name);
             return;
         }
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s'", owningClass.getName(), name), ex);
+        ex.printStackTrace();
     }
 
     public static void error(Class<?> owningClass, String name, Throwable ex, String message) {
         if (LOGGER == null) {
-            System.out.println(String.format("Error in class '%s', in method '%s'", owningClass.getName(), name));
+            System.out.printf("Error in class '%s', in method '%s'%n", owningClass.getName(), name);
             return;
         }
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s' due to '%s'", owningClass.getName(), name, message), ex);
@@ -52,8 +53,8 @@ public final class CommandDebugger {
 
     public static void debugParameters(String msg, List<CommandParameter> parameters) {
         if (LOGGER == null) {
-            System.out.println(String.format(msg, parameters.stream().map(CommandParameter::format)
-                    .collect(Collectors.joining(","))));
+            System.out.printf((msg) + "%n", parameters.stream().map(CommandParameter::format)
+                    .collect(Collectors.joining(",")));
             return;
         }
         LOGGER.log(Level.INFO, String.format(msg, parameters.stream().map(CommandParameter::format)

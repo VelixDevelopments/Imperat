@@ -56,7 +56,6 @@ public final class CommandTree<S extends Source> {
 
         CommandParameter param = parameters.get(index);
         UsageNode<?> childNode = getChildNode(currentNode, param);
-        System.out.println("ADDING " + childNode.format());
         // Recursively add the remaining parameters to the child node
         addParametersToTree(childNode, parameters, index + 1);
     }
@@ -140,8 +139,7 @@ public final class CommandTree<S extends Source> {
                         if (!child.isOptional()) {
                             allOptional = false;
                             break;
-                        }
-                        if (child.isOptional() && child.matchesInput(raw)) {
+                        } else {
                             traverse.append(child);
                         }
                     }

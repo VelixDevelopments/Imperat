@@ -1,14 +1,8 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.tree.CommandTree;
-import dev.velix.imperat.command.tree.CommandTreeVisualizer;
-import dev.velix.imperat.command.tree.Traverse;
 import dev.velix.imperat.command.tree.TraverseResult;
-import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
@@ -16,28 +10,26 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static dev.velix.imperat.TestCommands.GROUP_CMD;
+import static dev.velix.imperat.TestCommands.MULTIPLE_OPTIONAL_CMD;
+
 public class TestRun {
 
     TestRun() {
     }
 
-    private static Traverse testCmdTreeExecution(Command<TestSender> cmd, String input) {
-        CommandTree<TestSender> tree = CommandTree.create(cmd);
-        tree.parseCommandUsages();
+    private final static TestImperat IMPERAT = new TestImperat();
+    private final static TestSender SOURCE = new TestSender(System.out);
 
-        CommandDebugger.debug("Visualizing tree");
-        CommandTreeVisualizer<TestSender> visualizer = CommandTreeVisualizer.of(tree);
-        visualizer.visualize();
+    static {
+        IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
 
-        // command= /test
-        ArgumentQueue argumentQueue = ArgumentQueue.parse(input);
-        CommandDebugger.debug("traversing...");
+        IMPERAT.registerCommand(GROUP_CMD);
+        IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
+    }
 
-        CommandDebugger.debug("Visualizing traversing result");
-        Traverse traverse = tree.traverse(argumentQueue);
-        traverse.visualize();
-
-        return traverse;
+    private static TraverseResult testCmdTreeExecution(String cmdName, String input) {
+        return IMPERAT.dispatch(SOURCE, cmdName, input);
     }
 
     @Test
@@ -66,7 +58,16 @@ public class TestRun {
 
     @Test
     public void testIncompleteSubCommand() {
-        Traverse traverse = testCmdTreeExecution(TestCommands.GROUP_CMD, "member setperm");
-        Assertions.assertEquals(TraverseResult.INCOMPLETE, traverse.result());
+        //syntax -> /group <group> setperm <permission>
+        var result = testCmdTreeExecution("group", "member setperm");
+        Assertions.assertEquals(TraverseResult.INCOMPLETE, result);
     }
+
+    @Test
+    public void testHelpSubCommand() {
+        //syntax -> /group help [page]
+        var result = testCmdTreeExecution("group", "help");
+        Assertions.assertEquals(TraverseResult.COMPLETE, result);
+    }
+
 }

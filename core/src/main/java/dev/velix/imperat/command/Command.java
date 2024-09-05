@@ -130,6 +130,14 @@ public interface Command<S extends Source> extends CommandParameter {
     @NotNull Traverse traverse(Context<S> context);
 
     /**
+     * Debugs or visualizes all tree nodes
+     * from {@link CommandTree}.
+     * If the command is not a root command,
+     * nothing will be visualized.
+     */
+    void visualize();
+
+    /**
      * Sets a pre-processor for the command
      *
      * @param preProcessor the pre-processor for the command

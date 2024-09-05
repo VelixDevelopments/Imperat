@@ -19,6 +19,7 @@ public interface CommandCoordinator<S extends Source> {
                 execution.execute(source, context);
             } catch (Exception ex) {
                 CommandExceptionHandler.handleException(api, context, CommandCoordinator.class, "sync-lambda", ex);
+                ex.printStackTrace();
             }
         };
     }
@@ -34,6 +35,7 @@ public interface CommandCoordinator<S extends Source> {
                     execution.execute(source, context);
                 } catch (Exception e) {
                     CommandExceptionHandler.handleException(api, context, CommandCoordinator.class, "async-lambda", e);
+                    e.printStackTrace();
                 }
             }, executorService);
         });

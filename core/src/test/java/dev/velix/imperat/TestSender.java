@@ -4,21 +4,23 @@ import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 
-public record TestSender(Object origin) implements Source {
+import java.io.PrintStream;
+
+public record TestSender(PrintStream origin) implements Source {
 
 
     public void sendMsg(String msg) {
-        System.out.println(msg);
+        origin.println(msg);
     }
 
     @Override
     public String getName() {
-        return "";
+        return "CONSOLE";
     }
 
     @Override
     public void reply(String message) {
-
+        sendMsg(message);
     }
 
     @Override
@@ -33,6 +35,6 @@ public record TestSender(Object origin) implements Source {
 
     @Override
     public boolean isConsole() {
-        return false;
+        return true;
     }
 }

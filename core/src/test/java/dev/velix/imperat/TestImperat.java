@@ -3,6 +3,8 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.resolvers.PermissionResolver;
 
+import java.io.PrintStream;
+
 public final class TestImperat extends BaseImperat<TestSender> {
 
     TestImperat() {
@@ -30,7 +32,7 @@ public final class TestImperat extends BaseImperat<TestSender> {
      */
     @Override
     public TestSender wrapSender(Object sender) {
-        return new TestSender(sender);
+        return new TestSender((PrintStream) sender);
     }
 
     /**
