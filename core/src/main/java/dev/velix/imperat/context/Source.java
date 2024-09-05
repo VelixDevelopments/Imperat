@@ -12,7 +12,8 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Source<O> {
-
+ 
+    
     /**
      * @return name of a command source
      */
