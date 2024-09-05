@@ -16,7 +16,7 @@ import java.util.Iterator;
 public class CommandAnnotatedElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> {
 
     private final @NotNull AnnotationMap map = new AnnotationMap();
-
+    
     @Getter
     private final @NotNull E element;
 
@@ -32,7 +32,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
     private <A extends Annotation> void load(@NotNull AnnotationRegistry registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
             Class<A> clazz = (Class<A>) annotation.annotationType();
-            if (registry.isRegistered(clazz)) {
+            if (registry.isRegisteredType(clazz)) {
                 map.set(annotation);
             } else if (registry.hasReplacerFor(clazz)) {
                 AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);

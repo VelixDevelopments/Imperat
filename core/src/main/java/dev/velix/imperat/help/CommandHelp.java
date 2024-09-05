@@ -15,7 +15,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.ArrayList;
 
 @ApiStatus.AvailableSince("1.0.0")
-public abstract class CommandHelp<C> {
+public class CommandHelp<C> {
 
     private final Imperat<C> dispatcher;
     private final Context<C> context;

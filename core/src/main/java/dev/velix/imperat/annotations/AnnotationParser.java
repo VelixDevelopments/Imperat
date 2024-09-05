@@ -38,7 +38,7 @@ public abstract class AnnotationParser<C> {
      * @param <T>      the type of annotated command class to parse
      */
     public abstract <T> Command<C> parseCommandClass(
-            dev.velix.imperat.annotations.types.classes.Command commandAnnotation,
+            dev.velix.imperat.annotations.types.Command commandAnnotation,
             AnnotationReader reader,
             CommandAnnotatedElement<?> element,
             T instance,

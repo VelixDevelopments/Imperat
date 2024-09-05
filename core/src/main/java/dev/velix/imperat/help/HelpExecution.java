@@ -1,5 +1,7 @@
 package dev.velix.imperat.help;
 
+import dev.velix.imperat.command.CommandExecution;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.CommandException;
@@ -11,10 +13,11 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <C> the type of sender
  */
-@FunctionalInterface
 @ApiStatus.AvailableSince("1.0.0")
-public interface HelpExecution<C> {
+public interface HelpExecution<C> extends CommandExecution<C> {
 
+    String PAGE_PARAMETER_NAME = "page";
+    
     /**
      * Displays a help menu showing all possible syntaxes
      *
@@ -24,4 +27,10 @@ public interface HelpExecution<C> {
      */
     void help(Source<C> source, Context<C> context,
               CommandHelp<C> help, @Nullable Integer page) throws CommandException;
+    
+    @Override
+    default void execute(Source<C> source, ExecutionContext<C> context) throws CommandException {
+        CommandHelp<C> help = context.createCommandHelp();
+        help(source, (Context<C>) context, help, context.getArgument(PAGE_PARAMETER_NAME));
+    }
 }

@@ -9,7 +9,6 @@ import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.exceptions.CommandException;
-import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -103,18 +102,12 @@ final class CommandImpl<C> implements Command<C> {
     public @NotNull Description getDescription() {
         return description;
     }
-
-    /**
-     * Sets the description of a command
-     *
-     * @param description the desc to set
-     */
+    
     @Override
-    public void setDescription(String description) {
-        this.description = Description.of(description);
+    public void setDescription(Description description) {
+        this.description = description;
     }
-
-
+    
     /**
      * @return the index of this parameter
      */
@@ -455,7 +448,7 @@ final class CommandImpl<C> implements Command<C> {
      * @param params        the parameters of the help command
      * @param helpExecution the help execution
      */
-    @Override @SuppressWarnings("unchecked")
+    @Override
     public void addHelpCommand(Imperat<C> dispatcher, List<CommandParameter> params, HelpExecution<C> helpExecution) {
         if (params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
             params.add(
@@ -470,12 +463,8 @@ final class CommandImpl<C> implements Command<C> {
                 "help",
                 CommandUsage.<C>builder()
                         .parameters(params)
-                        .execute((sender, context) -> {
-                            //CommandDebugger.visualize("Executing help !");
-                            Integer page = context.getArgument("page");
-                            CommandHelp<C> help = dispatcher.createCommandHelp(this, (Context<C>) context);
-                            helpExecution.help(sender, (Context<C>) context, help, page);
-                        }).buildAsHelp(),
+                        .execute(helpExecution)
+                        .buildAsHelp(),
                 true
         );
     }

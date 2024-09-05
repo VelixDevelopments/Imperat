@@ -1,12 +1,8 @@
 package dev.velix.imperat.examples;
 
-
-import dev.velix.imperat.BukkitCommandHelp;
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.classes.Command;
+import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Permission;
-import dev.velix.imperat.annotations.types.methods.DefaultUsage;
-import dev.velix.imperat.annotations.types.methods.Help;
 import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Named;
@@ -16,7 +12,7 @@ import dev.velix.imperat.test.Group;
 @Command("group")
 public final class GroupCommand {
 
-    @DefaultUsage
+    @Usage
     public void defaultUsage(BukkitSource source) {
         //default execution = no args
         source.reply("/group <group>");
@@ -52,12 +48,5 @@ public final class GroupCommand {
         // /group <group> setprefix <prefix>
         source.reply("You have set prefix '" + prefix + "' to group '" + group.name() + "'");
     }
-
-    @Help
-    public void groupHelp(
-            BukkitSource source,
-            BukkitCommandHelp help
-    ) {
-        help.display(source);
-    }
+    
 }

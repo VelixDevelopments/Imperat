@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * @param <C> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface Context<C> extends ExecutionContext {
+public interface Context<C> extends ExecutionContext<C> {
 
     /**
      * @return the command source of the command

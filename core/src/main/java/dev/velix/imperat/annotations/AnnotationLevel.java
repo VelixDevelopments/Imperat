@@ -3,7 +3,6 @@ package dev.velix.imperat.annotations;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.annotations.element.MethodParameterElement;
-import dev.velix.imperat.annotations.types.parameters.Named;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.AnnotatedElement;
@@ -64,20 +63,36 @@ public enum AnnotationLevel {
             Set<AnnotatedElement> elements = new HashSet<>();
             for (Method method : target.getDeclaredMethods()) {
                 for (Parameter parameter : method.getParameters()) {
-                    MethodParameterElement element = new MethodParameterElement(registry, getParamName(parameter), parameter);
+                    MethodParameterElement element = new MethodParameterElement(registry, parameter);
                     elements.add(element);
                 }
             }
             return elements;
         }
-
-        private String getParamName(Parameter parameter) {
-            if (parameter.isAnnotationPresent(Named.class)) {
-                return parameter.getAnnotation(Named.class).value();
+    },
+    
+    WILDCARD(()-> null) {
+        @Override
+        public boolean matches(AnnotatedElement element) {
+            return true;
+        }
+        
+        @Override
+        public Set<? extends AnnotatedElement> getElements(
+                AnnotationRegistry registry,
+                Class<?> target
+        ) {
+            Set<AnnotatedElement> elements = new HashSet<>();
+            for(AnnotationLevel level : AnnotationLevel.values()) {
+                if(level == WILDCARD) continue;
+                elements.addAll(level.getElements(registry, target));
             }
-            return parameter.getName();
+            return elements;
         }
     };
+    
+    
+    
 
     private final Supplier<ElementVisitor<?>> supplier;
 

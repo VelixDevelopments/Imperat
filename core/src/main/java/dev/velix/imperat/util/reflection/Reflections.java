@@ -10,7 +10,7 @@ public final class Reflections {
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
-     * @param target - the target type.
+     * @param target - the targetToLoad type.
      * @param name - the name of the field, or NULL to ignore.
      * @param fieldType - a compatible field type.
      * @return The field accessor.
@@ -34,7 +34,7 @@ public final class Reflections {
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
-     * @param target - the target type.
+     * @param target - the targetToLoad type.
      * @param fieldType - a compatible field type.
      * @return The field accessor.
      */
@@ -45,7 +45,7 @@ public final class Reflections {
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
-     * @param target - the target type.
+     * @param target - the targetToLoad type.
      * @param fieldType - a compatible field type.
      * @param index - the number of compatible fields to skip.
      * @return The field accessor.
@@ -80,8 +80,8 @@ public final class Reflections {
                 field.setAccessible(true);
 
                 // A function for retrieving a specific field value
-                return new FieldAccessor<T>() {
-
+                return new FieldAccessor<>() {
+                    
                     @Override
                     @SuppressWarnings("unchecked")
                     public T get(final Object target) {
@@ -91,7 +91,7 @@ public final class Reflections {
                             throw new RuntimeException("Cannot access reflection.", e);
                         }
                     }
-
+                    
                     @Override
                     public void set(final Object target, final Object value) {
                         try {
@@ -100,10 +100,10 @@ public final class Reflections {
                             throw new RuntimeException("Cannot access reflection.", e);
                         }
                     }
-
+                    
                     @Override
                     public boolean hasField(final Object target) {
-                        // target instanceof DeclaringClass
+                        // targetToLoad instanceof DeclaringClass
                         return field.getDeclaringClass().isAssignableFrom(target.getClass());
                     }
                 };

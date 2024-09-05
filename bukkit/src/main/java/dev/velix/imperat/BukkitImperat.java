@@ -7,10 +7,8 @@ import dev.velix.imperat.adventure.NoAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
-import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.BukkitPermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.CommandDebugger;
@@ -19,7 +17,6 @@ import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -49,11 +46,11 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
 
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
 
-    private final static LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder()
+    /*private final static LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder()
             .character('&')
             .hexColors()
             .hexCharacter('#')
-            .build();
+            .build();*/
 
     @SuppressWarnings("unchecked")
     private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> provider, @NotNull PermissionResolver<CommandSender> permissionResolver) {
@@ -153,21 +150,6 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
         return plugin;
     }
 
-    /**
-     * Creates an instance of {@link CommandHelp}
-     *
-     * @param command       the command
-     * @param context       the context
-     * @return {@link CommandHelp} for the command usage used in a certain context
-     */
-    @Override
-    public CommandHelp<CommandSender> createCommandHelp(
-            Command<CommandSender> command,
-            Context<CommandSender> context
-    ) {
-        return BukkitCommandHelp.create(this, command, context);
-    }
-
     @Override
     public void shutdownPlatform() {
         this.provider.close();
@@ -200,6 +182,7 @@ public class BukkitImperat extends BaseImperat<CommandSender> {
     }
 
 
+    @SuppressWarnings("deprecation")
     protected void registerValueResolvers() {
         this.registerValueResolver(Player.class, ((source, context, raw, pivot, parameter) -> {
             final Player player = Bukkit.getPlayer(raw.toLowerCase());

@@ -1,5 +1,6 @@
 package dev.velix.imperat.annotations.element;
 
+import dev.velix.imperat.annotations.AnnotationHelper;
 import dev.velix.imperat.annotations.AnnotationRegistry;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
@@ -14,11 +15,10 @@ public final class MethodParameterElement extends CommandAnnotatedElement<Parame
 
     public MethodParameterElement(
             final AnnotationRegistry registry,
-            final String parameterName,
             final Parameter element
     ) {
         super(registry, element);
-        this.name = parameterName;
+        this.name = AnnotationHelper.getParamName(element);
     }
 
     @Override

@@ -1,8 +1,9 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.AnnotationHelper;
+import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.annotations.MethodCommandExecutor;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.CommandException;
@@ -21,14 +22,15 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
     private final List<CommandParameter> params;
 
     public MethodHelpExecution(Imperat<C> dispatcher,
-                               Object proxy, Method method,
+                               ProxyCommand<C> proxy,
+                               Method method,
                                List<CommandParameter> params) {
         this.dispatcher = dispatcher;
         this.method = method;
         this.params = params;
         try {
             this.caller = DefaultMethodCallerFactory.INSTANCE
-                    .createFor(method).bindTo(proxy);
+                    .createFor(method).bindTo(proxy.proxyInstance());
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -47,8 +49,8 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
                      CommandHelp<C> help,
                      @Nullable Integer page) throws CommandException {
 
-        Object[] instances = MethodCommandExecutor.loadParameterInstances(dispatcher, params, source,
-                context, method, help);
+        Object[] instances = AnnotationHelper
+                .loadParameterInstances(dispatcher, params, source, context, method, help);
         /*System.out.println("INSTANCES SIZE= " + instances.length);
         for (Object object : instances) {
             System.out.println("HELLO");

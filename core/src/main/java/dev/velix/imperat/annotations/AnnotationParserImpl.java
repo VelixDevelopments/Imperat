@@ -4,13 +4,13 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.element.ElementKey;
 import dev.velix.imperat.annotations.element.ElementVisitor;
-import dev.velix.imperat.annotations.types.classes.Command;
-import dev.velix.imperat.annotations.types.methods.DefaultUsage;
-import dev.velix.imperat.annotations.types.methods.Help;
+import dev.velix.imperat.annotations.injectors.AnnotationInjectorRegistry;
+import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
+import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.methods.Usage;
-import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.exceptions.UnknownCommandClass;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.annotations.MethodVerifier;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -27,14 +27,14 @@ import java.util.stream.Collectors;
 final class AnnotationParserImpl<C> extends AnnotationParser<C> {
 
     private final AnnotationRegistry annotationRegistry;
-    private final AnnotationHandlerRegistry<C> dataRegistry;
+    private final AnnotationInjectorRegistry<C> dataRegistry;
 
     AnnotationParserImpl(Imperat<C> dispatcher) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
-        this.dataRegistry = new AnnotationHandlerRegistry<>(this, annotationRegistry, dispatcher);
+        this.dataRegistry = AnnotationInjectorRegistry.create(dispatcher);
     }
-
+    
     private <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, E element) {
         return ((ElementVisitor<E>) level.getVisitor()).loadKey(element);
     }
@@ -54,10 +54,14 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
             T instance,
             Class<T> instanceClazz
     ) {
-        AnnotationDataCreator<dev.velix.imperat.command.Command<C>, Command> creator = dataRegistry.getDataCreator(Command.class);
-        assert creator != null;
-        dev.velix.imperat.command.Command<C> commandObject = creator.create(instance, instanceClazz, commandAnnotation, element);
-        dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, reader, element);
+        var proxyInjector = dataRegistry.getInjector(Command.class, new TypeWrap<dev.velix.imperat.command.Command<C>>() {}, AnnotationLevel.CLASS).orElseThrow();
+        dev.velix.imperat.command.Command<C> commandObject = proxyInjector.inject(null, null, reader, this, annotationRegistry, dataRegistry, element, commandAnnotation);
+        
+        ProxyCommand<C> proxyCommand = new ProxyCommand<>(instanceClazz, instance, commandObject);
+        
+        //loading class-level annotations
+        dataRegistry.injectForElement(proxyCommand, reader, this, annotationRegistry,
+                dataRegistry, element, AnnotationLevel.CLASS);
         
         Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods())
                 .sorted((m1, m2) -> getMethodPriority(m1) - getMethodPriority(m2))
@@ -65,22 +69,17 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
         
         for (Method method : methods) {
             if (!MethodVerifier.isMethodAcceptable(method)) continue;
-            MethodVerifier.verifyMethod(dispatcher, instanceClazz, method, method.isAnnotationPresent(DefaultUsage.class));
+            MethodVerifier.verifyMethod(dispatcher, instanceClazz, method);
             
             var methodKey = getKey(AnnotationLevel.METHOD, method);
             CommandAnnotatedElement<Method> methodElement = (CommandAnnotatedElement<Method>) reader.getAnnotated(AnnotationLevel.METHOD, methodKey);
             assert methodElement != null;
             
-            if (!methodElement.isAnnotationPresent(Usage.class)) {
-                dataRegistry.injectForElement(instance, instanceClazz, commandObject, commandObject, reader, methodElement);
-                continue;
-            }
-            Usage usageAnnotation = methodElement.getAnnotation(Usage.class);
-            AnnotationDataCreator<CommandUsage.Builder<C>, Usage> usageDataCreator = dataRegistry.getDataCreator(Usage.class);
-            assert usageDataCreator != null;
-            CommandUsage.Builder<C> usageBuilder = usageDataCreator.create(instance, instanceClazz, usageAnnotation, methodElement);
-            dataRegistry.injectForElement(instance, instanceClazz, commandObject, usageBuilder, reader, methodElement);
-            commandObject.addUsage(usageBuilder.build());
+            //loading method-level annotations
+            dataRegistry.injectForElement(
+                    proxyCommand, reader, this, annotationRegistry,
+                    dataRegistry, methodElement, AnnotationLevel.METHOD
+            );
         }
         return commandObject;
     }
@@ -122,16 +121,19 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
     }
 
     private int getMethodPriority(Method method) {
-        if (method.isAnnotationPresent(DefaultUsage.class)) {
-            return -1;
-        } else if (method.isAnnotationPresent(Usage.class)) {
-            return 0;
-        } else if (method.isAnnotationPresent(Help.class)) {
-            return 1;
-        } else if (method.isAnnotationPresent(SubCommand.class)) {
-            return 2 + method.getParameterCount();
+        int count = method.getParameterCount();
+        if(AnnotationHelper.isMethodHelp(method)) {
+            count--;
         }
-        return 10;
+        
+        if (method.isAnnotationPresent(Usage.class)) {
+            //if default -> -1 else -> 0;
+            return count == 1 ? -1 : 0;
+        } else if (method.isAnnotationPresent(SubCommand.class)) {
+            return 2 + count;
+        }
+        return 100;
     }
+    
 
 }

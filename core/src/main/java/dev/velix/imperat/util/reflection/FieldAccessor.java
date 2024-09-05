@@ -12,7 +12,7 @@ public interface FieldAccessor<T> {
     /**
      * Retrieve the content of a field.
      *
-     * @param target - the target object, or NULL for a static field.
+     * @param target - the targetToLoad object, or NULL for a static field.
      * @return The value of the field.
      */
     T get(final Object target);
@@ -20,7 +20,7 @@ public interface FieldAccessor<T> {
     /**
      * Set the content of a field.
      *
-     * @param target - the target object, or NULL for a static field.
+     * @param target - the targetToLoad object, or NULL for a static field.
      * @param value  - the new value of the field.
      */
     void set(final Object target, final Object value);

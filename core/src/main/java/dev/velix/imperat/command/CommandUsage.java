@@ -23,33 +23,7 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public interface CommandUsage<C> {
-
-    /**
-     * @return the permission for this usage
-     */
-    @Nullable
-    String getPermission();
-    
-    /**
-     * The permission for this usage
-     *
-     * @param permission permission to set
-     */
-    void setPermission(@Nullable String permission);
-    
-    /**
-     * @return the description for the
-     * command usage
-     */
-    String getDescription();
-    
-    /**
-     * sets the description for the usage
-     *
-     * @param desc the description to set
-     */
-    void setDescription(String desc);
+public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, CooldownHolder{
     
     /**
      * Checks whether the raw input is a flag
@@ -107,7 +81,7 @@ public interface CommandUsage<C> {
     /**
      * Creates a new command usage instance to use it to Merge
      * this usage with the usage regarding parameters
-     * and takes the target's execution as well
+     * and takes the targetToLoad's execution as well
      *
      * @param usage the usage to merge with
      * @return the merged command usage!
@@ -125,7 +99,7 @@ public interface CommandUsage<C> {
     /**
      * Creates a new command usage instance to use it to Merge
      * this usage with the usage regarding parameters
-     * and takes the target's execution as well
+     * and takes the targetToLoad's execution as well
      *
      * <p>
      * it also it also includes the subcommand's parameter itself
@@ -201,21 +175,6 @@ public interface CommandUsage<C> {
      */
     @Nullable
     CommandParameter getParameter(Predicate<CommandParameter> parameterPredicate);
-    
-    /**
-     * @return The cooldown for this usage {@link UsageCooldown}
-     * returns null if no cooldown has been set
-     */
-    @Nullable
-    UsageCooldown getCooldown();
-    
-    
-    /**
-     * Sets the command usage's cooldown {@link UsageCooldown}
-     *
-     * @param usageCooldown the cool down for this usage
-     */
-    void setCooldown(UsageCooldown usageCooldown);
     
     /**
      * @return the cool down handler {@link CooldownHandler}
@@ -342,7 +301,7 @@ public interface CommandUsage<C> {
             return this;
         }
     
-        CommandUsage<C> build(boolean help) {
+        public CommandUsage<C> build(boolean help) {
             CommandUsageImpl<C> impl = new CommandUsageImpl<>(execution, help);
             impl.setCoordinator(commandCoordinator);
             impl.setPermission(permission);

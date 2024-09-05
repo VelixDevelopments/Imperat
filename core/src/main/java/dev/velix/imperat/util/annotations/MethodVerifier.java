@@ -24,7 +24,7 @@ public final class MethodVerifier {
     }
 
     public static <C> void verifyMethod(Imperat<C> dispatcher,
-                                        Class<?> clazz, Method method, boolean verifyDefault) {
+                                        Class<?> clazz, Method method) {
         if (method.getReturnType() != void.class && Modifier.isPublic(method.getModifiers())) {
             throw methodError(clazz, method, "a return type (should be void)");
         }
@@ -37,10 +37,6 @@ public final class MethodVerifier {
             throw methodError(clazz, method, "unsuitable command-sender type '" + methodParams[0].getType().getName());
         }
 
-        if (verifyDefault && methodParams.length > 1) {
-            throw methodError(clazz, method, "been treated as default-usage while having more than 1 input-parameter !");
-        }
-
     }
 
     public static <C> void verifyHelpMethod(
@@ -49,7 +45,7 @@ public final class MethodVerifier {
             Class<?> clazz, Method method
     ) {
 
-        verifyMethod(dispatcher, clazz, method, false);
+        verifyMethod(dispatcher, clazz, method);
 
         Parameter commandHelpParam = null;
         int paramsCount = 0;

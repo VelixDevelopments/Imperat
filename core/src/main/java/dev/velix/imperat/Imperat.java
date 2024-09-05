@@ -24,7 +24,7 @@ import java.util.List;
 public non-sealed interface Imperat<C> extends
         ProcessorRegistrar<C>, ResolverRegistrar<C>,
         CommandRegistrar<C>, CaptionRegistrar<C>,
-        SourceWrapper<C>, CommandHelpHandler<C> {
+        SourceWrapper<C>, CommandHelpHandler {
     
     /**
      * @return the platform of the module

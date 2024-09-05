@@ -1,10 +1,9 @@
 package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.classes.Command;
+import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
-import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.*;
 import org.bukkit.Bukkit;
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 @Description("Main command for banning players")
 public final class BanCommand {
 
-    @DefaultUsage
+    @Usage
     public void showUsage(BukkitSource source) {
         source.reply("/ban <player> [-silent] [duration] [reason...]");
     }

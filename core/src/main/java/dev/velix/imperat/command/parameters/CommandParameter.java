@@ -3,6 +3,8 @@ package dev.velix.imperat.command.parameters;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
+import dev.velix.imperat.command.DescriptionHolder;
+import dev.velix.imperat.command.PermissionHolder;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
@@ -17,7 +19,7 @@ import java.lang.reflect.Type;
  * by the usage of the command itself
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface CommandParameter {
+public interface CommandParameter extends PermissionHolder, DescriptionHolder {
     
     /**
      * @return the name of the parameter
@@ -251,7 +253,7 @@ public interface CommandParameter {
     }
     
     default boolean isNumeric() {
-        return TypeUtility.isNumericType(TypeWrap.of(this.getType()));
+        return this instanceof NumericParameter;
     }
     
     default NumericParameter asNumeric() {

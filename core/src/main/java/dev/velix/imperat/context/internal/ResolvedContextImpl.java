@@ -11,6 +11,7 @@ import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.sur.SmartUsageResolve;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.exceptions.context.NumberOutOfRangeException;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.TypeUtility;
@@ -75,7 +76,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
      * @return the command used
      */
     @Override
-    public @NotNull String getCommandUsed() {
+    public @NotNull Command<C> getCommandUsed() {
         return context.getCommandUsed();
     }
 
@@ -157,7 +158,12 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         ContextResolver<C, T> factoryCr = (ContextResolver<C, T>) factory.create(null);
         return factoryCr == null ? null : factoryCr.resolve(this, null);
     }
-
+    
+    @Override
+    public CommandHelp<C> createCommandHelp() {
+        return context.createCommandHelp();
+    }
+    
     /**
      * @return the command source of the command
      * @see Source

@@ -1,6 +1,6 @@
 package dev.velix.imperat.annotations;
 
-import dev.velix.imperat.annotations.types.classes.Command;
+import dev.velix.imperat.annotations.types.Command;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 

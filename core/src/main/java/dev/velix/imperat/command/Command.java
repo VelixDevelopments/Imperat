@@ -56,13 +56,6 @@ public interface Command<C> extends CommandParameter {
     Description getDescription();
 
     /**
-     * Sets the description of a command
-     *
-     * @param description the desc to set
-     */
-    void setDescription(String description);
-
-    /**
      * @return The aliases for this commands
      */
     @UnmodifiableView

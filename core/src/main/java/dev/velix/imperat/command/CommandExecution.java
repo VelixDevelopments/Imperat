@@ -21,6 +21,6 @@ public interface CommandExecution<C> {
      * @param context the context of the command
      */
     void execute(Source<C> source,
-                 ExecutionContext context) throws CommandException;
+                 ExecutionContext<C> context) throws CommandException;
 
 }

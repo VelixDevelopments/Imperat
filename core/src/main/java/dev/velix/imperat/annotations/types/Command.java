@@ -1,4 +1,4 @@
-package dev.velix.imperat.annotations.types.classes;
+package dev.velix.imperat.annotations.types;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Command {
 
     /**

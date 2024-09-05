@@ -1,8 +1,10 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.context.internal.ResolvedFlag;
 import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.help.CommandHelp;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,12 +14,12 @@ import org.jetbrains.annotations.Nullable;
  * during the execution of a command
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface ExecutionContext {
+public interface ExecutionContext<C> {
 
     /**
      * @return the command label used originally
      */
-    String getCommandUsed();
+    Command<C> getCommandUsed();
 
     /**
      * @return the arguments entered by the
@@ -76,4 +78,13 @@ public interface ExecutionContext {
      * @return the argument/input that is resolved by the context
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException;
+    
+    
+    /**
+     * Creates an instance of {@link CommandHelp}
+     *
+     * @return {@link CommandHelp} for the command usage used in a certain context
+     */
+    CommandHelp<C> createCommandHelp();
+    
 }

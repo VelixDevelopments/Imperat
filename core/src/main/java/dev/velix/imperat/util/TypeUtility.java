@@ -156,5 +156,11 @@ public final class TypeUtility {
         // non-hacky way (i.e. using String value class names- "[L...")?
         return Array.newInstance(componentType, 0).getClass();
     }
+    
+    public static boolean areRelatedTypes(Type type1, Type type2) {
+        return matches(type1, type2)
+                || TypeWrap.of(type1).isSupertypeOf(type2)
+                || TypeWrap.of(type2).isSupertypeOf(type1);
+    }
 
 }

@@ -1,9 +1,12 @@
 package dev.velix.imperat.context.internal;
 
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.ContextResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -12,14 +15,17 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 final class ContextImpl<C> implements Context<C> {
 
+    private final Imperat<C> dispatcher;
     private final Source<C> source;
-    private final String command;
+    private final Command<C> command;
     private final ArgumentQueue args;
 
     ContextImpl(
+            Imperat<C> dispatcher,
+            Command<C> command,
             Source<C> source,
-            String command,
             ArgumentQueue args) {
+        this.dispatcher = dispatcher;
         this.source = source;
         this.command = command;
         this.args = args;
@@ -32,7 +38,7 @@ final class ContextImpl<C> implements Context<C> {
      * @return the command used
      */
     @Override
-    public @NotNull String getCommandUsed() {
+    public @NotNull Command<C> getCommandUsed() {
         return command;
     }
 
@@ -99,8 +105,14 @@ final class ContextImpl<C> implements Context<C> {
     public <T> @Nullable T getContextResolvedArgument(Class<T> type) {
         throw new UnsupportedOperationException();
     }
-
-
+    
+    
+    @Override
+    public CommandHelp<C> createCommandHelp() {
+        return new CommandHelp<>(dispatcher, command, this);
+    }
+    
+    
     /**
      * @return the number of flags extracted
      */

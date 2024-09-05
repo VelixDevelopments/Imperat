@@ -25,7 +25,7 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 final class CommandUsageImpl<C> implements CommandUsage<C> {
     
     private String permission = null;
-    private String description = "N/A";
+    private Description description = Description.of("N/A");
 
     private @NotNull CooldownHandler<C> cooldownHandler;
     private @Nullable UsageCooldown cooldown = null;
@@ -71,20 +71,15 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
      * command usage
      */
     @Override
-    public String getDescription() {
+    public Description getDescription() {
         return description;
     }
-
-    /**
-     * sets the description for the usage
-     *
-     * @param desc the description to set
-     */
+    
     @Override
-    public void setDescription(String desc) {
-        this.description = desc;
+    public void setDescription(Description description) {
+        this.description = description;
     }
-
+    
     /**
      * Checks whether the raw input is a flag
      * registered by this usage

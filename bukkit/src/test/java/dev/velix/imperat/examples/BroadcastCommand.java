@@ -1,10 +1,9 @@
 package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.classes.Command;
+import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.Description;
 import dev.velix.imperat.annotations.types.Permission;
-import dev.velix.imperat.annotations.types.methods.DefaultUsage;
 import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Greedy;
 import dev.velix.imperat.annotations.types.parameters.Named;
@@ -16,7 +15,8 @@ import org.bukkit.Bukkit;
 public final class BroadcastCommand {
 
 
-    @DefaultUsage //usage without args
+    //usage without args
+    @Usage
     public void example(BukkitSource source) {
         source.reply("/broadcast <message...>");
     }

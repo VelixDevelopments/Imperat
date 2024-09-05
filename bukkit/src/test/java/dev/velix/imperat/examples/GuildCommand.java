@@ -1,9 +1,9 @@
 package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.classes.Command;
-import dev.velix.imperat.annotations.types.methods.DefaultUsage;
+import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.SubCommand;
+import dev.velix.imperat.annotations.types.methods.Usage;
 import dev.velix.imperat.annotations.types.parameters.Named;
 import dev.velix.imperat.test.guild.Guild;
 import dev.velix.imperat.test.guild.GuildInvite;
@@ -19,7 +19,7 @@ public class GuildCommand {
 
     private final Map<UUID, Set<GuildInvite>> invites = new HashMap<>();
 
-    @DefaultUsage
+    @Usage
     public void defaultUsage(BukkitSource source) {
         source.reply("No args input !");
     }
