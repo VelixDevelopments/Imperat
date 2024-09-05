@@ -35,12 +35,14 @@ public final class TestCommands {
                     )
                     .build()
             )
+            //TODO fix the optional arg parsing not added in tree nodes
             .subCommand(Command.<TestSender>create("help").usage(
                     CommandUsage.<TestSender>builder()
                             .parameters(
                                     CommandParameter.optionalInt("page").defaultValue(1)
                             )
-                            .build()).build()
+                            .build()
+                    ).build(), true
             )
             .build();
     
