@@ -29,7 +29,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -41,7 +40,7 @@ import java.util.function.Predicate;
  * Utility for using Minecraft's 1.13 'brigadier' library in Bukkit plugins.
  */
 public interface Commodore {
-
+    
     /**
      * Registers the provided argument data to the dispatcher, against all
      * aliases defined for the {@code command}.
@@ -58,7 +57,7 @@ public interface Commodore {
      * @param permissionTest the predicate to check whether players should be sent argument data
      */
     void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest);
-
+    
     /**
      * Registers the provided argument data to the dispatcher, against all
      * aliases defined for the {@code command}.
@@ -80,7 +79,7 @@ public interface Commodore {
         Objects.requireNonNull(permissionTest, "permissionTest");
         register(command, argumentBuilder.build(), permissionTest);
     }
-
+    
     /**
      * Registers the provided argument data to the dispatcher, against all
      * aliases defined for the {@code command}.
@@ -97,7 +96,7 @@ public interface Commodore {
         Objects.requireNonNull(node, "node");
         register(command, node, command::testPermissionSilent);
     }
-
+    
     /**
      * Registers the provided argument data to the dispatcher, against all
      * aliases defined for the {@code command}.
@@ -114,7 +113,7 @@ public interface Commodore {
         Objects.requireNonNull(argumentBuilder, "argumentBuilder");
         register(command, argumentBuilder.build());
     }
-
+    
     /**
      * Registers the provided argument data to the dispatcher.
      *
@@ -126,7 +125,7 @@ public interface Commodore {
      * @param node the argument data
      */
     void register(LiteralCommandNode<?> node);
-
+    
     /**
      * Registers the provided argument data to the dispatcher.
      *
@@ -141,6 +140,6 @@ public interface Commodore {
         Objects.requireNonNull(argumentBuilder, "argumentBuilder");
         register(argumentBuilder.build());
     }
-
+    
     CommandSender wrapNMSCommandSource(Object nmsCmdSource);
 }

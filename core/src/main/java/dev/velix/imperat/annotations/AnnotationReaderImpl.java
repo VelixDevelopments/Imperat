@@ -13,36 +13,36 @@ import java.util.*;
 
 @ApiStatus.Internal
 final class AnnotationReaderImpl implements AnnotationReader {
-
+    
     private final Class<?> clazz;
     private final AnnotationRegistry registry;
-
+    
     private final Registry<AnnotationLevel, AnnotationContainer> containers = new Registry<>(() -> new EnumMap<>(AnnotationLevel.class));
-
+    
     AnnotationReaderImpl(AnnotationRegistry registry,
                          Class<?> clazz) {
         this.registry = registry;
         this.clazz = clazz;
         read();
     }
-
+    
     @SuppressWarnings("unchecked")
     private <E extends AnnotatedElement> void read() {
-
+        
         for (AnnotationLevel level : AnnotationLevel.values()) {
             AnnotationContainer container = new AnnotationContainer(level);
             Set<CommandAnnotatedElement<E>> elementsOfLevel = (Set<CommandAnnotatedElement<E>>) level.getElements(registry, clazz);
-
+            
             for (CommandAnnotatedElement<E> element : elementsOfLevel) {
                 ElementVisitor<E> visitor = (ElementVisitor<E>) level.getVisitor();
                 container.accept(visitor, element);
             }
             containers.setData(level, container);
         }
-
+        
     }
-
-
+    
+    
     /**
      * Get annotated element
      * may be a parameter, method or even a class
@@ -58,7 +58,7 @@ final class AnnotationReaderImpl implements AnnotationReader {
         if (container == null) return null;
         return container.getData(key).orElse(null);
     }
-
+    
     /**
      * Fetches all annotations registered within an element
      *
@@ -72,7 +72,7 @@ final class AnnotationReaderImpl implements AnnotationReader {
         if (element == null) return Collections.emptyList();
         return List.of(element.getAnnotations());
     }
-
+    
     /**
      * Fetches the annotation of an element
      *

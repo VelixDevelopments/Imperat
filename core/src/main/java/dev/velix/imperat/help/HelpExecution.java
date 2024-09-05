@@ -1,9 +1,9 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.command.CommandExecution;
+import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -11,11 +11,11 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Represents a help execution instructions
  *
- * @param <C> the type of sender
+ * @param <S> the type of sender
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface HelpExecution<C> extends CommandExecution<C> {
-
+public interface HelpExecution<S extends Source> extends CommandExecution<S> {
+    
     String PAGE_PARAMETER_NAME = "page";
     
     /**
@@ -25,12 +25,12 @@ public interface HelpExecution<C> extends CommandExecution<C> {
      * @param help   the help object
      * @param page   the page of the help menu
      */
-    void help(Source<C> source, Context<C> context,
-              CommandHelp<C> help, @Nullable Integer page) throws CommandException;
+    void help(S source, Context<S> context,
+              CommandHelp<S> help, @Nullable Integer page) throws CommandException;
     
     @Override
-    default void execute(Source<C> source, ExecutionContext<C> context) throws CommandException {
-        CommandHelp<C> help = context.createCommandHelp();
-        help(source, (Context<C>) context, help, context.getArgument(PAGE_PARAMETER_NAME));
+    default void execute(S source, ExecutionContext<S> context) throws CommandException {
+        CommandHelp<S> help = context.createCommandHelp();
+        help(source, (Context<S>) context, help, context.getArgument(PAGE_PARAMETER_NAME));
     }
 }

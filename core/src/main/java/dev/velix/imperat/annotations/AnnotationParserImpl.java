@@ -9,6 +9,7 @@ import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
 import dev.velix.imperat.annotations.types.Command;
 import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.Usage;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.UnknownCommandClass;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.annotations.MethodVerifier;
@@ -24,12 +25,12 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 @SuppressWarnings("unchecked")
-final class AnnotationParserImpl<C> extends AnnotationParser<C> {
-
+final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
+    
     private final AnnotationRegistry annotationRegistry;
-    private final AnnotationInjectorRegistry<C> dataRegistry;
-
-    AnnotationParserImpl(Imperat<C> dispatcher) {
+    private final AnnotationInjectorRegistry<S> dataRegistry;
+    
+    AnnotationParserImpl(Imperat<S> dispatcher) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
         this.dataRegistry = AnnotationInjectorRegistry.create(dispatcher);
@@ -47,17 +48,18 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
      * @param instance          the instance of the command class
      */
     @Override
-    public <T> dev.velix.imperat.command.Command<C> parseCommandClass(
+    public <T> dev.velix.imperat.command.Command<S> parseCommandClass(
             Command commandAnnotation,
             AnnotationReader reader,
             CommandAnnotatedElement<?> element,
             T instance,
             Class<T> instanceClazz
     ) {
-        var proxyInjector = dataRegistry.getInjector(Command.class, new TypeWrap<dev.velix.imperat.command.Command<C>>() {}, AnnotationLevel.CLASS).orElseThrow();
-        dev.velix.imperat.command.Command<C> commandObject = proxyInjector.inject(null, null, reader, this, annotationRegistry, dataRegistry, element, commandAnnotation);
+        var proxyInjector = dataRegistry.getInjector(Command.class, new TypeWrap<dev.velix.imperat.command.Command<S>>() {
+        }, AnnotationLevel.CLASS).orElseThrow();
+        dev.velix.imperat.command.Command<S> commandObject = proxyInjector.inject(null, null, reader, this, annotationRegistry, dataRegistry, element, commandAnnotation);
         
-        ProxyCommand<C> proxyCommand = new ProxyCommand<>(instanceClazz, instance, commandObject);
+        ProxyCommand<S> proxyCommand = new ProxyCommand<>(instanceClazz, instance, commandObject);
         
         //loading class-level annotations
         dataRegistry.injectForElement(proxyCommand, reader, this, annotationRegistry,
@@ -83,13 +85,13 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
         }
         return commandObject;
     }
-
+    
     @Override
-    public <T> dev.velix.imperat.command.Command<C> parseCommandClass(T instance) {
+    public <T> dev.velix.imperat.command.Command<S> parseCommandClass(T instance) {
         Class<T> instanceClazz = (Class<T>) instance.getClass();
         AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
         var elementKey = getKey(AnnotationLevel.CLASS, instanceClazz);
-
+        
         CommandAnnotatedElement<Class<?>> element = (CommandAnnotatedElement<Class<?>>) reader.getAnnotated(AnnotationLevel.CLASS, elementKey);
         assert element != null;
         Command commandAnnotation = element.getAnnotation(Command.class);
@@ -100,10 +102,9 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
             parseCommandClass(inner);
         }*/
         return parseCommandClass(commandAnnotation, reader, element, instance, instanceClazz);
-       
+        
     }
     
-
     
     /**
      * Registers {@link AnnotationReplacer}
@@ -115,14 +116,14 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
     public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
         annotationRegistry.registerAnnotationReplacer(type, replacer);
     }
-
+    
     public AnnotationRegistry getRegistry() {
         return annotationRegistry;
     }
-
+    
     private int getMethodPriority(Method method) {
         int count = method.getParameterCount();
-        if(AnnotationHelper.isMethodHelp(method)) {
+        if (AnnotationHelper.isMethodHelp(method)) {
             count--;
         }
         
@@ -135,5 +136,5 @@ final class AnnotationParserImpl<C> extends AnnotationParser<C> {
         return 100;
     }
     
-
+    
 }

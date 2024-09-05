@@ -2,13 +2,14 @@ package dev.velix.imperat.exceptions;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.context.Source;
 
 public final class AmbiguousUsageAdditionException extends RuntimeException {
-
-    public <C> AmbiguousUsageAdditionException(
-            final Command<C> command,
-            final CommandUsage<C> first,
-            final CommandUsage<C> second
+    
+    public <S extends Source> AmbiguousUsageAdditionException(
+            final Command<S> command,
+            final CommandUsage<S> first,
+            final CommandUsage<S> second
     ) {
         super(
                 String.format(
@@ -18,6 +19,6 @@ public final class AmbiguousUsageAdditionException extends RuntimeException {
                 )
         );
     }
-
-
+    
+    
 }

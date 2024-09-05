@@ -12,32 +12,32 @@ import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class Registry<K, V> {
-
+    
     private final Map<K, V> data;
-
+    
     public Registry(Supplier<Map<K, V>> data) {
         this.data = data.get();
     }
-
+    
     public Registry() {
         this(HashMap::new);
     }
-
+    
     public Optional<V> getData(K key) {
         return Optional.ofNullable(data.get(key));
     }
-
+    
     public void setData(K key, V value) {
         data.put(key, value);
     }
-
+    
     public void updateData(K key, Consumer<V> valueUpdater) {
         data.computeIfPresent(key, (k, v) -> {
             valueUpdater.accept(v);
             return v;
         });
     }
-
+    
     public Optional<V> search(BiPredicate<K, V> predicate) {
         for (Map.Entry<K, V> entry : data.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue()))
@@ -45,25 +45,25 @@ public class Registry<K, V> {
         }
         return Optional.empty();
     }
-
+    
     public Registry<K, V> addAll(Registry<K, V> registry) {
         this.data.putAll(registry.data);
         return this;
     }
-
+    
     public Collection<? extends V> getAll() {
         return data.values();
     }
-
+    
     public Iterable<? extends K> getKeys() {
         return data.keySet();
     }
-
+    
     public void removeData(K key) {
         data.remove(key);
     }
-
-
+    
+    
     public int size() {
         return data.size();
     }

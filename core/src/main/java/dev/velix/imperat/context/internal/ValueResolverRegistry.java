@@ -1,6 +1,7 @@
 package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.context.EnumValueResolver;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.context.ContextResolveException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Registry;
@@ -11,9 +12,9 @@ import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
 @ApiStatus.Internal
-public final class ValueResolverRegistry<C> extends Registry<Type, ValueResolver<C, ?>> {
-
-
+public final class ValueResolverRegistry<S extends Source> extends Registry<Type, ValueResolver<S, ?>> {
+    
+    
     private ValueResolverRegistry() {
         super();
         registerResolver(String.class, ((source, context, raw, pivot, parameter) -> raw));
@@ -47,29 +48,29 @@ public final class ValueResolverRegistry<C> extends Registry<Type, ValueResolver
         });
         registerEnumResolver(TimeUnit.class);
     }
-
-    public static <C> ValueResolverRegistry<C> createDefault() {
+    
+    public static <S extends Source> ValueResolverRegistry<S> createDefault() {
         return new ValueResolverRegistry<>();
     }
-
+    
     private ContextResolveException exception(String raw,
                                               Class<?> clazzRequired) {
         return new ContextResolveException(
                 "Error while parsing argument '%s', It's not a valid %s", raw, clazzRequired.getSimpleName()
         );
     }
-
-    public <T> void registerResolver(Type type, ValueResolver<C, T> resolver) {
+    
+    public <T> void registerResolver(Type type, ValueResolver<S, T> resolver) {
         setData(type, resolver);
     }
-
+    
     public <E extends Enum<E>> void registerEnumResolver(Class<E> enumClass) {
         registerResolver(enumClass, new EnumValueResolver<>(enumClass));
     }
-
+    
     @SuppressWarnings("unchecked")
-    public <T> ValueResolver<C, T> getResolver(Type type) {
-        return (ValueResolver<C, T>) getData(TypeUtility.primitiveToBoxed(type)).orElse(null);
+    public <T> ValueResolver<S, T> getResolver(Type type) {
+        return (ValueResolver<S, T>) getData(TypeUtility.primitiveToBoxed(type)).orElse(null);
     }
-
+    
 }

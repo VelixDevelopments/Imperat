@@ -16,7 +16,11 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandFlag {
-
+    
+    static CommandFlag create(String name, List<String> alias, Class<?> inputType) {
+        return new CommandFlagImpl(name, alias, inputType);
+    }
+    
     /**
      * The main name of the flag
      *
@@ -24,29 +28,25 @@ public interface CommandFlag {
      */
     @NotNull
     String name();
-
+    
     /**
      * @return the alias of the flag
      */
     @NotNull
     List<String> aliases();
-
+    
     /**
      * @return the type of input
      * from the flag
      */
     Class<?> inputType();
-
+    
     default boolean hasAlias(String alias) {
         return aliases().contains(alias.toLowerCase());
     }
-
-    static CommandFlag create(String name, List<String> alias, Class<?> inputType) {
-        return new CommandFlagImpl(name, alias, inputType);
-    }
-
+    
     default String format() {
-
+        
         String display = this.name();
         String valueFormat = (this instanceof CommandSwitch) ? "" : " <value>";
         return StringUtils.normalizedParameterFormatting("-" + display
@@ -56,11 +56,11 @@ public interface CommandFlag {
     default boolean acceptsInput(String input) {
         return this.name().equalsIgnoreCase(input) || hasAlias(input);
     }
-
-
+    
+    
     record CommandFlagImpl(String name, List<String> aliases, Class<?> inputType)
             implements CommandFlag {
     }
     
-
+    
 }

@@ -1,11 +1,11 @@
 package dev.velix.imperat.command.suggestions;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.jetbrains.annotations.ApiStatus;
@@ -17,15 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
-record AutoCompleterImpl<C>(Command<C> command) implements AutoCompleter<C> {
-    
-    /**
-     * @return The auto-completion command
-     */
-    @Override
-    public Command<C> command() {
-        return command;
-    }
+record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCompleter<S> {
     
     private static @NotNull CompletionArg getLastArg(String[] args) {
         if (args.length == 0) return new CompletionArg(null, -1);
@@ -38,6 +30,14 @@ record AutoCompleterImpl<C>(Command<C> command) implements AutoCompleter<C> {
     }
     
     /**
+     * @return The auto-completion command
+     */
+    @Override
+    public Command<S> command() {
+        return command;
+    }
+    
+    /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
      *
@@ -47,8 +47,8 @@ record AutoCompleterImpl<C>(Command<C> command) implements AutoCompleter<C> {
      * @return the auto-completed results
      */
     @Override
-    public List<String> autoComplete(Imperat<C> dispatcher,
-                                     Source<C> sender, String[] args) {
+    public List<String> autoComplete(Imperat<S> dispatcher,
+                                     S sender, String[] args) {
         CompletionArg argToComplete = getLastArg(args);
         return autoCompleteArgument(dispatcher, sender, argToComplete, args);
     }
@@ -65,13 +65,13 @@ record AutoCompleterImpl<C>(Command<C> command) implements AutoCompleter<C> {
      * @return the auto-completed results
      */
     @Override
-    public List<String> autoCompleteArgument(Imperat<C> dispatcher,
-                                             Source<C> sender,
+    public List<String> autoCompleteArgument(Imperat<S> dispatcher,
+                                             S sender,
                                              CompletionArg currentArg,
                                              String[] args) {
         
         
-        final PermissionResolver<C> permResolver = dispatcher.getPermissionResolver();
+        final PermissionResolver<S> permResolver = dispatcher.getPermissionResolver();
         if (!command.isIgnoringACPerms() &&
                 !permResolver.hasPermission(sender, command.getPermission())) {
             return Collections.emptyList();
@@ -84,7 +84,7 @@ record AutoCompleterImpl<C>(Command<C> command) implements AutoCompleter<C> {
             index = 0;
         
         AutoCompleteList results = new AutoCompleteList();
-        for (CommandUsage<C> usage : closestUsages) {
+        for (CommandUsage<S> usage : closestUsages) {
             if (index < 0 || index >= usage.getMaxLength()) continue;
             CommandParameter parameter = usage.getParameters().get(index);
             if (!command.isIgnoringACPerms() && !permResolver.hasPermission(sender, parameter.getPermission())) {
@@ -95,9 +95,9 @@ record AutoCompleterImpl<C>(Command<C> command) implements AutoCompleter<C> {
                 parameter.asCommand().getAliases()
                         .forEach(results::add);
             } else {
-                SuggestionResolver<C, ?> resolver = dispatcher.getParameterSuggestionResolver(parameter);
+                SuggestionResolver<S, ?> resolver = dispatcher.getParameterSuggestionResolver(parameter);
                 if (resolver != null) {
-                    results.addAll(resolver.autoComplete(command, sender.getOrigin(),
+                    results.addAll(resolver.autoComplete(command, sender,
                             queue, parameter, currentArg));
                 }
                 
@@ -109,7 +109,7 @@ record AutoCompleterImpl<C>(Command<C> command) implements AutoCompleter<C> {
     }
     
     
-    private Collection<? extends CommandUsage<C>> getClosestUsages(String[] args) {
+    private Collection<? extends CommandUsage<S>> getClosestUsages(String[] args) {
         
         return command
                 .findUsages((usage) -> {

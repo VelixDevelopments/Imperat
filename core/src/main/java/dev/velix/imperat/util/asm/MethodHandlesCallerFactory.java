@@ -18,9 +18,9 @@ import static java.util.Collections.addAll;
  * method callers
  */
 final class MethodHandlesCallerFactory implements MethodCallerFactory {
-
+    
     public static final MethodHandlesCallerFactory INSTANCE = new MethodHandlesCallerFactory();
-
+    
     @Override
     public @NotNull MethodCaller createFor(@NotNull Method method) throws Throwable {
         if (!method.isAccessible()) method.setAccessible(true);
@@ -39,14 +39,14 @@ final class MethodHandlesCallerFactory implements MethodCallerFactory {
                 }
                 return handle.invokeWithArguments(arguments);
             }
-
+            
             @Override
             public String toString() {
                 return "MethodHandlesCaller(" + methodString + ")";
             }
         };
     }
-
+    
     @Override
     public String toString() {
         return "MethodHandlesCallerFactory";

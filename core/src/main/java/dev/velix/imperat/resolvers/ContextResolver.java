@@ -1,6 +1,7 @@
 package dev.velix.imperat.resolvers;
 
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.CommandException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,11 +15,19 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of resolver's parameter
  */
-public interface ContextResolver<C, T> {
-
+public interface ContextResolver<S extends Source, T> {
+    
     //TODO make a registry for custom annotations that are used in the parameters
     //TODO and then replace `Parameter` with `ParameterCommandElement` with added method `hasCustomAnnotation`
-
+    
+    static <S extends Source, T> ContextResolver<S, T> of(T value) {
+        return (c, p) -> value;
+    }
+    
+    static <S extends Source, T> ContextResolver<S, T> of(Supplier<T> supplier) {
+        return of(supplier.get());
+    }
+    
     /**
      * Resolves a parameter's default value
      * if it has been not input by the user
@@ -29,16 +38,8 @@ public interface ContextResolver<C, T> {
      */
     @Nullable
     T resolve(
-            @NotNull Context<C> context,
+            @NotNull Context<S> context,
             @Nullable Parameter parameter
     ) throws CommandException;
-
-    static <C, T> ContextResolver<C, T> of(T value) {
-        return (c, p) -> value;
-    }
-
-    static <C, T> ContextResolver<C, T> of(Supplier<T> supplier) {
-        return of(supplier.get());
-    }
-
+    
 }

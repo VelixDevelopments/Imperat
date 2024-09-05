@@ -1,13 +1,13 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,32 +22,28 @@ import static dev.velix.imperat.util.Patterns.DOUBLE_FLAG;
 import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 
 @ApiStatus.Internal
-final class CommandUsageImpl<C> implements CommandUsage<C> {
+final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     
+    private final List<CommandParameter> parameters = new ArrayList<>();
+    private final CommandExecution<S> execution;
+    private final boolean help;
     private String permission = null;
     private Description description = Description.of("N/A");
-
-    private @NotNull CooldownHandler<C> cooldownHandler;
+    private @NotNull CooldownHandler<S> cooldownHandler;
     private @Nullable UsageCooldown cooldown = null;
-
-    private final List<CommandParameter> parameters = new ArrayList<>();
-    private final CommandExecution<C> execution;
-    private CommandCoordinator<C> commandCoordinator;
-
-
-    private final boolean help;
-
-    CommandUsageImpl(CommandExecution<C> execution) {
+    private CommandCoordinator<S> commandCoordinator;
+    
+    CommandUsageImpl(CommandExecution<S> execution) {
         this(execution, false);
     }
-
-    CommandUsageImpl(CommandExecution<C> execution, boolean help) {
+    
+    CommandUsageImpl(CommandExecution<S> execution, boolean help) {
         this.execution = execution;
         this.cooldownHandler = new DefaultCooldownHandler<>(this);
         this.commandCoordinator = CommandCoordinator.sync();
         this.help = help;
     }
-
+    
     /**
      * @return the permission for this usage
      */
@@ -55,7 +51,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public @Nullable String getPermission() {
         return permission;
     }
-
+    
     /**
      * The permission for this usage
      *
@@ -65,7 +61,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public void setPermission(String permission) {
         this.permission = permission;
     }
-
+    
     /**
      * @return the description for the
      * command usage
@@ -91,7 +87,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public boolean hasFlag(String input) {
         return getFlagFromRaw(input) != null;
     }
-
+    
     /**
      * Fetches the flag from the input
      *
@@ -102,13 +98,13 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public @Nullable CommandFlag getFlagFromRaw(String rawInput) {
         boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
         boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
-
+        
         if (!isSingle && !isDouble) {
             return null;
         }
-
+        
         String inputFlagAlias = rawInput.substring(isSingle ? 1 : 2);
-
+        
         for (var param : parameters) {
             if (!param.isFlag()) continue;
             CommandFlag flag = param.asFlagParameter().getFlagData();
@@ -116,11 +112,11 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
                 return flag;
             }
         }
-
+        
         return null;
     }
-
-
+    
+    
     /**
      * Adds parameters to the usage
      *
@@ -130,7 +126,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public void addParameters(CommandParameter... params) {
         parameters.addAll(Arrays.asList(params));
     }
-
+    
     /**
      * Adds parameters to the usage
      *
@@ -140,7 +136,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public void addParameters(List<CommandParameter> params) {
         parameters.addAll(params);
     }
-
+    
     /**
      * @return the parameters for this usages
      * @see CommandParameter
@@ -149,21 +145,21 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public List<CommandParameter> getParameters() {
         return parameters;
     }
-
+    
     @Override
     public @Nullable CommandParameter getParameter(int index) {
         if (index < 0 || index >= parameters.size()) return null;
         return parameters.get(index);
     }
-
+    
     /**
      * @return the execution for this command
      */
     @Override
-    public @NotNull CommandExecution<C> getExecution() {
+    public @NotNull CommandExecution<S> getExecution() {
         return execution;
     }
-
+    
     /**
      * @param clazz the type of the parameter to check upon
      * @return Whether the usage has a specific type of parameter
@@ -174,7 +170,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
                 .stream()
                 .anyMatch((param) -> param.getType().equals(clazz));
     }
-
+    
     /**
      * @return Gets the minimal possible number
      * of parameters that are acceptable to initiate this
@@ -187,7 +183,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
                 .filter((param) -> !param.isOptional())
                 .count();
     }
-
+    
     /**
      * @return Gets the maximum possible number
      * of parameters that are acceptable to initiate this
@@ -197,7 +193,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public int getMaxLength() {
         return getParameters().size();
     }
-
+    
     /**
      * Searches for a parameter with specific type
      *
@@ -210,10 +206,10 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
         for (CommandParameter parameter : getParameters())
             if (parameterPredicate.test(parameter))
                 return true;
-
+        
         return false;
     }
-
+    
     /**
      * @param parameterPredicate the condition
      * @return the parameter to get using a condition
@@ -226,7 +222,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
         }
         return null;
     }
-
+    
     /**
      * @return The cooldown for this usage {@link UsageCooldown}
      * returns null if no cooldown has been set
@@ -235,7 +231,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public @Nullable UsageCooldown getCooldown() {
         return cooldown;
     }
-
+    
     /**
      * Sets the command usage's cooldown {@link UsageCooldown}
      *
@@ -245,43 +241,43 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
     public void setCooldown(@Nullable UsageCooldown usageCooldown) {
         this.cooldown = usageCooldown;
     }
-
+    
     /**
      * @return the cool down handler {@link CooldownHandler}
      */
     @Override
-    public @NotNull CooldownHandler<C> getCooldownHandler() {
+    public @NotNull CooldownHandler<S> getCooldownHandler() {
         return cooldownHandler;
     }
-
+    
     /**
      * Sets the cooldown handler {@link CooldownHandler}
      *
      * @param cooldownHandler the cool down handler to set
      */
     @Override
-    public void setCooldownHandler(@NotNull CooldownHandler<C> cooldownHandler) {
+    public void setCooldownHandler(@NotNull CooldownHandler<S> cooldownHandler) {
         this.cooldownHandler = cooldownHandler;
     }
-
+    
     /**
      * @return the coordinator for execution of the command
      */
     @Override
-    public CommandCoordinator<C> getCoordinator() {
+    public CommandCoordinator<S> getCoordinator() {
         return commandCoordinator;
     }
-
+    
     /**
      * Sets the command coordinator
      *
      * @param commandCoordinator the coordinator to set
      */
     @Override
-    public void setCoordinator(CommandCoordinator<C> commandCoordinator) {
+    public void setCoordinator(CommandCoordinator<S> commandCoordinator) {
         this.commandCoordinator = commandCoordinator;
     }
-
+    
     /**
      * Executes the usage's actions
      * using the supplied {@link CommandCoordinator}
@@ -291,10 +287,10 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
      * @param context the context of the command
      */
     @Override
-    public void execute(Imperat<C> imperat, Source<C> source, Context<C> context) {
+    public void execute(Imperat<S> imperat, S source, Context<S> context) {
         commandCoordinator.coordinate(imperat, source, context, this.execution);
     }
-
+    
     @Override
     public boolean isHelp() {
         return help;
@@ -312,7 +308,7 @@ final class CommandUsageImpl<C> implements CommandUsage<C> {
         CommandUsageImpl<?> that = (CommandUsageImpl<?>) o;
         return Objects.equals(parameters, that.parameters);
     }
-
+    
     @Override
     public int hashCode() {
         return Objects.hash(parameters);

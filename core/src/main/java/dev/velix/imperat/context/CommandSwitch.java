@@ -12,7 +12,11 @@ import java.util.List;
  * @see CommandFlag
  */
 public interface CommandSwitch extends CommandFlag {
-
+    
+    static CommandSwitch create(String name, List<String> aliases) {
+        return new CommandSwitch.CommandSwitchImpl(CommandFlag.create(name, aliases, null));
+    }
+    
     /**
      * @return the type of input
      * from the flag
@@ -21,10 +25,6 @@ public interface CommandSwitch extends CommandFlag {
     default Class<?> inputType() {
         throw new UnsupportedOperationException("Command Switches are declared " +
                 "by their presence merely no input types");
-    }
-    
-    static CommandSwitch create(String name, List<String> aliases) {
-        return new CommandSwitch.CommandSwitchImpl(CommandFlag.create(name, aliases, null));
     }
     
     record CommandSwitchImpl(CommandFlag flag) implements CommandSwitch {

@@ -1,13 +1,13 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.ParameterBuilder;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,24 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, CooldownHolder{
+public interface CommandUsage<S extends Source> extends PermissionHolder, DescriptionHolder, CooldownHolder {
+    
+    static <S extends Source> String format(Command<S> command, CommandUsage<S> usage) {
+        StringBuilder builder = new StringBuilder(command.getName()).append(' ');
+        int i = 0;
+        for (CommandParameter parameter : usage.getParameters()) {
+            builder.append(parameter.format());
+            if (i != usage.getParameters().size() - 1) {
+                builder.append(' ');
+            }
+            i++;
+        }
+        return builder.toString();
+    }
+    
+    static <S extends Source> Builder<S> builder() {
+        return new Builder<>();
+    }
     
     /**
      * Checks whether the raw input is a flag
@@ -62,7 +79,6 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
      */
     List<CommandParameter> getParameters();
     
-    
     /**
      * Fetches the parameter at the index
      *
@@ -75,8 +91,7 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
      * @return the execution for this usage
      */
     @NotNull
-    CommandExecution<C> getExecution();
-    
+    CommandExecution<S> getExecution();
     
     /**
      * Creates a new command usage instance to use it to Merge
@@ -86,11 +101,11 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
      * @param usage the usage to merge with
      * @return the merged command usage!
      */
-    default CommandUsage<C> merge(CommandUsage<C> usage) {
+    default CommandUsage<S> merge(CommandUsage<S> usage) {
         List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
         parameters.addAll(usage.getParameters());
-    
-        return CommandUsage.<C>builder()
+        
+        return CommandUsage.<S>builder()
                 .parameters(parameters)
                 .execute(usage.getExecution())
                 .build();
@@ -110,34 +125,16 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
      * @param usage      the usage to merge with
      * @return the merged command usage!
      */
-    default CommandUsage<C> mergeWithCommand(Command<C> subCommand, CommandUsage<C> usage) {
+    default CommandUsage<S> mergeWithCommand(Command<S> subCommand, CommandUsage<S> usage) {
         List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
         parameters.add(subCommand);
         parameters.addAll(usage.getParameters());
-    
-        return CommandUsage.<C>builder()
+        
+        return CommandUsage.<S>builder()
                 .cooldown(usage.getCooldown())
                 .parameters(parameters)
                 .execute(usage.getExecution())
                 .build(usage.isHelp());
-    }
-    
-    
-    static <C> String format(Command<C> command, CommandUsage<C> usage) {
-        StringBuilder builder = new StringBuilder(command.getName()).append(' ');
-        int i = 0;
-        for (CommandParameter parameter : usage.getParameters()) {
-            builder.append(parameter.format());
-            if (i != usage.getParameters().size() - 1) {
-                builder.append(' ');
-            }
-            i++;
-        }
-        return builder.toString();
-    }
-    
-    static <C> Builder<C> builder() {
-        return new Builder<>();
     }
     
     /**
@@ -180,14 +177,14 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
      * @return the cool down handler {@link CooldownHandler}
      */
     @NotNull
-    CooldownHandler<C> getCooldownHandler();
+    CooldownHandler<S> getCooldownHandler();
     
     /**
      * Sets the cooldown handler {@link CooldownHandler}
      *
      * @param cooldownHandler the cool down handler to set
      */
-    void setCooldownHandler(CooldownHandler<C> cooldownHandler);
+    void setCooldownHandler(CooldownHandler<S> cooldownHandler);
     
     default boolean isDefault() {
         return getParameters().isEmpty();
@@ -196,14 +193,14 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
     /**
      * @return the coordinator for execution of the command
      */
-    CommandCoordinator<C> getCoordinator();
+    CommandCoordinator<S> getCoordinator();
     
     /**
      * Sets the command coordinator
      *
      * @param commandCoordinator the coordinator to set
      */
-    void setCoordinator(CommandCoordinator<C> commandCoordinator);
+    void setCoordinator(CommandCoordinator<S> commandCoordinator);
     
     /**
      * Executes the usage's actions
@@ -213,7 +210,7 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
      * @param source  the command source/sender
      * @param context the context of the command
      */
-    void execute(Imperat<C> imperat, Source<C> source, Context<C> context);
+    void execute(Imperat<S> imperat, S source, Context<S> context);
     
     /**
      * @return Whether this usage is a help-subcommand usage
@@ -225,60 +222,60 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
      * @return whether this usage has this sequence of parameters
      */
     boolean hasParameters(List<CommandParameter> parameters);
-	
-    @SuppressWarnings("all")
-    class Builder<C> {
     
-        private CommandExecution<C> execution;
+    @SuppressWarnings("all")
+    class Builder<S extends Source> {
+        
+        private final List<CommandParameter> parameters = new ArrayList<>();
+        private CommandExecution<S> execution;
         private String description = "N/A";
         private String permission = null;
-        private final List<CommandParameter> parameters = new ArrayList<>();
         private UsageCooldown cooldown = null;
-        private CommandCoordinator<C> commandCoordinator = CommandCoordinator.sync();
-    
+        private CommandCoordinator<S> commandCoordinator = CommandCoordinator.sync();
+        
         Builder() {
-    
+        
         }
-    
-        public Builder<C> coordinator(CommandCoordinator<C> commandCoordinator) {
+        
+        public Builder<S> coordinator(CommandCoordinator<S> commandCoordinator) {
             this.commandCoordinator = commandCoordinator;
             return this;
         }
-    
-        public Builder<C> execute(CommandExecution<C> execution) {
+        
+        public Builder<S> execute(CommandExecution<S> execution) {
             this.execution = execution;
             return this;
         }
-    
-        public Builder<C> permission(String permission) {
+        
+        public Builder<S> permission(String permission) {
             this.permission = permission;
             return this;
         }
-    
-        public Builder<C> cooldown(long value, TimeUnit unit) {
+        
+        public Builder<S> cooldown(long value, TimeUnit unit) {
             this.cooldown = new UsageCooldown(value, unit);
             return this;
         }
-    
-        public Builder<C> cooldown(@Nullable UsageCooldown cooldown) {
+        
+        public Builder<S> cooldown(@Nullable UsageCooldown cooldown) {
             this.cooldown = cooldown;
             return this;
         }
-    
-        public Builder<C> description(String description) {
+        
+        public Builder<S> description(String description) {
             if (description != null) {
                 this.description = description;
             }
             return this;
         }
         
-        public final Builder<C> parameters(ParameterBuilder<?, ?>... builders) {
+        public final Builder<S> parameters(ParameterBuilder<?, ?>... builders) {
             return parameters(
                     Arrays.stream(builders).map(ParameterBuilder::build).toList()
             );
         }
-    
-        public Builder<C> parameters(CommandParameter... params) {
+        
+        public Builder<S> parameters(CommandParameter... params) {
             int index = 0;
             for (CommandParameter parameter : params) {
                 if (!parameter.isCommand()) {
@@ -289,8 +286,8 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
             }
             return this;
         }
-    
-        public Builder<C> parameters(List<CommandParameter> params) {
+        
+        public Builder<S> parameters(List<CommandParameter> params) {
             for (int i = 0; i < params.size(); i++) {
                 CommandParameter parameter = params.get(i);
                 if (!parameter.isCommand()) {
@@ -300,9 +297,9 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
             }
             return this;
         }
-    
-        public CommandUsage<C> build(boolean help) {
-            CommandUsageImpl<C> impl = new CommandUsageImpl<>(execution, help);
+        
+        public CommandUsage<S> build(boolean help) {
+            CommandUsageImpl<S> impl = new CommandUsageImpl<>(execution, help);
             impl.setCoordinator(commandCoordinator);
             impl.setPermission(permission);
             impl.setDescription(description);
@@ -310,15 +307,15 @@ public interface CommandUsage<C> extends PermissionHolder, DescriptionHolder, Co
             impl.addParameters(parameters);
             return impl;
         }
-    
-    
-        public CommandUsage<C> build() {
+        
+        
+        public CommandUsage<S> build() {
             return build(false);
         }
-    
-        public CommandUsage<C> buildAsHelp() {
+        
+        public CommandUsage<S> buildAsHelp() {
             return build(true);
         }
-    
+        
     }
 }

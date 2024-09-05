@@ -1,7 +1,7 @@
 package dev.velix.imperat.resolvers;
 
-import net.md_5.bungee.api.CommandSender;
+import dev.velix.imperat.BungeeSource;
 
-public interface BungeeValueResolver<T> extends ValueResolver<CommandSender, T> {
+public interface BungeeValueResolver<T> extends ValueResolver<BungeeSource, T> {
 
 }

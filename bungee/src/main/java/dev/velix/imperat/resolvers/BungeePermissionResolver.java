@@ -1,17 +1,16 @@
 package dev.velix.imperat.resolvers;
 
-import dev.velix.imperat.context.Source;
-import net.md_5.bungee.api.CommandSender;
+import dev.velix.imperat.BungeeSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BungeePermissionResolver implements PermissionResolver<CommandSender> {
-
+public class BungeePermissionResolver implements PermissionResolver<BungeeSource> {
+    
     @Override
     public boolean hasPermission(
-            @NotNull Source<CommandSender> source,
+            @NotNull BungeeSource source,
             @Nullable String permission
     ) {
-        return source.getOrigin().hasPermission(permission);
+        return source.origin().hasPermission(permission);
     }
 }

@@ -5,11 +5,12 @@ import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class NoPermissionCaption<C> implements Caption<C> {
-
+public final class NoPermissionCaption<S extends Source> implements Caption<S> {
+    
     /**
      * @return the key
      */
@@ -17,7 +18,7 @@ public final class NoPermissionCaption<C> implements Caption<C> {
     public @NotNull CaptionKey getKey() {
         return CaptionKey.NO_PERMISSION;
     }
-
+    
     /**
      * @param dispatcher the dispatcher
      * @param context    the context
@@ -26,8 +27,8 @@ public final class NoPermissionCaption<C> implements Caption<C> {
      */
     @Override
     public @NotNull String getMessage(
-            @NotNull Imperat<C> dispatcher,
-            @NotNull Context<C> context,
+            @NotNull Imperat<S> dispatcher,
+            @NotNull Context<S> context,
             @Nullable Exception exception
     ) {
         return Messages.NO_PERMISSION;

@@ -1,9 +1,9 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.Pair;
 import dev.velix.imperat.util.api.Unstable;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,82 +16,81 @@ import java.util.List;
 @ApiStatus.Experimental
 @Unstable
 final class TreeDisplayer implements UsageDisplayer {
-
+    
     private final static String BRANCH_DOWN = "<dark_gray>┠</dark_gray>";
     private final static String BRANCH_FORWARDS = "<dark_gray>-</dark_gray>";
-
+    
     TreeDisplayer() {
-
+    
     }
-
+    
     @Override
-    public <C> void display(
-            Imperat<C> dispatcher,
-            Command<C> command,
-            Source<C> source,
+    public <S extends Source> void display(
+            Imperat<S> dispatcher,
+            Command<S> command,
+            S source,
             UsageFormatter formatter,
-            List<CommandUsage<C>> usages
+            List<CommandUsage<S>> usages
     ) {
-
-
+        
+        
         for (int i = 0; i < usages.size(); i++) {
             var usage = usages.get(i);
-
+            
             var formatInfo = formatUsageTillSub(dispatcher, command, usage);
-
+            
             var lastSub = formatInfo.left();
-
+            
             displayUsage(dispatcher, command, source, usage, lastSub,
                     formatter, formatInfo.right(), i == usages.size() - 1);
         }
-
+        
     }
-
-
-    @SuppressWarnings("unchecked")
-    private <C> Pair<String, Command<C>> formatUsageTillSub(Imperat<C> dispatcher,
-                                                            Command<C> command,
-                                                            CommandUsage<C> usage) {
+    
+    
+    private <S extends Source> Pair<String, Command<S>> formatUsageTillSub(Imperat<S> dispatcher,
+                                                                           Command<S> command,
+                                                                           CommandUsage<S> usage) {
         StringBuilder builder = new StringBuilder(dispatcher.commandPrefix() + command.getName());
-        Command<C> lastSub = null;
+        Command<S> lastSub = null;
         for (var param : usage.getParameters()) {
             builder.append(' ')
                     .append(param.format());
             if (param.isCommand()) {
-                lastSub = (Command<C>) param.asCommand();
+                lastSub = param.asCommand();
                 break;
             }
         }
-
+        
         return new Pair<>(builder.toString(), lastSub);
     }
-
-
-    private <C> void displayUsage(
-            Imperat<C> dispatcher,
-            Command<C> command,
-            Source<C> source,
-            CommandUsage<C> usage,
-            @Nullable Command<C> sub,
+    
+    
+    private <S extends Source> void displayUsage(
+            Imperat<S> dispatcher,
+            Command<S> command,
+            S source,
+            CommandUsage<S> usage,
+            @Nullable Command<S> sub,
             UsageFormatter formatter,
             @NotNull String format,
             boolean last
     ) {
-
-
+        
+        
         if (sub == null) {
             source.reply(formatter.formatUsageLine(dispatcher, command, usage, last));
             return;
         }
-
+        
         source.reply(formatter.formatUsageOnly(format));
-
+        
         int max = sub.getUsages().size();
         int i = 0;
-        for (CommandUsage<C> commandUsage : sub.getUsages()) {
+        for (CommandUsage<S> commandUsage : sub.getUsages()) {
             var formatInfo = formatUsageTillSub(dispatcher, command, commandUsage);
             source.reply(BRANCH_DOWN + BRANCH_FORWARDS +
-				            formatter.formatUsageOnly(formatInfo.right())
+                    formatter.formatUsageOnly(formatInfo.right())
             );
             if (commandUsage.hasParamType(Command.class)) {
                 displayUsage(dispatcher, command, source, commandUsage,
@@ -99,7 +98,7 @@ final class TreeDisplayer implements UsageDisplayer {
             }
             i++;
         }
-
+        
     }
-
+    
 }

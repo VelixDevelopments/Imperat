@@ -1,7 +1,7 @@
 package dev.velix.imperat.resolvers;
 
-import net.md_5.bungee.api.CommandSender;
+import dev.velix.imperat.BungeeSource;
 
-public interface BungeeContextResolver<T> extends ContextResolver<CommandSender, T> {
+public interface BungeeContextResolver<T> extends ContextResolver<BungeeSource, T> {
 
 }

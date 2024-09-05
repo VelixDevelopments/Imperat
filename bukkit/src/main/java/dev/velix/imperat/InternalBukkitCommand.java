@@ -14,16 +14,16 @@ import java.util.List;
 
 @ApiStatus.Internal
 final class InternalBukkitCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
-
+    
     @NotNull
     private final BukkitImperat dispatcher;
-
+    
     @NotNull
-    private final Command<CommandSender> command;
-
-
+    private final Command<BukkitSource> command;
+    
+    
     InternalBukkitCommand(@NotNull BukkitImperat dispatcher,
-                          @NotNull Command<CommandSender> command) {
+                          @NotNull Command<BukkitSource> command) {
         super(
                 command.getName(),
                 command.getDescription().toString(),
@@ -33,51 +33,53 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         this.dispatcher = dispatcher;
         this.command = command;
     }
-
+    
     @Override
     public boolean execute(@NotNull CommandSender sender,
                            @NotNull String label,
                            String[] raw) {
-
+        
         try {
-            dispatcher.dispatch(sender, label, raw);
+            BukkitSource source = dispatcher.wrapSender(sender);
+            dispatcher.dispatch(source, label, raw);
             return true;
         } catch (Exception ex) {
             CommandDebugger.error(InternalBukkitCommand.class, "execute", ex);
             return false;
         }
-
+        
     }
-
+    
     @Override
     public @NotNull Plugin getPlugin() {
         return dispatcher.getPlatform();
     }
-
+    
     @Nullable
     @Override
     public String getPermission() {
         return super.getPermission();
     }
-
+    
     @NotNull
     @Override
     public String getDescription() {
         return super.getDescription();
     }
-
+    
     @NotNull
     @Override
     public String getUsage() {
         return super.getUsage();
     }
-
-
+    
+    
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender,
                                              @NotNull String alias,
                                              String[] args) throws IllegalArgumentException {
-        return dispatcher.autoComplete(command, sender, args);
+        BukkitSource source = dispatcher.wrapSender(sender);
+        return dispatcher.autoComplete(command, source, args);
     }
-
+    
 }

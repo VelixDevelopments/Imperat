@@ -4,6 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -15,26 +16,26 @@ import java.util.List;
  * Represents a suggestion providing interface
  * for an argument/parameter
  *
- * @param <C> the command-sender type
+ * @param <S> the command-sender type
  * @see CommandParameter
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface SuggestionResolver<C, T> {
-
-    static <C, T> SuggestionResolver<C, T> plain(Class<T> type, List<String> results) {
+public interface SuggestionResolver<S extends Source, T> {
+    
+    static <S extends Source, T> SuggestionResolver<S, T> plain(Class<T> type, List<String> results) {
         return plain(TypeWrap.of(type), results);
     }
     
-    static <C, T> SuggestionResolver<C, T> plain(TypeWrap<T> type, List<String> results) {
+    static <S extends Source, T> SuggestionResolver<S, T> plain(TypeWrap<T> type, List<String> results) {
         return new SuggestionResolver<>() {
             @Override
             public TypeWrap<T> getType() {
                 return type;
             }
-
+            
             @Override
-            public List<String> autoComplete(Command<C> command,
-                                             C source,
+            public List<String> autoComplete(Command<S> command,
+                                             S source,
                                              ArgumentQueue queue,
                                              CommandParameter parameterToComplete,
                                              @Nullable CompletionArg argToComplete) {
@@ -43,19 +44,19 @@ public interface SuggestionResolver<C, T> {
         };
     }
     
-    static <C, T> SuggestionResolver<C, T> plain(Class<T> type, String... results) {
+    static <S extends Source, T> SuggestionResolver<S, T> plain(Class<T> type, String... results) {
         return plain(type, Arrays.asList(results));
     }
-
-    static <C, T> SuggestionResolver<C, T> plain(TypeWrap<T> type, String... results) {
+    
+    static <S extends Source, T> SuggestionResolver<S, T> plain(TypeWrap<T> type, String... results) {
         return plain(type, Arrays.asList(results));
     }
-
+    
     /**
      * @return Type of data the suggestion is resolving
      */
     TypeWrap<T> getType();
-
+    
     /**
      * @param command             the running command
      * @param source              the sender of the command
@@ -65,10 +66,10 @@ public interface SuggestionResolver<C, T> {
      *                            to complete
      * @return the auto-completed suggestions of the current argument
      */
-    List<String> autoComplete(Command<C> command,
-                              C source,
+    List<String> autoComplete(Command<S> command,
+                              S source,
                               ArgumentQueue queue,
                               CommandParameter parameterToComplete,
                               @Nullable CompletionArg argToComplete);
-
+    
 }

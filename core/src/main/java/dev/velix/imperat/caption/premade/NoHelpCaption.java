@@ -7,10 +7,11 @@ import dev.velix.imperat.caption.Messages;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class NoHelpCaption<C> implements Caption<C> {
+public final class NoHelpCaption<S extends Source> implements Caption<S> {
     /**
      * @return the key
      */
@@ -26,11 +27,11 @@ public final class NoHelpCaption<C> implements Caption<C> {
      * @return The message in the form of a component
      */
     @Override
-    public @NotNull String getMessage(@NotNull Imperat<C> dispatcher,
-                                      @NotNull Context<C> context,
+    public @NotNull String getMessage(@NotNull Imperat<S> dispatcher,
+                                      @NotNull Context<S> context,
                                       @Nullable Exception exception) {
-        Command<C> cmdUsed;
-        if (context instanceof ResolvedContext<C> resolvedContext) {
+        Command<S> cmdUsed;
+        if (context instanceof ResolvedContext<S> resolvedContext) {
             cmdUsed = resolvedContext.getLastUsedCommand();
         } else {
             cmdUsed = dispatcher.getCommand(context.getCommandUsed());

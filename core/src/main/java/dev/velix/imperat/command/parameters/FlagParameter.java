@@ -5,12 +5,12 @@ import dev.velix.imperat.context.CommandSwitch;
 import org.jetbrains.annotations.NotNull;
 
 public interface FlagParameter extends CommandParameter {
-
+    
     /**
      * @return The flag's data
      */
     @NotNull CommandFlag getFlagData();
-
+    
     /**
      * @return checks whether this parameter is a flag
      */
@@ -18,7 +18,7 @@ public interface FlagParameter extends CommandParameter {
     default boolean isFlag() {
         return true;
     }
-
+    
     default boolean isSwitch() {
         return getFlagData() instanceof CommandSwitch;
     }

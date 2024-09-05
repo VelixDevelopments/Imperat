@@ -10,41 +10,42 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
-public final class BungeeSource implements Source<CommandSender> {
-
+@SuppressWarnings("unchecked")
+public final class BungeeSource implements Source {
+    
     private final BungeeImperat imperat;
     private final CommandSender sender;
     private final AdventureProvider<CommandSender> provider;
-
+    
     public BungeeSource(BungeeImperat imperat, AdventureProvider<CommandSender> provider, CommandSender sender) {
         this.imperat = imperat;
         this.provider = provider;
         this.sender = sender;
     }
-
+    
     @Override
     public String getName() {
         return sender.getName();
     }
-
+    
     @Override
-    public CommandSender getOrigin() {
+    public CommandSender origin() {
         return sender;
     }
-
+    
     @Override
     public void reply(String message) {
         sender.sendMessage(TextComponent.fromLegacyText(message));
     }
-
+    
     public void reply(BaseComponent... message) {
         sender.sendMessage(message);
     }
-
+    
     public void reply(final ComponentLike component) {
         provider.send(this, component);
     }
-
+    
     /**
      * Replies to the command sender with a caption message
      *
@@ -52,10 +53,10 @@ public final class BungeeSource implements Source<CommandSender> {
      * @param context the {@link Context} to use
      */
     @Override
-    public void reply(Caption<CommandSender> caption, Context<CommandSender> context) {
-        reply(caption.getMessage(imperat, context));
+    public <S extends Source> void reply(Caption<S> caption, Context<S> context) {
+        reply(caption.getMessage((Imperat<S>) imperat, context));
     }
-
+    
     /**
      * Replies to command sender with a caption message
      *
@@ -64,13 +65,13 @@ public final class BungeeSource implements Source<CommandSender> {
      * @param context the context
      */
     @Override
-    public void reply(String prefix, Caption<CommandSender> caption, Context<CommandSender> context) {
-        reply(prefix + caption.getMessage(imperat, context));
+    public <S extends Source> void reply(String prefix, Caption<S> caption, Context<S> context) {
+        reply(prefix + caption.getMessage((Imperat<S>) imperat, context));
     }
-
+    
     @Override
     public boolean isConsole() {
         return ProxyServer.getInstance().getConsole().equals(sender);
     }
-
+    
 }

@@ -12,17 +12,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @FunctionalInterface
 public interface ArgumentTypeResolver {
-
-    /**
-     * Returns the argument type for the given parameter.
-     * If unknown, it returns null
-     *
-     * @param parameter Parameter to create for
-     * @return The argument type
-     */
-    @Nullable
-    ArgumentType<?> resolveArgType(@NotNull CommandParameter parameter);
-
+    
     /**
      * Creates a {@link ArgumentTypeResolver} that will return the same
      * argument type for all parameters that match a specific type
@@ -34,7 +24,7 @@ public interface ArgumentTypeResolver {
     static @NotNull ArgumentTypeResolver forType(Class<?> type, ArgumentType<?> argumentType) {
         return parameter -> parameter.getType() == type ? argumentType : null;
     }
-
+    
     /**
      * Creates a {@link ArgumentTypeResolver} that will return the same
      * argument type for all parameters that match or extend a specific type
@@ -50,4 +40,14 @@ public interface ArgumentTypeResolver {
             return parameter.getType() == type || token.isSupertypeOf(token2) ? argumentType : null;
         };
     }
+    
+    /**
+     * Returns the argument type for the given parameter.
+     * If unknown, it returns null
+     *
+     * @param parameter Parameter to create for
+     * @return The argument type
+     */
+    @Nullable
+    ArgumentType<?> resolveArgType(@NotNull CommandParameter parameter);
 }

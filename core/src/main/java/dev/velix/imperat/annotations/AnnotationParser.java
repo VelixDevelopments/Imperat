@@ -3,6 +3,7 @@ package dev.velix.imperat.annotations;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.context.Source;
 
 import java.lang.annotation.Annotation;
 
@@ -11,14 +12,18 @@ import java.lang.annotation.Annotation;
  * parsing annotated command classes and translating/converting them
  * into {@link Command} POJOs then registering them using {@link Imperat}
  *
- * @param <C> the command-sender type
+ * @param <S> the command-sender type
  */
-public abstract class AnnotationParser<C> {
-
-    protected final Imperat<C> dispatcher;
-
-    AnnotationParser(Imperat<C> dispatcher) {
+public abstract class AnnotationParser<S extends Source> {
+    
+    protected final Imperat<S> dispatcher;
+    
+    AnnotationParser(Imperat<S> dispatcher) {
         this.dispatcher = dispatcher;
+    }
+    
+    public static <S extends Source> AnnotationParser<S> defaultParser(Imperat<S> dispatcher) {
+        return new AnnotationParserImpl<>(dispatcher);
     }
     
     /**
@@ -28,7 +33,7 @@ public abstract class AnnotationParser<C> {
      * @param instance the instance of the command class
      * @param <T>      the type of annotated command class to parse
      */
-    public abstract <T> Command<C> parseCommandClass(T instance);
+    public abstract <T> Command<S> parseCommandClass(T instance);
     
     /**
      * Parses annotated command class of type {@linkplain T}
@@ -37,15 +42,13 @@ public abstract class AnnotationParser<C> {
      * @param instance the instance of the command class
      * @param <T>      the type of annotated command class to parse
      */
-    public abstract <T> Command<C> parseCommandClass(
+    public abstract <T> Command<S> parseCommandClass(
             dev.velix.imperat.annotations.types.Command commandAnnotation,
             AnnotationReader reader,
             CommandAnnotatedElement<?> element,
             T instance,
             Class<T> instanceClass
     );
-
-    
     
     /**
      * Registers {@link AnnotationReplacer}
@@ -54,9 +57,5 @@ public abstract class AnnotationParser<C> {
      * @param replacer the replacer
      */
     public abstract <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer);
-
-    public static <C> AnnotationParser<C> defaultParser(Imperat<C> dispatcher) {
-        return new AnnotationParserImpl<>(dispatcher);
-    }
-
+    
 }

@@ -2,10 +2,10 @@ package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.ContextResolver;
 import org.jetbrains.annotations.ApiStatus;
@@ -13,44 +13,44 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-final class ContextImpl<C> implements Context<C> {
-
-    private final Imperat<C> dispatcher;
-    private final Source<C> source;
-    private final Command<C> command;
+final class ContextImpl<S extends Source> implements Context<S> {
+    
+    private final Imperat<S> dispatcher;
+    private final S source;
+    private final Command<S> command;
     private final ArgumentQueue args;
-
+    
     ContextImpl(
-            Imperat<C> dispatcher,
-            Command<C> command,
-            Source<C> source,
+            Imperat<S> dispatcher,
+            Command<S> command,
+            S source,
             ArgumentQueue args) {
         this.dispatcher = dispatcher;
         this.source = source;
         this.command = command;
         this.args = args;
     }
-
-
+    
+    
     /**
      * the command used in the context
      *
      * @return the command used
      */
     @Override
-    public @NotNull Command<C> getCommandUsed() {
+    public @NotNull Command<S> getCommandUsed() {
         return command;
     }
-
+    
     /**
      * @return the command source of the command
      * @see Source
      */
     @Override
-    public @NotNull Source<C> getSource() {
+    public @NotNull S getSource() {
         return source;
     }
-
+    
     /**
      * @return the arguments entered by the
      * @see ArgumentQueue
@@ -59,7 +59,7 @@ final class ContextImpl<C> implements Context<C> {
     public @NotNull ArgumentQueue getArguments() {
         return args;
     }
-
+    
     /**
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
@@ -68,7 +68,7 @@ final class ContextImpl<C> implements Context<C> {
     public ResolvedFlag getFlag(String flagName) {
         throw new UnsupportedOperationException();
     }
-
+    
     /**
      * Fetches the flag input value
      * returns null if the flag is a {@link CommandSwitch}
@@ -81,7 +81,7 @@ final class ContextImpl<C> implements Context<C> {
     public <T> @Nullable T getFlagValue(String flagName) {
         throw new UnsupportedOperationException();
     }
-
+    
     /**
      * Fetches a resolved argument's value
      *
@@ -93,7 +93,7 @@ final class ContextImpl<C> implements Context<C> {
     public <T> @Nullable T getArgument(String name) {
         throw new UnsupportedOperationException();
     }
-
+    
     /**
      * Fetches the argument/input resolved by the context
      * using {@link ContextResolver}
@@ -108,7 +108,7 @@ final class ContextImpl<C> implements Context<C> {
     
     
     @Override
-    public CommandHelp<C> createCommandHelp() {
+    public CommandHelp<S> createCommandHelp() {
         return new CommandHelp<>(dispatcher, command, this);
     }
     
@@ -120,5 +120,5 @@ final class ContextImpl<C> implements Context<C> {
     public int flagsUsedCount() {
         throw new UnsupportedOperationException();
     }
-
+    
 }

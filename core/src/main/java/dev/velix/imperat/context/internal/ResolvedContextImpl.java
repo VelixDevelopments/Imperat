@@ -1,7 +1,6 @@
 package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -29,57 +28,53 @@ import java.util.*;
  * the results (resolved arguments) will be used later on to
  * find the command usage object then use the found command usage to execute the action.
  *
- * @param <C> the sender type
+ * @param <S> the sender type
  */
 @ApiStatus.Internal
-final class ResolvedContextImpl<C> implements ResolvedContext<C> {
-
-    private final Imperat<C> dispatcher;
-
-    private final Command<C> commandUsed;
-    private Command<C> lastCommand;
-    private final CommandUsage<C> usage;
-
-    private final Context<C> context;
-
+final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> {
+    
+    private final Imperat<S> dispatcher;
+    
+    private final Command<S> commandUsed;
+    private final CommandUsage<S> usage;
+    private final Context<S> context;
     private final FlagRegistry flagRegistry = new FlagRegistry();
-
     //per command/subcommand because the class 'Command' can be also treated as a sub command
-    private final Map<Command<C>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
-
+    private final Map<Command<S>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
     //all resolved arguments EXCEPT for subcommands and flags.
     private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
-
-    ResolvedContextImpl(Imperat<C> dispatcher,
-                        Command<C> commandUsed,
-                        Context<C> context,
-                        CommandUsage<C> usage) {
+    private Command<S> lastCommand;
+    
+    ResolvedContextImpl(Imperat<S> dispatcher,
+                        Command<S> commandUsed,
+                        Context<S> context,
+                        CommandUsage<S> usage) {
         this.dispatcher = dispatcher;
         this.commandUsed = commandUsed;
         this.lastCommand = commandUsed;
         this.context = context;
         this.usage = usage;
     }
-
-
+    
+    
     /**
      * @return The owning parent-command for all of these arguments
      */
     @Override
-    public Command<C> getOwningCommand() {
+    public Command<S> getOwningCommand() {
         return commandUsed;
     }
-
+    
     /**
      * the command used in the context
      *
      * @return the command used
      */
     @Override
-    public @NotNull Command<C> getCommandUsed() {
+    public @NotNull Command<S> getCommandUsed() {
         return context.getCommandUsed();
     }
-
+    
     /**
      * Fetches the arguments of a command/subcommand that got resolved
      * except for the arguments that represent the literal/subcommand name arguments
@@ -89,32 +84,32 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
      * @return the argument resolved from raw into a value
      */
     @Override
-    public @Nullable ResolvedArgument getResolvedArgument(Command<C> command, String name) {
+    public @Nullable ResolvedArgument getResolvedArgument(Command<S> command, String name) {
         Map<String, ResolvedArgument> resolvedArgs = resolvedArgumentsPerCommand.get(command);
         if (resolvedArgs == null) return null;
-
+        
         return resolvedArgs.get(name);
     }
-
+    
     /**
      * @param command the command/subcommand with certain args
      * @return the command/subcommand's resolved args in as a new array-list
      */
     @Override
-    public List<ResolvedArgument> getResolvedArguments(Command<C> command) {
+    public List<ResolvedArgument> getResolvedArguments(Command<S> command) {
         Map<String, ResolvedArgument> argMap = resolvedArgumentsPerCommand.get(command);
         if (argMap == null) return Collections.emptyList();
         return new ArrayList<>(argMap.values());
     }
-
+    
     /**
      * @return all {@link Command} that have been used in this context
      */
     @Override
-    public @NotNull Collection<? extends Command<C>> getCommandsUsed() {
+    public @NotNull Collection<? extends Command<S>> getCommandsUsed() {
         return resolvedArgumentsPerCommand.keySet();
     }
-
+    
     /**
      * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
@@ -123,7 +118,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     public Collection<? extends ResolvedArgument> getResolvedArguments() {
         return allResolvedArgs.values();
     }
-
+    
     /**
      * Fetches a resolved argument's value
      *
@@ -138,7 +133,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         if (argument == null) return null;
         return (T) argument.value();
     }
-
+    
     /**
      * Fetches the argument/input resolved by the context
      * using {@link ContextResolver}
@@ -155,12 +150,12 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
             if (cr == null) return null;
             return (T) cr.resolve(this, null);
         }
-        ContextResolver<C, T> factoryCr = (ContextResolver<C, T>) factory.create(null);
+        ContextResolver<S, T> factoryCr = (ContextResolver<S, T>) factory.create(null);
         return factoryCr == null ? null : factoryCr.resolve(this, null);
     }
     
     @Override
-    public CommandHelp<C> createCommandHelp() {
+    public CommandHelp<S> createCommandHelp() {
         return context.createCommandHelp();
     }
     
@@ -169,10 +164,10 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
      * @see Source
      */
     @Override
-    public @NotNull Source<C> getSource() {
+    public @NotNull S getSource() {
         return context.getSource();
     }
-
+    
     /**
      * @return the arguments entered by the command sender
      * @see ArgumentQueue
@@ -181,7 +176,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     public @NotNull ArgumentQueue getArguments() {
         return context.getArguments();
     }
-
+    
     /**
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
@@ -190,7 +185,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     public ResolvedFlag getFlag(String flagName) {
         return flagRegistry.getData(flagName).orElse(null);
     }
-
+    
     /**
      * Fetches the flag input value
      * returns null if the flag is a {@link CommandSwitch}
@@ -208,7 +203,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         }
         return (T) flag.value();
     }
-
+    
     /**
      * @return the number of flags extracted
      */
@@ -216,30 +211,30 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
     public int flagsUsedCount() {
         return flagRegistry.size();
     }
-
+    
     /**
      * Resolves the arguments from the given plain input {@link Context}
      */
     @Override
     public void resolve() throws CommandException {
-        SmartUsageResolve<C> handler = SmartUsageResolve.create(commandUsed, usage);
+        SmartUsageResolve<S> handler = SmartUsageResolve.create(commandUsed, usage);
         handler.resolve(dispatcher, this);
         this.lastCommand = handler.getCommand();
     }
-
-
+    
+    
     @Override
-    public <T> void resolveArgument(Command<C> command,
+    public <T> void resolveArgument(Command<S> command,
                                     @Nullable String raw,
                                     int index,
                                     CommandParameter parameter,
                                     @Nullable T value) throws CommandException {
-
+        
         if (value != null && TypeUtility.isNumericType(value.getClass())
                 && parameter instanceof NumericParameter numericParameter
                 && numericParameter.hasRange()
                 && !numericParameter.matchesRange((Number) value)) {
-
+            
             NumericRange range = numericParameter.getRange();
             throw new NumberOutOfRangeException(numericParameter, (Number) value, range);
         }
@@ -255,7 +250,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         });
         allResolvedArgs.put(parameter.getName(), argument);
     }
-
+    
     /**
      * Resolves flag the in the context
      *
@@ -274,7 +269,7 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
         flagRegistry.setData(flagDetected.name(),
                 new ResolvedFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue));
     }
-
+    
     /**
      * Fetches the last used resolved command
      * of a resolved context!
@@ -282,16 +277,16 @@ final class ResolvedContextImpl<C> implements ResolvedContext<C> {
      * @return the last used command/subcommand
      */
     @Override
-    public @NotNull Command<C> getLastUsedCommand() {
+    public @NotNull Command<S> getLastUsedCommand() {
         return lastCommand;
     }
-
+    
     /**
      * @return The used usage to use it to resolve commands
      */
     @Override
-    public CommandUsage<C> getDetectedUsage() {
+    public CommandUsage<S> getDetectedUsage() {
         return usage;
     }
-
+    
 }

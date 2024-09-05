@@ -1,7 +1,7 @@
 package dev.velix.imperat.resolvers;
 
-import org.bukkit.command.CommandSender;
+import dev.velix.imperat.BukkitSource;
 
-public interface BukkitValueResolver<T> extends ValueResolver<CommandSender, T> {
+public interface BukkitValueResolver<T> extends ValueResolver<BukkitSource, T> {
 
 }

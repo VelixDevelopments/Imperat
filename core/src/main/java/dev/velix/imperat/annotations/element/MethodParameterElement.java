@@ -10,9 +10,9 @@ import java.lang.reflect.Parameter;
 @ApiStatus.Internal
 @Getter
 public final class MethodParameterElement extends CommandAnnotatedElement<Parameter> {
-
+    
     private final String name;
-
+    
     public MethodParameterElement(
             final AnnotationRegistry registry,
             final Parameter element
@@ -20,7 +20,7 @@ public final class MethodParameterElement extends CommandAnnotatedElement<Parame
         super(registry, element);
         this.name = AnnotationHelper.getParamName(element);
     }
-
+    
     @Override
     public String toString() {
         return getElement().getType().getSimpleName() + " " + name;

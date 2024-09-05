@@ -1,7 +1,7 @@
 package dev.velix.imperat.resolvers;
 
-import org.bukkit.command.CommandSender;
+import dev.velix.imperat.BukkitSource;
 
-public interface BukkitContextResolver<T> extends ContextResolver<CommandSender, T> {
+public interface BukkitContextResolver<T> extends ContextResolver<BukkitSource, T> {
 
 }

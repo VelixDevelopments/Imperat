@@ -5,9 +5,9 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public final class FlagRegistry extends Registry<String, ResolvedFlag> {
-
+    
     public FlagRegistry() {
         super();
     }
-
+    
 }

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 public record ResolvedArgument(@Nullable String raw, CommandParameter parameter,
                                int index, @Nullable Object value) {
-
+    
     @Override
     public String toString() {
         return "ResolvedArgument{" +

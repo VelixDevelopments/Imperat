@@ -6,13 +6,13 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 
 
 final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command implements TabExecutor {
-
+    
     private final BungeeImperat bungeeCommandDispatcher;
-    private final Command<CommandSender> bungeeCommand;
-
+    private final Command<BungeeSource> bungeeCommand;
+    
     InternalBungeeCommand(
             BungeeImperat commandDispatcher,
-            Command<CommandSender> bungeeCommand
+            Command<BungeeSource> bungeeCommand
     ) {
         super(
                 bungeeCommand.getName(),
@@ -22,19 +22,27 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
         this.bungeeCommandDispatcher = commandDispatcher;
         this.bungeeCommand = bungeeCommand;
     }
-
+    
     @Override
     public void execute(CommandSender sender, String[] args) {
-        bungeeCommandDispatcher.dispatch(sender, bungeeCommand.getName(), args);
+        bungeeCommandDispatcher.dispatch(
+                bungeeCommandDispatcher.wrapSender(sender),
+                bungeeCommand.getName(),
+                args
+        );
     }
-
-
+    
+    
     @Override
     public Iterable<String> onTabComplete(
             CommandSender sender,
             String[] args
     ) {
-        return bungeeCommandDispatcher.autoComplete(bungeeCommand, sender, args);
+        return bungeeCommandDispatcher.autoComplete(
+                bungeeCommand,
+                bungeeCommandDispatcher.wrapSender(sender),
+                args
+        );
     }
-
+    
 }

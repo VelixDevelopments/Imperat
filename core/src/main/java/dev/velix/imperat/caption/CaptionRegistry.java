@@ -1,6 +1,7 @@
 package dev.velix.imperat.caption;
 
 import dev.velix.imperat.caption.premade.*;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -15,8 +16,8 @@ import org.jetbrains.annotations.Nullable;
  * @see Caption
  */
 @ApiStatus.AvailableSince("1.0.0")
-public final class CaptionRegistry<C> extends Registry<CaptionKey, Caption<C>> {
-
+public final class CaptionRegistry<S extends Source> extends Registry<CaptionKey, Caption<S>> {
+    
     private CaptionRegistry() {
         super();
         this.registerCaption(new NoPermissionCaption<>());
@@ -25,17 +26,17 @@ public final class CaptionRegistry<C> extends Registry<CaptionKey, Caption<C>> {
         this.registerCaption(new NoHelpCaption<>());
         this.registerCaption(new NoHelpPageCaption<>());
     }
-
-    public static <C> CaptionRegistry<C> createDefault() {
+    
+    public static <S extends Source> CaptionRegistry<S> createDefault() {
         return new CaptionRegistry<>();
     }
-
-    public @Nullable Caption<C> getCaption(CaptionKey key) {
+    
+    public @Nullable Caption<S> getCaption(CaptionKey key) {
         return getData(key).orElse(null);
     }
-
-    public void registerCaption(Caption<C> caption) {
+    
+    public void registerCaption(Caption<S> caption) {
         this.setData(caption.getKey(), caption);
     }
-
+    
 }

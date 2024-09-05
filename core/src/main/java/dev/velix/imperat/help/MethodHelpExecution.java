@@ -3,9 +3,9 @@ package dev.velix.imperat.help;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.AnnotationHelper;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.CommandException;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
@@ -14,15 +14,15 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public final class MethodHelpExecution<C> implements HelpExecution<C> {
-
-    private final Imperat<C> dispatcher;
+public final class MethodHelpExecution<S extends Source> implements HelpExecution<S> {
+    
+    private final Imperat<S> dispatcher;
     private final Method method;
     private final MethodCaller.BoundMethodCaller caller;
     private final List<CommandParameter> params;
-
-    public MethodHelpExecution(Imperat<C> dispatcher,
-                               ProxyCommand<C> proxy,
+    
+    public MethodHelpExecution(Imperat<S> dispatcher,
+                               ProxyCommand<S> proxy,
                                Method method,
                                List<CommandParameter> params) {
         this.dispatcher = dispatcher;
@@ -35,7 +35,7 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
             throw new RuntimeException(e);
         }
     }
-
+    
     /**
      * Displays a help menu showing all possible syntaxes
      *
@@ -44,11 +44,11 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
      * @param page   the page of the help menu
      */
     @Override
-    public void help(Source<C> source,
-                     Context<C> context,
-                     CommandHelp<C> help,
+    public void help(S source,
+                     Context<S> context,
+                     CommandHelp<S> help,
                      @Nullable Integer page) throws CommandException {
-
+        
         Object[] instances = AnnotationHelper
                 .loadParameterInstances(dispatcher, params, source, context, method, help);
         /*System.out.println("INSTANCES SIZE= " + instances.length);
@@ -61,9 +61,9 @@ public final class MethodHelpExecution<C> implements HelpExecution<C> {
             System.out.println("INSTANCE -> " + object.getClass().getSimpleName());
         }
         System.out.println("THEN");*/
-
+        
         caller.call(instances);
     }
-
-
+    
+    
 }

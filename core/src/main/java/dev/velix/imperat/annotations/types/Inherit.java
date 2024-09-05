@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Inherit {
-	
-	/**
-	 * @return the children subcommands
-	 */
-	Class<?>[] value();
-	
+    
+    /**
+     * @return the children subcommands
+     */
+    Class<?>[] value();
+    
 }

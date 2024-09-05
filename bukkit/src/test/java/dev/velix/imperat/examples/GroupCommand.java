@@ -11,13 +11,13 @@ import dev.velix.imperat.test.Group;
 
 @Command("group")
 public final class GroupCommand {
-
+    
     @Usage
     public void defaultUsage(BukkitSource source) {
         //default execution = no args
         source.reply("/group <group>");
     }
-
+    
     @Usage
     public void mainUsage(
             BukkitSource source,
@@ -26,8 +26,8 @@ public final class GroupCommand {
         //when he does "/group <group>"
         source.reply("entered group name= " + group.name());
     }
-
-
+    
+    
     @SubCommand(value = "setperm")
     @Permission("command.group.setperm")
     public void setPermission(BukkitSource source,
@@ -37,7 +37,7 @@ public final class GroupCommand {
         source.reply("You have set permission '" + permission
                 + "' to group '" + group.name() + "'");
     }
-
+    
     @SubCommand("setprefix")
     @Permission("command.group.setprefix")
     public void setPrefix(

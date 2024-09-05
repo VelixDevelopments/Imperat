@@ -7,16 +7,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 abstract class TypeVisitor {
-
+    
     private final Set<Type> visited = new HashSet<>();
-
+    
     public final void visit(@Nullable Type... types) {
         for (final Type type : types) {
             if (type == null || !visited.add(type)) {
                 // null owner type, or already visited;
                 continue;
             }
-
+            
             boolean succeeded = false;
             try {
                 if (type instanceof TypeVariable) {
@@ -40,11 +40,20 @@ abstract class TypeVisitor {
             }
         }
     }
-
-    void visitClass(Class<?> t) {}
-    void visitGenericArrayType(GenericArrayType t) {}
-    void visitParameterizedType(ParameterizedType t) {}
-    void visitTypeVariable(TypeVariable<?> t) {}
-    void visitWildcardType(WildcardType t) {}
-
+    
+    void visitClass(Class<?> t) {
+    }
+    
+    void visitGenericArrayType(GenericArrayType t) {
+    }
+    
+    void visitParameterizedType(ParameterizedType t) {
+    }
+    
+    void visitTypeVariable(TypeVariable<?> t) {
+    }
+    
+    void visitWildcardType(WildcardType t) {
+    }
+    
 }

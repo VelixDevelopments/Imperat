@@ -30,7 +30,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -43,39 +42,43 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+@SuppressWarnings("unchecked")
 final class PaperCommodore extends AbstractCommodore implements Commodore, Listener {
-
+    
     private final List<CommodoreCommand> commands = new ArrayList<>();
-
+    
     PaperCommodore(Plugin plugin) throws ClassNotFoundException {
         Class.forName("com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
-
+    
+    static void ensureSetup() {
+        // do nothing - this is only called to trigger the static initializer
+    }
+    
     @Override
     public void register(LiteralCommandNode<?> node) {
         Objects.requireNonNull(node, "node");
         this.commands.add(new CommodoreCommand(node, null));
     }
-
-
+    
     @Override
     public void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");
-
+        
         try {
             setRequiredHackyFieldsRecursively(node, DUMMY_SUGGESTION_PROVIDER);
         } catch (Throwable e) {
             e.printStackTrace();
         }
-
+        
         Collection<String> aliases = getAliases(command);
         if (!aliases.contains(node.getLiteral())) {
             node = renameLiteralNode(node, command.getName());
         }
-
+        
         for (String alias : aliases) {
             if (node.getLiteral().equals(alias)) {
                 this.commands.add(new CommodoreCommand(node, permissionTest));
@@ -87,7 +90,7 @@ final class PaperCommodore extends AbstractCommodore implements Commodore, Liste
             }
         }
     }
-
+    
     @EventHandler
     @SuppressWarnings("deprecation") // draft API, ok...
     public void onPlayerSendCommandsEvent(AsyncPlayerSendCommandsEvent<?> event) {
@@ -97,9 +100,9 @@ final class PaperCommodore extends AbstractCommodore implements Commodore, Liste
             }
         }
     }
-
+    
     private record CommodoreCommand(LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
-
+        
         @SuppressWarnings({"unchecked", "rawtypes"})
         public void apply(Player player, RootCommandNode<?> root) {
             if (this.permissionTest != null && !this.permissionTest.test(player)) {
@@ -109,9 +112,5 @@ final class PaperCommodore extends AbstractCommodore implements Commodore, Liste
             root.addChild((CommandNode) this.node);
         }
     }
-
-    static void ensureSetup() {
-        // do nothing - this is only called to trigger the static initializer
-    }
-
+    
 }

@@ -1,9 +1,9 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -21,7 +21,19 @@ import java.util.List;
 @ApiStatus.AvailableSince("1.0.0")
 @FunctionalInterface
 public interface UsageDisplayer {
-
+    
+    static UsageDisplayer plain() {
+        return new PlainDisplayer();
+    }
+    
+    static UsageDisplayer tree() {
+        return new TreeDisplayer();
+    }
+    
+    static UsageDisplayer custom(UsageDisplayer displayer) {
+        return displayer;
+    }
+    
     /**
      * Displays all usages together to
      * the {@link Source}
@@ -33,27 +45,15 @@ public interface UsageDisplayer {
      * @param source     the command sender
      * @param formatter  the formatter {@link UsageFormatter}
      * @param usages     the usages to display
-     * @param <C>        the command-sender type
+     * @param <S>        the command-sender type
      * @see PlainDisplayer
      * @see TreeDisplayer
      */
-    <C> void display(
-            Imperat<C> dispatcher,
-            Command<C> command,
-            Source<C> source,
+    <S extends Source> void display(
+            Imperat<S> dispatcher,
+            Command<S> command,
+            S source,
             UsageFormatter formatter,
-            List<CommandUsage<C>> usages
+            List<CommandUsage<S>> usages
     );
-
-    static UsageDisplayer plain() {
-        return new PlainDisplayer();
-    }
-
-    static UsageDisplayer tree() {
-        return new TreeDisplayer();
-    }
-
-    static UsageDisplayer custom(UsageDisplayer displayer) {
-        return displayer;
-    }
 }

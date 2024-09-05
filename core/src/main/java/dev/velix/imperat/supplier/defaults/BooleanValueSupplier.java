@@ -2,10 +2,11 @@ package dev.velix.imperat.supplier.defaults;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 
 public final class BooleanValueSupplier implements OptionalValueSupplier<Boolean> {
-
+    
     /**
      * @return The type of value to supply
      */
@@ -13,7 +14,7 @@ public final class BooleanValueSupplier implements OptionalValueSupplier<Boolean
     public Class<Boolean> getValueType() {
         return Boolean.class;
     }
-
+    
     /**
      * Supplies a default-value for optional
      * usage parameters {@link CommandParameter}
@@ -22,8 +23,8 @@ public final class BooleanValueSupplier implements OptionalValueSupplier<Boolean
      * @return the resolved default value
      */
     @Override
-    public <C> Boolean supply(Context<C> context) {
+    public <S extends Source> Boolean supply(Context<S> context) {
         return false;
     }
-
+    
 }

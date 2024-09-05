@@ -1,7 +1,7 @@
 package dev.velix.imperat.command.cooldown;
 
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
@@ -10,27 +10,27 @@ import java.util.Optional;
  * Cool-down checker and handler for the command usages
  * {@link CommandUsage}
  *
- * @param <C> the sender-type
+ * @param <S> the sender-type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface CooldownHandler<C> {
-
-
+public interface CooldownHandler<S extends Source> {
+    
+    
     /**
      * Sets the last time of execution to this
      * current moment using {@link System#currentTimeMillis()}
      *
      * @param source the command sender executing the {@link CommandUsage}
      */
-    void registerExecutionMoment(Source<C> source);
-
+    void registerExecutionMoment(S source);
+    
     /**
      * The required of a usage
      *
      * @return the container of usage's cooldown, the container may be empty
      */
     Optional<UsageCooldown> getUsageCooldown();
-
+    
     /**
      * Checks if there's a cooldown on
      * the usage for a specific command sender
@@ -39,31 +39,31 @@ public interface CooldownHandler<C> {
      * @return whether there's a current cooldown
      * on the usage for the command sender
      */
-    default boolean hasCooldown(Source<C> source) {
+    default boolean hasCooldown(S source) {
         UsageCooldown usageCooldown = getUsageCooldown().orElse(null);
         if (usageCooldown == null) {
             return false;
         }
-
+        
         boolean result = getLastTimeExecuted(source).map((lastTime) -> {
             long timePassed = System.currentTimeMillis() - lastTime;
             return timePassed <= usageCooldown.toMillis();
         }).orElse(false);
-
+        
         if (!result)
             removeCooldown(source);
         return result;
     }
-
+    
     /**
      * Unregisters the user's cached cooldown
-     * when it's expired !
+     * when it's expired!
      *
      * @param source the command-sender
      */
-    void removeCooldown(Source<C> source);
-
-
+    void removeCooldown(S source);
+    
+    
     /**
      * Fetches the last time the command source
      * executed a specific command usage
@@ -71,5 +71,5 @@ public interface CooldownHandler<C> {
      * @param source the command sender
      * @return the last time the sender executed {@link CommandUsage}
      */
-    Optional<Long> getLastTimeExecuted(Source<C> source);
+    Optional<Long> getLastTimeExecuted(S source);
 }

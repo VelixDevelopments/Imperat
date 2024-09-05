@@ -1,10 +1,13 @@
 package dev.velix.imperat.annotations.injectors;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.*;
+import dev.velix.imperat.annotations.AnnotationParser;
+import dev.velix.imperat.annotations.AnnotationReader;
+import dev.velix.imperat.annotations.AnnotationRegistry;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.injectors.context.InjectionContext;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,18 +20,18 @@ import java.lang.annotation.Annotation;
  * from {@link Annotation} and put it into an existing object
  *
  * @param <O> object to load type
- * @param <C> command-sender type
+ * @param <S> command-sender type
  * @param <A> annotation to a load type
  */
 @SuppressWarnings("unused")
-public abstract class AnnotationDataInjector<O, C, A extends Annotation> {
-   
-    protected final Imperat<C> dispatcher;
+public abstract class AnnotationDataInjector<O, S extends Source, A extends Annotation> {
+    
+    protected final Imperat<S> dispatcher;
     private final InjectionContext context;
     
     protected AnnotationDataInjector(
-            Imperat<C> dispatcher,
-				    InjectionContext context
+            Imperat<S> dispatcher,
+            InjectionContext context
     ) {
         this.dispatcher = dispatcher;
         this.context = context;
@@ -36,6 +39,7 @@ public abstract class AnnotationDataInjector<O, C, A extends Annotation> {
     
     /**
      * The key for the injection
+     *
      * @return the injection key that identifies the context of injection
      */
     public @NotNull InjectionContext getContext() {
@@ -54,19 +58,18 @@ public abstract class AnnotationDataInjector<O, C, A extends Annotation> {
      * @param injectorRegistry   the registry for injectors
      * @param element            the element of parameter
      * @param annotation         the annotation to load
-     *
-     * @param <T> a type parameter to help in casting
+     * @param <T>                a type parameter to help in casting
      */
     public abstract <T> @NotNull O inject(
-            ProxyCommand<C> proxyCommand,
+            ProxyCommand<S> proxyCommand,
             @Nullable O toLoad,
             AnnotationReader reader,
-            AnnotationParser<C> parser,
+            AnnotationParser<S> parser,
             AnnotationRegistry annotationRegistry,
-            AnnotationInjectorRegistry<C> injectorRegistry,
+            AnnotationInjectorRegistry<S> injectorRegistry,
             @NotNull CommandAnnotatedElement<?> element,
             @NotNull A annotation
     );
     
-
+    
 }

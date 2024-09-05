@@ -1,8 +1,8 @@
 package dev.velix.imperat.command.suggestions;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -13,12 +13,16 @@ import java.util.List;
  * tab-completion per one command, regardless of the sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface AutoCompleter<C> {
+public interface AutoCompleter<S extends Source> {
+    static <S extends Source> AutoCompleter<S> createNative(Command<S> command) {
+        return new AutoCompleterImpl<>(command);
+    }
+    
     /**
      * @return The auto-completion command
      */
-    Command<C> command();
-
+    Command<S> command();
+    
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
@@ -28,23 +32,19 @@ public interface AutoCompleter<C> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    List<String> autoComplete(Imperat<C> dispatcher,
-                              Source<C> sender, String[] args);
-
+    List<String> autoComplete(Imperat<S> dispatcher,
+                              S sender, String[] args);
+    
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
      *
      * @param dispatcher the command dispatcher
-     * @param sender     the sender of the auto-completion
+     * @param source     the sender of the auto-completion
      * @param currentArg the arg being completed
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    List<String> autoCompleteArgument(Imperat<C> dispatcher,
-                                      Source<C> sender, CompletionArg currentArg, String[] args);
-
-    static <C> AutoCompleter<C> createNative(Command<C> command) {
-        return new AutoCompleterImpl<>(command);
-    }
+    List<String> autoCompleteArgument(Imperat<S> dispatcher,
+                                      S source, CompletionArg currentArg, String[] args);
 }

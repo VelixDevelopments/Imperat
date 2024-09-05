@@ -1,5 +1,6 @@
 package dev.velix.imperat.context.internal;
 
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.ContextResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,11 +11,18 @@ import java.lang.reflect.Parameter;
  * Represents a context resolver factory
  * that is responsible for creating {@link ContextResolver}
  *
- * @param <C> the command-sender type
+ * @param <S> the command-sender type
  */
-public interface ContextResolverFactory<C> {
-
-
+public interface ContextResolverFactory<S extends Source> {
+    
+    
+    static <S extends Source, T> @NotNull ContextResolverFactory<S> of(
+            Class<T> clazz,
+            ContextResolver<S, T> resolver
+    ) {
+        return (p) -> p != null && p.getType().isAssignableFrom(clazz) ? resolver : null;
+    }
+    
     /**
      * Creates a context resolver based on the parameter
      *
@@ -22,14 +30,6 @@ public interface ContextResolverFactory<C> {
      * @return the {@link ContextResolver} specific for that parameter
      */
     @Nullable
-    ContextResolver<C, ?> create(@Nullable Parameter parameter);
-
-
-    static <C, T> @NotNull ContextResolverFactory<C> of(
-            Class<T> clazz,
-            ContextResolver<C, T> resolver
-    ) {
-        return (p) -> p != null && p.getType().isAssignableFrom(clazz) ? resolver : null;
-    }
-
+    ContextResolver<S, ?> create(@Nullable Parameter parameter);
+    
 }

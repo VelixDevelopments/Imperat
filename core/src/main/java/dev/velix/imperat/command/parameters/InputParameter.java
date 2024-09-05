@@ -2,6 +2,7 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
@@ -12,17 +13,17 @@ import java.util.Objects;
 
 @ApiStatus.Internal
 public abstract class InputParameter implements CommandParameter {
-
+    
     protected final String name;
-    protected String permission;
-    protected Description description;
-    protected int index;
     protected final TypeWrap<?> typeWrap;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final SuggestionResolver<?, ?> suggestionResolver;
-
-
+    protected String permission;
+    protected Description description;
+    protected int index;
+    
+    
     protected InputParameter(String name, TypeWrap<?> typeWrap,
                              @Nullable String permission,
                              Description description,
@@ -39,7 +40,7 @@ public abstract class InputParameter implements CommandParameter {
         this.suggestionResolver = suggestionResolver;
     }
     
-
+    
     /**
      * @return the name of the parameter
      */
@@ -47,7 +48,7 @@ public abstract class InputParameter implements CommandParameter {
     public String getName() {
         return name;
     }
-
+    
     /**
      * @return the index of this parameter
      */
@@ -55,7 +56,7 @@ public abstract class InputParameter implements CommandParameter {
     public int getPosition() {
         return index;
     }
-
+    
     /**
      * Sets the position of this parameter in a syntax
      * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -71,9 +72,10 @@ public abstract class InputParameter implements CommandParameter {
     public TypeWrap<?> getTypeWrap() {
         return typeWrap;
     }
-
+    
     /**
      * The permission for this parameter
+     *
      * @return the parameter permission
      */
     @Override
@@ -95,7 +97,7 @@ public abstract class InputParameter implements CommandParameter {
     public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) optionalValueSupplier;
     }
-
+    
     /**
      * @return whether this is an optional argument
      */
@@ -103,7 +105,7 @@ public abstract class InputParameter implements CommandParameter {
     public boolean isOptional() {
         return optional;
     }
-
+    
     /**
      * @return checks whether this parameter is a flag
      */
@@ -111,7 +113,7 @@ public abstract class InputParameter implements CommandParameter {
     public boolean isFlag() {
         return flag;
     }
-
+    
     /**
      * Casts the parameter to a flag parameter
      *
@@ -121,7 +123,7 @@ public abstract class InputParameter implements CommandParameter {
     public FlagParameter asFlagParameter() {
         return (FlagParameter) this;
     }
-
+    
     /**
      * @return checks whether this parameter
      * consumes all the args input after it.
@@ -135,13 +137,13 @@ public abstract class InputParameter implements CommandParameter {
         }
         return greedy;
     }
-
+    
     @Override
-    public <C> Command<C> asCommand() {
+    public <S extends Source> Command<S> asCommand() {
         throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
     }
-
-
+    
+    
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
@@ -150,10 +152,10 @@ public abstract class InputParameter implements CommandParameter {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public @Nullable <C, T> SuggestionResolver<C, T> getSuggestionResolver() {
-        return (SuggestionResolver<C, T>) suggestionResolver;
+    public @Nullable <S extends Source, T> SuggestionResolver<S, T> getSuggestionResolver() {
+        return (SuggestionResolver<S, T>) suggestionResolver;
     }
-
+    
     @Override
     public Description getDescription() {
         return description;
@@ -172,12 +174,12 @@ public abstract class InputParameter implements CommandParameter {
         return Objects.equals(name, that.name)
                 && Objects.equals(typeWrap, that.typeWrap);
     }
-
+    
     @Override
     public int hashCode() {
         return Objects.hash(name, typeWrap);
     }
-
+    
     @Override
     public String toString() {
         return format();

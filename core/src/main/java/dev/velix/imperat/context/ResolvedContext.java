@@ -25,18 +25,18 @@ import java.util.List;
  * @see Command
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface ResolvedContext<C> extends Context<C> {
-
+public interface ResolvedContext<S extends Source> extends Context<S> {
+    
     /**
      * @return The owning parent-command for all of these arguments
      */
-    Command<C> getOwningCommand();
-
+    Command<S> getOwningCommand();
+    
     /**
      * Resolves the arguments from the given plain input {@link Context}
      */
     void resolve() throws CommandException;
-
+    
     /**
      * Fetches the arguments of a command/subcommand that got resolved
      * except for the arguments that represent the literal/subcommand name arguments
@@ -46,26 +46,26 @@ public interface ResolvedContext<C> extends Context<C> {
      * @return the argument resolved from raw into a value
      */
     @Nullable
-    ResolvedArgument getResolvedArgument(Command<C> command, String name);
-
+    ResolvedArgument getResolvedArgument(Command<S> command, String name);
+    
     /**
      * @param command the command/subcommand with certain args
      * @return the command/subcommand's resolved args
      */
-    List<ResolvedArgument> getResolvedArguments(Command<C> command);
-
+    List<ResolvedArgument> getResolvedArguments(Command<S> command);
+    
     /**
      * @return all {@link Command} that have been used in this context
      */
     @NotNull
-    Collection<? extends Command<C>> getCommandsUsed();
-
+    Collection<? extends Command<S>> getCommandsUsed();
+    
     /**
      * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
     Collection<? extends ResolvedArgument> getResolvedArguments();
-
+    
     /**
      * Resolves the raw input and
      * the parameters into arguments {@link ResolvedArgument}
@@ -77,12 +77,12 @@ public interface ResolvedContext<C> extends Context<C> {
      * @param value     the resolved value of the argument
      * @param <T>       the type of resolved value of the argument
      */
-    <T> void resolveArgument(Command<C> command,
+    <T> void resolveArgument(Command<S> command,
                              @Nullable String raw,
                              int index,
                              CommandParameter parameter,
                              @Nullable T value) throws CommandException;
-
+    
     /**
      * Resolves flag the in the context
      *
@@ -95,17 +95,17 @@ public interface ResolvedContext<C> extends Context<C> {
                      @Nullable String flagInputRaw,
                      @Nullable Object flagInputValue,
                      CommandFlag flagDetected);
-
+    
     /**
      * Fetches the last used resolved command
      * of a resolved context!
      *
      * @return the last used command/subcommand
      */
-    Command<C> getLastUsedCommand();
-
+    Command<S> getLastUsedCommand();
+    
     /**
      * @return The used usage to use it to resolve commands
      */
-    CommandUsage<C> getDetectedUsage();
+    CommandUsage<S> getDetectedUsage();
 }

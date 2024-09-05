@@ -5,10 +5,12 @@ import dev.velix.imperat.annotations.AnnotationParser;
 import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
+
 import java.lang.annotation.Annotation;
 import java.util.List;
 
@@ -18,13 +20,13 @@ import java.util.List;
  * It also caches the settings that the user can
  * change or modify in the api.
  *
- * @param <C> the command sender type
+ * @param <S> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public non-sealed interface Imperat<C> extends
-        ProcessorRegistrar<C>, ResolverRegistrar<C>,
-        CommandRegistrar<C>, CaptionRegistrar<C>,
-        SourceWrapper<C>, CommandHelpHandler {
+public non-sealed interface Imperat<S extends Source> extends
+        ProcessorRegistrar<S>, ResolverRegistrar<S>,
+        CommandRegistrar<S>, CaptionRegistrar<S>,
+        SourceWrapper<S>, CommandHelpHandler {
     
     /**
      * @return the platform of the module
@@ -45,22 +47,23 @@ public non-sealed interface Imperat<C> extends
      * @return the factory for creation of
      * command related contexts {@link Context}
      */
-    ContextFactory<C> getContextFactory();
-
+    ContextFactory<S> getContextFactory();
+    
     /**
      * sets the context factory {@link ContextFactory} for the contexts
      *
      * @param contextFactory the context factory to set
      */
-    void setContextFactory(ContextFactory<C> contextFactory);
+    void setContextFactory(ContextFactory<S> contextFactory);
     
     
     /**
      * Changes the instance of {@link AnnotationParser}
+     *
      * @param parser the parser
      */
     @Contract("null->fail")
-    void setAnnotationParser(AnnotationParser<C> parser);
+    void setAnnotationParser(AnnotationParser<S> parser);
     
     
     /**
@@ -80,7 +83,7 @@ public non-sealed interface Imperat<C> extends
      *
      * @param usageVerifier the usage verifier to set
      */
-    void setUsageVerifier(UsageVerifier<C> usageVerifier);
+    void setUsageVerifier(UsageVerifier<S> usageVerifier);
     
     
     /**
@@ -90,8 +93,8 @@ public non-sealed interface Imperat<C> extends
      * @param commandName the name of the command to execute
      * @param rawInput    the command's args input
      */
-    void dispatch(C sender, String commandName, String... rawInput);
-
+    void dispatch(S sender, String commandName, String... rawInput);
+    
     /**
      * Dispatches and executes a command with certain raw arguments
      *
@@ -99,7 +102,7 @@ public non-sealed interface Imperat<C> extends
      * @param commandName    the name of the command to execute
      * @param rawArgsOneLine the command's args input
      */
-    void dispatch(C sender, String commandName, String rawArgsOneLine);
+    void dispatch(S sender, String commandName, String rawArgsOneLine);
     
     /**
      * @param command the data about the command being written in the chat box
@@ -107,6 +110,6 @@ public non-sealed interface Imperat<C> extends
      * @param args    the arguments currently written
      * @return the suggestions at the current position
      */
-    List<String> autoComplete(Command<C> command, C sender, String[] args);
+    List<String> autoComplete(Command<S> command, S sender, String[] args);
     
 }

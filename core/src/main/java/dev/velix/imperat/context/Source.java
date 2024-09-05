@@ -7,23 +7,19 @@ import org.jetbrains.annotations.ApiStatus;
  * Represents the sender/source
  * of a command being executed
  * may be a console, a player in a game, etc...
- *
- * @param <O> the command source type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface Source<O> {
- 
-    
+public interface Source {
     /**
      * @return name of a command source
      */
     String getName();
-
+    
     /**
      * @return The original command sender type instance
      */
-    O getOrigin();
-
+    Object origin();
+    
     /**
      * Replies to the command sender with a string message
      * This message is parsed using minimessage format for platforms
@@ -35,27 +31,29 @@ public interface Source<O> {
     
     /**
      * Replies to the command sender with a caption message
+     *
      * @param caption the {@link Caption} to send
      * @param context the {@link Context} to use
      */
-    void reply(Caption<O> caption, Context<O> context);
+    <S extends Source> void reply(Caption<S> caption, Context<S> context);
     
     /**
      * Replies to command sender with a caption message
-     * @param prefix the prefix before the caption message
+     *
+     * @param prefix  the prefix before the caption message
      * @param caption the caption
      * @param context the context
      */
-    void reply(String prefix, Caption<O> caption, Context<O> context);
+    <S extends Source> void reply(String prefix, Caption<S> caption, Context<S> context);
     
     /**
      * @return Whether the command source is from the console
      */
     boolean isConsole();
-
+    
     @SuppressWarnings("unchecked")
     default <T> T as(Class<T> clazz) {
-        return (T) this.getOrigin();
+        return (T) this.origin();
     }
-
+    
 }
