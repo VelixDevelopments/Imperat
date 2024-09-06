@@ -13,6 +13,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.CooldownHolder;
 import dev.velix.imperat.command.DescriptionHolder;
 import dev.velix.imperat.command.PermissionHolder;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeWrap;
@@ -45,14 +46,19 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
         };
 
         registerInjector(Command.class, commandTypeWrap, AnnotationLevel.CLASS, new ProxyCommandInjector<>(dispatcher));
+        registerInjector(Inherit.class, commandTypeWrap, AnnotationLevel.CLASS, new InheritanceInjector<>(dispatcher));
+
         registerInjector(Command.class, commandTypeWrap, AnnotationLevel.METHOD, new CommandMethodInjector<>(dispatcher));
 
         registerInjector(Usage.class, commandUsageTypeWrap, AnnotationLevel.METHOD, new UsageInjector<>(dispatcher));
+        registerInjector(SubCommand.class, commandTypeWrap, AnnotationLevel.METHOD, new SubCommandInjector<>(dispatcher));
 
+        registerInjector(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER, new CommandParameterInjector<>(dispatcher));
         registerInjector(Cooldown.class, TypeWrap.of(CooldownHolder.class)
                 , AnnotationLevel.METHOD, new CooldownInjector<>(dispatcher));
 
         registerInjector(Async.class, commandUsageTypeWrap, AnnotationLevel.METHOD, new AsyncInjector<>(dispatcher));
+
         //registering wildcards
         for (AnnotationLevel level : AnnotationLevel.values()) {
             if (level == AnnotationLevel.WILDCARD) continue;
@@ -90,7 +96,19 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
     @SuppressWarnings("unchecked")
     public <O, A extends Annotation, I extends AnnotationDataInjector<O, S, A>>
     Optional<I> getInjector(Class<A> annotationType, TypeWrap<O> typeToLoad, AnnotationLevel level) {
-        return (Optional<I>) getData(InjectionContext.of(annotationType, typeToLoad, level));
+        for (var injector : getAll()) {
+            var ctx = injector.getContext();
+            //debugInj(injector);
+            //System.out.println(String.format("VALUES= {actual-annotation-target=%s, actual-toLoad=%s, actual-level=%s}", annotationType.getSimpleName(), typeToLoad.getType().getTypeName(), level.name()));
+            if (ctx.isOnLevel(level) && ctx.hasAnnotationType(annotationType) && ctx.hasTargetType(typeToLoad)) {
+                return Optional.of((I) injector);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void debugInj(AnnotationDataInjector<?, S, ?> injector) {
+        System.out.println(injector.toString());
     }
 
     public void forEachInjector(
@@ -112,21 +130,27 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
             @NotNull AnnotationRegistry annotationRegistry,
             @NotNull AnnotationInjectorRegistry<S> injectorRegistry,
             @NotNull CommandAnnotatedElement<?> element,
-            @NotNull AnnotationLevel level
+            @NotNull AnnotationLevel level,
+            TypeWrap<O> targetToLoad,
+            @NotNull O toLoad
     ) {
 
         A mainAnn = (A) annotationRegistry.getMainAnnotation(element);
         if (mainAnn == null) {
             return;
         }
-        forEachInjector(
-                (inj) -> inj.getContext().hasAnnotationType(mainAnn.annotationType())
-                        && inj.getContext().isOnLevel(level)
-                , (injector) -> {
-                    ((AnnotationDataInjector<O, S, A>) injector).inject(proxyCommand, null, reader, parser,
-                            annotationRegistry, injectorRegistry, element, mainAnn);
-                }
-        );
+
+        for (var inj : injectorRegistry.getAll()) {
+            if (!inj.getContext().hasAnnotationType(mainAnn.annotationType())
+                    && inj.getContext().isOnLevel(level)
+                    && inj.getContext().hasTargetType(targetToLoad)) {
+                Annotation annotation = element.getAnnotation(inj.getContext().annClass());
+                if (annotation instanceof Inherit) continue;
+                if (annotation == null) continue;
+                ((AnnotationDataInjector<O, S, A>) inj).inject(proxyCommand, toLoad, reader, parser,
+                        annotationRegistry, injectorRegistry, element, (A) annotation);
+            }
+        }
 
     }
 }

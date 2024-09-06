@@ -33,6 +33,7 @@ public final class Traverse implements Iterable<CommandParameter> {
     }
 
     public void append(UsageNode<?> node) {
+        if (node == null) return;
         if (parameters.contains(node.data)) return;
         parameters.add(node.data);
     }

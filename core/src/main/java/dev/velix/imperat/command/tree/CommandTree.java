@@ -5,6 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -62,7 +63,8 @@ public final class CommandTree<S extends Source> {
 
     private UsageNode<?> getChildNode(UsageNode<?> parent, CommandParameter param) {
         for (UsageNode<?> child : parent.getChildren()) {
-            if (child.data.equals(param)) {
+            if (child.data.getName().equalsIgnoreCase(param.getName())
+                    && TypeUtility.matches(child.data.getType(), param.getType())) {
                 return child;
             }
         }
@@ -139,13 +141,21 @@ public final class CommandTree<S extends Source> {
                         if (!child.isOptional()) {
                             allOptional = false;
                             break;
-                        } else {
-                            traverse.append(child);
                         }
                     }
+
+                    //improved logic
+                    if (allOptional) {
+                        //if all optional, then append the first one
+                        traverse.append(node.getChild(UsageNode::isOptional));
+                    }
+
                     //CommandDebugger.debug("All optional after last depth ? = %s", (allOptional) );
+                    var usage = traverse.toUsage(root.data);
                     traverse.setResult(
-                            allOptional ? TraverseResult.COMPLETE : TraverseResult.INCOMPLETE
+                            allOptional || usage != null
+                                    ? TraverseResult.COMPLETE
+                                    : TraverseResult.INCOMPLETE
                     );
                     return traverse;
                 }

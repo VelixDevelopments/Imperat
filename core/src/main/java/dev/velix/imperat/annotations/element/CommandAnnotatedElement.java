@@ -118,4 +118,13 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
         }
         return element.toString();
     }
+
+    public void debug() {
+        StringBuilder builder = new StringBuilder();
+        for (Annotation annotation : getDeclaredAnnotations()) {
+            builder.append("@").append(annotation
+                    .annotationType().getSimpleName()).append(",");
+        }
+        System.out.println(builder);
+    }
 }

@@ -5,6 +5,7 @@ import dev.velix.imperat.command.Description;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -172,7 +173,7 @@ public abstract class InputParameter implements CommandParameter {
         if (o == null || getClass() != o.getClass()) return false;
         InputParameter that = (InputParameter) o;
         return Objects.equals(name, that.name)
-                && Objects.equals(typeWrap, that.typeWrap);
+                && TypeUtility.matches(typeWrap.getType(), that.typeWrap.getType());
     }
 
     @Override

@@ -46,7 +46,7 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
     ) {
 
         if (toLoad == null) {
-            throw new IllegalArgumentException("toLoad ,in @Description injection, is null.");
+            throw new IllegalArgumentException("toLoad ,in @SubCommand injection, is null.");
         }
 
         if (element.getElement() instanceof Class) {
@@ -79,9 +79,10 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
                         fullParams)).build();
 
         //injecting other data into the usage
-        UsageInjector.injectOthers(proxyCommand, usage, reader, parser,
-                injectorRegistry, annotationRegistry, element);
+        //UsageInjector.injectOthers(proxyCommand, usage, reader, parser,
+        //injectorRegistry, annotationRegistry, element);
 
+        //TODO fix subcommand not being added somehow to test command
         toLoad.addSubCommandUsage(values[0], aliases, usage, annotation.attachDirectly());
 
         return toLoad;

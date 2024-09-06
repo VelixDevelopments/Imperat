@@ -38,19 +38,26 @@ final class InheritanceInjector<S extends Source> extends AnnotationDataInjector
         if (toLoad == null) throw new IllegalArgumentException("toLoad in injection of `@Inherit` is null");
         Class<?>[] subClasses = annotation.value();
 
-        //Injecting subcommands recursively
+        //Injecting subcommands recursively\
         for (Class<?> subClass : subClasses) {
             if (!subClass.isAnnotationPresent(SubCommand.class)) {
                 continue;
             }
+
             SubCommand subAnn = subClass.getAnnotation(SubCommand.class);
+            var elementKey = AnnotationHelper.getKey(AnnotationLevel.CLASS, subClass);
+            AnnotationReader subReader = AnnotationReader.read(annotationRegistry, subClass);
+
+            CommandAnnotatedElement<Class<?>> subElement = (CommandAnnotatedElement<Class<?>>) subReader.getAnnotated(AnnotationLevel.CLASS, elementKey);
+
             var subCmd = parser.parseCommandClass(
                     subAnnotationToCmdAnnotation(subAnn),
-                    reader,
-                    element,
+                    subReader,
+                    subElement,
                     (T) getSubCommandInstance(subClass),
                     (Class<T>) subClass
             );
+
             toLoad.addSubCommand(subCmd, subAnn.attachDirectly());
         }
         return toLoad;

@@ -19,7 +19,6 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -37,8 +36,7 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
         );
     }
 
-    @SuppressWarnings("unchecked")
-    static <S extends Source, A extends Annotation> void injectOthers(
+    /*static <S extends Source, A extends Annotation> void injectOthers(
             ProxyCommand<S> proxyCommand,
             CommandUsage<S> usage,
             AnnotationReader reader,
@@ -47,6 +45,9 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
             AnnotationRegistry annotationRegistry,
             CommandAnnotatedElement<?> element
     ) {
+        for(var inj : injectorRegistry.getAll()) {
+
+        }
         injectorRegistry.forEachInjector((inj) -> !(inj instanceof UsageInjector) && inj.getContext().hasTargetType(new TypeWrap<CommandUsage<S>>() {
         })
                 && inj.getContext().isOnLevel(AnnotationLevel.METHOD), (inj) -> {
@@ -56,7 +57,7 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
                 dataInjector.inject(proxyCommand, usage, reader, parser, annotationRegistry, injectorRegistry, element, ann);
             }
         });
-    }
+    }*/
 
     @Override
     public <T> @NotNull CommandUsage<S> inject(
@@ -78,13 +79,22 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
 
         var execution = isHelp ? new MethodHelpExecution<>(dispatcher, proxyCommand, method, parametersInfo.right())
                 : new MethodCommandExecutor<>(proxyCommand, dispatcher, method, params);
+        //System.out.println("Loading usage for cmd: " + proxyCommand.commandLoaded().getName());
 
-        final CommandUsage<S> usage =
-                CommandUsage.<S>builder().parameters(params)
-                        .execute(execution).build(isHelp);
 
-        injectOthers(proxyCommand, usage, reader, parser, injectorRegistry, annotationRegistry, element);
-        return usage;
+        /*if(proxyCommand.proxyClass().isAnnotationPresent(SubCommand.class)) {
+            Command<S> cmd = proxyCommand.commandLoaded().getParent();
+            while (cmd != null) {
+                System.out.println(String.format("Number of params for cmd %s is %s", cmd.getName(), cmd
+                        .getMainUsage().getMaxLength()));
+                params.removeAll(cmd.getMainUsage().getParameters());
+                cmd = cmd.getParent();
+            }
+        }*/
+
+        //injectOthers(proxyCommand, usage, reader, parser, injectorRegistry, annotationRegistry, element);
+        return CommandUsage.<S>builder().parameters(params)
+                .execute(execution).build(isHelp);
     }
 
     private Pair<List<CommandParameter>, Boolean> loadParameters(
@@ -95,6 +105,7 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
             AnnotationParser<S> parser,
             Method method
     ) {
+
 
         List<CommandParameter> commandParameters = new ArrayList<>();
         CommandParameterInjector<S> paramInjector = injectorRegistry.<CommandParameter, Named, CommandParameterInjector<S>>
@@ -109,7 +120,11 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
                 help = true;
                 continue;
             }
-            MethodParameterElement element = new MethodParameterElement(annotationRegistry, parameter);
+
+            MethodParameterElement element = (MethodParameterElement) reader.getAnnotated(AnnotationLevel.PARAMETER, AnnotationHelper.getKey(AnnotationLevel.PARAMETER, parameter));
+            if (element == null) {
+                continue;
+            }
             CommandParameter commandParameter =
                     paramInjector.inject(proxyCommand, null, reader,
                             parser, annotationRegistry,

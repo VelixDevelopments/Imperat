@@ -135,6 +135,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
     @Override
     public void visualize() {
+        System.out.println("Visualizing " + this.name + "'s tree");
         visualizer.visualize();
     }
 
@@ -158,7 +159,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public void preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws CommandException {
         if (this.preProcessor != null) {
-            preProcessor.process(api, this, context, usage);
+            preProcessor.process(api, context, usage);
         }
     }
 
@@ -182,7 +183,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public void postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws CommandException {
         if (this.postProcessor != null) {
-            this.postProcessor.process(api, this, context, usage);
+            this.postProcessor.process(api, context);
         }
     }
 
@@ -339,13 +340,23 @@ final class CommandImpl<S extends Source> implements Command<S> {
         registerSubCommand(command);
 
         final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
-        final CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
+
+        CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
         //adding the merged command usage
 
-        CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
-        this.addUsage(
-                combo
-        );
+        //CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+        this.addUsage(combo);
+
+        for (CommandUsage<S> subUsage : command.getUsages()) {
+            if (subUsage.equals(command.getMainUsage())) continue;
+            combo = prime.mergeWithCommand(command, subUsage);
+            //adding the merged command usage
+
+            CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+            this.addUsage(
+                    combo
+            );
+        }
     }
 
     /**

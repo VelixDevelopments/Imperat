@@ -30,10 +30,13 @@ final class AnnotationReaderImpl implements AnnotationReader {
     private <E extends AnnotatedElement> void read() {
 
         for (AnnotationLevel level : AnnotationLevel.values()) {
+            if (level == AnnotationLevel.WILDCARD) continue;
+
             AnnotationContainer container = new AnnotationContainer(level);
             Set<CommandAnnotatedElement<E>> elementsOfLevel = (Set<CommandAnnotatedElement<E>>) level.getElements(registry, clazz);
 
             for (CommandAnnotatedElement<E> element : elementsOfLevel) {
+
                 ElementVisitor<E> visitor = (ElementVisitor<E>) level.getVisitor();
                 container.accept(visitor, element);
             }
@@ -44,7 +47,7 @@ final class AnnotationReaderImpl implements AnnotationReader {
 
 
     /**
-     * Get annotated element
+     * Get an annotated element
      * may be a parameter, method or even a class
      *
      * @param level the level

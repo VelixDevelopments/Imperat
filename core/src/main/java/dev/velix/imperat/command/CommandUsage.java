@@ -80,6 +80,12 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
     List<CommandParameter> getParameters();
 
     /**
+     * @return the parameters without flags
+     * @see CommandParameter
+     */
+    List<CommandParameter> getPureParameters();
+
+    /**
      * Fetches the parameter at the index
      *
      * @param index the index of the parameter
@@ -103,12 +109,22 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
      */
     default CommandUsage<S> merge(CommandUsage<S> usage) {
         List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
-        parameters.addAll(usage.getParameters());
+        for (CommandParameter param : usage.getParameters()) {
+            if (this.hasParameters((p) -> p.equals(param))) {
+                continue;
+            }
+            parameters.add(param);
+        }
+        //parameters.addAll(usage.getParameters());
 
         return CommandUsage.<S>builder()
+                .description(usage.getDescription().toString())
+                .permission(usage.getPermission())
+                .cooldown(usage.getCooldown())
                 .parameters(parameters)
+                .coordinator(usage.getCoordinator())
                 .execute(usage.getExecution())
-                .build();
+                .build(usage.isHelp());
     }
 
     /**
@@ -126,13 +142,20 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
      * @return the merged command usage!
      */
     default CommandUsage<S> mergeWithCommand(Command<S> subCommand, CommandUsage<S> usage) {
-        List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
-        parameters.add(subCommand);
-        parameters.addAll(usage.getParameters());
+        List<CommandParameter> comboParams = new ArrayList<>(this.getParameters());
+        comboParams.add(subCommand);
+        for (CommandParameter param : usage.getParameters()) {
+            if (this.hasParameters((p) -> p.equals(param))) {
+                continue;
+            }
+            comboParams.add(param);
+        }
+        //comboParams.addAll(usage.getParameters());
 
         return CommandUsage.<S>builder()
+                .coordinator(usage.getCoordinator())
                 .cooldown(usage.getCooldown())
-                .parameters(parameters)
+                .parameters(comboParams)
                 .execute(usage.getExecution())
                 .build(usage.isHelp());
     }

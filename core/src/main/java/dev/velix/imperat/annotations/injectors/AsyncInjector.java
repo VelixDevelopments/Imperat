@@ -20,7 +20,11 @@ import org.jetbrains.annotations.Nullable;
 final class AsyncInjector<S extends Source> extends AnnotationDataInjector<CommandUsage<S>, S, Async> {
 
     public AsyncInjector(Imperat<S> dispatcher) {
-        super(dispatcher, InjectionContext.of(Async.class, TypeWrap.of(CommandUsage.class), AnnotationLevel.METHOD));
+        super(dispatcher, InjectionContext.of(
+                Async.class,
+                new TypeWrap<CommandUsage<S>>() {
+                },
+                AnnotationLevel.METHOD));
     }
 
     @Override

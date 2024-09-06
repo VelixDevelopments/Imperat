@@ -19,28 +19,23 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.velix.imperat.annotations.injectors.AnnotationInjectorRegistry.logError;
-
 @SuppressWarnings({"unchecked", "unused"})
 final class CommandParameterInjector<S extends Source> extends AnnotationDataInjector<CommandParameter, S, Named> {
 
-    private final Method method;
 
     public CommandParameterInjector(
-            Imperat<S> imperat,
-            Method proxyMethod
+            Imperat<S> imperat
     ) {
         super(
                 imperat,
-                InjectionContext.of(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER)
+                InjectionContext.of(Named.class,
+                        TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER)
         );
-        this.method = proxyMethod;
     }
 
     @Override
@@ -63,8 +58,7 @@ final class CommandParameterInjector<S extends Source> extends AnnotationDataInj
         Switch switchAnnotation = parameter.getAnnotation(Switch.class);
 
         if (flag != null && switchAnnotation != null) {
-            logError(method, proxyCommand.proxyClass(), "both @Flag and @Switch at the same time !");
-            return null;
+            throw new IllegalStateException("both @Flag and @Switch at the same time !");
         }
 
         String name = AnnotationHelper.getParamName(parameter, named, flag, switchAnnotation);

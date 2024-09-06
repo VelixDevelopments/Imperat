@@ -48,9 +48,7 @@ public final class SmartUsageResolve<S extends Source> {
         final List<CommandParameter> parameterList = new ArrayList<>(usage.getParameters());
         final ArgumentQueue raws = context.getArguments().copy();
 
-        int lengthWithoutFlags = (int) usage.getParameters()
-                .stream().filter((param) -> !param.isFlag())
-                .count();
+        final int lengthWithoutFlags = usage.getPureParameters().size();
 
         while (cursor.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
             CommandParameter currentParameter = cursor.peekParameter(parameterList);
@@ -82,6 +80,21 @@ public final class SmartUsageResolve<S extends Source> {
                 }
                 //System.out.println("Closed at position= " + position);
                 break;
+            }
+
+            if (currentParameter.isCommand()) {
+
+                //visualize("Found command %s at %s", currentParameter.getName(), position.parameter);
+                @SuppressWarnings("unchecked")
+                Command<S> parameterSubCmd = (Command<S>) currentParameter;
+                if (parameterSubCmd.hasName(currentRaw)) {
+                    this.command = parameterSubCmd;
+                } else {
+                    throw new ContextResolveException("Unknown sub-command '" + currentRaw + "'");
+                }
+
+                cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+                continue;
             }
 
             CommandFlag flag = usage.getFlagFromRaw(currentRaw);
@@ -134,23 +147,6 @@ public final class SmartUsageResolve<S extends Source> {
                 );
 
                 cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-                continue;
-            }
-
-
-            if (currentParameter.isCommand()) {
-
-                //visualize("Found command %s at %s", currentParameter.getName(), position.parameter);
-
-                @SuppressWarnings("unchecked")
-                Command<S> parameterSubCmd = (Command<S>) currentParameter;
-                if (parameterSubCmd.hasName(currentRaw)) {
-                    this.command = parameterSubCmd;
-                } else {
-                    throw new ContextResolveException("Unknown sub-command '" + currentRaw + "'");
-                }
-
-                cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
                 continue;
             }
 

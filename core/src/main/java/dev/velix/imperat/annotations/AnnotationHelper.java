@@ -1,6 +1,8 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.element.ElementKey;
+import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.annotations.types.*;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
@@ -14,6 +16,7 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -30,6 +33,10 @@ public final class AnnotationHelper {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, E element) {
+        return ((ElementVisitor<E>) level.getVisitor()).loadKey(element);
+    }
 
     public static <S extends Source> Object[] loadParameterInstances(Imperat<S> dispatcher,
                                                                      List<CommandParameter> fullParameters,

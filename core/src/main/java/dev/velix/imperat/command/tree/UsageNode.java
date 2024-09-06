@@ -26,6 +26,7 @@ public abstract class UsageNode<T extends CommandParameter> {
     }
 
     public void addChild(UsageNode<?> node) {
+        if (nextNodes.contains(node)) return;
         nextNodes.add(node);
     }
 
@@ -59,6 +60,7 @@ public abstract class UsageNode<T extends CommandParameter> {
         }
         return null;
     }
+
 
     public UsageNode<?> getNextCommandChild() {
         return getChild((child) -> child instanceof CommandNode<?>);

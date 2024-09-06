@@ -11,6 +11,7 @@ import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -86,6 +87,15 @@ public non-sealed interface Imperat<S extends Source> extends
      */
     void setUsageVerifier(UsageVerifier<S> usageVerifier);
 
+    /**
+     * Dispatches and executes a command with certain raw arguments
+     * using {@link Command}
+     *
+     * @param source   the sender/executor of this command
+     * @param command  the command object to execute
+     * @param rawInput the command's args input
+     */
+    @NotNull TraverseResult dispatch(S source, Command<S> command, String... rawInput);
 
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -101,7 +111,7 @@ public non-sealed interface Imperat<S extends Source> extends
      *
      * @param sender         the sender/executor of this command
      * @param commandName    the name of the command to execute
-     * @param rawArgsOneLine the command's args input
+     * @param rawArgsOneLine the command's args input on ONE LINE
      */
     TraverseResult dispatch(S sender, String commandName, String rawArgsOneLine);
 

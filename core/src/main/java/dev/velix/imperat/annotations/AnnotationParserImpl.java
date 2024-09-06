@@ -2,13 +2,13 @@ package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
-import dev.velix.imperat.annotations.element.ElementKey;
-import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.annotations.injectors.AnnotationInjectorRegistry;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
 import dev.velix.imperat.annotations.types.Command;
+import dev.velix.imperat.annotations.types.Inherit;
 import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.Usage;
+import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exceptions.UnknownCommandClass;
 import dev.velix.imperat.util.TypeWrap;
@@ -16,7 +16,6 @@ import dev.velix.imperat.util.annotations.MethodVerifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -28,17 +27,19 @@ import java.util.stream.Collectors;
 final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
 
     private final AnnotationRegistry annotationRegistry;
-    private final AnnotationInjectorRegistry<S> dataRegistry;
+    private final AnnotationInjectorRegistry<S> injectors;
 
+    private final TypeWrap<dev.velix.imperat.command.Command<S>> commandTypeWrap = new TypeWrap<>() {
+    };
+    private final TypeWrap<CommandUsage<S>> commandUsageTypeWrap = new TypeWrap<>() {
+    };
     AnnotationParserImpl(Imperat<S> dispatcher) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
-        this.dataRegistry = AnnotationInjectorRegistry.create(dispatcher);
+        this.injectors = AnnotationInjectorRegistry.create(dispatcher);
+
     }
 
-    private <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, E element) {
-        return ((ElementVisitor<E>) level.getVisitor()).loadKey(element);
-    }
 
     /**
      * Parses annotated command class of type {@linkplain T}
@@ -55,15 +56,15 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
             T instance,
             Class<T> instanceClazz
     ) {
-        var proxyInjector = dataRegistry.getInjector(Command.class, new TypeWrap<dev.velix.imperat.command.Command<S>>() {
-        }, AnnotationLevel.CLASS).orElseThrow();
-        dev.velix.imperat.command.Command<S> commandObject = proxyInjector.inject(null, null, reader, this, annotationRegistry, dataRegistry, element, commandAnnotation);
 
+        var proxyInjector = injectors.getInjector(Command.class, commandTypeWrap, AnnotationLevel.CLASS).orElseThrow();
+        dev.velix.imperat.command.Command<S> commandObject = proxyInjector.inject(null, null, reader, this, annotationRegistry, injectors, element, commandAnnotation);
         ProxyCommand<S> proxyCommand = new ProxyCommand<>(instanceClazz, instance, commandObject);
-
         //loading class-level annotations
-        dataRegistry.injectForElement(proxyCommand, reader, this, annotationRegistry,
-                dataRegistry, element, AnnotationLevel.CLASS);
+        injectors.injectForElement(
+                proxyCommand, reader, this, annotationRegistry,
+                injectors, element, AnnotationLevel.CLASS, commandTypeWrap, commandObject
+        );
 
         Set<Method> methods = Arrays.stream(instanceClazz.getDeclaredMethods())
                 .sorted((m1, m2) -> getMethodPriority(m1) - getMethodPriority(m2))
@@ -73,15 +74,47 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
             if (!MethodVerifier.isMethodAcceptable(method)) continue;
             MethodVerifier.verifyMethod(dispatcher, instanceClazz, method);
 
-            var methodKey = getKey(AnnotationLevel.METHOD, method);
+            var methodKey = AnnotationHelper.getKey(AnnotationLevel.METHOD, method);
             CommandAnnotatedElement<Method> methodElement = (CommandAnnotatedElement<Method>) reader.getAnnotated(AnnotationLevel.METHOD, methodKey);
             assert methodElement != null;
 
+            //methodElement.debug();
             //loading method-level annotations
-            dataRegistry.injectForElement(
-                    proxyCommand, reader, this, annotationRegistry,
-                    dataRegistry, methodElement, AnnotationLevel.METHOD
-            );
+            if (methodElement.isAnnotationPresent(Usage.class)) {
+                Usage annotation = methodElement.getAnnotation(Usage.class);
+                var usageInjector = injectors.getInjector(Usage.class, commandUsageTypeWrap, AnnotationLevel.METHOD);
+                CommandUsage<S> usage = usageInjector.orElseThrow().inject(proxyCommand, null, reader, this, annotationRegistry, injectors, methodElement, annotation);
+                if (usage.isDefault()) {
+                    commandObject.setDefaultUsageExecution(usage.getExecution());
+                } else {
+                    injectors.injectForElement(
+                            proxyCommand, reader, this, annotationRegistry,
+                            injectors, methodElement, AnnotationLevel.METHOD, commandUsageTypeWrap, usage
+                    );
+                    commandObject.addUsage(usage);
+                }
+
+            } else if (methodElement.isAnnotationPresent(SubCommand.class)) {
+                //TODO get injector for sub command
+                SubCommand annotation = methodElement.getAnnotation(SubCommand.class);
+                var subCmdMethodInjector = injectors.getInjector(SubCommand.class, commandTypeWrap, AnnotationLevel.METHOD).orElseThrow();
+                commandObject = subCmdMethodInjector.inject(proxyCommand, commandObject, reader, this, annotationRegistry, injectors, methodElement, annotation);
+            } else if (methodElement.isAnnotationPresent(Command.class)) {
+                Command cmdMethodAnnotation = methodElement.getAnnotation(Command.class);
+                var cmdMethodInjector = injectors.getInjector(Command.class, commandTypeWrap, AnnotationLevel.METHOD).orElseThrow();
+
+                //Totally different command
+                //using dispatcher to register it
+                dev.velix.imperat.command.Command<S> internalCmd = cmdMethodInjector.inject(proxyCommand, null, reader, this, annotationRegistry, injectors, methodElement, cmdMethodAnnotation);
+                dispatcher.registerCommand(internalCmd);
+            }
+        }
+
+        //after we loaded the methods of the main root command, let's load the inherited subcommands
+        if (element.isAnnotationPresent(Inherit.class)) {
+            var inheritanceInjector = injectors.getInjector(Inherit.class, new TypeWrap<dev.velix.imperat.command.Command<S>>() {
+            }, AnnotationLevel.CLASS).orElseThrow();
+            inheritanceInjector.inject(proxyCommand, commandObject, reader, this, annotationRegistry, injectors, element, element.getAnnotation(Inherit.class));
         }
         return commandObject;
     }
@@ -90,7 +123,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public <T> dev.velix.imperat.command.Command<S> parseCommandClass(T instance) {
         Class<T> instanceClazz = (Class<T>) instance.getClass();
         AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
-        var elementKey = getKey(AnnotationLevel.CLASS, instanceClazz);
+        var elementKey = AnnotationHelper.getKey(AnnotationLevel.CLASS, instanceClazz);
 
         CommandAnnotatedElement<Class<?>> element = (CommandAnnotatedElement<Class<?>>) reader.getAnnotated(AnnotationLevel.CLASS, elementKey);
         assert element != null;

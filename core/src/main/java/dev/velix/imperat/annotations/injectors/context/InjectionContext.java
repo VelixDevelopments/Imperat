@@ -5,6 +5,7 @@ import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 
 import java.lang.annotation.Annotation;
+import java.util.Objects;
 
 public record InjectionContext(
         Class<? extends Annotation> annClass,
@@ -32,4 +33,17 @@ public record InjectionContext(
         return this.level == level;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InjectionContext that)) return false;
+        return level == that.level &&
+                Objects.equals(targetToLoad, that.targetToLoad)
+                && Objects.equals(annClass, that.annClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(annClass, targetToLoad, level);
+    }
 }

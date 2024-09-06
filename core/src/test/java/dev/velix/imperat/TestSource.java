@@ -6,7 +6,7 @@ import dev.velix.imperat.context.Source;
 
 import java.io.PrintStream;
 
-public record TestSender(PrintStream origin) implements Source {
+public record TestSource(PrintStream origin) implements Source {
 
 
     public void sendMsg(String msg) {

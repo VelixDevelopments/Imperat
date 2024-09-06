@@ -48,7 +48,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     public final static String START_PREFIX = "<dark_gray><bold>[<gold>!</gold>]</bold></dark_gray> ";
     public final static String FULL_SYNTAX_PREFIX = START_PREFIX + "<dark_aqua>Full syntax:</dark_aqua> ";
-
     public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
 
     private final Map<String, Command<S>> commands = new HashMap<>();
@@ -58,14 +57,14 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private final List<CommandPreProcessor<S>> globalPreProcessors = new ArrayList<>();
     private final List<CommandPostProcessor<S>> globalPostProcessors = new ArrayList<>();
     private final CaptionRegistry<S> captionRegistry;
-    protected PermissionResolver<S> permissionResolver;
-    private ContextFactory<S> contextFactory;
+    protected @NotNull PermissionResolver<S> permissionResolver;
+    private @NotNull ContextFactory<S> contextFactory;
     private @NotNull UsageVerifier<S> verifier;
-    private HelpTemplate template = DEFAULT_HELP_TEMPLATE;
-    private AnnotationParser<S> annotationParser;
+    private @NotNull HelpTemplate template = DEFAULT_HELP_TEMPLATE;
+    private @NotNull AnnotationParser<S> annotationParser;
 
 
-    protected BaseImperat(PermissionResolver<S> permissionResolver) {
+    protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory();
         contextResolverRegistry = ContextResolverRegistry.createDefault();
         valueResolverRegistry = ValueResolverRegistry.createDefault();
@@ -143,7 +142,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return {@link PermissionResolver} for the dispatcher
      */
     @Override
-    public PermissionResolver<S> getPermissionResolver() {
+    public @NotNull PermissionResolver<S> getPermissionResolver() {
         return permissionResolver;
     }
 
@@ -193,7 +192,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * command related contexts {@link Context}
      */
     @Override
-    public ContextFactory<S> getContextFactory() {
+    public @NotNull ContextFactory<S> getContextFactory() {
         return contextFactory;
     }
 
@@ -203,7 +202,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @param contextFactory the context factory to set
      */
     @Override
-    public void setContextFactory(ContextFactory<S> contextFactory) {
+    public void setContextFactory(@NotNull ContextFactory<S> contextFactory) {
         this.contextFactory = contextFactory;
     }
 
@@ -479,44 +478,41 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         return captionRegistry.getCaption(key);
     }
 
-    /**
-     * Dispatches and executes a command with certain raw arguments
-     *
-     * @param source      the sender/executor of this command
-     * @param commandName the name of the command to execute
-     * @param rawInput    the command's args input
-     */
-    @Override
-    public TraverseResult dispatch(S source, String commandName, String... rawInput) {
 
+    @Override
+    public @NotNull TraverseResult dispatch(S source, Command<S> command, String... rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
-        //CommandDebugger.visualize("Raw input = '%s'", String.join(",", rawArguments));
-        Command<S> command = getCommand(commandName);
-        if (command == null) {
-            source.reply("Unknown command !");
-            return TraverseResult.UNKNOWN;
-        }
 
         Context<S> plainContext = getContextFactory()
                 .createContext(this, source, command, rawArguments);
 
         try {
-            return handleExecution(source, plainContext);
+            return handleExecution(source, command, plainContext);
         } catch (Throwable ex) {
             CommandExceptionHandler.handleException(this, plainContext, BaseImperat.class, "dispatch", ex);
-            ex.printStackTrace();
             return TraverseResult.UNKNOWN;
         }
-
     }
 
     @Override
-    public TraverseResult dispatch(S sender, String commandName, String rawArgsOneLine) {
+    public @NotNull TraverseResult dispatch(S source, String commandName, String... rawInput) {
+        Command<S> command = getCommand(commandName);
+        if (command == null) {
+            //TODO better message here
+            source.reply("Unknown command !");
+            return TraverseResult.UNKNOWN;
+        }
+        //temp debugging
+        //command.visualize();
+        return dispatch(source, command, rawInput);
+    }
+
+    @Override
+    public @NotNull TraverseResult dispatch(S sender, String commandName, String rawArgsOneLine) {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
 
-    private TraverseResult handleExecution(S source, Context<S> context) throws CommandException {
-        Command<S> command = context.getCommandUsed();
+    private TraverseResult handleExecution(S source, Command<S> command, Context<S> context) throws CommandException {
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
         }
@@ -527,10 +523,14 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return TraverseResult.INCOMPLETE;
         }
 
+        long time = System.currentTimeMillis();
         Traverse searchResult = command.traverse(context);
-
+        System.out.println("Traverse took= " + (System.currentTimeMillis() - time) + "ms");
         //executing usage
+
+        time = System.currentTimeMillis();
         CommandUsage<S> usage = searchResult.toUsage(command);
+        System.out.println("Usage lookup took= " + (System.currentTimeMillis() - time) + "ms");
 
         if (searchResult.result() == TraverseResult.COMPLETE)
             executeUsage(command, source, context, usage);
@@ -541,11 +541,14 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                 CommandUsage<S> defaultUsage = sub.getDefaultUsage();
                 executeUsage(command, source, context, defaultUsage);
             } else {
-                throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
+                if (usage != null)
+                    executeUsage(command, source, context, usage);
+                else
+                    throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
             }
-        } else
+        } else {
             throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
-
+        }
         return searchResult.result();
     }
 
@@ -555,32 +558,44 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                               final CommandUsage<S> usage) throws CommandException {
 
         //global pre-processing
-        preProcess(command, context, usage);
+        long time = System.currentTimeMillis();
+        preProcess(context, usage);
+        System.out.println("Global pre-processing took= " + (System.currentTimeMillis() - time) + "ms");
 
         //per command pre-processing
+        time = System.currentTimeMillis();
         command.preProcess(this, context, usage);
+        System.out.println("Cmd pre-processing took= " + (System.currentTimeMillis() - time) + "ms");
 
+        time = System.currentTimeMillis();
         ResolvedContext<S> resolvedContext = contextFactory.createResolvedContext(this, command, context, usage);
         resolvedContext.resolve();
+        System.out.println("Resolving context took= " + (System.currentTimeMillis() - time) + "ms");
 
+        time = System.currentTimeMillis();
         //global post-processing
-        postProcess(command, resolvedContext, usage);
+        postProcess(resolvedContext);
+        System.out.println("Global post-processing took= " + (System.currentTimeMillis() - time) + "ms");
 
+        time = System.currentTimeMillis();
         //per command post-processing
         command.postProcess(this, resolvedContext, usage);
+        System.out.println("Cmd post-processing took= " + (System.currentTimeMillis() - time) + "ms");
 
+        time = System.currentTimeMillis();
         usage.execute(this, source, resolvedContext);
+        System.out.println("TOOK ON USAGE EXECUTION= " + (System.currentTimeMillis() - time) + "ms");
     }
 
     //TODO improve (DRY)
     private void preProcess(
-            @NotNull Command<S> command,
             @NotNull Context<S> context,
             @NotNull CommandUsage<S> usage
     ) {
+
         for (CommandPreProcessor<S> preProcessor : globalPreProcessors) {
             try {
-                preProcessor.process(this, command, context, usage);
+                preProcessor.process(this, context, usage);
             } catch (Throwable ex) {
                 CommandExceptionHandler.handleException(
                         this,
@@ -594,13 +609,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     //TODO improve (DRY)
     private void postProcess(
-            @NotNull Command<S> command,
-            @NotNull ResolvedContext<S> context,
-            @NotNull CommandUsage<S> usage
+            @NotNull ResolvedContext<S> context
     ) {
         for (CommandPostProcessor<S> postProcessor : globalPostProcessors) {
             try {
-                postProcessor.process(this, command, context, usage);
+                postProcessor.process(this, context);
             } catch (Throwable ex) {
                 CommandExceptionHandler.handleException(
                         this,

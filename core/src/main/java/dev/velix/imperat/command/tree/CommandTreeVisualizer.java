@@ -27,7 +27,9 @@ public final class CommandTreeVisualizer<S extends Source> {
     }
 
     private void visualizeNode(UsageNode<?> node, StringBuilder builder, int depth) {
-        if (node == null) return;
+        if (node == null) {
+            return;
+        }
         builder.append("  ".repeat(Math.max(0, depth)));
         builder.append(node.format()).append("\n");
         for (UsageNode<?> child : node.getChildren()) {

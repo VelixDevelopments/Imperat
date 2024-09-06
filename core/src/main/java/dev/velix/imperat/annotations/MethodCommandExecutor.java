@@ -54,6 +54,8 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
         var instances = AnnotationHelper.loadParameterInstances(dispatcher, fullParameters,
                 source, context, method, null);
 
+        System.out.println("CALLING ");
+
         try {
             boundMethodCaller.call(instances);
         } catch (Exception ex) {

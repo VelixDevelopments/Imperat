@@ -8,7 +8,6 @@ import dev.velix.imperat.annotations.AnnotationRegistry;
 import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.annotations.injectors.context.InjectionContext;
 import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
-import dev.velix.imperat.annotations.types.Inherit;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.TypeWrap;
@@ -24,7 +23,11 @@ final class ProxyCommandInjector<S extends Source> extends AnnotationDataInjecto
         <Command<S>, S, dev.velix.imperat.annotations.types.Command> {
 
     public ProxyCommandInjector(Imperat<S> dispatcher) {
-        super(dispatcher, InjectionContext.of(dev.velix.imperat.annotations.types.Command.class, TypeWrap.of(Command.class), AnnotationLevel.CLASS));
+        super(dispatcher, InjectionContext.of(
+                dev.velix.imperat.annotations.types.Command.class,
+                new TypeWrap<Command<S>>() {
+                }, AnnotationLevel.CLASS)
+        );
     }
 
     @Override
@@ -42,16 +45,9 @@ final class ProxyCommandInjector<S extends Source> extends AnnotationDataInjecto
         List<String> aliases = new ArrayList<>(Arrays.asList(values)
                 .subList(1, values.length));
 
-        Command<S> command = Command.<S>create(values[0])
+        return Command.<S>create(values[0])
                 .ignoreACPermissions(annotation.ignoreAutoCompletionPermission())
                 .aliases(aliases)
                 .build();
-
-        if (element.isAnnotationPresent(Inherit.class)) {
-            var inheritanceInjector = injectorRegistry.getInjector(Inherit.class, new TypeWrap<Command<S>>() {
-            }, AnnotationLevel.CLASS).orElseThrow();
-            inheritanceInjector.inject(proxyCommand, command, reader, parser, annotationRegistry, injectorRegistry, element, element.getAnnotation(Inherit.class));
-        }
-        return command;
     }
 }

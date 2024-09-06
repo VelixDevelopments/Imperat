@@ -22,10 +22,9 @@ public final class AnnotationRegistry {
         mains.add(Command.class);
         mains.add(Usage.class);
         mains.add(SubCommand.class);
-        mains.add(Help.class);
 
-        this.registerAnnotationTypes(Command.class, Description.class, Permission.class);
-        this.registerAnnotationTypes(Usage.class, SubCommand.class, Help.class, Command.class);
+        this.registerAnnotationTypes(Command.class, Inherit.class, Description.class, Permission.class);
+        this.registerAnnotationTypes(Usage.class, SubCommand.class, Command.class);
         this.registerAnnotationTypes(DefaultValue.class, DefaultValueProvider.class,
                 Flag.class, Greedy.class, Named.class, Optional.class, Range.class);
     }
@@ -66,7 +65,7 @@ public final class AnnotationRegistry {
     }
 
     public @Nullable Annotation getMainAnnotation(CommandAnnotatedElement<?> element) {
-        for (var ann : element.getAnnotations()) {
+        for (Annotation ann : element.getDeclaredAnnotations()) {
             if (isMainType(ann.annotationType()))
                 return ann;
         }

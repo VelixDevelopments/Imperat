@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -25,6 +25,7 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
     private final List<CommandParameter> parameters = new ArrayList<>();
+    private final List<CommandParameter> pureParameters = new ArrayList<>();
     private final CommandExecution<S> execution;
     private final boolean help;
     private String permission = null;
@@ -124,7 +125,11 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      */
     @Override
     public void addParameters(CommandParameter... params) {
-        parameters.addAll(Arrays.asList(params));
+        Collections.addAll(parameters, params);
+        for (var param : params) {
+            if (param.isFlag()) continue;
+            pureParameters.add(param);
+        }
     }
 
     /**
@@ -134,16 +139,25 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      */
     @Override
     public void addParameters(List<CommandParameter> params) {
+        for (var p : params) {
+            if (p.isFlag()) continue;
+            pureParameters.add(p);
+        }
         parameters.addAll(params);
     }
 
     /**
-     * @return the parameters for this usages
+     * @return the parameters for this usage
      * @see CommandParameter
      */
     @Override
     public List<CommandParameter> getParameters() {
         return parameters;
+    }
+
+    @Override
+    public List<CommandParameter> getPureParameters() {
+        return pureParameters;
     }
 
     @Override

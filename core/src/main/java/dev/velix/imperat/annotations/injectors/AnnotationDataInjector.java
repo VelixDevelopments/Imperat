@@ -71,5 +71,12 @@ public abstract class AnnotationDataInjector<O, S extends Source, A extends Anno
             @NotNull A annotation
     );
 
-
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" +
+                "annotation-target=" + context.annClass().getSimpleName() +
+                ", target-toLoad=" + context.targetToLoad().getType().getTypeName() +
+                ", level=" + context.level().name() +
+                '}';
+    }
 }

@@ -1,0 +1,25 @@
+package dev.velix.imperat.commands.annotations;
+
+import dev.velix.imperat.TestSource;
+import dev.velix.imperat.annotations.types.Named;
+import dev.velix.imperat.annotations.types.SubCommand;
+import dev.velix.imperat.annotations.types.Usage;
+
+@SubCommand("second")
+public class SecondSub {
+
+    @Usage
+    public void defaultUsage(TestSource source) {
+        source.reply("Default execution of second sub-command");
+    }
+
+    @Usage
+    public void cmdUsage(TestSource source,
+                         @Named("arg1") String arg1,
+                         @Named("arg2") String arg2,
+                         @Named("arg3") String arg3) {
+        source.reply("Executing usage in first's main usage," +
+                " arg1= " + arg1 + ", arg2= " + arg2 + ", arg3= " + arg3);
+    }
+
+}

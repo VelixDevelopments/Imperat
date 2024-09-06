@@ -27,7 +27,8 @@ final class CommandMethodInjector<S extends Source> extends AnnotationDataInject
     ) {
         super(imperat, InjectionContext.of(
                 dev.velix.imperat.annotations.types.Command.class,
-                TypeWrap.of(Command.class), AnnotationLevel.METHOD)
+                new TypeWrap<Command<S>>() {
+                }, AnnotationLevel.METHOD)
         );
     }
 
