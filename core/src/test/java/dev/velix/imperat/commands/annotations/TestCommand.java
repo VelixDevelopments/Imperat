@@ -22,6 +22,10 @@ public class TestCommand {
     public void doOtherSub(TestSource source, @Named("text") String text) {
         source.reply("Other-arg= " + text);
     }
-
-
+    
+    @Command("embedded")
+    public void embeddedCmd(TestSource source, @Named("arg") String arg) {
+        source.reply("Embedded command arg=" + arg);
+    }
+    
 }

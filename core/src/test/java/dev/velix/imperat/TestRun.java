@@ -129,6 +129,8 @@ public class TestRun {
         System.out.println("----------------------------");
         USAGE_EXECUTED = false;
         debugCommand(IMPERAT.getCommand("test"));
+        debugCommand(IMPERAT.getCommand("embedded"));
+        
         var result = testCmdTreeExecution("test", "first-arg first a1 a2 second a3");
         Assertions.assertEquals(TraverseResult.COMPLETE, result);
     }
