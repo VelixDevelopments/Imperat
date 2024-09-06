@@ -256,7 +256,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public void addUsage(CommandUsage<S> usage) {
         usages.put(usage.getParameters(), usage);
-
+        
         if (mainUsage == null && usage.getMaxLength() >= 1 &&
                 !usage.hasParamType(Command.class)) {
             mainUsage = usage;
@@ -385,7 +385,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
             CommandUsage<S> usage,
             boolean attachDirectly
     ) {
-
         int position;
         if (attachDirectly) {
             position = getPosition() + 1;
@@ -400,6 +399,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
                         .aliases(aliases)
                         .usage(usage)
                         .build();
+        System.out.println("ADDING SUB= " + subCommand + ", with usage= " + CommandUsage.format(subCmd, usage));
         addSubCommand(subCmd, attachDirectly);
     }
 

@@ -52,7 +52,7 @@ final class CommandParameterInjector<S extends Source> extends AnnotationDataInj
 
         MethodParameterElement element = (MethodParameterElement) paramElement;
         Parameter parameter = element.getElement();
-
+        
         Named named = parameter.getAnnotation(Named.class);
         Flag flag = parameter.getAnnotation(Flag.class);
         Switch switchAnnotation = parameter.getAnnotation(Switch.class);

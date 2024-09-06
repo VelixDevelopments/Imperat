@@ -13,6 +13,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.MethodHelpExecution;
+import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.util.Pair;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
@@ -32,7 +33,8 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
     ) {
         super(
                 dispatcher,
-                InjectionContext.of(Usage.class, TypeWrap.of(CommandUsage.class), AnnotationLevel.METHOD)
+                InjectionContext.of(Usage.class, new TypeWrap<CommandUsage<S>>() {
+                }, AnnotationLevel.METHOD)
         );
     }
 
@@ -72,15 +74,17 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
     ) {
 
         Method method = (Method) element.getElement();
-
+        System.out.println("Loading @Usage on method " + method.getName() + " in class " + proxyCommand.proxyClass().getSimpleName());
+        
         var parametersInfo = loadParameters(proxyCommand, injectorRegistry, annotationRegistry, reader, parser, method);
+        
         final boolean isHelp = parametersInfo.left();
         final List<CommandParameter> params = parametersInfo.right();
+        
+        CommandDebugger.debugParameters("Loaded method parameters=", parametersInfo.right());
 
         var execution = isHelp ? new MethodHelpExecution<>(dispatcher, proxyCommand, method, parametersInfo.right())
                 : new MethodCommandExecutor<>(proxyCommand, dispatcher, method, params);
-        //System.out.println("Loading usage for cmd: " + proxyCommand.commandLoaded().getName());
-
 
         /*if(proxyCommand.proxyClass().isAnnotationPresent(SubCommand.class)) {
             Command<S> cmd = proxyCommand.commandLoaded().getParent();
@@ -125,11 +129,12 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
             if (element == null) {
                 continue;
             }
+            System.out.println("Element type= " + parameter.getType().getSimpleName());
             CommandParameter commandParameter =
                     paramInjector.inject(proxyCommand, null, reader,
                             parser, annotationRegistry,
                             injectorRegistry, element, element.getAnnotation(Named.class));
-
+            
             commandParameters.add(commandParameter);
         }
         return new Pair<>(commandParameters, help);

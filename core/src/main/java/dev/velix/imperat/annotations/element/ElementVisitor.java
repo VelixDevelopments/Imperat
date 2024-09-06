@@ -1,6 +1,7 @@
 package dev.velix.imperat.annotations.element;
 
 import dev.velix.imperat.annotations.AnnotationContainer;
+import dev.velix.imperat.annotations.AnnotationHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.AnnotatedElement;
@@ -15,7 +16,7 @@ import java.util.Arrays;
  * as you can customize easily how the elements are added into the container
  * providing very high scalability
  *
- * @param <E> type of element that contain annotations
+ * @param <E> type of element that contains annotations
  */
 public interface ElementVisitor<E extends AnnotatedElement> {
 
@@ -30,7 +31,7 @@ public interface ElementVisitor<E extends AnnotatedElement> {
     }
 
     static ElementVisitor<Parameter> parameters() {
-        return (param) -> new ElementKey(param.getName(),
+        return (param) -> new ElementKey(AnnotationHelper.getParamName(param),
                 param.getType().getName());
     }
 

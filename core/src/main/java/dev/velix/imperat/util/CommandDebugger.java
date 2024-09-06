@@ -53,7 +53,7 @@ public final class CommandDebugger {
 
     public static void debugParameters(String msg, List<CommandParameter> parameters) {
         if (LOGGER == null) {
-            System.out.printf((msg) + "%n", parameters.stream().map(CommandParameter::format)
+            System.out.printf((msg) + "%s%n", parameters.stream().map(CommandParameter::format)
                     .collect(Collectors.joining(",")));
             return;
         }

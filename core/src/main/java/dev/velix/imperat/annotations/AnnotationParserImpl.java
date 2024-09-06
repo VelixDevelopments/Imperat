@@ -77,7 +77,8 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
             var methodKey = AnnotationHelper.getKey(AnnotationLevel.METHOD, method);
             CommandAnnotatedElement<Method> methodElement = (CommandAnnotatedElement<Method>) reader.getAnnotated(AnnotationLevel.METHOD, methodKey);
             assert methodElement != null;
-
+            
+            System.out.println("Injecting on method '" + method.getName() + "'");
             //methodElement.debug();
             //loading method-level annotations
             if (methodElement.isAnnotationPresent(Usage.class)) {

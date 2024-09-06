@@ -12,6 +12,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -55,28 +56,30 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
         }
 
         Method method = (Method) element.getElement();
-
+        System.out.println("METHOD= " + method.getName());
         final String[] values = annotation.value();
         List<String> aliases = new ArrayList<>(Arrays.asList(values)
                 .subList(1, values.length));
-
-        var mainUsage = toLoad.getMainUsage();
-        List<CommandParameter> methodCommandParameters = this.loadParameters(proxyCommand, injectorRegistry,
+        
+        var mainUsage = proxyCommand.commandLoaded().getMainUsage();
+        List<CommandParameter> methodCommandParameters = this.loadParameters(
+                proxyCommand, injectorRegistry,
                 annotationRegistry, reader, parser, mainUsage, method);
 
         //merging the command's main usage params with subcommand's parameters to use them in the method to be invoked
         List<CommandParameter> fullParams = new ArrayList<>(mainUsage.getParameters().size() + methodCommandParameters.size());
         fullParams.addAll(mainUsage.getParameters());
         fullParams.addAll(methodCommandParameters);
-		
-		/*UsageCooldown cooldown = loadCooldown(element);
-		String desc = element.isAnnotationPresent(Description.class) ? element.getAnnotation(Description.class).value() : "N/A";
-		String permission = element.isAnnotationPresent(Permission.class) ? element.getAnnotation(Permission.class).value() : null;
-		*/
+        
+        
+        System.out.println("toLoad= " + toLoad.getName());
+        CommandDebugger.debugParameters("Main sub params: ", mainUsage.getParameters());
+        CommandDebugger.debugParameters("sub-method params", methodCommandParameters);
+        
         var usage = CommandUsage.<S>builder()
                 .parameters(methodCommandParameters)
-                .execute(new MethodCommandExecutor<>(proxyCommand, dispatcher, method,
-                        fullParams)).build();
+                .execute(new MethodCommandExecutor<>(proxyCommand, dispatcher, method, fullParams))
+                .build();
 
         //injecting other data into the usage
         //UsageInjector.injectOthers(proxyCommand, usage, reader, parser,
@@ -95,6 +98,7 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
             AnnotationReader reader,
             AnnotationParser<S> parser,
             @Nullable CommandUsage<S> mainUsage,
+            //@Nullable CommandUsage<S> mainUsage,
             Method method
     ) {
 
@@ -106,8 +110,9 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
         for (Parameter parameter : method.getParameters()) {
             if (dispatcher.canBeSender(parameter.getType())) continue;
             if (dispatcher.hasContextResolver(parameter.getType())) continue;
-
-            MethodParameterElement element = new MethodParameterElement(annotationRegistry, parameter);
+            
+            MethodParameterElement element = (MethodParameterElement) reader.getAnnotated(AnnotationLevel.PARAMETER, AnnotationHelper.getKey(AnnotationLevel.PARAMETER, parameter));
+            assert element != null;
             CommandParameter commandParameter =
                     paramInjector.inject(proxyCommand, null, reader,
                             parser, annotationRegistry,
