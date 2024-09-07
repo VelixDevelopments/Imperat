@@ -13,15 +13,21 @@ import java.util.List;
  * tab-completion per one command, regardless of the sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface AutoCompleter<S extends Source> {
-    static <S extends Source> AutoCompleter<S> createNative(Command<S> command) {
-        return new AutoCompleterImpl<>(command);
+public abstract class AutoCompleter<S extends Source> {
+    
+    protected final Command<S> command;
+    
+    protected AutoCompleter(Command<S> command) {
+        this.command = command;
     }
-
-    /**
-     * @return The auto-completion command
-     */
-    Command<S> command();
+    
+    public static <S extends Source> AutoCompleter<S> simple(Command<S> command) {
+        return new SimpleAutoCompleter<>(command);
+    }
+    
+    public static <S extends Source> AutoCompleter<S> advanced(Command<S> command) {
+        return new AdvancedAutoCompleter<>(command);
+    }
 
     /**
      * Autocompletes an argument from the whole position of the
@@ -32,7 +38,7 @@ public interface AutoCompleter<S extends Source> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    List<String> autoComplete(Imperat<S> dispatcher,
+    public abstract List<String> autoComplete(Imperat<S> dispatcher,
                               S sender, String[] args);
 
     /**
@@ -45,6 +51,6 @@ public interface AutoCompleter<S extends Source> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    List<String> autoCompleteArgument(Imperat<S> dispatcher,
+    public abstract List<String> autoCompleteArgument(Imperat<S> dispatcher,
                                       S source, CompletionArg currentArg, String[] args);
 }

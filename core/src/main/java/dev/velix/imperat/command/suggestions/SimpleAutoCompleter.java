@@ -17,8 +17,12 @@ import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
-record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCompleter<S> {
-
+final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
+    
+    SimpleAutoCompleter(Command<S> command) {
+        super(command);
+    }
+    
     private static @NotNull CompletionArg getLastArg(String[] args) {
         if (args.length == 0) return new CompletionArg(null, -1);
         int index = args.length - 1;
@@ -27,14 +31,6 @@ record AutoCompleterImpl<S extends Source>(Command<S> command) implements AutoCo
             result = null;
 
         return new CompletionArg(result, index);
-    }
-
-    /**
-     * @return The auto-completion command
-     */
-    @Override
-    public Command<S> command() {
-        return command;
     }
 
     /**

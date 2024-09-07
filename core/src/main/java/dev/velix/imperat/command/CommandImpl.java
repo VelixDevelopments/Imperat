@@ -61,7 +61,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.name = name;
         setDefaultUsageExecution((source, context) -> {
         });
-        this.autoCompleter = AutoCompleter.createNative(this);
+        this.autoCompleter = AutoCompleter.advanced(this);
         this.commandTree = parent != null ? null : CommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
     }
