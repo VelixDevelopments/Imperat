@@ -112,7 +112,7 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
 
 
         List<CommandParameter> commandParameters = new ArrayList<>();
-        CommandParameterInjector<S> paramInjector = injectorRegistry.<CommandParameter, Named, CommandParameterInjector<S>>
+        ParameterInjector<S> paramInjector = injectorRegistry.<CommandParameter, Named, ParameterInjector<S>>
                         getInjector(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER)
                 .orElseThrow();
         boolean help = false;
@@ -124,8 +124,8 @@ final class UsageInjector<S extends Source> extends AnnotationDataInjector<Comma
                 help = true;
                 continue;
             }
-
-            MethodParameterElement element = (MethodParameterElement) reader.getAnnotated(AnnotationLevel.PARAMETER, AnnotationHelper.getKey(AnnotationLevel.PARAMETER, parameter));
+            
+            MethodParameterElement element = (MethodParameterElement) reader.getAnnotated(AnnotationLevel.PARAMETER, AnnotationHelper.getKey(AnnotationLevel.PARAMETER, method, parameter));
             if (element == null) {
                 continue;
             }

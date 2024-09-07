@@ -13,23 +13,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public final class Traverse implements Iterable<CommandParameter> {
+public final class UsageContextMatch implements Iterable<CommandParameter> {
 
     private final List<CommandParameter> parameters = new ArrayList<>();
 
     @Setter
-    private TraverseResult result;
-
-    private Traverse(TraverseResult result) {
+    private UsageMatchResult result;
+    
+    private UsageContextMatch(UsageMatchResult result) {
         this.result = result;
     }
-
-    public static Traverse of(TraverseResult result) {
-        return new Traverse(result);
+    
+    public static UsageContextMatch of(UsageMatchResult result) {
+        return new UsageContextMatch(result);
     }
-
-    public static Traverse of() {
-        return of(TraverseResult.UNKNOWN);
+    
+    public static UsageContextMatch of() {
+        return of(UsageMatchResult.UNKNOWN);
     }
 
     public void append(UsageNode<?> node) {
@@ -46,8 +46,8 @@ public final class Traverse implements Iterable<CommandParameter> {
     public @NotNull Iterator<CommandParameter> iterator() {
         return parameters.iterator();
     }
-
-    public TraverseResult result() {
+    
+    public UsageMatchResult result() {
         return result;
     }
 

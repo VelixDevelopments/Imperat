@@ -2,10 +2,7 @@ package dev.velix.imperat.context;
 
 import dev.velix.imperat.context.internal.SortedArgumentQueue;
 import dev.velix.imperat.util.StringTokenizer;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.*;
 
 import java.util.Deque;
 import java.util.List;
@@ -18,22 +15,28 @@ import java.util.List;
 public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
 
     static ArgumentQueue parse(String[] rawArguments) {
-        return StringTokenizer.parseToQueue(String.join(" ", rawArguments));
+        return StringTokenizer.parseToQueue(String.join(" ", rawArguments), false);
     }
 
     static ArgumentQueue parse(String string) {
-        return StringTokenizer.parseToQueue(string);
+        return StringTokenizer.parseToQueue(string, false);
     }
 
     static ArgumentQueue parseAutoCompletion(String[] rawArguments) {
-        return parseAutoCompletion(String.join(" ", rawArguments));
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < rawArguments.length; i++) {
+            builder.append(rawArguments[i]);
+            if (i != rawArguments.length - 1)
+                builder.append(" ");
+        }
+        return parseAutoCompletion(builder.toString());
     }
 
     static ArgumentQueue parseAutoCompletion(String string) {
-        if (string.isEmpty()) {
-            return StringTokenizer.parseToQueue(" ");
+        if (string.isEmpty() || string.isBlank()) {
+            return StringTokenizer.parseToQueue("", true);
         }
-        return parse(string);
+        return StringTokenizer.parseToQueue(string, true);
     }
 
     /**
@@ -41,6 +44,20 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
      */
     static ArgumentQueue empty() {
         return new SortedArgumentQueue();
+    }
+    
+    /**
+     * Fetches the element at the specified index
+     *
+     * @param index the index
+     * @param def   the default element
+     * @return the element at the specified index.
+     */
+    default @Nullable String getOr(int index, @Nullable String def) {
+        if (index < 0 || index >= size()) {
+            return def;
+        }
+        return get(index);
     }
 
     /**

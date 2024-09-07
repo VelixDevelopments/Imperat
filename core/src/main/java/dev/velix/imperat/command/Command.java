@@ -5,8 +5,9 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
+import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.command.tree.CommandTree;
-import dev.velix.imperat.command.tree.Traverse;
+import dev.velix.imperat.command.tree.UsageContextMatch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
@@ -127,8 +128,20 @@ public interface Command<S extends Source> extends CommandParameter {
      *
      * @param context the context of the execution
      */
-    @NotNull Traverse traverse(Context<S> context);
-
+    @NotNull UsageContextMatch contextMatch(Context<S> context);
+    
+    /**
+     * Traverses and searches in {@link CommandTree} , visiting every node
+     *
+     * @param dispatcher the dispatcher
+     * @param source     the source
+     * @param currentArg the current value to complete
+     * @param args       the args
+     * @return the auto-completed results
+     */
+    List<String> tabComplete(Imperat<S> dispatcher, S source, CompletionArg currentArg, String[] args);
+    
+    
     /**
      * Debugs or visualizes all tree nodes
      * from {@link CommandTree}.
@@ -398,7 +411,8 @@ public interface Command<S extends Source> extends CommandParameter {
     void addHelpCommand(Imperat<S> dispatcher,
                         List<CommandParameter> params,
                         HelpExecution<S> helpExecution);
-
+    
+    
     class Builder<S extends Source> {
 
         private final Command<S> cmd;

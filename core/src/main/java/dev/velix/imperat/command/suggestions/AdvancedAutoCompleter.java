@@ -13,13 +13,16 @@ final class AdvancedAutoCompleter<S extends Source> extends AutoCompleter<S> {
         super(command);
     }
     
-    @Override
-    public List<String> autoComplete(Imperat<S> dispatcher, S sender, String[] args) {
-        return List.of();
-    }
     
     @Override
-    public List<String> autoCompleteArgument(Imperat<S> dispatcher, S source, CompletionArg currentArg, String[] args) {
-        return List.of();
+    public List<String> autoCompleteArgument(
+            Imperat<S> dispatcher,
+            S source,
+            CompletionArg currentArg,
+            String[] args
+    ) {
+        AutoCompleteList list = new AutoCompleteList();
+        list.addAll(command.tabComplete(dispatcher, source, currentArg, args));
+        return list.asList();
     }
 }

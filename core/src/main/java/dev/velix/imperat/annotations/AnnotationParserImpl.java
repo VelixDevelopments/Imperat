@@ -73,8 +73,8 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
         for (Method method : methods) {
             if (!MethodVerifier.isMethodAcceptable(method)) continue;
             MethodVerifier.verifyMethod(dispatcher, instanceClazz, method);
-
-            var methodKey = AnnotationHelper.getKey(AnnotationLevel.METHOD, method);
+            
+            var methodKey = AnnotationHelper.getKey(AnnotationLevel.METHOD, instanceClazz, method);
             CommandAnnotatedElement<Method> methodElement = (CommandAnnotatedElement<Method>) reader.getAnnotated(AnnotationLevel.METHOD, methodKey);
             assert methodElement != null;
             
@@ -124,7 +124,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public <T> dev.velix.imperat.command.Command<S> parseCommandClass(T instance) {
         Class<T> instanceClazz = (Class<T>) instance.getClass();
         AnnotationReader reader = AnnotationReader.read(annotationRegistry, instanceClazz);
-        var elementKey = AnnotationHelper.getKey(AnnotationLevel.CLASS, instanceClazz);
+        var elementKey = AnnotationHelper.getKey(AnnotationLevel.CLASS, null, instanceClazz);
 
         CommandAnnotatedElement<Class<?>> element = (CommandAnnotatedElement<Class<?>>) reader.getAnnotated(AnnotationLevel.CLASS, elementKey);
         assert element != null;

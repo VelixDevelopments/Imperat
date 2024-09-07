@@ -61,7 +61,7 @@ public interface SuggestionResolver<S extends Source, T> {
      * @param command             the running command
      * @param source              the sender of the command
      * @param queue               the argument raw input
-     * @param parameterToComplete the parameter of the arg to complete
+     * @param parameterToComplete the parameter of the value to complete
      * @param argToComplete       the current raw argument/input that's being requested
      *                            to complete
      * @return the auto-completed suggestions of the current argument

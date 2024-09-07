@@ -18,9 +18,9 @@ import java.util.function.Supplier;
  */
 @ApiStatus.Internal
 public enum AnnotationLevel {
-
-
-    CLASS(ElementVisitor::classes) {
+    
+    
+    CLASS(() -> ElementVisitor.CLASSES_VISITOR) {
         @Override
         public boolean matches(AnnotatedElement element) {
             return element instanceof CommandAnnotatedElement<?> cmdElement
@@ -29,11 +29,11 @@ public enum AnnotationLevel {
 
         @Override
         public Set<AnnotatedElement> getElements(AnnotationRegistry registry, Class<?> target) {
-            return Set.of(new CommandAnnotatedElement<>(registry, target));
+            return Set.of(new CommandAnnotatedElement<>(registry, null, target));
         }
     },
-
-    METHOD(ElementVisitor::methods) {
+    
+    METHOD(() -> ElementVisitor.METHODS_VISITOR) {
         @Override
         public boolean matches(AnnotatedElement element) {
             return element instanceof CommandAnnotatedElement<?> cmdElement
@@ -45,13 +45,13 @@ public enum AnnotationLevel {
                                                  Class<?> target) {
             Set<AnnotatedElement> elements = new HashSet<>();
             for (Method method : target.getDeclaredMethods()) {
-                elements.add(new CommandAnnotatedElement<>(registry, method));
+                elements.add(new CommandAnnotatedElement<>(registry, target, method));
             }
             return elements;
         }
     },
-
-    PARAMETER(ElementVisitor::parameters) {
+    
+    PARAMETER(() -> ElementVisitor.PARAMETERS_VISITOR) {
         @Override
         public boolean matches(AnnotatedElement element) {
             return element instanceof CommandAnnotatedElement<?> cmdElement
@@ -63,7 +63,7 @@ public enum AnnotationLevel {
             Set<AnnotatedElement> elements = new HashSet<>();
             for (Method method : target.getDeclaredMethods()) {
                 for (Parameter parameter : method.getParameters()) {
-                    MethodParameterElement element = new MethodParameterElement(registry, parameter);
+                    MethodParameterElement element = new MethodParameterElement(registry, method, parameter);
                     elements.add(element);
                 }
             }

@@ -4,7 +4,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.annotations.AnnotationParser;
 import dev.velix.imperat.annotations.AnnotationReplacer;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.tree.TraverseResult;
+import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
@@ -95,7 +95,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param command  the command object to execute
      * @param rawInput the command's args input
      */
-    @NotNull TraverseResult dispatch(S source, Command<S> command, String... rawInput);
+    @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput);
 
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -104,7 +104,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param commandName the name of the command to execute
      * @param rawInput    the command's args input
      */
-    TraverseResult dispatch(S sender, String commandName, String... rawInput);
+    UsageMatchResult dispatch(S sender, String commandName, String... rawInput);
 
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -113,7 +113,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param commandName    the name of the command to execute
      * @param rawArgsOneLine the command's args input on ONE LINE
      */
-    TraverseResult dispatch(S sender, String commandName, String rawArgsOneLine);
+    UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine);
 
     /**
      * @param command the data about the command being written in the chat box

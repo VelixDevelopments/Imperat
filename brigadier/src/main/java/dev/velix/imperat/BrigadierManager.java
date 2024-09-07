@@ -33,8 +33,8 @@ public interface BrigadierManager<S extends Source> {
     /**
      * Registers the argument type to its class type
      *
-     * @param type                 the type to register to the arg-type obj
-     * @param argumentTypeResolver the arg type resolver
+     * @param type                 the type to register to the value-type obj
+     * @param argumentTypeResolver the value type resolver
      * @param <T>                  the type parameter for the type.
      */
     <T> void registerArgumentResolver(Class<T> type, ArgumentTypeResolver argumentTypeResolver);
@@ -42,7 +42,7 @@ public interface BrigadierManager<S extends Source> {
     /**
      * Registers the argument type resolver
      *
-     * @param argumentTypeResolver the arg type resolver
+     * @param argumentTypeResolver the value type resolver
      */
     void registerArgumentResolver(ArgumentTypeResolver argumentTypeResolver);
 

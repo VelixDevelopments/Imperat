@@ -34,8 +34,8 @@ public final class AnnotationHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, E element) {
-        return ((ElementVisitor<E>) level.getVisitor()).loadKey(element);
+    public static <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, @Nullable Object owningElement, E element) {
+        return ((ElementVisitor<E>) level.getVisitor()).loadKey(owningElement, element);
     }
 
     public static <S extends Source> Object[] loadParameterInstances(Imperat<S> dispatcher,
@@ -134,7 +134,7 @@ public final class AnnotationHelper {
         emptyConstructor.setAccessible(true);
         OptionalValueSupplier<T> valueSupplier = (OptionalValueSupplier<T>) emptyConstructor.newInstance();
         if (!TypeUtility.matches(valueSupplier.getValueType(), parameter.getType())) {
-            throw new IllegalArgumentException("Optional supplier of value-type '" + valueSupplier.getValueType().getName() + "' doesn't match the optional arg type '" + parameter.getType().getName() + "'");
+            throw new IllegalArgumentException("Optional supplier of value-type '" + valueSupplier.getValueType().getName() + "' doesn't match the optional value type '" + parameter.getType().getName() + "'");
         }
 
         return valueSupplier;

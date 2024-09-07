@@ -195,7 +195,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
 
 
         ArgumentType<?> argumentType = this.getArgumentType(parameter);
-        //CommandDebugger.visualize("Found arg type = " + argumentType.getClass().getSimpleName());
+        //CommandDebugger.visualize("Found value type = " + argumentType.getClass().getSimpleName());
         //CommandDebugger.visualize("Parameter position = '%s' , with usage max= '%s'", parameter.getPosition(), usage.getMaxLength());
 
         int max = command.isSubCommand() ? usage.getMaxLength() : usage.getMaxLength() - 1;
@@ -250,7 +250,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
                                 actor, args, parameter, arg
                         )
                         .stream()
-                        .filter(c -> c.toLowerCase().startsWith(arg.arg().toLowerCase()))
+                        .filter(c -> c.toLowerCase().startsWith(arg.value().toLowerCase()))
                         .distinct()
                         .sorted(String.CASE_INSENSITIVE_ORDER)
                         .forEach(suggestionResult -> builder.suggest(suggestionResult, tooltip));

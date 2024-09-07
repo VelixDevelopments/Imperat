@@ -14,18 +14,18 @@ public class TestCommand {
     }
 
     @Usage
-    public void cmdUsage(TestSource source, @Named("otherText") String otherText) {
+    public void cmdUsage(TestSource source, @Named("otherText") @Suggest({"hi", "bye"}) String otherText) {
         source.reply("Executing usage in test's main usage, num= " + otherText);
     }
 
     @SubCommand("othersub")
-    public void doOtherSub(TestSource source, @Named("text") String text) {
-        source.reply("Other-arg= " + text);
+    public void doOtherSub(TestSource source, @Named("text") @Suggest({"hi", "bye"}) String text) {
+        source.reply("Other-value= " + text);
     }
     
     @Command("embedded")
-    public void embeddedCmd(TestSource source, @Named("arg") String arg) {
-        source.reply("Embedded command arg=" + arg);
+    public void embeddedCmd(TestSource source, @Named("value") String arg) {
+        source.reply("Embedded command value=" + arg);
     }
     
 }

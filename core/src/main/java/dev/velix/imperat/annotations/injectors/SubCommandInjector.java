@@ -103,7 +103,7 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
     ) {
 
         List<CommandParameter> commandParameters = new ArrayList<>();
-        CommandParameterInjector<S> paramInjector = injectorRegistry.<CommandParameter, Named, CommandParameterInjector<S>>
+        ParameterInjector<S> paramInjector = injectorRegistry.<CommandParameter, Named, ParameterInjector<S>>
                         getInjector(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER)
                 .orElseThrow();
 
@@ -111,7 +111,7 @@ public final class SubCommandInjector<S extends Source> extends AnnotationDataIn
             if (dispatcher.canBeSender(parameter.getType())) continue;
             if (dispatcher.hasContextResolver(parameter.getType())) continue;
             
-            MethodParameterElement element = (MethodParameterElement) reader.getAnnotated(AnnotationLevel.PARAMETER, AnnotationHelper.getKey(AnnotationLevel.PARAMETER, parameter));
+            MethodParameterElement element = (MethodParameterElement) reader.getAnnotated(AnnotationLevel.PARAMETER, AnnotationHelper.getKey(AnnotationLevel.PARAMETER, method, parameter));
             assert element != null;
             CommandParameter commandParameter =
                     paramInjector.inject(proxyCommand, null, reader,

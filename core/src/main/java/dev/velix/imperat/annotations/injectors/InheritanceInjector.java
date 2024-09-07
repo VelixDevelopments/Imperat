@@ -45,7 +45,7 @@ final class InheritanceInjector<S extends Source> extends AnnotationDataInjector
             }
 
             SubCommand subAnn = subClass.getAnnotation(SubCommand.class);
-            var elementKey = AnnotationHelper.getKey(AnnotationLevel.CLASS, subClass);
+            var elementKey = AnnotationHelper.getKey(AnnotationLevel.CLASS, null, subClass);
             AnnotationReader subReader = AnnotationReader.read(annotationRegistry, subClass);
 
             CommandAnnotatedElement<Class<?>> subElement = (CommandAnnotatedElement<Class<?>>) subReader.getAnnotated(AnnotationLevel.CLASS, elementKey);

@@ -25,7 +25,7 @@ public final class AnnotationRegistry {
 
         this.registerAnnotationTypes(Command.class, Inherit.class, Description.class, Permission.class);
         this.registerAnnotationTypes(Usage.class, SubCommand.class, Command.class);
-        this.registerAnnotationTypes(DefaultValue.class, DefaultValueProvider.class,
+        this.registerAnnotationTypes(Suggest.class, SuggestionProvider.class, DefaultValue.class, DefaultValueProvider.class,
                 Flag.class, Greedy.class, Named.class, Optional.class, Range.class);
     }
 

@@ -1,6 +1,6 @@
 package dev.velix.imperat.command.tree;
 
-public enum TraverseResult {
+public enum UsageMatchResult {
 
     COMPLETE,
 

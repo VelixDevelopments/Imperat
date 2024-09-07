@@ -98,7 +98,7 @@ public final class Test extends JavaPlugin implements Listener {
                         .parameters(CommandParameter.requiredInt("firstArg"))
                         .execute((source, context) -> {
                             int firstArg = context.getArgumentOr("firstArg", -1);
-                            source.reply("Entered arg= " + firstArg);
+                            source.reply("Entered value= " + firstArg);
                         })
                         .build()
                 ).build();

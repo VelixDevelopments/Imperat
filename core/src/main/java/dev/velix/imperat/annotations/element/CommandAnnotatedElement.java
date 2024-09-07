@@ -6,6 +6,7 @@ import dev.velix.imperat.util.annotations.AnnotationMap;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -16,14 +17,19 @@ import java.util.Iterator;
 public class CommandAnnotatedElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> {
 
     private final @NotNull AnnotationMap map = new AnnotationMap();
-
+    
+    @Getter
+    private final @Nullable Object owningElement;
+    
     @Getter
     private final @NotNull E element;
 
     public CommandAnnotatedElement(
             @NotNull AnnotationRegistry registry,
+            @Nullable Object owningElement,
             @NotNull E element
     ) {
+        this.owningElement = owningElement;
         this.element = element;
         this.load(registry);
     }

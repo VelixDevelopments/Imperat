@@ -52,8 +52,9 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
 
         registerInjector(Usage.class, commandUsageTypeWrap, AnnotationLevel.METHOD, new UsageInjector<>(dispatcher));
         registerInjector(SubCommand.class, commandTypeWrap, AnnotationLevel.METHOD, new SubCommandInjector<>(dispatcher));
-
-        registerInjector(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER, new CommandParameterInjector<>(dispatcher));
+        
+        registerInjector(Named.class, TypeWrap.of(CommandParameter.class), AnnotationLevel.PARAMETER, new ParameterInjector<>(dispatcher));
+        
         registerInjector(Cooldown.class, TypeWrap.of(CooldownHolder.class)
                 , AnnotationLevel.METHOD, new CooldownInjector<>(dispatcher));
 
@@ -106,11 +107,7 @@ public final class AnnotationInjectorRegistry<S extends Source> extends Registry
         }
         return Optional.empty();
     }
-
-    private void debugInj(AnnotationDataInjector<?, S, ?> injector) {
-        System.out.println(injector.toString());
-    }
-
+    
     public void forEachInjector(
             Predicate<AnnotationDataInjector<?, S, ?>> predicate,
             Consumer<AnnotationDataInjector<?, S, ?>> action

@@ -6,6 +6,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 
+@SuppressWarnings("unused")
 public final class TestCommands {
 
     public final static Command<TestSource> GROUP_CMD = Command.<TestSource>create("group")
@@ -54,7 +55,6 @@ public final class TestCommands {
                     )
                     .build()
             )
-            //TODO fix the optional arg parsing not added in tree nodes
             .subCommand(Command.<TestSource>create("help").usage(
                     CommandUsage.<TestSource>builder()
                                     .parameters(

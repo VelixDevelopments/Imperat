@@ -36,7 +36,6 @@ final class AnnotationReaderImpl implements AnnotationReader {
             Set<CommandAnnotatedElement<E>> elementsOfLevel = (Set<CommandAnnotatedElement<E>>) level.getElements(registry, clazz);
 
             for (CommandAnnotatedElement<E> element : elementsOfLevel) {
-
                 ElementVisitor<E> visitor = (ElementVisitor<E>) level.getVisitor();
                 container.accept(visitor, element);
             }

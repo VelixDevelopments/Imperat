@@ -11,8 +11,8 @@ import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
 import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
-import dev.velix.imperat.command.tree.Traverse;
-import dev.velix.imperat.command.tree.TraverseResult;
+import dev.velix.imperat.command.tree.UsageContextMatch;
+import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
@@ -480,7 +480,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
 
     @Override
-    public @NotNull TraverseResult dispatch(S source, Command<S> command, String... rawInput) {
+    public @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
 
         Context<S> plainContext = getContextFactory()
@@ -490,17 +490,17 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return handleExecution(source, command, plainContext);
         } catch (Throwable ex) {
             CommandExceptionHandler.handleException(this, plainContext, BaseImperat.class, "dispatch", ex);
-            return TraverseResult.UNKNOWN;
+            return UsageMatchResult.UNKNOWN;
         }
     }
 
     @Override
-    public @NotNull TraverseResult dispatch(S source, String commandName, String... rawInput) {
+    public @NotNull UsageMatchResult dispatch(S source, String commandName, String... rawInput) {
         Command<S> command = getCommand(commandName);
         if (command == null) {
             //TODO better message here
             source.reply("Unknown command !");
-            return TraverseResult.UNKNOWN;
+            return UsageMatchResult.UNKNOWN;
         }
         //temp debugging
         //command.visualize();
@@ -508,11 +508,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     @Override
-    public @NotNull TraverseResult dispatch(S sender, String commandName, String rawArgsOneLine) {
+    public @NotNull UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine) {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
-
-    private TraverseResult handleExecution(S source, Command<S> command, Context<S> context) throws CommandException {
+    
+    private UsageMatchResult handleExecution(S source, Command<S> command, Context<S> context) throws CommandException {
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
         }
@@ -520,21 +520,21 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         if (context.getArguments().isEmpty()) {
             CommandUsage<S> defaultUsage = command.getDefaultUsage();
             defaultUsage.execute(this, source, context);
-            return TraverseResult.INCOMPLETE;
+            return UsageMatchResult.INCOMPLETE;
         }
 
         long time = System.currentTimeMillis();
-        Traverse searchResult = command.traverse(context);
-        System.out.println("Traverse took= " + (System.currentTimeMillis() - time) + "ms");
+        UsageContextMatch searchResult = command.contextMatch(context);
+        System.out.println("UsageContextMatch took= " + (System.currentTimeMillis() - time) + "ms");
         //executing usage
 
         time = System.currentTimeMillis();
         CommandUsage<S> usage = searchResult.toUsage(command);
         System.out.println("Usage lookup took= " + (System.currentTimeMillis() - time) + "ms");
-
-        if (searchResult.result() == TraverseResult.COMPLETE)
+        
+        if (searchResult.result() == UsageMatchResult.COMPLETE)
             executeUsage(command, source, context, usage);
-        else if (searchResult.result() == TraverseResult.INCOMPLETE) {
+        else if (searchResult.result() == UsageMatchResult.INCOMPLETE) {
             var lastParameter = searchResult.getLastParameter();
             if (lastParameter.isCommand()) {
                 Command<S> sub = lastParameter.asCommand();

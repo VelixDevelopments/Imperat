@@ -1,6 +1,7 @@
 package dev.velix.imperat.util;
 
 import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.internal.SortedArgumentQueue;
 import dev.velix.imperat.exceptions.TokenParseException;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -13,10 +14,10 @@ public final class StringTokenizer {
 
     private StringTokenizer() {
     }
-
-    public static ArgumentQueue parseToQueue(String argumentsInOneLine) {
+    
+    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion) {
         if (argumentsInOneLine.isEmpty())
-            return ArgumentQueue.empty();
+            return !autoCompletion ? ArgumentQueue.empty() : new SortedArgumentQueue(" ");
 
         TokenIterator iterator = new TokenIterator(argumentsInOneLine);
         ArgumentQueue toCollect = ArgumentQueue.empty();

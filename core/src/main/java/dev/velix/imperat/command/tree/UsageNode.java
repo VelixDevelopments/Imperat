@@ -35,7 +35,7 @@ public abstract class UsageNode<T extends CommandParameter> {
     }
 
     public abstract boolean matchesInput(String input);
-
+    
     public abstract String format();
 
     public boolean isLeaf() {

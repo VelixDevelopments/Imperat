@@ -25,10 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings({"unchecked", "unused"})
-final class CommandParameterInjector<S extends Source> extends AnnotationDataInjector<CommandParameter, S, Named> {
-
-
-    public CommandParameterInjector(
+final class ParameterInjector<S extends Source> extends AnnotationDataInjector<CommandParameter, S, Named> {
+    
+    
+    public ParameterInjector(
             Imperat<S> imperat
     ) {
         super(
@@ -66,12 +66,16 @@ final class CommandParameterInjector<S extends Source> extends AnnotationDataInj
                 || element.isAnnotationPresent(Optional.class);
 
         //reading suggestion annotation
+        System.out.println("Debugging parameter's '" + element.getName() + "' annotation: ");
+        element.debug();
+        
         Suggest suggestAnnotation = element.getAnnotation(Suggest.class);
         SuggestionProvider suggestionProvider = element.getAnnotation(SuggestionProvider.class);
 
         SuggestionResolver<S, T> suggestionResolver = null;
 
         if (suggestAnnotation != null) {
+            System.out.println("---> Found @Suggest for parameter " + element.getName());
             suggestionResolver = (SuggestionResolver<S, T>) SuggestionResolver.plain(parameter.getType(), suggestAnnotation.value());
         } else if (suggestionProvider != null) {
             suggestionResolver = dispatcher.getNamedSuggestionResolver(suggestionProvider.value().toLowerCase());
