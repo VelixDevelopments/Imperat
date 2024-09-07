@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ApiStatus.Internal
-class DefaultUsageVerifier<S extends Source> implements UsageVerifier<S> {
-
-    DefaultUsageVerifier() {
+class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
+    
+    SimpleVerifier() {
     }
 
     @Override

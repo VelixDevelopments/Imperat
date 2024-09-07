@@ -26,11 +26,11 @@ import org.jetbrains.annotations.ApiStatus;
 public interface UsageVerifier<S extends Source> {
 
     static <S extends Source> UsageVerifier<S> defaultVerifier() {
-        return new DefaultUsageVerifier<>();
+        return new SimpleVerifier<>();
     }
 
     static <S extends Source> UsageVerifier<S> typeTolerantVerifier() {
-        return new TypeTolerantUsageVerifier<>();
+        return new TypeTolerantVerifier<>();
     }
 
     /**

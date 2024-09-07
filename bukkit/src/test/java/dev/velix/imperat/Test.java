@@ -21,6 +21,7 @@ import dev.velix.imperat.test.guild.Guild;
 import dev.velix.imperat.test.guild.GuildContextResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -57,14 +58,15 @@ public final class Test extends JavaPlugin implements Listener {
 
         dispatcher.registerSuggestionResolver(new GroupSuggestionResolver());
         //dispatcher.registerCommand(new BroadcastCommand());
-		/*dispatcher.registerContextResolver(Group.class, (context, param)-> {
+        
+        dispatcher.registerContextResolver(Group.class, (context, param) -> {
 			var sender = context.getSource();
 			if(sender.isConsole()) {
-				return null;
+                throw new ContextResolveException("You don't have a guild !");
 			}
 			return GroupRegistry.getInstance()
 					  .getGroup(sender.as(Player.class).getUniqueId());
-		});*/
+        });
 
 
         dispatcher.registerAnnotationReplacer(MyCommand.class, (annotation) -> {
