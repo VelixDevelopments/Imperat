@@ -1,92 +1,78 @@
 package dev.velix.imperat.annotations;
 
-import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
-import dev.velix.imperat.annotations.element.ElementKey;
-import dev.velix.imperat.annotations.element.ElementVisitor;
-import dev.velix.imperat.util.Registry;
+import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.element.ClassElement;
+import dev.velix.imperat.annotations.element.CommandClassVisitor;
+import dev.velix.imperat.annotations.element.MethodElement;
+import dev.velix.imperat.annotations.element.RootCommandClass;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Comparator;
 
 @ApiStatus.Internal
-final class AnnotationReaderImpl implements AnnotationReader {
-
+final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S> {
+    
+    private final static Comparator<Method> METHOD_COMPARATOR = Comparator.comparingInt(AnnotationHelper::loadMethodPriority);
+    
     private final Class<?> clazz;
     private final AnnotationRegistry registry;
-
-    private final Registry<AnnotationLevel, AnnotationContainer> containers = new Registry<>(() -> new EnumMap<>(AnnotationLevel.class));
-
-    AnnotationReaderImpl(AnnotationRegistry registry,
-                         Class<?> clazz) {
+    
+    private final RootCommandClass<S> rootCommandClass;
+    private final ClassElement classElement;
+    
+    AnnotationReaderImpl(AnnotationRegistry registry, Object instance) {
         this.registry = registry;
-        this.clazz = clazz;
-        read();
+        this.clazz = instance.getClass();
+        this.rootCommandClass = new RootCommandClass<>(clazz, instance);
+        this.classElement = read();
     }
-
-    @SuppressWarnings("unchecked")
-    private <E extends AnnotatedElement> void read() {
-
-        for (AnnotationLevel level : AnnotationLevel.values()) {
-            if (level == AnnotationLevel.WILDCARD) continue;
-
-            AnnotationContainer container = new AnnotationContainer(level);
-            Set<CommandAnnotatedElement<E>> elementsOfLevel = (Set<CommandAnnotatedElement<E>>) level.getElements(registry, clazz);
-
-            for (CommandAnnotatedElement<E> element : elementsOfLevel) {
-                ElementVisitor<E> visitor = (ElementVisitor<E>) level.getVisitor();
-                container.accept(visitor, element);
-            }
-            containers.setData(level, container);
+    
+    private ClassElement read() {
+        return readClass(registry, null, clazz);
+    }
+    
+    private ClassElement readClass(
+            AnnotationRegistry registry,
+            @Nullable ClassElement parent,
+            @NotNull Class<?> clazz
+    ) {
+        ClassElement root = new ClassElement(registry, parent, clazz);
+        //System.out.println("Reading class: " + clazz.getSimpleName() + ", parent= " + parent);
+        //Adding methods with their parameters
+        Method[] methods = clazz.getDeclaredMethods();
+        Arrays.sort(methods, METHOD_COMPARATOR);
+        
+        for (Method method : methods) {
+            //System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
+            root.addChild(new MethodElement(registry, root, method));
         }
-
+        
+        //Adding inner classes
+        for (Class<?> child : clazz.getDeclaredClasses()) {
+            //System.out.println(clazz.getSimpleName() + ": adding child class= " + child.getSimpleName());
+            root.addChild(
+                    readClass(registry, root, child)
+            );
+        }
+        
+        return root;
     }
-
-
-    /**
-     * Get an annotated element
-     * may be a parameter, method or even a class
-     *
-     * @param level the level
-     * @param key   the key of this element
-     * @return the annotated element
-     */
+    
+    
     @Override
-    public @Nullable AnnotatedElement getAnnotated(AnnotationLevel level, ElementKey key) {
-        if (containers.getData(level).isEmpty()) return null;
-        AnnotationContainer container = containers.getData(level).orElse(null);
-        if (container == null) return null;
-        return container.getData(key).orElse(null);
+    public RootCommandClass<S> getRootClass() {
+        return rootCommandClass;
     }
-
-    /**
-     * Fetches all annotations registered within an element
-     *
-     * @param level the level of this element
-     * @param key   the key of this element
-     * @return the annotations added to this element
-     */
+    
     @Override
-    public Collection<Annotation> getAnnotations(AnnotationLevel level, ElementKey key) {
-        AnnotatedElement element = getAnnotated(level, key);
-        if (element == null) return Collections.emptyList();
-        return List.of(element.getAnnotations());
+    public void accept(Imperat<S> dispatcher, CommandClassVisitor<S> visitor) {
+        classElement.accept(this, visitor)
+                .forEach(dispatcher::registerCommand);
     }
-
-    /**
-     * Fetches the annotation of an element
-     *
-     * @param key   the element key
-     * @param level the level of the element
-     * @param type  the type of annotation
-     * @return the annotation added to the element
-     */
-    @Override
-    public <A extends Annotation> @Nullable A getAnnotation(ElementKey key, AnnotationLevel level, Class<A> type) {
-        AnnotatedElement element = getAnnotated(level, key);
-        if (element == null) return null;
-        return element.getAnnotation(type);
-    }
+    
 }

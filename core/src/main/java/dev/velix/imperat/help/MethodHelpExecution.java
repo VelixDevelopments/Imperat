@@ -2,7 +2,7 @@ package dev.velix.imperat.help;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.AnnotationHelper;
-import dev.velix.imperat.annotations.injectors.context.ProxyCommand;
+import dev.velix.imperat.annotations.element.RootCommandClass;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
@@ -22,7 +22,7 @@ public final class MethodHelpExecution<S extends Source> implements HelpExecutio
     private final List<CommandParameter> params;
 
     public MethodHelpExecution(Imperat<S> dispatcher,
-                               ProxyCommand<S> proxy,
+                               RootCommandClass<S> proxy,
                                Method method,
                                List<CommandParameter> params) {
         this.dispatcher = dispatcher;

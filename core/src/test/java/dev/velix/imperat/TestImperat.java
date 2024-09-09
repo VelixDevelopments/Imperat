@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.command.BaseImperat;
+import dev.velix.imperat.command.Command;
 
 import java.io.PrintStream;
 
@@ -42,5 +43,10 @@ public final class TestImperat extends BaseImperat<TestSource> {
     public void shutdownPlatform() {
 
     }
-
+    
+    @Override
+    public void registerCommand(Command<TestSource> command) {
+        super.registerCommand(command);
+        command.visualize();
+    }
 }

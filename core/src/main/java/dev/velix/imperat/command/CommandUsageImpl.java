@@ -140,10 +140,10 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     @Override
     public void addParameters(List<CommandParameter> params) {
         for (var p : params) {
+            parameters.add(p);
             if (p.isFlag()) continue;
             pureParameters.add(p);
         }
-        parameters.addAll(params);
     }
 
     /**

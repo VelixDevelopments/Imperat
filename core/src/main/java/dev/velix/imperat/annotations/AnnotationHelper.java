@@ -1,8 +1,6 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.element.ElementKey;
-import dev.velix.imperat.annotations.element.ElementVisitor;
 import dev.velix.imperat.annotations.types.*;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
@@ -16,7 +14,6 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -32,12 +29,8 @@ public final class AnnotationHelper {
         }
         return false;
     }
-
-    @SuppressWarnings("unchecked")
-    public static <E extends AnnotatedElement> ElementKey getKey(AnnotationLevel level, @Nullable Object owningElement, E element) {
-        return ((ElementVisitor<E>) level.getVisitor()).loadKey(owningElement, element);
-    }
-
+    
+    
     public static <S extends Source> Object[] loadParameterInstances(Imperat<S> dispatcher,
                                                                      List<CommandParameter> fullParameters,
                                                                      S source,
@@ -161,5 +154,20 @@ public final class AnnotationHelper {
             }
         }
         return null;
+    }
+    
+    public static int loadMethodPriority(Method method) {
+        int count = method.getParameterCount();
+        if (AnnotationHelper.isMethodHelp(method)) {
+            count--;
+        }
+        
+        if (method.isAnnotationPresent(Usage.class)) {
+            //if default -> -1 else -> 0;
+            return count == 1 ? -1 : 0;
+        } else if (method.isAnnotationPresent(SubCommand.class)) {
+            return 2 + count;
+        }
+        return 100;
     }
 }

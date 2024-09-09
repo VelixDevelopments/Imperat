@@ -267,6 +267,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     public void addUsage(CommandUsage<S> usage) {
+        if (usage.isDefault()) {
+            return;
+        }
+        
         usages.put(usage.getParameters(), usage);
         
         if (mainUsage == null && usage.getMaxLength() >= 1 &&
@@ -363,8 +367,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
             if (subUsage.equals(command.getMainUsage())) continue;
             combo = prime.mergeWithCommand(command, subUsage);
             //adding the merged command usage
-
-            CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+            
+            //CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
             this.addUsage(
                     combo
             );
@@ -411,7 +415,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
                         .aliases(aliases)
                         .usage(usage)
                         .build();
-        System.out.println("ADDING SUB= " + subCommand + ", with usage= " + CommandUsage.format(subCmd, usage));
         addSubCommand(subCmd, attachDirectly);
     }
 

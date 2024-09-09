@@ -104,6 +104,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             commands.put(command.getName().toLowerCase(), command);
         } catch (RuntimeException ex) {
             CommandDebugger.error(BaseImperat.class, "registerCommand(Command command)", ex);
+            ex.printStackTrace();
             shutdownPlatform();
         }
 
@@ -117,8 +118,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public void registerCommand(Object command) {
-        Command<S> parsedCommand = annotationParser.parseCommandClass(command);
-        registerCommand(parsedCommand);
+        annotationParser.parseCommandClass(command);
     }
 
     /**
@@ -523,23 +523,17 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return UsageMatchResult.INCOMPLETE;
         }
 
-        long time = System.currentTimeMillis();
         UsageContextMatch searchResult = command.contextMatch(context);
-        System.out.println("UsageContextMatch took= " + (System.currentTimeMillis() - time) + "ms");
         //executing usage
 
-        time = System.currentTimeMillis();
         CommandUsage<S> usage = searchResult.toUsage(command);
-        System.out.println("Usage lookup took= " + (System.currentTimeMillis() - time) + "ms");
         
         if (searchResult.result() == UsageMatchResult.COMPLETE)
             executeUsage(command, source, context, usage);
         else if (searchResult.result() == UsageMatchResult.INCOMPLETE) {
             var lastParameter = searchResult.getLastParameter();
             if (lastParameter.isCommand()) {
-                Command<S> sub = lastParameter.asCommand();
-                CommandUsage<S> defaultUsage = sub.getDefaultUsage();
-                executeUsage(command, source, context, defaultUsage);
+                executeUsage(command, source, context, lastParameter.<S>asCommand().getDefaultUsage());
             } else {
                 if (usage != null)
                     executeUsage(command, source, context, usage);
@@ -558,33 +552,22 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                               final CommandUsage<S> usage) throws CommandException {
 
         //global pre-processing
-        long time = System.currentTimeMillis();
         preProcess(context, usage);
-        System.out.println("Global pre-processing took= " + (System.currentTimeMillis() - time) + "ms");
 
         //per command pre-processing
-        time = System.currentTimeMillis();
         command.preProcess(this, context, usage);
-        System.out.println("Cmd pre-processing took= " + (System.currentTimeMillis() - time) + "ms");
 
-        time = System.currentTimeMillis();
         ResolvedContext<S> resolvedContext = contextFactory.createResolvedContext(this, command, context, usage);
         resolvedContext.resolve();
-        System.out.println("Resolving context took= " + (System.currentTimeMillis() - time) + "ms");
 
-        time = System.currentTimeMillis();
         //global post-processing
         postProcess(resolvedContext);
-        System.out.println("Global post-processing took= " + (System.currentTimeMillis() - time) + "ms");
 
-        time = System.currentTimeMillis();
         //per command post-processing
         command.postProcess(this, resolvedContext, usage);
-        System.out.println("Cmd post-processing took= " + (System.currentTimeMillis() - time) + "ms");
-
-        time = System.currentTimeMillis();
+        
+        //executing the usage
         usage.execute(this, source, resolvedContext);
-        System.out.println("TOOK ON USAGE EXECUTION= " + (System.currentTimeMillis() - time) + "ms");
     }
 
     //TODO improve (DRY)

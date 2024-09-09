@@ -1,7 +1,6 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.element.CommandAnnotatedElement;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 
@@ -33,22 +32,7 @@ public abstract class AnnotationParser<S extends Source> {
      * @param instance the instance of the command class
      * @param <T>      the type of annotated command class to parse
      */
-    public abstract <T> Command<S> parseCommandClass(T instance);
-
-    /**
-     * Parses annotated command class of type {@linkplain T}
-     * into {@link Command} then register it using {@link Imperat}
-     *
-     * @param instance the instance of the command class
-     * @param <T>      the type of annotated command class to parse
-     */
-    public abstract <T> Command<S> parseCommandClass(
-            dev.velix.imperat.annotations.types.Command commandAnnotation,
-            AnnotationReader reader,
-            CommandAnnotatedElement<?> element,
-            T instance,
-            Class<T> instanceClass
-    );
+    public abstract <T> void parseCommandClass(T instance);
 
     /**
      * Registers {@link AnnotationReplacer}

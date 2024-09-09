@@ -12,24 +12,26 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.Objects;
 
 @ApiStatus.Internal
-public class CommandAnnotatedElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> {
-
-    private final @NotNull AnnotationMap map = new AnnotationMap();
+public sealed abstract class ParseElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> permits ClassElement, MethodElement, ParameterElement {
+    
+    //use more memory but better performance, since it's going to be GCed anyway
+    private final @NotNull AnnotationMap total = new AnnotationMap();
     
     @Getter
-    private final @Nullable Object owningElement;
+    private final @Nullable ParseElement<?> parent;
     
     @Getter
     private final @NotNull E element;
-
-    public CommandAnnotatedElement(
+    
+    public ParseElement(
             @NotNull AnnotationRegistry registry,
-            @Nullable Object owningElement,
+            @Nullable ParseElement<?> parent,
             @NotNull E element
     ) {
-        this.owningElement = owningElement;
+        this.parent = parent;
         this.element = element;
         this.load(registry);
     }
@@ -38,18 +40,17 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
     private <A extends Annotation> void load(@NotNull AnnotationRegistry registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
             Class<A> clazz = (Class<A>) annotation.annotationType();
-            if (registry.isRegisteredType(clazz)) {
-                map.set(annotation);
+            if (registry.isRegisteredAnnotation(clazz)) {
+                total.put(clazz, annotation);
             } else if (registry.hasReplacerFor(clazz)) {
                 AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);
                 assert replacer != null;
                 replacer.replace((A) annotation)
-                        .forEach(map::set);
+                        .forEach((replacedAnnotation) -> total.put(clazz, annotation));
             }
-
         }
     }
-
+    
     /**
      * Returns this element's annotation for the specified type if
      * such an annotation is <em>present</em>, else null.
@@ -63,8 +64,8 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Annotation> T getAnnotation(@NotNull Class<T> annotationClass) {
-        return (T) map.get(annotationClass);
+    public <T extends Annotation> @Nullable T getAnnotation(@NotNull Class<T> annotationClass) {
+        return (T) total.get(annotationClass);
     }
 
     /**
@@ -81,7 +82,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
      */
     @Override
     public Annotation[] getAnnotations() {
-        return map.values().toArray(new Annotation[0]);
+        return total.values().toArray(new Annotation[0]);
     }
 
     /**
@@ -99,7 +100,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
      */
     @Override
     public Annotation[] getDeclaredAnnotations() {
-        return map.values().toArray(new Annotation[0]);
+        return total.values().toArray(new Annotation[0]);
     }
 
 
@@ -111,7 +112,7 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
     @NotNull
     @Override
     public Iterator<Annotation> iterator() {
-        return map.values().iterator();
+        return total.values().iterator();
     }
 
     @Override
@@ -124,7 +125,8 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
         }
         return element.toString();
     }
-
+    
+    
     public void debug() {
         StringBuilder builder = new StringBuilder();
         for (Annotation annotation : getDeclaredAnnotations()) {
@@ -132,5 +134,18 @@ public class CommandAnnotatedElement<E extends AnnotatedElement> implements Anno
                     .annotationType().getSimpleName()).append(",");
         }
         System.out.println(builder);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ParseElement<?> that)) return false;
+        return Objects.equals(parent, that.parent)
+                && Objects.equals(element, that.element);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(parent, element);
     }
 }

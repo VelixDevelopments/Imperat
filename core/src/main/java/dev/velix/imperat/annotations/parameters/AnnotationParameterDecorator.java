@@ -1,6 +1,6 @@
 package dev.velix.imperat.annotations.parameters;
 
-import dev.velix.imperat.annotations.element.MethodParameterElement;
+import dev.velix.imperat.annotations.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.InputParameter;
@@ -15,9 +15,9 @@ import java.util.List;
 public final class AnnotationParameterDecorator extends InputParameter implements AnnotatedParameter {
 
     private final CommandParameter parameter;
-    private final MethodParameterElement element;
-
-    AnnotationParameterDecorator(CommandParameter parameter, MethodParameterElement element) {
+    private final ParameterElement element;
+    
+    AnnotationParameterDecorator(CommandParameter parameter, ParameterElement element) {
         super(parameter.getName(), TypeWrap.of(element.getElement().getParameterizedType()), parameter.getPermission(),
                 parameter.getDescription(), parameter.isOptional(),
                 parameter.isFlag(), parameter.isGreedy(), parameter.getDefaultValueSupplier(),
@@ -28,7 +28,7 @@ public final class AnnotationParameterDecorator extends InputParameter implement
 
     public static AnnotationParameterDecorator decorate(
             CommandParameter parameter,
-            MethodParameterElement element
+            ParameterElement element
     ) {
         return new AnnotationParameterDecorator(parameter, element);
     }

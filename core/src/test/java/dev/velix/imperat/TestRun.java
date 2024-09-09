@@ -138,6 +138,16 @@ public class TestRun {
     }
     
     @Test
+    public void testInnerClassParsing() {
+        System.out.println("----------------------------");
+        debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
+        debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
+        
+        var result = testCmdTreeExecution("inner1", "");
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, result);
+    }
+    
+    @Test
     public void testArgParsing() {
         ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(new String[]{""});
         Assertions.assertEquals(1, queue.size());
