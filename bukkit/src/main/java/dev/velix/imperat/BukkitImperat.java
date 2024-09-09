@@ -15,7 +15,6 @@ import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -34,18 +33,11 @@ import java.util.UUID;
 
 public class BukkitImperat extends BaseImperat<BukkitSource> {
 
-    final static MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> provider;
     private Map<String, org.bukkit.command.Command> bukkitOGMapping;
     private BukkitBrigadierManager brigadierManager;
-
-    /*private final static LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder()
-            .character('&')
-            .hexColors()
-            .hexCharacter('#')
-            .build();*/
 
     @SuppressWarnings("unchecked")
     private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> provider, @NotNull PermissionResolver<BukkitSource> permissionResolver) {

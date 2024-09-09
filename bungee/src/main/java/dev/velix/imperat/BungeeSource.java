@@ -24,7 +24,7 @@ public final class BungeeSource implements Source {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return sender.getName();
     }
 

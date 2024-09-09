@@ -10,10 +10,11 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Source {
+
     /**
      * @return name of a command source
      */
-    String getName();
+    String name();
 
     /**
      * @return The original command sender type instance

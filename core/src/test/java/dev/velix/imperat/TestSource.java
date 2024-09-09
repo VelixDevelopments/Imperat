@@ -14,7 +14,7 @@ public record TestSource(PrintStream origin) implements Source {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "CONSOLE";
     }
 

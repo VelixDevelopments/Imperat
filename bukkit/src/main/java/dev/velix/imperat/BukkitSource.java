@@ -28,7 +28,7 @@ public final class BukkitSource implements Source {
      * @return name of a command source
      */
     @Override
-    public String getName() {
+    public String name() {
         return sender.getName();
     }
 
@@ -46,15 +46,19 @@ public final class BukkitSource implements Source {
 
     /**
      * Replies to the command sender with a string message
-     * this message is auto translated into a minimessage
      *
      * @param message the message
      */
     @Override
-    public void reply(String message) {
-        reply(BukkitImperat.MINI_MESSAGE.deserialize(message));
+    public void reply(final String message) {
+        this.sender.sendMessage(message);
     }
 
+    /**
+     * Replies to the command sender with a component message
+     *
+     * @param component the message component
+     */
     public void reply(final ComponentLike component) {
         provider.send(this, component);
     }
