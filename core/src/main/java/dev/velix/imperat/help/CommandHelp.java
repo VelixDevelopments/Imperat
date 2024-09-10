@@ -6,8 +6,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.ExecutionFailure;
-import dev.velix.imperat.util.CommandExceptionHandler;
+import dev.velix.imperat.exception.ExecutionFailure;
 import dev.velix.imperat.util.text.PaginatedText;
 import dev.velix.imperat.util.text.TextPage;
 import org.jetbrains.annotations.ApiStatus;
@@ -38,7 +37,6 @@ public class CommandHelp<S extends Source> {
     }
 
     public void display(S source, int page) {
-
         try {
             if (template instanceof PaginatedHelpTemplate paginatedTemplate) {
                 displayPaginated(source, paginatedTemplate, page);
@@ -46,9 +44,8 @@ public class CommandHelp<S extends Source> {
                 displayNormal(source);
             }
         } catch (Throwable ex) {
-            CommandExceptionHandler.handleException(dispatcher, context, this.getClass(), "display(source, page)", ex);
+            dispatcher.handleThrowable(ex, context, this.getClass(), "display(source, page)");
         }
-
     }
 
     private void displayPaginated(

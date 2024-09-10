@@ -3,7 +3,6 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.CommandExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,8 +17,7 @@ public interface CommandCoordinator<S extends Source> {
             try {
                 execution.execute(source, context);
             } catch (Exception ex) {
-                CommandExceptionHandler.handleException(api, context, CommandCoordinator.class, "sync-lambda", ex);
-                ex.printStackTrace();
+                api.handleThrowable(ex, context, CommandCoordinator.class, "sync-lambda");
             }
         };
     }
@@ -34,8 +32,7 @@ public interface CommandCoordinator<S extends Source> {
                 try {
                     execution.execute(source, context);
                 } catch (Exception e) {
-                    CommandExceptionHandler.handleException(api, context, CommandCoordinator.class, "async-lambda", e);
-                    e.printStackTrace();
+                    api.handleThrowable(e, context, CommandCoordinator.class, "async-lambda");
                 }
             }, executorService);
         });

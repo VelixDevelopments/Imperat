@@ -24,6 +24,11 @@ public record TestSource(PrintStream origin) implements Source {
     }
 
     @Override
+    public void error(String message) {
+        sendMsg(message);
+    }
+
+    @Override
     public <S extends Source> void reply(Caption<S> caption, Context<S> context) {
 
     }

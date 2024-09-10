@@ -7,7 +7,7 @@ import dev.velix.imperat.adventure.NoAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.exceptions.context.ContextResolveException;
+import dev.velix.imperat.exception.SenderErrorException;
 import dev.velix.imperat.resolvers.BukkitPermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.CommandDebugger;
@@ -177,12 +177,12 @@ public class BukkitImperat extends BaseImperat<BukkitSource> {
         this.registerValueResolver(Player.class, ((source, context, raw, pivot, parameter) -> {
             final Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;
-            throw new ContextResolveException("A player with the name '" + raw + "' doesn't seem to be online");
+            throw new SenderErrorException("A player with the name '" + raw + "' doesn't seem to be online");
         }));
 
         this.registerValueResolver(OfflinePlayer.class, (source, context, raw, pivot, parameter) -> {
             if (raw.length() > 16) {
-                throw new ContextResolveException("Invalid or Unknown offline player '%s'", raw);
+                throw new SenderErrorException("Invalid or Unknown offline player '%s'", raw);
             }
             return Bukkit.getOfflinePlayer(raw);
         });
@@ -190,14 +190,14 @@ public class BukkitImperat extends BaseImperat<BukkitSource> {
         this.registerValueResolver(World.class, (source, context, raw, pivot, parameter) -> {
             World world = Bukkit.getWorld(raw.toLowerCase());
             if (world != null) return world;
-            throw new ContextResolveException("Unknown world '%s'", raw);
+            throw new SenderErrorException("Unknown world '%s'", raw);
         });
 
         registerValueResolver(UUID.class, (source, context, raw, pivot, parameter) -> {
             try {
                 return UUID.fromString(raw);
             } catch (IllegalArgumentException ex) {
-                throw new ContextResolveException("Invalid uuid-format '%s'", raw);
+                throw new SenderErrorException("Invalid uuid-format '%s'", raw);
             }
         });
     }

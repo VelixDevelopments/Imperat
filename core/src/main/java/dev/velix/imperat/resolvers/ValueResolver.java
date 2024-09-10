@@ -4,7 +4,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.sur.Cursor;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -32,5 +32,5 @@ public interface ValueResolver<S extends Source, T> {
             String raw,
             Cursor cursor,
             CommandParameter parameter
-    ) throws CommandException;
+    ) throws ImperatException;
 }

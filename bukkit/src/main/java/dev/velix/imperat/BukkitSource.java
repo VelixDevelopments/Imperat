@@ -5,6 +5,7 @@ import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.text.ComponentLike;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -52,6 +53,11 @@ public final class BukkitSource implements Source {
     @Override
     public void reply(final String message) {
         this.sender.sendMessage(message);
+    }
+
+    @Override
+    public void error(final String message) {
+        this.sender.sendMessage(ChatColor.RED + message);
     }
 
     /**

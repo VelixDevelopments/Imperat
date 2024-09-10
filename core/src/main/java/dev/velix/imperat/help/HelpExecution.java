@@ -4,7 +4,7 @@ import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,12 +25,12 @@ public interface HelpExecution<S extends Source> extends CommandExecution<S> {
      * @param help   the help object
      * @param page   the page of the help menu
      */
-    void help(S source, Context<S> context,
-              CommandHelp<S> help, @Nullable Integer page) throws CommandException;
+    void help(S source, Context<S> context, CommandHelp<S> help, @Nullable Integer page) throws ImperatException;
 
     @Override
-    default void execute(S source, ExecutionContext<S> context) throws CommandException {
+    default void execute(S source, ExecutionContext<S> context) throws ImperatException {
         CommandHelp<S> help = context.createCommandHelp();
         help(source, (Context<S>) context, help, context.getArgument(PAGE_PARAMETER_NAME));
     }
+
 }

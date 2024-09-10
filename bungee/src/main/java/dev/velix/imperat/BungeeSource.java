@@ -5,6 +5,7 @@ import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.text.ComponentLike;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -36,6 +37,11 @@ public final class BungeeSource implements Source {
     @Override
     public void reply(String message) {
         sender.sendMessage(TextComponent.fromLegacyText(message));
+    }
+
+    @Override
+    public void error(final String message) {
+        this.sender.sendMessage(ChatColor.RED + message);
     }
 
     public void reply(BaseComponent... message) {

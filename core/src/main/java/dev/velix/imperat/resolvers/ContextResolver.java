@@ -2,7 +2,7 @@ package dev.velix.imperat.resolvers;
 
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +40,6 @@ public interface ContextResolver<S extends Source, T> {
     T resolve(
             @NotNull Context<S> context,
             @Nullable Parameter parameter
-    ) throws CommandException;
+    ) throws ImperatException;
 
 }

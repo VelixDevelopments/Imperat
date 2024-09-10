@@ -14,7 +14,7 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -181,7 +181,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param usage   the usage detected being used
      */
     @Override
-    public void preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws CommandException {
+    public void preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws ImperatException {
         if (this.preProcessor != null) {
             preProcessor.process(api, context, usage);
         }
@@ -205,7 +205,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param usage   the usage detected being used
      */
     @Override
-    public void postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws CommandException {
+    public void postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException {
         if (this.postProcessor != null) {
             this.postProcessor.process(api, context);
         }

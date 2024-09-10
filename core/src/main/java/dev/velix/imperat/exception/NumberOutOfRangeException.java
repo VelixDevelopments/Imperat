@@ -1,21 +1,20 @@
-package dev.velix.imperat.exceptions.context;
+package dev.velix.imperat.exception;
 
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 
-public class NumberOutOfRangeException extends ContextResolveException {
+public class NumberOutOfRangeException extends SenderErrorException {
 
     public NumberOutOfRangeException(
             final NumericParameter parameter,
             final Number value,
             final NumericRange range
     ) {
-        super("Value '" + value + "' entered for parameter '"
-                + parameter.format() + "' must be " + formatRange(range));
+        super("Value '" + value + "' entered for parameter '" + parameter.format() + "' must be " + formatRange(range));
     }
 
-    private static String formatRange(NumericRange range) {
-        StringBuilder builder = new StringBuilder();
+    private static String formatRange(final NumericRange range) {
+        final StringBuilder builder = new StringBuilder();
         if (range.getMin() != Double.MIN_VALUE && range.getMax() != Double.MAX_VALUE)
             builder.append("within ").append(range.getMin()).append('-').append(range.getMax());
         else if (range.getMin() != Double.MIN_VALUE)

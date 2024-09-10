@@ -3,7 +3,7 @@ package dev.velix.imperat.context;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.context.internal.ResolvedFlag;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -77,7 +77,7 @@ public interface ExecutionContext<S extends Source> {
      * @param <T>  the type of this argument parsed value
      * @return the argument/input that is resolved by the context
      */
-    <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException;
+    <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException;
 
 
     /**

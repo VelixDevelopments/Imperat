@@ -1,4 +1,4 @@
-package dev.velix.imperat.exceptions;
+package dev.velix.imperat.exception;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.caption.Caption;
@@ -8,13 +8,13 @@ import dev.velix.imperat.context.Source;
 
 import static dev.velix.imperat.command.BaseImperat.START_PREFIX;
 
-public final class ExecutionFailure extends CommandException {
+public final class ExecutionFailure extends SelfHandledException {
 
     private final static String CAPTION_EXECUTION_ERROR_PREFIX = START_PREFIX + "<red><bold>Execution error:</bold></red> ";
 
     private final CaptionKey key;
 
-    public ExecutionFailure(CaptionKey key) {
+    public ExecutionFailure(final CaptionKey key) {
         this.key = key;
     }
 

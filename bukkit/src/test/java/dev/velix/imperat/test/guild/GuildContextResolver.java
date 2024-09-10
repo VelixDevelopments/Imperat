@@ -2,8 +2,8 @@ package dev.velix.imperat.test.guild;
 
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.exceptions.CommandException;
-import dev.velix.imperat.exceptions.context.ContextResolveException;
+import dev.velix.imperat.exception.SenderErrorException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.resolvers.BukkitContextResolver;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -25,10 +25,10 @@ public final class GuildContextResolver implements BukkitContextResolver<Guild> 
     public @Nullable Guild resolve(
             @NotNull Context<BukkitSource> context,
             @Nullable Parameter parameter
-    ) throws CommandException {
+    ) throws ImperatException {
         var source = context.getSource();
         if (source.isConsole()) {
-            throw new ContextResolveException("Only a player can do this !");
+            throw new SenderErrorException("Only a player can do this !");
         }
         Player player = source.as(Player.class);
         return GuildRegistry.getInstance().getUserGuild(player.getUniqueId());

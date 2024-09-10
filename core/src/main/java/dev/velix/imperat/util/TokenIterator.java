@@ -1,6 +1,6 @@
 package dev.velix.imperat.util;
 
-import dev.velix.imperat.exceptions.TokenParseException;
+import dev.velix.imperat.exception.TokenParseException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

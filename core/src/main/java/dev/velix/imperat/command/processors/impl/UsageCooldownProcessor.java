@@ -6,8 +6,8 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
-import dev.velix.imperat.exceptions.ExecutionFailure;
+import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.ExecutionFailure;
 
 public final class UsageCooldownProcessor<S extends Source> implements CommandPreProcessor<S> {
     /**
@@ -16,14 +16,14 @@ public final class UsageCooldownProcessor<S extends Source> implements CommandPr
      * @param imperat the api
      * @param context the context
      * @param usage   The usage detected
-     * @throws CommandException the exception to throw if something happens
+     * @throws ImperatException the exception to throw if something happens
      */
     @Override
     public void process(
             Imperat<S> imperat,
             Context<S> context,
             CommandUsage<S> usage
-    ) throws CommandException {
+    ) throws ImperatException {
         var source = context.getSource();
         if (usage.getCooldownHandler().hasCooldown(source)) {
             throw new ExecutionFailure(CaptionKey.COOLDOWN);

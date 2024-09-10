@@ -13,7 +13,7 @@ import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.custom_annotations.MyCommand;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
-import dev.velix.imperat.exceptions.context.ContextResolveException;
+import dev.velix.imperat.exception.SenderErrorException;
 import dev.velix.imperat.test.Group;
 import dev.velix.imperat.test.GroupRegistry;
 import dev.velix.imperat.test.GroupSuggestionResolver;
@@ -52,7 +52,7 @@ public final class Test extends JavaPlugin implements Listener {
         dispatcher.registerValueResolver(Group.class, ((source, context, raw, pivot, parameter) -> {
             Group group = GroupRegistry.getInstance().getData(raw).orElse(null);
             if (group == null)
-                throw new ContextResolveException("Invalid group '" + raw + "'");
+                throw new SenderErrorException("Invalid group '" + raw + "'");
             return group;
         }));
 
@@ -62,7 +62,7 @@ public final class Test extends JavaPlugin implements Listener {
         dispatcher.registerContextResolver(Group.class, (context, param) -> {
 			var sender = context.getSource();
 			if(sender.isConsole()) {
-                throw new ContextResolveException("You don't have a guild !");
+                throw new SenderErrorException("You don't have a guild !");
 			}
 			return GroupRegistry.getInstance()
 					  .getGroup(sender.as(Player.class).getUniqueId());

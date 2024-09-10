@@ -7,7 +7,7 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ResolvedFlag;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
@@ -31,12 +31,14 @@ public final class AnnotationHelper {
     }
     
     
-    public static <S extends Source> Object[] loadParameterInstances(Imperat<S> dispatcher,
-                                                                     List<CommandParameter> fullParameters,
-                                                                     S source,
-                                                                     ExecutionContext<S> context,
-                                                                     Method method,
-                                                                     @Nullable CommandHelp<S> commandHelp) throws CommandException {
+    public static <S extends Source> Object[] loadParameterInstances(
+            Imperat<S> dispatcher,
+            List<CommandParameter> fullParameters,
+            S source,
+            ExecutionContext<S> context,
+            Method method,
+            @Nullable CommandHelp<S> commandHelp) throws ImperatException
+    {
         Parameter[] parameters = method.getParameters();
         Object[] paramsInstances = new Object[parameters.length];
 

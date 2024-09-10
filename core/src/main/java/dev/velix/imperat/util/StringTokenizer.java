@@ -2,7 +2,7 @@ package dev.velix.imperat.util;
 
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.internal.SortedArgumentQueue;
-import dev.velix.imperat.exceptions.TokenParseException;
+import dev.velix.imperat.exception.TokenParseException;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal

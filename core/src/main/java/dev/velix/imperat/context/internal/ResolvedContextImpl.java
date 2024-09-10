@@ -8,8 +8,8 @@ import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.sur.SmartUsageResolve;
-import dev.velix.imperat.exceptions.CommandException;
-import dev.velix.imperat.exceptions.context.NumberOutOfRangeException;
+import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.NumberOutOfRangeException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
@@ -143,7 +143,7 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> @Nullable T getContextResolvedArgument(Class<T> type) throws CommandException {
+    public <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException {
         var factory = dispatcher.getContextResolverFactory();
         if (factory == null) {
             var cr = dispatcher.getContextResolver(type);
@@ -216,7 +216,7 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
      * Resolves the arguments from the given plain input {@link Context}
      */
     @Override
-    public void resolve() throws CommandException {
+    public void resolve() throws ImperatException {
         SmartUsageResolve<S> handler = SmartUsageResolve.create(commandUsed, usage);
         handler.resolve(dispatcher, this);
         this.lastCommand = handler.getCommand();
@@ -228,7 +228,7 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
                                     @Nullable String raw,
                                     int index,
                                     CommandParameter parameter,
-                                    @Nullable T value) throws CommandException {
+                                    @Nullable T value) throws ImperatException {
 
         if (value != null && TypeUtility.isNumericType(value.getClass())
                 && parameter instanceof NumericParameter numericParameter

@@ -23,12 +23,18 @@ public interface Source {
 
     /**
      * Replies to the command sender with a string message
-     * This message is parsed using minimessage format for platforms
-     * that can integrate with Kyori-Adventure chat-components.
      *
      * @param message the message
      */
     void reply(String message);
+
+    /**
+     * Replies to the command sender with a string message
+     * formatted specifically for error messages
+     *
+     * @param message the message
+     */
+    void error(String message);
 
     /**
      * Replies to the command sender with a caption message

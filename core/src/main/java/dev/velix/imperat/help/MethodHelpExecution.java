@@ -6,7 +6,7 @@ import dev.velix.imperat.annotations.element.RootCommandClass;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +47,7 @@ public final class MethodHelpExecution<S extends Source> implements HelpExecutio
     public void help(S source,
                      Context<S> context,
                      CommandHelp<S> help,
-                     @Nullable Integer page) throws CommandException {
+                     @Nullable Integer page) throws ImperatException {
 
         Object[] instances = AnnotationHelper
                 .loadParameterInstances(dispatcher, params, source, context, method, help);

@@ -1,4 +1,4 @@
-package dev.velix.imperat.exceptions;
+package dev.velix.imperat.exception;
 
 import java.io.Serial;
 

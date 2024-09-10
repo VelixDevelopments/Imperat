@@ -21,10 +21,11 @@ import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.context.internal.ContextResolverRegistry;
 import dev.velix.imperat.context.internal.ValueResolverRegistry;
-import dev.velix.imperat.exceptions.AmbiguousUsageAdditionException;
-import dev.velix.imperat.exceptions.CommandException;
-import dev.velix.imperat.exceptions.ExecutionFailure;
-import dev.velix.imperat.exceptions.InvalidCommandUsageException;
+import dev.velix.imperat.exception.ExceptionManager;
+import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.AmbiguousUsageAdditionException;
+import dev.velix.imperat.exception.ExecutionFailure;
+import dev.velix.imperat.exception.InvalidCommandUsageException;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.help.templates.DefaultTemplate;
 import dev.velix.imperat.resolvers.ContextResolver;
@@ -32,7 +33,6 @@ import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.CommandDebugger;
-import dev.velix.imperat.util.CommandExceptionHandler;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -51,12 +51,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public final static String FULL_SYNTAX_PREFIX = START_PREFIX + "<dark_aqua>Full syntax:</dark_aqua> ";
     public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
 
-    private final Map<String, Command<S>> commands = new HashMap<>();
     private final ContextResolverRegistry<S> contextResolverRegistry;
     private final ValueResolverRegistry<S> valueResolverRegistry;
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
-    private final List<CommandPreProcessor<S>> globalPreProcessors = new ArrayList<>();
-    private final List<CommandPostProcessor<S>> globalPostProcessors = new ArrayList<>();
     private final CaptionRegistry<S> captionRegistry;
     protected @NotNull PermissionResolver<S> permissionResolver;
     private @NotNull ContextFactory<S> contextFactory;
@@ -64,6 +61,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private @NotNull HelpTemplate template = DEFAULT_HELP_TEMPLATE;
     private @NotNull AnnotationParser<S> annotationParser;
 
+    private final Map<String, Command<S>> commands = new HashMap<>();
+    private final ExceptionManager<S> exceptionManager = new ExceptionManager<>();
+    private final List<CommandPreProcessor<S>> globalPreProcessors = new ArrayList<>();
+    private final List<CommandPostProcessor<S>> globalPostProcessors = new ArrayList<>();
 
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory();
@@ -105,7 +106,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             commands.put(command.getName().toLowerCase(), command);
         } catch (RuntimeException ex) {
             CommandDebugger.error(BaseImperat.class, "registerCommand(Command command)", ex);
-            ex.printStackTrace();
             shutdownPlatform();
         }
 
@@ -490,7 +490,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         try {
             return handleExecution(source, command, plainContext);
         } catch (Throwable ex) {
-            CommandExceptionHandler.handleException(this, plainContext, BaseImperat.class, "dispatch", ex);
+            this.handleThrowable(ex, plainContext, BaseImperat.class, "dispatch");
             return UsageMatchResult.UNKNOWN;
         }
     }
@@ -513,7 +513,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
     
-    private UsageMatchResult handleExecution(S source, Command<S> command, Context<S> context) throws CommandException {
+    private UsageMatchResult handleExecution(S source, Command<S> command, Context<S> context) throws ImperatException {
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
         }
@@ -550,7 +550,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private void executeUsage(Command<S> command,
                               S source,
                               Context<S> context,
-                              final CommandUsage<S> usage) throws CommandException {
+                              final CommandUsage<S> usage) throws ImperatException {
 
         //global pre-processing
         preProcess(context, usage);
@@ -581,10 +581,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             try {
                 preProcessor.process(this, context, usage);
             } catch (Throwable ex) {
-                CommandExceptionHandler.handleException(
-                        this,
+                this.handleThrowable(
+                        ex,
                         context, preProcessor.getClass(),
-                        "CommandPreProcessor#process", ex
+                        "CommandPreProcessor#process"
                 );
                 break;
             }
@@ -599,10 +599,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             try {
                 postProcessor.process(this, context);
             } catch (Throwable ex) {
-                CommandExceptionHandler.handleException(
-                        this,
+                this.handleThrowable(
+                        ex,
                         context, postProcessor.getClass(),
-                        "CommandPostProcessor#process", ex
+                        "CommandPostProcessor#process"
                 );
                 break;
             }
@@ -648,5 +648,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         this.template = template;
     }
 
+    @Override
+    public final void handleThrowable(Throwable error, Context<S> context, Class<?> owning, String methodName) {
+        this.exceptionManager.handle(error, this, context, owning, methodName);
+    }
 
 }

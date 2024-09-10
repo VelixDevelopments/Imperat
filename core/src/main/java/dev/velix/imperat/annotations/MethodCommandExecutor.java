@@ -6,7 +6,7 @@ import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
@@ -49,7 +49,7 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
      */
     @Override
     public void execute(S source,
-                        ExecutionContext<S> context) throws CommandException {
+                        ExecutionContext<S> context) throws ImperatException {
 
         var instances = AnnotationHelper.loadParameterInstances(dispatcher, fullParameters,
                 source, context, method, null);

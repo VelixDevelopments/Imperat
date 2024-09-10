@@ -4,7 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.internal.ResolvedArgument;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +35,7 @@ public interface ResolvedContext<S extends Source> extends Context<S> {
     /**
      * Resolves the arguments from the given plain input {@link Context}
      */
-    void resolve() throws CommandException;
+    void resolve() throws ImperatException;
 
     /**
      * Fetches the arguments of a command/subcommand that got resolved
@@ -81,7 +81,7 @@ public interface ResolvedContext<S extends Source> extends Context<S> {
                              @Nullable String raw,
                              int index,
                              CommandParameter parameter,
-                             @Nullable T value) throws CommandException;
+                             @Nullable T value) throws ImperatException;
 
     /**
      * Resolves flag the in the context

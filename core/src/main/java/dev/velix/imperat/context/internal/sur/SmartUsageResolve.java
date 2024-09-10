@@ -5,9 +5,9 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
-import dev.velix.imperat.exceptions.CommandException;
-import dev.velix.imperat.exceptions.TokenParseException;
-import dev.velix.imperat.exceptions.context.ContextResolveException;
+import dev.velix.imperat.exception.SenderErrorException;
+import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.TokenParseException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import lombok.Getter;
@@ -43,7 +43,7 @@ public final class SmartUsageResolve<S extends Source> {
     }
 
     @SuppressWarnings("unchecked")
-    public void resolve(Imperat<S> dispatcher, ResolvedContext<S> context) throws CommandException {
+    public void resolve(Imperat<S> dispatcher, ResolvedContext<S> context) throws ImperatException {
 
         final List<CommandParameter> parameterList = new ArrayList<>(usage.getParameters());
         final ArgumentQueue raws = context.getArguments().copy();
@@ -90,7 +90,7 @@ public final class SmartUsageResolve<S extends Source> {
                 if (parameterSubCmd.hasName(currentRaw)) {
                     this.command = parameterSubCmd;
                 } else {
-                    throw new ContextResolveException("Unknown sub-command '" + currentRaw + "'");
+                    throw new SenderErrorException("Unknown sub-command '" + currentRaw + "'");
                 }
 
                 cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
@@ -113,7 +113,7 @@ public final class SmartUsageResolve<S extends Source> {
                     if (flagValueInput == null) {
 
                         if (flagDefaultValue == null)
-                            throw new ContextResolveException(String.format(
+                            throw new SenderErrorException(String.format(
                                     "Missing required flag value-input to be filled '%s'", flag.format())
                             );
 
@@ -124,7 +124,7 @@ public final class SmartUsageResolve<S extends Source> {
 
                     ValueResolver<S, ?> valueResolver = dispatcher.getValueResolver(flag.inputType());
                     if (valueResolver == null) {
-                        throw new ContextResolveException("Cannot find resolver for flag with input type '" + flag.name() + "'");
+                        throw new SenderErrorException("Cannot find resolver for flag with input type '" + flag.name() + "'");
                     }
                     context.resolveFlag(
                             currentRaw,
@@ -153,7 +153,7 @@ public final class SmartUsageResolve<S extends Source> {
             //argument input
             ValueResolver<S, ?> resolver = dispatcher.getValueResolver(currentParameter);
             if (resolver == null)
-                throw new ContextResolveException("Cannot find resolver for type '" + currentParameter.getType().getTypeName() + "'");
+                throw new SenderErrorException("Cannot find resolver for type '" + currentParameter.getType().getTypeName() + "'");
 
             if (currentParameter.isOptional()) {
                 //visualize("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
@@ -173,15 +173,13 @@ public final class SmartUsageResolve<S extends Source> {
 
     }
 
-    private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws ContextResolveException {
+    private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws SenderErrorException {
         final CommandParameter optionalEmptyParameter = cursor.peekParameter(parameterList);
         assert optionalEmptyParameter != null;
         //visualize("Parameter at %s = %s", i, parameter.format(command));
         if (!optionalEmptyParameter.isOptional()) {
             //cannot happen if no bugs, but just in case
-            throw new ContextResolveException(String.format(
-                    "Missing required parameters to be filled '%s'", optionalEmptyParameter.format())
-            );
+            throw new SenderErrorException("Missing required parameters to be filled '%s'", optionalEmptyParameter.format());
         }
         return optionalEmptyParameter;
     }
@@ -192,7 +190,7 @@ public final class SmartUsageResolve<S extends Source> {
             ArgumentQueue raws,
             String currentRaw,
             CommandParameter currentParameter
-    ) throws CommandException {
+    ) throws ImperatException {
         Object resolveResult;
         if (currentParameter.isGreedy()) {
 
@@ -226,7 +224,7 @@ public final class SmartUsageResolve<S extends Source> {
             String currentRaw,
             CommandParameter currentParameter,
             int lengthWithoutFlags
-    ) throws CommandException {
+    ) throws ImperatException {
         if (raws.size() < lengthWithoutFlags) {
             int diff = lengthWithoutFlags - raws.size();
 
@@ -290,7 +288,7 @@ public final class SmartUsageResolve<S extends Source> {
 
     }
 
-    private <T> T getResult(ValueResolver<S, T> resolver, Context<S> context, String raw, CommandParameter currentParameter) throws CommandException {
+    private <T> T getResult(ValueResolver<S, T> resolver, Context<S> context, String raw, CommandParameter currentParameter) throws ImperatException {
         return resolver.resolve(context.getSource(), context, raw, cursor, currentParameter);
     }
 

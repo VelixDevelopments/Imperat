@@ -1,4 +1,4 @@
-package dev.velix.imperat.exceptions;
+package dev.velix.imperat.exception;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;

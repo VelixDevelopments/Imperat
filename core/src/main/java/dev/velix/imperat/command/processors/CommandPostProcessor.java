@@ -4,7 +4,7 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 
 /**
  * Defines a functional interface that processes a {@link Context}
@@ -19,11 +19,11 @@ public interface CommandPostProcessor<S extends Source> {
      *
      * @param imperat the api
      * @param context the context
-     * @throws CommandException the exception to throw if something happens
+     * @throws ImperatException the exception to throw if something happens
      */
     void process(
             Imperat<S> imperat,
             ResolvedContext<S> context
-    ) throws CommandException;
+    ) throws ImperatException;
 
 }

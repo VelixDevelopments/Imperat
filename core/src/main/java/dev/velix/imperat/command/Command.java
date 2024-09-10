@@ -11,7 +11,7 @@ import dev.velix.imperat.command.tree.UsageContextMatch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exceptions.CommandException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.ListUtils;
@@ -164,7 +164,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @param context the context
      * @param usage   the usage detected being used
      */
-    void preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws CommandException;
+    void preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
 
     /**
      * Sets a post-processor for the command
@@ -180,7 +180,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @param context the context
      * @param usage   the usage detected being used
      */
-    void postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws CommandException;
+    void postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
 
     /**
      * @return the default usage of the command
