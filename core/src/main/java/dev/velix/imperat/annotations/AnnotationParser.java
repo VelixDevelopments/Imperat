@@ -1,8 +1,10 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.element.CommandClassVisitor;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 
@@ -20,11 +22,15 @@ public abstract class AnnotationParser<S extends Source> {
     AnnotationParser(Imperat<S> dispatcher) {
         this.dispatcher = dispatcher;
     }
-
-    public static <S extends Source> AnnotationParser<S> defaultParser(Imperat<S> dispatcher) {
-        return new AnnotationParserImpl<>(dispatcher);
+    
+    public static <S extends Source> AnnotationParser<S> defaultParser(@NotNull Imperat<S> dispatcher, @NotNull CommandClassVisitor<S> visitor) {
+        return new AnnotationParserImpl<>(dispatcher, visitor);
     }
-
+    
+    public static <S extends Source> AnnotationParser<S> defaultParser(@NotNull Imperat<S> dispatcher) {
+        return defaultParser(dispatcher, CommandClassVisitor.newSimpleVisitor(dispatcher));
+    }
+    
     /**
      * Parses annotated command class of type {@linkplain T}
      * into {@link Command} then register it using {@link Imperat}

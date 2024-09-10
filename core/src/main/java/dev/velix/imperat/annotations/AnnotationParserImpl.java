@@ -15,10 +15,10 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     
     private final CommandClassVisitor<S> visitor;
     
-    AnnotationParserImpl(Imperat<S> dispatcher) {
+    AnnotationParserImpl(Imperat<S> dispatcher, CommandClassVisitor<S> visitor) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
-        this.visitor = CommandClassVisitor.newSimpleVisitor(dispatcher);
+        this.visitor = visitor;
     }
     
     

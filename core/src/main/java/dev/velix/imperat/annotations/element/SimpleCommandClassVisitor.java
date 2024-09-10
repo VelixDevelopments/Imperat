@@ -135,6 +135,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     .ignoreACPermissions(ignoreAC)
                     .aliases(aliases)
                     .build();
+            
         } else if (cmdAnnotation instanceof SubCommand subCommand) {
             final String[] values = subCommand.value();
             assert values != null;
