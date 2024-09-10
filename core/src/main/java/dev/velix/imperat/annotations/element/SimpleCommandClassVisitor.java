@@ -181,6 +181,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             return cmd;
         } else if (parseElement instanceof ClassElement commandClass) {
             
+            
             //load command class
             for (ParseElement<?> element : commandClass.getChildren()) {
                 

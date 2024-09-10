@@ -5,6 +5,7 @@ import dev.velix.imperat.annotations.element.ClassElement;
 import dev.velix.imperat.annotations.element.CommandClassVisitor;
 import dev.velix.imperat.annotations.element.MethodElement;
 import dev.velix.imperat.annotations.element.RootCommandClass;
+import dev.velix.imperat.annotations.types.Inherit;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +53,17 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
             root.addChild(new MethodElement(registry, root, method));
         }
         
+        //We add external subcommand classes from @Inherit as children
+        if (root.isAnnotationPresent(Inherit.class)) {
+            Inherit inherit = root.getAnnotation(Inherit.class);
+            assert inherit != null;
+            for (Class<?> subClass : inherit.value()) {
+                root.addChild(
+                        readClass(registry, root, subClass)
+                );
+            }
+        }
+        
         //Adding inner classes
         for (Class<?> child : clazz.getDeclaredClasses()) {
             //System.out.println(clazz.getSimpleName() + ": adding child class= " + child.getSimpleName());
@@ -59,6 +71,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
                     readClass(registry, root, child)
             );
         }
+        
         
         return root;
     }

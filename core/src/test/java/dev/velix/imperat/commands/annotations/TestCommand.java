@@ -4,7 +4,7 @@ import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.types.*;
 
 @Command("test")
-//@Inherit(FirstSub.class)
+@Inherit(FirstSub.class)
 public class TestCommand {
     //TODO test command methods
     @Usage
