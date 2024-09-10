@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.*;
 
 final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisitor<S> {
@@ -50,7 +51,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             if (clazz.isAnnotationPresent(SubCommand.class)) {
                 throw new IllegalStateException("Root command class cannot be a @SubCommand");
             }
-            Command<S> cmd = loadCommand(reader, clazz, commandAnnotation);
+            Command<S> cmd = loadCommand(reader, null, clazz, commandAnnotation);
             
             //if cmd=null → loading @Command methods only from this class
             if (cmd != null) {
@@ -60,7 +61,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             
         } else if (commandAnnotation != null) {
             //inner class with @Command or @SubCommand
-            Command<S> cmd = loadCommand(reader, clazz, commandAnnotation);
+            Command<S> cmd = loadCommand(reader, null, clazz, commandAnnotation);
             assert cmd != null;
             loadCommandClassForRootClass(reader, clazz, cmd);
             commands.add(cmd);
@@ -68,7 +69,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             //no annotation
             for (ParseElement<?> element : clazz.getChildren()) {
                 if (element.isAnnotationPresent(dev.velix.imperat.annotations.types.Command.class)) {
-                    var cmd = loadCommand(reader, element, Objects.requireNonNull(element.getAnnotation(dev.velix.imperat.annotations.types.Command.class)));
+                    var cmd = loadCommand(reader, null, element, Objects.requireNonNull(element.getAnnotation(dev.velix.imperat.annotations.types.Command.class)));
                     if (cmd != null) {
                         imperat.registerCommand(cmd);
                     }
@@ -98,19 +99,19 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 if (method.isAnnotationPresent(dev.velix.imperat.annotations.types.Command.class)) {
                     var cmdAnn = method.getAnnotation(dev.velix.imperat.annotations.types.Command.class);
                     assert cmdAnn != null;
-                    imperat.registerCommand(loadCommand(reader, method, cmdAnn));
+                    imperat.registerCommand(loadCommand(reader, null, method, cmdAnn));
                 } else if (method.isAnnotationPresent(Usage.class)) {
-                    cmd.addUsage(loadUsage(reader, cmd, method));
+                    cmd.addUsage(loadUsage(reader, null, cmd, method));
                 } else if (method.isAnnotationPresent(SubCommand.class)) {
                     SubCommand subAnn = method.getAnnotation(SubCommand.class);
                     assert subAnn != null;
-                    cmd.addSubCommand(loadCommand(reader, method, subAnn), Boolean.TRUE.equals(subAnn.attachDirectly()));
+                    cmd.addSubCommand(loadCommand(reader, cmd, method, subAnn), Boolean.TRUE.equals(subAnn.attachDirectly()));
                 }
             } else if (element instanceof ClassElement innerClass) {
                 
                 SubCommand subCommand = innerClass.getAnnotation(SubCommand.class);
                 if (subCommand != null) {
-                    var sub = loadCommand(reader, innerClass, subCommand);
+                    var sub = loadCommand(reader, cmd, innerClass, subCommand);
                     cmd.addSubCommand(sub, Boolean.TRUE.equals(subCommand.attachDirectly()));
                 } else {
                     throw new IllegalArgumentException("Failed to load command elements from inner class" + innerClass.getElement().getSimpleName());
@@ -158,6 +159,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     
     private Command<S> loadCommand(
             AnnotationReader<S> reader,
+            @Nullable Command<S> parentCmd,
             ParseElement<?> parseElement,
             @NotNull Annotation annotation
     ) {
@@ -173,7 +175,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         )
                 );
             } else {
-                var usage = loadUsage(reader, cmd, methodElement);
+                var usage = loadUsage(reader, parentCmd, cmd, methodElement);
                 //CommandDebugger.debugParameters("sub usage params: " , usage.getParameters());
                 cmd.addUsage(usage);
             }
@@ -199,12 +201,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                                     )
                             );
                         } else {
-                            cmd.addUsage(loadUsage(reader, cmd, method));
+                            cmd.addUsage(loadUsage(reader, parentCmd, cmd, method));
                         }
                     } else if (method.isAnnotationPresent(SubCommand.class)) {
                         var subAnn = method.getAnnotation(SubCommand.class);
                         assert subAnn != null;
-                        var subCmd = loadCommand(reader, method, subAnn);
+                        var subCmd = loadCommand(reader, cmd, method, subAnn);
                         assert subCmd != null;
                         if (method.getParameters().size() == 1) {
                             //default usage for that command.
@@ -214,7 +216,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                                     )
                             );
                         } else {
-                            subCmd.addUsage(loadUsage(reader, cmd, method));
+                            subCmd.addUsage(loadUsage(reader, parentCmd, cmd, method));
                         }
                         cmd.addSubCommand(subCmd, subAnn.attachDirectly());
                     }
@@ -225,7 +227,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         var innerCmdAnn = innerClass.getAnnotation(dev.velix.imperat.annotations.types.Command.class);
                         assert innerCmdAnn != null;
                         imperat.registerCommand(
-                                loadCommand(reader, innerClass, innerCmdAnn)
+                                loadCommand(reader, null, innerClass, innerCmdAnn)
                         );
                         return null;
                     } else if (innerClass.isAnnotationPresent(SubCommand.class)) {
@@ -234,7 +236,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         }
                         SubCommand subCommandAnn = innerClass.getAnnotation(SubCommand.class);
                         assert subCommandAnn != null;
-                        cmd.addSubCommand(loadCommand(reader, innerClass, subCommandAnn), subCommandAnn.attachDirectly());
+                        cmd.addSubCommand(loadCommand(reader, cmd, innerClass, subCommandAnn), subCommandAnn.attachDirectly());
                     }
                     
                 }
@@ -248,18 +250,18 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
     
     
-    private CommandUsage<S> loadUsage(AnnotationReader<S> reader, @NotNull Command<S> loadedCmd, MethodElement element) {
+    private CommandUsage<S> loadUsage(AnnotationReader<S> reader, @Nullable Command<S> parentCmd,
+                                      @NotNull Command<S> loadedCmd, MethodElement element) {
         Method method = element.getElement();
         if (method.getParameters().length == 1) {
             loadedCmd.setDefaultUsageExecution(new MethodCommandExecutor<>(reader.getRootClass(), imperat, method, Collections.emptyList()));
-            return CommandUsage.<S>builder().build();
+            return CommandUsage.<S>builder().build(loadedCmd);
         }
         
         ClassElement methodOwner = (ClassElement) element.getParent();
         assert methodOwner != null;
         
-        boolean sub = element.isAnnotationPresent(SubCommand.class);
-        var parametersInfo = loadParameters(element, loadedCmd.getMainUsage(), sub);
+        var parametersInfo = loadParameters(element, loadedCmd, parentCmd);
         
         final boolean isHelp = parametersInfo.left();
         final List<CommandParameter> params = parametersInfo.right();
@@ -268,28 +270,58 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 : new MethodCommandExecutor<>(reader.getRootClass(), imperat, method, params);
         
         return CommandUsage.<S>builder().parameters(params)
-                .execute(execution).build(isHelp);
+                .execute(execution).build(loadedCmd, isHelp);
     }
     
-    private Pair<List<CommandParameter>, Boolean> loadParameters(MethodElement method, @Nullable CommandUsage<S> main, boolean sub) {
-        List<CommandParameter> commandParameters = new ArrayList<>();
+    private Pair<List<CommandParameter>, Boolean> loadParameters(
+            @NotNull MethodElement method,
+            @NotNull Command<S> loadedCmd,
+            @Nullable Command<S> parentCmd
+    ) {
+        
+        List<CommandParameter> toLoad = new ArrayList<>();
+        CommandUsage<S> main = parentCmd == null ? loadedCmd.getMainUsage() : parentCmd.getMainUsage();
+        
+        LinkedList<CommandParameter> mainUsageParameters = new LinkedList<>(main.getParameters());
+        LinkedList<ParameterElement> parameterElements = new LinkedList<>(method.getParameters());
+        
         boolean help = false;
-        for (ParameterElement parameter : method.getParameters()) {
-            Class<?> type = parameter.getElement().getType();
-            if (imperat.canBeSender(type)) continue;
-            if (imperat.hasContextResolver(type)) continue;
+        while (!parameterElements.isEmpty()) {
+            
+            ParameterElement parameterElement = parameterElements.peek();
+            if (parameterElement == null) break;
+            Type type = parameterElement.getElement().getParameterizedType();
+            
+            if (imperat.canBeSender(type) || imperat.hasContextResolver(type)) {
+                parameterElements.removeFirst();
+                continue;
+            }
             if (TypeUtility.areRelatedTypes(type, CommandHelp.class)) {
                 //CommandHelp parameter
                 help = true;
                 continue;
             }
-            var commandParameter = loadParameter(parameter);
-            if (main != null && sub && main.hasParameters((param) -> param.equals(commandParameter))) {
+            
+            CommandParameter commandParameter = loadParameter(parameterElement);
+            
+            CommandParameter mainParameter = mainUsageParameters.peek();
+            if (mainParameter == null) {
+                toLoad.add(commandParameter);
+                parameterElements.removeFirst();
                 continue;
             }
-            commandParameters.add(commandParameter);
+            if (parentCmd != null && mainParameter.isSimilarTo(commandParameter)) {
+                parameterElements.removeFirst();
+                mainUsageParameters.removeFirst();
+                continue;
+            }
+            
+            toLoad.add(commandParameter);
+            mainUsageParameters.removeFirst();
+            parameterElements.removeFirst();
         }
-        return new Pair<>(commandParameters, help);
+        
+        return new Pair<>(toLoad, help);
     }
     
     @SuppressWarnings("unchecked")
@@ -401,5 +433,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         flagAliases.addAll(Arrays.asList(array).subList(1, array.length));
         return flagAliases;
     }
+    
     
 }

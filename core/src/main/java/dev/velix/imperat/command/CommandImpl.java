@@ -19,6 +19,7 @@ import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +76,18 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public String getName() {
         return name;
     }
-
+    
+    @Override
+    public @Nullable Command<?> getParentCommand() {
+        return parent;
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public void setParentCommand(Command<?> parentCommand) {
+        this.parent = (Command<S>) parentCommand;
+    }
+    
     /**
      * @return The permission of the command
      */
@@ -221,8 +233,14 @@ final class CommandImpl<S extends Source> implements Command<S> {
         return (SuggestionResolver<CS, T>) SuggestionResolver.plain(Command.class,
                 List.of(this.getName()));
     }
-
-
+    
+    @Override
+    public boolean isSimilarTo(CommandParameter parameter) {
+        return this.name.equalsIgnoreCase(parameter.getName())
+                && TypeUtility.matches(getType(), parameter.getType());
+    }
+    
+    
     /**
      * @return the aliases for this commands
      */
@@ -257,7 +275,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void setDefaultUsageExecution(CommandExecution<S> execution) {
         this.defaultUsage = CommandUsage.<S>builder()
                 .execute(execution)
-                .build();
+                .build(this);
     }
 
     /**
@@ -335,7 +353,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param parent the parent to set.
      */
     @Override
-    public void setParent(Command<S> parent) {
+    public void setParent(@NotNull Command<S> parent) {
         this.parent = parent;
     }
 
@@ -398,7 +416,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void addSubCommandUsage(
             String subCommand,
             List<String> aliases,
-            CommandUsage<S> usage,
+            CommandUsage.Builder<S> usage,
             boolean attachDirectly
     ) {
         int position;
@@ -494,8 +512,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
                 "help",
                 CommandUsage.<S>builder()
                         .parameters(params)
-                        .execute(helpExecution)
-                        .buildAsHelp(),
+                        .execute(helpExecution),
                 true
         );
     }

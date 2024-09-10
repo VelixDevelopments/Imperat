@@ -104,34 +104,6 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
      * this usage with the usage regarding parameters
      * and takes the targetToLoad's execution as well
      *
-     * @param usage the usage to merge with
-     * @return the merged command usage!
-     */
-    default CommandUsage<S> merge(CommandUsage<S> usage) {
-        List<CommandParameter> parameters = new ArrayList<>(this.getParameters());
-        for (CommandParameter param : usage.getParameters()) {
-            if (this.hasParameters((p) -> p.equals(param))) {
-                continue;
-            }
-            parameters.add(param);
-        }
-        //parameters.addAll(usage.getParameters());
-
-        return CommandUsage.<S>builder()
-                .description(usage.getDescription().toString())
-                .permission(usage.getPermission())
-                .cooldown(usage.getCooldown())
-                .parameters(parameters)
-                .coordinator(usage.getCoordinator())
-                .execute(usage.getExecution())
-                .build(usage.isHelp());
-    }
-
-    /**
-     * Creates a new command usage instance to use it to Merge
-     * this usage with the usage regarding parameters
-     * and takes the targetToLoad's execution as well
-     *
      * <p>
      * it also it also includes the subcommand's parameter itself
      * into the command's usage !
@@ -157,7 +129,7 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
                 .cooldown(usage.getCooldown())
                 .parameters(comboParams)
                 .execute(usage.getExecution())
-                .build(usage.isHelp());
+                .build(subCommand, usage.isHelp());
     }
 
     /**
@@ -299,15 +271,7 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
         }
 
         public Builder<S> parameters(CommandParameter... params) {
-            int index = 0;
-            for (CommandParameter parameter : params) {
-                if (!parameter.isCommand()) {
-                    parameter.setPosition(index);
-                }
-                this.parameters.add(parameter);
-                index++;
-            }
-            return this;
+            return parameters(Arrays.asList(params));
         }
 
         public Builder<S> parameters(List<CommandParameter> params) {
@@ -316,28 +280,31 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
                 if (!parameter.isCommand()) {
                     parameter.setPosition(i);
                 }
+                
                 this.parameters.add(parameter);
             }
             return this;
         }
-
-        public CommandUsage<S> build(boolean help) {
+        
+        public CommandUsage<S> build(@NotNull Command<S> command, boolean help) {
             CommandUsageImpl<S> impl = new CommandUsageImpl<>(execution, help);
             impl.setCoordinator(commandCoordinator);
             impl.setPermission(permission);
             impl.setDescription(description);
             impl.setCooldown(cooldown);
-            impl.addParameters(parameters);
+            impl.addParameters(
+                    parameters.stream().peek((p) -> p.setParentCommand(command)).toList()
+            );
             return impl;
         }
-
-
-        public CommandUsage<S> build() {
-            return build(false);
+        
+        
+        public CommandUsage<S> build(@NotNull Command<S> command) {
+            return build(command, false);
         }
-
-        public CommandUsage<S> buildAsHelp() {
-            return build(true);
+        
+        public CommandUsage<S> buildAsHelp(@NotNull Command<S> command) {
+            return build(command, true);
         }
 
     }

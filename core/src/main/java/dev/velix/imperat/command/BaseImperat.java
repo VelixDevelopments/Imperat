@@ -34,6 +34,7 @@ import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.CommandDebugger;
 import dev.velix.imperat.util.CommandExceptionHandler;
 import dev.velix.imperat.util.Preconditions;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -314,8 +315,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return whether the type can be a command sender
      */
     @Override
-    public boolean canBeSender(Class<?> type) {
-        return Source.class.isAssignableFrom(type);
+    public boolean canBeSender(Type type) {
+        return TypeWrap.of(Source.class).isSupertypeOf(type);
     }
 
     /**

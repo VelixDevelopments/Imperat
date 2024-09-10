@@ -19,7 +19,7 @@ public final class TestCommands {
                         TestRun.USAGE_EXECUTED = true;
                         source.reply("Executing /group " + context.getArgument("group") + " without any other args");
                     })
-                    .build()
+            
             )
             .subCommand(
                     Command.<TestSource>create("setperm")
@@ -35,7 +35,7 @@ public final class TestCommands {
                                         Boolean value = ctx.getArgument("value");
                                         source.reply("Executing /group " + group + " setperm " + permission + " " + value);
                                     })
-                                    .build()
+                            
                             )
                             .build()
             )
@@ -51,7 +51,6 @@ public final class TestCommands {
                                         String prefix = ctx.getArgument("prefix");
                                         source.reply("Executing /group " + group + " setprefix " + prefix);
                                     })
-                                    .build()
                     )
                     .build()
             )
@@ -65,7 +64,7 @@ public final class TestCommands {
                                         source.sendMsg("Help page= " + page);
                                         TestRun.USAGE_EXECUTED = true;
                                     })
-                                    .build()
+                    
                     ).build(), true
             )
             .build();
@@ -80,7 +79,7 @@ public final class TestCommands {
                                     .usage(CommandUsage.<TestSource>builder()
                                             .parameters(CommandParameter.requiredText("arg1"))
                                             .execute((source, context) -> source.reply("Arg1= " + context.getArgument("arg1")))
-                                            .build()
+                                    
                                     )
                                     .subCommand(
                                             Command.<TestSource>create("second")
@@ -88,7 +87,7 @@ public final class TestCommands {
                                                     .usage(CommandUsage.<TestSource>builder()
                                                             .parameters(CommandParameter.requiredText("arg2"))
                                                             .execute((source, ctx) -> source.reply("Arg1= " + ctx.getArgument("arg1") + ", Arg2= " + ctx.getArgument("arg2")))
-                                                            .build())
+                                                    )
                                                     .subCommand(
                                                             Command.<TestSource>create("third")
                                                                     .defaultExecution((source, context) -> source.reply("THIRD, DEF EXEC"))
@@ -96,7 +95,7 @@ public final class TestCommands {
                                                                             .parameters(CommandParameter.requiredText("arg3"))
                                                                             .execute((source, ctx) -> source.reply("Arg1= " + ctx.getArgument("arg1") + ", " +
                                                                                     "Arg2= " + ctx.getArgument("arg2") + ", Arg3= " + ctx.getArgument("arg3")))
-                                                                            .build())
+                                                                    )
                                                                     .build()
                                                     )
                                                     .build()
@@ -116,7 +115,7 @@ public final class TestCommands {
                                             CommandParameter.requiredText("r2"),
                                             CommandParameter.optionalText("o2")
                                     )
-                                    .build()
+                    
                     )
                     .build();
 

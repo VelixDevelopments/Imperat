@@ -6,7 +6,7 @@ import dev.velix.imperat.annotations.types.*;
 @Command("test")
 @Inherit(FirstSub.class)
 public class TestCommand {
-    //TODO test command methods
+    
     @Usage
     public void defaultExec(TestSource source) {
         source.reply("Default execution of test(root) command");

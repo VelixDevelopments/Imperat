@@ -23,7 +23,7 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 
 @ApiStatus.Internal
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
-
+    
     private final List<CommandParameter> parameters = new ArrayList<>();
     private final List<CommandParameter> pureParameters = new ArrayList<>();
     private final CommandExecution<S> execution;

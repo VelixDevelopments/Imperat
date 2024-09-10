@@ -125,12 +125,24 @@ public interface CommandParameter extends PermissionHolder, DescriptionHolder {
     static <S extends Source> FlagBuilder<S, Boolean> flagSwitch(String name) {
         return FlagBuilder.ofSwitch(name);
     }
-
+    
     /**
      * @return the name of the parameter
      */
     String getName();
-
+    
+    /**
+     * @return the parent of this parameter
+     */
+    @Nullable Command<?> getParentCommand();
+    
+    /**
+     * Sets parent command for a parameter
+     *
+     * @param parentCommand the parameter's owning command
+     */
+    void setParentCommand(Command<?> parentCommand);
+    
     /**
      * @return the index of this parameter
      */
@@ -257,5 +269,17 @@ public interface CommandParameter extends PermissionHolder, DescriptionHolder {
     default NumericParameter asNumeric() {
         return (NumericParameter) this;
     }
-
+    
+    /**
+     * Checks if this parameter has same name and type to the other {@link CommandParameter}
+     * unlike `CommandParameter#equals(Object)`,
+     * if both parameters are only different in their parent {@link Command},
+     * it would still return true
+     *
+     * @param parameter the parameter to compare to
+     * @return Whether this parameter has same name and type to the other {@link CommandParameter} or not
+     */
+    boolean isSimilarTo(CommandParameter parameter);
+    
+    
 }

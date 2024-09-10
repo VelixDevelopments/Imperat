@@ -2,6 +2,8 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.context.Source;
 
+import java.lang.reflect.Type;
+
 public sealed interface SourceWrapper<S extends Source> permits Imperat {
     /**
      * Wraps the sender into a built-in command-sender type
@@ -17,5 +19,5 @@ public sealed interface SourceWrapper<S extends Source> permits Imperat {
      * @param type the type
      * @return whether the type can be a command sender
      */
-    boolean canBeSender(Class<?> type);
+    boolean canBeSender(Type type);
 }

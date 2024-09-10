@@ -8,13 +8,15 @@ import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 @ApiStatus.Internal
 public abstract class InputParameter implements CommandParameter {
-
+    
+    protected Command<?> parentCommand;
     protected final String name;
     protected final TypeWrap<?> typeWrap;
     protected final boolean optional, flag, greedy;
@@ -23,13 +25,15 @@ public abstract class InputParameter implements CommandParameter {
     protected String permission;
     protected Description description;
     protected int index;
-
-
-    protected InputParameter(String name, TypeWrap<?> typeWrap,
-                             @Nullable String permission,
-                             Description description,
-                             boolean optional, boolean flag, boolean greedy,
-                             OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver) {
+    
+    
+    protected InputParameter(
+            String name, TypeWrap<?> typeWrap,
+            @Nullable String permission,
+            Description description,
+            boolean optional, boolean flag, boolean greedy,
+            OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver
+    ) {
         this.name = name;
         this.typeWrap = typeWrap;
         this.permission = permission;
@@ -49,7 +53,18 @@ public abstract class InputParameter implements CommandParameter {
     public String getName() {
         return name;
     }
-
+    
+    @Override
+    public @Nullable Command<?> getParentCommand() {
+        return parentCommand;
+    }
+    
+    @Override
+    public void setParentCommand(@NotNull Command<?> parentCommand) {
+        this.parentCommand = parentCommand;
+    }
+    
+    
     /**
      * @return the index of this parameter
      */
@@ -166,23 +181,33 @@ public abstract class InputParameter implements CommandParameter {
     public void setDescription(Description description) {
         this.description = description;
     }
-
+    
+    
+    @Override
+    public boolean isSimilarTo(CommandParameter parameter) {
+        return this.name.equalsIgnoreCase(parameter.getName())
+                && TypeUtility.matches(typeWrap.getType(), parameter.getTypeWrap().getType());
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InputParameter that = (InputParameter) o;
         return Objects.equals(name, that.name)
-                && TypeUtility.matches(typeWrap.getType(), that.typeWrap.getType());
+                && TypeUtility.matches(typeWrap.getType(), that.typeWrap.getType())
+                && Objects.equals(parentCommand, that.parentCommand);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, typeWrap);
+        return Objects.hash(name, typeWrap, parentCommand);
     }
 
     @Override
     public String toString() {
         return format();
     }
+    
+    
 }

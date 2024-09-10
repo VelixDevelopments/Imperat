@@ -64,18 +64,18 @@ public class TestRun {
     @Test
     public void testTypeTolerantVerifierAmbiguity() {
         UsageVerifier<TestSource> verifier = UsageVerifier.typeTolerantVerifier();
-
-        CommandUsage<TestSource> usage1 = CommandUsage.<TestSource>builder()
+        
+        CommandUsage.Builder<TestSource> usage1 = CommandUsage.<TestSource>builder()
                 .parameters(
                         CommandParameter.requiredText("arg1")
-                ).build();
-
-        CommandUsage<TestSource> usage2 = CommandUsage.<TestSource>builder()
+                );
+        
+        CommandUsage.Builder<TestSource> usage2 = CommandUsage.<TestSource>builder()
                 .parameters(
                         CommandParameter.requiredBoolean("arg2")
-                ).build();
-
-        Assertions.assertFalse(verifier.areAmbiguous(usage1, usage2));
+                );
+        
+        Assertions.assertFalse(verifier.areAmbiguous(usage1.build(GROUP_CMD), usage2.build(GROUP_CMD)));
     }
 
     @Test

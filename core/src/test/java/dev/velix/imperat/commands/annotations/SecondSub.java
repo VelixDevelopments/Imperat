@@ -17,10 +17,9 @@ public class SecondSub {
     public void cmdUsage(TestSource source,
                          //TODO explain in docs that you don't have to specify any meta-annotations on the arguments that were inherited by their parent
                          @Named("arg1") String arg1,
-                         @Named("arg2") String arg2,
-                         @Named("arg3") String arg3) {
+                         @Named("arg1") String arg2) {
         source.reply("Executing usage in first's main usage," +
-                " arg1= " + arg1 + ", arg2= " + arg2 + ", arg3= " + arg3);
+                " arg1= " + arg1 + ", arg2= " + arg2);
     }
 
 }

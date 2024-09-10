@@ -200,7 +200,15 @@ public interface Command<S extends Source> extends CommandParameter {
      * @param usage the usage {@link CommandUsage} of the command
      */
     void addUsage(CommandUsage<S> usage);
-
+    
+    default void addUsage(CommandUsage.Builder<S> builder, boolean help) {
+        addUsage(builder.build(this, help));
+    }
+    
+    default void addUsage(CommandUsage.Builder<S> builder) {
+        addUsage(builder, false);
+    }
+    
     /**
      * Fetches the usage with specific sequence of parameters
      *
@@ -245,7 +253,7 @@ public interface Command<S extends Source> extends CommandParameter {
      *
      * @param parent the parent to set.
      */
-    void setParent(Command<S> parent);
+    void setParent(@NotNull Command<S> parent);
 
     /**
      * Injects a created-subcommand directly into the parent's command usages.
@@ -276,17 +284,17 @@ public interface Command<S extends Source> extends CommandParameter {
      */
     void addSubCommandUsage(String subCommand,
                             List<String> aliases,
-                            CommandUsage<S> usage,
+                            CommandUsage.Builder<S> usage,
                             boolean attachDirectly);
 
     default void addSubCommandUsage(String subCommand,
                                     List<String> aliases,
-                                    CommandUsage<S> usage) {
+                                    CommandUsage.Builder<S> usage) {
         addSubCommandUsage(subCommand, aliases, usage, false);
     }
 
     default void addSubCommandUsage(String subCommand,
-                                    CommandUsage<S> usage,
+                                    CommandUsage.Builder<S> usage,
                                     boolean attachDirectly) {
         addSubCommandUsage(subCommand, Collections.emptyList(), usage, attachDirectly);
     }
@@ -298,7 +306,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @param subCommand the sub-command's unique name
      * @param usage      the usage
      */
-    default void addSubCommandUsage(String subCommand, CommandUsage<S> usage) {
+    default void addSubCommandUsage(String subCommand, CommandUsage.Builder<S> usage) {
         addSubCommandUsage(subCommand, usage, false);
     }
 
@@ -454,8 +462,8 @@ public interface Command<S extends Source> extends CommandParameter {
             cmd.setDefaultUsageExecution(defaultExec);
             return this;
         }
-
-        public Builder<S> usage(CommandUsage<S> usage) {
+        
+        public Builder<S> usage(CommandUsage.Builder<S> usage) {
             cmd.addUsage(usage);
             return this;
         }
@@ -468,8 +476,8 @@ public interface Command<S extends Source> extends CommandParameter {
         public Builder<S> subCommand(Command<S> subCommand) {
             return subCommand(subCommand, false);
         }
-
-        public Builder<S> subCommand(String name, CommandUsage<S> mainUsage, boolean attachDirectly) {
+        
+        public Builder<S> subCommand(String name, CommandUsage.Builder<S> mainUsage, boolean attachDirectly) {
             return subCommand(
                     Command.<S>create(name)
                             .usage(mainUsage)
@@ -477,8 +485,8 @@ public interface Command<S extends Source> extends CommandParameter {
                     attachDirectly
             );
         }
-
-        public Builder<S> subCommand(String name, CommandUsage<S> mainUsage) {
+        
+        public Builder<S> subCommand(String name, CommandUsage.Builder<S> mainUsage) {
             return subCommand(name, mainUsage, false);
         }
 
