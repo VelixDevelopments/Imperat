@@ -34,16 +34,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     SimpleCommandClassVisitor(Imperat<S> imperat) {
         super(imperat);
     }
-    
-    private Annotation getCommandAnnotation(ClassElement clazz) {
-        if (clazz.isAnnotationPresent(dev.velix.imperat.annotations.types.Command.class))
-            return clazz.getAnnotation(dev.velix.imperat.annotations.types.Command.class);
-        
-        if (clazz.isAnnotationPresent(SubCommand.class))
-            return clazz.getAnnotation(SubCommand.class);
-        
-        return null;
-    }
+
     
     @Override
     public Set<Command<S>> visitCommandClass(
@@ -87,6 +78,17 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
         
         return commands;
+    }
+    
+    
+    private Annotation getCommandAnnotation(ClassElement clazz) {
+        if (clazz.isAnnotationPresent(dev.velix.imperat.annotations.types.Command.class))
+            return clazz.getAnnotation(dev.velix.imperat.annotations.types.Command.class);
+        
+        if (clazz.isAnnotationPresent(SubCommand.class))
+            return clazz.getAnnotation(SubCommand.class);
+        
+        return null;
     }
     
     
