@@ -60,7 +60,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private final Map<String, Command<S>> commands = new HashMap<>();
     private final List<CommandPreProcessor<S>> globalPreProcessors = new ArrayList<>();
     private final List<CommandPostProcessor<S>> globalPostProcessors = new ArrayList<>();
-    private final Map<Class<? extends Throwable>, ThrowableResolver<? extends Throwable, S>> handlers = new HashMap<>();
+    private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
 
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory();
