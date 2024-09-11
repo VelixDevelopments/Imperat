@@ -481,6 +481,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         try {
             return handleExecution(source, command, plainContext);
         } catch (Throwable ex) {
+            ex.printStackTrace();
             this.handleThrowable(ex, plainContext, BaseImperat.class, "dispatch");
             return UsageMatchResult.UNKNOWN;
         }

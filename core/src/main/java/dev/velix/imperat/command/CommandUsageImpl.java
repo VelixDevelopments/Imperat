@@ -320,7 +320,16 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CommandUsageImpl<?> that = (CommandUsageImpl<?>) o;
-        return Objects.equals(parameters, that.parameters);
+        if (this.size() != that.size()) return false;
+        for (int i = 0; i < this.size(); i++) {
+            var thisP = this.getParameter(i);
+            var thatP = that.getParameter(i);
+            assert thisP != null;
+            if (!thisP.isSimilarTo(thatP)) {
+                return false;
+            }
+        }
+        return true;
     }
     
     @Override

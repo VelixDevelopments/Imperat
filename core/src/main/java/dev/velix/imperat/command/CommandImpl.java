@@ -19,7 +19,6 @@ import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.CommandDebugger;
-import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +35,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private final int position;
     private final List<String> aliases = new ArrayList<>();
     private final Map<String, Command<S>> children = new TreeMap<>();
-    private final Map<List<CommandParameter>, CommandUsage<S>> usages = new TreeMap<>(UsageComparator.getInstance());
+    private final UsageMap<S> usages = new UsageMap<>();
     private final AutoCompleter<S> autoCompleter;
     private final @Nullable CommandTree<S> commandTree;
     private final @NotNull CommandTreeVisualizer<S> visualizer;
@@ -236,8 +235,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     
     @Override
     public boolean isSimilarTo(CommandParameter parameter) {
-        return this.name.equalsIgnoreCase(parameter.getName())
-                && TypeUtility.matches(getType(), parameter.getType());
+        return this.name.equalsIgnoreCase(parameter.getName());
     }
     
     
@@ -289,6 +287,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             return;
         }
         
+        
         usages.put(usage.getParameters(), usage);
         
         if (mainUsage == null && usage.getMaxLength() >= 1 &&
@@ -311,7 +310,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     public Collection<? extends CommandUsage<S>> getUsages() {
-        return usages.values();
+        return usages.asSortedSet();
     }
     
     @Override
@@ -379,6 +378,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         //adding the merged command usage
         
         //CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+        CommandDebugger.debug("ADDING to " + this.name + " USAGE= %s", CommandUsage.format(this, combo));
         this.addUsage(combo);
         
         for (CommandUsage<S> subUsage : command.getUsages()) {
@@ -391,6 +391,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
                     combo
             );
         }
+        
+        System.out.println(this.name + "'s SIZE= " + this.usages.size());
     }
     
     /**
@@ -517,5 +519,15 @@ final class CommandImpl<S extends Source> implements Command<S> {
         );
     }
     
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CommandImpl<?> command)) return false;
+        return Objects.equals(name, command.name);
+    }
     
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }

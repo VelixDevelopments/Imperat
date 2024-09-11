@@ -23,7 +23,7 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public interface CommandUsage<S extends Source> extends PermissionHolder, DescriptionHolder, CooldownHolder {
+public sealed interface CommandUsage<S extends Source> extends PermissionHolder, DescriptionHolder, CooldownHolder permits CommandUsageImpl {
     
     static <S extends Source> String format(Command<S> command, CommandUsage<S> usage) {
         StringBuilder builder = new StringBuilder(command.getName()).append(' ');
@@ -217,6 +217,11 @@ public interface CommandUsage<S extends Source> extends PermissionHolder, Descri
      * @return whether this usage has this sequence of parameters
      */
     boolean hasParameters(List<CommandParameter> parameters);
+    
+    default int size() {
+        return getParameters().size();
+    }
+    
     
     @SuppressWarnings("all")
     class Builder<S extends Source> {

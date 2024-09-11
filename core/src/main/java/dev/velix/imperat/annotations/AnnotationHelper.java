@@ -74,6 +74,7 @@ public final class AnnotationHelper {
                 ResolvedFlag value = context.getFlag(parameter.getName());
                 paramsInstances[i] = value.value();
             } else {
+                System.out.println("GETTING " + parameter.getName());
                 Object value = context.getArgument(parameter.getName());
                 paramsInstances[i] = value;
             }

@@ -32,12 +32,12 @@ public class TestCommand {
     public static class Sub1 {
         @Usage
         public void defaultUsage(TestSource source) {
-            source.reply("Default exec for Inner");
+            source.reply("default sub1");
         }
         
         @Usage
         public void sub1Main(TestSource source, @Named("a") String a) {
-            source.reply("a=" + a);
+            source.reply("sub1-main a=" + a);
         }
         
         @SubCommand("sub2")
@@ -46,12 +46,12 @@ public class TestCommand {
             
             @Usage
             public void defaultUsage(TestSource source) {
-                source.reply("Default exec for Inner");
+                source.reply("default sub2");
             }
             
             @Usage
             public void sub2Main(TestSource source, @Named("b") String b) {
-                source.reply("a=" + b);
+                source.reply("sub2-main b=" + b);
             }
             
             @SubCommand("sub3")
@@ -59,12 +59,12 @@ public class TestCommand {
                 
                 @Usage
                 public void defaultUsage(TestSource source) {
-                    source.reply("Default exec for Inner");
+                    source.reply("default sub3");
                 }
                 
                 @Usage
                 public void sub3Main(TestSource source, @Named("c") String c) {
-                    source.reply("a=" + c);
+                    source.reply("sub3 c=" + c);
                 }
                 
             }
@@ -78,12 +78,12 @@ public class TestCommand {
         
         @Usage
         public void defaultUsage(TestSource source) {
-            source.reply("Default exec for Inner");
+            source.reply("default sub4");
         }
         
         @Usage
-        public void sub4Main(TestSource source, @Named("a") String a) {
-            source.reply("a=" + a);
+        public void sub4Main(TestSource source, @Named("othertext") String otherText, @Named("a") String a) {
+            source.reply("sub4 a=" + a);
         }
         
         @SubCommand("sub5")
@@ -91,24 +91,24 @@ public class TestCommand {
             
             @Usage
             public void defaultUsage(TestSource source) {
-                source.reply("Default exec for Inner");
+                source.reply("default sub5");
             }
             
             @Usage
-            public void sub5Main(TestSource source, @Named("b") String b) {
-                source.reply("a=" + b);
+            public void sub5Main(TestSource source, @Named("othertext") String otherText, @Named("a") String a, @Named("b") String b) {
+                source.reply("sub4 a= " + a + ", sub5 b=" + b);
             }
             
             @SubCommand("sub6")
             public static class Sub6 {
                 @Usage
                 public void defaultUsage(TestSource source) {
-                    source.reply("Default exec for Inner");
+                    source.reply("default sub6");
                 }
                 
                 @Usage
-                public void sub6Main(TestSource source, @Named("c") String c) {
-                    source.reply("c=" + c);
+                public void sub6Main(TestSource source, @Named("othertext") String otherText, @Named("a") String a, @Named("b") String b, @Named("c") String c) {
+                    source.reply("sub4 a= " + a + ", sub5b= " + b + ", sub6 c=" + c);
                 }
                 
             }

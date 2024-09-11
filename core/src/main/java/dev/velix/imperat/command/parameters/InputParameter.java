@@ -192,16 +192,15 @@ public abstract class InputParameter implements CommandParameter {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        InputParameter that = (InputParameter) o;
-        return Objects.equals(name, that.name)
-                && TypeUtility.matches(typeWrap.getType(), that.typeWrap.getType())
-                && Objects.equals(parentCommand, that.parentCommand);
+        if (!(o instanceof InputParameter that)) return false;
+        return Objects.equals(parentCommand, that.parentCommand)
+                && Objects.equals(name, that.name)
+                && Objects.equals(typeWrap, that.typeWrap);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(name, typeWrap, parentCommand);
+        return Objects.hash(name, typeWrap);
     }
     
     @Override

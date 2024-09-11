@@ -47,6 +47,9 @@ public class TestRun {
     }
     
     private static void debugCommand(Command<TestSource> command) {
+        command.visualize();
+        
+        System.out.println("Debugging sub commands: ");
         System.out.println("Command '" + command.getName() + "' has usages: ");
         for (CommandUsage<TestSource> usage : command.getUsages()) {
             System.out.println("- " + CommandUsage.format(command, usage));
@@ -133,7 +136,7 @@ public class TestRun {
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
         
-        var result = testCmdTreeExecution("test", "first-value first a1 a2 second a3");
+        var result = testCmdTreeExecution("test", "first-value first a1 second a3");
         Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
     }
     
@@ -141,10 +144,24 @@ public class TestRun {
     public void testInnerClassParsing() {
         System.out.println("----------------------------");
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
-        debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
+        //debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
         
-        var result = testCmdTreeExecution("inner1", "");
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, result);
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub1"));
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub1 hi"));
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2"));
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye"));
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3"));
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3 hello"));
+        
+        Assertions.assertNotNull(IMPERAT.getCommand("test").getSubCommand("sub4"));
+        
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4"));
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub4 hi"));
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5"));
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye"));
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6"));
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6 hello"));
+   
     }
     
     @Test
@@ -168,7 +185,7 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", ""});
-        Assertions.assertLinesMatch(Arrays.asList("othersub", "first"), results);
+        Assertions.assertLinesMatch(Arrays.asList("othersub", "first", "sub4", "sub1"), results);
     }
     
     @Test

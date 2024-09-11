@@ -3,9 +3,8 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 
 import java.util.Comparator;
-import java.util.List;
 
-final class UsageComparator implements Comparator<List<CommandParameter>> {
+final class UsageComparator implements Comparator<CommandUsage<?>> {
     
     private static UsageComparator instance;
     
@@ -17,14 +16,14 @@ final class UsageComparator implements Comparator<List<CommandParameter>> {
         return instance;
     }
     
+    
     @Override
-    public int compare(List<CommandParameter> firstUsage, List<CommandParameter> secondUsage) {
-        
+    public int compare(CommandUsage<?> firstUsage, CommandUsage<?> secondUsage) {
         if (firstUsage.size() == secondUsage.size()) {
             
             for (int i = 0; i < firstUsage.size(); i++) {
-                CommandParameter p1 = firstUsage.get(i);
-                CommandParameter p2 = secondUsage.get(i);
+                CommandParameter p1 = firstUsage.getParameter(i);
+                CommandParameter p2 = secondUsage.getParameter(i);
                 if (p1 == null || p2 == null) break;
                 if (p1.isCommand() && !p2.isCommand()) {
                     return -1;
