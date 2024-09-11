@@ -28,7 +28,7 @@ import java.util.List;
 public non-sealed interface Imperat<S extends Source> extends
         ProcessorRegistrar<S>, ResolverRegistrar<S>,
         CommandRegistrar<S>, CaptionRegistrar<S>,
-        SourceWrapper<S>, CommandHelpHandler {
+        SourceWrapper<S>, CommandHelpHandler, ThrowableHandler<S> {
 
     /**
      * @return the platform of the module
@@ -122,22 +122,5 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the suggestions at the current position
      */
     List<String> autoComplete(Command<S> command, S sender, String[] args);
-
-    /**
-     * Handles a given throwable by finding the appropriate exception handler or using
-     * a default handling strategy if no specific handler is found.
-     *
-     * @param throwable  The throwable to be handled, which may be an exception or error.
-     * @param context    The context in which the throwable occurred, providing necessary information
-     *                   about the state and source where the exception happened.
-     * @param owning     The class where the throwable originated, used for logging and debugging purposes.
-     * @param methodName The name of the method where the throwable was thrown, used for logging and debugging.
-     */
-    void handleThrowable(
-            final Throwable throwable,
-            final Context<S> context,
-            final Class<?> owning,
-            final String methodName
-    );
 
 }

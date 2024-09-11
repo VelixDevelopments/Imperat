@@ -21,11 +21,7 @@ import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.context.internal.ContextResolverRegistry;
 import dev.velix.imperat.context.internal.ValueResolverRegistry;
-import dev.velix.imperat.exception.ExceptionManager;
-import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.AmbiguousUsageAdditionException;
-import dev.velix.imperat.exception.ExecutionFailure;
-import dev.velix.imperat.exception.InvalidCommandUsageException;
+import dev.velix.imperat.exception.*;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.help.templates.DefaultTemplate;
 import dev.velix.imperat.resolvers.ContextResolver;
@@ -62,9 +58,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private @NotNull AnnotationParser<S> annotationParser;
 
     private final Map<String, Command<S>> commands = new HashMap<>();
-    private final ExceptionManager<S> exceptionManager = new ExceptionManager<>();
     private final List<CommandPreProcessor<S>> globalPreProcessors = new ArrayList<>();
     private final List<CommandPostProcessor<S>> globalPostProcessors = new ArrayList<>();
+    private final Map<Class<? extends Throwable>, ThrowableResolver<? extends Throwable, S>> handlers = new HashMap<>();
 
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory();
@@ -76,6 +72,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         annotationParser = AnnotationParser.defaultParser(this);
         this.permissionResolver = permissionResolver;
         registerProcessors();
+        setThrowableResolver(SenderErrorException.class, (exception, imperat, context) -> context.getSource().error(exception.getMessage()));
     }
 
     private void registerProcessors() {
@@ -169,7 +166,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         annotationParser.registerAnnotationReplacer(type, replacer);
     }
 
-
     /**
      * @param owningCommand the command owning this sub-command
      * @param name          the name of the subcommand you're looking for
@@ -206,7 +202,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void setContextFactory(@NotNull ContextFactory<S> contextFactory) {
         this.contextFactory = contextFactory;
     }
-
 
     /**
      * Checks whether the type has
@@ -263,7 +258,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         contextResolverRegistry.registerResolver(type, resolver);
     }
 
-
     /**
      * Registers {@link ValueResolver}
      *
@@ -293,7 +287,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @Nullable <T> ValueResolver<S, T> getValueResolver(Type resolvingValueType) {
         return valueResolverRegistry.getResolver(resolvingValueType);
     }
-
 
     /**
      * Fetches the suggestion provider/resolver for a specific type of
@@ -360,7 +353,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void setUsageVerifier(UsageVerifier<S> usageVerifier) {
         this.verifier = usageVerifier;
     }
-
 
     @ApiStatus.Internal
     private Command<S> search(Command<S> sub, String name) {
@@ -479,7 +471,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         return captionRegistry.getCaption(key);
     }
 
-
     @Override
     public @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
@@ -512,7 +503,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @NotNull UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine) {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
-    
+
     private UsageMatchResult handleExecution(S source, Command<S> command, Context<S> context) throws ImperatException {
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
             throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
@@ -547,11 +538,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         return searchResult.result();
     }
 
-    private void executeUsage(Command<S> command,
-                              S source,
-                              Context<S> context,
-                              final CommandUsage<S> usage) throws ImperatException {
-
+    private void executeUsage(
+            final Command<S> command,
+            final S source,
+            final Context<S> context,
+            final CommandUsage<S> usage
+    ) throws ImperatException {
         //global pre-processing
         preProcess(context, usage);
 
@@ -649,8 +641,50 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     @Override
-    public final void handleThrowable(Throwable error, Context<S> context, Class<?> owning, String methodName) {
-        this.exceptionManager.handle(error, this, context, owning, methodName);
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> ThrowableResolver<T, S> getThrowableResolver(Class<T> exception) {
+        Class<?> current = exception;
+        while (current != null && Throwable.class.isAssignableFrom(current)) {
+            if (handlers.containsKey(current)) {
+                return (ThrowableResolver<T, S>) handlers.get(current);
+            }
+            current = current.getSuperclass();
+        }
+        return null;
+    }
+
+    @Override
+    public <T extends Throwable> void setThrowableResolver(Class<T> exception, ThrowableResolver<T, S> handler) {
+        this.handlers.put(exception, handler);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void handleThrowable(
+            final Throwable throwable,
+            final Context<S> context,
+            final Class<?> owning,
+            final String methodName
+    ) {
+        Throwable current = throwable;
+
+        while (current != null) {
+            if (current instanceof SelfHandledException selfHandledException) {
+                selfHandledException.handle(this, context);
+                return;
+            }
+
+            ThrowableResolver<? super Throwable, S> handler = (ThrowableResolver<? super Throwable, S>) this.getThrowableResolver(current.getClass());
+            if (handler != null) {
+                handler.resolve(current, this, context);
+                return;
+            }
+
+            current = current.getCause();
+        }
+
+        CommandDebugger.error(owning, methodName, throwable);
     }
 
 }
