@@ -18,7 +18,7 @@ import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.help.MethodHelpExecution;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
-import dev.velix.imperat.util.Pair;
+import dev.velix.imperat.util.TripleData;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -49,30 +49,30 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Annotation commandAnnotation = getCommandAnnotation(clazz);
         
         if (clazz.isRootClass() && commandAnnotation != null) {
-            System.out.println("Entering root class");
+            //System.out.println("Entering root class");
             if (clazz.isAnnotationPresent(SubCommand.class)) {
                 throw new IllegalStateException("Root command class cannot be a @SubCommand");
             }
-            System.out.println("ROOT CLASS ENTERING");
+            //System.out.println("ROOT CLASS ENTERING");
             Command<S> cmd = loadCommand(reader, null, clazz, commandAnnotation);
             
             //if cmd=null → loading @Command methods only from this class
             if (cmd != null) {
-                loadCommandClassForRootClass(reader, clazz, cmd);
+                loadCommandMethods(reader, clazz);
                 commands.add(cmd);
             }
             
         } else if (commandAnnotation != null) {
             //inner class with @Command or @SubCommand
-            System.out.println("Inner class with @Command or @SubCommand");
+            //System.out.println("Inner class with @Command or @SubCommand");
             Command<S> cmd = loadCommand(reader, null, clazz, commandAnnotation);
             if (cmd != null) {
-                loadCommandClassForRootClass(reader, clazz, cmd);
+                loadCommandMethods(reader, clazz);
                 commands.add(cmd);
             }
         } else {
             //no annotation
-            System.out.println("No Annotation");
+            //System.out.println("No Annotation");
             for (ParseElement<?> element : clazz.getChildren()) {
                 if (element.isAnnotationPresent(dev.velix.imperat.annotations.types.Command.class)) {
                     var cmd = loadCommand(reader, null, element, Objects.requireNonNull(element.getAnnotation(dev.velix.imperat.annotations.types.Command.class)));
@@ -99,20 +99,20 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
     
     
-    private void loadCommandClassForRootClass(AnnotationReader<S> reader, ClassElement clazz, @NotNull Command<S> cmd) {
+    private void loadCommandMethods(AnnotationReader<S> reader, ClassElement clazz) {
         for (ParseElement<?> element : clazz.getChildren()) {
             if (element instanceof MethodElement method) {
                 if (method.isAnnotationPresent(dev.velix.imperat.annotations.types.Command.class)) {
                     var cmdAnn = method.getAnnotation(dev.velix.imperat.annotations.types.Command.class);
                     assert cmdAnn != null;
                     imperat.registerCommand(loadCommand(reader, null, method, cmdAnn));
-                } else if (method.isAnnotationPresent(Usage.class)) {
+                } /*else if (method.isAnnotationPresent(Usage.class)) {
                     cmd.addUsage(loadUsage(reader, null, cmd, method));
                 } else if (method.isAnnotationPresent(SubCommand.class)) {
                     SubCommand subAnn = method.getAnnotation(SubCommand.class);
                     assert subAnn != null;
                     cmd.addSubCommand(loadCommand(reader, cmd, method, subAnn), Boolean.TRUE.equals(subAnn.attachDirectly()));
-                }
+                }*/
             }
             /*else if (element instanceof ClassElement innerClass) {
                 
@@ -271,26 +271,26 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ClassElement methodOwner = (ClassElement) element.getParent();
         assert methodOwner != null;
         
-        var parametersInfo = loadParameters(element, loadedCmd, parentCmd);
+        var parametersInfo = loadParameters(element, parentCmd);
         
         final boolean isHelp = parametersInfo.left();
         final List<CommandParameter> params = parametersInfo.right();
         
         var execution = isHelp ? new MethodHelpExecution<>(imperat, reader.getRootClass(), method, parametersInfo.right())
-                : new MethodCommandExecutor<>(reader.getRootClass(), imperat, element, params);
+                : new MethodCommandExecutor<>(reader.getRootClass(), imperat, element, parametersInfo.middle());
         
         return CommandUsage.<S>builder().parameters(params)
                 .execute(execution).build(loadedCmd, isHelp);
     }
     
-    private Pair<List<CommandParameter>, Boolean> loadParameters(
+    private TripleData<List<CommandParameter>, List<CommandParameter>, Boolean> loadParameters(
             @NotNull MethodElement method,
-            @NotNull Command<S> loadedCmd,
             @Nullable Command<S> parentCmd
     ) {
         
-        List<CommandParameter> toLoad = new ArrayList<>();
+        LinkedList<CommandParameter> toLoad = new LinkedList<>();
         
+        //WHATEVER HAPPENS, NEVER MESS WITH THIS IMPLEMENTATION OR ELSE I WILL FUCKING DESTROY YOU
         final StrictParameterList mainUsageParameters = new StrictParameterList();
         Command<S> currentParent = parentCmd;
         while (currentParent != null) {
@@ -301,8 +301,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
             currentParent = currentParent.getParent();
         }
-        System.out.println("LOADED " + loadedCmd.getName() + "'s PARENTERAL PARAMS : " + mainUsageParameters);
-        
+        //System.out.println("LOADED " + loadedCmd.getName() + "'s PARENTERAL PARAMS : " + mainUsageParameters);
+        LinkedList<CommandParameter> total = new LinkedList<>(mainUsageParameters);
         LinkedList<ParameterElement> parameterElements = new LinkedList<>(method.getParameters());
         
         boolean help = false;
@@ -328,6 +328,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             CommandParameter mainParameter = mainUsageParameters.peek();
             if (mainParameter == null) {
                 toLoad.add(commandParameter);
+                total.add(commandParameter);
                 parameterElements.removeFirst();
                 continue;
             }
@@ -339,11 +340,13 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
             
             toLoad.add(commandParameter);
+            total.add(commandParameter);
+            
             mainUsageParameters.removeFirst();
             parameterElements.removeFirst();
         }
         
-        return new Pair<>(toLoad, help);
+        return new TripleData<>(toLoad, total, help);
     }
     
     @SuppressWarnings("unchecked")

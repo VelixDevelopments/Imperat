@@ -42,10 +42,9 @@ public final class AnnotationHelper {
         Object[] paramsInstances = new Object[parameters.length];
         
         paramsInstances[0] = source;
-        
         for (int i = 1, p = 0; i < parameters.length; i++, p++) {
             Parameter actualParameter = parameters[i];
-            if (commandHelp != null && CommandHelp.class.isAssignableFrom(actualParameter.getType())) {
+            if (commandHelp != null && TypeUtility.areRelatedTypes(CommandHelp.class, actualParameter.getType())) {
                 paramsInstances[i] = commandHelp;
                 p--;
                 continue;
@@ -74,13 +73,11 @@ public final class AnnotationHelper {
                 ResolvedFlag value = context.getFlag(parameter.getName());
                 paramsInstances[i] = value.value();
             } else {
-                System.out.println("GETTING " + parameter.getName());
                 Object value = context.getArgument(parameter.getName());
                 paramsInstances[i] = value;
             }
             
         }
-        
         return paramsInstances;
     }
     

@@ -36,7 +36,6 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
         try {
             ClassElement methodOwner = (ClassElement) method.getParent();
             assert methodOwner != null;
-            
             boundMethodCaller = DefaultMethodCallerFactory.INSTANCE.createFor(method.getElement()).bindTo(methodOwner.newInstance());
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -59,6 +58,11 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
                 dispatcher, fullParameters,
                 source, context, method.getElement(), null
         );
+        
+        /*for (int i = 0; i < instances.length; i++) {
+            var param = method.getElement().getParameters()[i];
+            System.out.println("param #" + i + "(" + param.getType().getSimpleName() + ") has instance = " + (instances[i] == null ? "NULL" : instances[i].getClass().getSimpleName())) ;
+        }*/
         
         try {
             boundMethodCaller.call(instances);

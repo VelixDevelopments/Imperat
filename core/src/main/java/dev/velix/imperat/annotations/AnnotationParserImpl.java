@@ -8,7 +8,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.lang.annotation.Annotation;
 
 @ApiStatus.Internal
-@SuppressWarnings("unchecked")
 final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     
     private final AnnotationRegistry annotationRegistry;
@@ -24,12 +23,11 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     
     @Override
     public <T> void parseCommandClass(T instance) {
-        Class<T> instanceClazz = (Class<T>) instance.getClass();
-        System.out.println("-------------Reading-------------");
+        //System.out.println("-------------Reading-------------");
         AnnotationReader<S> reader = AnnotationReader.read(annotationRegistry, instance);
-        System.out.println("-----------Accepting-----------");
+        //System.out.println("-----------Accepting-----------");
         reader.accept(dispatcher, visitor);
-        System.out.println("-------Visited class `" + instanceClazz.getSimpleName() + "` --------");
+        //System.out.println("-------Visited class `" + instanceClazz.getSimpleName() + "` --------");
     }
     
     

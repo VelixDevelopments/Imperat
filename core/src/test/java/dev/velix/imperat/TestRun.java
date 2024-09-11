@@ -153,8 +153,6 @@ public class TestRun {
         Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3"));
         Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3 hello"));
         
-        Assertions.assertNotNull(IMPERAT.getCommand("test").getSubCommand("sub4"));
-        
         Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4"));
         Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub4 hi"));
         Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5"));

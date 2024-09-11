@@ -29,7 +29,6 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     
     AnnotationReaderImpl(AnnotationRegistry registry, Object instance) {
         this.registry = registry;
-        System.out.println("CLASS=" + instance.getClass().getSimpleName());
         this.clazz = instance.getClass();
         this.rootCommandClass = new RootCommandClass<>(clazz, instance);
         this.classElement = read();
@@ -45,13 +44,12 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
             @NotNull Class<?> clazz
     ) {
         ClassElement root = new ClassElement(registry, parent, clazz);
-        System.out.println("Reading class: " + clazz.getSimpleName() + ", parent= " + parent);
         //Adding methods with their parameters
         Method[] methods = clazz.getDeclaredMethods();
         Arrays.sort(methods, METHOD_COMPARATOR);
         
         for (Method method : methods) {
-            System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
+            //System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
             root.addChild(new MethodElement(registry, root, method));
         }
         
@@ -68,7 +66,6 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         
         //Adding inner classes
         for (Class<?> child : clazz.getDeclaredClasses()) {
-            System.out.println(clazz.getSimpleName() + ": adding child class= " + child.getSimpleName());
             root.addChild(
                     readClass(registry, root, child)
             );
@@ -87,7 +84,6 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     @Override
     public void accept(Imperat<S> dispatcher, CommandClassVisitor<S> visitor) {
         for (Command<S> loaded : classElement.accept(this, visitor)) {
-            System.out.println("Registering " + loaded.getName());
             dispatcher.registerCommand(loaded);
         }
     }

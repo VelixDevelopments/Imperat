@@ -378,7 +378,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
         //adding the merged command usage
         
         //CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
-        CommandDebugger.debug("ADDING to " + this.name + " USAGE= %s", CommandUsage.format(this, combo));
         this.addUsage(combo);
         
         for (CommandUsage<S> subUsage : command.getUsages()) {
@@ -392,7 +391,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
             );
         }
         
-        System.out.println(this.name + "'s SIZE= " + this.usages.size());
     }
     
     /**
