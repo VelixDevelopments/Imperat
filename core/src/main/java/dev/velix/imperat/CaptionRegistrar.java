@@ -8,15 +8,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public sealed interface CaptionRegistrar<S extends Source> permits Imperat {
-
+    
     /**
      * Registers a caption
      *
      * @param caption the caption to register
      */
     void registerCaption(Caption<S> caption);
-
-
+    
+    
     /**
      * Sends a caption to the source
      *
@@ -29,8 +29,8 @@ public sealed interface CaptionRegistrar<S extends Source> permits Imperat {
             Context<S> context,
             @Nullable Exception exception
     );
-
-
+    
+    
     /**
      * Sends a caption to the source
      *
@@ -41,7 +41,7 @@ public sealed interface CaptionRegistrar<S extends Source> permits Imperat {
             CaptionKey key,
             Context<S> context
     );
-
+    
     /**
      * Fetches the caption from a caption key
      *
@@ -49,5 +49,5 @@ public sealed interface CaptionRegistrar<S extends Source> permits Imperat {
      * @return the caption to get
      */
     @Nullable Caption<S> getCaption(@NotNull CaptionKey key);
-
+    
 }

@@ -7,7 +7,7 @@ package dev.velix.imperat.util.reflection;
  * @author Kristian
  */
 public interface FieldAccessor<T> {
-
+    
     /**
      * Retrieve the content of a field.
      *
@@ -15,7 +15,7 @@ public interface FieldAccessor<T> {
      * @return The value of the field.
      */
     T get(final Object target);
-
+    
     /**
      * Set the content of a field.
      *
@@ -23,7 +23,7 @@ public interface FieldAccessor<T> {
      * @param value  - the new value of the field.
      */
     void set(final Object target, final Object value);
-
+    
     /**
      * Determine if the given object has this field.
      *
@@ -32,5 +32,5 @@ public interface FieldAccessor<T> {
      */
     @SuppressWarnings("unused")
     boolean hasField(final Object target);
-
+    
 }

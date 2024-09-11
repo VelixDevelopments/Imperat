@@ -21,18 +21,18 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface SuggestionResolver<S extends Source, T> {
-
+    
     static <S extends Source, T> SuggestionResolver<S, T> plain(Class<T> type, List<String> results) {
         return plain(TypeWrap.of(type), results);
     }
-
+    
     static <S extends Source, T> SuggestionResolver<S, T> plain(TypeWrap<T> type, List<String> results) {
         return new SuggestionResolver<>() {
             @Override
             public TypeWrap<T> getType() {
                 return type;
             }
-
+            
             @Override
             public List<String> autoComplete(Command<S> command,
                                              S source,
@@ -43,20 +43,20 @@ public interface SuggestionResolver<S extends Source, T> {
             }
         };
     }
-
+    
     static <S extends Source, T> SuggestionResolver<S, T> plain(Class<T> type, String... results) {
         return plain(type, Arrays.asList(results));
     }
-
+    
     static <S extends Source, T> SuggestionResolver<S, T> plain(TypeWrap<T> type, String... results) {
         return plain(type, Arrays.asList(results));
     }
-
+    
     /**
      * @return Type of data the suggestion is resolving
      */
     TypeWrap<T> getType();
-
+    
     /**
      * @param command             the running command
      * @param source              the sender of the command
@@ -71,5 +71,5 @@ public interface SuggestionResolver<S extends Source, T> {
                               ArgumentQueue queue,
                               CommandParameter parameterToComplete,
                               @Nullable CompletionArg argToComplete);
-
+    
 }

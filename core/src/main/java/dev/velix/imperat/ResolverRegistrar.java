@@ -14,20 +14,20 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 
 public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
-
+    
     /**
      * @return {@link PermissionResolver} for the dispatcher
      */
     PermissionResolver<S> getPermissionResolver();
-
-
+    
+    
     /**
      * Registers a context resolver factory
      *
      * @param factory the factory to register
      */
     void registerContextResolverFactory(ContextResolverFactory<S> factory);
-
+    
     /**
      * Checks whether the type has
      * a registered context-resolver
@@ -37,13 +37,13 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * a context-resolver
      */
     boolean hasContextResolver(Type type);
-
+    
     /**
      * @return returns the factory for creation of
      * {@link ContextResolver}
      */
     ContextResolverFactory<S> getContextResolverFactory();
-
+    
     /**
      * Fetches {@link ContextResolver} for a certain type
      *
@@ -52,7 +52,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @return the context resolver
      */
     <T> ContextResolver<S, T> getContextResolver(Type resolvingContextType);
-
+    
     /**
      * Fetches the {@link ContextResolver} suitable for the {@link CommandParameter}
      *
@@ -63,7 +63,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     default <T> ContextResolver<S, T> getContextResolver(CommandParameter commandParameter) {
         return getContextResolver(commandParameter.getType());
     }
-
+    
     /**
      * Registers {@link ContextResolver}
      *
@@ -73,7 +73,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     <T>
     void registerContextResolver(Type type, @NotNull ContextResolver<S, T> resolver);
-
+    
     /**
      * Fetches {@link ValueResolver} for a certain value
      *
@@ -83,7 +83,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     @Nullable
     <T> ValueResolver<S, T> getValueResolver(Type resolvingValueType);
-
+    
     /**
      * Fetches the {@link ValueResolver} suitable for the {@link CommandParameter}
      *
@@ -94,7 +94,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     default <T> ValueResolver<S, T> getValueResolver(CommandParameter commandParameter) {
         return getValueResolver(commandParameter.getType());
     }
-
+    
     /**
      * Registers {@link ValueResolver}
      *
@@ -103,12 +103,12 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param <T>      the type of value being resolved from context
      */
     <T> void registerValueResolver(Type type, @NotNull ValueResolver<S, T> resolver);
-
+    
     /**
      * @return all currently registered {@link ValueResolver}
      */
     Collection<? extends ValueResolver<S, ?>> getRegisteredValueResolvers();
-
+    
     /**
      * Fetches the suggestion provider/resolver for a specific type of
      * argument or parameter.
@@ -126,7 +126,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
         else
             return parameterSpecificResolver;
     }
-
+    
     /**
      * Fetches the suggestion provider/resolver for a specific type of
      * argument or parameter.
@@ -138,7 +138,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     @Nullable
     <T> SuggestionResolver<S, T> getSuggestionResolverByType(Class<T> clazz);
-
+    
     /**
      * Fetches the suggestion provider/resolver that is registered by its unique name
      *
@@ -149,7 +149,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     @Nullable
     <T> SuggestionResolver<S, T> getNamedSuggestionResolver(String name);
-
+    
     /**
      * Registers a suggestion resolver
      *
@@ -157,7 +157,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param <T>                the type of value that the suggestion resolver will work with.
      */
     <T> void registerSuggestionResolver(SuggestionResolver<S, T> suggestionResolver);
-
+    
     /**
      * Registers a suggestion resolver
      *
@@ -166,6 +166,6 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param <T>                the type of value that the suggestion resolver will work with.
      */
     <T> void registerNamedSuggestionResolver(String name, SuggestionResolver<S, T> suggestionResolver);
-
-
+    
+    
 }

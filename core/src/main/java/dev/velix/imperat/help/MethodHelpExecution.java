@@ -15,12 +15,12 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 public final class MethodHelpExecution<S extends Source> implements HelpExecution<S> {
-
+    
     private final Imperat<S> dispatcher;
     private final Method method;
     private final MethodCaller.BoundMethodCaller caller;
     private final List<CommandParameter> params;
-
+    
     public MethodHelpExecution(Imperat<S> dispatcher,
                                RootCommandClass<S> proxy,
                                Method method,
@@ -35,7 +35,7 @@ public final class MethodHelpExecution<S extends Source> implements HelpExecutio
             throw new RuntimeException(e);
         }
     }
-
+    
     /**
      * Displays a help menu showing all possible syntaxes
      *
@@ -48,7 +48,7 @@ public final class MethodHelpExecution<S extends Source> implements HelpExecutio
                      Context<S> context,
                      CommandHelp<S> help,
                      @Nullable Integer page) throws ImperatException {
-
+        
         Object[] instances = AnnotationHelper
                 .loadParameterInstances(dispatcher, params, source, context, method, help);
         /*System.out.println("INSTANCES SIZE= " + instances.length);
@@ -61,9 +61,9 @@ public final class MethodHelpExecution<S extends Source> implements HelpExecutio
             System.out.println("INSTANCE -> " + object.getClass().getSimpleName());
         }
         System.out.println("THEN");*/
-
+        
         caller.call(instances);
     }
-
-
+    
+    
 }

@@ -21,19 +21,19 @@ import java.util.List;
 @ApiStatus.AvailableSince("1.0.0")
 @FunctionalInterface
 public interface UsageDisplayer {
-
+    
     static UsageDisplayer plain() {
         return new PlainDisplayer();
     }
-
+    
     static UsageDisplayer tree() {
         return new TreeDisplayer();
     }
-
+    
     static UsageDisplayer custom(UsageDisplayer displayer) {
         return displayer;
     }
-
+    
     /**
      * Displays all usages together to
      * the {@link Source}

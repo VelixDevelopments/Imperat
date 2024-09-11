@@ -4,7 +4,7 @@ import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 
 public class NumberOutOfRangeException extends SenderErrorException {
-
+    
     public NumberOutOfRangeException(
             final NumericParameter parameter,
             final Number value,
@@ -12,7 +12,7 @@ public class NumberOutOfRangeException extends SenderErrorException {
     ) {
         super("Value '" + value + "' entered for parameter '" + parameter.format() + "' must be " + formatRange(range));
     }
-
+    
     private static String formatRange(final NumericRange range) {
         final StringBuilder builder = new StringBuilder();
         if (range.getMin() != Double.MIN_VALUE && range.getMax() != Double.MAX_VALUE)
@@ -23,8 +23,8 @@ public class NumberOutOfRangeException extends SenderErrorException {
             builder.append("at most '").append(range.getMax()).append("'");
         else
             builder.append("(Open range)");
-
+        
         return builder.toString();
     }
-
+    
 }

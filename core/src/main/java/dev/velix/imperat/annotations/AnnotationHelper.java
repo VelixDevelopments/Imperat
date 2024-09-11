@@ -20,7 +20,7 @@ import java.lang.reflect.Parameter;
 import java.util.List;
 
 public final class AnnotationHelper {
-
+    
     public static boolean isMethodHelp(Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (TypeUtility.areRelatedTypes(parameter.getType(), CommandHelp.class)) {
@@ -37,13 +37,12 @@ public final class AnnotationHelper {
             S source,
             ExecutionContext<S> context,
             Method method,
-            @Nullable CommandHelp<S> commandHelp) throws ImperatException
-    {
+            @Nullable CommandHelp<S> commandHelp) throws ImperatException {
         Parameter[] parameters = method.getParameters();
         Object[] paramsInstances = new Object[parameters.length];
-
+        
         paramsInstances[0] = source;
-
+        
         for (int i = 1, p = 0; i < parameters.length; i++, p++) {
             Parameter actualParameter = parameters[i];
             if (commandHelp != null && CommandHelp.class.isAssignableFrom(actualParameter.getType())) {
@@ -51,26 +50,26 @@ public final class AnnotationHelper {
                 p--;
                 continue;
             }
-
+            
             var factory = dispatcher.getContextResolverFactory();
             var contextResolver = factory.create(actualParameter);
-
+            
             if (contextResolver != null) {
                 System.out.println("PARAMETER AT " + p + "GOT CONTEXT RESOLVED");
                 paramsInstances[i] = contextResolver.resolve((Context<S>) context, actualParameter);
                 continue;
             }
-
+            
             contextResolver = dispatcher.getContextResolver(actualParameter.getType());
             if (contextResolver != null) {
                 paramsInstances[i] = contextResolver.resolve((Context<S>) context, actualParameter);
                 continue;
             }
-
+            
             CommandParameter parameter = getUsageParam(fullParameters, p);
             if (parameter == null)
                 continue;
-
+            
             if (parameter.isFlag()) {
                 ResolvedFlag value = context.getFlag(parameter.getName());
                 paramsInstances[i] = value.value();
@@ -78,17 +77,17 @@ public final class AnnotationHelper {
                 Object value = context.getArgument(parameter.getName());
                 paramsInstances[i] = value;
             }
-
+            
         }
-
+        
         return paramsInstances;
     }
-
+    
     private static @Nullable CommandParameter getUsageParam(List<? extends CommandParameter> params, int index) {
         if (index < 0 || index >= params.size()) return null;
         return params.get(index);
     }
-
+    
     public static @NotNull String getParamName(
             Parameter parameter,
             @Nullable Named named,
@@ -96,7 +95,7 @@ public final class AnnotationHelper {
             @Nullable Switch switchAnnotation
     ) {
         String name;
-
+        
         if (named != null)
             name = named.value();
         else if (flag != null)
@@ -105,10 +104,10 @@ public final class AnnotationHelper {
             name = switchAnnotation.value()[0];
         else
             name = parameter.getName();
-
+        
         return name;
     }
-
+    
     public static @NotNull String getParamName(Parameter parameter) {
         return getParamName(
                 parameter,
@@ -117,31 +116,31 @@ public final class AnnotationHelper {
                 parameter.getAnnotation(Switch.class)
         );
     }
-
+    
     @SuppressWarnings({"unchecked"})
     public static <T> @NotNull OptionalValueSupplier<T> getOptionalValueSupplier(
             Parameter parameter,
             Class<? extends OptionalValueSupplier<?>> supplierClass
     ) throws NoSuchMethodException, InstantiationException,
             IllegalAccessException, InvocationTargetException {
-
+        
         var emptyConstructor = supplierClass.getDeclaredConstructor();
         emptyConstructor.setAccessible(true);
         OptionalValueSupplier<T> valueSupplier = (OptionalValueSupplier<T>) emptyConstructor.newInstance();
         if (!TypeUtility.matches(valueSupplier.getValueType(), parameter.getType())) {
             throw new IllegalArgumentException("Optional supplier of value-type '" + valueSupplier.getValueType().getName() + "' doesn't match the optional value type '" + parameter.getType().getName() + "'");
         }
-
+        
         return valueSupplier;
     }
-
+    
     @SuppressWarnings("unchecked")
     public static <T> @Nullable OptionalValueSupplier<T> deduceOptionalValueSupplier(
             Parameter parameter,
             DefaultValue defaultValueAnnotation,
             DefaultValueProvider provider
     ) {
-
+        
         if (defaultValueAnnotation != null) {
             String def = defaultValueAnnotation.value();
             return (OptionalValueSupplier<T>) OptionalValueSupplier.of(def);

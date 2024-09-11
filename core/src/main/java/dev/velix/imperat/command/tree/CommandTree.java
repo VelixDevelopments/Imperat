@@ -18,18 +18,18 @@ import java.util.List;
  * @author Mqzen
  */
 public final class CommandTree<S extends Source> {
-
+    
     final CommandNode<S> root;
-
+    
     CommandTree(Command<S> command) {
         this.root = new CommandNode<>(command);
         //parse(command);
     }
-
+    
     public static <S extends Source> CommandTree<S> create(Command<S> command) {
         return new CommandTree<>(command);
     }
-
+    
     public static <S extends Source> CommandTree<S> parsed(Command<S> command) {
         CommandTree<S> tree = create(command);
         tree.parseCommandUsages();
@@ -42,7 +42,7 @@ public final class CommandTree<S extends Source> {
             parseUsage(usage);
         }
     }
-
+    
     public void parseUsage(CommandUsage<S> usage) {
         List<CommandParameter> parameters = usage.getParameters();
         if (parameters == null || parameters.isEmpty()) {
@@ -50,7 +50,7 @@ public final class CommandTree<S extends Source> {
         }
         addParametersToTree(root, parameters, 0);
     }
-
+    
     private void addParametersToTree(
             UsageNode<?> currentNode,
             List<CommandParameter> parameters,
@@ -59,13 +59,13 @@ public final class CommandTree<S extends Source> {
         if (index >= parameters.size()) {
             return;
         }
-
+        
         CommandParameter param = parameters.get(index);
         UsageNode<?> childNode = getChildNode(currentNode, param);
         // Recursively add the remaining parameters to the child node
         addParametersToTree(childNode, parameters, index + 1);
     }
-
+    
     private UsageNode<?> getChildNode(UsageNode<?> parent, CommandParameter param) {
         for (UsageNode<?> child : parent.getChildren()) {
             if (child.data.getName().equalsIgnoreCase(param.getName())
@@ -78,7 +78,7 @@ public final class CommandTree<S extends Source> {
             newNode = new CommandNode<>(param.asCommand());
         else
             newNode = new ArgumentNode(param);
-
+        
         parent.addChild(newNode);
         return newNode;
     }
@@ -158,16 +158,16 @@ public final class CommandTree<S extends Source> {
     public @NotNull UsageContextMatch contextMatch(
             ArgumentQueue input
     ) {
-
+        
         int depth = 0;
-
+        
         for (UsageNode<?> child : root.getChildren()) {
             UsageContextMatch nodeTraversing = UsageContextMatch.of();
             var traverse = contextMatchNode(nodeTraversing, input, child, depth);
             if (traverse.result() != UsageMatchResult.UNKNOWN) {
                 return traverse;
             }
-
+            
         }
         
         return UsageContextMatch.of();
@@ -183,7 +183,7 @@ public final class CommandTree<S extends Source> {
         if (depth >= input.size()) {
             return usageContextMatch;
         }
-
+        
         String raw = input.get(depth);
         boolean matchesInput = node.matchesInput(raw);
         if (!matchesInput) {
@@ -192,19 +192,19 @@ public final class CommandTree<S extends Source> {
         //GO TO NODE'S children
         usageContextMatch.append(node);
         if (node.isLeaf()) {
-
+            
             //not the deepest search depth (still more raw args than number of nodes)
             usageContextMatch.setResult((depth != input.size() - 1 && !node.isGreedyParam())
                     ? UsageMatchResult.INCOMPLETE : UsageMatchResult.COMPLETE);
             return usageContextMatch;
         } else {
             //not the last node → continue traversing
-
+            
             //checking if depth is the last
             if (depth == input.size() - 1) {
                 //depth is last → check for missing required arguments
                 usageContextMatch.append(node);
-
+                
                 if (node.isOptional()) {
                     //so if the node is optional,
                     // we go deeper into the tree, while backtracking the depth of the argument input.
@@ -220,13 +220,13 @@ public final class CommandTree<S extends Source> {
                             break;
                         }
                     }
-
+                    
                     //improved logic
                     if (allOptional) {
                         //if all optional, then append the first one
                         usageContextMatch.append(node.getChild(UsageNode::isOptional));
                     }
-
+                    
                     //CommandDebugger.debug("All optional after last depth ? = %s", (allOptional) );
                     var usage = usageContextMatch.toUsage(root.data);
                     usageContextMatch.setResult(
@@ -236,13 +236,13 @@ public final class CommandTree<S extends Source> {
                     );
                     return usageContextMatch;
                 }
-
+                
             } else {
                 return this.searchForMatch(node, usageContextMatch, input, depth);
             }
-
+            
         }
-
+        
     }
     
     private UsageContextMatch searchForMatch(
@@ -258,5 +258,5 @@ public final class CommandTree<S extends Source> {
         }
         return usageContextMatch;
     }
-
+    
 }

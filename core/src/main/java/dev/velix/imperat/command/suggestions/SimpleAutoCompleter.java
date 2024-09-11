@@ -21,8 +21,8 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
     SimpleAutoCompleter(Command<S> command) {
         super(command);
     }
-
-
+    
+    
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
@@ -38,20 +38,20 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
                                              S sender,
                                              CompletionArg currentArg,
                                              String[] args) {
-
-
+        
+        
         final PermissionResolver<S> permResolver = dispatcher.getPermissionResolver();
         if (!command.isIgnoringACPerms() &&
                 !permResolver.hasPermission(sender, command.getPermission())) {
             return Collections.emptyList();
         }
-
+        
         ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(args);
         var closestUsages = getClosestUsages(args);
         int index = currentArg.index();
         if (index == -1)
             index = 0;
-
+        
         AutoCompleteList results = new AutoCompleteList();
         for (CommandUsage<S> usage : closestUsages) {
             if (index < 0 || index >= usage.getMaxLength()) continue;
@@ -69,24 +69,24 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
                     results.addAll(resolver.autoComplete(command, sender,
                             queue, parameter, currentArg));
                 }
-
+                
             }
-
+            
         }
         
         return results.asList();
     }
-
-
+    
+    
     private Collection<? extends CommandUsage<S>> getClosestUsages(String[] args) {
-
+        
         return command
                 .findUsages((usage) -> {
                     if (args.length >= usage.getMaxLength()) {
                         for (int i = 0; i < usage.getMaxLength(); i++) {
                             CommandParameter parameter = usage.getParameters().get(i);
                             if (!parameter.isCommand()) continue;
-
+                            
                             if (i >= args.length) return false;
                             String corresponding = args[i];
                             if (corresponding != null && !corresponding.isEmpty() &&
@@ -98,6 +98,6 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
                     return args.length <= usage.getMaxLength();
                 });
     }
-
-
+    
+    
 }

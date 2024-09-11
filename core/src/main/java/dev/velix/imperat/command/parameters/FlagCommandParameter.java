@@ -13,10 +13,10 @@ import java.util.List;
 
 @ApiStatus.Internal
 public final class FlagCommandParameter extends InputParameter implements FlagParameter {
-
+    
     private final CommandFlag flag;
     private final OptionalValueSupplier<?> supplier;
-
+    
     FlagCommandParameter(
             CommandFlag flag,
             String permission,
@@ -25,14 +25,14 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
     ) {
         this(flag.name(), permission, flag.aliases(), description, flag.inputType(), valueSupplier);
     }
-
+    
     FlagCommandParameter(String flagName, @Nullable String permission, List<String> aliases, Description description, Class<?> inputType, OptionalValueSupplier<?> supplier) {
         super(flagName, TypeWrap.of(CommandFlag.class), permission, description,
                 true, true, false, null, null);
         flag = CommandFlag.create(flagName, aliases, inputType);
         this.supplier = supplier;
     }
-
+    
     FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission,
                          Description description, OptionalValueSupplier<?> supplier) {
         super(commandSwitch.name(), TypeWrap.of(CommandSwitch.class), permission, description,
@@ -41,7 +41,7 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
         this.flag = commandSwitch;
         this.supplier = supplier;
     }
-
+    
     FlagCommandParameter(
             CommandSwitch commandSwitch,
             @Nullable String permission,
@@ -49,12 +49,12 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
     ) {
         this(commandSwitch, permission, Description.EMPTY, supplier);
     }
-
+    
     @Override
     public String format() {
         return flag.format();
     }
-
+    
     /**
      * @return The flag's data
      */
@@ -62,7 +62,7 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
     public @NotNull CommandFlag getFlagData() {
         return flag;
     }
-
+    
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional

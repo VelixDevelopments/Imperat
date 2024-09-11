@@ -6,7 +6,7 @@ import dev.velix.imperat.exception.ThrowableResolver;
 import org.jetbrains.annotations.Nullable;
 
 public sealed interface ThrowableHandler<S extends Source> permits Imperat {
-
+    
     /**
      * Retrieves the {@link ThrowableResolver} responsible for handling the specified type
      * of throwable. If no specific resolver is found, it may return null or a default resolver.
@@ -14,11 +14,11 @@ public sealed interface ThrowableHandler<S extends Source> permits Imperat {
      * @param exception The class of the throwable to get the resolver for.
      * @param <T>       The type of the throwable.
      * @return The {@link ThrowableResolver} capable of handling the throwable of the specified type,
-     *         or null if no specific resolver is registered.
+     * or null if no specific resolver is registered.
      */
     @Nullable
     <T extends Throwable> ThrowableResolver<T, S> getThrowableResolver(final Class<T> exception);
-
+    
     /**
      * Registers a new {@link ThrowableResolver} for the specified type of throwable.
      * This allows customizing the handling of specific throwable types within the application.
@@ -31,7 +31,7 @@ public sealed interface ThrowableHandler<S extends Source> permits Imperat {
             final Class<T> exception,
             final ThrowableResolver<T, S> handler
     );
-
+    
     /**
      * Handles a given throwable by finding the appropriate exception handler or using
      * a default handling strategy if no specific handler is found.
@@ -48,5 +48,5 @@ public sealed interface ThrowableHandler<S extends Source> permits Imperat {
             final Class<?> owning,
             final String methodName
     );
-
+    
 }

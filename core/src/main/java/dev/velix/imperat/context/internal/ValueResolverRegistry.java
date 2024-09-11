@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 @ApiStatus.Internal
 public final class ValueResolverRegistry<S extends Source> extends Registry<Type, ValueResolver<S, ?>> {
-
-
+    
+    
     private ValueResolverRegistry() {
         super();
         registerResolver(String.class, ((source, context, raw, pivot, parameter) -> raw));
@@ -48,29 +48,29 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
         });
         registerEnumResolver(TimeUnit.class);
     }
-
+    
     public static <S extends Source> ValueResolverRegistry<S> createDefault() {
         return new ValueResolverRegistry<>();
     }
-
+    
     private SenderErrorException exception(String raw,
                                            Class<?> clazzRequired) {
         return new SenderErrorException(
                 "Error while parsing argument '%s', It's not a valid %s", raw, clazzRequired.getSimpleName()
         );
     }
-
+    
     public <T> void registerResolver(Type type, ValueResolver<S, T> resolver) {
         setData(type, resolver);
     }
-
+    
     public <E extends Enum<E>> void registerEnumResolver(Class<E> enumClass) {
         registerResolver(enumClass, new EnumValueResolver<>(enumClass));
     }
-
+    
     @SuppressWarnings("unchecked")
     public <T> ValueResolver<S, T> getResolver(Type type) {
         return (ValueResolver<S, T>) getData(TypeUtility.primitiveToBoxed(type)).orElse(null);
     }
-
+    
 }

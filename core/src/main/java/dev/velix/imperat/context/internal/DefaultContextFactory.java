@@ -12,11 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
 class DefaultContextFactory<S extends Source> implements ContextFactory<S> {
-
-
+    
+    
     DefaultContextFactory() {
     }
-
+    
     /**
      * @param source  the sender/source of this command execution
      * @param command the command label used
@@ -32,7 +32,7 @@ class DefaultContextFactory<S extends Source> implements ContextFactory<S> {
     ) {
         return new ContextImpl<>(dispatcher, command, source, queue);
     }
-
+    
     /**
      * @param command      the command that's running
      * @param plainContext the context plain

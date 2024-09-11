@@ -2,9 +2,9 @@ package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.Command;
+import dev.velix.imperat.annotations.types.Named;
 import dev.velix.imperat.annotations.types.SubCommand;
 import dev.velix.imperat.annotations.types.Usage;
-import dev.velix.imperat.annotations.types.Named;
 import dev.velix.imperat.test.guild.Guild;
 import dev.velix.imperat.test.guild.GuildInvite;
 import dev.velix.imperat.test.guild.GuildRegistry;
@@ -16,14 +16,14 @@ import java.util.*;
 
 @Command("guild")
 public class GuildCommand {
-
+    
     private final Map<UUID, Set<GuildInvite>> invites = new HashMap<>();
-
+    
     @Usage
     public void defaultUsage(BukkitSource source) {
         source.reply("No args input !");
     }
-
+    
     @SubCommand("create")
     public void create(BukkitSource source, @Named("guild") String guildName) {
         Guild newGuild = new Guild(guildName);
@@ -31,7 +31,7 @@ public class GuildCommand {
         GuildRegistry.getInstance().registerGuild(newGuild);
         source.reply("You have created the guild '" + guildName + "'");
     }
-
+    
     @SubCommand("disband")
     public void disband(BukkitSource source, Guild guild) {
         if (guild == null) {
@@ -45,7 +45,7 @@ public class GuildCommand {
         guild.disband();
         source.reply("You have disbanded your guild successfully !!");
     }
-
+    
     @SubCommand("invite")
     public void invite(
             @NotNull BukkitSource source,
@@ -54,7 +54,7 @@ public class GuildCommand {
     ) {
         Player sourcePlayer = source.asPlayer();
         guild.sendInvite(sourcePlayer, player);
-
+        
         //adding the invite to the invites related to the receiver of the invite
         invites.compute(player.getUniqueId(), (uuid, oldInvites) -> {
             var guildInvite = new GuildInvite(sourcePlayer, player, guild);
@@ -66,11 +66,11 @@ public class GuildCommand {
             oldInvites.add(guildInvite);
             return oldInvites;
         });
-
+        
         player.sendMessage("You have been invited to guild '"
                 + guild.getName() + "' by " + sourcePlayer.getName());
     }
-
+    
     @SubCommand("accept")
     public void accept(
             @NotNull BukkitSource source,
@@ -79,24 +79,24 @@ public class GuildCommand {
     ) {
         Player sourcePlayer = source.asPlayer();
         Set<GuildInvite> targetInvites = invites.get(sourcePlayer.getUniqueId());
-
+        
         if (sourceGuild != null) {
             source.reply("You're already in a sourceGuild , you can't do that !");
             return;
         }
-
+        
         GuildInvite invite = getInvite(targetInvites, inviter);
-
+        
         if (targetInvites.isEmpty() || invite == null) {
             source.reply("no invites from '" + inviter.getName() + "'");
             return;
         }
-
+        
         Guild targetGuild = invite.guild();
         targetGuild.addMember(sourcePlayer.getUniqueId());
         sourcePlayer.sendMessage("You have accepted " + inviter.getName() + "'s invite to his sourceGuild '" + targetGuild.getName() + "'");
     }
-
+    
     private GuildInvite getInvite(Set<GuildInvite> invites, Player inviter) {
         for (var inv : invites) {
             if (inv.from().getUniqueId().equals(inviter.getUniqueId()))

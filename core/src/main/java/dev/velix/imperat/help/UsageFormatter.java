@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageFormatter {
-
+    
     /**
      * Displays the usage by converting it into
      * an adventure component
@@ -33,7 +33,7 @@ public interface UsageFormatter {
             CommandUsage<S> usage,
             boolean isLast
     );
-
+    
     /**
      * Formats a single syntax, this is used
      * only in the {@link TreeDisplayer}

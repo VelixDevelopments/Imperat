@@ -6,8 +6,8 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.ExecutionFailure;
+import dev.velix.imperat.exception.ImperatException;
 
 public final class UsageCooldownProcessor<S extends Source> implements CommandPreProcessor<S> {
     /**
@@ -30,5 +30,5 @@ public final class UsageCooldownProcessor<S extends Source> implements CommandPr
         }
         usage.getCooldownHandler().registerExecutionMoment(source);
     }
-
+    
 }

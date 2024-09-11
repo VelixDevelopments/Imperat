@@ -8,14 +8,14 @@ import dev.velix.imperat.help.UsageFormatter;
 import org.jetbrains.annotations.NotNull;
 
 public class ExampleUsageFormatter implements UsageFormatter {
-
-
+    
+    
     @Override
     public <S extends Source> String formatUsageLine(@NotNull Imperat<S> dispatcher, Command<S> command, CommandUsage<S> usage, boolean isLast) {
         String format = dispatcher.commandPrefix() + CommandUsage.format(command, usage);
         return "<green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
     }
-
+    
     @Override
     public String formatUsageOnly(String formattedUsage) {
         return "<green>" + formattedUsage;

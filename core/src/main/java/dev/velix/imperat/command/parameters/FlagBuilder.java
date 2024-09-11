@@ -10,39 +10,39 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, CommandFlag> {
-
+    
     private final Class<?> inputType;
     private final List<String> aliases = new ArrayList<>();
     private OptionalValueSupplier<T> defaultValueSupplier = null;
-
+    
     private FlagBuilder(String name, Class<T> inputType) {
         super(name, CommandFlag.class, true, false);
         this.inputType = inputType;
     }
-
+    
     //for switches
     private FlagBuilder(String name) {
         this(name, null);
     }
-
+    
     public static <S extends Source, T> FlagBuilder<S, T> ofFlag(String name, Class<T> inputType) {
         return new FlagBuilder<>(name, inputType);
     }
-
+    
     public static <S extends Source, T> FlagBuilder<S, T> ofSwitch(String name) {
         return new FlagBuilder<>(name);
     }
-
+    
     public FlagBuilder<S, T> aliases(List<String> aliases) {
         this.aliases.addAll(aliases);
         return this;
     }
-
+    
     public FlagBuilder<S, T> aliases(String... aliases) {
         this.aliases.addAll(Arrays.asList(aliases));
         return this;
     }
-
+    
     public FlagBuilder<S, T> flagDefaultInputValue(OptionalValueSupplier<T> valueSupplier) {
         if (inputType == null) {
             throw new IllegalArgumentException("Flag of type switches, cannot have a default value supplier !");
@@ -50,10 +50,10 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
         this.defaultValueSupplier = valueSupplier;
         return this;
     }
-
+    
     @Override
     public FlagParameter build() {
-
+        
         if (inputType != null) {
             CommandFlag flag = CommandFlag.create(name, aliases, inputType);
             return new FlagCommandParameter(flag, permission, description, defaultValueSupplier);
@@ -62,5 +62,5 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
             return new FlagCommandParameter(commandSwitch, permission, null);
         }
     }
-
+    
 }

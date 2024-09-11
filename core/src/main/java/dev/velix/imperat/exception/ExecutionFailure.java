@@ -9,15 +9,15 @@ import dev.velix.imperat.context.Source;
 import static dev.velix.imperat.command.BaseImperat.START_PREFIX;
 
 public final class ExecutionFailure extends SelfHandledException {
-
+    
     private final static String CAPTION_EXECUTION_ERROR_PREFIX = START_PREFIX + "<red><bold>Execution error:</bold></red> ";
-
+    
     private final CaptionKey key;
-
+    
     public ExecutionFailure(final CaptionKey key) {
         this.key = key;
     }
-
+    
     /**
      * Handles the exception
      *
@@ -33,5 +33,5 @@ public final class ExecutionFailure extends SelfHandledException {
         S source = context.getSource();
         source.reply(CAPTION_EXECUTION_ERROR_PREFIX, caption, context);
     }
-
+    
 }

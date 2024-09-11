@@ -10,7 +10,7 @@ import java.lang.annotation.Annotation;
 @ApiStatus.Internal
 @SuppressWarnings("unchecked")
 final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
-
+    
     private final AnnotationRegistry annotationRegistry;
     
     private final CommandClassVisitor<S> visitor;
@@ -28,8 +28,8 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
         AnnotationReader<S> reader = AnnotationReader.read(annotationRegistry, instanceClazz);
         reader.accept(dispatcher, visitor);
     }
-
-
+    
+    
     /**
      * Registers {@link AnnotationReplacer}
      *
@@ -40,10 +40,10 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
         annotationRegistry.registerAnnotationReplacer(type, replacer);
     }
-
+    
     public AnnotationRegistry getRegistry() {
         return annotationRegistry;
     }
-
-
+    
+    
 }

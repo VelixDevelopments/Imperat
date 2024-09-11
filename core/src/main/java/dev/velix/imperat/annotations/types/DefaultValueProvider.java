@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.PARAMETER})
 public @interface DefaultValueProvider {
-
+    
     Class<? extends OptionalValueSupplier<?>> value();
 }

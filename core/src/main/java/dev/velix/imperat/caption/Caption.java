@@ -12,13 +12,13 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Caption<S extends Source> {
-
+    
     /**
      * @return the key
      */
     @NotNull
     CaptionKey getKey();
-
+    
     /**
      * @param dispatcher the command dispatcher
      * @param context    the context
@@ -31,13 +31,13 @@ public interface Caption<S extends Source> {
             @NotNull Context<S> context,
             @Nullable Exception exception
     );
-
-
+    
+    
     default @NotNull String getMessage(
             @NotNull Imperat<S> dispatcher,
             @NotNull Context<S> context
     ) {
         return getMessage(dispatcher, context, null);
     }
-
+    
 }

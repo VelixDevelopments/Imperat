@@ -48,28 +48,28 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 final class ReflectionCommodore extends AbstractCommodore implements Commodore {
-
+    
     // obc.CraftServer#console field
     private static final Field CONSOLE_FIELD;
-
+    
     // nms.MinecraftServer#getCommandDispatcher method
     private static final Method GET_COMMAND_DISPATCHER_METHOD;
-
+    
     // nms.CommandDispatcher#getDispatcher (obfuscated) method
     private static final Method GET_BRIGADIER_DISPATCHER_METHOD;
-
+    
     // obc.command.BukkitCommandWrapper constructor
     private static final Constructor<?> COMMAND_WRAPPER_CONSTRUCTOR;
-
+    
     static {
         try {
             /*if (ClassesRefUtil.minecraftVersion() >= 19) {
                 throw new UnsupportedOperationException("ReflectionCommodore is not supported on MC 1.19 or above. Switch to Paper :)");
             }*/
-
+            
             final Class<?> minecraftServer;
             final Class<?> commandDispatcher;
-
+            
             if (BukkitUtil.ClassesRefUtil.minecraftVersion() > 16) {
                 minecraftServer = BukkitUtil.ClassesRefUtil.mcClass("server.MinecraftServer");
                 commandDispatcher = BukkitUtil.ClassesRefUtil.mcClass("commands.CommandDispatcher");
@@ -77,43 +77,43 @@ final class ReflectionCommodore extends AbstractCommodore implements Commodore {
                 minecraftServer = BukkitUtil.ClassesRefUtil.nmsClass("MinecraftServer");
                 commandDispatcher = BukkitUtil.ClassesRefUtil.nmsClass("CommandDispatcher");
             }
-
+            
             Class<?> craftServer = BukkitUtil.ClassesRefUtil.obcClass("CraftServer");
             CONSOLE_FIELD = craftServer.getDeclaredField("console");
             CONSOLE_FIELD.setAccessible(true);
-
+            
             GET_COMMAND_DISPATCHER_METHOD = Arrays.stream(minecraftServer.getDeclaredMethods())
                     .filter(method -> method.getParameterCount() == 0)
                     .filter(method -> commandDispatcher.isAssignableFrom(method.getReturnType()))
                     .findFirst().orElseThrow(NoSuchMethodException::new);
             GET_COMMAND_DISPATCHER_METHOD.setAccessible(true);
-
+            
             GET_BRIGADIER_DISPATCHER_METHOD = Arrays.stream(commandDispatcher.getDeclaredMethods())
                     .filter(method -> method.getParameterCount() == 0)
                     .filter(method -> CommandDispatcher.class.isAssignableFrom(method.getReturnType()))
                     .findFirst().orElseThrow(NoSuchMethodException::new);
             GET_BRIGADIER_DISPATCHER_METHOD.setAccessible(true);
-
+            
             Class<?> commandWrapperClass = BukkitUtil.ClassesRefUtil.obcClass("command.BukkitCommandWrapper");
             COMMAND_WRAPPER_CONSTRUCTOR = commandWrapperClass.getConstructor(craftServer, Command.class);
-
+            
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
-
+    
     private final Plugin plugin;
     private final List<LiteralCommandNode<?>> registeredNodes = new ArrayList<>();
-
+    
     ReflectionCommodore(Plugin plugin) {
         this.plugin = plugin;
         this.plugin.getServer().getPluginManager().registerEvents(new ServerReloadListener(this), this.plugin);
     }
-
+    
     static void ensureSetup() {
         // do nothing - this is only called to trigger the static initializer
     }
-
+    
     private CommandDispatcher<?> getDispatcher() {
         try {
             Object mcServerObject = CONSOLE_FIELD.get(Bukkit.getServer());
@@ -123,39 +123,39 @@ final class ReflectionCommodore extends AbstractCommodore implements Commodore {
             throw new RuntimeException(e);
         }
     }
-
+    
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void register(LiteralCommandNode<?> node) {
         Objects.requireNonNull(node, "node");
-
+        
         CommandDispatcher dispatcher = getDispatcher();
         RootCommandNode root = dispatcher.getRoot();
-
+        
         removeChild(root, node.getName());
         root.addChild(node);
         this.registeredNodes.add(node);
     }
-
+    
     @SuppressWarnings("unchecked")
     @Override
     public void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");
-
+        
         try {
             SuggestionProvider<?> wrapper = (SuggestionProvider<?>) COMMAND_WRAPPER_CONSTRUCTOR.newInstance(this.plugin.getServer(), command);
             setRequiredHackyFieldsRecursively(node, wrapper);
         } catch (Throwable e) {
             e.printStackTrace();
         }
-
+        
         Collection<String> aliases = getAliases(command);
         if (!aliases.contains(node.getLiteral())) {
             node = renameLiteralNode(node, command.getName());
         }
-
+        
         for (String alias : aliases) {
             if (node.getLiteral().equals(alias)) {
                 register(node);
@@ -163,28 +163,28 @@ final class ReflectionCommodore extends AbstractCommodore implements Commodore {
                 register(LiteralArgumentBuilder.literal(alias).redirect((LiteralCommandNode<Object>) node).build());
             }
         }
-
+        
         this.plugin.getServer().getPluginManager().registerEvents(new CommandDataSendListener(command, permissionTest), this.plugin);
     }
-
+    
     /**
      * Listens for server (re)loads, and re-adds all registered nodes to the dispatcher.
      */
     private record ServerReloadListener(ReflectionCommodore commodore) implements Listener {
-
+        
         @SuppressWarnings({"rawtypes", "unchecked"})
         @EventHandler
         public void onLoad(ServerLoadEvent e) {
             CommandDispatcher dispatcher = this.commodore.getDispatcher();
             RootCommandNode root = dispatcher.getRoot();
-
+            
             for (LiteralCommandNode<?> node : this.commodore.registeredNodes) {
                 removeChild(root, node.getName());
                 root.addChild(node);
             }
         }
     }
-
+    
     /**
      * Removes minecraft namespaced argument data, & data for players without permission to view the
      * corresponding commands.
@@ -193,24 +193,24 @@ final class ReflectionCommodore extends AbstractCommodore implements Commodore {
         private final Set<String> aliases;
         private final Set<String> minecraftPrefixedAliases;
         private final Predicate<? super Player> permissionTest;
-
+        
         CommandDataSendListener(Command pluginCommand, Predicate<? super Player> permissionTest) {
             this.aliases = new HashSet<>(getAliases(pluginCommand));
             this.minecraftPrefixedAliases = this.aliases.stream().map(alias -> "minecraft:" + alias).collect(Collectors.toSet());
             this.permissionTest = permissionTest;
         }
-
+        
         @EventHandler
         public void onCommandSend(PlayerCommandSendEvent e) {
             // always remove 'minecraft:' prefixed aliases added by craftbukkit.
             // this happens because bukkit thinks our injected commands are vanilla commands.
             e.getCommands().removeAll(this.minecraftPrefixedAliases);
-
+            
             // remove the actual aliases if the player doesn't pass the permission test
             if (!this.permissionTest.test(e.getPlayer())) {
                 e.getCommands().removeAll(this.aliases);
             }
         }
     }
-
+    
 }

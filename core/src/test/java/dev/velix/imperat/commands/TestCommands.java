@@ -8,7 +8,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 
 @SuppressWarnings("unused")
 public final class TestCommands {
-
+    
     public final static Command<TestSource> GROUP_CMD = Command.<TestSource>create("group")
             .defaultExecution((source, context) -> {
                 source.reply("/group <group>");
@@ -68,7 +68,7 @@ public final class TestCommands {
                     ).build(), true
             )
             .build();
-
+    
     public final static Command<TestSource> CHAINED_SUBCOMMANDS_CMD =
             Command.<TestSource>create("subs")
                     .subCommand(
@@ -102,9 +102,9 @@ public final class TestCommands {
                                     )
                                     .build()
                     )
-
+                    
                     .build();
-
+    
     public final static Command<TestSource> MULTIPLE_OPTIONAL_CMD =
             Command.<TestSource>create("ot")
                     .usage(
@@ -118,6 +118,6 @@ public final class TestCommands {
                     
                     )
                     .build();
-
-
+    
+    
 }

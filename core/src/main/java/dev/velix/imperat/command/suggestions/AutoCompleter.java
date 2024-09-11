@@ -59,7 +59,7 @@ public abstract class AutoCompleter<S extends Source> {
         CompletionArg argToComplete = getLastArg(args);
         return autoCompleteArgument(dispatcher, sender, argToComplete, args);
     }
-
+    
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input

@@ -15,9 +15,9 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface HelpExecution<S extends Source> extends CommandExecution<S> {
-
+    
     String PAGE_PARAMETER_NAME = "page";
-
+    
     /**
      * Displays a help menu showing all possible syntaxes
      *
@@ -26,11 +26,11 @@ public interface HelpExecution<S extends Source> extends CommandExecution<S> {
      * @param page   the page of the help menu
      */
     void help(S source, Context<S> context, CommandHelp<S> help, @Nullable Integer page) throws ImperatException;
-
+    
     @Override
     default void execute(S source, ExecutionContext<S> context) throws ImperatException {
         CommandHelp<S> help = context.createCommandHelp();
         help(source, (Context<S>) context, help, context.getArgument(PAGE_PARAMETER_NAME));
     }
-
+    
 }

@@ -19,7 +19,7 @@ public final class NoHelpCaption<S extends Source> implements Caption<S> {
     public @NotNull CaptionKey getKey() {
         return CaptionKey.NO_HELP_AVAILABLE_CAPTION;
     }
-
+    
     /**
      * @param dispatcher the command dispatcher
      * @param context    the context

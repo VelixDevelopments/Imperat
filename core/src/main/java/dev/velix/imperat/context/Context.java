@@ -11,17 +11,17 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Context<S extends Source> extends ExecutionContext<S> {
-
+    
     /**
      * @return the command source of the command
      * @see Source
      */
     @NotNull
     S getSource();
-
+    
     /**
      * @return the number of flags extracted
      */
     int flagsUsedCount();
-
+    
 }

@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.TimeUnit;
 
 public final class CooldownCaption<S extends Source> implements Caption<S> {
-
+    
     /**
      * @return the key
      */
@@ -24,7 +24,7 @@ public final class CooldownCaption<S extends Source> implements Caption<S> {
     public @NotNull CaptionKey getKey() {
         return CaptionKey.COOLDOWN;
     }
-
+    
     /**
      * @param dispatcher the dispatcher
      * @param context    the context
@@ -46,17 +46,17 @@ public final class CooldownCaption<S extends Source> implements Caption<S> {
         }
         return Messages.COOL_DOWN_WAIT.replace("<time>", formatTime(context.getSource(), usage));
     }
-
+    
     private String formatTime(S source, CommandUsage<S> usage) {
         return formatTime(source, usage.getCooldown(), usage.getCooldownHandler());
     }
-
+    
     private String formatTime(S source,
                               UsageCooldown cooldown,
                               CooldownHandler<S> cooldownHandler) {
         return formatTime(cooldown, cooldownHandler.getLastTimeExecuted(source).orElse(-1L));
     }
-
+    
     private String formatTime(UsageCooldown cooldown, long lastTimeExecuted) {
         long timePassed = System.currentTimeMillis() - lastTimeExecuted;
         long remaining = cooldown.toMillis() - timePassed;

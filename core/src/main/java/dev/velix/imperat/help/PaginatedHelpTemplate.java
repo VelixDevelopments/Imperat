@@ -8,13 +8,13 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface PaginatedHelpTemplate extends HelpTemplate {
-
+    
     /**
      * @return The number of syntaxes to display
      * per page
      */
     int syntaxesPerPage();
-
+    
     /**
      * The header of the paginated help template
      *

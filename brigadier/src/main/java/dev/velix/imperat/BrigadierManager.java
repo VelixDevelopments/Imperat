@@ -13,14 +13,14 @@ import org.jetbrains.annotations.NotNull;
  * @param <S> the command-source type
  */
 public interface BrigadierManager<S extends Source> {
-
+    
     /**
      * Get the dispatcher
      *
      * @return {@link Imperat}
      */
     Imperat<S> getDispatcher();
-
+    
     /**
      * Converts the original command source from brigadier
      * into the platform's command-source
@@ -29,7 +29,7 @@ public interface BrigadierManager<S extends Source> {
      * @return the platform's command sender/source
      */
     S wrapCommandSource(Object commandSource);
-
+    
     /**
      * Registers the argument type to its class type
      *
@@ -38,15 +38,15 @@ public interface BrigadierManager<S extends Source> {
      * @param <T>                  the type parameter for the type.
      */
     <T> void registerArgumentResolver(Class<T> type, ArgumentTypeResolver argumentTypeResolver);
-
+    
     /**
      * Registers the argument type resolver
      *
      * @param argumentTypeResolver the value type resolver
      */
     void registerArgumentResolver(ArgumentTypeResolver argumentTypeResolver);
-
-
+    
+    
     /**
      * Fetches the argument type from the parameter
      *
@@ -55,12 +55,12 @@ public interface BrigadierManager<S extends Source> {
      */
     @NotNull
     ArgumentType<?> getArgumentType(CommandParameter parameter);
-
+    
     /**
      * Parses the registered {@link Command} to brigadier node
      *
      * @return the parsed node
      */
     BrigadierNode parseCommandIntoNode(Command<S> command);
-
+    
 }

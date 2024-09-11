@@ -21,21 +21,21 @@ import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
 import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
 
 public class TestRun {
-
+    
     TestRun() {
         USAGE_EXECUTED = false;
     }
-
+    
     private final static TestImperat IMPERAT = new TestImperat();
     private final static TestSource SOURCE = new TestSource(System.out);
-
+    
     public static volatile boolean USAGE_EXECUTED = false;
     public static volatile int POST_PROCESSOR_INT = 0;
     public static volatile int PRE_PROCESSOR_INT = 0;
-
+    
     static {
         IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
-
+        
         IMPERAT.registerCommand(GROUP_CMD);
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
         //IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
@@ -45,22 +45,22 @@ public class TestRun {
     private static UsageMatchResult testCmdTreeExecution(String cmdName, String input) {
         return IMPERAT.dispatch(SOURCE, cmdName, input);
     }
-
+    
     private static void debugCommand(Command<TestSource> command) {
         System.out.println("Command '" + command.getName() + "' has usages: ");
         for (CommandUsage<TestSource> usage : command.getUsages()) {
             System.out.println("- " + CommandUsage.format(command, usage));
         }
-
+        
     }
-
+    
     @Test
     public void testTypeWrap() {
         final TypeWrap<List<String>> typeWrap = new TypeWrap<>() {
         };
         Assertions.assertEquals("java.util.List<java.lang.String>", typeWrap.getType().getTypeName());
     }
-
+    
     @Test
     public void testTypeTolerantVerifierAmbiguity() {
         UsageVerifier<TestSource> verifier = UsageVerifier.typeTolerantVerifier();
@@ -77,7 +77,7 @@ public class TestRun {
         
         Assertions.assertFalse(verifier.areAmbiguous(usage1.build(GROUP_CMD), usage2.build(GROUP_CMD)));
     }
-
+    
     @Test
     public void testIncompleteSubCommand() {
         //syntax -> /group <group> setperm <permission> [value]
@@ -85,9 +85,9 @@ public class TestRun {
         var result = testCmdTreeExecution("group", "member setperm");
         Assertions.assertEquals(UsageMatchResult.INCOMPLETE, result);
         Assertions.assertFalse(USAGE_EXECUTED);
-
+        
     }
-
+    
     @Test
     public void testCompleteSubCommand() {
         USAGE_EXECUTED = false;
@@ -95,7 +95,7 @@ public class TestRun {
         Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
         Assertions.assertTrue(USAGE_EXECUTED);
     }
-
+    
     @Test
     public void testHelpSubCommand() {
         //syntax -> /group help [page]
@@ -104,29 +104,29 @@ public class TestRun {
         Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
         Assertions.assertTrue(USAGE_EXECUTED);
     }
-
+    
     @Test
     public void testPreProcessor() {
         USAGE_EXECUTED = false;
         GROUP_CMD.setPreProcessor(new CustomPreProcessor());
         var result = testCmdTreeExecution("group", "member");
-
+        
         Assertions.assertEquals(PRE_PROCESSOR_INT, 1);
         Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
         Assertions.assertTrue(USAGE_EXECUTED);
     }
-
+    
     @Test
     public void testPostProcessor() {
         USAGE_EXECUTED = false;
         GROUP_CMD.setPostProcessor(new CustomPostProcessor());
-
+        
         var result = testCmdTreeExecution("group", "member");
         Assertions.assertEquals(POST_PROCESSOR_INT, 1);
         Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
         Assertions.assertTrue(USAGE_EXECUTED);
     }
-
+    
     @Test
     public void testSubInheritance() {
         System.out.println("----------------------------");

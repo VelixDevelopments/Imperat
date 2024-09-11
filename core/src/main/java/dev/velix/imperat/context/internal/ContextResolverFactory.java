@@ -14,15 +14,15 @@ import java.lang.reflect.Parameter;
  * @param <S> the command-sender type
  */
 public interface ContextResolverFactory<S extends Source> {
-
-
+    
+    
     static <S extends Source, T> @NotNull ContextResolverFactory<S> of(
             Class<T> clazz,
             ContextResolver<S, T> resolver
     ) {
         return (p) -> p != null && p.getType().isAssignableFrom(clazz) ? resolver : null;
     }
-
+    
     /**
      * Creates a context resolver based on the parameter
      *
@@ -31,5 +31,5 @@ public interface ContextResolverFactory<S extends Source> {
      */
     @Nullable
     ContextResolver<S, ?> create(@Nullable Parameter parameter);
-
+    
 }

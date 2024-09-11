@@ -35,7 +35,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     SimpleCommandClassVisitor(Imperat<S> imperat) {
         super(imperat);
     }
-
+    
     
     @Override
     public Set<Command<S>> visitCommandClass(

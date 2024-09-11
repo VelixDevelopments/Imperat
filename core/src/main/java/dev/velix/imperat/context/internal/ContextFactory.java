@@ -18,12 +18,12 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ContextFactory<S extends Source> {
-
+    
     static <S extends Source> ContextFactory<S> defaultFactory() {
         return new DefaultContextFactory<>();
     }
-
-
+    
+    
     /**
      * @param dispatcher the dispatcher
      * @param source     the sender/source of this command execution
@@ -38,7 +38,7 @@ public interface ContextFactory<S extends Source> {
             @NotNull Command<S> command,
             @NotNull ArgumentQueue queue
     );
-
+    
     /**
      * @param dispatcher   the dispatcher
      * @param command      the command that's running
@@ -53,5 +53,5 @@ public interface ContextFactory<S extends Source> {
             @NotNull Context<S> plainContext,
             @NotNull CommandUsage<S> usage
     );
-
+    
 }

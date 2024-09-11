@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 final class CommandImpl<S extends Source> implements Command<S> {
-
+    
     private final String name;
     private final int position;
     private final List<String> aliases = new ArrayList<>();
@@ -48,16 +48,16 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private @Nullable CommandPreProcessor<S> preProcessor;
     private @Nullable CommandPostProcessor<S> postProcessor;
     private Command<S> parent;
-
+    
     CommandImpl(String name) {
         this(null, name);
     }
-
+    
     //sub-command constructor
     CommandImpl(@Nullable Command<S> parent, String name) {
         this(parent, 0, name);
     }
-
+    
     CommandImpl(@Nullable Command<S> parent, int position, String name) {
         this.parent = parent;
         this.position = position;
@@ -68,7 +68,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.commandTree = parent != null ? null : CommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
     }
-
+    
     /**
      * @return the name of the command
      */
@@ -95,7 +95,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @Nullable String getPermission() {
         return permission;
     }
-
+    
     /**
      * Sets the permission of a command
      *
@@ -105,7 +105,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void setPermission(@Nullable String permission) {
         this.permission = permission;
     }
-
+    
     /**
      * @return The description of a command
      */
@@ -113,12 +113,12 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @NotNull Description getDescription() {
         return description;
     }
-
+    
     @Override
     public void setDescription(Description description) {
         this.description = description;
     }
-
+    
     /**
      * @return the index of this parameter
      */
@@ -126,7 +126,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public int getPosition() {
         return position;
     }
-
+    
     /**
      * Sets the position of this command in a syntax
      * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -137,7 +137,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void setPosition(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
-
+    
     @Override
     public @NotNull UsageContextMatch contextMatch(Context<S> context) {
         if (commandTree != null) {
@@ -162,7 +162,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         CommandDebugger.debug("Visualizing %s's tree", this.name);
         visualizer.visualize();
     }
-
+    
     /**
      * Sets a pre-processor for the command
      *
@@ -172,7 +172,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void setPreProcessor(@NotNull CommandPreProcessor<S> preProcessor) {
         this.preProcessor = preProcessor;
     }
-
+    
     /**
      * Executes the pre-processing instructions in {@link CommandPreProcessor}
      *
@@ -186,7 +186,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             preProcessor.process(api, context, usage);
         }
     }
-
+    
     /**
      * Sets a post-processor for the command
      *
@@ -196,7 +196,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void setPostProcessor(@NotNull CommandPostProcessor<S> postProcessor) {
         this.postProcessor = postProcessor;
     }
-
+    
     /**
      * Executes the post-processing instructions in {@link CommandPostProcessor}
      *
@@ -210,7 +210,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             this.postProcessor.process(api, context);
         }
     }
-
+    
     /**
      * Casts the parameter to a flag parameter
      *
@@ -220,7 +220,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public FlagParameter asFlagParameter() {
         throw new UnsupportedOperationException("A command cannot be treated as a flag !");
     }
-
+    
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
@@ -248,7 +248,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @UnmodifiableView List<String> getAliases() {
         return aliases;
     }
-
+    
     /**
      * Sets the aliases of a command
      *
@@ -258,7 +258,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void addAliases(List<String> aliases) {
         this.aliases.addAll(aliases);
     }
-
+    
     /**
      * @return the default usage of the command
      * without any args
@@ -267,7 +267,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @NotNull CommandUsage<S> getDefaultUsage() {
         return defaultUsage;
     }
-
+    
     /**
      * @param execution sets what happens when there are no parameters
      */
@@ -277,7 +277,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
                 .execute(execution)
                 .build(this);
     }
-
+    
     /**
      * Adds a usage to the command
      *
@@ -295,16 +295,16 @@ final class CommandImpl<S extends Source> implements Command<S> {
                 !usage.hasParamType(Command.class)) {
             mainUsage = usage;
         }
-
+        
         if (commandTree != null)
             commandTree.parseUsage(usage);
     }
-
+    
     @Override
     public @Nullable CommandUsage<S> getUsage(List<CommandParameter> parameters) {
         return usages.get(parameters);
     }
-
+    
     /**
      * @return all {@link CommandUsage} that were registered
      * to this command by the user
@@ -313,13 +313,13 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public Collection<? extends CommandUsage<S>> getUsages() {
         return usages.values();
     }
-
+    
     @Override
     public Collection<? extends CommandUsage<S>> findUsages(Predicate<CommandUsage<S>> predicate) {
         return usages.values().stream().filter(predicate)
                 .collect(Collectors.toList());
     }
-
+    
     /**
      * @return the usage that doesn't include any subcommands, only
      * parameters
@@ -329,7 +329,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         return Optional.ofNullable(mainUsage)
                 .orElse(defaultUsage);
     }
-
+    
     /**
      * @return Returns {@link AutoCompleter}
      * that handles all auto-completes for this command
@@ -338,7 +338,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public AutoCompleter<S> getAutoCompleter() {
         return autoCompleter;
     }
-
+    
     /**
      * @return Whether this command is a sub command or not
      */
@@ -346,7 +346,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @Nullable Command<S> getParent() {
         return parent;
     }
-
+    
     /**
      * sets the parent command
      *
@@ -356,11 +356,11 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void setParent(@NotNull Command<S> parent) {
         this.parent = parent;
     }
-
+    
     private void registerSubCommand(Command<S> command) {
         children.put(command.getName(), command);
     }
-
+    
     /**
      * Injects a created-subcommand directly into the parent's command usages.
      *
@@ -372,15 +372,15 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void addSubCommand(Command<S> command, boolean attachDirectly) {
         command.setParent(this);
         registerSubCommand(command);
-
+        
         final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
-
+        
         CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
         //adding the merged command usage
-
+        
         //CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
         this.addUsage(combo);
-
+        
         for (CommandUsage<S> subUsage : command.getUsages()) {
             if (subUsage.equals(command.getMainUsage())) continue;
             combo = prime.mergeWithCommand(command, subUsage);
@@ -392,7 +392,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             );
         }
     }
-
+    
     /**
      * Creates and adds a new sub-command (if it doesn't exist) then add
      * the {@link CommandUsage} to the sub-command
@@ -426,7 +426,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             CommandUsage<S> main = getMainUsage();
             position = this.getPosition() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
         }
-
+        
         //creating subcommand to modify
         Command<S> subCmd =
                 Command.create(this, position, subCommand.toLowerCase())
@@ -435,7 +435,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
                         .build();
         addSubCommand(subCmd, attachDirectly);
     }
-
+    
     /**
      * @param name the name of the wanted sub-command
      * @return the sub-command of a specific name directly from
@@ -447,7 +447,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         Command<S> sub = children.get(name);
         if (sub != null)
             return sub;
-
+        
         for (String subsNames : children.keySet()) {
             Command<S> other = children.get(subsNames);
             if (other.hasName(name)) return other;
@@ -455,7 +455,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         }
         return null;
     }
-
+    
     /**
      * @return the subcommands of this command
      */
@@ -463,7 +463,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @NotNull Collection<? extends Command<S>> getSubCommands() {
         return children.values();
     }
-
+    
     /**
      * whether to ignore permission checks on the auto-completion of command and
      * sub commands or not
@@ -475,7 +475,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public boolean isIgnoringACPerms() {
         return suppressACPermissionChecks;
     }
-
+    
     /**
      * if true, it will ignore permission checks
      * on the auto-completion of command and sub commands
@@ -489,7 +489,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void ignoreACPermissions(boolean suppress) {
         this.suppressACPermissionChecks = suppress;
     }
-
+    
     /**
      * Adds help as a sub-command to the command chain
      *
@@ -507,7 +507,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
                             .build()
             );
         }
-
+        
         addSubCommandUsage(
                 "help",
                 CommandUsage.<S>builder()
@@ -516,6 +516,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
                 true
         );
     }
-
-
+    
+    
 }

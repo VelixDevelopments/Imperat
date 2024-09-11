@@ -12,7 +12,7 @@ public sealed interface SourceWrapper<S extends Source> permits Imperat {
      * @return the wrapped command-sender type
      */
     S wrapSender(Object sender);
-
+    
     /**
      * Checks whether the type can be a command sender
      *

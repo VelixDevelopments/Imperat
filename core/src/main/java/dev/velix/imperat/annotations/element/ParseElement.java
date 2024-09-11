@@ -35,7 +35,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
         this.element = element;
         this.load(registry);
     }
-
+    
     @SuppressWarnings("unchecked")
     private <A extends Annotation> void load(@NotNull AnnotationRegistry registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
@@ -67,7 +67,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public <T extends Annotation> @Nullable T getAnnotation(@NotNull Class<T> annotationClass) {
         return (T) total.get(annotationClass);
     }
-
+    
     /**
      * Returns annotations that are <em>present</em> on this element.
      * <p>
@@ -84,7 +84,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public Annotation[] getAnnotations() {
         return total.values().toArray(new Annotation[0]);
     }
-
+    
     /**
      * Returns annotations that are <em>directly present</em> on this element.
      * This method ignores inherited annotations.
@@ -102,8 +102,8 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public Annotation[] getDeclaredAnnotations() {
         return total.values().toArray(new Annotation[0]);
     }
-
-
+    
+    
     /**
      * Returns an iterator over elements of type {@code T}.
      *
@@ -114,7 +114,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public Iterator<Annotation> iterator() {
         return total.values().iterator();
     }
-
+    
     @Override
     public String toString() {
         if (element instanceof Method method) {

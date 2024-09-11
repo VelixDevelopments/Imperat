@@ -14,13 +14,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 final class BukkitSuggestionResolvers {
-
+    
     public final static BukkitSuggestionResolver<OfflinePlayer> OFFLINE_PLAYER = new BukkitSuggestionResolver<>() {
         @Override
         public TypeWrap<OfflinePlayer> getType() {
             return TypeWrap.of(OfflinePlayer.class);
         }
-
+        
         @Override
         public List<String> autoComplete(
                 Command<BukkitSource> command,
@@ -33,13 +33,13 @@ final class BukkitSuggestionResolvers {
                     .map(Player::getName).toList();
         }
     };
-
+    
     public final static BukkitSuggestionResolver<Player> PLAYER = new BukkitSuggestionResolver<>() {
         @Override
         public TypeWrap<Player> getType() {
             return TypeWrap.of(Player.class);
         }
-
+        
         @Override
         public List<String> autoComplete(
                 Command<BukkitSource> command,
@@ -52,5 +52,5 @@ final class BukkitSuggestionResolvers {
                     .map(Player::getName).toList();
         }
     };
-
+    
 }

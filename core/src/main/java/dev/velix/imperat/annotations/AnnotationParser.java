@@ -16,9 +16,9 @@ import java.lang.annotation.Annotation;
  * @param <S> the command-sender type
  */
 public abstract class AnnotationParser<S extends Source> {
-
+    
     protected final Imperat<S> dispatcher;
-
+    
     AnnotationParser(Imperat<S> dispatcher) {
         this.dispatcher = dispatcher;
     }
@@ -39,7 +39,7 @@ public abstract class AnnotationParser<S extends Source> {
      * @param <T>      the type of annotated command class to parse
      */
     public abstract <T> void parseCommandClass(T instance);
-
+    
     /**
      * Registers {@link AnnotationReplacer}
      *
@@ -47,5 +47,5 @@ public abstract class AnnotationParser<S extends Source> {
      * @param replacer the replacer
      */
     public abstract <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer);
-
+    
 }

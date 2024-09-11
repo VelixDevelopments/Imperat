@@ -40,7 +40,7 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
         this.fullParameters = fullParameters;
         //this.helpAnnotation = help;
     }
-
+    
     /**
      * Executes the command's actions
      *
@@ -50,18 +50,18 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
     @Override
     public void execute(S source,
                         ExecutionContext<S> context) throws ImperatException {
-
+        
         var instances = AnnotationHelper.loadParameterInstances(dispatcher, fullParameters,
                 source, context, method, null);
-
+        
         System.out.println("CALLING ");
-
+        
         try {
             boundMethodCaller.call(instances);
         } catch (Exception ex) {
             CommandDebugger.error(proxy.getClass(), method.getName(), ex);
         }
-
+        
     }
-
+    
 }

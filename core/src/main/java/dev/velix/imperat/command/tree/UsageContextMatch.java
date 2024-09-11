@@ -14,9 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public final class UsageContextMatch implements Iterable<CommandParameter> {
-
+    
     private final List<CommandParameter> parameters = new ArrayList<>();
-
+    
     @Setter
     private UsageMatchResult result;
     
@@ -31,17 +31,17 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
     public static UsageContextMatch of() {
         return of(UsageMatchResult.UNKNOWN);
     }
-
+    
     public void append(UsageNode<?> node) {
         if (node == null) return;
         if (parameters.contains(node.data)) return;
         parameters.add(node.data);
     }
-
+    
     public CommandParameter getLastParameter() {
         return parameters.get(parameters.size() - 1);
     }
-
+    
     @Override
     public @NotNull Iterator<CommandParameter> iterator() {
         return parameters.iterator();
@@ -50,11 +50,11 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
     public UsageMatchResult result() {
         return result;
     }
-
+    
     public <S extends Source> @Nullable CommandUsage<S> toUsage(Command<S> command) {
         return command.getUsage(parameters);
     }
-
+    
     public void visualize() {
         CommandDebugger.debug("Result => " + result.name());
         StringBuilder builder = new StringBuilder();
@@ -63,6 +63,6 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
         }
         CommandDebugger.debug(builder.toString());
     }
-
-
+    
+    
 }
