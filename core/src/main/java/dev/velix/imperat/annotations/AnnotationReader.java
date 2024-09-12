@@ -15,8 +15,8 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.AvailableSince("1.0.0")
 public interface AnnotationReader<S extends Source> {
     
-    static <S extends Source> AnnotationReader<S> read(AnnotationRegistry registry, Object target) {
-        return new AnnotationReaderImpl<>(registry, target);
+    static <S extends Source> AnnotationReader<S> read(Imperat<S> imperat, AnnotationRegistry registry, Object target) {
+        return new AnnotationReaderImpl<>(imperat, registry, target);
     }
     
     RootCommandClass<S> getRootClass();

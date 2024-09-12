@@ -1,12 +1,12 @@
 package dev.velix.imperat.resolvers;
 
+import dev.velix.imperat.annotations.element.ParameterElement;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Parameter;
 import java.util.function.Supplier;
 
 /**
@@ -15,10 +15,9 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of resolver's parameter
  */
+@FunctionalInterface
 public interface ContextResolver<S extends Source, T> {
     
-    //TODO make a registry for custom annotations that are used in the parameters
-    //TODO and then replace `Parameter` with `ParameterCommandElement` with added method `hasCustomAnnotation`
     
     static <S extends Source, T> ContextResolver<S, T> of(T value) {
         return (c, p) -> value;
@@ -39,7 +38,7 @@ public interface ContextResolver<S extends Source, T> {
     @Nullable
     T resolve(
             @NotNull Context<S> context,
-            @Nullable Parameter parameter
+            @Nullable ParameterElement parameter
     ) throws ImperatException;
     
 }

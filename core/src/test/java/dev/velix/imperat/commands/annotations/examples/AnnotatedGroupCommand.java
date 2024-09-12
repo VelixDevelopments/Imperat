@@ -1,5 +1,6 @@
 package dev.velix.imperat.commands.annotations.examples;
 
+import dev.velix.imperat.TestCommandHelp;
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.types.*;
 
@@ -21,8 +22,13 @@ public final class AnnotatedGroupCommand {
         source.reply("entered group name= " + group.name());
     }
     
+    @SubCommand(value = "help", attachDirectly = true)
+    public void help(TestSource source, TestCommandHelp help) {
+        help.display(source);
+        System.out.println("HELOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+    }
     
-    @SubCommand(value = "setperm")
+    @SubCommand("setperm")
     @Permission("command.group.setperm")
     public void setPermission(TestSource source,
                               @Named("group") Group group,

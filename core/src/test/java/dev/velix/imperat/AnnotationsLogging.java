@@ -17,7 +17,7 @@ public final class AnnotationsLogging {
     @Test
     public void debugVisitor() {
         TestCommand cmd = new TestCommand();
-        AnnotationReader<TestSource> reader = AnnotationReader.read(registry, cmd);
+        AnnotationReader<TestSource> reader = AnnotationReader.read(imperat, registry, cmd);
         reader.accept(imperat, visitor);
     }
     

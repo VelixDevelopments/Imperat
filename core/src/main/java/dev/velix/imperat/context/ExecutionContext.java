@@ -70,12 +70,12 @@ public interface ExecutionContext<S extends Source> {
     
     
     /**
-     * Fetches the argument/input that is resolved by the context
+     * Fetches the argument/input resolved by the context
      * using {@link dev.velix.imperat.resolvers.ContextResolver}
      *
      * @param type type of argument to return
      * @param <T>  the type of this argument parsed value
-     * @return the argument/input that is resolved by the context
+     * @return the argument/input resolved by the context
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException;
     

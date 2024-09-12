@@ -1,8 +1,8 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.ContextResolverFactory;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;

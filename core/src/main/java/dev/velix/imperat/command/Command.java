@@ -12,7 +12,6 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.ListUtils;
 import dev.velix.imperat.util.TypeWrap;
@@ -418,7 +417,7 @@ public interface Command<S extends Source> extends CommandParameter {
      */
     void addHelpCommand(Imperat<S> dispatcher,
                         List<CommandParameter> params,
-                        HelpExecution<S> helpExecution);
+                        CommandExecution<S> helpExecution);
     
     
     class Builder<S extends Source> {

@@ -45,6 +45,10 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
                 //System.out.println("Found registered annotation");
                 total.put(clazz, annotation);
             } else if (registry.hasReplacerFor(clazz)) {
+                //we add the custom annotation anyway
+                total.put(clazz, annotation);
+                
+                //adding the replaced annotations
                 AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);
                 assert replacer != null;
                 replacer.replace((A) annotation)

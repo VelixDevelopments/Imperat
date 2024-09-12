@@ -70,7 +70,14 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
     
     @SuppressWarnings("unchecked")
     public <T> ValueResolver<S, T> getResolver(Type type) {
-        return (ValueResolver<S, T>) getData(TypeUtility.primitiveToBoxed(type)).orElse(null);
+        return (ValueResolver<S, T>) getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
+            for (var registeredType : getKeys()) {
+                if (TypeUtility.areRelatedTypes(type, registeredType)) {
+                    return getData(registeredType).orElse(null);
+                }
+            }
+            return null;
+        });
     }
     
 }

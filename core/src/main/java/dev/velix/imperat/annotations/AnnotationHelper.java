@@ -1,6 +1,8 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.element.MethodElement;
+import dev.velix.imperat.annotations.element.ParameterElement;
 import dev.velix.imperat.annotations.types.*;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
@@ -36,32 +38,29 @@ public final class AnnotationHelper {
             List<CommandParameter> fullParameters,
             S source,
             ExecutionContext<S> context,
-            Method method,
-            @Nullable CommandHelp<S> commandHelp) throws ImperatException {
-        Parameter[] parameters = method.getParameters();
-        Object[] paramsInstances = new Object[parameters.length];
+            MethodElement method
+    ) throws ImperatException {
+        
+        Object[] paramsInstances = new Object[method.getParameters().size()];
         
         paramsInstances[0] = source;
-        for (int i = 1, p = 0; i < parameters.length; i++, p++) {
-            Parameter actualParameter = parameters[i];
-            if (commandHelp != null && TypeUtility.areRelatedTypes(CommandHelp.class, actualParameter.getType())) {
-                paramsInstances[i] = commandHelp;
-                p--;
-                continue;
-            }
+        for (int i = 1, p = 0; i < method.size(); i++, p++) {
+            ParameterElement actualParameter = method.getParameterAt(i);
             
             var factory = dispatcher.getContextResolverFactory();
             var contextResolver = factory.create(actualParameter);
             
             if (contextResolver != null) {
-                System.out.println("PARAMETER AT " + p + "GOT CONTEXT RESOLVED");
                 paramsInstances[i] = contextResolver.resolve((Context<S>) context, actualParameter);
+                p--;
                 continue;
             }
             
+            assert actualParameter != null;
             contextResolver = dispatcher.getContextResolver(actualParameter.getType());
             if (contextResolver != null) {
                 paramsInstances[i] = contextResolver.resolve((Context<S>) context, actualParameter);
+                p--;
                 continue;
             }
             
@@ -168,5 +167,10 @@ public final class AnnotationHelper {
             return 2 + count;
         }
         return 100;
+    }
+    
+    
+    public static boolean isHelpParameter(Parameter element) {
+        return TypeUtility.areRelatedTypes(element.getType(), CommandHelp.class);
     }
 }

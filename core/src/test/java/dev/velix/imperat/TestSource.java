@@ -35,7 +35,7 @@ public record TestSource(PrintStream origin) implements Source {
     
     @Override
     public <S extends Source> void reply(String prefix, Caption<S> caption, Context<S> context) {
-    
+        //sendMsg(prefix);
     }
     
     @Override

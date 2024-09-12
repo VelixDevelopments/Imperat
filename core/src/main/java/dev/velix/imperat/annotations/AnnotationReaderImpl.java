@@ -27,18 +27,19 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     private final RootCommandClass<S> rootCommandClass;
     private final ClassElement classElement;
     
-    AnnotationReaderImpl(AnnotationRegistry registry, Object instance) {
+    AnnotationReaderImpl(Imperat<S> imperat, AnnotationRegistry registry, Object instance) {
         this.registry = registry;
         this.clazz = instance.getClass();
         this.rootCommandClass = new RootCommandClass<>(clazz, instance);
-        this.classElement = read();
+        this.classElement = read(imperat);
     }
     
-    private ClassElement read() {
-        return readClass(registry, null, clazz);
+    private ClassElement read(Imperat<S> imperat) {
+        return readClass(imperat, registry, null, clazz);
     }
     
     private ClassElement readClass(
+            Imperat<S> imperat,
             AnnotationRegistry registry,
             @Nullable ClassElement parent,
             @NotNull Class<?> clazz
@@ -50,7 +51,9 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         
         for (Method method : methods) {
             //System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
-            root.addChild(new MethodElement(registry, root, method));
+            root.addChild(
+                    new MethodElement(imperat, registry, root, method)
+            );
         }
         
         //We add external subcommand classes from @Inherit as children
@@ -59,7 +62,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
             assert inherit != null;
             for (Class<?> subClass : inherit.value()) {
                 root.addChild(
-                        readClass(registry, root, subClass)
+                        readClass(imperat, registry, root, subClass)
                 );
             }
         }
@@ -67,7 +70,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         //Adding inner classes
         for (Class<?> child : clazz.getDeclaredClasses()) {
             root.addChild(
-                    readClass(registry, root, child)
+                    readClass(imperat, registry, root, child)
             );
         }
         

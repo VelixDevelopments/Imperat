@@ -1,5 +1,5 @@
 package dev.velix.imperat.util;
 
-public record Pair<R, L>(R right, L left) {
+public record Pair<L, R>(L left, R right) {
 
 }

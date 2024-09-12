@@ -39,10 +39,10 @@ final class TreeDisplayer implements UsageDisplayer {
             
             var formatInfo = formatUsageTillSub(dispatcher, command, usage);
             
-            var lastSub = formatInfo.left();
+            var lastSub = formatInfo.right();
             
             displayUsage(dispatcher, command, source, usage, lastSub,
-                    formatter, formatInfo.right(), i == usages.size() - 1);
+                    formatter, formatInfo.left(), i == usages.size() - 1);
         }
         
     }
@@ -90,11 +90,11 @@ final class TreeDisplayer implements UsageDisplayer {
         for (CommandUsage<S> commandUsage : sub.getUsages()) {
             var formatInfo = formatUsageTillSub(dispatcher, command, commandUsage);
             source.reply(BRANCH_DOWN + BRANCH_FORWARDS +
-                    formatter.formatUsageOnly(formatInfo.right())
+                    formatter.formatUsageOnly(formatInfo.left())
             );
             if (commandUsage.hasParamType(Command.class)) {
                 displayUsage(dispatcher, command, source, commandUsage,
-                        formatInfo.left(), formatter, formatInfo.right(), i == max - 1);
+                        formatInfo.right(), formatter, formatInfo.left(), i == max - 1);
             }
             i++;
         }

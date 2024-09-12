@@ -24,7 +24,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     @Override
     public <T> void parseCommandClass(T instance) {
         //System.out.println("-------------Reading-------------");
-        AnnotationReader<S> reader = AnnotationReader.read(annotationRegistry, instance);
+        AnnotationReader<S> reader = AnnotationReader.read(dispatcher, annotationRegistry, instance);
         //System.out.println("-----------Accepting-----------");
         reader.accept(dispatcher, visitor);
         //System.out.println("-------Visited class `" + instanceClazz.getSimpleName() + "` --------");

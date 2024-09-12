@@ -15,7 +15,6 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.help.HelpExecution;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.CommandDebugger;
@@ -498,7 +497,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param helpExecution the help execution
      */
     @Override
-    public void addHelpCommand(Imperat<S> dispatcher, List<CommandParameter> params, HelpExecution<S> helpExecution) {
+    public void addHelpCommand(Imperat<S> dispatcher, List<CommandParameter> params, CommandExecution<S> helpExecution) {
         if (params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
             params.add(
                     CommandParameter.optionalInt("page")

@@ -1,11 +1,11 @@
-package dev.velix.imperat.context.internal;
+package dev.velix.imperat.command;
 
+import dev.velix.imperat.annotations.element.ParameterElement;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.Parameter;
 
 /**
  * Represents a context resolver factory
@@ -20,7 +20,7 @@ public interface ContextResolverFactory<S extends Source> {
             Class<T> clazz,
             ContextResolver<S, T> resolver
     ) {
-        return (p) -> p != null && p.getType().isAssignableFrom(clazz) ? resolver : null;
+        return (p) -> p != null && TypeUtility.areRelatedTypes(clazz, p.getType()) ? resolver : null;
     }
     
     /**
@@ -30,6 +30,6 @@ public interface ContextResolverFactory<S extends Source> {
      * @return the {@link ContextResolver} specific for that parameter
      */
     @Nullable
-    ContextResolver<S, ?> create(@Nullable Parameter parameter);
+    ContextResolver<S, ?> create(@Nullable ParameterElement parameter);
     
 }

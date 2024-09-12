@@ -18,13 +18,14 @@ public final class GroupValueResolver implements ValueResolver<TestSource, Group
             Cursor cursor,
             CommandParameter parameter
     ) throws ImperatException {
-        var sender = context.getSource();
-        if (sender.isConsole()) {
+        /*if (sender.isConsole()) {
+            throw new SenderErrorException("Invalid group '%s'", raw);
+        }*/
+        var group = GroupRegistry.getInstance()
+                .getData(raw);
+        if (group.isEmpty()) {
             throw new SenderErrorException("Invalid group '%s'", raw);
         }
-        
-        return GroupRegistry.getInstance()
-                .getGroup(sender.name());
-        
+        return group.get();
     }
 }

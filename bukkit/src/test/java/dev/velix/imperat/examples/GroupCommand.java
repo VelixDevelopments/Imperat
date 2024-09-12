@@ -2,6 +2,7 @@ package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.test.Group;
 
 @Command("group")
@@ -22,6 +23,12 @@ public final class GroupCommand {
         source.reply("entered group name= " + group.name());
     }
     
+    @SubCommand(value = "help", attachDirectly = true)
+    public void help(BukkitSource source, CommandHelp<BukkitSource> help) {
+        //System.out.println("EXECUTING HELP, " + help);
+        //source.reply("EXECUTING HELP !!");
+        help.display(source);
+    }
     
     @SubCommand(value = "setperm")
     @Permission("command.group.setperm")

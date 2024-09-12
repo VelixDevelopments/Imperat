@@ -18,8 +18,6 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
-import dev.velix.imperat.context.internal.ContextResolverFactory;
-import dev.velix.imperat.context.internal.ContextResolverRegistry;
 import dev.velix.imperat.context.internal.ValueResolverRegistry;
 import dev.velix.imperat.exception.*;
 import dev.velix.imperat.help.HelpTemplate;

@@ -6,12 +6,14 @@ import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 
 @ApiStatus.Internal
 @Getter
 public final class ParameterElement extends ParseElement<Parameter> {
     
     private final String name;
+    private final Type type;
     private final ClassElement owningClass;
     
     public ParameterElement(
@@ -23,6 +25,7 @@ public final class ParameterElement extends ParseElement<Parameter> {
         super(registry, method, element);
         this.owningClass = owningClass;
         this.name = AnnotationHelper.getParamName(element);
+        this.type = element.getParameterizedType();
     }
     
     @Override
