@@ -365,7 +365,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         
         String name = AnnotationHelper.getParamName(parameter, named, flag, switchAnnotation);
         boolean optional = flag != null || switchAnnotation != null
-                || element.isAnnotationPresent(Optional.class);
+                || element.isAnnotationPresent(Optional.class)
+                || element.isAnnotationPresent(DefaultValue.class)
+                || element.isAnnotationPresent(DefaultValueProvider.class);
         
         //reading suggestion annotation
         //element.debug();

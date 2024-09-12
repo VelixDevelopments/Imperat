@@ -5,10 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.commands.annotations.TestCommand;
-import dev.velix.imperat.commands.annotations.examples.AnnotatedGroupCommand;
-import dev.velix.imperat.commands.annotations.examples.Group;
-import dev.velix.imperat.commands.annotations.examples.GroupSuggestionResolver;
-import dev.velix.imperat.commands.annotations.examples.GroupValueResolver;
+import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -45,6 +42,7 @@ public class TestRun {
         //IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
         IMPERAT.registerCommand(new AnnotatedGroupCommand());
         IMPERAT.registerCommand(new TestCommand());
+        IMPERAT.registerCommand(new OptionalArgCommand());
     }
     
     private static UsageMatchResult testCmdTreeExecution(String cmdName, String input) {
@@ -200,5 +198,13 @@ public class TestRun {
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "first", ""});
         Assertions.assertLinesMatch(Arrays.asList("x", "y", "z", "sexy"), results);
+    }
+    
+    @Test
+    public void testOptionalArgCmd() {
+        var cmd = IMPERAT.getCommand("opt");
+        assert cmd != null;
+        debugCommand(cmd);
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("opt", "hi"));
     }
 }
