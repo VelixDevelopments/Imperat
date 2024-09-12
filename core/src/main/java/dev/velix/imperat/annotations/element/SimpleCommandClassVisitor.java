@@ -185,6 +185,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         )
                 );
             } else {
+                //System.out.println("Recurring Method= " + methodElement.getElement().getName());
                 var usage = loadUsage(reader, parentCmd, cmd, methodElement);
                 //CommandDebugger.debugParameters("sub usage params: " , usage.getParameters());
                 cmd.addUsage(usage);
@@ -201,7 +202,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     if (cmd == null) {
                         throw new IllegalStateException("Method  '" + method.getElement().getName() + "' Cannot be treated as usage/subcommand, it doesn't have a parent ");
                     }
-                    
+                    //System.out.println("----------> Method= " + method.getElement().getName());
                     if (method.isAnnotationPresent(Usage.class)) {
                         if (method.getParameters().size() == 1) {
                             //default usage for that command.
@@ -216,9 +217,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     } else if (method.isAnnotationPresent(SubCommand.class)) {
                         var subAnn = method.getAnnotation(SubCommand.class);
                         assert subAnn != null;
+                        
                         var subCmd = loadCommand(reader, cmd, method, subAnn);
                         assert subCmd != null;
-                        if (method.getParameters().size() == 1) {
+                        /*if (method.getParameters().size() == 1) {
                             //default usage for that command.
                             subCmd.setDefaultUsageExecution(
                                     new MethodCommandExecutor<>(
@@ -226,8 +228,11 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                                     )
                             );
                         } else {
-                            subCmd.addUsage(loadUsage(reader, parentCmd, cmd, method));
-                        }
+                            System.out.println("Loading usage for parent= " + (parentCmd == null ? "NULL" : parentCmd.getName()) + ", cmd= " + cmd.getName());
+                            var usage = loadUsage(reader, parentCmd, cmd, method);
+                            System.out.println("LOADED USAGEEE== " + CommandUsage.format(subCmd, usage));
+                            subCmd.addUsage(usage);
+                        }*/
                         cmd.addSubCommand(subCmd, subAnn.attachDirectly());
                     }
                 } else if (element instanceof ClassElement innerClass) {
@@ -271,21 +276,21 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ClassElement methodOwner = (ClassElement) element.getParent();
         assert methodOwner != null;
         
-        var parametersInfo = loadParameters(element, parentCmd);
+        var parametersInfo = loadParameters(element, parentCmd, loadedCmd);
         
         final boolean isHelp = parametersInfo.left();
-        final List<CommandParameter> params = parametersInfo.right();
         
-        var execution = isHelp ? new MethodHelpExecution<>(imperat, reader.getRootClass(), method, parametersInfo.right())
+        var execution = isHelp ? new MethodHelpExecution<>(imperat, reader.getRootClass(), method, parametersInfo.middle())
                 : new MethodCommandExecutor<>(reader.getRootClass(), imperat, element, parametersInfo.middle());
         
-        return CommandUsage.<S>builder().parameters(params)
+        return CommandUsage.<S>builder().parameters(parametersInfo.right())
                 .execute(execution).build(loadedCmd, isHelp);
     }
     
     private TripleData<List<CommandParameter>, List<CommandParameter>, Boolean> loadParameters(
             @NotNull MethodElement method,
-            @Nullable Command<S> parentCmd
+            @Nullable Command<S> parentCmd,
+            @NotNull Command<S> loadedCmd
     ) {
         
         LinkedList<CommandParameter> toLoad = new LinkedList<>();
@@ -301,9 +306,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
             currentParent = currentParent.getParent();
         }
-        //System.out.println("LOADED " + loadedCmd.getName() + "'s PARENTERAL PARAMS : " + mainUsageParameters);
+        //System.out.println("Parent= " + parentCmd + " LOADED " + loadedCmd.getName() + "'s PARENTERAL PARAMS : " + mainUsageParameters);
+        
         LinkedList<CommandParameter> total = new LinkedList<>(mainUsageParameters);
         LinkedList<ParameterElement> parameterElements = new LinkedList<>(method.getParameters());
+        
+        //System.out.println("TOTAL BEFORE FOR " + loadedCmd.getName() + " IS= " + total);
         
         boolean help = false;
         while (!parameterElements.isEmpty()) {
@@ -332,10 +340,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 parameterElements.removeFirst();
                 continue;
             }
-            if (parentCmd != null && mainParameter.isSimilarTo(commandParameter)) {
+            
+            if (mainParameter.isSimilarTo(commandParameter)) {
                 parameterElements.removeFirst();
                 mainUsageParameters.removeFirst();
-                
                 continue;
             }
             
@@ -345,7 +353,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             mainUsageParameters.removeFirst();
             parameterElements.removeFirst();
         }
-        
+        //System.out.println("TOTAL= " + total);
+        //System.out.println("TO-LOAD= " + toLoad);
         return new TripleData<>(toLoad, total, help);
     }
     

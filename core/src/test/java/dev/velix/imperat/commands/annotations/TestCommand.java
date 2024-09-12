@@ -1,5 +1,7 @@
 package dev.velix.imperat.commands.annotations;
 
+import dev.velix.imperat.TestCommandHelp;
+import dev.velix.imperat.TestRun;
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.types.*;
 
@@ -20,6 +22,13 @@ public class TestCommand {
     @SubCommand("othersub")
     public void doOtherSub(TestSource source, @Named("text") @Suggest({"hi", "bye"}) String text) {
         source.reply("Other-text= " + text);
+    }
+    
+    @SubCommand(value = "help", attachDirectly = true)
+    public void help(TestSource source, TestCommandHelp help) {
+        help.display(source);
+        source.reply("executed /test help");
+        TestRun.USAGE_EXECUTED = true;
     }
     
     @Command("embedded")

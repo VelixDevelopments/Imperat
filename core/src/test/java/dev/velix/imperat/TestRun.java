@@ -5,6 +5,10 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.commands.annotations.TestCommand;
+import dev.velix.imperat.commands.annotations.examples.AnnotatedGroupCommand;
+import dev.velix.imperat.commands.annotations.examples.Group;
+import dev.velix.imperat.commands.annotations.examples.GroupSuggestionResolver;
+import dev.velix.imperat.commands.annotations.examples.GroupValueResolver;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.processors.CustomPostProcessor;
 import dev.velix.imperat.processors.CustomPreProcessor;
@@ -35,10 +39,13 @@ public class TestRun {
     
     static {
         IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
+        IMPERAT.registerValueResolver(Group.class, new GroupValueResolver());
+        IMPERAT.registerSuggestionResolver(new GroupSuggestionResolver());
         
-        IMPERAT.registerCommand(GROUP_CMD);
+        //IMPERAT.registerCommand(GROUP_CMD);
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
         //IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
+        IMPERAT.registerCommand(new AnnotatedGroupCommand());
         IMPERAT.registerCommand(new TestCommand());
     }
     
@@ -79,6 +86,17 @@ public class TestRun {
                 );
         
         Assertions.assertFalse(verifier.areAmbiguous(usage1.build(GROUP_CMD), usage2.build(GROUP_CMD)));
+    }
+    
+    @Test
+    public void testHelp() {
+        USAGE_EXECUTED = false;
+        debugCommand(IMPERAT.getCommand("test"));
+        debugCommand(IMPERAT.getCommand("group"));
+        
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("group", "help"));
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "help"));
+        Assertions.assertTrue(USAGE_EXECUTED);
     }
     
     @Test

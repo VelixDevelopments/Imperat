@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-String DESTINATION_1_8 = "C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot test server 1.8.8\\plugins"
-String DESTINATION_1_19 = "C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot 1.19.2\\plugins"
-String DESTINATION_1_17 = "C:\\Users\\Bergo\\OneDrive\\Desktop\\servers\\spigot 1.17.1\\plugins"
+String DESTINATION_1_8 = "C:\\Users\\Bergo\\Desktop\\servers\\spigot test server 1.8.8\\plugins"
+String DESTINATION_1_19 = "C:\\Users\\Bergo\\Desktop\\servers\\spigot 1.19.2\\plugins"
+String DESTINATION_1_17 = "C:\\Users\\Bergo\\Desktop\\servers\\spigot 1.17.1\\plugins"
 
 repositories {
     mavenCentral()

@@ -59,10 +59,10 @@ public final class MethodCommandExecutor<S extends Source> implements CommandExe
                 source, context, method.getElement(), null
         );
         
-        /*for (int i = 0; i < instances.length; i++) {
+        for (int i = 0; i < instances.length; i++) {
             var param = method.getElement().getParameters()[i];
             System.out.println("param #" + i + "(" + param.getType().getSimpleName() + ") has instance = " + (instances[i] == null ? "NULL" : instances[i].getClass().getSimpleName())) ;
-        }*/
+        }
         
         try {
             boundMethodCaller.call(instances);

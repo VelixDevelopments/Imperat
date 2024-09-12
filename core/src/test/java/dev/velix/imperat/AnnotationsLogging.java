@@ -7,7 +7,8 @@ import dev.velix.imperat.annotations.element.CommandClassVisitor;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import org.junit.jupiter.api.Test;
 
-public final class TestAnnotations {
+
+public final class AnnotationsLogging {
     
     private final Imperat<TestSource> imperat = new TestImperat();
     private final AnnotationRegistry registry = new AnnotationRegistry();

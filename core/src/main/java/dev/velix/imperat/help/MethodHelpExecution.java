@@ -9,6 +9,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
@@ -46,7 +47,7 @@ public final class MethodHelpExecution<S extends Source> implements HelpExecutio
     @Override
     public void help(S source,
                      Context<S> context,
-                     CommandHelp<S> help,
+                     @NotNull CommandHelp<S> help,
                      @Nullable Integer page) throws ImperatException {
         
         Object[] instances = AnnotationHelper

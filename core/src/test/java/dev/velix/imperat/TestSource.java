@@ -15,7 +15,7 @@ public record TestSource(PrintStream origin) implements Source {
     
     @Override
     public String name() {
-        return "CONSOLE";
+        return "mqzen";
     }
     
     @Override
