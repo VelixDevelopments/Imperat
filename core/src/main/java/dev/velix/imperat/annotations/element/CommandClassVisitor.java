@@ -10,7 +10,6 @@ import java.util.Set;
 
 /**
  * Visits each element in a {@link ClassElement}
- *
  * @param <S> the command source
  */
 public abstract class CommandClassVisitor<S extends Source> {
