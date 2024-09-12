@@ -1,12 +1,10 @@
 package dev.velix.imperat.help.templates;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.UsageFormatter;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
 public final class DefaultFormatter implements UsageFormatter {
@@ -18,15 +16,14 @@ public final class DefaultFormatter implements UsageFormatter {
      * <p>
      * This is used in the PlainDisplayer
      *
-     * @param dispatcher the dispatcher
      * @param command    the command
      * @param usage      the usage to display
      * @param isLast     is it the last usage?
      * @return the usage component
      */
     @Override
-    public <S extends Source> String formatUsageLine(@NotNull Imperat<S> dispatcher, Command<S> command, CommandUsage<S> usage, boolean isLast) {
-        String format = dispatcher.commandPrefix() + CommandUsage.format(command, usage);
+    public <S extends Source> String formatUsageLine(Command<S> command, CommandUsage<S> usage, boolean isLast) {
+        String format = "/" + CommandUsage.format(command, usage);
         return "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
     }
     

@@ -14,17 +14,18 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.ArrayList;
 
 @ApiStatus.AvailableSince("1.0.0")
-public class CommandHelp<S extends Source> {
+@SuppressWarnings("unchecked")
+public final class CommandHelp {
     
-    private final Imperat<S> dispatcher;
-    private final Context<S> context;
-    private final Command<S> command;
+    private final Imperat<?> dispatcher;
+    private final Context<?> context;
+    private final Command<?> command;
     private final HelpTemplate template;
     
     public CommandHelp(
-            Imperat<S> dispatcher,
-            Command<S> command,
-            Context<S> context
+            Imperat<?> dispatcher,
+            Command<?> command,
+            Context<?> context
     ) {
         this.dispatcher = dispatcher;
         this.command = command;
@@ -32,11 +33,11 @@ public class CommandHelp<S extends Source> {
         this.context = context;
     }
     
-    public void display(S source) {
+    public <S extends Source> void display(S source) {
         display(source, 1);
     }
     
-    public void display(S source, int page) {
+    public <S extends Source> void display(S source, int page) {
         try {
             if (template instanceof PaginatedHelpTemplate paginatedTemplate) {
                 displayPaginated(source, paginatedTemplate, page);
@@ -44,11 +45,11 @@ public class CommandHelp<S extends Source> {
                 displayNormal(source);
             }
         } catch (Throwable ex) {
-            dispatcher.handleThrowable(ex, context, this.getClass(), "display(source, page)");
+            ((Imperat<S>) dispatcher).handleThrowable(ex, (Context<S>) context, this.getClass(), "display(source, page)");
         }
     }
     
-    private void displayPaginated(
+    private <S extends Source> void displayPaginated(
             S source,
             PaginatedHelpTemplate template,
             int page
@@ -57,9 +58,10 @@ public class CommandHelp<S extends Source> {
             throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
         
+        Command<S> command = (Command<S>) this.command;
         PaginatedText<CommandUsage<S>> text = new PaginatedText<>(template.syntaxesPerPage());
         
-        for (var usage : command.getUsages()) {
+        for (CommandUsage<S> usage : command.getUsages()) {
             if (usage.isDefault()) continue;
             text.add(usage);
         }
@@ -76,16 +78,17 @@ public class CommandHelp<S extends Source> {
         }
         source.reply(template.fullHeader(command, page, text.getMaxPages()));
         
-        template.getUsagesDisplayer().display(dispatcher, command, source,
+        template.getUsagesDisplayer().display(command, source,
                 template.getUsageFormatter(), textPage.asList());
         
         source.reply(template.getFooter(command));
     }
     
-    private void displayNormal(S source) throws ExecutionFailure {
+    private <S extends Source> void displayNormal(S source) throws ExecutionFailure {
         if (template == null) {
             throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
         }
+        Command<S> command = (Command<S>) this.command;
         
         final int maxUsages = command.getUsages().size();
         if (maxUsages == 0) {
@@ -93,7 +96,7 @@ public class CommandHelp<S extends Source> {
         }
         
         source.reply(template.getHeader(command));
-        template.getUsagesDisplayer().display(dispatcher, command, source,
+        template.getUsagesDisplayer().display(command, source,
                 template.getUsageFormatter(), new ArrayList<>(command.getUsages()));
         
         source.reply(template.getFooter(command));

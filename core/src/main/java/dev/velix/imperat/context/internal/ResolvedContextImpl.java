@@ -155,7 +155,7 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
     }
     
     @Override
-    public CommandHelp<S> createCommandHelp() {
+    public CommandHelp createCommandHelp() {
         return context.createCommandHelp();
     }
     

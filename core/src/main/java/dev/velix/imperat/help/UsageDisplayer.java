@@ -1,6 +1,5 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
@@ -40,7 +39,6 @@ public interface UsageDisplayer {
      * <p>
      * It has two pre-made implementations
      *
-     * @param dispatcher the command dispatcher
      * @param command    the command that owns all the usages
      * @param source     the command sender
      * @param formatter  the formatter {@link UsageFormatter}
@@ -50,7 +48,6 @@ public interface UsageDisplayer {
      * @see TreeDisplayer
      */
     <S extends Source> void display(
-            Imperat<S> dispatcher,
             Command<S> command,
             S source,
             UsageFormatter formatter,

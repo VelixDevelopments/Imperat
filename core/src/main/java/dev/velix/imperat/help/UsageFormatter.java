@@ -1,11 +1,9 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a class responsible for formatting
@@ -20,7 +18,6 @@ public interface UsageFormatter {
      * <p>
      * This is used in the {@link PlainDisplayer}
      *
-     * @param dispatcher the dispatcher
      * @param command    the command
      * @param usage      the usage to display
      * @param isLast     is it the last usage?
@@ -28,7 +25,6 @@ public interface UsageFormatter {
      * @return the usage component
      */
     <S extends Source> String formatUsageLine(
-            @NotNull Imperat<S> dispatcher,
             Command<S> command,
             CommandUsage<S> usage,
             boolean isLast

@@ -85,6 +85,6 @@ public interface ExecutionContext<S extends Source> {
      *
      * @return {@link CommandHelp} for the command usage used in a certain context
      */
-    CommandHelp<S> createCommandHelp();
+    CommandHelp createCommandHelp();
     
 }

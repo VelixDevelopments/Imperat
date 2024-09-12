@@ -25,11 +25,11 @@ public interface HelpExecution<S extends Source> extends CommandExecution<S> {
      * @param help   the help object
      * @param page   the page of the help menu
      */
-    void help(S source, Context<S> context, CommandHelp<S> help, @Nullable Integer page) throws ImperatException;
+    void help(S source, Context<S> context, CommandHelp help, @Nullable Integer page) throws ImperatException;
     
     @Override
     default void execute(S source, ExecutionContext<S> context) throws ImperatException {
-        CommandHelp<S> help = context.createCommandHelp();
+        CommandHelp help = context.createCommandHelp();
         help(source, (Context<S>) context, help, context.getArgument(PAGE_PARAMETER_NAME));
     }
     

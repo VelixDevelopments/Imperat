@@ -1,8 +1,8 @@
 package dev.velix.imperat.examples;
 
-import dev.velix.imperat.BukkitHelp;
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.test.Group;
 
 @Command("group")
@@ -24,7 +24,7 @@ public final class GroupCommand {
     }
     
     @SubCommand(value = "help", attachDirectly = true)
-    public void help(BukkitSource source, BukkitHelp help) {
+    public void help(BukkitSource source, CommandHelp help) {
         help.display(source);
     }
     

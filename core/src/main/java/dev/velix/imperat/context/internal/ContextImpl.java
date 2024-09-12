@@ -108,8 +108,8 @@ final class ContextImpl<S extends Source> implements Context<S> {
     
     
     @Override
-    public CommandHelp<S> createCommandHelp() {
-        return new CommandHelp<>(dispatcher, command, this);
+    public CommandHelp createCommandHelp() {
+        return new CommandHelp(dispatcher, command, this);
     }
     
     

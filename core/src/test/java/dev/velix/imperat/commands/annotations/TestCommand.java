@@ -1,9 +1,9 @@
 package dev.velix.imperat.commands.annotations;
 
-import dev.velix.imperat.TestCommandHelp;
 import dev.velix.imperat.TestRun;
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.help.CommandHelp;
 
 @Command("test")
 @Inherit(FirstSub.class)
@@ -25,7 +25,7 @@ public class TestCommand {
     }
     
     @SubCommand(value = "help", attachDirectly = true)
-    public void help(TestSource source, TestCommandHelp help) {
+    public void help(TestSource source, CommandHelp help) {
         help.display(source);
         source.reply("executed /test help");
         TestRun.USAGE_EXECUTED = true;

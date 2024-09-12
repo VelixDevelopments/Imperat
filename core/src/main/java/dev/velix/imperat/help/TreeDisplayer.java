@@ -1,6 +1,5 @@
 package dev.velix.imperat.help;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
@@ -26,7 +25,6 @@ final class TreeDisplayer implements UsageDisplayer {
     
     @Override
     public <S extends Source> void display(
-            Imperat<S> dispatcher,
             Command<S> command,
             S source,
             UsageFormatter formatter,
@@ -37,21 +35,20 @@ final class TreeDisplayer implements UsageDisplayer {
         for (int i = 0; i < usages.size(); i++) {
             var usage = usages.get(i);
             
-            var formatInfo = formatUsageTillSub(dispatcher, command, usage);
+            var formatInfo = formatUsageTillSub(command, usage);
             
             var lastSub = formatInfo.right();
             
-            displayUsage(dispatcher, command, source, usage, lastSub,
+            displayUsage(command, source, usage, lastSub,
                     formatter, formatInfo.left(), i == usages.size() - 1);
         }
         
     }
     
     
-    private <S extends Source> Pair<String, Command<S>> formatUsageTillSub(Imperat<S> dispatcher,
-                                                                           Command<S> command,
+    private <S extends Source> Pair<String, Command<S>> formatUsageTillSub(Command<S> command,
                                                                            CommandUsage<S> usage) {
-        StringBuilder builder = new StringBuilder(dispatcher.commandPrefix() + command.getName());
+        StringBuilder builder = new StringBuilder("/" + command.getName());
         Command<S> lastSub = null;
         for (var param : usage.getParameters()) {
             builder.append(' ')
@@ -67,7 +64,6 @@ final class TreeDisplayer implements UsageDisplayer {
     
     
     private <S extends Source> void displayUsage(
-            Imperat<S> dispatcher,
             Command<S> command,
             S source,
             CommandUsage<S> usage,
@@ -79,7 +75,7 @@ final class TreeDisplayer implements UsageDisplayer {
         
         
         if (sub == null) {
-            source.reply(formatter.formatUsageLine(dispatcher, command, usage, last));
+            source.reply(formatter.formatUsageLine(command, usage, last));
             return;
         }
         
@@ -88,12 +84,12 @@ final class TreeDisplayer implements UsageDisplayer {
         int max = sub.getUsages().size();
         int i = 0;
         for (CommandUsage<S> commandUsage : sub.getUsages()) {
-            var formatInfo = formatUsageTillSub(dispatcher, command, commandUsage);
+            var formatInfo = formatUsageTillSub(command, commandUsage);
             source.reply(BRANCH_DOWN + BRANCH_FORWARDS +
                     formatter.formatUsageOnly(formatInfo.left())
             );
             if (commandUsage.hasParamType(Command.class)) {
-                displayUsage(dispatcher, command, source, commandUsage,
+                displayUsage(command, source, commandUsage,
                         formatInfo.right(), formatter, formatInfo.left(), i == max - 1);
             }
             i++;
