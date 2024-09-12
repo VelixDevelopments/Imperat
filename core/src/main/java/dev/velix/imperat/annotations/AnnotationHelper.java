@@ -134,12 +134,12 @@ public final class AnnotationHelper {
     @SuppressWarnings("unchecked")
     public static <T> @Nullable OptionalValueSupplier<T> deduceOptionalValueSupplier(
             Parameter parameter,
-            DefaultValue defaultValueAnnotation,
-            DefaultValueProvider provider
+            Default defaultAnnotation,
+            DefaultProvider provider
     ) {
         
-        if (defaultValueAnnotation != null) {
-            String def = defaultValueAnnotation.value();
+        if (defaultAnnotation != null) {
+            String def = defaultAnnotation.value();
             return (OptionalValueSupplier<T>) OptionalValueSupplier.of(def);
         } else if (provider != null) {
             Class<? extends OptionalValueSupplier<?>> supplierClass = provider.value();

@@ -22,7 +22,7 @@ public final class BanCommand {
             @Named("player") OfflinePlayer player,
             @Switch({"silent", "s"}) boolean silent,
             @Named("duration") @Optional @Nullable String duration,
-            @Named("reason") @Optional @DefaultValue("Breaking server laws") @Greedy String reason
+            @Named("reason") @Optional @Default("Breaking server laws") @Greedy String reason
     ) {
         //TODO actual ban logic
         String durationFormat = duration == null ? "FOREVER" : "for " + duration;

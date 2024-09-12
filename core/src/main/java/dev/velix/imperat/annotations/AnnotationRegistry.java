@@ -26,7 +26,7 @@ public final class AnnotationRegistry {
         
         this.registerAnnotationTypes(
                 Cooldown.class, Description.class, Permission.class,
-                Suggest.class, SuggestionProvider.class, DefaultValue.class, DefaultValueProvider.class,
+                Suggest.class, SuggestionProvider.class, Default.class, DefaultProvider.class,
                 Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, Range.class, Async.class, Cooldown.class
         );
     }

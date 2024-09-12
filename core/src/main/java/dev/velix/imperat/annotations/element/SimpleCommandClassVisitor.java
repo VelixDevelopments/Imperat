@@ -366,8 +366,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         String name = AnnotationHelper.getParamName(parameter, named, flag, switchAnnotation);
         boolean optional = flag != null || switchAnnotation != null
                 || element.isAnnotationPresent(Optional.class)
-                || element.isAnnotationPresent(DefaultValue.class)
-                || element.isAnnotationPresent(DefaultValueProvider.class);
+                || element.isAnnotationPresent(Default.class)
+                || element.isAnnotationPresent(DefaultProvider.class);
         
         //reading suggestion annotation
         //element.debug();
@@ -405,9 +405,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         
         OptionalValueSupplier<T> optionalValueSupplier = null;
         if (optional) {
-            DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
-            DefaultValueProvider provider = parameter.getAnnotation(DefaultValueProvider.class);
-            optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(parameter, defaultValueAnnotation, provider);
+            Default defaultAnnotation = parameter.getAnnotation(Default.class);
+            DefaultProvider provider = parameter.getAnnotation(DefaultProvider.class);
+            optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(parameter, defaultAnnotation, provider);
         }
         
         if (flag != null) {
