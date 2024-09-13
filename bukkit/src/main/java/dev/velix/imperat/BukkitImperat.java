@@ -2,7 +2,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BukkitAdventure;
-import dev.velix.imperat.adventure.PaperAdventure;
+import dev.velix.imperat.adventure.CastingAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
@@ -61,7 +61,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             if (provider != null) {
                 return provider;
             } else if (Audience.class.isAssignableFrom(CommandSender.class)) {
-                return new PaperAdventure();
+                return new CastingAdventure<>();
             } else if (Reflections.findClass("net.kyori.adventure.platform.bukkit.BukkitAudiences")) {
                 return new BukkitAdventure(plugin);
             }
