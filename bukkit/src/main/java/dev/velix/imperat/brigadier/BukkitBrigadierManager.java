@@ -183,7 +183,6 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
                     });
             
             if (!flagParameter.isSwitch()) {
-                System.out.println("NOT SWITCH");
                 var flagInputArgType = getArgumentType(flagParameter);
                 BrigadierNode flagInputNode = BrigadierNode.create(argument("value", flagInputArgType));
                 node.addChild(flagInputNode);

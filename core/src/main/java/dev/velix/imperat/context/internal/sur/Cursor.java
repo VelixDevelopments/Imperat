@@ -26,7 +26,6 @@ public final class Cursor {
             this.raw = operator.applyAsInt(raw);
             this.parameter = operator.applyAsInt(parameter);
         }
-        //System.out.println("r=" + raw + ", p=" +parameter);
     }
     
     public void shift(ShiftTarget target, ShiftOperation operation) {

@@ -132,16 +132,6 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
         return element.toString();
     }
     
-    
-    public void debug() {
-        StringBuilder builder = new StringBuilder();
-        for (Annotation annotation : getDeclaredAnnotations()) {
-            builder.append("@").append(annotation
-                    .annotationType().getSimpleName()).append(",");
-        }
-        System.out.println(builder);
-    }
-    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
