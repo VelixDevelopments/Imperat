@@ -4,7 +4,7 @@ import dev.velix.imperat.context.Source;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.ComponentLike;
 
-public class NoAdventure<S> implements AdventureProvider<S> {
+public class EmptyAdventure<S> implements AdventureProvider<S> {
     
     @Override
     public Audience audience(final S sender) {
