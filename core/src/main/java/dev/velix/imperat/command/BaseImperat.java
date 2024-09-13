@@ -3,6 +3,7 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
@@ -86,6 +87,75 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     context.getSource().error(
                             "Please wait %d second(s) to execute this command again!".formatted(remaining)
                     );
+                }
+        );
+        this.setThrowableResolver(
+                PermissionDeniedException.class,
+                (exception, imperat, context) -> context.getSource().error("You don't have permission to use this command!")
+        );
+        this.setThrowableResolver(
+                InvalidSyntaxException.class,
+                (exception, imperat, context) -> {
+                    S source = context.getSource();
+                    if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
+                        source.error(
+                                "Unknown command, usage '<raw_args>' is unknown.".replace("<raw_args>", context.getArguments().join(" "))
+                        );
+                    }
+
+                    if (!(context instanceof ResolvedContext<S> resolvedContext)) {
+                        throw new IllegalCallerException("Invalid syntax exception can NOT be Thrown before resolving the context");
+                    }
+
+                    var usage = resolvedContext.getDetectedUsage();
+                    final int last = context.getArguments().size() - 1;
+
+                    final List<CommandParameter> params = new ArrayList<>(usage.getParameters())
+                            .stream()
+                            .filter((param) -> !param.isOptional() && param.getPosition() > last)
+                            .toList();
+
+                    final StringBuilder builder = new StringBuilder();
+                    for (int i = 0; i < params.size(); i++) {
+                        CommandParameter param = params.get(i);
+                        assert !param.isOptional();
+                        builder.append(param.format());
+                        if (i != params.size() - 1)
+                            builder.append(' ');
+
+                    }
+                    //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
+                    source.error(
+                            "Missing required arguments '<required_args>'\n Full syntax: '<usage>'"
+                                    .replace("<required_args>", builder.toString())
+                                    .replace("<usage>", imperat.commandPrefix()
+                                            + CommandUsage.format(resolvedContext.getOwningCommand(), usage))
+                    );
+                }
+        );
+        this.setThrowableResolver(
+                NoHelpException.class,
+                (exception, imperat, context) -> {
+                    Command<S> cmdUsed;
+                    if (context instanceof ResolvedContext<S> resolvedContext) {
+                        cmdUsed = resolvedContext.getLastUsedCommand();
+                    } else {
+                        cmdUsed = imperat.getCommand(context.getCommandUsed());
+                    }
+                    assert cmdUsed != null;
+                    context.getSource().error("No Help available for <yellow>'<command>'".replace("<command>", cmdUsed.getName()));
+                }
+        );
+        this.setThrowableResolver(
+                NoHelpPageException.class,
+                (exception, imperat, context) -> {
+                    if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null
+                            || resolvedContext.getDetectedUsage().isHelp()) {
+                        throw new IllegalCallerException("Called NoHelpPageCaption in wrong the wrong sequence/part of the code");
+                    }
+
+                    int page = context.getArgumentOr("page", 1);
+                    context.getSource().error("Page '<page>' doesn't exist!".replace("<page>", String.valueOf(page)));
                 }
         );
     }
