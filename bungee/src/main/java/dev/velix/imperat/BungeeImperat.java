@@ -2,6 +2,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BungeeAdventure;
+import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
@@ -35,7 +36,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         } else if (Reflections.findClass("net.kyori.adventure.platform.bungeecord.BungeeAudiences")) {
             return new BungeeAdventure(plugin);
         }
-        return BungeeAdventure.EMPTY;
+        return new EmptyAdventure<>();
     }
     
     public static BungeeImperat create(
