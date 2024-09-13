@@ -32,7 +32,7 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
         return of(UsageMatchResult.UNKNOWN);
     }
     
-    public void append(UsageNode<?> node) {
+    public void append(ParameterNode<?> node) {
         if (node == null) return;
         if (parameters.contains(node.data)) return;
         parameters.add(node.data);

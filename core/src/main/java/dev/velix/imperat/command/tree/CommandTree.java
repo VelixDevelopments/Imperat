@@ -52,7 +52,7 @@ public final class CommandTree<S extends Source> {
     }
     
     private void addParametersToTree(
-            UsageNode<?> currentNode,
+            ParameterNode<?> currentNode,
             List<CommandParameter> parameters,
             int index
     ) {
@@ -61,19 +61,19 @@ public final class CommandTree<S extends Source> {
         }
         
         CommandParameter param = parameters.get(index);
-        UsageNode<?> childNode = getChildNode(currentNode, param);
+        ParameterNode<?> childNode = getChildNode(currentNode, param);
         // Recursively add the remaining parameters to the child node
         addParametersToTree(childNode, parameters, index + 1);
     }
     
-    private UsageNode<?> getChildNode(UsageNode<?> parent, CommandParameter param) {
-        for (UsageNode<?> child : parent.getChildren()) {
+    private ParameterNode<?> getChildNode(ParameterNode<?> parent, CommandParameter param) {
+        for (ParameterNode<?> child : parent.getChildren()) {
             if (child.data.getName().equalsIgnoreCase(param.getName())
                     && TypeUtility.matches(child.data.getType(), param.getType())) {
                 return child;
             }
         }
-        UsageNode<?> newNode;
+        ParameterNode<?> newNode;
         if (param.isCommand())
             newNode = new CommandNode<>(param.asCommand());
         else
@@ -102,7 +102,7 @@ public final class CommandTree<S extends Source> {
             S source,
             ArgumentQueue raws,
             CompletionArg arg,
-            UsageNode<?> child,
+            ParameterNode<?> child,
             int depth,
             final int maxDepth,
             List<String> results
@@ -140,7 +140,7 @@ public final class CommandTree<S extends Source> {
             S source,
             ArgumentQueue raws,
             CompletionArg arg,
-            UsageNode<?> node,
+            ParameterNode<?> node,
             List<String> results
     ) {
         if (node instanceof CommandNode<?>) {
@@ -162,7 +162,7 @@ public final class CommandTree<S extends Source> {
         
         int depth = 0;
         
-        for (UsageNode<?> child : root.getChildren()) {
+        for (ParameterNode<?> child : root.getChildren()) {
             UsageContextMatch nodeTraversing = UsageContextMatch.of();
             var traverse = contextMatchNode(nodeTraversing, input, child, depth);
             if (traverse.result() != UsageMatchResult.UNKNOWN) {
@@ -177,7 +177,7 @@ public final class CommandTree<S extends Source> {
     private @NotNull UsageContextMatch contextMatchNode(
             UsageContextMatch usageContextMatch,
             ArgumentQueue input,
-            UsageNode<?> node,
+            ParameterNode<?> node,
             int depth
     ) {
         //CommandDebugger.debug("Traversing node=%s, at depth=%s", node.format(), depth);
@@ -215,7 +215,7 @@ public final class CommandTree<S extends Source> {
                     //node is not the last, and we reached the end of the raw input length
                     //We check if there's any missing optional
                     boolean allOptional = true;
-                    for (UsageNode<?> child : node.getChildren()) {
+                    for (ParameterNode<?> child : node.getChildren()) {
                         if (!child.isOptional()) {
                             allOptional = false;
                             break;
@@ -225,7 +225,7 @@ public final class CommandTree<S extends Source> {
                     //improved logic
                     if (allOptional) {
                         //if all optional, then append the first one
-                        usageContextMatch.append(node.getChild(UsageNode::isOptional));
+                        usageContextMatch.append(node.getChild(ParameterNode::isOptional));
                     }
                     
                     //CommandDebugger.debug("All optional after last depth ? = %s", (allOptional) );
@@ -247,12 +247,12 @@ public final class CommandTree<S extends Source> {
     }
     
     private UsageContextMatch searchForMatch(
-            UsageNode<?> node,
+            ParameterNode<?> node,
             UsageContextMatch usageContextMatch,
             ArgumentQueue input,
             int depth
     ) {
-        for (UsageNode<?> child : node.getChildren()) {
+        for (ParameterNode<?> child : node.getChildren()) {
             var traversedChild = contextMatchNode(usageContextMatch, input, child, depth + 1);
             if (traversedChild.result() == UsageMatchResult.COMPLETE)
                 return traversedChild;

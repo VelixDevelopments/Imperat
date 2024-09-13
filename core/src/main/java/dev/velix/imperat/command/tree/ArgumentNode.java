@@ -7,7 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
-final class ArgumentNode extends UsageNode<CommandParameter> {
+final class ArgumentNode extends ParameterNode<CommandParameter> {
     
     ArgumentNode(@NotNull CommandParameter data) {
         super(data);

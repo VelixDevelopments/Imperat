@@ -26,13 +26,13 @@ public final class CommandTreeVisualizer<S extends Source> {
         CommandDebugger.debug(builder.toString());
     }
     
-    private void visualizeNode(UsageNode<?> node, StringBuilder builder, int depth) {
+    private void visualizeNode(ParameterNode<?> node, StringBuilder builder, int depth) {
         if (node == null) {
             return;
         }
         builder.append("  ".repeat(Math.max(0, depth)));
         builder.append(node.format()).append("\n");
-        for (UsageNode<?> child : node.getChildren()) {
+        for (ParameterNode<?> child : node.getChildren()) {
             visualizeNode(child, builder, depth + 1);
         }
         

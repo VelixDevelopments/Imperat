@@ -8,15 +8,15 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.function.Predicate;
 
-public abstract class UsageNode<T extends CommandParameter> {
+public abstract class ParameterNode<T extends CommandParameter> {
     
     protected final @NotNull T data;
     
-    private final PriorityQueue<UsageNode<?>> nextNodes = new PriorityQueue<>(
-            Comparator.comparing(UsageNode::priority)
+    private final PriorityQueue<ParameterNode<?>> nextNodes = new PriorityQueue<>(
+            Comparator.comparing(ParameterNode::priority)
     );
     
-    protected UsageNode(@NotNull T data) {
+    protected ParameterNode(@NotNull T data) {
         this.data = data;
     }
     
@@ -25,12 +25,12 @@ public abstract class UsageNode<T extends CommandParameter> {
         return data;
     }
     
-    public void addChild(UsageNode<?> node) {
+    public void addChild(ParameterNode<?> node) {
         if (nextNodes.contains(node)) return;
         nextNodes.add(node);
     }
     
-    public Iterable<? extends UsageNode<?>> getChildren() {
+    public Iterable<? extends ParameterNode<?>> getChildren() {
         return nextNodes;
     }
     
@@ -52,7 +52,7 @@ public abstract class UsageNode<T extends CommandParameter> {
         return (this instanceof ArgumentNode param) && param.data.isOptional();
     }
     
-    public @Nullable UsageNode<?> getChild(Predicate<UsageNode<?>> predicate) {
+    public @Nullable ParameterNode<?> getChild(Predicate<ParameterNode<?>> predicate) {
         for (var child : getChildren()) {
             if (predicate.test(child)) {
                 return child;
@@ -62,11 +62,11 @@ public abstract class UsageNode<T extends CommandParameter> {
     }
     
     
-    public UsageNode<?> getNextCommandChild() {
+    public ParameterNode<?> getNextCommandChild() {
         return getChild((child) -> child instanceof CommandNode<?>);
     }
     
-    public UsageNode<?> getNextParameterChild() {
+    public ParameterNode<?> getNextParameterChild() {
         return getChild((child) -> child instanceof CommandNode<?>);
     }
     
