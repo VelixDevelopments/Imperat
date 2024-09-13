@@ -21,7 +21,6 @@ public final class CaptionRegistry<S extends Source> extends Registry<CaptionKey
     private CaptionRegistry() {
         super();
         this.registerCaption(new NoPermissionCaption<>());
-        this.registerCaption(new CooldownCaption<>());
         this.registerCaption(new InvalidSyntaxCaption<>());
         this.registerCaption(new NoHelpCaption<>());
         this.registerCaption(new NoHelpPageCaption<>());

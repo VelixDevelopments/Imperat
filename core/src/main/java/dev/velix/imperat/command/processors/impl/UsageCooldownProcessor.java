@@ -1,12 +1,11 @@
 package dev.velix.imperat.command.processors.impl;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exception.ExecutionFailure;
+import dev.velix.imperat.exception.CooldownException;
 import dev.velix.imperat.exception.ImperatException;
 
 public final class UsageCooldownProcessor<S extends Source> implements CommandPreProcessor<S> {
@@ -26,7 +25,10 @@ public final class UsageCooldownProcessor<S extends Source> implements CommandPr
     ) throws ImperatException {
         var source = context.getSource();
         if (usage.getCooldownHandler().hasCooldown(source)) {
-            throw new ExecutionFailure(CaptionKey.COOLDOWN);
+            throw new CooldownException(
+                    usage.getCooldownHandler().getUsageCooldown().orElseThrow().toMillis(),
+                    usage.getCooldownHandler().getLastTimeExecuted(source).orElse(0L)
+            );
         }
         usage.getCooldownHandler().registerExecutionMoment(source);
     }

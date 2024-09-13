@@ -70,7 +70,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         annotationParser = AnnotationParser.defaultParser(this);
         this.permissionResolver = permissionResolver;
         registerProcessors();
-        setThrowableResolver(SenderErrorException.class, (exception, imperat, context) -> context.getSource().error(exception.getMessage()));
+        this.regDefThrowableResolvers();
     }
     
     private void registerProcessors() {
@@ -78,7 +78,25 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         registerGlobalPreProcessor(new UsageCooldownProcessor<>());
         //TODO register creative built-in processors in the future
     }
-    
+
+    private void regDefThrowableResolvers() {
+        this.setThrowableResolver(
+                SenderErrorException.class,
+                (exception, imperat, context) -> context.getSource().error(exception.getMessage())
+        );
+        this.setThrowableResolver(
+                CooldownException.class,
+                (exception, imperat, context) -> {
+                    final long lastTimeExecuted = exception.getCooldown();
+                    final long timePassed = System.currentTimeMillis() - lastTimeExecuted;
+                    final long remaining = exception.getDefaultCooldown() - timePassed;
+                    context.getSource().error(
+                            "Please wait %d second(s) to execute this command again!".formatted(remaining)
+                    );
+                }
+        );
+    }
+
     /**
      * Registering a command into the dispatcher
      *
