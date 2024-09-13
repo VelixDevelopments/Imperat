@@ -1,12 +1,13 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exception.ExecutionFailure;
+import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.NoHelpException;
+import dev.velix.imperat.exception.NoHelpPageException;
 import dev.velix.imperat.util.text.PaginatedText;
 import dev.velix.imperat.util.text.TextPage;
 import org.jetbrains.annotations.ApiStatus;
@@ -53,9 +54,9 @@ public final class CommandHelp {
             S source,
             PaginatedHelpTemplate template,
             int page
-    ) throws ExecutionFailure {
+    ) throws ImperatException {
         if (template == null) {
-            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
+            throw new NoHelpException();
         }
         
         Command<S> command = (Command<S>) this.command;
@@ -68,13 +69,13 @@ public final class CommandHelp {
         
         text.paginate();
         if (text.getMaxPages() == 0) {
-            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
+            throw new NoHelpPageException();
         }
         
         TextPage<CommandUsage<S>> textPage = text.getPage(page);
         
         if (textPage == null) {
-            throw new ExecutionFailure(CaptionKey.NO_HELP_PAGE_AVAILABLE_CAPTION);
+            throw new NoHelpPageException();
         }
         source.reply(template.fullHeader(command, page, text.getMaxPages()));
         
@@ -84,15 +85,15 @@ public final class CommandHelp {
         source.reply(template.getFooter(command));
     }
     
-    private <S extends Source> void displayNormal(S source) throws ExecutionFailure {
+    private <S extends Source> void displayNormal(S source) throws ImperatException {
         if (template == null) {
-            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
+            throw new NoHelpException();
         }
         Command<S> command = (Command<S>) this.command;
         
         final int maxUsages = command.getUsages().size();
         if (maxUsages == 0) {
-            throw new ExecutionFailure(CaptionKey.NO_HELP_AVAILABLE_CAPTION);
+            throw new NoHelpException();
         }
         
         source.reply(template.getHeader(command));

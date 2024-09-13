@@ -3,9 +3,6 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
-import dev.velix.imperat.caption.Caption;
-import dev.velix.imperat.caption.CaptionKey;
-import dev.velix.imperat.caption.CaptionRegistry;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
@@ -48,7 +45,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private final ContextResolverRegistry<S> contextResolverRegistry;
     private final ValueResolverRegistry<S> valueResolverRegistry;
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
-    private final CaptionRegistry<S> captionRegistry;
     protected @NotNull PermissionResolver<S> permissionResolver;
     private @NotNull ContextFactory<S> contextFactory;
     private @NotNull UsageVerifier<S> verifier;
@@ -66,7 +62,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         valueResolverRegistry = ValueResolverRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
         verifier = UsageVerifier.defaultVerifier();
-        captionRegistry = CaptionRegistry.createDefault();
         annotationParser = AnnotationParser.defaultParser(this);
         this.permissionResolver = permissionResolver;
         registerProcessors();
@@ -434,58 +429,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         globalPostProcessors.add(priority, postProcessor);
     }
     
-    /**
-     * Registers a caption
-     *
-     * @param caption the caption to register
-     */
-    @Override
-    public void registerCaption(Caption<S> caption) {
-        Preconditions.notNull(caption, "Caption cannot be null");
-        this.captionRegistry.registerCaption(caption);
-    }
-    
-    /**
-     * Sends a caption to the source
-     *
-     * @param key     the id/key of the caption
-     * @param context the context of the command
-     */
-    @Override
-    public void sendCaption(CaptionKey key,
-                            Context<S> context) {
-        this.sendCaption(key, context, null);
-    }
-    
-    /**
-     * Sends a caption to the source
-     *
-     * @param key       the id/key of the caption
-     * @param context   the context of the command
-     * @param exception the error if present
-     */
-    @Override
-    public void sendCaption(CaptionKey key,
-                            Context<S> context,
-                            @Nullable Exception exception) {
-        Caption<S> caption = captionRegistry.getCaption(key);
-        if (caption == null) {
-            throw new IllegalStateException(String.format("Unregistered caption from key '%s'", key.id()));
-        }
-        S source = context.getSource();
-        source.reply(caption, context);
-    }
-    
-    /**
-     * Fetches the caption from a caption key
-     *
-     * @param key the key
-     * @return the caption to get
-     */
-    @Override
-    public @Nullable Caption<S> getCaption(@NotNull CaptionKey key) {
-        return captionRegistry.getCaption(key);
-    }
     
     @Override
     public @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput) {
@@ -523,7 +466,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     
     private UsageMatchResult handleExecution(S source, Command<S> command, Context<S> context) throws ImperatException {
         if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
-            throw new ExecutionFailure(CaptionKey.NO_PERMISSION);
+            throw new PermissionDeniedException();
         }
         
         if (context.getArguments().isEmpty()) {
@@ -547,10 +490,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                 if (usage != null)
                     executeUsage(command, source, context, usage);
                 else
-                    throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
+                    throw new IllegalStateException("Matched Usage is null while the result is INCOMPLETE, this error is internal and almost impossible to occur, please contact mqzen or iiahmedyt on discord");
             }
         } else {
-            throw new ExecutionFailure(CaptionKey.INVALID_SYNTAX);
+            throw new InvalidSyntaxException();
         }
         return searchResult.result();
     }

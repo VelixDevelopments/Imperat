@@ -1,8 +1,6 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
-import dev.velix.imperat.caption.Caption;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.ChatColor;
@@ -52,12 +50,17 @@ public final class BukkitSource implements Source {
      */
     @Override
     public void reply(final String message) {
-        this.sender.sendMessage(message);
+        //check if adventure is loaded, otherwise we send the message normally
+        if (imperat.isAdventureLoaded()) {
+            imperat.getAdventureProvider().sendMiniMessage(sender, message);
+        } else {
+            this.sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        }
     }
     
     @Override
     public void error(final String message) {
-        this.sender.sendMessage(ChatColor.RED + message);
+        this.reply(ChatColor.RED + message);
     }
     
     /**
@@ -67,16 +70,6 @@ public final class BukkitSource implements Source {
      */
     public void reply(final ComponentLike component) {
         provider.send(this, component);
-    }
-    
-    @Override
-    public <S extends Source> void reply(Caption<S> caption, Context<S> context) {
-        reply(caption.getMessage((Imperat<S>) imperat, context));
-    }
-    
-    @Override
-    public <S extends Source> void reply(String prefix, Caption<S> caption, Context<S> context) {
-        reply(prefix + caption.getMessage((Imperat<S>) imperat, context));
     }
     
     /**

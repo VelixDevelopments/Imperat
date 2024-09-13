@@ -12,6 +12,7 @@ repositories {
 dependencies {
     compileOnly project(":core")
     compileOnlyApi kyori(KyoriModule.API)
+    compileOnlyApi kyori(KyoriModule.MINI_MESSAGE)
 
     compileOnly 'org.jetbrains:annotations:24.1.0'
     annotationProcessor('org.jetbrains:annotations:24.1.0')

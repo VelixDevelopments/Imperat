@@ -2,11 +2,12 @@ package dev.velix.imperat.adventure;
 
 import net.kyori.adventure.audience.Audience;
 
-public class CastingAdventure<S> implements AdventureProvider<S> {
+public abstract class CastingAdventure<S> implements AdventureProvider<S> {
     
     @Override
-    public Audience audience(final S sender) {
+    public final Audience audience(S sender) {
         return (Audience) sender;
     }
+    
     
 }
