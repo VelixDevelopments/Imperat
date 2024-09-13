@@ -7,8 +7,6 @@ import org.bukkit.plugin.Plugin;
 
 public final class BukkitAdventure implements AdventureProvider<CommandSender> {
     
-    public static final EmptyBukkitAdventure EMPTY = new EmptyBukkitAdventure();
-    
     private final BukkitAudiences audiences;
     
     public BukkitAdventure(final Plugin plugin) {

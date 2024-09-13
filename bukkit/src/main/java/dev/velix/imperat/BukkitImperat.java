@@ -3,6 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BukkitAdventure;
 import dev.velix.imperat.adventure.CastingAdventure;
+import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
@@ -67,7 +68,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             }
         }
         
-        return BukkitAdventure.EMPTY;
+        return new EmptyAdventure<>();
     }
     
     /**
