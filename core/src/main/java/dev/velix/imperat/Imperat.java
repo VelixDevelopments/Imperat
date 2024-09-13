@@ -1,8 +1,8 @@
 package dev.velix.imperat;
 
 
-import dev.velix.imperat.annotations.AnnotationParser;
-import dev.velix.imperat.annotations.AnnotationReplacer;
+import dev.velix.imperat.annotations.base.AnnotationParser;
+import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.context.Context;

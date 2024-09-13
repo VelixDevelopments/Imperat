@@ -1,7 +1,7 @@
 package dev.velix.imperat.commands.annotations;
 
 import dev.velix.imperat.TestSource;
-import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.annotations.*;
 
 @SubCommand("first")
 @Inherit(SecondSub.class)

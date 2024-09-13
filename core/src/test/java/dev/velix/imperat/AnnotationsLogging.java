@@ -1,9 +1,9 @@
 package dev.velix.imperat;
 
 
-import dev.velix.imperat.annotations.AnnotationReader;
-import dev.velix.imperat.annotations.AnnotationRegistry;
-import dev.velix.imperat.annotations.element.CommandClassVisitor;
+import dev.velix.imperat.annotations.base.AnnotationReader;
+import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.element.CommandClassVisitor;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import org.junit.jupiter.api.Test;
 

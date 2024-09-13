@@ -1,6 +1,6 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.annotations.element.ParameterElement;
+import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.util.TypeUtility;

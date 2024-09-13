@@ -1,7 +1,7 @@
 package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.test.Group;
 

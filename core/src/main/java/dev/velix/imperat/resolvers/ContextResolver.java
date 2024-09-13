@@ -1,6 +1,6 @@
 package dev.velix.imperat.resolvers;
 
-import dev.velix.imperat.annotations.element.ParameterElement;
+import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;

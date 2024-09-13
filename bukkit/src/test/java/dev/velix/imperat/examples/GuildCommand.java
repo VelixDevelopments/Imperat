@@ -1,10 +1,10 @@
 package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.types.Command;
-import dev.velix.imperat.annotations.types.Named;
-import dev.velix.imperat.annotations.types.SubCommand;
-import dev.velix.imperat.annotations.types.Usage;
+import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.Named;
+import dev.velix.imperat.annotations.SubCommand;
+import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.test.guild.Guild;
 import dev.velix.imperat.test.guild.GuildInvite;
 import dev.velix.imperat.test.guild.GuildRegistry;

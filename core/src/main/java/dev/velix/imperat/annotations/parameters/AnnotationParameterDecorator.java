@@ -1,6 +1,6 @@
 package dev.velix.imperat.annotations.parameters;
 
-import dev.velix.imperat.annotations.element.ParameterElement;
+import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.InputParameter;

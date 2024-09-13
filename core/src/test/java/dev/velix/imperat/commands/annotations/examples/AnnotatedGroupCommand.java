@@ -1,7 +1,7 @@
 package dev.velix.imperat.commands.annotations.examples;
 
 import dev.velix.imperat.TestSource;
-import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.help.CommandHelp;
 
 @Command("group")

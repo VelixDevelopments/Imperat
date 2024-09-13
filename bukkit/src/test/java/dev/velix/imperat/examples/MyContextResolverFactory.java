@@ -2,7 +2,7 @@ package dev.velix.imperat.examples;
 
 import dev.velix.imperat.BukkitContextResolverFactory;
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.element.ParameterElement;
+import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.examples.custom_annotations.MyCustomAnnotation2;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.test.guild.GuildRegistry;

@@ -1,7 +1,7 @@
 package dev.velix.imperat.test.guild;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.annotations.element.ParameterElement;
+import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SenderErrorException;

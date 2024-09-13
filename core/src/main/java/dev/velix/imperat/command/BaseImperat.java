@@ -1,8 +1,8 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.AnnotationParser;
-import dev.velix.imperat.annotations.AnnotationReplacer;
+import dev.velix.imperat.annotations.base.AnnotationParser;
+import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.caption.CaptionKey;
 import dev.velix.imperat.caption.CaptionRegistry;

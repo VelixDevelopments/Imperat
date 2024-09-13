@@ -2,7 +2,7 @@ package dev.velix.imperat.commands.annotations;
 
 import dev.velix.imperat.TestRun;
 import dev.velix.imperat.TestSource;
-import dev.velix.imperat.annotations.types.*;
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.help.CommandHelp;
 
 @Command("test")

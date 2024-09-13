@@ -1,9 +1,9 @@
 package dev.velix.imperat;
 
 
-import dev.velix.imperat.annotations.AnnotationFactory;
-import dev.velix.imperat.annotations.types.Description;
-import dev.velix.imperat.annotations.types.Permission;
+import dev.velix.imperat.annotations.Description;
+import dev.velix.imperat.annotations.Permission;
+import dev.velix.imperat.annotations.base.AnnotationFactory;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -70,7 +70,7 @@ public final class Test extends JavaPlugin implements Listener {
         
         dispatcher.registerAnnotationReplacer(MyCommand.class, (annotation) -> {
             var cmd = AnnotationFactory.create(
-                    dev.velix.imperat.annotations.types.Command.class,
+                    dev.velix.imperat.annotations.Command.class,
                     "value", new String[]{"name", "alias"});
             var permission = AnnotationFactory.create(Permission.class, "value", "command.group");
             var desc = AnnotationFactory.create(Description.class, "value",

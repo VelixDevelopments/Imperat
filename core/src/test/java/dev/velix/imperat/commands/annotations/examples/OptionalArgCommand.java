@@ -1,10 +1,10 @@
 package dev.velix.imperat.commands.annotations.examples;
 
 import dev.velix.imperat.TestSource;
-import dev.velix.imperat.annotations.types.Command;
-import dev.velix.imperat.annotations.types.Default;
-import dev.velix.imperat.annotations.types.Named;
-import dev.velix.imperat.annotations.types.Usage;
+import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.Default;
+import dev.velix.imperat.annotations.Named;
+import dev.velix.imperat.annotations.Usage;
 import org.jetbrains.annotations.NotNull;
 
 @Command("opt")
