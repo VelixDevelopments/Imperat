@@ -114,7 +114,8 @@ public final class CommandTree<S extends Source> {
         String raw = raws.getOr(depth, "");
         assert raw != null;
         
-        if ((!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)) {
+        if ((!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
+                || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver().hasPermission(source, child.data.getPermission()))) {
             return results;
         }
         
