@@ -1,11 +1,9 @@
 package dev.velix.imperat.exception;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.Messages;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 
@@ -18,8 +16,7 @@ public final class InvalidSyntaxException extends SelfHandledException {
         S source = context.getSource();
         if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
             source.error(
-                    Messages.INVALID_SYNTAX_UNKNOWN_USAGE
-                            .replace("<raw_args>", context.getArguments().join(" "))
+                    "Unknown command, usage '<raw_args>' is unknown.".replace("<raw_args>", context.getArguments().join(" "))
             );
         }
         
@@ -46,7 +43,7 @@ public final class InvalidSyntaxException extends SelfHandledException {
         }
         //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
         source.error(
-                (Messages.INVALID_SYNTAX_INCOMPLETE_USAGE + "\n" + BaseImperat.FULL_SYNTAX_PREFIX + Messages.INVALID_SYNTAX_ORIGINAL_USAGE_SHOWCASE)
+                "Missing required arguments '<required_args>'\n Full syntax: '<usage>'"
                         .replace("<required_args>", builder.toString())
                         .replace("<usage>", imperat.commandPrefix()
                                 + CommandUsage.format(resolvedContext.getOwningCommand(), usage))

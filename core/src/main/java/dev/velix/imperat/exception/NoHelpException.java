@@ -3,7 +3,6 @@ package dev.velix.imperat.exception;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.Messages;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 
@@ -18,7 +17,7 @@ public final class NoHelpException extends SelfHandledException {
             cmdUsed = imperat.getCommand(context.getCommandUsed());
         }
         assert cmdUsed != null;
-        context.getSource().error(Messages.NO_HELP_AVAILABLE.replace("<command>", cmdUsed.getName()));
+        context.getSource().error("No Help available for <yellow>'<command>'".replace("<command>", cmdUsed.getName()));
     }
     
 }

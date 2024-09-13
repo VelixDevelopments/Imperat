@@ -37,9 +37,7 @@ import java.util.*;
 
 @ApiStatus.Internal
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
-    
-    public final static String START_PREFIX = "<dark_gray><bold>[<gold>!</gold>]</bold></dark_gray> ";
-    public final static String FULL_SYNTAX_PREFIX = START_PREFIX + "<dark_aqua>Full syntax:</dark_aqua> ";
+
     public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
     
     private final ContextResolverRegistry<S> contextResolverRegistry;
