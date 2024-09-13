@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.text.ComponentLike;
 import net.md_5.bungee.api.ChatColor;
@@ -10,11 +11,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public final class BungeeSource implements Source {
     
-    private final BungeeImperat imperat;
     private final CommandSender sender;
+    private final AdventureProvider<CommandSender> adventureProvider;
     
-    public BungeeSource(BungeeImperat imperat, CommandSender sender) {
-        this.imperat = imperat;
+    BungeeSource(AdventureProvider<CommandSender> adventureProvider, CommandSender sender) {
+        this.adventureProvider = adventureProvider;
         this.sender = sender;
     }
     
@@ -43,7 +44,7 @@ public final class BungeeSource implements Source {
     }
     
     public void reply(final ComponentLike component) {
-        imperat.getAdventureProvider().send(this, component);
+        adventureProvider.send(this, component);
     }
     
     @Override

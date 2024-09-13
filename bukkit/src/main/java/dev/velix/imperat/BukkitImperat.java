@@ -2,8 +2,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BukkitAdventure;
-import dev.velix.imperat.adventure.CastingAdventure;
-import dev.velix.imperat.adventure.EmptyAdventure;
+import dev.velix.imperat.adventure.PaperAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
@@ -31,16 +30,16 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.UUID;
 
-public class BukkitImperat extends BaseImperat<BukkitSource> {
+public final class BukkitImperat extends BaseImperat<BukkitSource> {
     
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
     private final Plugin plugin;
-    private final AdventureProvider<CommandSender> provider;
+    private final AdventureProvider<CommandSender> adventureProvider;
     private Map<String, org.bukkit.command.Command> bukkitOGMapping;
     private BukkitBrigadierManager brigadierManager;
     
     @SuppressWarnings("unchecked")
-    private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> provider, @NotNull PermissionResolver<BukkitSource> permissionResolver) {
+    private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, @NotNull PermissionResolver<BukkitSource> permissionResolver) {
         super(permissionResolver);
         this.plugin = plugin;
         CommandDebugger.setLogger(plugin.getLogger());
@@ -51,23 +50,24 @@ public class BukkitImperat extends BaseImperat<BukkitSource> {
                 CommandDebugger.warning("Failed to access the internal command map");
             }
         }
-        
-        if (Reflections.findClass("net.kyori.adventure.audience.Audience")) {
-            if (provider != null) {
-                this.provider = provider;
-            } else if (Audience.class.isAssignableFrom(CommandSender.class)) {
-                this.provider = new CastingAdventure<>();
-            } else if (Reflections.findClass("net.kyori.adventure.platform.bukkit.BukkitAudiences")) {
-                this.provider = new BukkitAdventure(plugin);
-            } else {
-                this.provider = new EmptyAdventure<>();
-            }
-        } else {
-            this.provider = new EmptyAdventure<>();
-        }
-        
+        //cleaner
+        this.adventureProvider = loadAdventure(adventureProvider);
         registerValueResolvers();
         registerSuggestionResolvers();
+    }
+    
+    private AdventureProvider<CommandSender> loadAdventure(@Nullable AdventureProvider<CommandSender> provider) {
+        if (Reflections.findClass("net.kyori.adventure.audience.Audience")) {
+            if (provider != null) {
+                return provider;
+            } else if (Audience.class.isAssignableFrom(CommandSender.class)) {
+                return new PaperAdventure();
+            } else if (Reflections.findClass("net.kyori.adventure.platform.bukkit.BukkitAudiences")) {
+                return new BukkitAdventure(plugin);
+            }
+        }
+        
+        return BukkitAdventure.EMPTY;
     }
     
     /**
@@ -131,7 +131,7 @@ public class BukkitImperat extends BaseImperat<BukkitSource> {
      */
     @Override
     public BukkitSource wrapSender(Object sender) {
-        return new BukkitSource(this, (CommandSender) sender, provider);
+        return new BukkitSource((CommandSender) sender, adventureProvider);
     }
     
     /**
@@ -144,12 +144,12 @@ public class BukkitImperat extends BaseImperat<BukkitSource> {
     
     @Override
     public void shutdownPlatform() {
-        this.provider.close();
+        this.adventureProvider.close();
         Bukkit.getPluginManager().disablePlugin(plugin);
     }
     
     @Override
-    public final String commandPrefix() {
+    public String commandPrefix() {
         return "/";
     }
     
@@ -159,7 +159,7 @@ public class BukkitImperat extends BaseImperat<BukkitSource> {
      * @param command the command to register
      */
     @Override
-    public final void registerCommand(Command<BukkitSource> command) {
+    public void registerCommand(Command<BukkitSource> command) {
         super.registerCommand(command);
         var internalCmd = new InternalBukkitCommand(this, command);
         if (BukkitUtil.KNOWN_COMMANDS != null) {
@@ -173,7 +173,7 @@ public class BukkitImperat extends BaseImperat<BukkitSource> {
     }
     
     @SuppressWarnings("deprecation")
-    protected void registerValueResolvers() {
+    private void registerValueResolvers() {
         this.registerValueResolver(Player.class, ((source, context, raw, pivot, parameter) -> {
             final Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;

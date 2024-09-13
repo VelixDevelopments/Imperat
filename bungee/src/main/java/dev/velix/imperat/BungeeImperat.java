@@ -75,7 +75,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     
     @Override
     public BungeeSource wrapSender(Object sender) {
-        return new BungeeSource(this, provider, (CommandSender) sender);
+        return new BungeeSource(provider, (CommandSender) sender);
     }
     
     @Override

@@ -12,7 +12,7 @@ public final class BukkitSource implements Source {
     private final CommandSender sender;
     private final AdventureProvider<CommandSender> provider;
     
-    public BukkitSource(
+    BukkitSource(
             final CommandSender sender,
             final AdventureProvider<CommandSender> provider
     ) {
