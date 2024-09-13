@@ -15,13 +15,7 @@ import net.kyori.adventure.text.ComponentLike;
  */
 @SuppressWarnings("unchecked")
 public interface AdventureProvider<S> {
-    
-    AdventureProvider<?> EMPTY = new EmptyAdventure<>();
-    
-    default boolean isEmpty() {
-        return this == EMPTY;
-    }
-    
+
     /**
      * Obtains an {@link Audience} for the specified source.
      *
