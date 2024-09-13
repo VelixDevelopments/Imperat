@@ -3,7 +3,6 @@ package dev.velix.imperat.adventure;
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 /**
  * The {@code AdventureProvider} interface defines a mechanism for obtaining an
@@ -63,19 +62,6 @@ public interface AdventureProvider<S> {
      */
     default void send(final Source source, final ComponentLike component) {
         this.send((S) source.origin(), component);
-    }
-    
-    /**
-     * @return Returns the {@link MiniMessage} field
-     */
-    MiniMessage getMiniMessage();
-    
-    default void sendMiniMessage(final S sender, final String miniFormat, MiniMessage miniMessage) {
-        send(sender, miniMessage.deserialize(miniFormat));
-    }
-    
-    default void sendMiniMessage(final S sender, final String miniFormat) {
-        sendMiniMessage(sender, miniFormat, getMiniMessage());
     }
     
     /**

@@ -42,7 +42,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
 
     compileOnly kyori(KyoriModule.API)
-    compileOnly kyori(KyoriModule.MINI_MESSAGE)
+    //compileOnly kyori(KyoriModule.MINI_MESSAGE)
     compileOnly kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
 
     // The full Spigot server with no shadowing. Requires mavenLocal.
@@ -51,7 +51,7 @@ dependencies {
     testAnnotationProcessor lombok()
 
     testImplementation kyori(KyoriModule.API)
-    testImplementation kyori(KyoriModule.MINI_MESSAGE)
+    //testImplementation kyori(KyoriModule.MINI_MESSAGE)
     testImplementation kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
     testCompileOnly('org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT')
     testCompileOnly("com.mojang:brigadier:1.0.18")

@@ -30,11 +30,7 @@ public final class BungeeSource implements Source {
     
     @Override
     public void reply(String message) {
-        if (imperat.isAdventureLoaded() /*&& imperat.isMiniMessageLoaded()*/) {
-            imperat.getAdventureProvider().sendMiniMessage(sender, message);
-        } else {
-            sender.sendMessage(TextComponent.fromLegacyText(message));
-        }
+        reply(TextComponent.fromLegacyText(message));
     }
     
     @Override

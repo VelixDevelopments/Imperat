@@ -9,16 +9,13 @@ import org.bukkit.entity.Player;
 
 public final class BukkitSource implements Source {
     
-    private final BukkitImperat imperat;
     private final CommandSender sender;
     private final AdventureProvider<CommandSender> provider;
     
     public BukkitSource(
-            final BukkitImperat imperat,
             final CommandSender sender,
             final AdventureProvider<CommandSender> provider
     ) {
-        this.imperat = imperat;
         this.sender = sender;
         this.provider = provider;
     }
@@ -51,11 +48,7 @@ public final class BukkitSource implements Source {
     @Override
     public void reply(final String message) {
         //check if adventure is loaded, otherwise we send the message normally
-        if (imperat.isAdventureLoaded()) {
-            imperat.getAdventureProvider().sendMiniMessage(sender, message);
-        } else {
-            this.sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-        }
+        this.sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
     
     @Override
