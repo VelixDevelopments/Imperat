@@ -1,4 +1,4 @@
-package dev.velix.imperat.caption;
+package dev.velix.imperat.context;
 
 import org.jetbrains.annotations.ApiStatus;
 

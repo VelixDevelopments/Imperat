@@ -27,8 +27,8 @@ import java.util.List;
 @ApiStatus.AvailableSince("1.0.0")
 public non-sealed interface Imperat<S extends Source> extends
         ProcessorRegistrar<S>, ResolverRegistrar<S>,
-        CommandRegistrar<S>, CaptionRegistrar<S>,
-        SourceWrapper<S>, CommandHelpHandler, ThrowableHandler<S> {
+        CommandRegistrar<S>, SourceWrapper<S>,
+        CommandHelpHandler, ThrowableHandler<S> {
     
     /**
      * @return the platform of the module

@@ -1,6 +1,5 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.caption.Caption;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 

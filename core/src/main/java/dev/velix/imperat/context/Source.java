@@ -1,6 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.caption.Caption;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -36,22 +35,6 @@ public interface Source {
      */
     void error(String message);
     
-    /**
-     * Replies to the command sender with a caption message
-     *
-     * @param caption the {@link Caption} to send
-     * @param context the {@link Context} to use
-     */
-    <S extends Source> void reply(Caption<S> caption, Context<S> context);
-    
-    /**
-     * Replies to command sender with a caption message
-     *
-     * @param prefix  the prefix before the caption message
-     * @param caption the caption
-     * @param context the context
-     */
-    <S extends Source> void reply(String prefix, Caption<S> caption, Context<S> context);
     
     /**
      * @return Whether the command source is from the console

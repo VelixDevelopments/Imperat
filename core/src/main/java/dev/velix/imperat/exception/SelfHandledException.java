@@ -11,7 +11,7 @@ public abstract class SelfHandledException extends ImperatException {
     /**
      * Handles the exception
      *
-     * @param <S>     the command-sender type
+     * @param <S>     the command-source type
      * @param imperat the api
      * @param context the context
      */
