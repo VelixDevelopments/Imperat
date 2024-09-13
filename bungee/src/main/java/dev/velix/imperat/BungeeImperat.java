@@ -2,7 +2,6 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BungeeAdventure;
-import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
@@ -18,22 +17,25 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     private final static BungeePermissionResolver DEFAULT_PERMISSION_RESOLVER = new BungeePermissionResolver();
     
     private final Plugin plugin;
-    private final AdventureProvider<CommandSender> provider;
+    private final AdventureProvider<CommandSender> adventureProvider;
     
     private BungeeImperat(
             final Plugin plugin,
-            final AdventureProvider<CommandSender> provider,
+            final AdventureProvider<CommandSender> adventureProvider,
             final PermissionResolver<BungeeSource> permissionResolver
     ) {
         super(permissionResolver);
         this.plugin = plugin;
+        this.adventureProvider = loadAdventureProvider(adventureProvider);
+    }
+    
+    private AdventureProvider<CommandSender> loadAdventureProvider(@Nullable AdventureProvider<CommandSender> provider) {
         if (provider != null) {
-            this.provider = provider;
+            return provider;
         } else if (Reflections.findClass("net.kyori.adventure.platform.bungeecord.BungeeAudiences")) {
-            this.provider = new BungeeAdventure(plugin);
-        } else {
-            this.provider = new EmptyAdventure<>();
+            return new BungeeAdventure(plugin);
         }
+        return BungeeAdventure.EMPTY;
     }
     
     public static BungeeImperat create(
@@ -75,7 +77,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     
     @Override
     public BungeeSource wrapSender(Object sender) {
-        return new BungeeSource(provider, (CommandSender) sender);
+        return new BungeeSource(adventureProvider, (CommandSender) sender);
     }
     
     @Override
@@ -86,7 +88,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     
     @Override
     public void shutdownPlatform() {
-        this.provider.close();
+        this.adventureProvider.close();
         this.plugin.onDisable();
     }
     
