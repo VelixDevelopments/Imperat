@@ -50,7 +50,12 @@ public final class BukkitSource implements Source {
         //check if adventure is loaded, otherwise we send the message normally
         this.sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
-    
+
+    @Override
+    public void warn(String message) {
+        reply(ChatColor.YELLOW + message);
+    }
+
     @Override
     public void error(final String message) {
         this.reply(ChatColor.RED + message);

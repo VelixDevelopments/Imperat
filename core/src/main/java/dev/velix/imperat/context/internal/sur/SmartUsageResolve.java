@@ -6,7 +6,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SenderErrorException;
+import dev.velix.imperat.exception.SourceAnswerException;
 import dev.velix.imperat.exception.TokenParseException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -90,7 +90,7 @@ public final class SmartUsageResolve<S extends Source> {
                 if (parameterSubCmd.hasName(currentRaw)) {
                     this.command = parameterSubCmd;
                 } else {
-                    throw new SenderErrorException("Unknown sub-command '" + currentRaw + "'");
+                    throw new SourceAnswerException("Unknown sub-command '" + currentRaw + "'");
                 }
                 
                 cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
@@ -113,7 +113,7 @@ public final class SmartUsageResolve<S extends Source> {
                     if (flagValueInput == null) {
                         
                         if (flagDefaultValue == null)
-                            throw new SenderErrorException(String.format(
+                            throw new SourceAnswerException(String.format(
                                     "Missing required flag value-input to be filled '%s'", flag.format())
                             );
                         
@@ -124,7 +124,7 @@ public final class SmartUsageResolve<S extends Source> {
                     
                     ValueResolver<S, ?> valueResolver = dispatcher.getValueResolver(flag.inputType());
                     if (valueResolver == null) {
-                        throw new SenderErrorException("Cannot find resolver for flag with input type '" + flag.name() + "'");
+                        throw new SourceAnswerException("Cannot find resolver for flag with input type '" + flag.name() + "'");
                     }
                     context.resolveFlag(
                             currentRaw,
@@ -153,7 +153,7 @@ public final class SmartUsageResolve<S extends Source> {
             //argument input
             ValueResolver<S, ?> resolver = dispatcher.getValueResolver(currentParameter);
             if (resolver == null)
-                throw new SenderErrorException("Cannot find resolver for type '" + currentParameter.type().getTypeName() + "'");
+                throw new SourceAnswerException("Cannot find resolver for type '" + currentParameter.type().getTypeName() + "'");
             
             if (currentParameter.isOptional()) {
                 //visualize("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
@@ -173,13 +173,13 @@ public final class SmartUsageResolve<S extends Source> {
         
     }
     
-    private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws SenderErrorException {
+    private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws SourceAnswerException {
         final CommandParameter optionalEmptyParameter = cursor.peekParameter(parameterList);
         assert optionalEmptyParameter != null;
         //visualize("Parameter at %s = %s", i, parameter.format(command));
         if (!optionalEmptyParameter.isOptional()) {
             //cannot happen if no bugs, but just in case
-            throw new SenderErrorException("Missing required parameters to be filled '%s'", optionalEmptyParameter.format());
+            throw new SourceAnswerException("Missing required parameters to be filled '%s'", optionalEmptyParameter.format());
         }
         return optionalEmptyParameter;
     }

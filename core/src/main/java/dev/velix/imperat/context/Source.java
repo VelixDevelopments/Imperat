@@ -26,7 +26,15 @@ public interface Source {
      * @param message the message
      */
     void reply(String message);
-    
+
+    /**
+     * Replies to the command sender with a string message
+     * formatted specifically for error messages
+     *
+     * @param message the message
+     */
+    void warn(String message);
+
     /**
      * Replies to the command sender with a string message
      * formatted specifically for error messages
@@ -34,8 +42,7 @@ public interface Source {
      * @param message the message
      */
     void error(String message);
-    
-    
+
     /**
      * @return Whether the command source is from the console
      */

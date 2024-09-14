@@ -75,8 +75,15 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     private void regDefThrowableResolvers() {
         this.setThrowableResolver(
-                SenderErrorException.class,
-                (exception, imperat, context) -> context.getSource().error(exception.getMessage())
+                SourceAnswerException.class,
+                (exception, imperat, context) -> {
+                    final String msg = exception.getMessage();
+                    switch (exception.getType()) {
+                        case ERROR -> context.getSource().error(msg);
+                        case WARN -> context.getSource().warn(msg);
+                        case REPLY -> context.getSource().reply(msg);
+                    }
+                }
         );
         this.setThrowableResolver(
                 CooldownException.class,

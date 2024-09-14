@@ -4,7 +4,7 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SenderErrorException;
+import dev.velix.imperat.exception.SourceAnswerException;
 import dev.velix.imperat.resolvers.BukkitContextResolver;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public final class GuildContextResolver implements BukkitContextResolver<Guild> 
     ) throws ImperatException {
         var source = context.getSource();
         if (source.isConsole()) {
-            throw new SenderErrorException("Only a player can do this !");
+            throw new SourceAnswerException("Only a player can do this !");
         }
         Player player = source.as(Player.class);
         return GuildRegistry.getInstance().getUserGuild(player.getUniqueId());

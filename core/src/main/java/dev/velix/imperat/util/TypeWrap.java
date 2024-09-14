@@ -48,16 +48,15 @@ public abstract class TypeWrap<T> {
     }
     
     private Class<?> extractRawType(Type type) {
-        if (type instanceof Class<?> cls) {
-            return cls;
-        } else if (type instanceof ParameterizedType parameterizedType) {
-            return (Class<?>) parameterizedType.getRawType();
-        } else if (type instanceof GenericArrayType genericArrayType) {
-            return Array.newInstance(extractRawType(genericArrayType.getGenericComponentType()), 0).getClass();
-        } else {
-            //throw new IllegalArgumentException("Unsupported type: " + type);
-            return null;
-        }
+        return switch (type) {
+            case Class<?> cls -> cls;
+            case ParameterizedType parameterizedType -> (Class<?>) parameterizedType.getRawType();
+            case GenericArrayType genericArrayType ->
+                    Array.newInstance(extractRawType(genericArrayType.getGenericComponentType()), 0).getClass();
+            case null, default ->
+                //throw new IllegalArgumentException("Unsupported type: " + type);
+                    null;
+        };
     }
     
     @SuppressWarnings("unchecked")
@@ -161,16 +160,15 @@ public abstract class TypeWrap<T> {
         if (type instanceof GenericArrayType) {
             return of(supertype).isSupertypeOfArray((GenericArrayType) type);
         }
-        
-        if (supertype instanceof Class clazz) {
-            return this.someRawTypeIsSubclassOf(clazz);
-        } else if (supertype instanceof ParameterizedType parameterizedType) {
-            return this.isSubtypeOfParameterizedType(parameterizedType); // TODO: Check if this checks actually work lol
-        } else if (supertype instanceof GenericArrayType genericArrayType) {
-            return this.isSubtypeOfArrayType(genericArrayType);
-        } else {
-            return false;
-        }
+
+        return switch (supertype) {
+            case Class clazz -> this.someRawTypeIsSubclassOf(clazz);
+            case ParameterizedType parameterizedType ->
+                    this.isSubtypeOfParameterizedType(parameterizedType); // TODO: Check if this checks actually work lol
+
+            case GenericArrayType genericArrayType -> this.isSubtypeOfArrayType(genericArrayType);
+            case null, default -> false;
+        };
     }
     
     private boolean isSupertypeOfArray(GenericArrayType subtype) {

@@ -33,7 +33,12 @@ public final class BungeeSource implements Source {
     public void reply(String message) {
         reply(TextComponent.fromLegacyText(message));
     }
-    
+
+    @Override
+    public void warn(String message) {
+        reply(ChatColor.YELLOW + message);
+    }
+
     @Override
     public void error(final String message) {
         reply(ChatColor.RED + message);

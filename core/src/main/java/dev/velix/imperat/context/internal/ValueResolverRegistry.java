@@ -2,7 +2,7 @@ package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.context.EnumValueResolver;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exception.SenderErrorException;
+import dev.velix.imperat.exception.SourceAnswerException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
@@ -53,9 +53,9 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
         return new ValueResolverRegistry<>();
     }
     
-    private SenderErrorException exception(String raw,
-                                           Class<?> clazzRequired) {
-        return new SenderErrorException(
+    private SourceAnswerException exception(String raw,
+                                            Class<?> clazzRequired) {
+        return new SourceAnswerException(
                 "Error while parsing argument '%s', It's not a valid %s", raw, clazzRequired.getSimpleName()
         );
     }

@@ -5,7 +5,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.internal.sur.Cursor;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SenderErrorException;
+import dev.velix.imperat.exception.SourceAnswerException;
 import dev.velix.imperat.resolvers.ValueResolver;
 
 public final class GroupValueResolver implements ValueResolver<TestSource, Group> {
@@ -24,7 +24,7 @@ public final class GroupValueResolver implements ValueResolver<TestSource, Group
         var group = GroupRegistry.getInstance()
                 .getData(raw);
         if (group.isEmpty()) {
-            throw new SenderErrorException("Invalid group '%s'", raw);
+            throw new SourceAnswerException("Invalid group '%s'", raw);
         }
         return group.get();
     }

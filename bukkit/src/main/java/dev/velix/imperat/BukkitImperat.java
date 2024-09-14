@@ -7,7 +7,7 @@ import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.exception.SenderErrorException;
+import dev.velix.imperat.exception.*;
 import dev.velix.imperat.resolvers.BukkitPermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.CommandDebugger;
@@ -51,10 +51,29 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
                 CommandDebugger.warning("Failed to access the internal command map");
             }
         }
-        //cleaner
+        this.addThrowableHandlers();
         this.adventureProvider = loadAdventure(adventureProvider);
         registerValueResolvers();
         registerSuggestionResolvers();
+    }
+
+    private void addThrowableHandlers() {
+        this.setThrowableResolver(
+                UnknownPlayerException.class, (exception, imperat, context) ->
+                context.getSource().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
+        );
+        this.setThrowableResolver(
+                UnknownOfflinePlayerException.class, (exception, imperat, context) ->
+                        context.getSource().error("A player with the name '" + exception.getName() + "' doesn't seem to exist")
+        );
+        this.setThrowableResolver(
+                UnknownWorldException.class, (exception, imperat, context) ->
+                        context.getSource().error("A world with the name '" + exception.getName() + "' doesn't seem to exist")
+        );
+        this.setThrowableResolver(
+                InvalidUUIDException.class, (exception, imperat, context) ->
+                        context.getSource().error("Invalid uuid-format '" + exception.getRaw() + "'")
+        );
     }
     
     private AdventureProvider<CommandSender> loadAdventure(@Nullable AdventureProvider<CommandSender> provider) {
@@ -175,30 +194,30 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     
     @SuppressWarnings("deprecation")
     private void registerValueResolvers() {
-        this.registerValueResolver(Player.class, ((source, context, raw, pivot, parameter) -> {
+        this.registerValueResolver(Player.class, ((source, context, raw, cursor, parameter) -> {
             final Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;
-            throw new SenderErrorException("A player with the name '" + raw + "' doesn't seem to be online");
+            throw new UnknownPlayerException(raw);
         }));
         
-        this.registerValueResolver(OfflinePlayer.class, (source, context, raw, pivot, parameter) -> {
+        this.registerValueResolver(OfflinePlayer.class, (source, context, raw, cursor, parameter) -> {
             if (raw.length() > 16) {
-                throw new SenderErrorException("Invalid or Unknown offline player '%s'", raw);
+                throw new UnknownPlayerException(raw);
             }
             return Bukkit.getOfflinePlayer(raw);
         });
         
-        this.registerValueResolver(World.class, (source, context, raw, pivot, parameter) -> {
+        this.registerValueResolver(World.class, (source, context, raw, cursor, parameter) -> {
             World world = Bukkit.getWorld(raw.toLowerCase());
             if (world != null) return world;
-            throw new SenderErrorException("Unknown world '%s'", raw);
+            throw new UnknownWorldException(raw);
         });
         
-        registerValueResolver(UUID.class, (source, context, raw, pivot, parameter) -> {
+        registerValueResolver(UUID.class, (source, context, raw, cursor, parameter) -> {
             try {
                 return UUID.fromString(raw);
             } catch (IllegalArgumentException ex) {
-                throw new SenderErrorException("Invalid uuid-format '%s'", raw);
+                throw new InvalidUUIDException(raw);
             }
         });
     }
