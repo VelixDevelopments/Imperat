@@ -8,6 +8,7 @@ import dev.velix.imperat.annotations.base.MethodCommandExecutor;
 import dev.velix.imperat.annotations.parameters.AnnotationParameterDecorator;
 import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.CommandCoordinator;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
@@ -242,8 +243,29 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         
         var execution = MethodCommandExecutor.of(imperat, method, parametersInfo.right());
         
-        return CommandUsage.<S>builder().parameters(parametersInfo.left())
-                .execute(execution).build(loadedCmd, method.isHelp());
+        Description description = method.getAnnotation(Description.class);
+        Permission permission = methodOwner.getAnnotation(Permission.class);
+        Cooldown cooldown = methodOwner.getAnnotation(Cooldown.class);
+        Async async = methodOwner.getAnnotation(Async.class);
+        
+        var builder = CommandUsage.<S>builder()
+                .parameters(parametersInfo.left())
+                .execute(execution);
+        
+        if (description != null)
+            builder.description(description.value());
+        
+        if (permission != null)
+            builder.permission(permission.value());
+        
+        if (cooldown != null)
+            builder.cooldown(cooldown.value(), cooldown.unit());
+        
+        if (async != null)
+            builder.coordinator(CommandCoordinator.async());
+        
+        return builder.build(loadedCmd, method.isHelp());
+        
     }
     
     private Pair<List<CommandParameter>, List<CommandParameter>> loadParameters(
