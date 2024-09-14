@@ -21,7 +21,7 @@ public final class GuildContextResolver implements BukkitContextResolver<Guild> 
      * @return the resolved default-value
      */
     @Override
-    public @Nullable Guild resolve(
+    public @NotNull Guild resolve(
             @NotNull Context<BukkitSource> context,
             @Nullable ParameterElement parameter
     ) throws ImperatException {
@@ -30,6 +30,10 @@ public final class GuildContextResolver implements BukkitContextResolver<Guild> 
             throw new SourceException("Only a player can do this !");
         }
         Player player = source.as(Player.class);
-        return GuildRegistry.getInstance().getUserGuild(player.getUniqueId());
+        Guild guild = GuildRegistry.getInstance().getUserGuild(player.getUniqueId());
+        if (guild == null) {
+            throw new SourceException("You don't have a guild !");
+        }
+        return guild;
     }
 }
