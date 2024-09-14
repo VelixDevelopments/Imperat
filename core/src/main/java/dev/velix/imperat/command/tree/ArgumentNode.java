@@ -19,7 +19,7 @@ final class ArgumentNode extends ParameterNode<CommandParameter> {
             return data.asFlagParameter()
                     .getFlagData().acceptsInput(input);
         
-        ParameterType type = ParameterTypes.getParamType(data.getType());
+        ParameterType type = ParameterTypes.getParamType(data.type());
         return type == null || type.matchesInput(input);
     }
     

@@ -14,7 +14,7 @@ public final class ExamplePaginatedHelpTemplate
     @Override
     public String fullHeader(Command<?> command, int page, int maxPages) {
         return "<dark_gray><bold><strikethrough>=================== <dark_green>"
-                + command.getName() + "'s help " + pagesHeaderComponent(page, maxPages) + " </dark_green>===================";
+                + command.name() + "'s help " + pagesHeaderComponent(page, maxPages) + " </dark_green>===================";
     }
     
     

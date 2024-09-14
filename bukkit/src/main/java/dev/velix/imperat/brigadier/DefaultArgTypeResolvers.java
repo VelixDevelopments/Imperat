@@ -21,7 +21,7 @@ class DefaultArgTypeResolvers {
         
         if (parameter.isNumeric()) {
             NumericRange range = parameter.asNumeric().getRange();
-            return numeric(parameter.getType(), range);
+            return numeric(parameter.type(), range);
         }
         
         return null;

@@ -68,8 +68,8 @@ public final class CommandTree<S extends Source> {
     
     private ParameterNode<?> getChildNode(ParameterNode<?> parent, CommandParameter param) {
         for (ParameterNode<?> child : parent.getChildren()) {
-            if (child.data.getName().equalsIgnoreCase(param.getName())
-                    && TypeUtility.matches(child.data.getType(), param.getType())) {
+            if (child.data.name().equalsIgnoreCase(param.name())
+                    && TypeUtility.matches(child.data.type(), param.type())) {
                 return child;
             }
         }
@@ -115,7 +115,7 @@ public final class CommandTree<S extends Source> {
         assert raw != null;
         
         if ((!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
-                || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver().hasPermission(source, child.data.getPermission()))) {
+                || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver().hasPermission(source, child.data.permission()))) {
             return results;
         }
         
@@ -144,8 +144,8 @@ public final class CommandTree<S extends Source> {
             List<String> results
     ) {
         if (node instanceof CommandNode<?>) {
-            results.add(node.data.getName());
-            results.addAll(node.data.asCommand().getAliases());
+            results.add(node.data.name());
+            results.addAll(node.data.asCommand().aliases());
         } else {
             SuggestionResolver<S, ?> resolver = imperat.getParameterSuggestionResolver(node.data);
             if (resolver == null) return;

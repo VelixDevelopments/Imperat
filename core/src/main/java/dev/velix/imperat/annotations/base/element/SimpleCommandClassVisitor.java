@@ -108,36 +108,27 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
     
     private Command<S> loadCmdInstance(Annotation cmdAnnotation) {
-        
         if (cmdAnnotation instanceof dev.velix.imperat.annotations.Command cmdAnn) {
             final String[] values = cmdAnn.value();
-            assert values != null;
-            
-            List<String> aliases = new ArrayList<>(Arrays.asList(values)
-                    .subList(1, values.length));
-            
-            boolean ignoreAC = cmdAnn.ignoreAutoCompletionPermission();
-            
+            final List<String> aliases = List.of(values).subList(1, values.length);
+            final boolean ignoreAC = cmdAnn.skipSuggestionsChecks();
+
             return Command.<S>create(values[0])
                     .ignoreACPermissions(ignoreAC)
                     .aliases(aliases)
                     .build();
-            
         } else if (cmdAnnotation instanceof SubCommand subCommand) {
             final String[] values = subCommand.value();
             assert values != null;
             
-            List<String> aliases = new ArrayList<>(Arrays.asList(values)
-                    .subList(1, values.length));
-            
-            boolean ignoreAC = subCommand.ignoreAutoCompletionChecks();
+            final List<String> aliases = List.of(values).subList(1, values.length);
+            final boolean ignoreAC = subCommand.skipSuggestionsChecks();
             
             return Command.<S>create(values[0])
                     .ignoreACPermissions(ignoreAC)
                     .aliases(aliases)
                     .build();
         }
-        
         return null;
     }
     
@@ -146,8 +137,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             ParseElement<?> parseElement,
             @NotNull Annotation annotation
     ) {
-        
-        Command<S> cmd = loadCmdInstance(annotation);
+        final Command<S> cmd = loadCmdInstance(annotation);
         if (parentCmd != null && cmd != null) {
             cmd.setParent(parentCmd);
         }
@@ -302,7 +292,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 continue;
             }
             
-            if (mainParameter.isSimilarTo(commandParameter)) {
+            if (mainParameter.similarTo(commandParameter)) {
                 parameterElements.removeFirst();
                 mainUsageParameters.removeFirst();
                 continue;
@@ -411,7 +401,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         ), element
                 );
         
-        if (TypeUtility.isNumericType(TypeWrap.of(param.getType()))
+        if (TypeUtility.isNumericType(TypeWrap.of(param.type()))
                 && element.isAnnotationPresent(Range.class)) {
             Range range = element.getAnnotation(Range.class);
             assert range != null;
@@ -425,9 +415,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     
     private List<String> getAllExceptFirst(String[] array) {
         List<String> flagAliases = new ArrayList<>(array.length - 1);
-        flagAliases.addAll(Arrays.asList(array).subList(1, array.length));
+        flagAliases.addAll(List.of(array).subList(1, array.length));
         return flagAliases;
     }
-    
     
 }

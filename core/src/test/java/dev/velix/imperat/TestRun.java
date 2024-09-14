@@ -53,7 +53,7 @@ public class TestRun {
         command.visualize();
         
         System.out.println("Debugging sub commands: ");
-        System.out.println("Command '" + command.getName() + "' has usages: ");
+        System.out.println("Command '" + command.name() + "' has usages: ");
         for (CommandUsage<TestSource> usage : command.getUsages()) {
             System.out.println("- " + CommandUsage.format(command, usage));
         }

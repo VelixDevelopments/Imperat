@@ -204,7 +204,7 @@ public final class Test extends JavaPlugin implements Listener {
     
     private void debugCommands() {
         for (var command : dispatcher.getRegisteredCommands()) {
-            System.out.println("Command '" + command.getName() + "' has usages: ");
+            System.out.println("Command '" + command.name() + "' has usages: ");
             for (CommandUsage<BukkitSource> usage : command.getUsages()) {
                 System.out.println("- " + CommandUsage.format(command, usage));
             }

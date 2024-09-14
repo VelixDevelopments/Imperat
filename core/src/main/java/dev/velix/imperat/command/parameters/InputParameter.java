@@ -50,17 +50,17 @@ public abstract class InputParameter implements CommandParameter {
      * @return the name of the parameter
      */
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
     
     @Override
-    public @Nullable Command<?> getParentCommand() {
+    public @Nullable Command<?> parent() {
         return parentCommand;
     }
     
     @Override
-    public void setParentCommand(@NotNull Command<?> parentCommand) {
+    public void parent(@NotNull Command<?> parentCommand) {
         this.parentCommand = parentCommand;
     }
     
@@ -69,7 +69,7 @@ public abstract class InputParameter implements CommandParameter {
      * @return the index of this parameter
      */
     @Override
-    public int getPosition() {
+    public int position() {
         return index;
     }
     
@@ -80,12 +80,12 @@ public abstract class InputParameter implements CommandParameter {
      * @param position the position to set
      */
     @Override
-    public void setPosition(int position) {
+    public void position(int position) {
         this.index = position;
     }
     
     @Override
-    public TypeWrap<?> getTypeWrap() {
+    public TypeWrap<?> wrappedType() {
         return typeWrap;
     }
     
@@ -95,12 +95,12 @@ public abstract class InputParameter implements CommandParameter {
      * @return the parameter permission
      */
     @Override
-    public @Nullable String getPermission() {
+    public @Nullable String permission() {
         return permission;
     }
     
     @Override
-    public void setPermission(String permission) {
+    public void permission(String permission) {
         this.permission = permission;
     }
     
@@ -148,7 +148,7 @@ public abstract class InputParameter implements CommandParameter {
     public boolean isGreedy() {
         if (this.typeWrap.getType() != String.class && greedy) {
             throw new IllegalStateException(
-                    String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, getType().getTypeName())
+                    String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type().getTypeName())
             );
         }
         return greedy;
@@ -173,20 +173,19 @@ public abstract class InputParameter implements CommandParameter {
     }
     
     @Override
-    public Description getDescription() {
+    public Description description() {
         return description;
     }
     
     @Override
-    public void setDescription(Description description) {
+    public void describe(final Description description) {
         this.description = description;
     }
     
-    
     @Override
-    public boolean isSimilarTo(CommandParameter parameter) {
-        return this.name.equalsIgnoreCase(parameter.getName())
-                && TypeUtility.matches(typeWrap.getType(), parameter.getTypeWrap().getType());
+    public boolean similarTo(CommandParameter parameter) {
+        return this.name.equalsIgnoreCase(parameter.name())
+                && TypeUtility.matches(typeWrap.getType(), parameter.wrappedType().getType());
     }
     
     @Override
@@ -207,6 +206,5 @@ public abstract class InputParameter implements CommandParameter {
     public String toString() {
         return format();
     }
-    
     
 }

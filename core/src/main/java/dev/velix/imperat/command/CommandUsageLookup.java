@@ -96,7 +96,7 @@ public final class CommandUsageLookup<S extends Source> {
         CommandParameter lastParameter = usage.getParameters().get(maxExpectedLength - 1);
         if (lastParameter.isGreedy()) {
             final int minMaxDiff = maxExpectedLength - minExpectedLength;
-            int paramPos = lastParameter.getPosition() - minMaxDiff;
+            int paramPos = lastParameter.position() - minMaxDiff;
             rawLength = rawLength - (rawLength - paramPos - 1);
         }
         

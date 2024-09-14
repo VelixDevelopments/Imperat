@@ -112,7 +112,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
                     final List<CommandParameter> params = new ArrayList<>(usage.getParameters())
                             .stream()
-                            .filter((param) -> !param.isOptional() && param.getPosition() > last)
+                            .filter((param) -> !param.isOptional() && param.position() > last)
                             .toList();
 
                     final StringBuilder builder = new StringBuilder();
@@ -143,7 +143,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                         cmdUsed = imperat.getCommand(context.getCommandUsed());
                     }
                     assert cmdUsed != null;
-                    context.getSource().error("No Help available for <yellow>'<command>'".replace("<command>", cmdUsed.getName()));
+                    context.getSource().error("No Help available for <yellow>'<command>'".replace("<command>", cmdUsed.name()));
                 }
         );
         this.setThrowableResolver(
@@ -179,7 +179,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                 }
                 
             }
-            commands.put(command.getName().toLowerCase(), command);
+            commands.put(command.name().toLowerCase(), command);
         } catch (RuntimeException ex) {
             CommandDebugger.error(BaseImperat.class, "registerCommand(Command command)", ex);
             shutdownPlatform();
@@ -533,7 +533,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
     
     private UsageMatchResult handleExecution(S source, Command<S> command, Context<S> context) throws ImperatException {
-        if (!getPermissionResolver().hasPermission(source, command.getPermission())) {
+        if (!getPermissionResolver().hasPermission(source, command.permission())) {
             throw new PermissionDeniedException();
         }
         

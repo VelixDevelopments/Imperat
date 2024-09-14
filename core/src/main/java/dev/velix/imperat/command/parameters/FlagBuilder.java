@@ -6,7 +6,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, CommandFlag> {
@@ -39,7 +38,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     }
     
     public FlagBuilder<S, T> aliases(String... aliases) {
-        this.aliases.addAll(Arrays.asList(aliases));
+        this.aliases.addAll(List.of(aliases));
         return this;
     }
     

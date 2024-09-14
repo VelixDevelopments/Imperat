@@ -13,8 +13,8 @@ public final class NumericParameterDecorator extends InputParameter implements N
     
     NumericParameterDecorator(CommandParameter parameter, NumericRange range) {
         super(
-                parameter.getName(), parameter.getTypeWrap(), parameter.getPermission(),
-                parameter.getDescription(), parameter.isOptional(), parameter.isFlag(),
+                parameter.name(), parameter.wrappedType(), parameter.permission(),
+                parameter.description(), parameter.isOptional(), parameter.isFlag(),
                 parameter.isFlag(), parameter.getDefaultValueSupplier(),
                 parameter.getSuggestionResolver()
         );

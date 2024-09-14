@@ -23,10 +23,10 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public sealed interface CommandUsage<S extends Source> extends PermissionHolder, DescriptionHolder, CooldownHolder permits CommandUsageImpl {
+public sealed interface CommandUsage<S extends Source> extends PermissionHolder, Describable, CooldownHolder permits CommandUsageImpl {
     
     static <S extends Source> String format(Command<S> command, CommandUsage<S> usage) {
-        StringBuilder builder = new StringBuilder(command.getName()).append(' ');
+        StringBuilder builder = new StringBuilder(command.name()).append(' ');
         int i = 0;
         for (CommandParameter parameter : usage.getParameters()) {
             builder.append(parameter.format());
@@ -276,14 +276,14 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
         }
         
         public Builder<S> parameters(CommandParameter... params) {
-            return parameters(Arrays.asList(params));
+            return parameters(List.of(params));
         }
         
         public Builder<S> parameters(List<CommandParameter> params) {
             for (int i = 0; i < params.size(); i++) {
                 CommandParameter parameter = params.get(i);
                 if (!parameter.isCommand()) {
-                    parameter.setPosition(i);
+                    parameter.position(i);
                 }
                 
                 this.parameters.add(parameter);
@@ -294,11 +294,11 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
         public CommandUsage<S> build(@NotNull Command<S> command, boolean help) {
             CommandUsageImpl<S> impl = new CommandUsageImpl<>(execution, help);
             impl.setCoordinator(commandCoordinator);
-            impl.setPermission(permission);
-            impl.setDescription(description);
+            impl.permission(permission);
+            impl.describe(description);
             impl.setCooldown(cooldown);
             impl.addParameters(
-                    parameters.stream().peek((p) -> p.setParentCommand(command)).toList()
+                    parameters.stream().peek((p) -> p.parent(command)).toList()
             );
             return impl;
         }

@@ -39,7 +39,7 @@ public final class StrictParameterList extends LinkedList<CommandParameter> {
     
     public boolean containsSimilar(CommandParameter parameter) {
         for (var p : this) {
-            if (p.isSimilarTo(parameter))
+            if (p.similarTo(parameter))
                 return true;
         }
         return false;

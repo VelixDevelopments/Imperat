@@ -49,7 +49,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @return the permission for this usage
      */
     @Override
-    public @Nullable String getPermission() {
+    public @Nullable String permission() {
         return permission;
     }
     
@@ -59,7 +59,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @param permission permission to set
      */
     @Override
-    public void setPermission(String permission) {
+    public void permission(String permission) {
         this.permission = permission;
     }
     
@@ -68,12 +68,12 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * command usage
      */
     @Override
-    public Description getDescription() {
+    public Description description() {
         return description;
     }
     
     @Override
-    public void setDescription(Description description) {
+    public void describe(Description description) {
         this.description = description;
     }
     
@@ -182,7 +182,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public boolean hasParamType(Class<?> clazz) {
         return getParameters()
                 .stream()
-                .anyMatch((param) -> param.getType().equals(clazz));
+                .anyMatch((param) -> param.type().equals(clazz));
     }
     
     /**
@@ -325,7 +325,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
             var thisP = this.getParameter(i);
             var thatP = that.getParameter(i);
             assert thisP != null;
-            if (!thisP.isSimilarTo(thatP)) {
+            if (!thisP.similarTo(thatP)) {
                 return false;
             }
         }

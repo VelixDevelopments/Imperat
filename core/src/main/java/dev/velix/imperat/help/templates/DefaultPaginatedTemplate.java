@@ -24,7 +24,7 @@ public final class DefaultPaginatedTemplate extends DefaultTemplate implements P
     @Override
     public String fullHeader(Command<?> command, int page, int maxPages) {
         return "<dark_gray><bold><strikethrough>=================== <green>"
-                + command.getName() + "'s help " + pagesHeaderComponent(page, maxPages) +
+                + command.name() + "'s help " + pagesHeaderComponent(page, maxPages) +
                 " </green>===================";
         
     }

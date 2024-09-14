@@ -25,10 +25,10 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     InternalBukkitCommand(@NotNull BukkitImperat dispatcher,
                           @NotNull Command<BukkitSource> command) {
         super(
-                command.getName(),
-                command.getDescription().toString(),
+                command.name(),
+                command.description().toString(),
                 CommandUsage.format(command, command.getDefaultUsage()),
-                command.getAliases()
+                command.aliases()
         );
         this.dispatcher = dispatcher;
         this.command = command;

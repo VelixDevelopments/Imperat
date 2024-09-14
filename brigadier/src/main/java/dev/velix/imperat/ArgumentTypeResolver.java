@@ -22,7 +22,7 @@ public interface ArgumentTypeResolver {
      * @return The resolver factory
      */
     static @NotNull ArgumentTypeResolver forType(Class<?> type, ArgumentType<?> argumentType) {
-        return parameter -> parameter.getType() == type ? argumentType : null;
+        return parameter -> parameter.type() == type ? argumentType : null;
     }
     
     /**
@@ -35,9 +35,9 @@ public interface ArgumentTypeResolver {
      */
     static @NotNull ArgumentTypeResolver forHierarchyType(Class<?> type, ArgumentType<?> argumentType) {
         return parameter -> {
-            var token = TypeWrap.of(parameter.getType());
+            var token = TypeWrap.of(parameter.type());
             var token2 = TypeWrap.of(type);
-            return parameter.getType() == type || token.isSupertypeOf(token2) ? argumentType : null;
+            return parameter.type() == type || token.isSupertypeOf(token2) ? argumentType : null;
         };
     }
     

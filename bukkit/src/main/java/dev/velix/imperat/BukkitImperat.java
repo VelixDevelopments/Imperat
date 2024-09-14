@@ -164,9 +164,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         super.registerCommand(command);
         var internalCmd = new InternalBukkitCommand(this, command);
         if (BukkitUtil.KNOWN_COMMANDS != null) {
-            bukkitOGMapping.put(command.getName(), internalCmd);
+            bukkitOGMapping.put(command.name(), internalCmd);
         } else {
-            BukkitUtil.COMMAND_MAP.register(command.getName(), internalCmd);
+            BukkitUtil.COMMAND_MAP.register(command.name(), internalCmd);
         }
         if (brigadierManager != null) {
             brigadierManager.registerBukkitCommand(internalCmd, command);

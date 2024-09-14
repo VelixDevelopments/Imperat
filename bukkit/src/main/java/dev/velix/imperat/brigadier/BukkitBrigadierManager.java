@@ -80,10 +80,10 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
                     return argumentTypeResolver.resolveArgType(flagParameter);
                 }
                 
-                return param.getType() == flagParameter.getFlagData().inputType()
+                return param.type() == flagParameter.getFlagData().inputType()
                         ? argumentTypeResolver.resolveArgType(param) : null;
             }
-            return param.getType() == type ? argumentTypeResolver.resolveArgType(param) : null;
+            return param.type() == type ? argumentTypeResolver.resolveArgType(param) : null;
         });
     }
     
@@ -110,7 +110,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
     
     @Override
     public BrigadierNode parseCommandIntoNode(Command<BukkitSource> command) {
-        BrigadierNode root = BrigadierNode.create(literal(command.getName()));
+        BrigadierNode root = BrigadierNode.create(literal(command.name()));
         //CommandDebugger.visualize("Parsing %s '%s'", (command.isSubCommand() ? "sub-command" : "command"), command.getName());
         //input
         CommandUsage<BukkitSource> mainUsage = command.getMainUsage();
@@ -135,7 +135,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
     }
     
     private void parseSubCommand(Command<BukkitSource> command, BrigadierNode lastParent) {
-        BrigadierNode literalSub = BrigadierNode.create(literal(command.getName()));
+        BrigadierNode literalSub = BrigadierNode.create(literal(command.name()));
         lastParent.addChild(literalSub);
         lastParent = literalSub;
         
@@ -165,7 +165,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
     private BrigadierNode parseParameter(Command<BukkitSource> command,
                                          CommandUsage<BukkitSource> usage,
                                          CommandParameter parameter) {
-        CommandDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.getName(), command.getName());
+        CommandDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.name(), command.name());
         CommandDebugger.debug("Entering usage '%s'", CommandUsage.format(command, usage));
         if (parameter.isFlag()) {
             CommandDebugger.debug("Found flag parameter");
@@ -198,11 +198,11 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
         //CommandDebugger.visualize("Parameter position = '%s' , with usage max= '%s'", parameter.getPosition(), usage.getMaxLength());
         
         int max = command.isSubCommand() ? usage.getMaxLength() : usage.getMaxLength() - 1;
-        boolean isLast = parameter.getPosition() == max;
+        boolean isLast = parameter.position() == max;
         
         //CommandDebugger.visualize("isLast= " + isLast);
         
-        BrigadierNode node = BrigadierNode.create(argument(parameter.getName(), argumentType));
+        BrigadierNode node = BrigadierNode.create(argument(parameter.name(), argumentType));
         
         //CommandDebugger.visualize("Resolving suggestions");
         node.withRequirement((sender) -> true)
@@ -235,7 +235,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
             try {
                 
                 BukkitSource actor = this.wrapCommandSource(context.getSource());
-                String tooltipMessage = parameter.getDescription() == Description.EMPTY ? parameter.format() : parameter.getDescription().toString();
+                String tooltipMessage = parameter.description() == Description.EMPTY ? parameter.format() : parameter.description().toString();
                 Message tooltip = new LiteralMessage(tooltipMessage);
                 String input = context.getInput();
                 

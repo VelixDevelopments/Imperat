@@ -11,7 +11,7 @@ public @interface SubCommand {
     
     String[] value();
     
-    boolean ignoreAutoCompletionChecks() default false;
+    boolean skipSuggestionsChecks() default false;
     
     boolean attachDirectly() default false;
 }

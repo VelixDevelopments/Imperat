@@ -16,7 +16,7 @@ public class ExampleHelpTemplate implements HelpTemplate {
     public String getHeader(Command<?> command) {
         return
                 "<dark_gray><bold><strikethrough>=================== <gold>"
-                        + command.getName() + "'s help</gold> ===================";
+                        + command.name() + "'s help</gold> ===================";
     }
     
     

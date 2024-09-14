@@ -48,7 +48,7 @@ final class TreeDisplayer implements UsageDisplayer {
     
     private <S extends Source> Pair<String, Command<S>> formatUsageTillSub(Command<S> command,
                                                                            CommandUsage<S> usage) {
-        StringBuilder builder = new StringBuilder("/" + command.getName());
+        StringBuilder builder = new StringBuilder("/" + command.name());
         Command<S> lastSub = null;
         for (var param : usage.getParameters()) {
             builder.append(' ')

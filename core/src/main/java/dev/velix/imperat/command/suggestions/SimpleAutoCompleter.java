@@ -42,7 +42,7 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
         
         final PermissionResolver<S> permResolver = dispatcher.getPermissionResolver();
         if (!command.isIgnoringACPerms() &&
-                !permResolver.hasPermission(sender, command.getPermission())) {
+                !permResolver.hasPermission(sender, command.permission())) {
             return Collections.emptyList();
         }
         
@@ -56,12 +56,12 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
         for (CommandUsage<S> usage : closestUsages) {
             if (index < 0 || index >= usage.getMaxLength()) continue;
             CommandParameter parameter = usage.getParameters().get(index);
-            if (!command.isIgnoringACPerms() && !permResolver.hasPermission(sender, parameter.getPermission())) {
+            if (!command.isIgnoringACPerms() && !permResolver.hasPermission(sender, parameter.permission())) {
                 continue;
             }
             if (parameter.isCommand()) {
-                results.add(parameter.getName());
-                parameter.asCommand().getAliases()
+                results.add(parameter.name());
+                parameter.asCommand().aliases()
                         .forEach(results::add);
             } else {
                 SuggestionResolver<S, ?> resolver = dispatcher.getParameterSuggestionResolver(parameter);

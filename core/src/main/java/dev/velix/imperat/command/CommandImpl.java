@@ -71,18 +71,18 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return the name of the command
      */
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
     
     @Override
-    public @Nullable Command<?> getParentCommand() {
+    public @Nullable Command<?> parent() {
         return parent;
     }
     
     @Override
     @SuppressWarnings("unchecked")
-    public void setParentCommand(Command<?> parentCommand) {
+    public void parent(Command<?> parentCommand) {
         this.parent = (Command<S>) parentCommand;
     }
     
@@ -90,7 +90,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return The permission of the command
      */
     @Override
-    public @Nullable String getPermission() {
+    public @Nullable String permission() {
         return permission;
     }
     
@@ -100,7 +100,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param permission the permission of a command
      */
     @Override
-    public void setPermission(@Nullable String permission) {
+    public void permission(@Nullable String permission) {
         this.permission = permission;
     }
     
@@ -108,12 +108,12 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return The description of a command
      */
     @Override
-    public @NotNull Description getDescription() {
+    public @NotNull Description description() {
         return description;
     }
     
     @Override
-    public void setDescription(Description description) {
+    public void describe(Description description) {
         this.description = description;
     }
     
@@ -121,7 +121,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return the index of this parameter
      */
     @Override
-    public int getPosition() {
+    public int position() {
         return position;
     }
     
@@ -132,7 +132,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param position the position to set
      */
     @Override
-    public void setPosition(int position) {
+    public void position(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
     
@@ -229,12 +229,12 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @SuppressWarnings("unchecked")
     public @Nullable <CS extends Source, T> SuggestionResolver<CS, T> getSuggestionResolver() {
         return (SuggestionResolver<CS, T>) SuggestionResolver.plain(Command.class,
-                List.of(this.getName()));
+                List.of(this.name()));
     }
     
     @Override
-    public boolean isSimilarTo(CommandParameter parameter) {
-        return this.name.equalsIgnoreCase(parameter.getName());
+    public boolean similarTo(CommandParameter parameter) {
+        return this.name.equalsIgnoreCase(parameter.name());
     }
     
     
@@ -242,7 +242,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return the aliases for this commands
      */
     @Override
-    public @UnmodifiableView List<String> getAliases() {
+    public @UnmodifiableView List<String> aliases() {
         return aliases;
     }
     
@@ -356,7 +356,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     }
     
     private void registerSubCommand(Command<S> command) {
-        children.put(command.getName(), command);
+        children.put(command.name(), command);
     }
     
     /**
@@ -420,10 +420,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
     ) {
         int position;
         if (attachDirectly) {
-            position = getPosition() + 1;
+            position = position() + 1;
         } else {
             CommandUsage<S> main = getMainUsage();
-            position = this.getPosition() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
+            position = this.position() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
         }
         
         //creating subcommand to modify

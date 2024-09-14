@@ -21,7 +21,7 @@ public class DefaultTemplate implements HelpTemplate {
      */
     @Override
     public String getHeader(Command<?> command) {
-        return "<dark_gray><bold><strikethrough>=================== <dark_green>" + command.getName() + "'s help</dark_green> ===================";
+        return "<dark_gray><bold><strikethrough>=================== <dark_green>" + command.name() + "'s help</dark_green> ===================";
     }
     
     /**

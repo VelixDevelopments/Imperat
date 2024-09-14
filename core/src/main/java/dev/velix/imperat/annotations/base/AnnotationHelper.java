@@ -69,10 +69,10 @@ public final class AnnotationHelper {
                 continue;
             
             if (parameter.isFlag()) {
-                ResolvedFlag value = context.getFlag(parameter.getName());
+                ResolvedFlag value = context.getFlag(parameter.name());
                 paramsInstances[i] = value.value();
             } else {
-                Object value = context.getArgument(parameter.getName());
+                Object value = context.getArgument(parameter.name());
                 paramsInstances[i] = value;
             }
             

@@ -9,7 +9,6 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,11 +44,11 @@ public interface SuggestionResolver<S extends Source, T> {
     }
     
     static <S extends Source, T> SuggestionResolver<S, T> plain(Class<T> type, String... results) {
-        return plain(type, Arrays.asList(results));
+        return plain(type, List.of(results));
     }
     
     static <S extends Source, T> SuggestionResolver<S, T> plain(TypeWrap<T> type, String... results) {
-        return plain(type, Arrays.asList(results));
+        return plain(type, List.of(results));
     }
     
     /**

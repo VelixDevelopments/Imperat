@@ -25,10 +25,10 @@ public interface PermissionResolver<S extends Source> {
         if (usage == null) {
             return true;
         }
-        if (!hasPermission(source, usage.getPermission())) return false;
+        if (!hasPermission(source, usage.permission())) return false;
         for (CommandParameter parameter : usage.getParameters()) {
             //if (!parameter.isCommand()) continue;
-            if (!hasPermission(source, parameter.getPermission()))
+            if (!hasPermission(source, parameter.permission()))
                 return false;
         }
         return true;

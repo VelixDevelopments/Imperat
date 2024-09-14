@@ -7,17 +7,18 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @ApiStatus.Internal
 public final class AnnotationRegistry {
     
-    private final LinkedHashSet<Class<? extends Annotation>> metas = new LinkedHashSet<>();
-    private final LinkedHashSet<Class<? extends Annotation>> mains = new LinkedHashSet<>();
+    private final Set<Class<? extends Annotation>> metas = new LinkedHashSet<>();
+    private final Set<Class<? extends Annotation>> mains = new LinkedHashSet<>();
     private final ClassMap<Annotation, AnnotationReplacer<?>> replacers = new ClassMap<>();
-    
+
     public AnnotationRegistry() {
         mains.add(Command.class);
         mains.add(Inherit.class);
@@ -27,7 +28,7 @@ public final class AnnotationRegistry {
         this.registerAnnotationTypes(
                 Cooldown.class, Description.class, Permission.class,
                 Suggest.class, SuggestionProvider.class, Default.class, DefaultProvider.class,
-                Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, Range.class, Async.class, Cooldown.class
+                Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, Range.class, Async.class
         );
     }
     
@@ -46,7 +47,7 @@ public final class AnnotationRegistry {
     
     @SafeVarargs
     public final void registerAnnotationTypes(Class<? extends Annotation>... annotationClasses) {
-        metas.addAll(Arrays.asList(annotationClasses));
+        metas.addAll(List.of(annotationClasses));
     }
     
     public boolean isMainType(Class<? extends Annotation> type) {

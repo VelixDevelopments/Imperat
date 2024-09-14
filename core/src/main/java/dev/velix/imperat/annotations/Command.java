@@ -20,8 +20,8 @@ public @interface Command {
     
     /**
      * @return Whether to ignore the permission checks
-     * while auto-completing or not
-     * @see Command#ignoreAutoCompletionPermission()
+     * while auto-completing/suggesting or not
      */
-    boolean ignoreAutoCompletionPermission() default false;
+    boolean skipSuggestionsChecks() default false;
+
 }

@@ -61,7 +61,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @return the context resolver for this parameter's value type
      */
     default <T> ContextResolver<S, T> getContextResolver(CommandParameter commandParameter) {
-        return getContextResolver(commandParameter.getType());
+        return getContextResolver(commandParameter.type());
     }
     
     /**
@@ -92,7 +92,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @return the value resolver for this parameter's value type
      */
     default <T> ValueResolver<S, T> getValueResolver(CommandParameter commandParameter) {
-        return getValueResolver(commandParameter.getType());
+        return getValueResolver(commandParameter.type());
     }
     
     /**
@@ -122,7 +122,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     default @Nullable <T> SuggestionResolver<S, T> getParameterSuggestionResolver(CommandParameter parameter) {
         SuggestionResolver<S, T> parameterSpecificResolver = parameter.getSuggestionResolver();
         if (parameterSpecificResolver == null)
-            return getSuggestionResolverByType((Class<T>) parameter.getType());
+            return getSuggestionResolverByType((Class<T>) parameter.type());
         else
             return parameterSpecificResolver;
     }

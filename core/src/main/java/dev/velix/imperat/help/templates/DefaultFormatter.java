@@ -24,7 +24,7 @@ public final class DefaultFormatter implements UsageFormatter {
     @Override
     public <S extends Source> String formatUsageLine(Command<S> command, CommandUsage<S> usage, boolean isLast) {
         String format = "/" + CommandUsage.format(command, usage);
-        return "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.getDescription();
+        return "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.description();
     }
     
     /**

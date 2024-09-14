@@ -241,14 +241,14 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
         final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
         resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
             if (existingResolvedArgs != null) {
-                existingResolvedArgs.put(parameter.getName(), argument);
+                existingResolvedArgs.put(parameter.name(), argument);
                 return existingResolvedArgs;
             }
             Map<String, ResolvedArgument> args = new LinkedHashMap<>();
-            args.put(parameter.getName(), argument);
+            args.put(parameter.name(), argument);
             return args;
         });
-        allResolvedArgs.put(parameter.getName(), argument);
+        allResolvedArgs.put(parameter.name(), argument);
     }
     
     /**

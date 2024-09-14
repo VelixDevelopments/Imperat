@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -53,32 +52,19 @@ public interface Command<S extends Source> extends CommandParameter {
     /**
      * @return The name of the command
      */
-    String getName();
-    
-    /**
-     * @return The permission of the command
-     */
-    @Nullable
-    String getPermission();
-    
-    /**
-     * Sets the permission of a command
-     *
-     * @param permission the permission of a command
-     */
-    void setPermission(@Nullable String permission);
+    String name();
     
     /**
      * @return The description of a command
      */
     @NotNull
-    Description getDescription();
+    Description description();
     
     /**
      * @return The aliases for this commands
      */
     @UnmodifiableView
-    List<String> getAliases();
+    List<String> aliases();
     
     /**
      * Sets the aliases of a command
@@ -88,7 +74,7 @@ public interface Command<S extends Source> extends CommandParameter {
     void addAliases(List<String> aliases);
     
     default void addAliases(String... aliases) {
-        addAliases(Arrays.asList(aliases));
+        addAliases(List.of(aliases));
     }
     
     /**
@@ -98,7 +84,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @param position the position to set
      */
     @ApiStatus.Internal
-    default void setPosition(int position) {
+    default void position(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
     
@@ -109,7 +95,7 @@ public interface Command<S extends Source> extends CommandParameter {
     @Override
     @SuppressWarnings("unchecked")
     default @Nullable <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
-        return (OptionalValueSupplier<T>) OptionalValueSupplier.of(getName());
+        return (OptionalValueSupplier<T>) OptionalValueSupplier.of(name());
     }
     
     /**
@@ -117,7 +103,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @return Whether this command has this name/alias
      */
     default boolean hasName(String name) {
-        return this.getName().equalsIgnoreCase(name) || ListUtils.contains(this.getAliases(), name);
+        return this.name().equalsIgnoreCase(name) || ListUtils.contains(this.aliases(), name);
     }
     
     /**
@@ -343,7 +329,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @return the value type of this parameter
      */
     @Override
-    default TypeWrap<?> getTypeWrap() {
+    default TypeWrap<?> wrappedType() {
         return TypeWrap.of(Command.class);
     }
     
@@ -385,7 +371,7 @@ public interface Command<S extends Source> extends CommandParameter {
      */
     @Override
     default String format() {
-        return getName();
+        return name();
     }
     
     /**
@@ -444,7 +430,7 @@ public interface Command<S extends Source> extends CommandParameter {
         }
         
         public Builder<S> description(String description) {
-            this.cmd.setDescription(description);
+            this.cmd.describe(description);
             return this;
         }
         
@@ -453,7 +439,7 @@ public interface Command<S extends Source> extends CommandParameter {
         }
         
         public Builder<S> permission(String permission) {
-            this.cmd.setPermission(permission);
+            this.cmd.permission(permission);
             return this;
         }
         

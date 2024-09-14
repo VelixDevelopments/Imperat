@@ -3,7 +3,7 @@ package dev.velix.imperat.command.parameters;
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
-import dev.velix.imperat.command.DescriptionHolder;
+import dev.velix.imperat.command.Describable;
 import dev.velix.imperat.command.PermissionHolder;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -21,7 +21,7 @@ import java.lang.reflect.Type;
  * by the usage of the command itself
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface CommandParameter extends PermissionHolder, DescriptionHolder {
+public interface CommandParameter extends PermissionHolder, Describable {
     
     static <S extends Source, T> CommandParameter of(
             String name,
@@ -129,24 +129,24 @@ public interface CommandParameter extends PermissionHolder, DescriptionHolder {
     /**
      * @return the name of the parameter
      */
-    String getName();
+    String name();
     
     /**
      * @return the parent of this parameter
      */
-    @Nullable Command<?> getParentCommand();
+    @Nullable Command<?> parent();
     
     /**
      * Sets parent command for a parameter
      *
      * @param parentCommand the parameter's owning command
      */
-    void setParentCommand(Command<?> parentCommand);
+    void parent(Command<?> parentCommand);
     
     /**
      * @return the index of this parameter
      */
-    int getPosition();
+    int position();
     
     /**
      * Sets the position of this parameter in a syntax
@@ -155,34 +155,20 @@ public interface CommandParameter extends PermissionHolder, DescriptionHolder {
      * @param position the position to set
      */
     @ApiStatus.Internal
-    void setPosition(int position);
+    void position(int position);
     
     /**
      * @return the value type-token of this parameter
      */
-    TypeWrap<?> getTypeWrap();
+    TypeWrap<?> wrappedType();
     
     /**
      * @return the value type of this parameter
      */
-    default Type getType() {
-        return getTypeWrap().getType();
+    default Type type() {
+        return wrappedType().getType();
     }
-    
-    /**
-     * The permission for this parameter
-     *
-     * @return the parameter permission
-     */
-    @Nullable String getPermission();
-    
-    /**
-     * Get the description of a parameter
-     *
-     * @return the description of a parameter
-     */
-    Description getDescription();
-    
+
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional
@@ -279,7 +265,6 @@ public interface CommandParameter extends PermissionHolder, DescriptionHolder {
      * @param parameter the parameter to compare to
      * @return Whether this parameter has same name and type to the other {@link CommandParameter} or not
      */
-    boolean isSimilarTo(CommandParameter parameter);
-    
+    boolean similarTo(CommandParameter parameter);
     
 }

@@ -39,7 +39,7 @@ class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
         if (greedyParam == null)
             return firstArgIsRequired;
         
-        return greedyParam.getPosition() == usage.getMaxLength() - 1 && firstArgIsRequired;
+        return greedyParam.position() == usage.getMaxLength() - 1 && firstArgIsRequired;
     }
     
     @Override

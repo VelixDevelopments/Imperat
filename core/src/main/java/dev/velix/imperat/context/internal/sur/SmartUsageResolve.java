@@ -153,7 +153,7 @@ public final class SmartUsageResolve<S extends Source> {
             //argument input
             ValueResolver<S, ?> resolver = dispatcher.getValueResolver(currentParameter);
             if (resolver == null)
-                throw new SenderErrorException("Cannot find resolver for type '" + currentParameter.getType().getTypeName() + "'");
+                throw new SenderErrorException("Cannot find resolver for type '" + currentParameter.type().getTypeName() + "'");
             
             if (currentParameter.isOptional()) {
                 //visualize("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);

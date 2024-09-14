@@ -30,7 +30,7 @@ class NormalCommandParameter extends InputParameter {
      */
     @Override
     public String format() {
-        var content = getName();
+        var content = name();
         if (isGreedy())
             content += "...";
         return StringUtils.normalizedParameterFormatting(content, isOptional());
