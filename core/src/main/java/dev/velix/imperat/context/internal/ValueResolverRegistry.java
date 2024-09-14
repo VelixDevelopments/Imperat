@@ -2,7 +2,7 @@ package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.context.EnumValueResolver;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exception.ExecutionError;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
@@ -17,29 +17,29 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
     
     private ValueResolverRegistry() {
         super();
-        registerResolver(String.class, ((source, context, raw, pivot, parameter) -> raw));
-        registerResolver(Integer.class, (source, context, raw, pivot, parameter) -> {
+        registerResolver(String.class, ((context, parameter, cursor, raw) -> raw));
+        registerResolver(Integer.class, (context, parameter, cursor, raw) -> {
             if (TypeUtility.isInteger(raw)) {
                 return Integer.parseInt(raw);
             } else {
                 throw exception(raw, Integer.class);
             }
         });
-        registerResolver(Long.class, (source, context, raw, pivot, parameter) -> {
+        registerResolver(Long.class, (context, parameter, cursor, raw) -> {
             if (TypeUtility.isLong(raw)) {
                 return Long.parseLong(raw);
             } else {
                 throw exception(raw, Long.class);
             }
         });
-        registerResolver(Boolean.class, (source, context, raw, pivot, parameter) -> {
+        registerResolver(Boolean.class, (context, parameter, cursor, raw) -> {
             if (TypeUtility.isBoolean(raw)) {
                 return Boolean.valueOf(raw);
             } else {
                 throw exception(raw, Boolean.class);
             }
         });
-        registerResolver(Double.class, (source, context, raw, pivot, parameter) -> {
+        registerResolver(Double.class, (context, parameter, cursor, raw) -> {
             if (TypeUtility.isDouble(raw)) {
                 return Double.parseDouble(raw);
             } else {
@@ -53,9 +53,9 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
         return new ValueResolverRegistry<>();
     }
     
-    private ExecutionError exception(String raw,
-                                     Class<?> clazzRequired) {
-        return new ExecutionError(
+    private SourceException exception(String raw,
+                                      Class<?> clazzRequired) {
+        return new SourceException(
                 "Error while parsing argument '%s', It's not a valid %s", raw, clazzRequired.getSimpleName()
         );
     }

@@ -4,8 +4,8 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.internal.sur.Cursor;
-import dev.velix.imperat.exception.ExecutionError;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.BukkitValueResolver;
 import org.bukkit.entity.Player;
 
@@ -13,19 +13,24 @@ public final class GroupValueResolver implements BukkitValueResolver<Group> {
     
     @Override
     public Group resolve(
-            BukkitSource source,
             Context<BukkitSource> context,
-            String raw,
+            CommandParameter parameter,
             Cursor cursor,
-            CommandParameter parameter
+            String raw
     ) throws ImperatException {
+        
         var sender = context.getSource();
         if (sender.isConsole()) {
-            throw new ExecutionError("Invalid group '%s'", raw);
+            throw new SourceException("Only players can do this !");
         }
         
-        return GroupRegistry.getInstance()
+        var playerGroup = GroupRegistry.getInstance()
                 .getGroup(sender.as(Player.class).getUniqueId());
         
+        if (playerGroup == null) {
+            throw new SourceException("Invalid group '%s'", raw);
+        }
+        
+        return playerGroup;
     }
 }

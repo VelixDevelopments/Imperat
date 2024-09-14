@@ -7,10 +7,9 @@ import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GroupSuggestionResolver implements SuggestionResolver<TestSource, Group> {
     
@@ -20,11 +19,15 @@ public class GroupSuggestionResolver implements SuggestionResolver<TestSource, G
     }
     
     @Override
-    public List<String> autoComplete(Command<TestSource> command, TestSource source,
-                                     ArgumentQueue queue, CommandParameter parameterToComplete, @Nullable CompletionArg argToComplete) {
+    public List<String> autoComplete(
+            Command<TestSource> command,
+            ArgumentQueue queue,
+            CommandParameter parameterToComplete,
+            @NotNull CompletionArg argToComplete
+    ) {
         return GroupRegistry.getInstance().getAll()
                 .stream().map(Group::name)
-                .collect(Collectors.toList());
+                .toList();
     }
     
 }

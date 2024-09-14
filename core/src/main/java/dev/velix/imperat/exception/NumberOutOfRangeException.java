@@ -3,7 +3,7 @@ package dev.velix.imperat.exception;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 
-public class NumberOutOfRangeException extends ExecutionError {
+public class NumberOutOfRangeException extends SourceException {
     
     public NumberOutOfRangeException(
             final NumericParameter parameter,

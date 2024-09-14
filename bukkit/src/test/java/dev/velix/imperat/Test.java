@@ -13,7 +13,7 @@ import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.custom_annotations.MyCommand;
 import dev.velix.imperat.examples.help.ExampleHelpTemplate;
-import dev.velix.imperat.exception.ExecutionError;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.test.Group;
 import dev.velix.imperat.test.GroupRegistry;
 import dev.velix.imperat.test.GroupSuggestionResolver;
@@ -48,10 +48,10 @@ public final class Test extends JavaPlugin implements Listener {
         
         dispatcher.setHelpTemplate(new ExampleHelpTemplate());
         
-        dispatcher.registerValueResolver(Group.class, ((source, context, raw, pivot, parameter) -> {
+        dispatcher.registerValueResolver(Group.class, ((context, parameter, cursor, raw) -> {
             Group group = GroupRegistry.getInstance().getData(raw).orElse(null);
             if (group == null)
-                throw new ExecutionError("Invalid group '" + raw + "'");
+                throw new SourceException("Invalid group '" + raw + "'");
             return group;
         }));
         

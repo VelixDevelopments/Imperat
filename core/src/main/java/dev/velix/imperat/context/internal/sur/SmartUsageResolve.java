@@ -5,8 +5,8 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
-import dev.velix.imperat.exception.ExecutionError;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.TokenParseException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -90,7 +90,7 @@ public final class SmartUsageResolve<S extends Source> {
                 if (parameterSubCmd.hasName(currentRaw)) {
                     this.command = parameterSubCmd;
                 } else {
-                    throw new ExecutionError("Unknown sub-command '" + currentRaw + "'");
+                    throw new SourceException("Unknown sub-command '" + currentRaw + "'");
                 }
                 
                 cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
@@ -113,7 +113,7 @@ public final class SmartUsageResolve<S extends Source> {
                     if (flagValueInput == null) {
                         
                         if (flagDefaultValue == null)
-                            throw new ExecutionError(String.format(
+                            throw new SourceException(String.format(
                                     "Missing required flag value-input to be filled '%s'", flag.format())
                             );
                         
@@ -124,7 +124,7 @@ public final class SmartUsageResolve<S extends Source> {
                     
                     ValueResolver<S, ?> valueResolver = dispatcher.getValueResolver(flag.inputType());
                     if (valueResolver == null) {
-                        throw new ExecutionError("Cannot find resolver for flag with input type '" + flag.name() + "'");
+                        throw new SourceException("Cannot find resolver for flag with input type '" + flag.name() + "'");
                     }
                     context.resolveFlag(
                             currentRaw,
@@ -153,7 +153,7 @@ public final class SmartUsageResolve<S extends Source> {
             //argument input
             ValueResolver<S, ?> resolver = dispatcher.getValueResolver(currentParameter);
             if (resolver == null)
-                throw new ExecutionError("Cannot find resolver for type '" + currentParameter.type().getTypeName() + "'");
+                throw new SourceException("Cannot find resolver for type '" + currentParameter.type().getTypeName() + "'");
             
             if (currentParameter.isOptional()) {
                 //visualize("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);
@@ -173,13 +173,13 @@ public final class SmartUsageResolve<S extends Source> {
         
     }
     
-    private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws ExecutionError {
+    private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws SourceException {
         final CommandParameter optionalEmptyParameter = cursor.peekParameter(parameterList);
         assert optionalEmptyParameter != null;
         //visualize("Parameter at %s = %s", i, parameter.format(command));
         if (!optionalEmptyParameter.isOptional()) {
             //cannot happen if no bugs, but just in case
-            throw new ExecutionError("Missing required parameters to be filled '%s'", optionalEmptyParameter.format());
+            throw new SourceException("Missing required parameters to be filled '%s'", optionalEmptyParameter.format());
         }
         return optionalEmptyParameter;
     }
@@ -289,7 +289,7 @@ public final class SmartUsageResolve<S extends Source> {
     }
     
     private <T> T getResult(ValueResolver<S, T> resolver, Context<S> context, String raw, CommandParameter currentParameter) throws ImperatException {
-        return resolver.resolve(context.getSource(), context, raw, cursor, currentParameter);
+        return resolver.resolve(context, currentParameter, cursor, raw);
     }
     
     

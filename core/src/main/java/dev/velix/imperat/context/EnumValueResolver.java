@@ -2,8 +2,8 @@ package dev.velix.imperat.context;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.internal.sur.Cursor;
-import dev.velix.imperat.exception.ExecutionError;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -17,16 +17,16 @@ public final class EnumValueResolver<S extends Source, E extends Enum<E>> implem
     }
     
     @Override
-    public E resolve(S source,
-                     Context<S> context,
-                     String raw,
-                     Cursor cursor,
-                     CommandParameter parameter
+    public E resolve(
+            Context<S> context,
+            CommandParameter parameter,
+            Cursor cursor,
+            String raw
     ) throws ImperatException {
         try {
             return Enum.valueOf(enumType, raw.toUpperCase());
         } catch (EnumConstantNotPresentException ex) {
-            throw new ExecutionError("Invalid " + enumType.getSimpleName() + " '" + raw + "'");
+            throw new SourceException("Invalid " + enumType.getSimpleName() + " '" + raw + "'");
         }
     }
 }

@@ -19,18 +19,16 @@ import org.jetbrains.annotations.ApiStatus;
 public interface ValueResolver<S extends Source, T> {
     
     /**
-     * @param source    the source of the command
      * @param context   the context for the command
-     * @param raw       the required raw of the command.
-     * @param cursor    the cursor for controlling the position of raws and parameters
      * @param parameter the parameter corresponding to the raw
+     * @param cursor    the cursor for controlling the position of raws and parameters
+     * @param raw       the required raw of the command.
      * @return the resolved output from the input object
      */
     T resolve(
-            S source,
             Context<S> context,
-            String raw,
+            CommandParameter parameter,
             Cursor cursor,
-            CommandParameter parameter
+            String raw
     ) throws ImperatException;
 }

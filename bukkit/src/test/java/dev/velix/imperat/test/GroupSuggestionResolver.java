@@ -20,8 +20,12 @@ public class GroupSuggestionResolver implements BukkitSuggestionResolver<Group> 
     }
     
     @Override
-    public List<String> autoComplete(Command<BukkitSource> command, BukkitSource source,
-                                     ArgumentQueue queue, CommandParameter parameterToComplete, @Nullable CompletionArg argToComplete) {
+    public List<String> autoComplete(
+            Command<BukkitSource> command,
+            ArgumentQueue queue,
+            CommandParameter parameterToComplete,
+            @Nullable CompletionArg argToComplete
+    ) {
         return GroupRegistry.getInstance().getAll()
                 .stream().map(Group::name)
                 .collect(Collectors.toList());

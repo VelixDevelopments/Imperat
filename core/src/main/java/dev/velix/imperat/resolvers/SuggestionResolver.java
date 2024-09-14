@@ -7,6 +7,7 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -34,7 +35,6 @@ public interface SuggestionResolver<S extends Source, T> {
             
             @Override
             public List<String> autoComplete(Command<S> command,
-                                             S source,
                                              ArgumentQueue queue,
                                              CommandParameter parameterToComplete,
                                              @Nullable CompletionArg argToComplete) {
@@ -58,7 +58,6 @@ public interface SuggestionResolver<S extends Source, T> {
     
     /**
      * @param command             the running command
-     * @param source              the sender of the command
      * @param queue               the argument raw input
      * @param parameterToComplete the parameter of the value to complete
      * @param argToComplete       the current raw argument/input that's being requested
@@ -66,9 +65,8 @@ public interface SuggestionResolver<S extends Source, T> {
      * @return the auto-completed suggestions of the current argument
      */
     List<String> autoComplete(Command<S> command,
-                              S source,
                               ArgumentQueue queue,
                               CommandParameter parameterToComplete,
-                              @Nullable CompletionArg argToComplete);
+                              @NotNull CompletionArg argToComplete);
     
 }

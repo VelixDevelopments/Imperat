@@ -3,12 +3,12 @@ package dev.velix.imperat.exception;
 import lombok.Getter;
 
 @Getter
-public class ExecutionError extends ImperatException {
+public class SourceException extends ImperatException {
 
     private final String message;
     private final ErrorLevel type;
     
-    public ExecutionError(
+    public SourceException(
             final String msg,
             final Object... args
     ) {
@@ -16,7 +16,7 @@ public class ExecutionError extends ImperatException {
         this.message = String.format(msg, args);
     }
     
-    public ExecutionError(
+    public SourceException(
             final ErrorLevel type,
             final String msg,
             final Object... args

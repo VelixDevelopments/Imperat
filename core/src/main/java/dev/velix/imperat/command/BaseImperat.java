@@ -60,7 +60,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         contextResolverRegistry = ContextResolverRegistry.createDefault();
         valueResolverRegistry = ValueResolverRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
-        verifier = UsageVerifier.defaultVerifier();
+        verifier = UsageVerifier.typeTolerantVerifier();
         annotationParser = AnnotationParser.defaultParser(this);
         this.permissionResolver = permissionResolver;
         registerProcessors();
@@ -75,7 +75,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     private void regDefThrowableResolvers() {
         this.setThrowableResolver(
-                ExecutionError.class,
+                SourceException.class,
                 (exception, imperat, context) -> {
                     final String msg = exception.getMessage();
                     switch (exception.getType()) {
