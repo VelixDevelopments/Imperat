@@ -4,8 +4,8 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.internal.sur.Cursor;
+import dev.velix.imperat.exception.ExecutionError;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SourceAnswerException;
 import dev.velix.imperat.resolvers.BukkitValueResolver;
 import org.bukkit.entity.Player;
 
@@ -21,7 +21,7 @@ public final class GroupValueResolver implements BukkitValueResolver<Group> {
     ) throws ImperatException {
         var sender = context.getSource();
         if (sender.isConsole()) {
-            throw new SourceAnswerException("Invalid group '%s'", raw);
+            throw new ExecutionError("Invalid group '%s'", raw);
         }
         
         return GroupRegistry.getInstance()

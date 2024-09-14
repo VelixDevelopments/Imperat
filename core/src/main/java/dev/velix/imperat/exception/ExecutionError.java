@@ -3,21 +3,21 @@ package dev.velix.imperat.exception;
 import lombok.Getter;
 
 @Getter
-public class SourceAnswerException extends ImperatException {
+public class ExecutionError extends ImperatException {
 
     private final String message;
-    private final AnswerType type;
-
-    public SourceAnswerException(
+    private final ErrorLevel type;
+    
+    public ExecutionError(
             final String msg,
             final Object... args
     ) {
-        this.type = AnswerType.ERROR;
+        this.type = ErrorLevel.SEVERE;
         this.message = String.format(msg, args);
     }
-
-    public SourceAnswerException(
-            final AnswerType type,
+    
+    public ExecutionError(
+            final ErrorLevel type,
             final String msg,
             final Object... args
     ) {
@@ -29,11 +29,11 @@ public class SourceAnswerException extends ImperatException {
     public String getMessage() {
         return this.message;
     }
-
-    public enum AnswerType {
+    
+    public enum ErrorLevel {
         REPLY,
         WARN,
-        ERROR
+        SEVERE
     }
 
 }
