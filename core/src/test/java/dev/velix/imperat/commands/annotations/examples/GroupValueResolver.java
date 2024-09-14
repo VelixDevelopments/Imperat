@@ -2,7 +2,7 @@ package dev.velix.imperat.commands.annotations.examples;
 
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.sur.Cursor;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
@@ -12,7 +12,7 @@ public final class GroupValueResolver implements ValueResolver<TestSource, Group
     
     @Override
     public Group resolve(
-            Context<TestSource> context,
+            ExecutionContext<TestSource> context,
             CommandParameter parameter,
             Cursor cursor,
             String raw

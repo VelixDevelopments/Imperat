@@ -2,7 +2,7 @@ package dev.velix.imperat.test;
 
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.sur.Cursor;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
@@ -13,7 +13,7 @@ public final class GroupValueResolver implements BukkitValueResolver<Group> {
     
     @Override
     public Group resolve(
-            Context<BukkitSource> context,
+            ExecutionContext<BukkitSource> context,
             CommandParameter parameter,
             Cursor cursor,
             String raw

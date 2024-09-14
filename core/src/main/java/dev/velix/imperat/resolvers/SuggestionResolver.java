@@ -1,14 +1,10 @@
 package dev.velix.imperat.resolvers;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.suggestions.CompletionArg;
-import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -34,10 +30,7 @@ public interface SuggestionResolver<S extends Source, T> {
             }
             
             @Override
-            public List<String> autoComplete(Command<S> command,
-                                             ArgumentQueue queue,
-                                             CommandParameter parameterToComplete,
-                                             @Nullable CompletionArg argToComplete) {
+            public List<String> autoComplete(SuggestionContext<S> context, CommandParameter parameterToComplete) {
                 return results;
             }
         };
@@ -57,16 +50,10 @@ public interface SuggestionResolver<S extends Source, T> {
     TypeWrap<T> getType();
     
     /**
-     * @param command             the running command
-     * @param queue               the argument raw input
-     * @param parameterToComplete the parameter of the value to complete
-     * @param argToComplete       the current raw argument/input that's being requested
-     *                            to complete
+     * @param context               the context for suggestions
+     * @param parameterToComplete   the parameter of the value to complete
      * @return the auto-completed suggestions of the current argument
      */
-    List<String> autoComplete(Command<S> command,
-                              ArgumentQueue queue,
-                              CommandParameter parameterToComplete,
-                              @NotNull CompletionArg argToComplete);
+    List<String> autoComplete(SuggestionContext<S> context, CommandParameter parameterToComplete);
     
 }

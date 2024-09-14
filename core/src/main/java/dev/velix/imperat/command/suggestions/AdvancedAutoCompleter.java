@@ -3,6 +3,7 @@ package dev.velix.imperat.command.suggestions;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
 
 import java.util.List;
 
@@ -17,12 +18,10 @@ final class AdvancedAutoCompleter<S extends Source> extends AutoCompleter<S> {
     @Override
     public List<String> autoCompleteArgument(
             Imperat<S> dispatcher,
-            S source,
-            CompletionArg currentArg,
-            String[] args
+            SuggestionContext<S> context
     ) {
         AutoCompleteList list = new AutoCompleteList();
-        list.addAll(command.tabComplete(dispatcher, source, currentArg, args));
+        list.addAll(command.tabComplete(dispatcher, context));
         return list.asList();
     }
 }

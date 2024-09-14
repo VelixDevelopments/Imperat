@@ -5,7 +5,6 @@ import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ResolvedFlag;
@@ -51,7 +50,7 @@ public final class AnnotationHelper {
             var contextResolver = factory.create(actualParameter);
             
             if (contextResolver != null) {
-                paramsInstances[i] = contextResolver.resolve((Context<S>) context, actualParameter);
+                paramsInstances[i] = contextResolver.resolve(context, actualParameter);
                 p--;
                 continue;
             }
@@ -59,7 +58,7 @@ public final class AnnotationHelper {
             assert actualParameter != null;
             contextResolver = dispatcher.getContextResolver(actualParameter.getType());
             if (contextResolver != null) {
-                paramsInstances[i] = contextResolver.resolve((Context<S>) context, actualParameter);
+                paramsInstances[i] = contextResolver.resolve(context, actualParameter);
                 p--;
                 continue;
             }

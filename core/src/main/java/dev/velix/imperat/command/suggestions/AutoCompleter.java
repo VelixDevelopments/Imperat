@@ -2,7 +2,9 @@ package dev.velix.imperat.command.suggestions;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,7 +59,12 @@ public abstract class AutoCompleter<S extends Source> {
     public final List<String> autoComplete(Imperat<S> dispatcher,
                                            S sender, String[] args) {
         CompletionArg argToComplete = getLastArg(args);
-        return autoCompleteArgument(dispatcher, sender, argToComplete, args);
+        ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(args);
+        
+        SuggestionContext<S> context = dispatcher.getContextFactory()
+                .createSuggestionContext(dispatcher, sender, command, queue, argToComplete);
+        
+        return autoCompleteArgument(dispatcher, context);
     }
     
     /**
@@ -65,15 +72,11 @@ public abstract class AutoCompleter<S extends Source> {
      * argument-raw input
      *
      * @param dispatcher the command dispatcher
-     * @param source     the sender of the auto-completion
-     * @param currentArg the value being completed
-     * @param args       the args for raw input
+     * @param context the context for suggestions
      * @return the auto-completed results
      */
     public abstract List<String> autoCompleteArgument(
             Imperat<S> dispatcher,
-            S source,
-            CompletionArg currentArg,
-            String[] args
+            SuggestionContext<S> context
     );
 }

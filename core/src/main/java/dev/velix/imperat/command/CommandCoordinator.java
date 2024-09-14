@@ -1,7 +1,7 @@
 package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ public interface CommandCoordinator<S extends Source> {
     void coordinate(
             @NotNull Imperat<S> imperat,
             @NotNull S source,
-            @NotNull Context<S> context,
+            @NotNull ExecutionContext<S> context,
             @NotNull CommandExecution<S> execution
     );
     

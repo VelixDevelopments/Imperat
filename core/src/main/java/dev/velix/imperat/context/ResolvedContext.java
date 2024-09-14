@@ -25,12 +25,8 @@ import java.util.List;
  * @see Command
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface ResolvedContext<S extends Source> extends Context<S> {
-    
-    /**
-     * @return The owning parent-command for all of these arguments
-     */
-    Command<S> getOwningCommand();
+public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
+
     
     /**
      * Resolves the arguments from the given plain input {@link Context}
@@ -77,11 +73,13 @@ public interface ResolvedContext<S extends Source> extends Context<S> {
      * @param value     the resolved value of the argument
      * @param <T>       the type of resolved value of the argument
      */
-    <T> void resolveArgument(Command<S> command,
-                             @Nullable String raw,
-                             int index,
-                             CommandParameter parameter,
-                             @Nullable T value) throws ImperatException;
+    <T> void resolveArgument(
+            Command<S> command,
+            @Nullable String raw,
+            int index,
+            CommandParameter parameter,
+            @Nullable T value
+    ) throws ImperatException;
     
     /**
      * Resolves flag the in the context
@@ -91,10 +89,12 @@ public interface ResolvedContext<S extends Source> extends Context<S> {
      * @param flagInputValue the flag's input value resolved by {@link ValueResolver}
      * @param flagDetected   the optional flag-parameter detected
      */
-    void resolveFlag(String flagRaw,
-                     @Nullable String flagInputRaw,
-                     @Nullable Object flagInputValue,
-                     CommandFlag flagDetected);
+    void resolveFlag(
+            String flagRaw,
+            @Nullable String flagInputRaw,
+            @Nullable Object flagInputValue,
+            CommandFlag flagDetected
+    );
     
     /**
      * Fetches the last used resolved command

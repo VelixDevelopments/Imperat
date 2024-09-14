@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  * during the execution of a command
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface ExecutionContext<S extends Source> {
+public interface ExecutionContext<S extends Source> extends Context<S> {
     
     /**
      * @return the command label used originally
@@ -34,7 +34,6 @@ public interface ExecutionContext<S extends Source> {
      * @return The flag whether it has been used or not in this command context
      */
     ResolvedFlag getFlag(String flagName);
-    
     
     /**
      * Fetches the flag input value

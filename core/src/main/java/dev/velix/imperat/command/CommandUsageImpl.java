@@ -6,7 +6,7 @@ import dev.velix.imperat.command.cooldown.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.CommandFlag;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -301,7 +301,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @param context the context of the command
      */
     @Override
-    public void execute(Imperat<S> imperat, S source, Context<S> context) {
+    public void execute(Imperat<S> imperat, S source, ExecutionContext<S> context) {
         commandCoordinator.coordinate(imperat, source, context, this.execution);
     }
     

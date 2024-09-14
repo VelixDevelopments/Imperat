@@ -7,7 +7,10 @@ import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.exception.*;
+import dev.velix.imperat.exception.InvalidUUIDException;
+import dev.velix.imperat.exception.UnknownOfflinePlayerException;
+import dev.velix.imperat.exception.UnknownPlayerException;
+import dev.velix.imperat.exception.UnknownWorldException;
 import dev.velix.imperat.resolvers.BukkitPermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.CommandDebugger;
@@ -194,26 +197,26 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     
     @SuppressWarnings("deprecation")
     private void registerValueResolvers() {
-        this.registerValueResolver(Player.class, ((source, context, raw, cursor, parameter) -> {
+        this.registerValueResolver(Player.class, ((context, parameter, cursor, raw) -> {
             final Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;
             throw new UnknownPlayerException(raw);
         }));
         
-        this.registerValueResolver(OfflinePlayer.class, (source, context, raw, cursor, parameter) -> {
+        this.registerValueResolver(OfflinePlayer.class, (context, parameter, cursor, raw) -> {
             if (raw.length() > 16) {
                 throw new UnknownPlayerException(raw);
             }
             return Bukkit.getOfflinePlayer(raw);
         });
         
-        this.registerValueResolver(World.class, (source, context, raw, cursor, parameter) -> {
+        this.registerValueResolver(World.class, (context, parameter, cursor, raw) -> {
             World world = Bukkit.getWorld(raw.toLowerCase());
             if (world != null) return world;
             throw new UnknownWorldException(raw);
         });
         
-        registerValueResolver(UUID.class, (source, context, raw, cursor, parameter) -> {
+        registerValueResolver(UUID.class, (context, parameter, cursor, raw) -> {
             try {
                 return UUID.fromString(raw);
             } catch (IllegalArgumentException ex) {

@@ -31,13 +31,10 @@ import java.util.*;
  * @param <S> the sender type
  */
 @ApiStatus.Internal
-final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> {
+final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> implements ResolvedContext<S> {
     
-    private final Imperat<S> dispatcher;
     
-    private final Command<S> commandUsed;
     private final CommandUsage<S> usage;
-    private final Context<S> context;
     private final FlagRegistry flagRegistry = new FlagRegistry();
     //per command/subcommand because the class 'Command' can be also treated as a sub command
     private final Map<Command<S>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
@@ -46,33 +43,11 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
     private Command<S> lastCommand;
     
     ResolvedContextImpl(Imperat<S> dispatcher,
-                        Command<S> commandUsed,
                         Context<S> context,
                         CommandUsage<S> usage) {
-        this.dispatcher = dispatcher;
-        this.commandUsed = commandUsed;
-        this.lastCommand = commandUsed;
-        this.context = context;
+        super(dispatcher, context.getCommandUsed(), context.getSource(), context.getArguments());
+        this.lastCommand = context.getCommandUsed();
         this.usage = usage;
-    }
-    
-    
-    /**
-     * @return The owning parent-command for all of these arguments
-     */
-    @Override
-    public Command<S> getOwningCommand() {
-        return commandUsed;
-    }
-    
-    /**
-     * the command used in the context
-     *
-     * @return the command used
-     */
-    @Override
-    public @NotNull Command<S> getCommandUsed() {
-        return context.getCommandUsed();
     }
     
     /**
@@ -156,31 +131,10 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
     
     @Override
     public CommandHelp createCommandHelp() {
-        return context.createCommandHelp();
+        return new CommandHelp(dispatcher, getCommandUsed(), this);
     }
     
-    /**
-     * @return the command source of the command
-     * @see Source
-     */
-    @Override
-    public @NotNull S getSource() {
-        return context.getSource();
-    }
     
-    /**
-     * @return the arguments entered by the command sender
-     * @see ArgumentQueue
-     */
-    @Override
-    public @NotNull ArgumentQueue getArguments() {
-        return context.getArguments();
-    }
-    
-    /**
-     * @param flagName the name of the flag to check if it's used or not
-     * @return The flag whether it has been used or not in this command context
-     */
     @Override
     public ResolvedFlag getFlag(String flagName) {
         return flagRegistry.getData(flagName).orElse(null);
@@ -204,20 +158,16 @@ final class ResolvedContextImpl<S extends Source> implements ResolvedContext<S> 
         return (T) flag.value();
     }
     
-    /**
-     * @return the number of flags extracted
-     */
-    @Override
-    public int flagsUsedCount() {
-        return flagRegistry.size();
-    }
     
     /**
      * Resolves the arguments from the given plain input {@link Context}
      */
     @Override
     public void resolve() throws ImperatException {
-        SmartUsageResolve<S> handler = SmartUsageResolve.create(commandUsed, usage);
+        if (getArguments().isEmpty())
+            return;
+        
+        SmartUsageResolve<S> handler = SmartUsageResolve.create(getCommandUsed(), usage);
         handler.resolve(dispatcher, this);
         this.lastCommand = handler.getCommand();
     }

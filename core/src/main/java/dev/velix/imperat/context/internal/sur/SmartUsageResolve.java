@@ -288,7 +288,7 @@ public final class SmartUsageResolve<S extends Source> {
         
     }
     
-    private <T> T getResult(ValueResolver<S, T> resolver, Context<S> context, String raw, CommandParameter currentParameter) throws ImperatException {
+    private <T> T getResult(ValueResolver<S, T> resolver, ExecutionContext<S> context, String raw, CommandParameter currentParameter) throws ImperatException {
         return resolver.resolve(context, currentParameter, cursor, raw);
     }
     

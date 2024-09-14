@@ -5,12 +5,12 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
-import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.UsageContextMatch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.ListUtils;
@@ -119,12 +119,10 @@ public interface Command<S extends Source> extends CommandParameter {
      * Traverses and searches in {@link CommandTree} , visiting every node
      *
      * @param dispatcher the dispatcher
-     * @param source     the source
-     * @param currentArg the current value to complete
-     * @param args       the args
+     * @param context the context
      * @return the auto-completed results
      */
-    List<String> tabComplete(Imperat<S> dispatcher, S source, CompletionArg currentArg, String[] args);
+    List<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context);
     
     
     /**

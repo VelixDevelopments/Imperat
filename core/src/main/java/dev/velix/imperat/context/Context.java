@@ -1,5 +1,6 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +11,12 @@ import org.jetbrains.annotations.NotNull;
  * @param <S> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface Context<S extends Source> extends ExecutionContext<S> {
+public interface Context<S extends Source> {
+    
+    /**
+     * @return The {@link Command} owning this context.
+     */
+    Command<S> getCommandUsed();
     
     /**
      * @return the command source of the command
@@ -19,9 +25,12 @@ public interface Context<S extends Source> extends ExecutionContext<S> {
     @NotNull
     S getSource();
     
+    
     /**
-     * @return the number of flags extracted
+     * @return the arguments entered by the
+     * @see ArgumentQueue
      */
-    int flagsUsedCount();
+    ArgumentQueue getArguments();
+    
     
 }

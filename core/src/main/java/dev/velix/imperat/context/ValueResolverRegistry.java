@@ -1,7 +1,5 @@
-package dev.velix.imperat.context.internal;
+package dev.velix.imperat.context;
 
-import dev.velix.imperat.context.EnumValueResolver;
-import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Registry;

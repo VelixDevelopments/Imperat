@@ -11,12 +11,8 @@ import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.command.tree.UsageContextMatch;
 import dev.velix.imperat.command.tree.UsageMatchResult;
-import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.ContextFactory;
-import dev.velix.imperat.context.internal.ValueResolverRegistry;
 import dev.velix.imperat.exception.*;
 import dev.velix.imperat.help.HelpTemplate;
 import dev.velix.imperat.help.templates.DefaultTemplate;
@@ -136,7 +132,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                             "Missing required arguments '<required_args>'\n Full syntax: '<usage>'"
                                     .replace("<required_args>", builder.toString())
                                     .replace("<usage>", imperat.commandPrefix()
-                                            + CommandUsage.format(resolvedContext.getOwningCommand(), usage))
+                                            + CommandUsage.format(resolvedContext.getCommandUsed(), usage))
                     );
                 }
         );
@@ -160,8 +156,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                             || resolvedContext.getDetectedUsage().isHelp()) {
                         throw new IllegalCallerException("Called NoHelpPageCaption in wrong the wrong sequence/part of the code");
                     }
-
-                    int page = context.getArgumentOr("page", 1);
+                    
+                    int page = resolvedContext.getArgumentOr("page", 1);
                     context.getSource().error("Page '<page>' doesn't exist!".replace("<page>", String.valueOf(page)));
                 }
         );
@@ -546,7 +542,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         
         if (context.getArguments().isEmpty()) {
             CommandUsage<S> defaultUsage = command.getDefaultUsage();
-            defaultUsage.execute(this, source, context);
+            executeUsage(command, source, context, defaultUsage);
             return UsageMatchResult.INCOMPLETE;
         }
         
@@ -585,7 +581,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         //per command pre-processing
         command.preProcess(this, context, usage);
         
-        ResolvedContext<S> resolvedContext = contextFactory.createResolvedContext(this, command, context, usage);
+        ResolvedContext<S> resolvedContext = contextFactory.createResolvedContext(this, context, usage);
         resolvedContext.resolve();
         
         //global post-processing

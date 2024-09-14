@@ -16,6 +16,7 @@ import dev.velix.imperat.commodore.Commodore;
 import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandFlag;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.CommandDebugger;
 import org.bukkit.OfflinePlayer;
@@ -234,7 +235,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
             
             try {
                 
-                BukkitSource actor = this.wrapCommandSource(context.getSource());
+                BukkitSource source = this.wrapCommandSource(context.getSource());
                 String tooltipMessage = parameter.description() == Description.EMPTY ? parameter.format() : parameter.description().toString();
                 Message tooltip = new LiteralMessage(tooltipMessage);
                 String input = context.getInput();
@@ -242,12 +243,11 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
                 ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
                         input.startsWith("/") ? input.substring(1) : input
                 );
-                CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
                 
+                CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
+                SuggestionContext<BukkitSource> ctx = dispatcher.getContextFactory().createSuggestionContext(dispatcher, source, command, args, arg);
                 suggestionResolver
-                        .autoComplete(command,
-                                actor, args, parameter, arg
-                        )
+                        .autoComplete(ctx, parameter)
                         .stream()
                         .filter(c -> c.toLowerCase().startsWith(arg.value().toLowerCase()))
                         .distinct()

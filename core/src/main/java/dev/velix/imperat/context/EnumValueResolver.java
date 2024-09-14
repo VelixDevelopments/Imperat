@@ -18,7 +18,7 @@ public final class EnumValueResolver<S extends Source, E extends Enum<E>> implem
     
     @Override
     public E resolve(
-            Context<S> context,
+            ExecutionContext<S> context,
             CommandParameter parameter,
             Cursor cursor,
             String raw

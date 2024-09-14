@@ -6,7 +6,7 @@ import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.ParameterBuilder;
 import dev.velix.imperat.context.CommandFlag;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -205,7 +205,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @param source  the command source/sender
      * @param context the context of the command
      */
-    void execute(Imperat<S> imperat, S source, Context<S> context);
+    void execute(Imperat<S> imperat, S source, ExecutionContext<S> context);
     
     /**
      * @return Whether this usage is a help-subcommand usage

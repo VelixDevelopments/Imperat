@@ -4,9 +4,9 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
@@ -83,15 +83,13 @@ public final class CommandTree<S extends Source> {
         return newNode;
     }
     
-    public @NotNull List<String> tabComplete(Imperat<S> imperat, S source, CompletionArg arg, ArgumentQueue raws) {
-        
-        final int depthToReach = arg.index();
+    public @NotNull List<String> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
+        final int depthToReach = context.getArgToComplete().index();
         
         List<String> results = new ArrayList<>();
         for (var child : root.getChildren()) {
             results.addAll(
-                    collectNodeCompletions(imperat, source, raws,
-                            arg, child, 0, depthToReach, results)
+                    collectNodeCompletions(imperat, context, child, 0, depthToReach, results)
             );
         }
         return results;
@@ -99,9 +97,7 @@ public final class CommandTree<S extends Source> {
     
     private List<String> collectNodeCompletions(
             Imperat<S> imperat,
-            S source,
-            ArgumentQueue raws,
-            CompletionArg arg,
+            SuggestionContext<S> context,
             ParameterNode<?> child,
             int depth,
             final int maxDepth,
@@ -111,24 +107,25 @@ public final class CommandTree<S extends Source> {
             return results;
         }
         
-        String raw = raws.getOr(depth, "");
+        String raw = context.getArguments().getOr(depth, "");
         assert raw != null;
         
         if ((!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
-                || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver().hasPermission(source, child.data.permission()))) {
+                || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
+                .hasPermission(context.getSource(), child.data.permission()))) {
             return results;
         }
         
         if (depth == maxDepth) {
             //we reached the arg we want to complete, let's complete it using our current node
             //COMPLETE DIRECTLY
-            addChildResults(imperat, source, raws, arg, child, results);
+            addChildResults(imperat, context, child, results);
             return results;
         } else {
             //Keep looking
             for (var innerChild : child.getChildren()) {
                 results.addAll(
-                        collectNodeCompletions(imperat, source, raws, arg, innerChild, depth + 1, maxDepth, results)
+                        collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, results)
                 );
             }
         }
@@ -137,9 +134,7 @@ public final class CommandTree<S extends Source> {
     
     private void addChildResults(
             Imperat<S> imperat,
-            S source,
-            ArgumentQueue raws,
-            CompletionArg arg,
+            SuggestionContext<S> context,
             ParameterNode<?> node,
             List<String> results
     ) {
@@ -149,7 +144,7 @@ public final class CommandTree<S extends Source> {
         } else {
             SuggestionResolver<S, ?> resolver = imperat.getParameterSuggestionResolver(node.data);
             if (resolver == null) return;
-            List<String> autoCompletions = resolver.autoComplete(root.data, source, raws, node.data, arg);
+            List<String> autoCompletions = resolver.autoComplete(context, node.data);
             results.addAll(autoCompletions);
         }
     }

@@ -2,7 +2,7 @@ package dev.velix.imperat.test.guild;
 
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.BukkitContextResolver;
@@ -22,7 +22,7 @@ public final class GuildContextResolver implements BukkitContextResolver<Guild> 
      */
     @Override
     public @NotNull Guild resolve(
-            @NotNull Context<BukkitSource> context,
+            @NotNull ExecutionContext<BukkitSource> context,
             @Nullable ParameterElement parameter
     ) throws ImperatException {
         var source = context.getSource();

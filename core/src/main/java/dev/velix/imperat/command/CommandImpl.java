@@ -6,14 +6,13 @@ import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
-import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.CommandTreeVisualizer;
 import dev.velix.imperat.command.tree.UsageContextMatch;
-import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -146,10 +145,9 @@ final class CommandImpl<S extends Source> implements Command<S> {
     }
     
     @Override
-    public List<String> tabComplete(Imperat<S> dispatcher, S source, CompletionArg currentArg, String[] args) {
+    public List<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context) {
         if (commandTree != null) {
-            ArgumentQueue input = ArgumentQueue.parseAutoCompletion(args);
-            return commandTree.tabComplete(dispatcher, source, currentArg, input);
+            return commandTree.tabComplete(dispatcher, context);
         } else {
             throw new IllegalCallerException("Cannot match a sub command in a root's execution !");
         }
