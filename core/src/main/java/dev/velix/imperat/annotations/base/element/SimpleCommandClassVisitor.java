@@ -43,26 +43,17 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Set<Command<S>> commands = new HashSet<>();
         
         Annotation commandAnnotation = getCommandAnnotation(clazz);
+        if (clazz.isRootClass() && commandAnnotation != null && clazz.isAnnotationPresent(SubCommand.class)) {
+            throw new IllegalStateException("Root command class cannot be a @SubCommand");
+        }
         
-        if (clazz.isRootClass() && commandAnnotation != null) {
+        if (commandAnnotation != null) {
             //System.out.println("Entering root class");
-            if (clazz.isAnnotationPresent(SubCommand.class)) {
-                throw new IllegalStateException("Root command class cannot be a @SubCommand");
-            }
             
             //System.out.println("ROOT CLASS ENTERING");
             Command<S> cmd = loadCommand(null, clazz, commandAnnotation);
             
             //if cmd=null → loading @Command methods only from this class
-            if (cmd != null) {
-                loadCommandMethods(clazz);
-                commands.add(cmd);
-            }
-            
-        } else if (commandAnnotation != null) {
-            //inner class with @Command or @SubCommand
-            //System.out.println("Inner class with @Command or @SubCommand");
-            Command<S> cmd = loadCommand(null, clazz, commandAnnotation);
             if (cmd != null) {
                 loadCommandMethods(clazz);
                 commands.add(cmd);
@@ -98,26 +89,39 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     
     private void loadCommandMethods(ClassElement clazz) {
         for (ParseElement<?> element : clazz.getChildren()) {
-            if (element instanceof MethodElement method) {
-                if (method.isAnnotationPresent(dev.velix.imperat.annotations.Command.class)) {
-                    var cmdAnn = method.getAnnotation(dev.velix.imperat.annotations.Command.class);
-                    assert cmdAnn != null;
-                    imperat.registerCommand(loadCommand(null, method, cmdAnn));
-                }
+            if (element instanceof MethodElement method && method.isAnnotationPresent(dev.velix.imperat.annotations.Command.class)) {
+                var cmdAnn = method.getAnnotation(dev.velix.imperat.annotations.Command.class);
+                assert cmdAnn != null;
+                imperat.registerCommand(loadCommand(null, method, cmdAnn));
             }
         }
     }
     
-    private Command<S> loadCmdInstance(Annotation cmdAnnotation) {
+    private Command<S> loadCmdInstance(Annotation cmdAnnotation, ParseElement<?> element) {
+
         if (cmdAnnotation instanceof dev.velix.imperat.annotations.Command cmdAnn) {
+            
+            
             final String[] values = cmdAnn.value();
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = cmdAnn.skipSuggestionsChecks();
-
-            return Command.<S>create(values[0])
+            
+            Permission permission = element.getAnnotation(Permission.class);
+            Description description = element.getAnnotation(Description.class);
+            
+            var builder = Command.<S>create(values[0])
                     .ignoreACPermissions(ignoreAC)
-                    .aliases(aliases)
-                    .build();
+                    .aliases(aliases);
+            if (permission != null) {
+                builder.permission(permission.value());
+            }
+            
+            if (description != null) {
+                builder.description(description.value());
+            }
+            
+            return builder.build();
+            
         } else if (cmdAnnotation instanceof SubCommand subCommand) {
             final String[] values = subCommand.value();
             assert values != null;
@@ -138,7 +142,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             ParseElement<?> parseElement,
             @NotNull Annotation annotation
     ) {
-        final Command<S> cmd = loadCmdInstance(annotation);
+        final Command<S> cmd = loadCmdInstance(annotation, parseElement);
         if (parentCmd != null && cmd != null) {
             cmd.setParent(parentCmd);
         }
