@@ -24,19 +24,8 @@ public final class DefaultFormatter implements UsageFormatter {
     @Override
     public <S extends Source> String formatUsageLine(Command<S> command, CommandUsage<S> usage, boolean isLast) {
         String format = "/" + CommandUsage.format(command, usage);
-        return "<dark_gray><bold>[<dark_aqua>+</dark_aqua>]</bold></dark_gray><green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.description();
+        return "&8&l[&3+&8]&r &a" + format + " &r&l-&r&e " + usage.description();
     }
     
-    /**
-     * Formats a single syntax, this is used
-     * only in the TreeDisplayer
-     *
-     * @param formattedUsage the format of the usage syntax
-     * @return the format component of the usage
-     */
-    @Override
-    public String formatUsageOnly(String formattedUsage) {
-        return "<green>" + formattedUsage;
-    }
     
 }

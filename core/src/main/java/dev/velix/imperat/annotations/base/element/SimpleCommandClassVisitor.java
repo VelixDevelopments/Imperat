@@ -13,16 +13,20 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.StrictParameterList;
+import dev.velix.imperat.command.processors.CommandPostProcessor;
+import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Pair;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
+import dev.velix.imperat.util.reflection.Reflections;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -48,9 +52,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
         
         if (commandAnnotation != null) {
-            //System.out.println("Entering root class");
             
-            //System.out.println("ROOT CLASS ENTERING");
             Command<S> cmd = loadCommand(null, clazz, commandAnnotation);
             
             //if cmd=null → loading @Command methods only from this class
@@ -98,16 +100,18 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
     
     private Command<S> loadCmdInstance(Annotation cmdAnnotation, ParseElement<?> element) {
-
+        PreProcessor preProcessor = element.getAnnotation(PreProcessor.class);
+        PostProcessor postProcessor = element.getAnnotation(PostProcessor.class);
+        
+        Permission permission = element.getAnnotation(Permission.class);
+        Description description = element.getAnnotation(Description.class);
+        
         if (cmdAnnotation instanceof dev.velix.imperat.annotations.Command cmdAnn) {
             
             
             final String[] values = cmdAnn.value();
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = cmdAnn.skipSuggestionsChecks();
-            
-            Permission permission = element.getAnnotation(Permission.class);
-            Description description = element.getAnnotation(Description.class);
             
             var builder = Command.<S>create(values[0])
                     .ignoreACPermissions(ignoreAC)
@@ -120,6 +124,14 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 builder.description(description.value());
             }
             
+            if (preProcessor != null) {
+                builder.preProcessor(loadPreProcessorInstance(preProcessor.value()));
+            }
+            
+            if (postProcessor != null) {
+                builder.postProcessor(loadPostProcessorInstance(postProcessor.value()));
+            }
+            
             return builder.build();
             
         } else if (cmdAnnotation instanceof SubCommand subCommand) {
@@ -129,10 +141,27 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = subCommand.skipSuggestionsChecks();
             
-            return Command.<S>create(values[0])
+            var builder = Command.<S>create(values[0])
                     .ignoreACPermissions(ignoreAC)
-                    .aliases(aliases)
-                    .build();
+                    .aliases(aliases);
+            
+            if (permission != null) {
+                builder.permission(permission.value());
+            }
+            
+            if (description != null) {
+                builder.description(description.value());
+            }
+            
+            if (preProcessor != null) {
+                builder.preProcessor(loadPreProcessorInstance(preProcessor.value()));
+            }
+            
+            if (postProcessor != null) {
+                builder.postProcessor(loadPostProcessorInstance(postProcessor.value()));
+            }
+            
+            return builder.build();
         }
         return null;
     }
@@ -228,6 +257,32 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
         
         return cmd;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private CommandPreProcessor<S> loadPreProcessorInstance(Class<? extends CommandPreProcessor<?>> clazz) {
+        var constructor = Reflections.getConstructor(clazz);
+        if (constructor == null)
+            throw new UnsupportedOperationException("Couldn't find constructor in class `" + clazz.getSimpleName() + "`");
+        
+        try {
+            return (CommandPreProcessor<S>) constructor.newInstance();
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private CommandPostProcessor<S> loadPostProcessorInstance(Class<? extends CommandPostProcessor<?>> clazz) {
+        var constructor = Reflections.getConstructor(clazz);
+        if (constructor == null)
+            throw new UnsupportedOperationException("Couldn't find constructor in class `" + clazz.getSimpleName() + "`");
+        
+        try {
+            return (CommandPostProcessor<S>) constructor.newInstance();
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     

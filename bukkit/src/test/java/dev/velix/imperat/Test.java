@@ -12,7 +12,6 @@ import dev.velix.imperat.examples.ExampleCommand;
 import dev.velix.imperat.examples.GroupCommand;
 import dev.velix.imperat.examples.GuildCommand;
 import dev.velix.imperat.examples.custom_annotations.MyCommand;
-import dev.velix.imperat.examples.help.ExampleHelpTemplate;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.test.Group;
@@ -47,13 +46,14 @@ public final class Test extends JavaPlugin implements Listener {
         //testBrigadierCommodore();
         
         
-        dispatcher.setHelpTemplate(new ExampleHelpTemplate());
+        //dispatcher.setHelpTemplate(new ExampleHelpTemplate());
         
         dispatcher.registerValueResolver(Group.class, ((context, parameter, cursor, raw) -> {
             context.getContextResolvedArgument(CommandHelp.class);
             Group group = GroupRegistry.getInstance().getData(raw).orElse(null);
             if (group == null)
                 throw new SourceException("Invalid group '" + raw + "'");
+            
             return group;
         }));
         

@@ -21,7 +21,7 @@ public class DefaultTemplate implements HelpTemplate {
      */
     @Override
     public String getHeader(Command<?> command) {
-        return "<dark_gray><bold><strikethrough>=================== <dark_green>" + command.name() + "'s help</dark_green> ===================";
+        return "&8&l&m===================&r &2" + command.name() + "'s help&r &8&l&m===================";
     }
     
     /**
@@ -29,7 +29,7 @@ public class DefaultTemplate implements HelpTemplate {
      */
     @Override
     public String getFooter(Command<?> command) {
-        return "<dark_gray><bold><strikethrough>======================================";
+        return "&8&l&m======================================";
     }
     
     /**

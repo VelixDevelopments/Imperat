@@ -15,14 +15,14 @@ public class ExampleHelpTemplate implements HelpTemplate {
     @Override
     public String getHeader(Command<?> command) {
         return
-                "<dark_gray><bold><strikethrough>=================== <gold>"
-                        + command.name() + "'s help</gold> ===================";
+                "&8&l&m===================&r &6"
+                        + command.name() + "'s help&r &8&l&m===================";
     }
     
     
     @Override
     public String getFooter(Command<?> command) {
-        return "<dark_gray><bold><strikethrough>===============================================";
+        return "&8&l&m=================================";
     }
     
     @Override

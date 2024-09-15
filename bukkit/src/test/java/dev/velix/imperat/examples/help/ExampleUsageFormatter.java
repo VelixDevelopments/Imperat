@@ -11,11 +11,7 @@ public class ExampleUsageFormatter implements UsageFormatter {
     @Override
     public <S extends Source> String formatUsageLine(Command<S> command, CommandUsage<S> usage, boolean isLast) {
         String format = "/" + CommandUsage.format(command, usage);
-        return "<green>" + format + " <white><bold>-</bold></white> <yellow>" + usage.description();
+        return "&a" + format + " &r&l-&r &e<yellow>" + usage.description();
     }
     
-    @Override
-    public String formatUsageOnly(String formattedUsage) {
-        return "<green>" + formattedUsage;
-    }
 }

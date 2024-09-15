@@ -13,13 +13,13 @@ public final class ExamplePaginatedHelpTemplate
     
     @Override
     public String fullHeader(Command<?> command, int page, int maxPages) {
-        return "<dark_gray><bold><strikethrough>=================== <dark_green>"
-                + command.name() + "'s help " + pagesHeaderComponent(page, maxPages) + " </dark_green>===================";
+        return "&8&l&m===================&r &2"
+                + command.name() + "'s help " + pagesHeaderComponent(page, maxPages) + "&r &8&l&m===================";
     }
     
     
     private String pagesHeaderComponent(int page, int maxPages) {
-        return "<dark_gray>(</dark_gray> <green>" + page + "<gray>/</gray>" + maxPages + " <dark_gray>)</dark_gray>";
+        return "&8( &a" + page + "&7/" + maxPages + " &8)";
     }
     
 }

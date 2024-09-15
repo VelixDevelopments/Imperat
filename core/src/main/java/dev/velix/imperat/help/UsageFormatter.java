@@ -30,12 +30,4 @@ public interface UsageFormatter {
             boolean isLast
     );
     
-    /**
-     * Formats a single syntax, this is used
-     * only in the {@link TreeDisplayer}
-     *
-     * @param formattedUsage the format of the usage syntax
-     * @return the format component of the usage
-     */
-    String formatUsageOnly(String formattedUsage);
 }

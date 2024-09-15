@@ -25,10 +25,6 @@ public interface UsageDisplayer {
         return new PlainDisplayer();
     }
     
-    static UsageDisplayer tree() {
-        return new TreeDisplayer();
-    }
-    
     static UsageDisplayer custom(UsageDisplayer displayer) {
         return displayer;
     }
@@ -45,7 +41,6 @@ public interface UsageDisplayer {
      * @param usages     the usages to display
      * @param <S>        the command-sender type
      * @see PlainDisplayer
-     * @see TreeDisplayer
      */
     <S extends Source> void display(
             Command<S> command,
