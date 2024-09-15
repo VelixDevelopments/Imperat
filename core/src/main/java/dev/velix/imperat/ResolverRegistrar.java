@@ -118,11 +118,10 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      *                  will work with
      * @return the {@link SuggestionResolver} instance for that type
      */
-    @SuppressWarnings("unchecked")
-    default @Nullable <T> SuggestionResolver<S, T> getParameterSuggestionResolver(CommandParameter parameter) {
+    default @Nullable <T> SuggestionResolver<S, ?> getParameterSuggestionResolver(CommandParameter parameter) {
         SuggestionResolver<S, T> parameterSpecificResolver = parameter.getSuggestionResolver();
         if (parameterSpecificResolver == null)
-            return getSuggestionResolverByType((Class<T>) parameter.type());
+            return getSuggestionResolverByType(parameter.type());
         else
             return parameterSpecificResolver;
     }
@@ -131,16 +130,16 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * Fetches the suggestion provider/resolver for a specific type of
      * argument or parameter.
      *
-     * @param clazz the clazz symbolizing the type
+     * @param type  the type
      * @param <T>   the type parameter representing the type of value that the suggestion resolver
      *              will work with
      * @return the {@link SuggestionResolver} instance for that type
      */
     @Nullable
-    <T> SuggestionResolver<S, T> getSuggestionResolverByType(Class<T> clazz);
+    <T> SuggestionResolver<S, ?> getSuggestionResolverByType(Type type);
     
     /**
-     * Fetches the suggestion provider/resolver that is registered by its unique name
+     * Fetches the suggestion provider/resolver registered by its unique name
      *
      * @param name the name of the argument
      * @param <T>  the type parameter representing the type of value that the suggestion resolver

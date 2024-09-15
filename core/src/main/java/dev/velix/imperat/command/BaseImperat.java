@@ -374,13 +374,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * Fetches the suggestion provider/resolver for a specific type of
      * argument or parameter.
      *
-     * @param clazz the clazz symbolizing the type
+     * @param type the type
      * @return the {@link SuggestionResolver} instance for that type
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public @Nullable <T> SuggestionResolver<S, T> getSuggestionResolverByType(Class<T> clazz) {
-        return (SuggestionResolver<S, T>) suggestionResolverRegistry.getResolver(clazz);
+    public @Nullable SuggestionResolver<S, ?> getSuggestionResolverByType(Type type) {
+        return suggestionResolverRegistry.getResolver(type);
     }
     
     /**
