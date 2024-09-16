@@ -1,9 +1,5 @@
-dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-    }
-}
 rootProject.name = 'Imperat'
+
 include 'core'
 include 'bukkit'
 include 'bungee'

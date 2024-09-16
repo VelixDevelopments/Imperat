@@ -1,6 +1,10 @@
 compileJava.options.encoding = "UTF-8"
 compileJava.options.compilerArgs += ["-parameters"]
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compileOnly lombok()
     annotationProcessor lombok()
@@ -26,7 +30,6 @@ java {
 test {
     useJUnitPlatform()
 }
-
 
 static String lombok() {
     return 'org.projectlombok:lombok:1.18.34'

@@ -1,17 +1,9 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
-String DESTINATION_1_8 = "C:\\Users\\Bergo\\Desktop\\servers\\spigot test server 1.8.8\\plugins"
-String DESTINATION_1_19 = "C:\\Users\\Bergo\\Desktop\\servers\\spigot 1.19.2\\plugins"
-String DESTINATION_1_17 = "C:\\Users\\Bergo\\Desktop\\servers\\spigot 1.17.1\\plugins"
-
 repositories {
     mavenCentral()
     mavenLocal()
     maven {
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
 
-        // As of Gradle 5.1, you can limit this to only those
-        // dependencies you expect from it
         content {
             includeGroup 'org.bukkit'
             includeGroup 'org.spigotmc'
@@ -26,14 +18,15 @@ repositories {
         url "https://libraries.minecraft.net"
     }
 }
+
 dependencies {
+    api project(":adventure")
+    api project(":brigadier")
+
+    compileOnly project(":core")
 
     compileOnly lombok()
     annotationProcessor lombok()
-
-    implementation project(":core")
-    implementation project(":adventure")
-    implementation project(":brigadier")
 
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly 'org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT'
@@ -42,7 +35,6 @@ dependencies {
     compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
 
     compileOnly kyori(KyoriModule.API)
-    //compileOnly kyori(KyoriModule.MINI_MESSAGE)
     compileOnly kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
 
     // The full Spigot server with no shadowing. Requires mavenLocal.
@@ -51,12 +43,10 @@ dependencies {
     testAnnotationProcessor lombok()
 
     testImplementation kyori(KyoriModule.API)
-    //testImplementation kyori(KyoriModule.MINI_MESSAGE)
     testImplementation kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
     testCompileOnly('org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT')
     testCompileOnly("com.mojang:brigadier:1.0.18")
     testImplementation project(":brigadier")
-
 }
 
 java {
@@ -68,35 +58,9 @@ processTestResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-shadowJar {
-    setArchiveFileName("Imperat-bukkit.jar")
-}
-
 compileJava {
     options.compilerArgs += ["-parameters"]
 }
-
-tasks.register('bukkit-1.8', ShadowJar) {
-    archiveClassifier.set("tests")
-    from sourceSets.main.output, sourceSets.test.output
-    configurations = [project.configurations.testRuntimeClasspath]
-    setDestinationDirectory(file(DESTINATION_1_8))
-}
-
-tasks.register('bukkit-1.17.1', ShadowJar) {
-    archiveClassifier.set("tests")
-    from sourceSets.main.output, sourceSets.test.output
-    configurations = [project.configurations.testRuntimeClasspath]
-    setDestinationDirectory(file(DESTINATION_1_17))
-}
-
-tasks.register('bukkit-1.19.2', ShadowJar) {
-    archiveClassifier.set("tests")
-    from sourceSets.main.output, sourceSets.test.output
-    configurations = [project.configurations.testRuntimeClasspath]
-    setDestinationDirectory(file(DESTINATION_1_19))
-}
-
 
 static String lombok() {
     return 'org.projectlombok:lombok:1.18.34'

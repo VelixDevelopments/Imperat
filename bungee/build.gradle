@@ -6,12 +6,13 @@ repositories {
 }
 
 dependencies {
-    implementation project(":core")
-    implementation project(":adventure")
+    api project(":adventure")
+
     compileOnly lombok()
     annotationProcessor lombok()
 
-    compileOnly kyori(KyoriModule.MINI_MESSAGE)
+    compileOnly project(":core")
+    compileOnly kyori(KyoriModule.API)
     compileOnly platform(KyoriModule.BUNGEE, "4.3.4")
     compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
 }

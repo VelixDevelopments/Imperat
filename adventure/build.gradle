@@ -2,9 +2,6 @@ plugins {
     id 'java-library'
 }
 
-group = 'dev.velix.imperat'
-version = 'unspecified'
-
 repositories {
     mavenCentral()
 }
