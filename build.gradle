@@ -1,7 +1,8 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
-    id 'signing'
-    id 'maven-publish'
     id 'java-library'
+    id("com.vanniktech.maven.publish") version "0.29.0"
 }
 
 allprojects {
@@ -11,4 +12,44 @@ allprojects {
 
 subprojects {
     plugins.apply("java-library")
+    plugins.apply("com.vanniktech.maven.publish")
+
+    mavenPublishing {
+        coordinates(group, "imperat-" + name, version)
+
+        pom {
+            name = "Imperat"
+            description = "A modern customizable command framework."
+            inceptionYear = "2024"
+            url = "https://github.com/VelixDevelopments/Imperat/"
+            licenses {
+                license {
+                    name = 'MIT'
+                    url = "https://opensource.org/licenses/MIT"
+                    distribution = "https://mit-license.org/"
+                }
+            }
+            developers {
+                developer {
+                    id = "mqzn"
+                    name = "Mqzn"
+                    url = "https://github.com/Mqzn/"
+                }
+                developer {
+                    id = "iiahmedyt"
+                    name = "iiAhmedYT"
+                    url = "https://github.com/iiAhmedYT/"
+                }
+            }
+            scm {
+                url = "https://github.com/VelixDevelopments/Imperat/"
+                connection = "scm:git:git://github.com/VelixDevelopments/Imperat.git"
+                developerConnection = "scm:git:ssh://git@github.com/VelixDevelopments/Imperat.git"
+            }
+        }
+
+        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+        signAllPublications()
+    }
+
 }

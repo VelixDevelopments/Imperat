@@ -3,7 +3,7 @@ rootProject.name = 'Imperat'
 include 'core'
 include 'bukkit'
 include 'bungee'
-include 'velocity'
+//include 'velocity'
 include 'brigadier'
 include 'adventure'
 
