@@ -9,6 +9,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * @author Mqzen
  */
+@Getter
 public final class CommandTree<S extends Source> {
     
     final CommandNode<S> root;

@@ -244,6 +244,11 @@ final class CommandImpl<S extends Source> implements Command<S> {
         return aliases;
     }
     
+    @Override
+    public CommandTree<S> tree() {
+        return this.commandTree;
+    }
+    
     /**
      * Sets the aliases of a command
      *

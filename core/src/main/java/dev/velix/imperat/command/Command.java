@@ -67,6 +67,11 @@ public interface Command<S extends Source> extends CommandParameter {
     List<String> aliases();
     
     /**
+     * @return The tree for the command
+     */
+    CommandTree<S> tree();
+    
+    /**
      * Sets the aliases of a command
      *
      * @param aliases the aliases for te command to set

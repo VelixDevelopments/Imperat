@@ -6,7 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
-final class CommandNode<S extends Source> extends ParameterNode<Command<S>> {
+public final class CommandNode<S extends Source> extends ParameterNode<Command<S>> {
     
     CommandNode(@NotNull Command<S> data) {
         super(data);

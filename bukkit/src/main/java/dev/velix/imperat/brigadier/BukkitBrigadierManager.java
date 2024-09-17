@@ -7,17 +7,19 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.velix.imperat.*;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
+import dev.velix.imperat.command.tree.CommandNode;
+import dev.velix.imperat.command.tree.ParameterNode;
 import dev.velix.imperat.commodore.Commodore;
 import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.util.ImperatDebugger;
+import dev.velix.imperat.util.TypeUtility;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -83,7 +85,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
                 return param.type() == flagParameter.getFlagData().inputType()
                         ? argumentTypeResolver.resolveArgType(param) : null;
             }
-            return param.type() == type ? argumentTypeResolver.resolveArgType(param) : null;
+            return TypeUtility.matches(param.type(), type) ? argumentTypeResolver.resolveArgType(param) : null;
         });
     }
     
@@ -110,111 +112,61 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
     
     @Override
     public BrigadierNode parseCommandIntoNode(Command<BukkitSource> command) {
-        BrigadierNode root = BrigadierNode.create(literal(command.name()));
+        var tree = command.tree();
+        var root = tree.getRoot();
         //ImperatDebugger.visualize("Parsing %s '%s'", (command.isSubCommand() ? "sub-command" : "command"), command.getName());
-        //input
-        CommandUsage<BukkitSource> mainUsage = command.getMainUsage();
-        
-        BrigadierNode last = root;
-        
-        for (CommandParameter parameter : mainUsage.getParameters()) {
-            //we parse an actual brigadier argument
-            //ImperatDebugger.visualize("Attempting to add args to %s", command.getName());
-            last = parseParameter(command, mainUsage, parameter);
-            root.addChild(last);
-        }
-        
-        //ImperatDebugger.visualize("Trying to add children for command '%s'", command.getName());
-        for (Command<BukkitSource> sub : command.getSubCommands()) {
-            //ImperatDebugger.visualize("Found child '%s' for parent '%s'", sub.getName(), command.getName());
-            //last = parseCommand(sub, last);
-            parseSubCommand(sub, last);
-        }
-        
-        return root;
+        return convertRoot(root);
     }
     
-    private void parseSubCommand(Command<BukkitSource> command, BrigadierNode lastParent) {
-        BrigadierNode literalSub = BrigadierNode.create(literal(command.name()));
-        lastParent.addChild(literalSub);
-        lastParent = literalSub;
-        
-        //ImperatDebugger.visualize("Parsing %s '%s'", (command.isSubCommand() ? "sub-command" : "command"), command.getName());
-        //input
-        CommandUsage<BukkitSource> mainUsage = command.getMainUsage();
-        //ImperatDebugger.visualize("Main usage '%s'", CommandUsage.format(command, mainUsage));
-        
-        for (CommandParameter parameter : mainUsage.getParameters()) {
-            //ImperatDebugger.visualize("Attempting to add args to %s", command.getName());
-            if (parameter.isCommand()) {
-                continue;
-            }
-            BrigadierNode child = parseParameter(command, mainUsage, parameter);
-            lastParent.addChild(child);
-            lastParent = child;
-        }
-        
-        //parse other inner children
-		/*for(var sub : command.getSubCommands()) {
-			parseSubCommand(sub, lastParent);
-		}*/
-    
-    }
-    
-    
-    private BrigadierNode parseParameter(Command<BukkitSource> command,
-                                         CommandUsage<BukkitSource> usage,
-                                         CommandParameter parameter) {
-        //ImperatDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.name(), command.name());
-        //ImperatDebugger.debug("Entering usage '%s'", CommandUsage.format(command, usage));
-        if (parameter.isFlag()) {
-            //ImperatDebugger.debug("Found flag parameter");
-            FlagParameter flagParameter = parameter.asFlagParameter();
-            CommandFlag flag = flagParameter.getFlagData();
-            
-            //TODO find a better workaround for aliases of the flag
-            var node = BrigadierNode.create(argument("-" + flag.name(), StringArgumentType.word()))
-                    .withRequirement((sender) -> dispatcher.getPermissionResolver().hasPermission(wrapCommandSource(sender), parameter.permission()))
-                    .suggest((context, suggestionBuilder) -> {
-                        suggestionBuilder.suggest("-" + flag.name());
-                        for (String alias : flag.aliases()) {
-                            suggestionBuilder.suggest("-" + alias);
+    private BrigadierNode convertRoot(CommandNode<BukkitSource> root) {
+        BrigadierNode bRoot = BrigadierNode.create(literal(root.getData().name()));
+        bRoot.withExecution(dispatcher, this)
+                .withRequirement((obj) -> {
+                            var source = wrapCommandSource(obj);
+                            return root.getData().isIgnoringACPerms()
+                                    || dispatcher.getPermissionResolver().hasPermission(source, root.getData().permission());
                         }
-                        return suggestionBuilder.buildFuture();
-                    });
-            
-            if (!flagParameter.isSwitch()) {
-                var flagInputArgType = getArgumentType(flagParameter);
-                BrigadierNode flagInputNode = BrigadierNode.create(argument("value", flagInputArgType));
-                node.addChild(flagInputNode);
-                return flagInputNode;
-            }
-            
-            return node;
+                );
+        
+        for (var child : root.getChildren()) {
+            bRoot.addChild(convertNode(root, root, child));
         }
-        
-        
-        ArgumentType<?> argumentType = this.getArgumentType(parameter);
-        //ImperatDebugger.visualize("Found value type = " + argumentType.getClass().getSimpleName());
-        //ImperatDebugger.visualize("Parameter position = '%s' , with usage max= '%s'", parameter.getPosition(), usage.getMaxLength());
-        
-        int max = command.isSubCommand() ? usage.getMaxLength() : usage.getMaxLength() - 1;
-        boolean isLast = parameter.position() == max;
-        
-        //ImperatDebugger.visualize("isLast= " + isLast);
-        
-        BrigadierNode node = BrigadierNode.create(argument(parameter.name(), argumentType));
-        
-        //ImperatDebugger.visualize("Resolving suggestions");
-        node.withRequirement((sender) -> dispatcher.getPermissionResolver().hasPermission(wrapCommandSource(sender), parameter.permission()))
-                .suggest(createSuggestionProvider(command, parameter));
-        
-        if (isLast) {
-            //ImperatDebugger.visualize("Setting execution !");
-            node.withExecution(dispatcher, this);
-        }
-        return node;
+        return bRoot;
     }
+    
+    private BrigadierNode convertNode(CommandNode<BukkitSource> root, ParameterNode<?> parent, ParameterNode<?> node) {
+        BrigadierNode child = BrigadierNode.create(argument(node.getData().name(), getArgumentType(node.getData())));
+        child.withExecution(dispatcher, this)
+                .withRequirement((obj) -> {
+                    var permissionResolver = dispatcher.getPermissionResolver();
+                    var source = wrapCommandSource(obj);
+                    
+                    boolean isIgnoringAC = root.getData().isIgnoringACPerms();
+                    if (parent != root && parent instanceof CommandNode<?> parentCmdNode) {
+                        isIgnoringAC = isIgnoringAC && parentCmdNode.getData().isIgnoringACPerms();
+                    }
+                    if (node instanceof CommandNode<?> commandNode) {
+                        isIgnoringAC = isIgnoringAC && commandNode.getData().isIgnoringACPerms();
+                    }
+                    if (isIgnoringAC) {
+                        return true;
+                    }
+                    boolean hasParentPerm = permissionResolver.hasPermission(source, parent.getData().permission());
+                    boolean hasNodePerm = permissionResolver.hasPermission(source, node.getData().permission());
+                    
+                    return (hasParentPerm && hasNodePerm);
+                });
+        
+        if (!(node instanceof CommandNode<?>)) {
+            child.suggest(createSuggestionProvider(root.getData(), node.getData()));
+        }
+        
+        for (var innerChild : node.getChildren()) {
+            child.addChild(convertNode(root, node, innerChild));
+        }
+        return child;
+    }
+
 	
 	/*private Predicate<Object> getParamRequirement(CommandParameter parameter) {
 		return sender -> this.wrapCommandSource(sender).hasPermission(parameter.get);
@@ -224,14 +176,13 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
             Command<BukkitSource> command,
             CommandParameter parameter
     ) {
-        if (parameter.getSuggestionResolver() == null)
-            return null;
+        SuggestionResolver<BukkitSource, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
+        ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", suggestionResolver == null, parameter.format());
+        if (suggestionResolver == null) {
+            return ((context, builder) -> builder.buildFuture());
+        }
         
         return (context, builder) -> {
-            SuggestionResolver<BukkitSource, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
-            if (suggestionResolver == null) {
-                return null;
-            }
             
             try {
                 
@@ -244,12 +195,14 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
                         input.startsWith("/") ? input.substring(1) : input
                 );
                 
+                System.out.println("ARGS=" + args);
+                
                 CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
                 SuggestionContext<BukkitSource> ctx = dispatcher.getContextFactory().createSuggestionContext(dispatcher, source, command, args, arg);
                 suggestionResolver
                         .autoComplete(ctx, parameter)
                         .stream()
-                        .filter(c -> c.toLowerCase().startsWith(arg.value().toLowerCase()))
+                        .filter(c -> arg.value().isEmpty() || arg.value().isBlank() || c.toLowerCase().startsWith(arg.value().toLowerCase()))
                         .distinct()
                         .sorted(String.CASE_INSENSITIVE_ORDER)
                         .forEach(suggestionResult -> builder.suggest(suggestionResult, tooltip));
