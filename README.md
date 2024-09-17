@@ -73,5 +73,5 @@ Imperat is released under the MIT License. See `LICENSE` for more information.
 
 ## Credits
 
-- Mqzn and iiAhmedYT (the original authors for Imperat) <br>
+- Mqzn and iiAhmedYT (the original authors of Imperat) <br>
   Some features/ideas were inspired from [Lamp](https://github.com/Revxrsal/Lamp).
