@@ -166,11 +166,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
         }
         return child;
     }
-
-	
-	/*private Predicate<Object> getParamRequirement(CommandParameter parameter) {
-		return sender -> this.wrapCommandSource(sender).hasPermission(parameter.get);
-	}*/
+    
     
     private SuggestionProvider<Object> createSuggestionProvider(
             Command<BukkitSource> command,
