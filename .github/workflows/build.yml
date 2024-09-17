@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: Maven Central
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Gradle Build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+      - name: Gradle Test
+        run: |
+          chmod +x ./gradlew
+          ./gradlew test
