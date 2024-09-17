@@ -21,7 +21,9 @@ dependencies {
     compileOnly("com.mojang:brigadier:1.0.18")
 
 }
-
+signing {
+    setRequired(false)
+}
 
 static String lombok() {
     return 'org.projectlombok:lombok:1.18.34'
