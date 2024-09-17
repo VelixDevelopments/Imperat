@@ -24,6 +24,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
     private final FlagSuggestionResolver flagSuggestionResolver = new FlagSuggestionResolver();
     private SuggestionResolverRegistry() {
         super();
+        registerResolverForType(SuggestionResolver.plain(Boolean.class, "true", "false"));
         resolversPerName = new HashMap<>();
     }
     
