@@ -13,35 +13,24 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Checkout Project
+      - name: ✅ Checkout Project
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: 📐 Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: corretto
           java-version: 17
 
-      - name: Setup Gradle
+      - name: 📐 Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Gradle Build
+      - name: 👷 Gradle Build
         run: |
           chmod +x ./gradlew
           ./gradlew build
 
-      - name: Gradle Test
+      - name: 🧪 Gradle Test
         run: |
           chmod +x ./gradlew
           ./gradlew test
-  cleanup:
-    runs-on: ubuntu-latest
-    permissions: write-all
-
-    steps:
-      - name: 🗑 Delete deployment
-        uses: strumwolf/delete-deployment-environment@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment: Maven Central
-          onlyRemoveDeployments: true

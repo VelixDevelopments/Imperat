@@ -5,31 +5,42 @@ on:
     types: [ created ]
 
 jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: 🗑 Delete deployment
+        uses: strumwolf/delete-deployment-environment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: Maven Central
+          onlyRemoveDeployments: true
   build:
+    needs: cleanup
     runs-on: ubuntu-latest
     environment: Maven Central
     permissions:
       contents: read
       packages: write
     steps:
-      - name: Checkout Project
+      - name: ✅ Checkout Project
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: 📐 Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: corretto
           java-version: 17
 
-      - name: Setup Gradle
+      - name: 📐 Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Gradle Build
+      - name: 👷 Gradle Build
         run: |
           chmod +x ./gradlew
           ./gradlew build
 
-      - name: Gradle Publish
+      - name: 🚀 Deploy
         run: ./gradlew publishAndReleaseToMavenCentral
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
