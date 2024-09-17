@@ -22,8 +22,8 @@ Replace `PLATFORM` with your desired platform and `VERSION` with the latest vers
 
 ```gradle
 dependencies {
-    implementation "dev.velix:Imperat-core:VERSION"
-    implementation "dev.velix:Imperat-PLATFORM:VERSION"
+    implementation "dev.velix:imperat-core:VERSION"
+    implementation "dev.velix:imperat-PLATFORM:VERSION"
 }
 ```
 
@@ -34,13 +34,13 @@ dependencies {
 <dependencies>
   <dependency>
     <groupId>dev.velix</groupId>
-    <artifactId>Imperat-core</artifactId>
+    <artifactId>imperat-core</artifactId>
     <version>VERSION</version>
   </dependency>
 
   <dependency>
     <groupId>dev.velix</groupId>
-    <artifactId>Imperat-PLATFORM</artifactId>
+    <artifactId>imperat-PLATFORM</artifactId>
     <version>VERSION</version>
   </dependency>
 </dependencies>
