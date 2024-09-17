@@ -47,6 +47,6 @@ public final class TestImperat extends BaseImperat<TestSource> {
     @Override
     public void registerCommand(Command<TestSource> command) {
         super.registerCommand(command);
-        command.visualize();
+        command.visualizeTree();
     }
 }

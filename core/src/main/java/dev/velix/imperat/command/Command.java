@@ -131,7 +131,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * If the command is not a root command,
      * nothing will be visualized.
      */
-    void visualize();
+    void visualizeTree();
     
     /**
      * Sets a pre-processor for the command

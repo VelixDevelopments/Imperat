@@ -50,7 +50,7 @@ public class TestRun {
     }
     
     private static void debugCommand(Command<TestSource> command) {
-        command.visualize();
+        command.visualizeTree();
         
         System.out.println("Debugging sub commands: ");
         System.out.println("Command '" + command.name() + "' has usages: ");

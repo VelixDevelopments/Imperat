@@ -715,4 +715,17 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         ImperatDebugger.error(owning, methodName, throwable);
     }
     
+    @Override
+    public void debug(boolean treeVisualizing) {
+        for (var cmd : commands.values()) {
+            if (treeVisualizing) {
+                cmd.visualizeTree();
+            } else {
+                ImperatDebugger.debug("Debugging command '%s'", cmd.name());
+                for (CommandUsage<S> usage : cmd.getUsages()) {
+                    ImperatDebugger.debug("   - '%s'", usage);
+                }
+            }
+        }
+    }
 }

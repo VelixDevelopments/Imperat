@@ -123,4 +123,10 @@ public non-sealed interface Imperat<S extends Source> extends
      */
     List<String> autoComplete(Command<S> command, S sender, String[] args);
     
+    /**
+     * Debugs all registered commands and their usages.
+     *
+     * @param treeVisualizing whether to display them in the form of tree
+     */
+    void debug(boolean treeVisualizing);
 }
