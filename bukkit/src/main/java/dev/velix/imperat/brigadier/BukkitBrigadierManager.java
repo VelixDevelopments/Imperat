@@ -135,7 +135,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
     }
     
     private BrigadierNode convertNode(CommandNode<BukkitSource> root, ParameterNode<?> parent, ParameterNode<?> node) {
-        BrigadierNode child = BrigadierNode.create(argument(node.getData().name(), getArgumentType(node.getData())));
+        BrigadierNode child = BrigadierNode.create(node instanceof CommandNode<?> ? literal(node.getData().name()) : argument(node.getData().name(), getArgumentType(node.getData())));
         child.withExecution(dispatcher, this)
                 .withRequirement((obj) -> {
                     var permissionResolver = dispatcher.getPermissionResolver();
@@ -194,8 +194,6 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
                 ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
                         input.startsWith("/") ? input.substring(1) : input
                 );
-                
-                System.out.println("ARGS=" + args);
                 
                 CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
                 SuggestionContext<BukkitSource> ctx = dispatcher.getContextFactory().createSuggestionContext(dispatcher, source, command, args, arg);
