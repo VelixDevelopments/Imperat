@@ -1,6 +1,8 @@
 repositories {
     mavenCentral()
-    mavenLocal()
+    maven {
+        url = "https://repo.codemc.io/repository/nms/"
+    }
     maven {
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
 
@@ -15,7 +17,7 @@ repositories {
         url = "https://repo.papermc.io/repository/maven-public/"
     }
     maven {
-        url "https://libraries.minecraft.net"
+        url = "https://libraries.minecraft.net"
     }
 }
 
@@ -37,7 +39,6 @@ dependencies {
     compileOnly kyori(KyoriModule.API)
     compileOnly kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
 
-    // The full Spigot server with no shadowing. Requires mavenLocal.
     testImplementation project(":core")
     testCompileOnly lombok()
     testAnnotationProcessor lombok()
