@@ -36,9 +36,9 @@ public final class ImperatDebugger {
     }
     
     public static void error(Class<?> owningClass, String name, @NotNull Throwable ex) {
-        ex.printStackTrace();
         if (LOGGER == null) {
             System.out.printf("Error in class '%s', in method '%s'%n", owningClass.getName(), name);
+            ex.printStackTrace();
             return;
         }
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s'", owningClass.getName(), name), ex);
