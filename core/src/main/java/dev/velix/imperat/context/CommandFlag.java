@@ -4,6 +4,7 @@ import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ import java.util.List;
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandFlag {
     
-    static CommandFlag create(String name, List<String> alias, Class<?> inputType) {
+    static CommandFlag create(String name, List<String> alias, Type inputType) {
         return new CommandFlagImpl(name, alias, inputType);
     }
     
@@ -39,7 +40,7 @@ public interface CommandFlag {
      * @return the type of input
      * from the flag
      */
-    Class<?> inputType();
+    Type inputType();
     
     default boolean hasAlias(String alias) {
         return aliases().contains(alias.toLowerCase());
@@ -58,7 +59,7 @@ public interface CommandFlag {
     }
     
     
-    record CommandFlagImpl(String name, List<String> aliases, Class<?> inputType)
+    record CommandFlagImpl(String name, List<String> aliases, Type inputType)
             implements CommandFlag {
     }
     

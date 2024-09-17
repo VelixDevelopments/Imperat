@@ -1,6 +1,8 @@
 package dev.velix.imperat.command.suggestions;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.FlagParameter;
+import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -19,7 +21,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
     private final Map<String, SuggestionResolver<S, ?>> resolversPerName;
     
     private final EnumSuggestionResolver enumSuggestionResolver = new EnumSuggestionResolver();
-    
+    private final FlagSuggestionResolver flagSuggestionResolver = new FlagSuggestionResolver();
     private SuggestionResolverRegistry() {
         super();
         resolversPerName = new HashMap<>();
@@ -30,11 +32,15 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
     }
     
     @SuppressWarnings({"unchecked"})
-    public <T> void registerResolver(SuggestionResolver<S, T> suggestionResolver) {
+    public <T> void registerResolverForType(SuggestionResolver<S, T> suggestionResolver) {
         Type resolverType = suggestionResolver.getType().getType();
         if (TypeUtility.areRelatedTypes(resolverType, Enum.class)) {
             //we don't register enum related resolvers
             enumSuggestionResolver.registerEnumResolver((Class<? extends Enum<?>>) resolverType);
+            return;
+        }
+        
+        if (TypeUtility.areRelatedTypes(resolverType, CommandFlag.class)) {
             return;
         }
         setData(resolverType, suggestionResolver);
@@ -49,6 +55,11 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         if (TypeUtility.areRelatedTypes(type, Enum.class)) {
             return enumSuggestionResolver;
         }
+        
+        if (TypeUtility.areRelatedTypes(type, CommandFlag.class)) {
+            return flagSuggestionResolver;
+        }
+        
         return getData(type).orElseGet(() -> {
             for (var resolverByType : this.getAll()) {
                 if (resolverByType.getType().isSupertypeOf(type)) {
@@ -87,6 +98,51 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
             Type type = this.getType().getType();
             return getResults(type)
                     .orElse(Collections.emptyList());
+        }
+    }
+    
+    final class FlagSuggestionResolver implements SuggestionResolver<S, CommandFlag> {
+        
+        @Override
+        public TypeWrap<CommandFlag> getType() {
+            return TypeWrap.of(CommandFlag.class);
+        }
+        
+        @Override
+        public List<String> autoComplete(SuggestionContext<S> context, CommandParameter parameterToComplete) {
+            assert parameterToComplete.isFlag();
+            FlagParameter flagParameter = parameterToComplete.asFlagParameter();
+            CompletionArg arg = context.getArgToComplete();
+            CommandFlag data = flagParameter.getFlagData();
+            
+            if (flagParameter.isSwitch()) {
+                //normal one arg
+                return autoCompleteFlagNames(data);
+            }
+            
+            //normal flag with a value next!
+            int paramPos = parameterToComplete.position();
+            int argPos = arg.index();
+            if (argPos > paramPos) {
+                //auto-complete the value for the flag
+                var flagInputResolver = getResolver(TypeWrap.of(data.inputType()).getType());
+                if (flagInputResolver == null)
+                    return List.of();
+                return flagInputResolver.autoComplete(context, parameterToComplete);
+            } else {
+                //auto-complete the flag-names
+                return autoCompleteFlagNames(data);
+            }
+            
+        }
+        
+        private List<String> autoCompleteFlagNames(CommandFlag data) {
+            List<String> results = new ArrayList<>();
+            results.add("-" + data.name());
+            for (var alias : data.aliases()) {
+                results.add("-" + alias);
+            }
+            return results;
         }
     }
     

@@ -396,7 +396,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public <T> void registerSuggestionResolver(SuggestionResolver<S, T> suggestionResolver) {
-        suggestionResolverRegistry.registerResolver(suggestionResolver);
+        suggestionResolverRegistry.registerResolverForType(suggestionResolver);
     }
     
     /**

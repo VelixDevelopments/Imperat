@@ -4,7 +4,6 @@ import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.InputParameter;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -18,10 +17,12 @@ public final class AnnotationParameterDecorator extends InputParameter implement
     private final ParameterElement element;
     
     AnnotationParameterDecorator(CommandParameter parameter, ParameterElement element) {
-        super(parameter.name(), TypeWrap.of(element.getElement().getParameterizedType()), parameter.permission(),
+        super(
+                parameter.name(), parameter.wrappedType(), parameter.permission(),
                 parameter.description(), parameter.isOptional(),
-                parameter.isFlag(), parameter.isGreedy(), parameter.getDefaultValueSupplier(),
-                parameter.getSuggestionResolver());
+                parameter.isFlag(), parameter.isGreedy(),
+                parameter.getDefaultValueSupplier(), parameter.getSuggestionResolver()
+        );
         this.parameter = parameter;
         this.element = element;
     }

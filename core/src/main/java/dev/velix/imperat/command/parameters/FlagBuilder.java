@@ -5,12 +5,13 @@ import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, CommandFlag> {
     
-    private final Class<?> inputType;
+    private final Type inputType;
     private final List<String> aliases = new ArrayList<>();
     private OptionalValueSupplier<T> defaultValueSupplier = null;
     
@@ -58,7 +59,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
             return new FlagCommandParameter(flag, permission, description, defaultValueSupplier);
         } else {
             CommandSwitch commandSwitch = CommandSwitch.create(name, aliases);
-            return new FlagCommandParameter(commandSwitch, permission, null);
+            return new FlagCommandParameter(commandSwitch, permission, OptionalValueSupplier.of(false));
         }
     }
     

@@ -477,7 +477,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         CommandParameter param =
                 AnnotationParameterDecorator.decorate(
                         CommandParameter.of(
-                                name, TypeWrap.of((Class<T>) parameter.getType()), permission, desc,
+                                name, TypeWrap.of((Class<T>) parameter.getParameterizedType()), permission, desc,
                                 optional, greedy, optionalValueSupplier, suggestionResolver
                         ), element
                 );

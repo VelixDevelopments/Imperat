@@ -9,6 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -26,7 +27,7 @@ public final class FlagCommandParameter extends InputParameter implements FlagPa
         this(flag.name(), permission, flag.aliases(), description, flag.inputType(), valueSupplier);
     }
     
-    FlagCommandParameter(String flagName, @Nullable String permission, List<String> aliases, Description description, Class<?> inputType, OptionalValueSupplier<?> supplier) {
+    FlagCommandParameter(String flagName, @Nullable String permission, List<String> aliases, Description description, Type inputType, OptionalValueSupplier<?> supplier) {
         super(flagName, TypeWrap.of(CommandFlag.class), permission, description,
                 true, true, false, null, null);
         flag = CommandFlag.create(flagName, aliases, inputType);
