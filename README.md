@@ -43,7 +43,6 @@ dependencies {
     <artifactId>Imperat-PLATFORM</artifactId>
     <version>VERSION</version>
   </dependency>
-
 </dependencies>
 
 ```
