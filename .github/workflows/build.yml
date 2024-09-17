@@ -34,3 +34,14 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew test
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: 🗑 Delete deployment
+        uses: strumwolf/delete-deployment-environment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: Maven Central
+          onlyRemoveDeployments: true
