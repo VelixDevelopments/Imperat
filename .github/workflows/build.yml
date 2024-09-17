@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: Maven Central
     permissions:
       contents: read
       packages: write
