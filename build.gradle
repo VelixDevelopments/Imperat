@@ -13,8 +13,10 @@ allprojects {
 subprojects {
     plugins.apply("java-library")
     plugins.apply("com.vanniktech.maven.publish")
+    if (project.name == "adventure" || project.name == "brigadier") return
 
     mavenPublishing {
+
         coordinates(group as String, "imperat-" + name, version as String)
 
         pom {
@@ -50,6 +52,7 @@ subprojects {
 
         publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
         signAllPublications()
+
     }
 
 }
