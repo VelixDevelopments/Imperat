@@ -50,11 +50,6 @@ dependencies {
     testImplementation project(":brigadier")
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 processTestResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

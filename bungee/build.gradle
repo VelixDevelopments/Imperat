@@ -17,11 +17,6 @@ dependencies {
     compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 static String lombok() {
     return 'org.projectlombok:lombok:1.18.34'
 }
