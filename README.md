@@ -31,7 +31,7 @@ dependencies {
 ```xml
 
 <dependency>
-  <groupId>dev.velix</groupId>
+    <groupId>dev.velix.imperat</groupId>
     <artifactId>Imperat-PLATFORM</artifactId>
     <version>VERSION</version>
 </dependency>
