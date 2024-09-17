@@ -88,12 +88,22 @@ public non-sealed interface Imperat<S extends Source> extends
     void setUsageVerifier(UsageVerifier<S> usageVerifier);
     
     /**
+     * Dispatches and executes a command using {@link Context} only
+     *
+     * @param context the context
+     * @return the usage match result
+     */
+    @NotNull UsageMatchResult dispatch(Context<S> context);
+    
+    /**
      * Dispatches and executes a command with certain raw arguments
      * using {@link Command}
      *
      * @param source   the sender/executor of this command
      * @param command  the command object to execute
      * @param rawInput the command's args input
+     *
+     * @return the usage match result
      */
     @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput);
     
@@ -103,6 +113,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param sender      the sender/executor of this command
      * @param commandName the name of the command to execute
      * @param rawInput    the command's args input
+     * @return the usage match result
      */
     UsageMatchResult dispatch(S sender, String commandName, String... rawInput);
     
@@ -112,6 +123,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param sender         the sender/executor of this command
      * @param commandName    the name of the command to execute
      * @param rawArgsOneLine the command's args input on ONE LINE
+     * @return the usage match result
      */
     UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine);
     

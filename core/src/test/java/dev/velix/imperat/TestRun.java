@@ -207,4 +207,14 @@ public class TestRun {
         debugCommand(cmd);
         Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("opt", "hi"));
     }
+    
+    @Test
+    public void testBanCmd() {
+        IMPERAT.registerCommand(new BanCommand());
+        var cmd = IMPERAT.getCommand("ban");
+        assert cmd != null;
+        debugCommand(cmd);
+        
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("ban", "mqzen"));
+    }
 }

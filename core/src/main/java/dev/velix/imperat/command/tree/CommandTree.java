@@ -172,7 +172,7 @@ public final class CommandTree<S extends Source> {
     private @NotNull UsageContextMatch contextMatchNode(
             UsageContextMatch usageContextMatch,
             ArgumentQueue input,
-            ParameterNode<?> node,
+            ParameterNode<?> currentNode,
             int depth
     ) {
         //ImperatDebugger.debug("Traversing node=%s, at depth=%s", node.format(), depth);
@@ -181,16 +181,16 @@ public final class CommandTree<S extends Source> {
         }
         
         String raw = input.get(depth);
-        boolean matchesInput = node.matchesInput(raw);
+        boolean matchesInput = currentNode.matchesInput(raw);
         if (!matchesInput) {
             return usageContextMatch;
         }
         //GO TO NODE'S children
-        usageContextMatch.append(node);
-        if (node.isLeaf()) {
+        usageContextMatch.append(currentNode);
+        if (currentNode.isLeaf()) {
             
             //not the deepest search depth (still more raw args than number of nodes)
-            usageContextMatch.setResult((depth != input.size() - 1 && !node.isGreedyParam())
+            usageContextMatch.setResult((depth != input.size() - 1 && !currentNode.isGreedyParam())
                     ? UsageMatchResult.INCOMPLETE : UsageMatchResult.COMPLETE);
             return usageContextMatch;
         } else {
@@ -199,18 +199,18 @@ public final class CommandTree<S extends Source> {
             //checking if depth is the last
             if (depth == input.size() - 1) {
                 //depth is last → check for missing required arguments
-                usageContextMatch.append(node);
+                usageContextMatch.append(currentNode);
                 
-                if (node.isOptional()) {
+                if (currentNode.isOptional()) {
                     //so if the node is optional,
                     // we go deeper into the tree, while backtracking the depth of the argument input.
-                    return searchForMatch(node, usageContextMatch, input, depth - 1);
+                    return searchForMatch(currentNode, usageContextMatch, input, depth - 1);
                 } else {
                     //ImperatDebugger.debug("Last Depth=%s, Current node= %s", depth, node.format());
                     //node is not the last, and we reached the end of the raw input length
                     //We check if there's any missing optional
                     boolean allOptional = true;
-                    for (ParameterNode<?> child : node.getChildren()) {
+                    for (ParameterNode<?> child : currentNode.getChildren()) {
                         if (!child.isOptional()) {
                             allOptional = false;
                             break;
@@ -219,8 +219,15 @@ public final class CommandTree<S extends Source> {
                     
                     //improved logic
                     if (allOptional) {
-                        //if all optional, then append the first one
-                        usageContextMatch.append(node.getChild(ParameterNode::isOptional));
+                        //if all optional, then append the all next
+                        var child = currentNode.getChild(ParameterNode::isOptional);
+                        if (child != null) {
+                            usageContextMatch.append(child);
+                            //collect optionals while depth is constant since we reached the end of raw input early
+                            if (!child.isLeaf()) {
+                                return searchForMatch(child, usageContextMatch, input, depth - 1);
+                            }
+                        }
                     }
                     
                     //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
@@ -234,7 +241,7 @@ public final class CommandTree<S extends Source> {
                 }
                 
             } else {
-                return this.searchForMatch(node, usageContextMatch, input, depth);
+                return this.searchForMatch(currentNode, usageContextMatch, input, depth);
             }
             
         }

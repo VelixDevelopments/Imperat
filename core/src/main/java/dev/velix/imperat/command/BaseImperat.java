@@ -103,12 +103,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                         source.error(
                                 "Unknown command, usage '<raw_args>' is unknown.".replace("<raw_args>", context.getArguments().join(" "))
                         );
+                        return;
                     }
-
-                    if (!(context instanceof ResolvedContext<S> resolvedContext)) {
-                        throw new IllegalCallerException("Invalid syntax exception can NOT be Thrown before resolving the context");
-                    }
-
+                    
                     var usage = resolvedContext.getDetectedUsage();
                     final int last = context.getArguments().size() - 1;
 
@@ -500,18 +497,23 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     
     
     @Override
+    public @NotNull UsageMatchResult dispatch(Context<S> context) {
+        try {
+            return handleExecution(context);
+        } catch (Throwable ex) {
+            this.handleThrowable(ex, context, BaseImperat.class, "dispatch");
+            return UsageMatchResult.UNKNOWN;
+        }
+    }
+    
+    @Override
     public @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
         
         Context<S> plainContext = getContextFactory()
                 .createContext(this, source, command, rawArguments);
         
-        try {
-            return handleExecution(source, command, plainContext);
-        } catch (Throwable ex) {
-            this.handleThrowable(ex, plainContext, BaseImperat.class, "dispatch");
-            return UsageMatchResult.UNKNOWN;
-        }
+        return dispatch(plainContext);
     }
     
     @Override
@@ -532,7 +534,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
     
-    private UsageMatchResult handleExecution(S source, Command<S> command, Context<S> context) throws ImperatException {
+    private UsageMatchResult handleExecution(Context<S> context) throws ImperatException {
+        Command<S> command = context.getCommandUsed();
+        S source = context.getSource();
+        
         if (!getPermissionResolver().hasPermission(source, command.permission())) {
             throw new PermissionDeniedException();
         }
