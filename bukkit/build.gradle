@@ -38,16 +38,6 @@ dependencies {
 
     compileOnly kyori(KyoriModule.API)
     compileOnly kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
-
-    testImplementation project(":core")
-    testCompileOnly lombok()
-    testAnnotationProcessor lombok()
-
-    testImplementation kyori(KyoriModule.API)
-    testImplementation kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
-    testCompileOnly('org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT')
-    testCompileOnly("com.mojang:brigadier:1.0.18")
-    testImplementation project(":brigadier")
 }
 
 processTestResources {
