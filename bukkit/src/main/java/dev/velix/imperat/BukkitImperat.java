@@ -25,8 +25,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,35 +97,17 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
      * @param plugin             the plugin
      * @param audienceProvider   the kyori adventure audience provider
      * @param permissionResolver the permission resolver
-     * @param override           whether to override the existing instance in the bukkit server
-     *                           or just use an already existing instance in the server loaded
-     *                           from any other plugin
      * @return the new or existing bukkit command dispatcher instance in the bukkit server
      */
     public static BukkitImperat create(
             @NotNull Plugin plugin,
             @Nullable AdventureProvider<CommandSender> audienceProvider,
-            @NotNull PermissionResolver<BukkitSource> permissionResolver,
-            boolean override
-    ) {
-        Preconditions.notNull(plugin, "plugin");
-        RegisteredServiceProvider<BukkitImperat> provider =
-                Bukkit.getServicesManager().getRegistration(BukkitImperat.class);
-        if (provider == null || override) {
-            BukkitImperat dispatcher = new BukkitImperat(plugin, audienceProvider, permissionResolver);
-            Bukkit.getServicesManager().register(BukkitImperat.class, dispatcher, plugin, ServicePriority.Normal);
-            return dispatcher;
-        }
-        return provider.getProvider();
-    }
-    
-    public static BukkitImperat create(
-            @NotNull Plugin plugin,
-            @Nullable AdventureProvider<CommandSender> audienceProvider,
             @NotNull PermissionResolver<BukkitSource> permissionResolver
     ) {
-        return create(plugin, audienceProvider, permissionResolver, false);
+        Preconditions.notNull(plugin, "plugin");
+        return new BukkitImperat(plugin, audienceProvider, permissionResolver);
     }
+    
     
     public static BukkitImperat create(Plugin plugin, @Nullable AdventureProvider<CommandSender> audienceProvider) {
         return create(plugin, audienceProvider, DEFAULT_PERMISSION_RESOLVER);
