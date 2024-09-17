@@ -37,6 +37,13 @@ dependencies {
 </dependency>
 ```
 
+## Supported platforms
+
+Imperat supports the following platforms:
+
+- Bukkit/Spigot/Paper
+- Bungeecord
+
 ## Documentation
 
 For detailed usage instructions, architecture overview, and API documentation,
