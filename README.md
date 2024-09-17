@@ -31,17 +31,21 @@ dependencies {
 
 ```xml
 
-<dependency>
-  <groupId>dev.velix</groupId>
-  <artifactId>Imperat-core</artifactId>
-  <version>VERSION</version>
-</dependency>
+<dependencies>
+  <dependency>
+    <groupId>dev.velix</groupId>
+    <artifactId>Imperat-core</artifactId>
+    <version>VERSION</version>
+  </dependency>
 
-<dependency>
-<groupId>dev.velix</groupId>
+  <dependency>
+    <groupId>dev.velix</groupId>
     <artifactId>Imperat-PLATFORM</artifactId>
     <version>VERSION</version>
-</dependency>
+  </dependency>
+
+</dependencies>
+
 ```
 
 ## Supported platforms
