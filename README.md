@@ -1,4 +1,7 @@
-
+[![Discord](https://discord.com/api/guilds/1285395980610568192/widget.png)](https://discord.gg/ZwSF6xZFdU)
+[![Maven Central](https://img.shields.io/maven-metadata/v/https/repo1.maven.org/maven2/dev/velix/imperat-core/maven-metadata.xml.svg?label=maven%20central&colorB=brightgreen)](https://search.maven.org/artifact/dev.velix/imperat-core)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build](https://github.com/VelixDevelopments/Imperat/actions/workflows/build.yml/badge.svg)](https://github.com/VelixDevelopments/Imperat/actions/workflows/build.yml)
 # Imperat
 
 **Imperat** is a high-performance, general-purpose command dispatching framework built in Java.
