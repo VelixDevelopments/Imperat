@@ -692,7 +692,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     @SuppressWarnings("unchecked")
     public void handleThrowable(
-            final Throwable throwable,
+            @NotNull final Throwable throwable,
             final Context<S> context,
             final Class<?> owning,
             final String methodName

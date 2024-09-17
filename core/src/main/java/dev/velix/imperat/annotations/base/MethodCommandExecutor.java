@@ -79,7 +79,6 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
         try {
             boundMethodCaller.call(instances);
         } catch (Exception ex) {
-            ex.printStackTrace();
             ImperatDebugger.error(methodOwner.getElement(), method.getElement().getName(), ex);
         }
         

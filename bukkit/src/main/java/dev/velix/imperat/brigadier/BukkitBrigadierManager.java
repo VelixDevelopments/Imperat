@@ -18,7 +18,6 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.ImperatDebugger;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -169,7 +168,7 @@ public final class BukkitBrigadierManager implements BrigadierManager<BukkitSour
         //ImperatDebugger.debug("Parsing parameter '%s' for cmd '%s'", parameter.name(), command.name());
         //ImperatDebugger.debug("Entering usage '%s'", CommandUsage.format(command, usage));
         if (parameter.isFlag()) {
-            ImperatDebugger.debug("Found flag parameter");
+            //ImperatDebugger.debug("Found flag parameter");
             FlagParameter flagParameter = parameter.asFlagParameter();
             CommandFlag flag = flagParameter.getFlagData();
             

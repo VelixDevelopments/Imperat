@@ -1,6 +1,7 @@
 package dev.velix.imperat.util;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -34,13 +35,13 @@ public final class ImperatDebugger {
         LOGGER.log(Level.WARNING, String.format(msg, args));
     }
     
-    public static void error(Class<?> owningClass, String name, Throwable ex) {
+    public static void error(Class<?> owningClass, String name, @NotNull Throwable ex) {
+        ex.printStackTrace();
         if (LOGGER == null) {
             System.out.printf("Error in class '%s', in method '%s'%n", owningClass.getName(), name);
             return;
         }
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s'", owningClass.getName(), name), ex);
-        ex.printStackTrace();
     }
     
     public static void error(Class<?> owningClass, String name, Throwable ex, String message) {
