@@ -4,7 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,12 +56,12 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
     }
     
     public void visualize() {
-        CommandDebugger.debug("Result => " + result.name());
+        ImperatDebugger.debug("Result => " + result.name());
         StringBuilder builder = new StringBuilder();
         for (var node : parameters) {
             builder.append(node.format()).append(" -> ");
         }
-        CommandDebugger.debug(builder.toString());
+        ImperatDebugger.debug(builder.toString());
     }
     
     

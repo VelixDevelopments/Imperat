@@ -187,7 +187,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 
             } else {
                 var usage = loadUsage(parentCmd, cmd, method);
-                //CommandDebugger.debugParameters("sub usage params: " , usage.getParameters());
+                //ImperatDebugger.debugParameters("sub usage params: " , usage.getParameters());
                 
                 if (usage != null) {
                     cmd.addUsage(usage);

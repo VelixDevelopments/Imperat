@@ -16,7 +16,7 @@ import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -155,7 +155,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     
     @Override
     public void visualize() {
-        CommandDebugger.debug("Visualizing %s's tree", this.name);
+        ImperatDebugger.debug("Visualizing %s's tree", this.name);
         visualizer.visualize();
     }
     
@@ -374,7 +374,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
         //adding the merged command usage
         
-        //CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+        //ImperatDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
         this.addUsage(combo);
         
         for (CommandUsage<S> subUsage : command.getUsages()) {
@@ -382,7 +382,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             combo = prime.mergeWithCommand(command, subUsage);
             //adding the merged command usage
             
-            //CommandDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
+            //ImperatDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
             this.addUsage(
                     combo
             );

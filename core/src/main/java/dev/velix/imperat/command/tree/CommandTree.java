@@ -175,7 +175,7 @@ public final class CommandTree<S extends Source> {
             ParameterNode<?> node,
             int depth
     ) {
-        //CommandDebugger.debug("Traversing node=%s, at depth=%s", node.format(), depth);
+        //ImperatDebugger.debug("Traversing node=%s, at depth=%s", node.format(), depth);
         if (depth >= input.size()) {
             return usageContextMatch;
         }
@@ -206,7 +206,7 @@ public final class CommandTree<S extends Source> {
                     // we go deeper into the tree, while backtracking the depth of the argument input.
                     return searchForMatch(node, usageContextMatch, input, depth - 1);
                 } else {
-                    //CommandDebugger.debug("Last Depth=%s, Current node= %s", depth, node.format());
+                    //ImperatDebugger.debug("Last Depth=%s, Current node= %s", depth, node.format());
                     //node is not the last, and we reached the end of the raw input length
                     //We check if there's any missing optional
                     boolean allOptional = true;
@@ -223,7 +223,7 @@ public final class CommandTree<S extends Source> {
                         usageContextMatch.append(node.getChild(ParameterNode::isOptional));
                     }
                     
-                    //CommandDebugger.debug("All optional after last depth ? = %s", (allOptional) );
+                    //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
                     var usage = usageContextMatch.toUsage(root.data);
                     usageContextMatch.setResult(
                             allOptional || usage != null

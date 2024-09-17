@@ -1,7 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.context.internal.SortedArgumentQueue;
-import dev.velix.imperat.util.StringTokenizer;
 import org.jetbrains.annotations.*;
 
 import java.util.Deque;
@@ -43,7 +41,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
      * @return a new, empty {@link ArgumentQueue}.
      */
     static ArgumentQueue empty() {
-        return new SortedArgumentQueue();
+        return new ArgumentQueueImpl();
     }
     
     /**

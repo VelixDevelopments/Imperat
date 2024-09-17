@@ -8,7 +8,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
 import org.jetbrains.annotations.ApiStatus;
@@ -80,7 +80,7 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
             boundMethodCaller.call(instances);
         } catch (Exception ex) {
             ex.printStackTrace();
-            CommandDebugger.error(methodOwner.getElement(), method.getElement().getName(), ex);
+            ImperatDebugger.error(methodOwner.getElement(), method.getElement().getName(), ex);
         }
         
     }

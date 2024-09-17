@@ -55,9 +55,9 @@ public final class SmartUsageResolve<S extends Source> {
             assert currentParameter != null;
             
             String currentRaw = cursor.peekRaw(raws);
-            //CommandDebugger.visualize("Current raw= '%s' at %s" , currentRaw, position.raw);
+            //ImperatDebugger.visualize("Current raw= '%s' at %s" , currentRaw, position.raw);
             if (currentRaw == null) {
-                //CommandDebugger.visualize("Filling empty optional args");
+                //ImperatDebugger.visualize("Filling empty optional args");
                 for (int i = cursor.parameter; i < parameterList.size(); i++) {
                     final CommandParameter optionalEmptyParameter = getNextParameter(parameterList);
                     //all parameters from here must be optional
@@ -99,7 +99,7 @@ public final class SmartUsageResolve<S extends Source> {
             
             CommandFlag flag = usage.getFlagFromRaw(currentRaw);
             if (flag != null && currentParameter.isFlag()) {
-                //CommandDebugger.visualize("Found flag raw '%s' at %s", currentRaw, position.raw);
+                //ImperatDebugger.visualize("Found flag raw '%s' at %s", currentRaw, position.raw);
                 //shifting raw only
                 //check if it's switch
                 if (flag instanceof CommandSwitch) {
@@ -211,7 +211,7 @@ public final class SmartUsageResolve<S extends Source> {
             resolveResult = this.getResult(resolver, context, currentRaw, currentParameter);
             cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         }
-        //CommandDebugger.visualize("Resolving required param '%s' with value '%s'", currentParameter.format(), resolveResult);
+        //ImperatDebugger.visualize("Resolving required param '%s' with value '%s'", currentParameter.format(), resolveResult);
         context.resolveArgument(command, currentRaw, cursor.parameter,
                 currentParameter, resolveResult);
     }

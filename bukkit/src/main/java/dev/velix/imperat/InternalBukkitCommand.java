@@ -2,7 +2,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
@@ -44,7 +44,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
             dispatcher.dispatch(source, label, raw);
             return true;
         } catch (Exception ex) {
-            CommandDebugger.error(InternalBukkitCommand.class, "execute", ex);
+            ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);
             return false;
         }
         

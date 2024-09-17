@@ -2,8 +2,8 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.Describable;
+import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.PermissionHolder;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -33,8 +33,8 @@ public interface CommandParameter extends PermissionHolder, Describable {
             OptionalValueSupplier<T> valueSupplier,
             SuggestionResolver<S, T> suggestionResolver
     ) {
-        Preconditions.notNull(name, "name cannot be null !");
-        Preconditions.notNull(type, "type cannot be null ");
+        Preconditions.notNull(name, "name");
+        Preconditions.notNull(type, "type");
         Preconditions.checkArgument(!TypeUtility.matches(type.getType(), Object.class), "Type cannot be `Object`");
         
         return new NormalCommandParameter(

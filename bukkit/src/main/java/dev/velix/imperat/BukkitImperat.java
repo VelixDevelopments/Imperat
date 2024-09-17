@@ -13,7 +13,7 @@ import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
 import dev.velix.imperat.resolvers.BukkitPermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.reflection.Reflections;
@@ -46,12 +46,12 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, @NotNull PermissionResolver<BukkitSource> permissionResolver) {
         super(permissionResolver);
         this.plugin = plugin;
-        CommandDebugger.setLogger(plugin.getLogger());
+        ImperatDebugger.setLogger(plugin.getLogger());
         if (BukkitUtil.KNOWN_COMMANDS != null) {
             try {
                 bukkitOGMapping = (Map<String, org.bukkit.command.Command>) BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
             } catch (IllegalAccessException e) {
-                CommandDebugger.warning("Failed to access the internal command map");
+                ImperatDebugger.warning("Failed to access the internal command map");
             }
         }
         this.addThrowableHandlers();
@@ -110,7 +110,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             @NotNull PermissionResolver<BukkitSource> permissionResolver,
             boolean override
     ) {
-        Preconditions.notNull(plugin, "plugin cannot be null !");
+        Preconditions.notNull(plugin, "plugin");
         RegisteredServiceProvider<BukkitImperat> provider =
                 Bukkit.getServicesManager().getRegistration(BukkitImperat.class);
         if (provider == null || override) {

@@ -24,7 +24,7 @@ public interface NumericComparator<N extends Number> {
     
     @SuppressWarnings("unchecked")
     static <N extends Number> NumericComparator<N> of(N value) {
-        Preconditions.notNull(value, "Value cannot be null");
+        Preconditions.notNull(value, "Value");
         return (NumericComparator<N>) COMPARATORS.getOrDefault(value.getClass(), DOUBLE_NUMERIC_COMPARATOR);
     }
     

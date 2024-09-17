@@ -25,7 +25,7 @@
 
 package dev.velix.imperat.commodore;
 
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,7 +62,7 @@ public final class CommodoreProvider {
             return new PaperCommodore(plugin);
         } catch (Throwable e) {
             //printDebugInfo(e);
-            CommandDebugger.warning("Paper not found, falling back to Reflection for brigadier");
+            ImperatDebugger.warning("Paper not found, falling back to Reflection for brigadier");
         }
         
         // try reflection impl

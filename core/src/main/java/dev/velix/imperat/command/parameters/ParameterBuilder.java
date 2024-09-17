@@ -48,7 +48,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
     }
     
     public ParameterBuilder<S, T> description(@NotNull Description description) {
-        Preconditions.notNull(description, "description cannot be null !");
+        Preconditions.notNull(description, "description");
         this.description = description;
         return this;
     }

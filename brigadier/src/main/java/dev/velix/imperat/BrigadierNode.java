@@ -6,7 +6,6 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.CommandDebugger;
 
 import java.util.function.Predicate;
 
@@ -29,7 +28,7 @@ public final class BrigadierNode {
     }
     
     public BrigadierNode addChild(BrigadierNode node) {
-        CommandDebugger.debug("Adding child '%s' of type='%s'", node.node.getName(), (node.node instanceof ArgumentCommandNode<?, ?> ? "ARGUMENT" : "LITERAL"));
+        //ImperatDebugger.debug("Adding child '%s' of type='%s'", node.node.getName(), (node.node instanceof ArgumentCommandNode<?, ?> ? "ARGUMENT" : "LITERAL"));
         this.node.addChild(node.toInternalNode());
         return this;
     }

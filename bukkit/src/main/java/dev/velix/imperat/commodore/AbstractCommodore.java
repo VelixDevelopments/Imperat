@@ -179,7 +179,7 @@ abstract class AbstractCommodore implements Commodore {
     
     @Override
     public CommandSender wrapNMSCommandSource(Object nmsCmdSource) {
-        Preconditions.notNull(nmsCmdSource, "Source from NMS cannot be null");
+        Preconditions.notNull(nmsCmdSource, "Source from NMS ");
         try {
             return (CommandSender) GET_COMMAND_SENDER_METHOD.invoke(nmsCmdSource);
         } catch (ReflectiveOperationException e) {

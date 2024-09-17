@@ -1,4 +1,4 @@
-package dev.velix.imperat.util;
+package dev.velix.imperat.context;
 
 import dev.velix.imperat.exception.TokenParseException;
 import org.jetbrains.annotations.ApiStatus;

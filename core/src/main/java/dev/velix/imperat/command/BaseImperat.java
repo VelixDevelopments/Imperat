@@ -20,7 +20,7 @@ import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -184,7 +184,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             }
             commands.put(command.name().toLowerCase(), command);
         } catch (RuntimeException ex) {
-            CommandDebugger.error(BaseImperat.class, "registerCommand(Command command)", ex);
+            ImperatDebugger.error(BaseImperat.class, "registerCommand(Command command)", ex);
             shutdownPlatform();
         }
         
@@ -233,7 +233,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public void setAnnotationParser(AnnotationParser<S> parser) {
-        Preconditions.notNull(parser, "Parser cannot be null !");
+        Preconditions.notNull(parser, "Parser");
         this.annotationParser = parser;
     }
     
@@ -460,7 +460,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public void registerGlobalPreProcessor(CommandPreProcessor<S> preProcessor) {
-        Preconditions.notNull(preProcessor, "Pre-processor cannot be null");
+        Preconditions.notNull(preProcessor, "Pre-processor");
         globalPreProcessors.add(preProcessor);
     }
     
@@ -471,7 +471,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public void registerGlobalPostProcessor(CommandPostProcessor<S> postProcessor) {
-        Preconditions.notNull(postProcessor, "Post-processor cannot be null");
+        Preconditions.notNull(postProcessor, "Post-processor");
         globalPostProcessors.add(postProcessor);
     }
     
@@ -483,7 +483,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public void registerGlobalPreProcessor(int priority, CommandPreProcessor<S> preProcessor) {
-        Preconditions.notNull(preProcessor, "Pre-processor cannot be null");
+        Preconditions.notNull(preProcessor, "Pre-processor");
         globalPreProcessors.add(priority, preProcessor);
     }
     
@@ -495,7 +495,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public void registerGlobalPostProcessor(int priority, CommandPostProcessor<S> postProcessor) {
-        Preconditions.notNull(postProcessor, "Post-processor cannot be null");
+        Preconditions.notNull(postProcessor, "Post-processor");
         globalPostProcessors.add(priority, postProcessor);
     }
     
@@ -714,7 +714,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             current = current.getCause();
         }
         
-        CommandDebugger.error(owning, methodName, throwable);
+        ImperatDebugger.error(owning, methodName, throwable);
     }
     
 }

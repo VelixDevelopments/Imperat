@@ -7,15 +7,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public final class CommandDebugger {
+public final class ImperatDebugger {
     
     private static Logger LOGGER;
     
-    private CommandDebugger() {
+    private ImperatDebugger() {
     }
     
     public static void setLogger(Logger LOGGER) {
-        CommandDebugger.LOGGER = LOGGER;
+        ImperatDebugger.LOGGER = LOGGER;
     }
     
     public static void debug(String msg, Object... args) {

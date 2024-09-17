@@ -1,6 +1,6 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.util.CommandDebugger;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.reflection.FieldAccessor;
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
@@ -21,7 +21,7 @@ public final class BukkitUtil {
         try {
             loadBukkitFieldMappings();
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
-            CommandDebugger.warning("Failed to fetch bukkit command-map, disabling plugin");
+            ImperatDebugger.warning("Failed to fetch bukkit command-map, disabling plugin");
             e.printStackTrace();
         }
     }

@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Objects;
 
 import static java.lang.reflect.Modifier.isStatic;
 
@@ -46,8 +45,10 @@ public final class Preconditions {
         return Math.max(value, min);
     }
     
-    public static <T> T notNull(T t, String err) {
-        return Objects.requireNonNull(t, err + " cannot be null!");
+    public static <T> void notNull(T t, String err) {
+        if (t == null) {
+            throw new NullPointerException(err + " cannot be null !");
+        }
     }
     
     public static void checkCallableStatic(@Nullable Object instance, @NotNull Method method) {
