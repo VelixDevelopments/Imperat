@@ -32,7 +32,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
 
-@ApiStatus.Internal
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
