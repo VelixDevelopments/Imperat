@@ -15,7 +15,7 @@ subprojects {
     plugins.apply("com.vanniktech.maven.publish")
 
     mavenPublishing {
-        coordinates(group, "imperat-" + name, version)
+        coordinates(group as String, "imperat-" + name, version as String)
 
         pom {
             name = "Imperat"
