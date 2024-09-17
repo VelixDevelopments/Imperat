@@ -57,10 +57,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         valueResolverRegistry = ValueResolverRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
         verifier = UsageVerifier.typeTolerantVerifier();
-        annotationParser = AnnotationParser.defaultParser(this);
         this.permissionResolver = permissionResolver;
         registerProcessors();
         this.regDefThrowableResolvers();
+        annotationParser = AnnotationParser.defaultParser(this);
     }
     
     private void registerProcessors() {
