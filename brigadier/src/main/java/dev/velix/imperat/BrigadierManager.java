@@ -12,14 +12,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <S> the command-source type
  */
-public interface BrigadierManager<S extends Source> {
-    
-    /**
-     * Get the dispatcher
-     *
-     * @return {@link Imperat}
-     */
-    Imperat<S> getDispatcher();
+public sealed interface BrigadierManager<S extends Source> permits BaseBrigadierManager {
     
     /**
      * Converts the original command source from brigadier
