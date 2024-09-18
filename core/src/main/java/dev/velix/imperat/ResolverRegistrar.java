@@ -116,10 +116,8 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     default @Nullable <T> SuggestionResolver<S, ?> getParameterSuggestionResolver(CommandParameter parameter) {
         SuggestionResolver<S, T> parameterSpecificResolver = parameter.getSuggestionResolver();
-        if (parameterSpecificResolver == null) {
-            System.out.println("Getting resolver for type= " + parameter.type().getTypeName());
+        if (parameterSpecificResolver == null)
             return getSuggestionResolverByType(parameter.type());
-        }
         else
             return parameterSpecificResolver;
     }
