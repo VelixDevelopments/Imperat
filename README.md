@@ -1,4 +1,4 @@
-[![Discord](https://discord.com/api/guilds/1285395980610568192/widget.png)](https://discord.gg/ZwSF6xZFdU)
+[![Discord](https://discord.com/api/guilds/1285395980610568192/widget.png)](https://discord.velix.dev/)
 [![Maven Central](https://img.shields.io/maven-metadata/v/https/repo1.maven.org/maven2/dev/velix/imperat-core/maven-metadata.xml.svg?label=maven%20central&colorB=brightgreen)](https://search.maven.org/artifact/dev.velix/imperat-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build](https://github.com/VelixDevelopments/Imperat/actions/workflows/build.yml/badge.svg)](https://github.com/VelixDevelopments/Imperat/actions/workflows/build.yml)
@@ -65,7 +65,7 @@ visit the official [Imperat Documentation](https://docs.velix.dev/Imperat/).
 ## Join the Community
 
 If you have any questions, ideas,
-or want to connect with other developers using Imperat, join our community on [Discord](https://discord.gg/MX9MkaDT5W).
+or want to connect with other developers using Imperat, join our community on [Discord](https://discord.velix.dev/).
 
 ## License
 
