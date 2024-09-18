@@ -142,7 +142,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                         cmdUsed = imperat.getCommand(context.getCommandUsed());
                     }
                     assert cmdUsed != null;
-                    context.getSource().error("No Help available for <yellow>'<command>'".replace("<command>", cmdUsed.name()));
+                    context.getSource().error("No Help available for '<command>'".replace("<command>", cmdUsed.name()));
                 }
         );
         this.setThrowableResolver(
