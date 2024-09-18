@@ -20,7 +20,6 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     PermissionResolver<S> getPermissionResolver();
     
-    
     /**
      * Registers a context resolver factory
      *
@@ -71,27 +70,24 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param resolver the resolver for this value
      * @param <T>      the type of value being resolved from context
      */
-    <T>
-    void registerContextResolver(Type type, @NotNull ContextResolver<S, T> resolver);
+    <T> void registerContextResolver(Type type, @NotNull ContextResolver<S, T> resolver);
     
     /**
      * Fetches {@link ValueResolver} for a certain value
      *
      * @param resolvingValueType the value that the resolver ends providing it from the context
-     * @param <T>                the type of value resolved from the context resolver
      * @return the value resolver of a certain type
      */
     @Nullable
-    <T> ValueResolver<S, T> getValueResolver(Type resolvingValueType);
+    ValueResolver<S, ?> getValueResolver(Type resolvingValueType);
     
     /**
      * Fetches the {@link ValueResolver} suitable for the {@link CommandParameter}
      *
      * @param commandParameter the parameter of a command's usage
-     * @param <T>              the type of value that will be resolved by {@link ValueResolver}
      * @return the value resolver for this parameter's value type
      */
-    default <T> ValueResolver<S, T> getValueResolver(CommandParameter commandParameter) {
+    default ValueResolver<S, ?> getValueResolver(CommandParameter commandParameter) {
         return getValueResolver(commandParameter.type());
     }
     

@@ -32,12 +32,11 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         return new SuggestionResolverRegistry<>();
     }
     
-    @SuppressWarnings({"unchecked"})
     public <T> void registerResolverForType(SuggestionResolver<S, T> suggestionResolver) {
         Type resolverType = suggestionResolver.getType().getType();
         if (TypeUtility.areRelatedTypes(resolverType, Enum.class)) {
             //we don't register enum related resolvers
-            enumSuggestionResolver.registerEnumResolver((Class<? extends Enum<?>>) resolverType);
+            enumSuggestionResolver.registerEnumResolver(resolverType);
             return;
         }
         
@@ -76,13 +75,14 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         return (SuggestionResolver<S, T>) resolversPerName.get(name);
     }
     
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     final class EnumSuggestionResolver implements SuggestionResolver<S, Enum> {
         private final Map<Type, List<String>> PRE_LOADED_ENUMS = new HashMap<>();
         
-        public void registerEnumResolver(Class<? extends Enum<?>> raw) {
+        public void registerEnumResolver(Type raw) {
+            Class<Enum> enumClass = (Class<Enum>) raw;
             PRE_LOADED_ENUMS.computeIfAbsent(raw,
-                    (v) -> Arrays.stream(raw.getEnumConstants()).map(Enum::name).toList());
+                    (v) -> Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).toList());
         }
         
         private Optional<List<String>> getResults(Type type) {
@@ -96,9 +96,12 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         
         @Override
         public List<String> autoComplete(SuggestionContext<S> context, CommandParameter parameterToComplete) {
-            Type type = this.getType().getType();
+            Type type = parameterToComplete.type();
             return getResults(type)
-                    .orElse(Collections.emptyList());
+                    .orElseGet(() -> {
+                        registerEnumResolver(type);
+                        return getResults(type).orElse(Collections.emptyList());
+                    });
         }
     }
     

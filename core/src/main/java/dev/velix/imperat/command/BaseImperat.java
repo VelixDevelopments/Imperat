@@ -362,7 +362,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return the context resolver of a certain type
      */
     @Override
-    public @Nullable <T> ValueResolver<S, T> getValueResolver(Type resolvingValueType) {
+    public @Nullable ValueResolver<S, ?> getValueResolver(Type resolvingValueType) {
         return valueResolverRegistry.getResolver(resolvingValueType);
     }
     

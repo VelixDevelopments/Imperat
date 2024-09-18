@@ -1,5 +1,8 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.internal.sur.Cursor;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Registry;
@@ -7,11 +10,11 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Type;
-import java.util.concurrent.TimeUnit;
 
 @ApiStatus.Internal
 public final class ValueResolverRegistry<S extends Source> extends Registry<Type, ValueResolver<S, ?>> {
     
+    private final EnumValueResolver enumValueResolver = new EnumValueResolver();
     
     private ValueResolverRegistry() {
         super();
@@ -44,7 +47,7 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
                 throw exception(raw, Double.class);
             }
         });
-        registerEnumResolver(TimeUnit.class);
+        
     }
     
     public static <S extends Source> ValueResolverRegistry<S> createDefault() {
@@ -59,16 +62,15 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
     }
     
     public <T> void registerResolver(Type type, ValueResolver<S, T> resolver) {
+        if (TypeUtility.areRelatedTypes(type, Enum.class)) return;
         setData(type, resolver);
     }
     
-    public <E extends Enum<E>> void registerEnumResolver(Class<E> enumClass) {
-        registerResolver(enumClass, new EnumValueResolver<>(enumClass));
-    }
-    
-    @SuppressWarnings("unchecked")
-    public <T> ValueResolver<S, T> getResolver(Type type) {
-        return (ValueResolver<S, T>) getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
+    public ValueResolver<S, ?> getResolver(Type type) {
+        if (TypeUtility.areRelatedTypes(type, Enum.class)) {
+            return enumValueResolver;
+        }
+        return getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
             for (var registeredType : getKeys()) {
                 if (TypeUtility.areRelatedTypes(type, registeredType)) {
                     return getData(registeredType).orElse(null);
@@ -78,4 +80,24 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
         });
     }
     
+    @ApiStatus.Internal
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    final class EnumValueResolver implements ValueResolver<S, Enum<?>> {
+        
+        
+        @Override
+        public Enum<?> resolve(
+                ExecutionContext<S> context,
+                CommandParameter parameter,
+                Cursor cursor,
+                String raw
+        ) throws ImperatException {
+            var enumType = (Class<? extends Enum>) parameter.type();
+            try {
+                return Enum.valueOf(enumType, raw.toUpperCase());
+            } catch (EnumConstantNotPresentException ex) {
+                throw new SourceException("Invalid " + enumType.getSimpleName() + " '" + raw + "'");
+            }
+        }
+    }
 }
