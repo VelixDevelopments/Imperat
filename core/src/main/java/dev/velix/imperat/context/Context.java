@@ -19,7 +19,7 @@ public interface Context<S extends Source> {
     Command<S> getCommandUsed();
     
     /**
-     * @return the command source of the command
+     * @return the {@link Source} of the command
      * @see Source
      */
     @NotNull
@@ -27,7 +27,7 @@ public interface Context<S extends Source> {
     
     
     /**
-     * @return the arguments entered by the
+     * @return the arguments entered by the {@link Source}
      * @see ArgumentQueue
      */
     ArgumentQueue getArguments();
