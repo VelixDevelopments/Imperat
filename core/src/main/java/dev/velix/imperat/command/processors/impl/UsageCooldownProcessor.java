@@ -23,7 +23,7 @@ public final class UsageCooldownProcessor<S extends Source> implements CommandPr
             Context<S> context,
             CommandUsage<S> usage
     ) throws ImperatException {
-        var source = context.getSource();
+        var source = context.source();
         if (usage.getCooldownHandler().hasCooldown(source)) {
             throw new CooldownException(
                     usage.getCooldownHandler().getUsageCooldown().orElseThrow().toMillis(),

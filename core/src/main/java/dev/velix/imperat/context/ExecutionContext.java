@@ -15,20 +15,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ExecutionContext<S extends Source> extends Context<S> {
-    
-    /**
-     * @return the command label used originally
-     */
-    Command<S> getCommandUsed();
-    
-    /**
-     * @return the arguments entered by the
-     * @see ArgumentQueue
-     */
-    @NotNull
-    ArgumentQueue getArguments();
-    
-    
+
     /**
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
@@ -63,8 +50,8 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
     }
     
     default String getRawArgument(int index) {
-        if (index >= getArguments().size() || index < 0) return null;
-        return getArguments().get(index);
+        if (index >= arguments().size() || index < 0) return null;
+        return arguments().get(index);
     }
     
     

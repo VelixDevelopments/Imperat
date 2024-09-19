@@ -109,12 +109,12 @@ public final class CommandTree<S extends Source> {
             return results;
         }
         
-        String raw = context.getArguments().getOr(depth, "");
+        String raw = context.arguments().getOr(depth, "");
         assert raw != null;
         
         if ((!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
                 || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
-                .hasPermission(context.getSource(), child.data.permission()))) {
+                .hasPermission(context.source(), child.data.permission()))) {
             return results;
         }
         

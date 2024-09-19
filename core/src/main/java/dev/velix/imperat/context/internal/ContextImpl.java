@@ -18,19 +18,18 @@ class ContextImpl<S extends Source> implements Context<S> {
     private final ArgumentQueue raw;
     
     @Override
-    public @NotNull Command<S> getCommandUsed() {
+    public @NotNull Command<S> command() {
         return commandUsed;
     }
     
     @Override
-    public @NotNull S getSource() {
+    public @NotNull S source() {
         return source;
     }
     
     @Override
-    public @NotNull ArgumentQueue getArguments() {
+    public @NotNull ArgumentQueue arguments() {
         return raw;
     }
-    
     
 }

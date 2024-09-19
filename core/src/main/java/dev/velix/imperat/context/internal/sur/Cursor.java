@@ -71,7 +71,7 @@ public final class Cursor {
     }
     
     public <S extends Source> @Nullable String nextRaw(Context<S> context) {
-        return nextRaw(context.getArguments());
+        return nextRaw(context.arguments());
     }
     
 }

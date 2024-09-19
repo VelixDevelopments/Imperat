@@ -45,8 +45,8 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     ResolvedContextImpl(Imperat<S> dispatcher,
                         Context<S> context,
                         CommandUsage<S> usage) {
-        super(dispatcher, context.getCommandUsed(), context.getSource(), context.getArguments());
-        this.lastCommand = context.getCommandUsed();
+        super(dispatcher, context.command(), context.source(), context.arguments());
+        this.lastCommand = context.command();
         this.usage = usage;
     }
     
@@ -131,7 +131,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     
     @Override
     public CommandHelp createCommandHelp() {
-        return new CommandHelp(dispatcher, getCommandUsed(), this);
+        return new CommandHelp(dispatcher, command(), this);
     }
     
     
@@ -164,10 +164,10 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      */
     @Override
     public void resolve() throws ImperatException {
-        if (getArguments().isEmpty())
+        if (arguments().isEmpty())
             return;
         
-        SmartUsageResolve<S> handler = SmartUsageResolve.create(getCommandUsed(), usage);
+        SmartUsageResolve<S> handler = SmartUsageResolve.create(command(), usage);
         handler.resolve(dispatcher, this);
         this.lastCommand = handler.getCommand();
     }

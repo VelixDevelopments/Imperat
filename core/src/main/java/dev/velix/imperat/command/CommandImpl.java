@@ -138,7 +138,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public @NotNull UsageContextMatch contextMatch(Context<S> context) {
         if (commandTree != null) {
-            return commandTree.contextMatch(context.getArguments());
+            return commandTree.contextMatch(context.arguments());
         } else {
             throw new IllegalCallerException("Cannot match a sub command in a root's execution !");
         }

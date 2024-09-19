@@ -35,7 +35,7 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
     @Override
     public List<String> autoCompleteArgument(Imperat<S> dispatcher, SuggestionContext<S> context) {
         
-        var sender = context.getSource();
+        var sender = context.source();
         var currentArg = context.getArgToComplete();
         
         final PermissionResolver<S> permResolver = dispatcher.getPermissionResolver();
@@ -44,7 +44,7 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
             return Collections.emptyList();
         }
         
-        var closestUsages = getClosestUsages(context.getArguments());
+        var closestUsages = getClosestUsages(context.arguments());
         int index = currentArg.index();
         if (index == -1)
             index = 0;

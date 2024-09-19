@@ -61,19 +61,19 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private void addThrowableHandlers() {
         this.setThrowableResolver(
                 UnknownPlayerException.class, (exception, imperat, context) ->
-                context.getSource().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
+                context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
         );
         this.setThrowableResolver(
                 UnknownOfflinePlayerException.class, (exception, imperat, context) ->
-                        context.getSource().error("A player with the name '" + exception.getName() + "' doesn't seem to exist")
+                        context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to exist")
         );
         this.setThrowableResolver(
                 UnknownWorldException.class, (exception, imperat, context) ->
-                        context.getSource().error("A world with the name '" + exception.getName() + "' doesn't seem to exist")
+                        context.source().error("A world with the name '" + exception.getName() + "' doesn't seem to exist")
         );
         this.setThrowableResolver(
                 InvalidUUIDException.class, (exception, imperat, context) ->
-                        context.getSource().error("Invalid uuid-format '" + exception.getRaw() + "'")
+                        context.source().error("Invalid uuid-format '" + exception.getRaw() + "'")
         );
     }
     
@@ -177,11 +177,11 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     
     @SuppressWarnings("deprecation")
     private void registerValueResolvers() {
-        this.registerValueResolver(Player.class, ((context, parameter, cursor, raw) -> {
+        this.registerValueResolver(Player.class, (context, parameter, cursor, raw) -> {
             final Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;
             throw new UnknownPlayerException(raw);
-        }));
+        });
         
         this.registerValueResolver(OfflinePlayer.class, (context, parameter, cursor, raw) -> {
             if (raw.length() > 16) {

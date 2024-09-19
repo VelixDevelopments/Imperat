@@ -46,7 +46,7 @@ public final class SmartUsageResolve<S extends Source> {
     public void resolve(Imperat<S> dispatcher, ResolvedContext<S> context) throws ImperatException {
         
         final List<CommandParameter> parameterList = new ArrayList<>(usage.getParameters());
-        final ArgumentQueue raws = context.getArguments().copy();
+        final ArgumentQueue raws = context.arguments().copy();
         
         final int lengthWithoutFlags = usage.getPureParameters().size();
         

@@ -74,9 +74,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                 (exception, imperat, context) -> {
                     final String msg = exception.getMessage();
                     switch (exception.getType()) {
-                        case SEVERE -> context.getSource().error(msg);
-                        case WARN -> context.getSource().warn(msg);
-                        case REPLY -> context.getSource().reply(msg);
+                        case SEVERE -> context.source().error(msg);
+                        case WARN -> context.source().warn(msg);
+                        case REPLY -> context.source().reply(msg);
                     }
                 }
         );
@@ -86,28 +86,28 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     final long lastTimeExecuted = exception.getCooldown();
                     final long timePassed = System.currentTimeMillis() - lastTimeExecuted;
                     final long remaining = exception.getDefaultCooldown() - timePassed;
-                    context.getSource().error(
+                    context.source().error(
                             "Please wait %d second(s) to execute this command again!".formatted(remaining)
                     );
                 }
         );
         this.setThrowableResolver(
                 PermissionDeniedException.class,
-                (exception, imperat, context) -> context.getSource().error("You don't have permission to use this command!")
+                (exception, imperat, context) -> context.source().error("You don't have permission to use this command!")
         );
         this.setThrowableResolver(
                 InvalidSyntaxException.class,
                 (exception, imperat, context) -> {
-                    S source = context.getSource();
+                    S source = context.source();
                     if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
                         source.error(
-                                "Unknown command, usage '<raw_args>' is unknown.".replace("<raw_args>", context.getArguments().join(" "))
+                                "Unknown command, usage '<raw_args>' is unknown.".replace("<raw_args>", context.arguments().join(" "))
                         );
                         return;
                     }
                     
                     var usage = resolvedContext.getDetectedUsage();
-                    final int last = context.getArguments().size() - 1;
+                    final int last = context.arguments().size() - 1;
 
                     final List<CommandParameter> params = new ArrayList<>(usage.getParameters())
                             .stream()
@@ -128,7 +128,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                             "Missing required arguments '<required_args>'\n Full syntax: '<usage>'"
                                     .replace("<required_args>", builder.toString())
                                     .replace("<usage>", imperat.commandPrefix()
-                                            + CommandUsage.format(resolvedContext.getCommandUsed(), usage))
+                                            + CommandUsage.format(resolvedContext.command(), usage))
                     );
                 }
         );
@@ -139,10 +139,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     if (context instanceof ResolvedContext<S> resolvedContext) {
                         cmdUsed = resolvedContext.getLastUsedCommand();
                     } else {
-                        cmdUsed = imperat.getCommand(context.getCommandUsed());
+                        cmdUsed = imperat.getCommand(context.command());
                     }
                     assert cmdUsed != null;
-                    context.getSource().error("No Help available for '<command>'".replace("<command>", cmdUsed.name()));
+                    context.source().error("No Help available for '<command>'".replace("<command>", cmdUsed.name()));
                 }
         );
         this.setThrowableResolver(
@@ -154,7 +154,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     }
                     
                     int page = resolvedContext.getArgumentOr("page", 1);
-                    context.getSource().error("Page '<page>' doesn't exist!".replace("<page>", String.valueOf(page)));
+                    context.source().error("Page '<page>' doesn't exist!".replace("<page>", String.valueOf(page)));
                 }
         );
     }
@@ -535,14 +535,14 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
     
     private UsageMatchResult handleExecution(Context<S> context) throws ImperatException {
-        Command<S> command = context.getCommandUsed();
-        S source = context.getSource();
+        Command<S> command = context.command();
+        S source = context.source();
         
         if (!getPermissionResolver().hasPermission(source, command.permission())) {
             throw new PermissionDeniedException();
         }
         
-        if (context.getArguments().isEmpty()) {
+        if (context.arguments().isEmpty()) {
             CommandUsage<S> defaultUsage = command.getDefaultUsage();
             executeUsage(command, source, context, defaultUsage);
             return UsageMatchResult.INCOMPLETE;

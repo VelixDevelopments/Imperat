@@ -16,21 +16,19 @@ public interface Context<S extends Source> {
     /**
      * @return The {@link Command} owning this context.
      */
-    Command<S> getCommandUsed();
+    Command<S> command();
     
     /**
      * @return the {@link Source} of the command
      * @see Source
      */
     @NotNull
-    S getSource();
-    
+    S source();
     
     /**
      * @return the arguments entered by the {@link Source}
      * @see ArgumentQueue
      */
-    ArgumentQueue getArguments();
-    
-    
+    ArgumentQueue arguments();
+
 }

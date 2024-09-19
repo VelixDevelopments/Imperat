@@ -22,7 +22,7 @@ public final class UsagePermissionProcessor<S extends Source> implements Command
             Context<S> context,
             CommandUsage<S> usage
     ) throws ImperatException {
-        var source = context.getSource();
+        var source = context.source();
         
         if (!imperat.getPermissionResolver().hasUsagePermission(source, usage)) {
             throw new PermissionDeniedException();
