@@ -37,7 +37,7 @@ public interface CommandParameter extends PermissionHolder, Describable {
         Preconditions.notNull(type, "type");
         Preconditions.checkArgument(!TypeUtility.matches(type.getType(), Object.class), "Type cannot be `Object`");
         
-        return new NormalCommandParameter(
+        return new NormalCommandParameter<S>(
                 name, type, permission, description, optional,
                 greedy, valueSupplier, suggestionResolver
         );

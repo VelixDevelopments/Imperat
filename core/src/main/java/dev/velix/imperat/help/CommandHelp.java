@@ -62,7 +62,7 @@ public final class CommandHelp {
         Command<S> command = (Command<S>) this.command;
         PaginatedText<CommandUsage<S>> text = new PaginatedText<>(template.syntaxesPerPage());
         
-        for (CommandUsage<S> usage : command.getUsages()) {
+        for (CommandUsage<S> usage : command.usages()) {
             if (usage.isDefault()) continue;
             text.add(usage);
         }
@@ -91,14 +91,14 @@ public final class CommandHelp {
         }
         Command<S> command = (Command<S>) this.command;
         
-        final int maxUsages = command.getUsages().size();
+        final int maxUsages = command.usages().size();
         if (maxUsages == 0) {
             throw new NoHelpException();
         }
         
         source.reply(template.getHeader(command));
         template.getUsagesDisplayer().display(command, source,
-                template.getUsageFormatter(), new ArrayList<>(command.getUsages()));
+                template.getUsageFormatter(), new ArrayList<>(command.usages()));
         
         source.reply(template.getFooter(command));
     }

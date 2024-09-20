@@ -4,6 +4,7 @@ import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.InputParameter;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -11,7 +12,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 
-public final class AnnotationParameterDecorator extends InputParameter implements AnnotatedParameter {
+public final class AnnotationParameterDecorator<S extends Source> extends InputParameter<S> implements AnnotatedParameter {
     
     private final CommandParameter parameter;
     private final ParameterElement element;
@@ -27,14 +28,13 @@ public final class AnnotationParameterDecorator extends InputParameter implement
         this.element = element;
     }
     
-    public static AnnotationParameterDecorator decorate(
+    public static <S extends Source> AnnotationParameterDecorator<S> decorate(
             CommandParameter parameter,
             ParameterElement element
     ) {
-        return new AnnotationParameterDecorator(parameter, element);
+        return new AnnotationParameterDecorator<>(parameter, element);
     }
-    
-    
+
     /**
      * Get the instance of specific annotation
      *

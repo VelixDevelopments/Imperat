@@ -1,13 +1,14 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Description;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.StringUtils;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.Nullable;
 
-class NormalCommandParameter extends InputParameter {
+class NormalCommandParameter<S extends Source> extends InputParameter<S> {
     
     NormalCommandParameter(String name,
                            TypeWrap<?> type,

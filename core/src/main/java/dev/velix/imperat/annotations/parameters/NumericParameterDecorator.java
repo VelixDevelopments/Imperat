@@ -4,9 +4,10 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.InputParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.Nullable;
 
-public final class NumericParameterDecorator extends InputParameter implements NumericParameter {
+public final class NumericParameterDecorator<S extends Source> extends InputParameter<S> implements NumericParameter {
     
     private final CommandParameter parameter;
     private final NumericRange range;
@@ -22,8 +23,8 @@ public final class NumericParameterDecorator extends InputParameter implements N
         this.range = range;
     }
     
-    public static NumericParameterDecorator decorate(CommandParameter parameter, NumericRange range) {
-        return new NumericParameterDecorator(parameter, range);
+    public static <S extends Source> NumericParameterDecorator<S> decorate(CommandParameter parameter, NumericRange range) {
+        return new NumericParameterDecorator<>(parameter, range);
     }
     
     /**

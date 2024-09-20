@@ -53,13 +53,12 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     
     @Override
     public FlagParameter build() {
-        
         if (inputType != null) {
             CommandFlag flag = CommandFlag.create(name, aliases, inputType);
-            return new FlagCommandParameter(flag, permission, description, defaultValueSupplier);
+            return new FlagCommandParameter<>(flag, permission, description, defaultValueSupplier);
         } else {
             CommandSwitch commandSwitch = CommandSwitch.create(name, aliases);
-            return new FlagCommandParameter(commandSwitch, permission, OptionalValueSupplier.of(false));
+            return new FlagCommandParameter<>(commandSwitch, permission, OptionalValueSupplier.of(false));
         }
     }
     

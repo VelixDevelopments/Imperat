@@ -209,7 +209,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @return All {@link CommandUsage} that were registered
      * to this command by the user
      */
-    Collection<? extends CommandUsage<S>> getUsages();
+    Collection<? extends CommandUsage<S>> usages();
     
     /**
      * @param predicate the criteria
@@ -222,19 +222,19 @@ public interface Command<S extends Source> extends CommandParameter {
      * parameters
      */
     @NotNull
-    CommandUsage<S> getMainUsage();
+    CommandUsage<S> mainUsage();
     
     /**
      * @return Returns {@link AutoCompleter}
      * that handles all auto-completes for this command
      */
-    AutoCompleter<S> getAutoCompleter();
+    AutoCompleter<S> autoCompleter();
     
     /**
      * @return the parent command of this sub-command
      */
     @Nullable
-    Command<S> getParent();
+    Command<S> parent();
     
     /**
      * sets the parent command
@@ -312,7 +312,7 @@ public interface Command<S extends Source> extends CommandParameter {
     Collection<? extends Command<S>> getSubCommands();
     
     default @Nullable CommandUsage<S> getUsage(Predicate<CommandUsage<S>> usagePredicate) {
-        for (var usage : getUsages()) {
+        for (var usage : usages()) {
             if (usagePredicate.test(usage)) {
                 return usage;
             }
@@ -321,7 +321,7 @@ public interface Command<S extends Source> extends CommandParameter {
     }
     
     default boolean hasParent() {
-        return getParent() != null;
+        return parent() != null;
     }
     
     default boolean isSubCommand() {

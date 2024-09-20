@@ -40,7 +40,7 @@ public final class CommandTree<S extends Source> {
     
     //parsing usages part
     public void parseCommandUsages() {
-        for (CommandUsage<S> usage : root.data.getUsages()) {
+        for (CommandUsage<S> usage : root.data.usages()) {
             parseUsage(usage);
         }
     }

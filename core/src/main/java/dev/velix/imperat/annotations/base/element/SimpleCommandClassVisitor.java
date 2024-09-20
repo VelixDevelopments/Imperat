@@ -338,10 +338,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         final StrictParameterList mainUsageParameters = new StrictParameterList();
         Command<S> currentParent = parentCmd;
         while (currentParent != null) {
-            currentParent.getMainUsage().getParameters()
+            currentParent.mainUsage().getParameters()
                     .forEach(mainUsageParameters::addFirst);
             
-            currentParent = currentParent.getParent();
+            currentParent = currentParent.parent();
         }
         
         LinkedList<CommandParameter> total = new LinkedList<>(mainUsageParameters);

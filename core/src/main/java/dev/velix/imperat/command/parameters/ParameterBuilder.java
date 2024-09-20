@@ -28,7 +28,6 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
         this.greedy = greedy;
     }
     
-    
     ParameterBuilder(String name, TypeWrap<T> type, boolean optional) {
         this(name, type, optional, false);
     }

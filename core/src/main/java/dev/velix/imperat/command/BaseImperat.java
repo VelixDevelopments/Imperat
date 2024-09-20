@@ -167,11 +167,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public void registerCommand(Command<S> command) {
         try {
-            for (CommandUsage<S> usage : command.getUsages()) {
+            for (CommandUsage<S> usage : command.usages()) {
                 if (!verifier.verify(usage))
                     throw new InvalidCommandUsageException(command, usage);
                 
-                for (CommandUsage<S> other : command.getUsages()) {
+                for (CommandUsage<S> other : command.usages()) {
                     if (other.equals(usage)) continue;
                     if (verifier.areAmbiguous(usage, other))
                         throw new AmbiguousUsageAdditionException(command, usage, other);
@@ -642,7 +642,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public List<String> autoComplete(Command<S> command, S source, String[] args) {
-        return command.getAutoCompleter().autoComplete(this, source, args);
+        return command.autoCompleter().autoComplete(this, source, args);
     }
     
     /**
@@ -727,7 +727,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                 cmd.visualizeTree();
             } else {
                 ImperatDebugger.debug("Debugging command '%s'", cmd.name());
-                for (CommandUsage<S> usage : cmd.getUsages()) {
+                for (CommandUsage<S> usage : cmd.usages()) {
                     ImperatDebugger.debug("   - '%s'", usage);
                 }
             }

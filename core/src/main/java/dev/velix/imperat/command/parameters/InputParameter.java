@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class InputParameter implements CommandParameter {
+public abstract class InputParameter<S extends Source> implements CommandParameter {
     
-    protected Command<?> parentCommand;
+    protected Command<S> parentCommand;
     protected final String name;
     protected final TypeWrap<?> typeWrap;
     protected final boolean optional, flag, greedy;
@@ -55,13 +55,13 @@ public abstract class InputParameter implements CommandParameter {
     }
     
     @Override
-    public @Nullable Command<?> parent() {
+    public @Nullable Command<S> parent() {
         return parentCommand;
     }
     
     @Override
     public void parent(@NotNull Command<?> parentCommand) {
-        this.parentCommand = parentCommand;
+        this.parentCommand = (Command<S>) parentCommand;
     }
     
     

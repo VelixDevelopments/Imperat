@@ -73,12 +73,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public String name() {
         return name;
     }
-    
-    @Override
-    public @Nullable Command<?> parent() {
-        return parent;
-    }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public void parent(Command<?> parentCommand) {
@@ -311,7 +306,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * to this command by the user
      */
     @Override
-    public Collection<? extends CommandUsage<S>> getUsages() {
+    public Collection<? extends CommandUsage<S>> usages() {
         return usages.asSortedSet();
     }
     
@@ -326,7 +321,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * parameters
      */
     @Override
-    public @NotNull CommandUsage<S> getMainUsage() {
+    public @NotNull CommandUsage<S> mainUsage() {
         return Optional.ofNullable(mainUsage)
                 .orElse(defaultUsage);
     }
@@ -336,7 +331,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * that handles all auto-completes for this command
      */
     @Override
-    public AutoCompleter<S> getAutoCompleter() {
+    public AutoCompleter<S> autoCompleter() {
         return autoCompleter;
     }
     
@@ -344,7 +339,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return Whether this command is a sub command or not
      */
     @Override
-    public @Nullable Command<S> getParent() {
+    public @Nullable Command<S> parent() {
         return parent;
     }
     
@@ -374,16 +369,16 @@ final class CommandImpl<S extends Source> implements Command<S> {
         command.setParent(this);
         registerSubCommand(command);
         
-        final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
+        final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : mainUsage();
         
-        CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
+        CommandUsage<S> combo = prime.mergeWithCommand(command, command.mainUsage());
         //adding the merged command usage
         
         //ImperatDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
         this.addUsage(combo);
         
-        for (CommandUsage<S> subUsage : command.getUsages()) {
-            if (subUsage.equals(command.getMainUsage())) continue;
+        for (CommandUsage<S> subUsage : command.usages()) {
+            if (subUsage.equals(command.mainUsage())) continue;
             combo = prime.mergeWithCommand(command, subUsage);
             //adding the merged command usage
             
@@ -425,7 +420,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         if (attachDirectly) {
             position = position() + 1;
         } else {
-            CommandUsage<S> main = getMainUsage();
+            CommandUsage<S> main = mainUsage();
             position = this.position() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
         }
         
