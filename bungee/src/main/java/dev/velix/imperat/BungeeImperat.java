@@ -7,6 +7,7 @@ import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -27,6 +28,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     ) {
         super(permissionResolver);
         this.plugin = plugin;
+        ImperatDebugger.setLogger(plugin.getLogger());
         this.adventureProvider = loadAdventureProvider(adventureProvider);
     }
     
