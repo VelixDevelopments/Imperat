@@ -18,7 +18,7 @@ public class GroupSuggestionResolver implements SuggestionResolver<TestSource, G
     @Override
     public List<String> autoComplete(
             SuggestionContext<TestSource> context,
-            CommandParameter parameterToComplete
+            CommandParameter<TestSource> parameterToComplete
     ) {
         return GroupRegistry.getInstance().getAll()
                 .stream().map(Group::name)

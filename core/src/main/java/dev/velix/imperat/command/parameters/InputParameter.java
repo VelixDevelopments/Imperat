@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class InputParameter<S extends Source> implements CommandParameter {
+public abstract class InputParameter<S extends Source> implements CommandParameter<S> {
     
     protected Command<S> parentCommand;
     protected final String name;
@@ -60,8 +60,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     }
     
     @Override
-    public void parent(@NotNull Command<?> parentCommand) {
-        this.parentCommand = (Command<S>) parentCommand;
+    public void parent(@NotNull Command<S> parentCommand) {
+        this.parentCommand = parentCommand;
     }
     
     
@@ -136,8 +136,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      * @return the parameter as a flag
      */
     @Override
-    public FlagParameter asFlagParameter() {
-        return (FlagParameter) this;
+    public FlagParameter<S> asFlagParameter() {
+        return (FlagParameter<S>) this;
     }
     
     /**
@@ -155,7 +155,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     }
     
     @Override
-    public <S extends Source> Command<S> asCommand() {
+    public Command<S> asCommand() {
         throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
     }
     
@@ -168,7 +168,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      */
     @Override
     @SuppressWarnings("unchecked")
-    public @Nullable <S extends Source, T> SuggestionResolver<S, T> getSuggestionResolver() {
+    public @Nullable <T> SuggestionResolver<S, T> getSuggestionResolver() {
         return (SuggestionResolver<S, T>) suggestionResolver;
     }
     
@@ -181,9 +181,9 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public void describe(final Description description) {
         this.description = description;
     }
-    
+
     @Override
-    public boolean similarTo(CommandParameter parameter) {
+    public boolean similarTo(CommandParameter<?> parameter) {
         return this.name.equalsIgnoreCase(parameter.name())
                 && TypeUtility.matches(typeWrap.getType(), parameter.wrappedType().getType());
     }
@@ -191,7 +191,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof InputParameter that)) return false;
+        if (!(o instanceof InputParameter<?> that)) return false;
         return Objects.equals(parentCommand, that.parentCommand)
                 && Objects.equals(name, that.name)
                 && Objects.equals(typeWrap, that.typeWrap);

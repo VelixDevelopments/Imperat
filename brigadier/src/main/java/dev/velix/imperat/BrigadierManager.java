@@ -47,7 +47,7 @@ public sealed interface BrigadierManager<S extends Source> permits BaseBrigadier
      * @return the {@link ArgumentType} for the {@link CommandParameter}
      */
     @NotNull
-    ArgumentType<?> getArgumentType(CommandParameter parameter);
+    ArgumentType<?> getArgumentType(CommandParameter<S> parameter);
     
     /**
      * Parses the registered {@link Command} to brigadier node

@@ -52,14 +52,13 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
         AutoCompleteList results = new AutoCompleteList();
         for (CommandUsage<S> usage : closestUsages) {
             if (index < 0 || index >= usage.getMaxLength()) continue;
-            CommandParameter parameter = usage.getParameters().get(index);
+            CommandParameter<S> parameter = usage.getParameters().get(index);
             if (!command.isIgnoringACPerms() && !permResolver.hasPermission(sender, parameter.permission())) {
                 continue;
             }
             if (parameter.isCommand()) {
                 results.add(parameter.name());
-                parameter.asCommand().aliases()
-                        .forEach(results::add);
+                parameter.asCommand().aliases().forEach(results::add);
             } else {
                 SuggestionResolver<S, ?> resolver = dispatcher.getParameterSuggestionResolver(parameter);
                 if (resolver != null) {
@@ -80,7 +79,7 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
                 .findUsages((usage) -> {
                     if (queue.size() >= usage.getMaxLength()) {
                         for (int i = 0; i < usage.getMaxLength(); i++) {
-                            CommandParameter parameter = usage.getParameters().get(i);
+                            CommandParameter<S> parameter = usage.getParameters().get(i);
                             if (!parameter.isCommand()) continue;
                             
                             if (i >= queue.size()) return false;

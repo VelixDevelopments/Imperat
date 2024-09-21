@@ -12,12 +12,12 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 
-public final class AnnotationParameterDecorator<S extends Source> extends InputParameter<S> implements AnnotatedParameter {
+public final class AnnotationParameterDecorator<S extends Source> extends InputParameter<S> implements AnnotatedParameter<S> {
     
-    private final CommandParameter parameter;
+    private final CommandParameter<S> parameter;
     private final ParameterElement element;
     
-    AnnotationParameterDecorator(CommandParameter parameter, ParameterElement element) {
+    AnnotationParameterDecorator(CommandParameter<S> parameter, ParameterElement element) {
         super(
                 parameter.name(), parameter.wrappedType(), parameter.permission(),
                 parameter.description(), parameter.isOptional(),
@@ -29,7 +29,7 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
     }
     
     public static <S extends Source> AnnotationParameterDecorator<S> decorate(
-            CommandParameter parameter,
+            CommandParameter<S> parameter,
             ParameterElement element
     ) {
         return new AnnotationParameterDecorator<>(parameter, element);

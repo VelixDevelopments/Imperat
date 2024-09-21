@@ -49,7 +49,7 @@ final class TypeTolerantVerifier<S extends Source> extends SimpleVerifier<S> {
         return noDiff;
     }
     
-    private boolean areSimilarParameters(CommandParameter param1, CommandParameter param2) {
+    private boolean areSimilarParameters(CommandParameter<S> param1, CommandParameter<S> param2) {
         if (!param1.isCommand() && !param2.isCommand()) {
             return TypeUtility.matches(param1.type(), param2.type());
         } else if (param1.isCommand() && param2.isCommand()) {

@@ -37,9 +37,9 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     private final CommandUsage<S> usage;
     private final FlagRegistry flagRegistry = new FlagRegistry();
     //per command/subcommand because the class 'Command' can be also treated as a sub command
-    private final Map<Command<S>, Map<String, ResolvedArgument>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
+    private final Map<Command<S>, Map<String, ResolvedArgument<S>>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
     //all resolved arguments EXCEPT for subcommands and flags.
-    private final Map<String, ResolvedArgument> allResolvedArgs = new LinkedHashMap<>();
+    private final Map<String, ResolvedArgument<S>> allResolvedArgs = new LinkedHashMap<>();
     private Command<S> lastCommand;
     
     ResolvedContextImpl(Imperat<S> dispatcher,
@@ -59,8 +59,8 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * @return the argument resolved from raw into a value
      */
     @Override
-    public @Nullable ResolvedArgument getResolvedArgument(Command<S> command, String name) {
-        Map<String, ResolvedArgument> resolvedArgs = resolvedArgumentsPerCommand.get(command);
+    public @Nullable ResolvedArgument<S> getResolvedArgument(Command<S> command, String name) {
+        Map<String, ResolvedArgument<S>> resolvedArgs = resolvedArgumentsPerCommand.get(command);
         if (resolvedArgs == null) return null;
         
         return resolvedArgs.get(name);
@@ -71,8 +71,8 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * @return the command/subcommand's resolved args in as a new array-list
      */
     @Override
-    public List<ResolvedArgument> getResolvedArguments(Command<S> command) {
-        Map<String, ResolvedArgument> argMap = resolvedArgumentsPerCommand.get(command);
+    public List<ResolvedArgument<S>> getResolvedArguments(Command<S> command) {
+        Map<String, ResolvedArgument<S>> argMap = resolvedArgumentsPerCommand.get(command);
         if (argMap == null) return Collections.emptyList();
         return new ArrayList<>(argMap.values());
     }
@@ -90,7 +90,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
     @Override
-    public Collection<? extends ResolvedArgument> getResolvedArguments() {
+    public Collection<? extends ResolvedArgument<S>> getResolvedArguments() {
         return allResolvedArgs.values();
     }
     
@@ -104,7 +104,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getArgument(String name) {
-        ResolvedArgument argument = allResolvedArgs.get(name);
+        ResolvedArgument<S> argument = allResolvedArgs.get(name);
         if (argument == null) return null;
         return (T) argument.value();
     }
@@ -177,24 +177,24 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     public <T> void resolveArgument(Command<S> command,
                                     @Nullable String raw,
                                     int index,
-                                    CommandParameter parameter,
+                                    CommandParameter<S> parameter,
                                     @Nullable T value) throws ImperatException {
         
         if (value != null && TypeUtility.isNumericType(value.getClass())
-                && parameter instanceof NumericParameter numericParameter
+                && parameter instanceof NumericParameter<S> numericParameter
                 && numericParameter.hasRange()
                 && !numericParameter.matchesRange((Number) value)) {
             
             NumericRange range = numericParameter.getRange();
             throw new NumberOutOfRangeException(numericParameter, (Number) value, range);
         }
-        final ResolvedArgument argument = new ResolvedArgument(raw, parameter, index, value);
+        final ResolvedArgument<S> argument = new ResolvedArgument<>(raw, parameter, index, value);
         resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
             if (existingResolvedArgs != null) {
                 existingResolvedArgs.put(parameter.name(), argument);
                 return existingResolvedArgs;
             }
-            Map<String, ResolvedArgument> args = new LinkedHashMap<>();
+            Map<String, ResolvedArgument<S>> args = new LinkedHashMap<>();
             args.put(parameter.name(), argument);
             return args;
         });

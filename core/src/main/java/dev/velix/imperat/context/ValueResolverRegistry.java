@@ -88,8 +88,8 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
         @Override
         public Enum<?> resolve(
                 ExecutionContext<S> context,
-                CommandParameter parameter,
-                Cursor cursor,
+                CommandParameter<S> parameter,
+                Cursor<S> cursor,
                 String raw
         ) throws ImperatException {
             var enumType = (Class<? extends Enum>) parameter.type();

@@ -23,7 +23,7 @@ public final class SmartUsageResolve<S extends Source> {
     @Getter
     private final Command<S> mainCommand;
     private final CommandUsage<S> usage;
-    private final Cursor cursor = new Cursor(0, 0);
+    private final Cursor<S> cursor = new Cursor<>(0, 0);
     @Getter
     private Command<S> command;
     
@@ -41,17 +41,15 @@ public final class SmartUsageResolve<S extends Source> {
     ) {
         return new SmartUsageResolve<>(command, usage);
     }
-    
-    @SuppressWarnings("unchecked")
+
     public void resolve(Imperat<S> dispatcher, ResolvedContext<S> context) throws ImperatException {
-        
-        final List<CommandParameter> parameterList = new ArrayList<>(usage.getParameters());
+        final List<CommandParameter<S>> parameterList = new ArrayList<>(usage.getParameters());
         final ArgumentQueue raws = context.arguments().copy();
         
         final int lengthWithoutFlags = usage.getPureParameters().size();
         
         while (cursor.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
-            CommandParameter currentParameter = cursor.peekParameter(parameterList);
+            CommandParameter<S> currentParameter = cursor.peekParameter(parameterList);
             assert currentParameter != null;
             
             String currentRaw = cursor.peekRaw(raws);
@@ -59,7 +57,7 @@ public final class SmartUsageResolve<S extends Source> {
             if (currentRaw == null) {
                 //ImperatDebugger.visualize("Filling empty optional args");
                 for (int i = cursor.parameter; i < parameterList.size(); i++) {
-                    final CommandParameter optionalEmptyParameter = getNextParameter(parameterList);
+                    final CommandParameter<S> optionalEmptyParameter = getNextParameter(parameterList);
                     //all parameters from here must be optional
                     //adding the absent optional args with their default values
                     
@@ -85,7 +83,6 @@ public final class SmartUsageResolve<S extends Source> {
             if (currentParameter.isCommand()) {
                 
                 //visualize("Found command %s at %s", currentParameter.getName(), position.parameter);
-                @SuppressWarnings("unchecked")
                 Command<S> parameterSubCmd = (Command<S>) currentParameter;
                 if (parameterSubCmd.hasName(currentRaw)) {
                     this.command = parameterSubCmd;
@@ -173,8 +170,8 @@ public final class SmartUsageResolve<S extends Source> {
         
     }
     
-    private @NotNull CommandParameter getNextParameter(List<CommandParameter> parameterList) throws SourceException {
-        final CommandParameter optionalEmptyParameter = cursor.peekParameter(parameterList);
+    private @NotNull CommandParameter<S> getNextParameter(List<CommandParameter<S>> parameterList) throws SourceException {
+        final CommandParameter<S> optionalEmptyParameter = cursor.peekParameter(parameterList);
         assert optionalEmptyParameter != null;
         //visualize("Parameter at %s = %s", i, parameter.format(command));
         if (!optionalEmptyParameter.isOptional()) {
@@ -189,7 +186,7 @@ public final class SmartUsageResolve<S extends Source> {
             ValueResolver<S, ?> resolver,
             ArgumentQueue raws,
             String currentRaw,
-            CommandParameter currentParameter
+            CommandParameter<S> currentParameter
     ) throws ImperatException {
         Object resolveResult;
         if (currentParameter.isGreedy()) {
@@ -220,9 +217,9 @@ public final class SmartUsageResolve<S extends Source> {
             ResolvedContext<S> context,
             ValueResolver<S, ?> resolver,
             ArgumentQueue raws,
-            List<CommandParameter> parameterList,
+            List<CommandParameter<S>> parameterList,
             String currentRaw,
-            CommandParameter currentParameter,
+            CommandParameter<S> currentParameter,
             int lengthWithoutFlags
     ) throws ImperatException {
         if (raws.size() < lengthWithoutFlags) {
@@ -233,7 +230,7 @@ public final class SmartUsageResolve<S extends Source> {
             if (!cursor.isLast(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
                 
                 if (diff > 1) {
-                    CommandParameter nextParam = getNextParam(cursor.parameter + 1, parameterList, (param) -> !param.isOptional());
+                    CommandParameter<S> nextParam = getNextParam(cursor.parameter + 1, parameterList, (param) -> !param.isOptional());
                     if (nextParam == null) {
                         cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
                         return;
@@ -288,13 +285,13 @@ public final class SmartUsageResolve<S extends Source> {
         
     }
     
-    private <T> T getResult(ValueResolver<S, T> resolver, ExecutionContext<S> context, String raw, CommandParameter currentParameter) throws ImperatException {
+    private <T> T getResult(ValueResolver<S, T> resolver, ExecutionContext<S> context, String raw, CommandParameter<S> currentParameter) throws ImperatException {
         return resolver.resolve(context, currentParameter, cursor, raw);
     }
     
     
-    private @Nullable CommandParameter getNextParam(int start, List<CommandParameter> parameters,
-                                                    Predicate<CommandParameter> parameterCondition) {
+    private @Nullable CommandParameter<S> getNextParam(int start, List<CommandParameter<S>> parameters,
+                                                    Predicate<CommandParameter<S>> parameterCondition) {
         if (start >= parameters.size()) return null;
         for (int i = start; i < parameters.size(); i++) {
             if (parameterCondition.test(parameters.get(i)))
@@ -304,7 +301,7 @@ public final class SmartUsageResolve<S extends Source> {
         return null;
     }
     
-    private @Nullable <T> T getDefaultValue(Context<S> context, CommandParameter parameter) {
+    private @Nullable <T> T getDefaultValue(Context<S> context, CommandParameter<S> parameter) {
         OptionalValueSupplier<T> optionalSupplier = parameter.getDefaultValueSupplier();
         T defaultValue = null;
         if (optionalSupplier != null) {

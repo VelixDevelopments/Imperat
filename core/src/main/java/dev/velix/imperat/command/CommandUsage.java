@@ -28,7 +28,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     static <S extends Source> String format(Command<S> command, CommandUsage<S> usage) {
         StringBuilder builder = new StringBuilder(command.name()).append(' ');
         int i = 0;
-        for (CommandParameter parameter : usage.getParameters()) {
+        for (CommandParameter<S> parameter : usage.getParameters()) {
             builder.append(parameter.format());
             if (i != usage.getParameters().size() - 1) {
                 builder.append(' ');
@@ -64,26 +64,26 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      *
      * @param params the parameters to add
      */
-    void addParameters(CommandParameter... params);
+    void addParameters(CommandParameter<S>... params);
     
     /**
      * Adds parameters to the usage
      *
      * @param params the parameters to add
      */
-    void addParameters(List<CommandParameter> params);
+    void addParameters(List<CommandParameter<S>> params);
     
     /**
      * @return the parameters for this usage
      * @see CommandParameter
      */
-    List<CommandParameter> getParameters();
+    List<CommandParameter<S>> getParameters();
     
     /**
      * @return the parameters without flags
      * @see CommandParameter
      */
-    List<CommandParameter> getPureParameters();
+    List<CommandParameter<S>> getPureParameters();
     
     /**
      * Fetches the parameter at the index
@@ -91,7 +91,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @param index the index of the parameter
      * @return the parameter at specified index/position
      */
-    @Nullable CommandParameter getParameter(int index);
+    @Nullable CommandParameter<S> getParameter(int index);
     
     /**
      * @return the execution for this usage
@@ -114,9 +114,9 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @return the merged command usage!
      */
     default CommandUsage<S> mergeWithCommand(Command<S> subCommand, CommandUsage<S> usage) {
-        List<CommandParameter> comboParams = new ArrayList<>(this.getParameters());
+        List<CommandParameter<S>> comboParams = new ArrayList<>(this.getParameters());
         comboParams.add(subCommand);
-        for (CommandParameter param : usage.getParameters()) {
+        for (CommandParameter<S> param : usage.getParameters()) {
             if (this.hasParameters((p) -> p.equals(param))) {
                 continue;
             }
@@ -159,14 +159,14 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @return whether this usage has atLeast on {@link CommandParameter} with specific condition
      * or not
      */
-    boolean hasParameters(Predicate<CommandParameter> parameterPredicate);
+    boolean hasParameters(Predicate<CommandParameter<S>> parameterPredicate);
     
     /**
      * @param parameterPredicate the condition
      * @return the parameter to get using a condition
      */
     @Nullable
-    CommandParameter getParameter(Predicate<CommandParameter> parameterPredicate);
+    CommandParameter<S> getParameter(Predicate<CommandParameter<S>> parameterPredicate);
     
     /**
      * @return the cool down handler {@link CooldownHandler}
@@ -216,7 +216,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @param parameters the parameters
      * @return whether this usage has this sequence of parameters
      */
-    boolean hasParameters(List<CommandParameter> parameters);
+    boolean hasParameters(List<CommandParameter<S>> parameters);
     
     default int size() {
         return getParameters().size();
@@ -226,7 +226,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     @SuppressWarnings("all")
     class Builder<S extends Source> {
         
-        private final List<CommandParameter> parameters = new ArrayList<>();
+        private final List<CommandParameter<S>> parameters = new ArrayList<>();
         private CommandExecution<S> execution;
         private String description = "N/A";
         private String permission = null;
@@ -269,19 +269,19 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
             return this;
         }
         
-        public final Builder<S> parameters(ParameterBuilder<?, ?>... builders) {
+        public final Builder<S> parameters(ParameterBuilder<S, ?>... builders) {
             return parameters(
                     Arrays.stream(builders).map(ParameterBuilder::build).toList()
             );
         }
         
-        public Builder<S> parameters(CommandParameter... params) {
+        public Builder<S> parameters(CommandParameter<S>... params) {
             return parameters(List.of(params));
         }
         
-        public Builder<S> parameters(List<CommandParameter> params) {
+        public Builder<S> parameters(List<CommandParameter<S>> params) {
             for (int i = 0; i < params.size(); i++) {
-                CommandParameter parameter = params.get(i);
+                CommandParameter<S> parameter = params.get(i);
                 if (!parameter.isCommand()) {
                     parameter.position(i);
                 }

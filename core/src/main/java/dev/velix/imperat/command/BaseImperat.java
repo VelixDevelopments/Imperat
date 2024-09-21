@@ -109,14 +109,14 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     var usage = resolvedContext.getDetectedUsage();
                     final int last = context.arguments().size() - 1;
 
-                    final List<CommandParameter> params = new ArrayList<>(usage.getParameters())
+                    final List<CommandParameter<S>> params = new ArrayList<>(usage.getParameters())
                             .stream()
                             .filter((param) -> !param.isOptional() && param.position() > last)
                             .toList();
 
                     final StringBuilder builder = new StringBuilder();
                     for (int i = 0; i < params.size(); i++) {
-                        CommandParameter param = params.get(i);
+                        CommandParameter<S> param = params.get(i);
                         assert !param.isOptional();
                         builder.append(param.format());
                         if (i != params.size() - 1)
@@ -548,7 +548,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return UsageMatchResult.INCOMPLETE;
         }
         
-        UsageContextMatch searchResult = command.contextMatch(context);
+        UsageContextMatch<S> searchResult = command.contextMatch(context);
         //executing usage
         
         CommandUsage<S> usage = searchResult.toUsage(command);
@@ -558,7 +558,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         else if (searchResult.result() == UsageMatchResult.INCOMPLETE) {
             var lastParameter = searchResult.getLastParameter();
             if (lastParameter.isCommand()) {
-                executeUsage(command, source, context, lastParameter.<S>asCommand().getDefaultUsage());
+                executeUsage(command, source, context, lastParameter.asCommand().getDefaultUsage());
             } else {
                 if (usage != null)
                     executeUsage(command, source, context, usage);

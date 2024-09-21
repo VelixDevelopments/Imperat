@@ -35,7 +35,7 @@ public sealed interface CommandRegistrar<S extends Source> permits Imperat {
      * @param parameter the parameter
      * @return the command from the parameter's name
      */
-    default @Nullable Command<S> getCommand(final CommandParameter parameter) {
+    default @Nullable Command<S> getCommand(final CommandParameter<S> parameter) {
         return getCommand(parameter.name());
     }
     

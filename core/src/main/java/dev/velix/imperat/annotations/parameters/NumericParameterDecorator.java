@@ -7,12 +7,12 @@ import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.Nullable;
 
-public final class NumericParameterDecorator<S extends Source> extends InputParameter<S> implements NumericParameter {
+public final class NumericParameterDecorator<S extends Source> extends InputParameter<S> implements NumericParameter<S> {
     
-    private final CommandParameter parameter;
+    private final CommandParameter<S> parameter;
     private final NumericRange range;
     
-    NumericParameterDecorator(CommandParameter parameter, NumericRange range) {
+    NumericParameterDecorator(CommandParameter<S> parameter, NumericRange range) {
         super(
                 parameter.name(), parameter.wrappedType(), parameter.permission(),
                 parameter.description(), parameter.isOptional(), parameter.isFlag(),
@@ -23,7 +23,7 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
         this.range = range;
     }
     
-    public static <S extends Source> NumericParameterDecorator<S> decorate(CommandParameter parameter, NumericRange range) {
+    public static <S extends Source> NumericParameterDecorator<S> decorate(CommandParameter<S> parameter, NumericRange range) {
         return new NumericParameterDecorator<>(parameter, range);
     }
     

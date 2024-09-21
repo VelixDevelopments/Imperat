@@ -31,7 +31,7 @@ import java.util.function.Predicate;
  * @param <S> the command sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface Command<S extends Source> extends CommandParameter {
+public interface Command<S extends Source> extends CommandParameter<S> {
     
     static <S extends Source> Command.Builder<S> create(String name) {
         return create(null, name);
@@ -118,7 +118,7 @@ public interface Command<S extends Source> extends CommandParameter {
      *
      * @param context the context of the execution
      */
-    @NotNull UsageContextMatch contextMatch(Context<S> context);
+    @NotNull UsageContextMatch<S> contextMatch(Context<S> context);
     
     /**
      * Traverses and searches in {@link CommandTree} , visiting every node
@@ -203,7 +203,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @param parameters the parameters
      * @return the usage from its sequence of parameters, null if no usage has such a sequence of parameters
      */
-    @Nullable CommandUsage<S> getUsage(List<CommandParameter> parameters);
+    @Nullable CommandUsage<S> getUsage(List<CommandParameter<S>> parameters);
     
     /**
      * @return All {@link CommandUsage} that were registered
@@ -363,7 +363,7 @@ public interface Command<S extends Source> extends CommandParameter {
     
     @Override
     @SuppressWarnings("all")
-    default <S extends Source> Command<S> asCommand() {
+    default Command<S> asCommand() {
         return (Command<S>) this;
     }
     
@@ -405,7 +405,7 @@ public interface Command<S extends Source> extends CommandParameter {
      * @param helpExecution the help execution
      */
     void addHelpCommand(Imperat<S> dispatcher,
-                        List<CommandParameter> params,
+                        List<CommandParameter<S>> params,
                         CommandExecution<S> helpExecution);
     
     

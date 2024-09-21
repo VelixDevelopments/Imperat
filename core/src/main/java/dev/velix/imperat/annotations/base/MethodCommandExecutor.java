@@ -22,14 +22,14 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
     private final ClassElement methodOwner;
     private final MethodElement method;
     private final MethodCaller.BoundMethodCaller boundMethodCaller;
-    private final List<CommandParameter> fullParameters;
+    private final List<CommandParameter<S>> fullParameters;
     //private final Help helpAnnotation;
     
     
     private MethodCommandExecutor(
             Imperat<S> dispatcher,
             MethodElement method,
-            List<CommandParameter> fullParameters
+            List<CommandParameter<S>> fullParameters
     ) {
         
         try {
@@ -50,7 +50,7 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
     public static <S extends Source> MethodCommandExecutor<S> of(
             Imperat<S> imperat,
             MethodElement method,
-            List<CommandParameter> fullParameters
+            List<CommandParameter<S>> fullParameters
     ) {
         return new MethodCommandExecutor<>(imperat, method, fullParameters);
     }

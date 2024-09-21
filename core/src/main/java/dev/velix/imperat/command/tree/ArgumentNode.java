@@ -3,13 +3,14 @@ package dev.velix.imperat.command.tree;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.types.ParameterType;
 import dev.velix.imperat.command.parameters.types.ParameterTypes;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
-public final class ArgumentNode extends ParameterNode<CommandParameter> {
+public final class ArgumentNode<S extends Source> extends ParameterNode<S, CommandParameter<S>> {
     
-    ArgumentNode(@NotNull CommandParameter data) {
+    ArgumentNode(@NotNull CommandParameter<S> data) {
         super(data);
     }
     

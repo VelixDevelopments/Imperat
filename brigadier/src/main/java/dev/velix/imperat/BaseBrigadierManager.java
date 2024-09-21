@@ -59,7 +59,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         return bRoot;
     }
     
-    private BrigadierNode convertNode(CommandNode<S> root, ParameterNode<?> parent, ParameterNode<?> node) {
+    private BrigadierNode convertNode(CommandNode<S> root, ParameterNode<?, ?> parent, ParameterNode<S, ?> node) {
         BrigadierNode child = BrigadierNode.create(node instanceof CommandNode<?> ? literal(node.getData().name()) : argument(node.getData().name(), getArgumentType(node.getData())));
         child.withExecution(dispatcher, this)
                 .withRequirement((obj) -> {
@@ -95,7 +95,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
     
     private @NotNull SuggestionProvider<Object> createSuggestionProvider(
             Command<S> command,
-            CommandParameter parameter
+            CommandParameter<S> parameter
     ) {
         SuggestionResolver<S, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
         ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", suggestionResolver == null, parameter.format());
@@ -144,7 +144,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         resolvers.add((param) -> {
             if (param.isFlag()) {
                 
-                FlagParameter flagParameter = param.asFlagParameter();
+                FlagParameter<S> flagParameter = (FlagParameter<S>) param.asFlagParameter();
                 if (flagParameter.isSwitch()) {
                     return argumentTypeResolver.resolveArgType(flagParameter);
                 }
@@ -162,7 +162,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
     }
     
     @Override
-    public @NotNull ArgumentType<?> getArgumentType(CommandParameter parameter) {
+    public @NotNull ArgumentType<?> getArgumentType(CommandParameter<S> parameter) {
         for (var resolver : resolvers) {
             var resolved = resolver.resolveArgType(parameter);
             if (resolved != null)
@@ -172,7 +172,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
     }
     
     
-    private StringArgumentType getStringArgType(CommandParameter parameter) {
+    private StringArgumentType getStringArgType(CommandParameter<S> parameter) {
         if (parameter.isGreedy()) return StringArgumentType.greedyString();
         else return StringArgumentType.string();
     }

@@ -24,8 +24,8 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 @ApiStatus.Internal
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     
-    private final List<CommandParameter> parameters = new ArrayList<>();
-    private final List<CommandParameter> pureParameters = new ArrayList<>();
+    private final List<CommandParameter<S>> parameters = new ArrayList<>();
+    private final List<CommandParameter<S>> pureParameters = new ArrayList<>();
     private final CommandExecution<S> execution;
     private final boolean help;
     private String permission = null;
@@ -124,7 +124,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @param params the parameters to add
      */
     @Override
-    public void addParameters(CommandParameter... params) {
+    public void addParameters(CommandParameter<S>... params) {
         Collections.addAll(parameters, params);
         for (var param : params) {
             if (param.isFlag()) continue;
@@ -138,7 +138,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @param params the parameters to add
      */
     @Override
-    public void addParameters(List<CommandParameter> params) {
+    public void addParameters(List<CommandParameter<S>> params) {
         for (var p : params) {
             parameters.add(p);
             if (p.isFlag()) continue;
@@ -151,17 +151,17 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @see CommandParameter
      */
     @Override
-    public List<CommandParameter> getParameters() {
+    public List<CommandParameter<S>> getParameters() {
         return parameters;
     }
     
     @Override
-    public List<CommandParameter> getPureParameters() {
+    public List<CommandParameter<S>> getPureParameters() {
         return pureParameters;
     }
     
     @Override
-    public @Nullable CommandParameter getParameter(int index) {
+    public @Nullable CommandParameter<S> getParameter(int index) {
         if (index < 0 || index >= parameters.size()) return null;
         return parameters.get(index);
     }
@@ -216,8 +216,8 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * or not
      */
     @Override
-    public boolean hasParameters(Predicate<CommandParameter> parameterPredicate) {
-        for (CommandParameter parameter : getParameters())
+    public boolean hasParameters(Predicate<CommandParameter<S>> parameterPredicate) {
+        for (CommandParameter<S> parameter : getParameters())
             if (parameterPredicate.test(parameter))
                 return true;
         
@@ -229,8 +229,8 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @return the parameter to get using a condition
      */
     @Override
-    public @Nullable CommandParameter getParameter(Predicate<CommandParameter> parameterPredicate) {
-        for (CommandParameter parameter : getParameters()) {
+    public @Nullable CommandParameter<S> getParameter(Predicate<CommandParameter<S>> parameterPredicate) {
+        for (CommandParameter<S> parameter : getParameters()) {
             if (parameterPredicate.test(parameter))
                 return parameter;
         }
@@ -311,7 +311,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     }
     
     @Override
-    public boolean hasParameters(List<CommandParameter> parameters) {
+    public boolean hasParameters(List<CommandParameter<S>> parameters) {
         return this.parameters.equals(parameters);
     }
     

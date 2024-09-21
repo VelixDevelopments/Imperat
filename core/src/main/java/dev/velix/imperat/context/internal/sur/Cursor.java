@@ -13,7 +13,7 @@ import java.util.function.IntUnaryOperator;
 
 @Data
 @AllArgsConstructor
-public final class Cursor {
+public final class Cursor<S extends Source> {
     
     int parameter, raw;
     
@@ -32,12 +32,13 @@ public final class Cursor {
         shift(target, operation.operator);
     }
     
-    public boolean canContinue(ShiftTarget target,
-                               List<CommandParameter> parameters,
-                               ArgumentQueue queue) {
+    public boolean canContinue(
+            ShiftTarget target,
+            List<CommandParameter<S>> parameters,
+            ArgumentQueue queue
+    ) {
         return target.canContinue(this, parameters.size(), queue.size());
     }
-    
     
     public boolean isLast(ShiftTarget shiftTarget, int maxParams, int maxRaws) {
         if (shiftTarget == ShiftTarget.PARAMETER_ONLY)
@@ -48,12 +49,12 @@ public final class Cursor {
             return parameter == maxParams - 1 && raw == maxRaws - 1;
     }
     
-    public boolean isLast(ShiftTarget shiftTarget, List<CommandParameter> params, ArgumentQueue raws) {
+    public boolean isLast(ShiftTarget shiftTarget, List<CommandParameter<S>> params, ArgumentQueue raws) {
         return isLast(shiftTarget, params.size(), raws.size());
     }
     
     
-    public @Nullable CommandParameter peekParameter(List<CommandParameter> parameters) {
+    public @Nullable CommandParameter<S> peekParameter(List<CommandParameter<S>> parameters) {
         return parameters.get(this.parameter);
     }
     
@@ -70,7 +71,7 @@ public final class Cursor {
         return peekRaw(queue);
     }
     
-    public <S extends Source> @Nullable String nextRaw(Context<S> context) {
+    public @Nullable String nextRaw(Context<S> context) {
         return nextRaw(context.arguments());
     }
     

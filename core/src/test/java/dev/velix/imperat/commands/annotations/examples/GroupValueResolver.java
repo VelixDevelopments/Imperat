@@ -13,8 +13,8 @@ public final class GroupValueResolver implements ValueResolver<TestSource, Group
     @Override
     public Group resolve(
             ExecutionContext<TestSource> context,
-            CommandParameter parameter,
-            Cursor cursor,
+            CommandParameter<TestSource> parameter,
+            Cursor<TestSource> cursor,
             String raw
     ) throws ImperatException {
         /*if (sender.isConsole()) {

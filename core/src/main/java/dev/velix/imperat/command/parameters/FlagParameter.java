@@ -2,9 +2,10 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.CommandSwitch;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 
-public interface FlagParameter extends CommandParameter {
+public interface FlagParameter<S extends Source> extends CommandParameter<S> {
     
     /**
      * @return The flag's data

@@ -1,6 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.context.internal.ResolvedFlag;
 import dev.velix.imperat.exception.ImperatException;

@@ -74,7 +74,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
         return suggest(SuggestionResolver.plain(type, suggestions));
     }
     
-    public CommandParameter build() {
+    public CommandParameter<S> build() {
         return CommandParameter.of(
                 name, type, permission, description,
                 optional, greedy, valueSupplier,

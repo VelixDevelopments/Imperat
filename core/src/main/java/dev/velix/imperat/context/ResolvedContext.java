@@ -42,13 +42,13 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * @return the argument resolved from raw into a value
      */
     @Nullable
-    ResolvedArgument getResolvedArgument(Command<S> command, String name);
+    ResolvedArgument<S> getResolvedArgument(Command<S> command, String name);
     
     /**
      * @param command the command/subcommand with certain args
      * @return the command/subcommand's resolved args
      */
-    List<ResolvedArgument> getResolvedArguments(Command<S> command);
+    List<ResolvedArgument<S>> getResolvedArguments(Command<S> command);
     
     /**
      * @return all {@link Command} that have been used in this context
@@ -60,7 +60,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
-    Collection<? extends ResolvedArgument> getResolvedArguments();
+    Collection<? extends ResolvedArgument<S>> getResolvedArguments();
     
     /**
      * Resolves the raw input and
@@ -77,7 +77,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
             Command<S> command,
             @Nullable String raw,
             int index,
-            CommandParameter parameter,
+            CommandParameter<S> parameter,
             @Nullable T value
     ) throws ImperatException;
     

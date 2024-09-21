@@ -1,12 +1,14 @@
 package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.context.Source;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
-public final class StrictParameterList extends LinkedList<CommandParameter> {
+public final class StrictParameterList<S extends Source> extends LinkedList<CommandParameter<S>> {
     
     @Override
-    public void addFirst(CommandParameter parameter) {
+    public void addFirst(CommandParameter<S> parameter) {
         if (containsSimilar(parameter))
             return;
         
@@ -14,7 +16,7 @@ public final class StrictParameterList extends LinkedList<CommandParameter> {
     }
     
     @Override
-    public boolean add(CommandParameter parameter) {
+    public boolean add(CommandParameter<S> parameter) {
         
         if (containsSimilar(parameter))
             return false;
@@ -23,7 +25,7 @@ public final class StrictParameterList extends LinkedList<CommandParameter> {
     }
     
     @Override
-    public boolean addAll(Collection<? extends CommandParameter> c) {
+    public boolean addAll(Collection<? extends CommandParameter<S>> c) {
         for (var e : c) {
             add(e);
         }
@@ -33,11 +35,11 @@ public final class StrictParameterList extends LinkedList<CommandParameter> {
     
     @Override
     public boolean contains(Object o) {
-        if (!(o instanceof CommandParameter parameter)) return false;
+        if (!(o instanceof CommandParameter<?> parameter)) return false;
         return super.contains(parameter) || containsSimilar(parameter);
     }
     
-    public boolean containsSimilar(CommandParameter parameter) {
+    public boolean containsSimilar(CommandParameter<?> parameter) {
         for (var p : this) {
             if (p.similarTo(parameter))
                 return true;

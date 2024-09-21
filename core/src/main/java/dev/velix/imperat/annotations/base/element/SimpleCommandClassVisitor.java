@@ -327,15 +327,15 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         
     }
     
-    private Pair<List<CommandParameter>, List<CommandParameter>> loadParameters(
+    private Pair<List<CommandParameter<S>>, List<CommandParameter<S>>> loadParameters(
             @NotNull MethodElement method,
             @Nullable Command<S> parentCmd
     ) {
         
-        LinkedList<CommandParameter> toLoad = new LinkedList<>();
+        LinkedList<CommandParameter<S>> toLoad = new LinkedList<>();
         
         //WHATEVER HAPPENS, NEVER MESS WITH THIS IMPLEMENTATION OR ELSE I WILL FUCKING DESTROY YOU
-        final StrictParameterList mainUsageParameters = new StrictParameterList();
+        final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
         Command<S> currentParent = parentCmd;
         while (currentParent != null) {
             currentParent.mainUsage().getParameters()
@@ -344,7 +344,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             currentParent = currentParent.parent();
         }
         
-        LinkedList<CommandParameter> total = new LinkedList<>(mainUsageParameters);
+        LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
         LinkedList<ParameterElement> parameterElements = new LinkedList<>(method.getParameters());
         
         while (!parameterElements.isEmpty()) {
@@ -363,9 +363,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 continue;
             }
             
-            CommandParameter commandParameter = loadParameter(parameterElement);
+            CommandParameter<S> commandParameter = loadParameter(parameterElement);
             
-            CommandParameter mainParameter = mainUsageParameters.peek();
+            CommandParameter<S> mainParameter = mainUsageParameters.peek();
             if (mainParameter == null) {
                 toLoad.add(commandParameter);
                 total.add(commandParameter);
@@ -389,7 +389,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
     
     @SuppressWarnings("unchecked")
-    private <T> CommandParameter loadParameter(
+    private <T> CommandParameter<S> loadParameter(
             @NotNull ParseElement<?> paramElement
     ) {
         
@@ -474,7 +474,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             );
         }
         
-        CommandParameter param =
+        CommandParameter<S> param =
                 AnnotationParameterDecorator.decorate(
                         CommandParameter.of(
                                 name, TypeWrap.of((Class<T>) parameter.getParameterizedType()), permission, desc,

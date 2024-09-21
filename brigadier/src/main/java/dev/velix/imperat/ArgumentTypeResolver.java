@@ -49,5 +49,5 @@ public interface ArgumentTypeResolver {
      * @return The argument type
      */
     @Nullable
-    ArgumentType<?> resolveArgType(@NotNull CommandParameter parameter);
+    ArgumentType<?> resolveArgType(@NotNull CommandParameter<?> parameter);
 }

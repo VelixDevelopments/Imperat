@@ -34,7 +34,7 @@ public final class AnnotationHelper {
     
     public static <S extends Source> Object[] loadParameterInstances(
             Imperat<S> dispatcher,
-            List<CommandParameter> fullParameters,
+            List<CommandParameter<S>> fullParameters,
             S source,
             ExecutionContext<S> context,
             MethodElement method
@@ -63,7 +63,7 @@ public final class AnnotationHelper {
                 continue;
             }
             
-            CommandParameter parameter = getUsageParam(fullParameters, p);
+            CommandParameter<S> parameter = getUsageParam(fullParameters, p);
             if (parameter == null)
                 continue;
             
@@ -79,7 +79,7 @@ public final class AnnotationHelper {
         return paramsInstances;
     }
     
-    private static @Nullable CommandParameter getUsageParam(List<? extends CommandParameter> params, int index) {
+    private static <S extends Source> @Nullable CommandParameter<S> getUsageParam(List<? extends CommandParameter<S>> params, int index) {
         if (index < 0 || index >= params.size()) return null;
         return params.get(index);
     }

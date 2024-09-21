@@ -26,7 +26,7 @@ public final class TestCommands {
                             .usage(CommandUsage.<TestSource>builder()
                                     .parameters(
                                             CommandParameter.requiredText("permission"),
-                                            CommandParameter.optionalBoolean("value").defaultValue(false)
+                                            CommandParameter.<TestSource>optionalBoolean("value").defaultValue(false)
                                     )
                                     .execute((source, ctx) -> {
                                         TestRun.USAGE_EXECUTED = true;
@@ -54,10 +54,11 @@ public final class TestCommands {
                     )
                     .build()
             )
-            .subCommand(Command.<TestSource>create("help").usage(
-                    CommandUsage.<TestSource>builder()
+            .subCommand(Command.<TestSource>create("help")
+                    .usage(
+                            CommandUsage.<TestSource>builder()
                                     .parameters(
-                                            CommandParameter.optionalInt("page").defaultValue(1)
+                                            CommandParameter.<TestSource>optionalInt("page").defaultValue(1)
                                     )
                                     .execute((source, context) -> {
                                         Integer page = context.getArgument("page");

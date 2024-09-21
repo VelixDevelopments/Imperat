@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 @ApiStatus.Internal
-public final class FlagCommandParameter<S extends Source> extends InputParameter<S> implements FlagParameter {
+public final class FlagCommandParameter<S extends Source> extends InputParameter<S> implements FlagParameter<S> {
     
     private final CommandFlag flag;
     private final OptionalValueSupplier<?> supplier;

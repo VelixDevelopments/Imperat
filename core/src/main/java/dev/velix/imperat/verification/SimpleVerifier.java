@@ -23,7 +23,7 @@ class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
         
         int greedyCount = 0;
         for (int i = 0; i < usage.getMaxLength(); i++) {
-            CommandParameter param = usage.getParameters().get(i);
+            CommandParameter<S> param = usage.getParameters().get(i);
             if (param.isGreedy()) greedyCount++;
         }
         
@@ -31,11 +31,11 @@ class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
             return false;
         }
         
-        CommandParameter firstParameter = usage.getParameters().get(0);
+        CommandParameter<S> firstParameter = usage.getParameters().get(0);
         boolean firstArgIsRequired = firstParameter != null
                 && !firstParameter.isOptional();
         
-        CommandParameter greedyParam = usage.getParameter(CommandParameter::isGreedy);
+        CommandParameter<S> greedyParam = usage.getParameter(CommandParameter::isGreedy);
         if (greedyParam == null)
             return firstArgIsRequired;
         
@@ -50,10 +50,10 @@ class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
                 && secondUsage.hasParamType(Command.class);
         
         if (sameLength && hasSubCommands) {
-            List<CommandParameter> parameterList1 = new ArrayList<>(firstUsage.getParameters());
+            List<CommandParameter<S>> parameterList1 = new ArrayList<>(firstUsage.getParameters());
             parameterList1.removeIf((param) -> !param.isCommand());
             
-            List<CommandParameter> parameterList2 = new ArrayList<>(secondUsage.getParameters());
+            List<CommandParameter<S>> parameterList2 = new ArrayList<>(secondUsage.getParameters());
             parameterList2.removeIf((param) -> !param.isCommand());
             
             return parameterList1.equals(parameterList2);
@@ -62,8 +62,8 @@ class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
         if (sameLength) {
             final int capacity = firstUsage.getMinLength();
             for (int i = 0; i < capacity; i++) {
-                CommandParameter firstUsageParameter = firstUsage.getParameter(i);
-                CommandParameter secondUsageParameter = secondUsage.getParameter(i);
+                CommandParameter<S> firstUsageParameter = firstUsage.getParameter(i);
+                CommandParameter<S> secondUsageParameter = secondUsage.getParameter(i);
                 if (firstUsageParameter == null || secondUsageParameter == null) break;
                 
                 if ((firstUsageParameter.isCommand() && !secondUsageParameter.isCommand())

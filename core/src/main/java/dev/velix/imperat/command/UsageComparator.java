@@ -22,8 +22,8 @@ final class UsageComparator implements Comparator<CommandUsage<?>> {
         if (firstUsage.size() == secondUsage.size()) {
             
             for (int i = 0; i < firstUsage.size(); i++) {
-                CommandParameter p1 = firstUsage.getParameter(i);
-                CommandParameter p2 = secondUsage.getParameter(i);
+                CommandParameter<?> p1 = firstUsage.getParameter(i);
+                CommandParameter<?> p2 = secondUsage.getParameter(i);
                 if (p1 == null || p2 == null) break;
                 if (p1.isCommand() && !p2.isCommand()) {
                     return -1;

@@ -46,7 +46,7 @@ public final class CommandTree<S extends Source> {
     }
     
     public void parseUsage(CommandUsage<S> usage) {
-        List<CommandParameter> parameters = usage.getParameters();
+        List<CommandParameter<S>> parameters = usage.getParameters();
         if (parameters == null || parameters.isEmpty()) {
             return;
         }
@@ -54,32 +54,32 @@ public final class CommandTree<S extends Source> {
     }
     
     private void addParametersToTree(
-            ParameterNode<?> currentNode,
-            List<CommandParameter> parameters,
+            ParameterNode<S, ?> currentNode,
+            List<CommandParameter<S>> parameters,
             int index
     ) {
         if (index >= parameters.size()) {
             return;
         }
         
-        CommandParameter param = parameters.get(index);
-        ParameterNode<?> childNode = getChildNode(currentNode, param);
+        CommandParameter<S> param = parameters.get(index);
+        ParameterNode<S,?> childNode = getChildNode(currentNode, param);
         // Recursively add the remaining parameters to the child node
         addParametersToTree(childNode, parameters, index + 1);
     }
     
-    private ParameterNode<?> getChildNode(ParameterNode<?> parent, CommandParameter param) {
-        for (ParameterNode<?> child : parent.getChildren()) {
+    private ParameterNode<S, ?> getChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
+        for (ParameterNode<S, ?> child : parent.getChildren()) {
             if (child.data.name().equalsIgnoreCase(param.name())
                     && TypeUtility.matches(child.data.type(), param.type())) {
                 return child;
             }
         }
-        ParameterNode<?> newNode;
+        ParameterNode<S, ?> newNode;
         if (param.isCommand())
             newNode = new CommandNode<>(param.asCommand());
         else
-            newNode = new ArgumentNode(param);
+            newNode = new ArgumentNode<>(param);
         
         parent.addChild(newNode);
         return newNode;
@@ -100,7 +100,7 @@ public final class CommandTree<S extends Source> {
     private List<String> collectNodeCompletions(
             Imperat<S> imperat,
             SuggestionContext<S> context,
-            ParameterNode<?> child,
+            ParameterNode<S, ?> child,
             int depth,
             final int maxDepth,
             List<String> results
@@ -137,7 +137,7 @@ public final class CommandTree<S extends Source> {
     private void addChildResults(
             Imperat<S> imperat,
             SuggestionContext<S> context,
-            ParameterNode<?> node,
+            ParameterNode<S, ?> node,
             List<String> results
     ) {
         if (node instanceof CommandNode<?>) {
@@ -153,14 +153,14 @@ public final class CommandTree<S extends Source> {
     
     
     //context matching part
-    public @NotNull UsageContextMatch contextMatch(
+    public @NotNull UsageContextMatch<S> contextMatch(
             ArgumentQueue input
     ) {
         
         int depth = 0;
         
-        for (ParameterNode<?> child : root.getChildren()) {
-            UsageContextMatch nodeTraversing = UsageContextMatch.of();
+        for (ParameterNode<S, ?> child : root.getChildren()) {
+            UsageContextMatch<S> nodeTraversing = UsageContextMatch.of();
             var traverse = contextMatchNode(nodeTraversing, input, child, depth);
             if (traverse.result() != UsageMatchResult.UNKNOWN) {
                 return traverse;
@@ -171,10 +171,10 @@ public final class CommandTree<S extends Source> {
         return UsageContextMatch.of();
     }
     
-    private @NotNull UsageContextMatch contextMatchNode(
-            UsageContextMatch usageContextMatch,
+    private @NotNull UsageContextMatch<S> contextMatchNode(
+            UsageContextMatch<S> usageContextMatch,
             ArgumentQueue input,
-            ParameterNode<?> currentNode,
+            ParameterNode<S, ?> currentNode,
             int depth
     ) {
         //ImperatDebugger.debug("Traversing node=%s, at depth=%s", node.format(), depth);
@@ -212,7 +212,7 @@ public final class CommandTree<S extends Source> {
                     //node is not the last, and we reached the end of the raw input length
                     //We check if there's any missing optional
                     boolean allOptional = true;
-                    for (ParameterNode<?> child : currentNode.getChildren()) {
+                    for (ParameterNode<S, ?> child : currentNode.getChildren()) {
                         if (!child.isOptional()) {
                             allOptional = false;
                             break;
@@ -250,13 +250,13 @@ public final class CommandTree<S extends Source> {
         
     }
     
-    private UsageContextMatch searchForMatch(
-            ParameterNode<?> node,
-            UsageContextMatch usageContextMatch,
+    private UsageContextMatch<S> searchForMatch(
+            ParameterNode<S, ?> node,
+            UsageContextMatch<S> usageContextMatch,
             ArgumentQueue input,
             int depth
     ) {
-        for (ParameterNode<?> child : node.getChildren()) {
+        for (ParameterNode<S, ?> child : node.getChildren()) {
             var traversedChild = contextMatchNode(usageContextMatch, input, child, depth + 1);
             if (traversedChild.result() == UsageMatchResult.COMPLETE)
                 return traversedChild;

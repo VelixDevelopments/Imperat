@@ -20,12 +20,10 @@ final class BukkitSuggestionResolvers {
         }
         
         @Override
-        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter parameterToComplete) {
+        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameterToComplete) {
             return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName).toList();
         }
-        
-        
     };
     
     public final static BukkitSuggestionResolver<Player> PLAYER = new BukkitSuggestionResolver<>() {
@@ -35,11 +33,10 @@ final class BukkitSuggestionResolvers {
         }
         
         @Override
-        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter parameterToComplete) {
+        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameterToComplete) {
             return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName).toList();
         }
-        
     };
     
 }

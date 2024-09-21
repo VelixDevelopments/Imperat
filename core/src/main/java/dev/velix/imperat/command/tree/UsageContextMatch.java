@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public final class UsageContextMatch implements Iterable<CommandParameter> {
+public final class UsageContextMatch<S extends Source> implements Iterable<CommandParameter<S>> {
     
-    private final List<CommandParameter> parameters = new ArrayList<>();
+    private final List<CommandParameter<S>> parameters = new ArrayList<>();
     
     @Setter
     private UsageMatchResult result;
@@ -24,26 +24,26 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
         this.result = result;
     }
     
-    public static UsageContextMatch of(UsageMatchResult result) {
-        return new UsageContextMatch(result);
+    public static <S extends Source> UsageContextMatch<S> of(UsageMatchResult result) {
+        return new UsageContextMatch<>(result);
     }
     
-    public static UsageContextMatch of() {
+    public static <S extends Source> UsageContextMatch<S> of() {
         return of(UsageMatchResult.UNKNOWN);
     }
     
-    public void append(ParameterNode<?> node) {
+    public void append(ParameterNode<S, ?> node) {
         if (node == null) return;
         if (parameters.contains(node.data)) return;
         parameters.add(node.data);
     }
     
-    public CommandParameter getLastParameter() {
+    public CommandParameter<S> getLastParameter() {
         return parameters.get(parameters.size() - 1);
     }
     
     @Override
-    public @NotNull Iterator<CommandParameter> iterator() {
+    public @NotNull Iterator<CommandParameter<S>> iterator() {
         return parameters.iterator();
     }
     
@@ -51,7 +51,7 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
         return result;
     }
     
-    public <S extends Source> @Nullable CommandUsage<S> toUsage(Command<S> command) {
+    public @Nullable CommandUsage<S> toUsage(Command<S> command) {
         return command.getUsage(parameters);
     }
     
@@ -63,6 +63,5 @@ public final class UsageContextMatch implements Iterable<CommandParameter> {
         }
         ImperatDebugger.debug(builder.toString());
     }
-    
     
 }

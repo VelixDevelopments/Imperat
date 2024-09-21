@@ -21,9 +21,9 @@ import java.lang.reflect.Type;
  * by the usage of the command itself
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface CommandParameter extends PermissionHolder, Describable {
+public interface CommandParameter<S extends Source> extends PermissionHolder, Describable {
     
-    static <S extends Source, T> CommandParameter of(
+    static <S extends Source, T> CommandParameter<S> of(
             String name,
             TypeWrap<T> type,
             @Nullable String permission,
@@ -37,7 +37,7 @@ public interface CommandParameter extends PermissionHolder, Describable {
         Preconditions.notNull(type, "type");
         Preconditions.checkArgument(!TypeUtility.matches(type.getType(), Object.class), "Type cannot be `Object`");
         
-        return new NormalCommandParameter<S>(
+        return new NormalCommandParameter<>(
                 name, type, permission, description, optional,
                 greedy, valueSupplier, suggestionResolver
         );
@@ -134,14 +134,14 @@ public interface CommandParameter extends PermissionHolder, Describable {
     /**
      * @return the parent of this parameter
      */
-    @Nullable Command<?> parent();
+    @Nullable Command<S> parent();
     
     /**
      * Sets parent command for a parameter
      *
      * @param parentCommand the parameter's owning command
      */
-    void parent(Command<?> parentCommand);
+    void parent(Command<S> parentCommand);
     
     /**
      * @return the index of this parameter
@@ -190,7 +190,7 @@ public interface CommandParameter extends PermissionHolder, Describable {
      *
      * @return the parameter as a flag
      */
-    FlagParameter asFlagParameter();
+    FlagParameter<S> asFlagParameter();
     
     /**
      * @return checks whether this parameter
@@ -210,7 +210,7 @@ public interface CommandParameter extends PermissionHolder, Describable {
      *
      * @return the parameter as a command
      */
-    <S extends Source> Command<S> asCommand();
+    Command<S> asCommand();
     
     /**
      * @return Whether this usage parameter has been constructed
@@ -226,20 +226,19 @@ public interface CommandParameter extends PermissionHolder, Describable {
      * @return the parameter as annotated one
      * @see AnnotatedParameter
      */
-    default AnnotatedParameter asAnnotated() {
-        return (AnnotatedParameter) this;
+    default AnnotatedParameter<S> asAnnotated() {
+        return (AnnotatedParameter<S>) this;
     }
     
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
      *
-     * @param <S> the command-sender type
      * @param <T> the type of value to be resolved
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Nullable
-    <S extends Source, T> SuggestionResolver<S, T> getSuggestionResolver();
+    <T> SuggestionResolver<S, T> getSuggestionResolver();
     
     /**
      * Formats the usage parameter*
@@ -252,8 +251,8 @@ public interface CommandParameter extends PermissionHolder, Describable {
         return this instanceof NumericParameter;
     }
     
-    default NumericParameter asNumeric() {
-        return (NumericParameter) this;
+    default NumericParameter<S> asNumeric() {
+        return (NumericParameter<S>) this;
     }
     
     /**
@@ -265,6 +264,6 @@ public interface CommandParameter extends PermissionHolder, Describable {
      * @param parameter the parameter to compare to
      * @return Whether this parameter has same name and type to the other {@link CommandParameter} or not
      */
-    boolean similarTo(CommandParameter parameter);
+    boolean similarTo(CommandParameter<?> parameter);
     
 }

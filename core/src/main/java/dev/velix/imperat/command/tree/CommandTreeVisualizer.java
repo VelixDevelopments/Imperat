@@ -26,13 +26,13 @@ public final class CommandTreeVisualizer<S extends Source> {
         ImperatDebugger.debug(builder.toString());
     }
     
-    private void visualizeNode(ParameterNode<?> node, StringBuilder builder, int depth) {
+    private void visualizeNode(ParameterNode<S, ?> node, StringBuilder builder, int depth) {
         if (node == null) {
             return;
         }
         builder.append("  ".repeat(Math.max(0, depth)));
         builder.append(node.format()).append("\n");
-        for (ParameterNode<?> child : node.getChildren()) {
+        for (ParameterNode<S, ?> child : node.getChildren()) {
             visualizeNode(child, builder, depth + 1);
         }
         

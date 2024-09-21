@@ -75,9 +75,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void parent(Command<?> parentCommand) {
-        this.parent = (Command<S>) parentCommand;
+    public void parent(Command<S> parentCommand) {
+        this.parent = parentCommand;
     }
     
     /**
@@ -208,7 +207,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return the parameter as a flag
      */
     @Override
-    public FlagParameter asFlagParameter() {
+    public FlagParameter<S> asFlagParameter() {
         throw new UnsupportedOperationException("A command cannot be treated as a flag !");
     }
     
@@ -220,16 +219,14 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public @Nullable <CS extends Source, T> SuggestionResolver<CS, T> getSuggestionResolver() {
-        return (SuggestionResolver<CS, T>) SuggestionResolver.plain(Command.class,
-                List.of(this.name()));
+    public @Nullable <T> SuggestionResolver<S, T> getSuggestionResolver() {
+        return (SuggestionResolver<S, T>) SuggestionResolver.plain(Command.class, List.of(this.name()));
     }
     
     @Override
-    public boolean similarTo(CommandParameter parameter) {
+    public boolean similarTo(CommandParameter<?> parameter) {
         return this.name.equalsIgnoreCase(parameter.name());
     }
-    
     
     /**
      * @return the aliases for this commands
@@ -283,21 +280,18 @@ final class CommandImpl<S extends Source> implements Command<S> {
         if (usage.isDefault()) {
             return;
         }
-        
-        
+
         usages.put(usage.getParameters(), usage);
         
-        if (mainUsage == null && usage.getMaxLength() >= 1 &&
-                !usage.hasParamType(Command.class)) {
+        if (mainUsage == null && usage.getMaxLength() >= 1 && !usage.hasParamType(Command.class)) {
             mainUsage = usage;
         }
         
-        if (commandTree != null)
-            commandTree.parseUsage(usage);
+        if (commandTree != null) commandTree.parseUsage(usage);
     }
     
     @Override
-    public @Nullable CommandUsage<S> getUsage(List<CommandParameter> parameters) {
+    public @Nullable CommandUsage<S> getUsage(List<CommandParameter<S>> parameters) {
         return usages.get(parameters);
     }
     
@@ -495,10 +489,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param helpExecution the help execution
      */
     @Override
-    public void addHelpCommand(Imperat<S> dispatcher, List<CommandParameter> params, CommandExecution<S> helpExecution) {
+    public void addHelpCommand(Imperat<S> dispatcher, List<CommandParameter<S>> params, CommandExecution<S> helpExecution) {
         if (params.isEmpty() && dispatcher.getHelpTemplate() instanceof PaginatedHelpTemplate) {
             params.add(
-                    CommandParameter.optionalInt("page")
+                    CommandParameter.<S>optionalInt("page")
                             .description("help-page")
                             .defaultValue(1)
                             .build()

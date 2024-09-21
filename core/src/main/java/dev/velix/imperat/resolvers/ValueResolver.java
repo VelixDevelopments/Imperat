@@ -27,8 +27,8 @@ public interface ValueResolver<S extends Source, T> {
      */
     T resolve(
             ExecutionContext<S> context,
-            CommandParameter parameter,
-            Cursor cursor,
+            CommandParameter<S> parameter,
+            Cursor<S> cursor,
             String raw
     ) throws ImperatException;
 }

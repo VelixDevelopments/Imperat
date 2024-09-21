@@ -52,7 +52,7 @@ public final class ImperatDebugger {
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s' due to '%s'", owningClass.getName(), name, message), ex);
     }
     
-    public static void debugParameters(String msg, List<CommandParameter> parameters) {
+    public static void debugParameters(String msg, List<CommandParameter<?>> parameters) {
         if (LOGGER == null) {
             System.out.printf((msg) + "%s%n", parameters.stream().map(CommandParameter::format)
                     .collect(Collectors.joining(",")));
