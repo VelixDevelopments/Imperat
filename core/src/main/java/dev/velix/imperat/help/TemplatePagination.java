@@ -6,9 +6,10 @@ import dev.velix.imperat.context.Source;
 final class TemplatePagination<S extends Source> extends PaginatedHelpTemplate<S> {
     private final HelpTemplate<S> template;
     
-    public TemplatePagination(
+    TemplatePagination(
             HelpTemplate<S> template,
-            int syntaxesPerPage) {
+            int syntaxesPerPage
+    ) {
         super(template.formatter, syntaxesPerPage);
         this.template = template;
     }

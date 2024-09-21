@@ -15,7 +15,7 @@ final class HelpTemplateImpl<S extends Source> extends HelpTemplate<S> {
     private final HelpHyphen<S> headerProvider, footerProvider;
     private final @Nullable BiConsumer<ExecutionContext<S>, Collection<? extends CommandUsage<S>>> displayerFunc;
     
-    public HelpTemplateImpl(
+    HelpTemplateImpl(
             UsageFormatter formatter,
             HelpHyphen<S> headerProvider,
             HelpHyphen<S> footerProvider,
