@@ -14,8 +14,7 @@ import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.exception.*;
-import dev.velix.imperat.help.HelpTemplate;
-import dev.velix.imperat.help.templates.DefaultTemplate;
+import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -34,7 +33,6 @@ import java.util.*;
 
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
-    public final static HelpTemplate DEFAULT_HELP_TEMPLATE = new DefaultTemplate();
     
     private final ContextResolverRegistry<S> contextResolverRegistry;
     private final ValueResolverRegistry<S> valueResolverRegistry;
@@ -42,7 +40,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     protected @NotNull PermissionResolver<S> permissionResolver;
     private @NotNull ContextFactory<S> contextFactory;
     private @NotNull UsageVerifier<S> verifier;
-    private @NotNull HelpTemplate template = DEFAULT_HELP_TEMPLATE;
+    private @Nullable HelpProvider<S> provider = null;
     private @NotNull AnnotationParser<S> annotationParser;
     
     private final Map<String, Command<S>> commands = new HashMap<>();
@@ -52,7 +50,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory();
-        contextResolverRegistry = ContextResolverRegistry.createDefault();
+        contextResolverRegistry = ContextResolverRegistry.createDefault(this);
         valueResolverRegistry = ValueResolverRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
         verifier = UsageVerifier.typeTolerantVerifier();
@@ -659,8 +657,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return The template for showing help
      */
     @Override
-    public @NotNull HelpTemplate getHelpTemplate() {
-        return template;
+    public @Nullable HelpProvider<S> getHelpProvider() {
+        return provider;
     }
     
     /**
@@ -669,8 +667,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @param template the help template
      */
     @Override
-    public void setHelpTemplate(HelpTemplate template) {
-        this.template = template;
+    public void setHelpProvider(@Nullable HelpProvider<S> template) {
+        this.provider = template;
     }
     
     @Override

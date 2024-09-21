@@ -26,7 +26,7 @@ public class TestCommand {
     
     @SubCommand(value = "help", attachDirectly = true)
     public void help(TestSource source, CommandHelp help) {
-        help.display(source);
+        help.display();
         source.reply("executed /test help");
         TestRun.USAGE_EXECUTED = true;
     }

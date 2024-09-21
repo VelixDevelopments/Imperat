@@ -3,7 +3,6 @@ package dev.velix.imperat.context;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.context.internal.ResolvedFlag;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.help.CommandHelp;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,13 +62,5 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @return the argument/input resolved by the context
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException;
-    
-    
-    /**
-     * Creates an instance of {@link CommandHelp}
-     *
-     * @return {@link CommandHelp} for the command usage used in a certain context
-     */
-    CommandHelp createCommandHelp();
     
 }

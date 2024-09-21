@@ -10,7 +10,6 @@ import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.sur.SmartUsageResolve;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NumberOutOfRangeException;
-import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.TypeUtility;
@@ -127,11 +126,6 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
         }
         ContextResolver<S, T> factoryCr = (ContextResolver<S, T>) factory.create(null);
         return factoryCr == null ? null : factoryCr.resolve(this, null);
-    }
-    
-    @Override
-    public CommandHelp createCommandHelp() {
-        return new CommandHelp(dispatcher, command(), this);
     }
     
     

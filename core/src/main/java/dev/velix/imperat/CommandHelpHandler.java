@@ -1,23 +1,23 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.help.HelpTemplate;
-import org.jetbrains.annotations.NotNull;
+import dev.velix.imperat.context.Source;
+import dev.velix.imperat.help.HelpProvider;
+import org.jetbrains.annotations.Nullable;
 
-public sealed interface CommandHelpHandler permits Imperat {
+public sealed interface CommandHelpHandler<S extends Source> permits Imperat {
     
     
     /**
      * @return The template for showing help
      */
-    @NotNull
-    HelpTemplate getHelpTemplate();
+    @Nullable
+    HelpProvider<S> getHelpProvider();
     
     /**
      * Set the help template to use
      *
      * @param template the help template
      */
-    void setHelpTemplate(HelpTemplate template);
-    
+    void setHelpProvider(@Nullable HelpProvider<S> template);
     
 }

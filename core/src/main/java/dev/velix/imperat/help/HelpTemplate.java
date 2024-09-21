@@ -1,6 +1,10 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.Source;
+import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.NoHelpException;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -8,45 +12,44 @@ import org.jetbrains.annotations.ApiStatus;
  * to display the help menu of a single command to the command sender
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface HelpTemplate {
+public sealed abstract class HelpTemplate<S extends Source> implements HelpProvider<S> permits HelpTemplateImpl, PaginatedHelpTemplate {
+    
+    protected final UsageFormatter formatter;
+    
+    public HelpTemplate(UsageFormatter formatter) {
+        this.formatter = formatter;
+    }
     
     /**
      * @param command the command
      * @return the header
      */
-    String getHeader(Command<?> command);
+    public abstract String getHeader(Command<S> command, int currentPage, int maxPages);
     
     /**
      * @param command the command
      * @return the footer
      */
-    String getFooter(Command<?> command);
+    public abstract String getFooter(Command<S> command, int currentPage, int maxPages);
     
-    /**
-     * The usage formatter for the help-template
-     *
-     * @return the formatter of the usage
-     */
-    UsageFormatter getUsageFormatter();
     
-    /**
-     * sets the usage help-formatter
-     *
-     * @param formatter the instance of the formatter to set to
-     */
-    void setUsageFormatter(UsageFormatter formatter);
+    @Override
+    public void provide(ExecutionContext<S> context) throws ImperatException {
+        Command<S> command = context.command();
+        S source = context.source();
+        
+        final int maxUsages = command.usages().size();
+        if (maxUsages == 0) {
+            throw new NoHelpException();
+        }
+        int page = context.getArgumentOr("page", 1);
+        displayHeaderHyphen(command, source, page);
+        display(context, formatter, command.usages());
+        displayFooterHyphen(command, source, page);
+    }
     
-    /**
-     * @return the usage displayer
-     */
-    UsageDisplayer getUsagesDisplayer();
+    public abstract void displayHeaderHyphen(Command<S> command, S source, int page);
     
-    /**
-     * Sets the usage displayer instance
-     * to a new one
-     *
-     * @param displayer the displayer instance to set
-     */
-    void setUsageDisplayer(UsageDisplayer displayer);
+    public abstract void displayFooterHyphen(Command<S> command, S source, int page);
     
 }

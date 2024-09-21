@@ -15,19 +15,17 @@ public interface UsageFormatter {
     /**
      * Displays the usage by converting it into
      * an adventure component
-     * <p>
-     * This is used in the {@link PlainDisplayer}
      *
      * @param command    the command
      * @param usage      the usage to display
-     * @param isLast     is it the last usage?
+     * @param index      the index of the usage
      * @param <S>        the sender-type
      * @return the usage component
      */
-    <S extends Source> String formatUsageLine(
+    <S extends Source> String format(
             Command<S> command,
             CommandUsage<S> usage,
-            boolean isLast
+            int index
     );
     
 }

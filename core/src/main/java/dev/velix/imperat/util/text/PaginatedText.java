@@ -52,4 +52,8 @@ public final class PaginatedText<T> {
         }
     }
     
+    public void clear() {
+        objects.clear();
+        pages.clear();
+    }
 }
