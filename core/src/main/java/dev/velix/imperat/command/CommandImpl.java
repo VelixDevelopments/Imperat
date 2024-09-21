@@ -73,11 +73,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public String name() {
         return name;
     }
-
-    @Override
-    public void parent(Command<S> parentCommand) {
-        this.parent = parentCommand;
-    }
     
     /**
      * @return The permission of the command
@@ -130,7 +125,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     }
     
     @Override
-    public @NotNull UsageContextMatch contextMatch(Context<S> context) {
+    public @NotNull UsageContextMatch<S> contextMatch(Context<S> context) {
         if (commandTree != null) {
             return commandTree.contextMatch(context.arguments());
         } else {
@@ -343,7 +338,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param parent the parent to set.
      */
     @Override
-    public void setParent(@NotNull Command<S> parent) {
+    public void parent(@NotNull Command<S> parent) {
         this.parent = parent;
     }
     
@@ -360,7 +355,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     public void addSubCommand(Command<S> command, boolean attachDirectly) {
-        command.setParent(this);
+        command.parent(this);
         registerSubCommand(command);
         
         final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : mainUsage();

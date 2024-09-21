@@ -229,20 +229,7 @@ public interface Command<S extends Source> extends CommandParameter<S> {
      * that handles all auto-completes for this command
      */
     AutoCompleter<S> autoCompleter();
-    
-    /**
-     * @return the parent command of this sub-command
-     */
-    @Nullable
-    Command<S> parent();
-    
-    /**
-     * sets the parent command
-     *
-     * @param parent the parent to set.
-     */
-    void setParent(@NotNull Command<S> parent);
-    
+
     /**
      * Injects a created-subcommand directly into the parent's command usages.
      *

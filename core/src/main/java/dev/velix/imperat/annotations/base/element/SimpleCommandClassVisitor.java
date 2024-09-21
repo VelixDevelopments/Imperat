@@ -173,7 +173,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     ) {
         final Command<S> cmd = loadCmdInstance(annotation, parseElement);
         if (parentCmd != null && cmd != null) {
-            cmd.setParent(parentCmd);
+            cmd.parent(parentCmd);
         }
         //System.out.println("CMD=" + (cmd == null ?"NULL" : cmd.getName())) ;
         if (parseElement instanceof MethodElement method && cmd != null) {
