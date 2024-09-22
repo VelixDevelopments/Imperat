@@ -505,7 +505,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
     
     @Override
-    public @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput) {
+    public @NotNull UsageMatchResult dispatch(S source, Command<S> command, String[] rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
         
         Context<S> plainContext = getContextFactory()
@@ -515,7 +515,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
     
     @Override
-    public @NotNull UsageMatchResult dispatch(S source, String commandName, String... rawInput) {
+    public @NotNull UsageMatchResult dispatch(S source, String commandName, String[] rawInput) {
         Command<S> command = getCommand(commandName);
         if (command == null) {
             //TODO better message here
@@ -530,6 +530,14 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public @NotNull UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine) {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
+    }
+    
+    @Override
+    public UsageMatchResult dispatch(S sender, String line) {
+        String[] lineArgs = line.split(" ");
+        String[] argumentsOnly = new String[lineArgs.length - 1];
+        System.arraycopy(lineArgs, 1, argumentsOnly, 0, lineArgs.length - 1);
+        return dispatch(sender, lineArgs[0], argumentsOnly);
     }
     
     private UsageMatchResult handleExecution(Context<S> context) throws ImperatException {

@@ -115,7 +115,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param rawInput    the command's args input
      * @return the usage match result
      */
-    UsageMatchResult dispatch(S sender, String commandName, String... rawInput);
+    UsageMatchResult dispatch(S sender, String commandName, String[] rawInput);
     
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -126,6 +126,15 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the usage match result
      */
     UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine);
+    
+    /**
+     * Dispatches the full command-line
+     *
+     * @param sender      the source/sender of the command
+     * @param commandLine the command line to dispatch
+     * @return the usage match result
+     */
+    UsageMatchResult dispatch(S sender, String commandLine);
     
     /**
      * @param command the data about the command being written in the chat box

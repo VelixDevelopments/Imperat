@@ -1,0 +1,8 @@
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":core")
+    //implementation 'org.jline:jline:3.21.0'
+}
