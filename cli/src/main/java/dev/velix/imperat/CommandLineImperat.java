@@ -14,6 +14,10 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
         this.input = inputStream;
     }
     
+    public static CommandLineImperat create(InputStream inputStream) {
+        return new CommandLineImperat(inputStream);
+    }
+    
     
     @Override
     public Object getPlatform() {
