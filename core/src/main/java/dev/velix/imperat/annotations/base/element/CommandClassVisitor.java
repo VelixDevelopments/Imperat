@@ -1,6 +1,9 @@
 package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.verification.ElementSelector;
+import dev.velix.imperat.annotations.base.verification.MethodRules;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
@@ -14,9 +17,13 @@ import java.util.Set;
 public abstract class CommandClassVisitor<S extends Source> {
     
     protected final Imperat<S> imperat;
+    protected final AnnotationRegistry registry;
+    protected final ElementSelector<MethodElement> methodSelector;
     
-    protected CommandClassVisitor(Imperat<S> imperat) {
+    protected CommandClassVisitor(Imperat<S> imperat, AnnotationRegistry registry, ElementSelector<MethodElement> methodSelector) {
         this.imperat = imperat;
+        this.registry = registry;
+        this.methodSelector = methodSelector;
     }
     
     public abstract Set<Command<S>> visitCommandClass(
@@ -24,8 +31,15 @@ public abstract class CommandClassVisitor<S extends Source> {
     );
     
     public static <S extends Source> CommandClassVisitor<S> newSimpleVisitor(
-            Imperat<S> imperat
+            Imperat<S> imperat,
+            AnnotationRegistry registry
     ) {
-        return new SimpleCommandClassVisitor<>(imperat);
+        return new SimpleCommandClassVisitor<>(
+                imperat,
+                registry,
+                ElementSelector.<MethodElement>create()
+                        .addRule(MethodRules.HAS_KNOWN_SENDER)
+                        .addRule(MethodRules.HAS_LEAST_ONLY_ONE_MAIN_ANNOTATION)
+        );
     }
 }

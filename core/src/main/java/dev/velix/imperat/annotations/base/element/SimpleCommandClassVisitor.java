@@ -4,7 +4,9 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
+import dev.velix.imperat.annotations.base.AnnotationRegistry;
 import dev.velix.imperat.annotations.base.MethodCommandExecutor;
+import dev.velix.imperat.annotations.base.verification.ElementSelector;
 import dev.velix.imperat.annotations.parameters.AnnotationParameterDecorator;
 import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.command.Command;
@@ -34,8 +36,8 @@ import java.util.*;
 final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisitor<S> {
     
     
-    SimpleCommandClassVisitor(Imperat<S> imperat) {
-        super(imperat);
+    SimpleCommandClassVisitor(Imperat<S> imperat, AnnotationRegistry registry, ElementSelector<MethodElement> methodSelector) {
+        super(imperat, registry, methodSelector);
     }
     
     
@@ -178,6 +180,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         //System.out.println("CMD=" + (cmd == null ?"NULL" : cmd.getName())) ;
         if (parseElement instanceof MethodElement method && cmd != null) {
             //@Command on method
+            if (!methodSelector.canBeSelected(imperat, registry, method, true)) {
+                return cmd;
+            }
             if (method.getInputCount() == 0) {
                 //default usage for that command.
                 
@@ -204,6 +209,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 if (element instanceof MethodElement method) {
                     if (cmd == null) {
                         throw new IllegalStateException("Method  '" + method.getElement().getName() + "' Cannot be treated as usage/subcommand, it doesn't have a parent ");
+                    }
+                    
+                    if (!methodSelector.canBeSelected(imperat, registry, method, true)) {
+                        return cmd;
                     }
                     //System.out.println("----------> Method= " + method.getElement().getName());
                     if (method.isAnnotationPresent(Usage.class)) {

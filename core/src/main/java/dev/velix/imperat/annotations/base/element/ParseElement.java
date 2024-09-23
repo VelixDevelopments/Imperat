@@ -144,4 +144,6 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public int hashCode() {
         return Objects.hash(parent, element);
     }
+    
+    public abstract String getName();
 }

@@ -73,4 +73,12 @@ public final class ClassElement extends ParseElement<Class<?>> {
     }
     
     
+    @Override
+    public String getName() {
+        return getElement().getName();
+    }
+    
+    public String getSimpleName() {
+        return getElement().getSimpleName();
+    }
 }

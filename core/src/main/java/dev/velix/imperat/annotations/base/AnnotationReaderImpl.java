@@ -6,6 +6,7 @@ import dev.velix.imperat.annotations.base.element.ClassElement;
 import dev.velix.imperat.annotations.base.element.CommandClassVisitor;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.RootCommandClass;
+import dev.velix.imperat.annotations.base.verification.ElementSelector;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
@@ -23,14 +24,15 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     
     private final Class<?> clazz;
     private final AnnotationRegistry registry;
-    
+    private final ElementSelector<MethodElement> methodSelector;
     private final RootCommandClass<S> rootCommandClass;
     private final ClassElement classElement;
     
-    AnnotationReaderImpl(Imperat<S> imperat, AnnotationRegistry registry, Object instance) {
+    AnnotationReaderImpl(Imperat<S> imperat, ElementSelector<MethodElement> methodSelector, AnnotationRegistry registry, Object instance) {
         this.registry = registry;
         this.clazz = instance.getClass();
         this.rootCommandClass = new RootCommandClass<>(clazz, instance);
+        this.methodSelector = methodSelector;
         this.classElement = read(imperat);
     }
     
@@ -51,9 +53,10 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         
         for (Method method : methods) {
             //System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
-            root.addChild(
-                    new MethodElement(imperat, registry, root, method)
-            );
+            MethodElement methodElement = new MethodElement(imperat, registry, root, method);
+            if (methodSelector.canBeSelected(imperat, registry, methodElement, false)) {
+                root.addChild(methodElement);
+            }
         }
         
         //We add external subcommand classes from @Inherit as children

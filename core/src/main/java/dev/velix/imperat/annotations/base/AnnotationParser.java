@@ -23,12 +23,21 @@ public abstract class AnnotationParser<S extends Source> {
         this.dispatcher = dispatcher;
     }
     
-    public static <S extends Source> AnnotationParser<S> defaultParser(@NotNull Imperat<S> dispatcher, @NotNull CommandClassVisitor<S> visitor) {
-        return new AnnotationParserImpl<>(dispatcher, visitor);
+    public static <S extends Source> AnnotationParser<S> defaultParser(
+            @NotNull Imperat<S> dispatcher,
+            @NotNull AnnotationRegistry annotationRegistry,
+            @NotNull CommandClassVisitor<S> visitor
+    ) {
+        return new AnnotationParserImpl<>(dispatcher, annotationRegistry, visitor);
     }
     
+    public static <S extends Source> AnnotationParser<S> defaultParser(@NotNull Imperat<S> dispatcher, @NotNull AnnotationRegistry annotationRegistry) {
+        return defaultParser(dispatcher, annotationRegistry, CommandClassVisitor.newSimpleVisitor(dispatcher, annotationRegistry));
+    }
+    
+    
     public static <S extends Source> AnnotationParser<S> defaultParser(@NotNull Imperat<S> dispatcher) {
-        return defaultParser(dispatcher, CommandClassVisitor.newSimpleVisitor(dispatcher));
+        return defaultParser(dispatcher, new AnnotationRegistry());
     }
     
     /**

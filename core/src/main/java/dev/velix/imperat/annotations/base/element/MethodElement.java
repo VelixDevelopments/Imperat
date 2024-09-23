@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,4 +51,16 @@ public final class MethodElement extends ParseElement<Method> {
         return parameters.size();
     }
     
+    public Type getReturnType() {
+        return getElement().getReturnType();
+    }
+    
+    public int getModifiers() {
+        return getElement().getModifiers();
+    }
+    
+    @Override
+    public String getName() {
+        return getElement().getName();
+    }
 }
