@@ -9,7 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.List;
+import java.util.Collection;
 
 final class BukkitSuggestionResolvers {
     
@@ -20,7 +20,7 @@ final class BukkitSuggestionResolvers {
         }
         
         @Override
-        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameterToComplete) {
+        public Collection<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameterToComplete) {
             return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName).toList();
         }
@@ -33,7 +33,7 @@ final class BukkitSuggestionResolvers {
         }
         
         @Override
-        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameterToComplete) {
+        public Collection<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameterToComplete) {
             return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName).toList();
         }

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -21,9 +22,10 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     @NotNull
     private final Command<BukkitSource> command;
     
-    
-    InternalBukkitCommand(@NotNull BukkitImperat dispatcher,
-                          @NotNull Command<BukkitSource> command) {
+    InternalBukkitCommand(
+            final @NotNull BukkitImperat dispatcher,
+            final @NotNull Command<BukkitSource> command
+    ) {
         super(
                 command.name(),
                 command.description().toString(),
@@ -72,14 +74,19 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     public String getUsage() {
         return super.getUsage();
     }
-    
-    
+
     @Override
-    public @NotNull List<String> tabComplete(@NotNull CommandSender sender,
-                                             @NotNull String alias,
-                                             String[] args) throws IllegalArgumentException {
+    public @NotNull List<String> tabComplete(
+            final @NotNull CommandSender sender,
+            final @NotNull String alias,
+            final String[] args
+    ) throws IllegalArgumentException {
         BukkitSource source = dispatcher.wrapSender(sender);
-        return dispatcher.autoComplete(command, source, args);
+        var compeletion = dispatcher.autoComplete(command, source, args);
+        if (compeletion instanceof List<String> list) {
+            return list;
+        }
+        return new ArrayList<>(compeletion);
     }
-    
+
 }

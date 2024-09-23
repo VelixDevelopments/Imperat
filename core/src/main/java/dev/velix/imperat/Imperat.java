@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Represents the class that handles all
@@ -142,7 +142,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param args    the arguments currently written
      * @return the suggestions at the current position
      */
-    List<String> autoComplete(Command<S> command, S sender, String[] args);
+    Collection<String> autoComplete(Command<S> command, S sender, String[] args);
     
     /**
      * Debugs all registered commands and their usages.

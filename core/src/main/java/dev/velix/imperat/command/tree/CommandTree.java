@@ -141,8 +141,7 @@ public final class CommandTree<S extends Source> {
         } else {
             SuggestionResolver<S, ?> resolver = imperat.getParameterSuggestionResolver(node.data);
             if (resolver == null) return;
-            List<String> autoCompletions = resolver.autoComplete(context, node.data);
-            results.addAll(autoCompletions);
+            results.addAll(resolver.autoComplete(context, node.data));
         }
     }
     

@@ -221,9 +221,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     default int size() {
         return getParameters().size();
     }
-    
-    
-    @SuppressWarnings("all")
+
     class Builder<S extends Source> {
         
         private final List<CommandParameter<S>> parameters = new ArrayList<>();
@@ -269,13 +267,15 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
             return this;
         }
         
+        @SafeVarargs
         public final Builder<S> parameters(ParameterBuilder<S, ?>... builders) {
             return parameters(
                     Arrays.stream(builders).map(ParameterBuilder::build).toList()
             );
         }
         
-        public Builder<S> parameters(CommandParameter<S>... params) {
+        @SafeVarargs
+        public final Builder<S> parameters(CommandParameter<S>... params) {
             return parameters(List.of(params));
         }
         

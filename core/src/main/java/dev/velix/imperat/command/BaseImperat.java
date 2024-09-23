@@ -647,7 +647,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return the suggestions at the current position
      */
     @Override
-    public List<String> autoComplete(Command<S> command, S source, String[] args) {
+    public Collection<String> autoComplete(Command<S> command, S source, String[] args) {
         return command.autoCompleter().autoComplete(this, source, args);
     }
     

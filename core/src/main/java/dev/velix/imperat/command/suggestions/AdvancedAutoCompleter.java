@@ -5,21 +5,20 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 
-import java.util.List;
+import java.util.Collection;
 
 final class AdvancedAutoCompleter<S extends Source> extends AutoCompleter<S> {
-    
-    
-    AdvancedAutoCompleter(Command<S> command) {
+
+    AdvancedAutoCompleter(final Command<S> command) {
         super(command);
     }
-    
-    
+
     @Override
-    public List<String> autoCompleteArgument(
+    public Collection<String> autoCompleteArgument(
             Imperat<S> dispatcher,
             SuggestionContext<S> context
     ) {
         return command.tabComplete(dispatcher, context);
     }
+
 }

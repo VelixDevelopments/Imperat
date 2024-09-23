@@ -127,8 +127,7 @@ public interface Command<S extends Source> extends CommandParameter<S> {
      * @param context the context
      * @return the auto-completed results
      */
-    List<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context);
-    
+    Collection<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context);
     
     /**
      * Debugs or visualizes all tree nodes

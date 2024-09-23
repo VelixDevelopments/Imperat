@@ -113,7 +113,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         }
         
         @Override
-        public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete) {
+        public Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete) {
             assert parameterToComplete.isFlag();
             FlagParameter<S> flagParameter = parameterToComplete.asFlagParameter();
             CompletionArg arg = context.getArgToComplete();

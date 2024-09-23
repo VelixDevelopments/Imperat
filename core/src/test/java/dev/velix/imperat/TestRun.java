@@ -12,9 +12,9 @@ import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
 import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
@@ -179,7 +179,7 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{""});
-        Assertions.assertLinesMatch(Arrays.asList("hi", "bye"), results);
+        Assertions.assertLinesMatch(Stream.of("hi", "bye"), results.stream());
     }
     
     @Test
@@ -188,7 +188,7 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", ""});
-        Assertions.assertLinesMatch(Arrays.asList("othersub", "first", "sub4", "sub1"), results);
+        Assertions.assertLinesMatch(Stream.of("othersub", "first", "sub4", "sub1"), results.stream());
     }
     
     @Test
@@ -197,7 +197,7 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "first", ""});
-        Assertions.assertLinesMatch(Arrays.asList("x", "y", "z", "sexy"), results);
+        Assertions.assertLinesMatch(Stream.of("x", "y", "z", "sexy"), results.stream());
     }
     
     @Test

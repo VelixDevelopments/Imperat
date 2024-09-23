@@ -8,7 +8,7 @@ import dev.velix.imperat.context.SuggestionContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Represents a class that's responsible for
@@ -46,7 +46,6 @@ public abstract class AutoCompleter<S extends Source> {
         return new CompletionArg(result, index);
     }
     
-    
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
@@ -56,8 +55,11 @@ public abstract class AutoCompleter<S extends Source> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    public final List<String> autoComplete(Imperat<S> dispatcher,
-                                           S sender, String[] args) {
+    public final Collection<String> autoComplete(
+            final Imperat<S> dispatcher,
+            final S sender,
+            final String[] args
+    ) {
         CompletionArg argToComplete = getLastArg(args);
         ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(args);
         
@@ -75,7 +77,7 @@ public abstract class AutoCompleter<S extends Source> {
      * @param context the context for suggestions
      * @return the auto-completed results
      */
-    public abstract List<String> autoCompleteArgument(
+    public abstract Collection<String> autoCompleteArgument(
             Imperat<S> dispatcher,
             SuggestionContext<S> context
     );

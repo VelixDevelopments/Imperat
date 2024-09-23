@@ -134,7 +134,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     }
     
     @Override
-    public List<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context) {
+    public Collection<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context) {
         if (commandTree != null) {
             return commandTree.tabComplete(dispatcher, context);
         } else {

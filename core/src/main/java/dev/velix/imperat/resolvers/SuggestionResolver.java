@@ -6,6 +6,7 @@ import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -54,6 +55,6 @@ public interface SuggestionResolver<S extends Source, T> {
      * @param parameterToComplete   the parameter of the value to complete
      * @return the auto-completed suggestions of the current argument
      */
-    List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete);
+    Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete);
     
 }
