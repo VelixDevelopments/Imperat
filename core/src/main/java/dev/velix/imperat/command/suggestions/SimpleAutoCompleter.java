@@ -11,6 +11,7 @@ import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +50,7 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
         if (index == -1)
             index = 0;
         
-        AutoCompleteList results = new AutoCompleteList();
+        List<String> results = new ArrayList<>();
         for (CommandUsage<S> usage : closestUsages) {
             if (index < 0 || index >= usage.getMaxLength()) continue;
             CommandParameter<S> parameter = usage.getParameters().get(index);
@@ -58,7 +59,7 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
             }
             if (parameter.isCommand()) {
                 results.add(parameter.name());
-                parameter.asCommand().aliases().forEach(results::add);
+                results.addAll(parameter.asCommand().aliases());
             } else {
                 SuggestionResolver<S, ?> resolver = dispatcher.getParameterSuggestionResolver(parameter);
                 if (resolver != null) {
@@ -69,7 +70,7 @@ final class SimpleAutoCompleter<S extends Source> extends AutoCompleter<S> {
             
         }
         
-        return results.asList();
+        return results;
     }
     
     

@@ -4,7 +4,6 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.suggestions.AutoCompleteList;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
@@ -13,6 +12,7 @@ import dev.velix.imperat.util.TypeUtility;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -88,25 +88,23 @@ public final class CommandTree<S extends Source> {
     public @NotNull List<String> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
         
-        AutoCompleteList results = new AutoCompleteList();
+        List<String> results = new ArrayList<>();
         for (var child : root.getChildren()) {
-            results.addAll(
-                    collectNodeCompletions(imperat, context, child, 0, depthToReach, results)
-            );
+            collectNodeCompletions(imperat, context, child, 0, depthToReach, results);
         }
-        return results.asList();
+        return results;
     }
     
-    private AutoCompleteList collectNodeCompletions(
+    private void collectNodeCompletions(
             Imperat<S> imperat,
             SuggestionContext<S> context,
             ParameterNode<S, ?> child,
             int depth,
             final int maxDepth,
-            AutoCompleteList results
+            List<String> results
     ) {
         if (depth > maxDepth) {
-            return results;
+            return;
         }
         
         String raw = context.arguments().getOr(depth, "");
@@ -115,30 +113,27 @@ public final class CommandTree<S extends Source> {
         if ((!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
                 || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
                 .hasPermission(context.source(), child.data.permission()))) {
-            return results;
+            return;
         }
         
         if (depth == maxDepth) {
             //we reached the arg we want to complete, let's complete it using our current node
             //COMPLETE DIRECTLY
             addChildResults(imperat, context, child, results);
-            return results;
         } else {
             //Keep looking
             for (var innerChild : child.getChildren()) {
-                results.addAll(
-                        collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, results)
-                );
+                collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, results);
             }
         }
-        return results;
+        
     }
     
     private void addChildResults(
             Imperat<S> imperat,
             SuggestionContext<S> context,
             ParameterNode<S, ?> node,
-            AutoCompleteList results
+            List<String> results
     ) {
         if (node instanceof CommandNode<?>) {
             results.add(node.data.name());
