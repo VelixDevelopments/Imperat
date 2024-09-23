@@ -39,7 +39,6 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
     public <CN extends com.mojang.brigadier.tree.CommandNode<?>> @NotNull CN parseCommandIntoNode(@NotNull Command<S> command) {
         var tree = command.tree();
         var root = tree.getRoot();
-        //ImperatDebugger.visualize("Parsing %s '%s'", (command.isSubCommand() ? "sub-command" : "command"), command.getName());
         return convertRoot(root).toInternalNode();
     }
     

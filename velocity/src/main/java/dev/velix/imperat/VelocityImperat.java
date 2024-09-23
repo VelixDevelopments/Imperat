@@ -17,7 +17,7 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
     private final PluginContainer plugin;
     private final ProxyServer proxyServer;
     
-    private final VelocityBrigadier velocityBrigadier;
+    private final BaseBrigadierManager<VelocitySource> velocityBrigadier;
     
     private VelocityImperat(
             @NotNull String pluginName,
@@ -52,13 +52,18 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
     public void registerCommand(Command<VelocitySource> command) {
         super.registerCommand(command);
         CommandManager manager = proxyServer.getCommandManager();
-        LiteralCommandNode<CommandSource> commandNode = (LiteralCommandNode<CommandSource>) velocityBrigadier.parseCommandIntoNode(command);
-        manager.register(
-                manager.metaBuilder(command.name().toLowerCase())
-                        .aliases(command.aliases().toArray(new String[0]))
-                        .plugin(plugin).build(),
-                new BrigadierCommand(commandNode)
-        );
+        try {
+            LiteralCommandNode<CommandSource> commandNode = (LiteralCommandNode<CommandSource>) velocityBrigadier.parseCommandIntoNode(command);
+            
+            manager.register(
+                    manager.metaBuilder(command.name().toLowerCase())
+                            .aliases(command.aliases().toArray(new String[0]))
+                            .plugin(plugin).build(),
+                    new BrigadierCommand(commandNode)
+            );
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
     
     @Override
