@@ -2,7 +2,7 @@ package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.annotations.base.AnnotationRegistry;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
-import dev.velix.imperat.util.annotations.AnnotationMap;
+import dev.velix.imperat.util.AnnotationMap;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

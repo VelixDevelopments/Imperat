@@ -1,4 +1,4 @@
-package dev.velix.imperat.util.annotations;
+package dev.velix.imperat.util;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
