@@ -54,12 +54,13 @@ dependencies {
 
 Imperat supports the following platforms:
 
-- Bukkit/Spigot/Paper
+- Bukkit
 - Bungeecord
+- CLI (Command Line Interface)
 
 ## Documentation
 
-For detailed usage instructions, architecture overview, and API documentation,
+For detailed usage instructions, architecture overview, and API documentation,<br>
 visit the official [Imperat Documentation](https://docs.velix.dev/Imperat/).
 
 ## Join the Community
