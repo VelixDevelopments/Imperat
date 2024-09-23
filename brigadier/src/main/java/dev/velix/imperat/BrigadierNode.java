@@ -10,7 +10,7 @@ import dev.velix.imperat.context.Source;
 import java.util.function.Predicate;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public final class BrigadierNode {
+final class BrigadierNode {
     
     private final CommandNode<?> node;
     

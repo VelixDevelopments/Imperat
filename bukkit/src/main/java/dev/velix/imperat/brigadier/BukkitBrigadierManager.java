@@ -44,7 +44,6 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
             org.bukkit.command.Command bukkitCmd,
             Command<BukkitSource> imperatCommand
     ) {
-        commodore.register(bukkitCmd,
-                parseCommandIntoNode(imperatCommand).toInternalNode());
+        commodore.register(bukkitCmd, parseCommandIntoNode(imperatCommand));
     }
 }

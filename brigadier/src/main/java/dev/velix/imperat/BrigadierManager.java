@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.tree.CommandNode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
@@ -54,6 +55,6 @@ public sealed interface BrigadierManager<S extends Source> permits BaseBrigadier
      *
      * @return the parsed node
      */
-    BrigadierNode parseCommandIntoNode(Command<S> command);
+    <CN extends CommandNode<?>> CN parseCommandIntoNode(Command<S> command);
     
 }
