@@ -4,7 +4,7 @@ package dev.velix.imperat.command;
  * Represents an entity that can have a description.
  * This interface provides methods to get and set a description.
  */
-public interface Describable {
+public interface DescriptionHolder {
 
     /**
      * Retrieves the current description associated with this entity.

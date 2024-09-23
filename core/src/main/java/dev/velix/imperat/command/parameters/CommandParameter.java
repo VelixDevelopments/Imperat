@@ -2,8 +2,8 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.annotations.parameters.AnnotatedParameter;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.Describable;
 import dev.velix.imperat.command.Description;
+import dev.velix.imperat.command.DescriptionHolder;
 import dev.velix.imperat.command.PermissionHolder;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -21,7 +21,7 @@ import java.lang.reflect.Type;
  * by the usage of the command itself
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface CommandParameter<S extends Source> extends PermissionHolder, Describable {
+public interface CommandParameter<S extends Source> extends PermissionHolder, DescriptionHolder {
     
     static <S extends Source, T> CommandParameter<S> of(
             String name,

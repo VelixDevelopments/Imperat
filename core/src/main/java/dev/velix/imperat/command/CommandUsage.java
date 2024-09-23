@@ -23,7 +23,7 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public sealed interface CommandUsage<S extends Source> extends PermissionHolder, Describable, CooldownHolder permits CommandUsageImpl {
+public sealed interface CommandUsage<S extends Source> extends PermissionHolder, DescriptionHolder, CooldownHolder permits CommandUsageImpl {
     
     static <S extends Source> String format(Command<S> command, CommandUsage<S> usage) {
         StringBuilder builder = new StringBuilder(command.name()).append(' ');
