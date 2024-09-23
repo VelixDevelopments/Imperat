@@ -178,6 +178,12 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     @SuppressWarnings("deprecation")
     private void registerValueResolvers() {
         this.registerValueResolver(Player.class, (context, parameter, cursor, raw) -> {
+            if (raw.equalsIgnoreCase("me")) {
+                if (context.source().isConsole()) {
+                    throw new UnknownPlayerException(raw);
+                }
+                return context.source().asPlayer();
+            }
             final Player player = Bukkit.getPlayer(raw.toLowerCase());
             if (player != null) return player;
             throw new UnknownPlayerException(raw);
