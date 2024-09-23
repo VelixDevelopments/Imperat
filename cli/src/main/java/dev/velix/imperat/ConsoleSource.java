@@ -8,7 +8,7 @@ public final class ConsoleSource implements Source {
     
     private final PrintStream outputStream;
     
-    public ConsoleSource(PrintStream outputStream) {
+    public ConsoleSource(final PrintStream outputStream) {
         this.outputStream = outputStream;
     }
     
@@ -18,22 +18,22 @@ public final class ConsoleSource implements Source {
     }
     
     @Override
-    public Object origin() {
+    public PrintStream origin() {
         return outputStream;
     }
     
     @Override
-    public void reply(String message) {
+    public void reply(final String message) {
         outputStream.println(message);
     }
     
     @Override
-    public void warn(String message) {
+    public void warn(final String message) {
         outputStream.println("[WARN] " + message);
     }
     
     @Override
-    public void error(String message) {
+    public void error(final String message) {
         outputStream.println("[ERROR] " + message);
     }
     
@@ -41,4 +41,5 @@ public final class ConsoleSource implements Source {
     public boolean isConsole() {
         return true;
     }
+
 }

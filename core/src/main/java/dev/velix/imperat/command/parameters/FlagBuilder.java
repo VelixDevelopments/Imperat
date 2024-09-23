@@ -52,7 +52,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     }
     
     @Override
-    public FlagParameter build() {
+    public FlagParameter<S> build() {
         if (inputType != null) {
             CommandFlag flag = CommandFlag.create(name, aliases, inputType);
             return new FlagCommandParameter<>(flag, permission, description, defaultValueSupplier);
