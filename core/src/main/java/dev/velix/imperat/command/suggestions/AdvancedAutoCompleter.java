@@ -20,8 +20,6 @@ final class AdvancedAutoCompleter<S extends Source> extends AutoCompleter<S> {
             Imperat<S> dispatcher,
             SuggestionContext<S> context
     ) {
-        AutoCompleteList list = new AutoCompleteList();
-        list.addAll(command.tabComplete(dispatcher, context));
-        return list.asList();
+        return command.tabComplete(dispatcher, context);
     }
 }

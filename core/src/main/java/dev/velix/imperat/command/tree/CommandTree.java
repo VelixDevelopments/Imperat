@@ -4,6 +4,7 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.suggestions.AutoCompleteList;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
@@ -12,7 +13,6 @@ import dev.velix.imperat.util.TypeUtility;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -88,22 +88,22 @@ public final class CommandTree<S extends Source> {
     public @NotNull List<String> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
         
-        List<String> results = new ArrayList<>();
+        AutoCompleteList results = new AutoCompleteList();
         for (var child : root.getChildren()) {
             results.addAll(
                     collectNodeCompletions(imperat, context, child, 0, depthToReach, results)
             );
         }
-        return results;
+        return results.asList();
     }
     
-    private List<String> collectNodeCompletions(
+    private AutoCompleteList collectNodeCompletions(
             Imperat<S> imperat,
             SuggestionContext<S> context,
             ParameterNode<S, ?> child,
             int depth,
             final int maxDepth,
-            List<String> results
+            AutoCompleteList results
     ) {
         if (depth > maxDepth) {
             return results;
@@ -138,7 +138,7 @@ public final class CommandTree<S extends Source> {
             Imperat<S> imperat,
             SuggestionContext<S> context,
             ParameterNode<S, ?> node,
-            List<String> results
+            AutoCompleteList results
     ) {
         if (node instanceof CommandNode<?>) {
             results.add(node.data.name());
