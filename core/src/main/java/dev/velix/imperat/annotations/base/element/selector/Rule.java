@@ -1,4 +1,4 @@
-package dev.velix.imperat.annotations.base.verification;
+package dev.velix.imperat.annotations.base.element.selector;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationRegistry;

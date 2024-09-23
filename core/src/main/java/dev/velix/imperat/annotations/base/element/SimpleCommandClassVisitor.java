@@ -6,7 +6,7 @@ import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationRegistry;
 import dev.velix.imperat.annotations.base.MethodCommandExecutor;
-import dev.velix.imperat.annotations.base.verification.ElementSelector;
+import dev.velix.imperat.annotations.base.element.selector.ElementSelector;
 import dev.velix.imperat.annotations.parameters.AnnotationParameterDecorator;
 import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
 import dev.velix.imperat.command.Command;

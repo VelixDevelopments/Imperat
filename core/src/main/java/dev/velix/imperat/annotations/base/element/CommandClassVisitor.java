@@ -2,8 +2,8 @@ package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationRegistry;
-import dev.velix.imperat.annotations.base.verification.ElementSelector;
-import dev.velix.imperat.annotations.base.verification.MethodRules;
+import dev.velix.imperat.annotations.base.element.selector.ElementSelector;
+import dev.velix.imperat.annotations.base.element.selector.MethodRules;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
