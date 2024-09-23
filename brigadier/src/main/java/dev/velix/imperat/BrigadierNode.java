@@ -28,7 +28,6 @@ public final class BrigadierNode {
     }
     
     public BrigadierNode addChild(BrigadierNode node) {
-        //ImperatDebugger.debug("Adding child '%s' of type='%s'", node.node.getName(), (node.node instanceof ArgumentCommandNode<?, ?> ? "ARGUMENT" : "LITERAL"));
         this.node.addChild(node.toInternalNode());
         return this;
     }

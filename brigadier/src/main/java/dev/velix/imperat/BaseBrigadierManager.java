@@ -100,7 +100,10 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         SuggestionResolver<S, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
         ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", suggestionResolver == null, parameter.format());
         if (suggestionResolver == null) {
-            return ((context, builder) -> builder.buildFuture());
+            String paramFormat = parameter.format();
+            String desc = parameter.description() == Description.EMPTY ? parameter.description().toString() : "";
+            return ((context, builder) -> builder.suggest(paramFormat, new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc)))
+                    .buildFuture());
         }
         
         return (context, builder) -> {
@@ -108,8 +111,10 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             try {
                 
                 S source = this.wrapCommandSource(context.getSource());
-                String tooltipMessage = parameter.description() == Description.EMPTY ? parameter.format() : parameter.description().toString();
-                Message tooltip = new LiteralMessage(tooltipMessage);
+                String paramFormat = parameter.format();
+                String desc = parameter.description() == Description.EMPTY ? parameter.description().toString() : "";
+                Message tooltip = new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc));
+                
                 String input = context.getInput();
                 
                 ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
@@ -137,6 +142,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
     //resolvers methods
     
     @Override
+    @SuppressWarnings("unchecked")
     public <T> void registerArgumentResolver(
             Class<T> type,
             ArgumentTypeResolver argumentTypeResolver
