@@ -7,4 +7,5 @@ include 'bungee'
 include 'brigadier'
 include 'adventure'
 include 'cli'
+include 'velocity'
 
