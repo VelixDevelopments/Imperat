@@ -3,15 +3,13 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.resolvers.ContextResolver;
-import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.ValueResolver;
+import dev.velix.imperat.resolvers.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 
 public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     
@@ -110,14 +108,16 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * argument or parameter.
      *
      * @param parameter the parameter symbolizing the type and argument name
-     * @param <T>       the type parameter representing the type of value that the suggestion resolver
-     *                  will work with
      * @return the {@link SuggestionResolver} instance for that type
      */
-    default @Nullable <T> SuggestionResolver<S, ?> getParameterSuggestionResolver(CommandParameter<S> parameter) {
-        SuggestionResolver<S, T> parameterSpecificResolver = parameter.getSuggestionResolver();
-        if (parameterSpecificResolver == null)
-            return getSuggestionResolverByType(parameter.type());
+    @SuppressWarnings("uncecked")
+    default @Nullable SuggestionResolver<S> getParameterSuggestionResolver(CommandParameter<S> parameter) {
+        SuggestionResolver<S> parameterSpecificResolver = parameter.getSuggestionResolver();
+        if (parameterSpecificResolver == null) {
+            var resolverByType = getSuggestionResolverByType(parameter.type());
+            if (resolverByType != null) return resolverByType;
+            else return SuggestionResolver.plain(Collections.singletonList(parameter.format()));
+        }
         else
             return parameterSpecificResolver;
     }
@@ -131,18 +131,16 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @return the {@link SuggestionResolver} instance for that type
      */
     @Nullable
-    SuggestionResolver<S, ?> getSuggestionResolverByType(Type type);
+    SuggestionResolver<S> getSuggestionResolverByType(Type type);
     
     /**
      * Fetches the suggestion provider/resolver registered by its unique name
      *
      * @param name the name of the argument
-     * @param <T>  the type parameter representing the type of value that the suggestion resolver
-     *             will work with
      * @return the {@link SuggestionResolver} instance for that argument
      */
     @Nullable
-    <T> SuggestionResolver<S, T> getNamedSuggestionResolver(String name);
+    SuggestionResolver<S> getNamedSuggestionResolver(String name);
     
     /**
      * Registers a suggestion resolver
@@ -150,16 +148,22 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param suggestionResolver the suggestion resolver to register
      * @param <T>                the type of value that the suggestion resolver will work with.
      */
-    <T> void registerSuggestionResolver(SuggestionResolver<S, T> suggestionResolver);
+    <T> void registerSuggestionResolver(TypeSuggestionResolver<S, T> suggestionResolver);
+    
+    /**
+     * Registers a suggestion resolver to a type
+     *
+     * @param type               the type
+     * @param suggestionResolver the suggestion resolver.
+     */
+    void registerSuggestionResolver(Type type, SuggestionResolver<S> suggestionResolver);
     
     /**
      * Registers a suggestion resolver
      *
      * @param name               the name of the suggestion resolver
      * @param suggestionResolver the suggestion resolver to register
-     * @param <T>                the type of value that the suggestion resolver will work with.
      */
-    <T> void registerNamedSuggestionResolver(String name, SuggestionResolver<S, T> suggestionResolver);
-    
+    void registerNamedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver);
     
 }

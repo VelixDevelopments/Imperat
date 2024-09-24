@@ -25,7 +25,7 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
-    private final List<CommandParameter<S>> pureParameters = new ArrayList<>();
+    private final List<CommandParameter<S>> parametersWithoutFlags = new ArrayList<>();
     private final CommandExecution<S> execution;
     private final boolean help;
     private String permission = null;
@@ -123,12 +123,13 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      *
      * @param params the parameters to add
      */
+    @SafeVarargs
     @Override
-    public void addParameters(CommandParameter<S>... params) {
+    public final void addParameters(CommandParameter<S>... params) {
         Collections.addAll(parameters, params);
         for (var param : params) {
             if (param.isFlag()) continue;
-            pureParameters.add(param);
+            parametersWithoutFlags.add(param);
         }
     }
     
@@ -142,7 +143,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         for (var p : params) {
             parameters.add(p);
             if (p.isFlag()) continue;
-            pureParameters.add(p);
+            parametersWithoutFlags.add(p);
         }
     }
     
@@ -156,8 +157,8 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     }
     
     @Override
-    public List<CommandParameter<S>> getPureParameters() {
-        return pureParameters;
+    public List<CommandParameter<S>> getParametersWithoutFlags() {
+        return parametersWithoutFlags;
     }
     
     @Override

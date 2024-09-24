@@ -16,24 +16,16 @@ import java.util.Collection;
  * tab-completion per one command, regardless of the sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public abstract class AutoCompleter<S extends Source> {
+public final class AutoCompleter<S extends Source> {
     
-    protected final Command<S> command;
+    private final Command<S> command;
     
-    protected AutoCompleter(Command<S> command) {
+    private AutoCompleter(Command<S> command) {
         this.command = command;
     }
     
-    /**
-     * @deprecated use {@link AutoCompleter#advanced(Command)}
-     */
-    @Deprecated
-    public static <S extends Source> AutoCompleter<S> simple(Command<S> command) {
-        return new SimpleAutoCompleter<>(command);
-    }
-    
-    public static <S extends Source> AutoCompleter<S> advanced(Command<S> command) {
-        return new AdvancedAutoCompleter<>(command);
+    public static <S extends Source> AutoCompleter<S> createNative(Command<S> command) {
+        return new AutoCompleter<>(command);
     }
     
     private static @NotNull CompletionArg getLastArg(String[] args) {
@@ -55,7 +47,7 @@ public abstract class AutoCompleter<S extends Source> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    public final Collection<String> autoComplete(
+    public Collection<String> autoComplete(
             final Imperat<S> dispatcher,
             final S sender,
             final String[] args
@@ -66,7 +58,7 @@ public abstract class AutoCompleter<S extends Source> {
         SuggestionContext<S> context = dispatcher.getContextFactory()
                 .createSuggestionContext(dispatcher, sender, command, queue, argToComplete);
         
-        return autoCompleteArgument(dispatcher, context);
+        return autoComplete(dispatcher, context);
     }
     
     /**
@@ -77,8 +69,10 @@ public abstract class AutoCompleter<S extends Source> {
      * @param context the context for suggestions
      * @return the auto-completed results
      */
-    public abstract Collection<String> autoCompleteArgument(
+    public Collection<String> autoComplete(
             Imperat<S> dispatcher,
             SuggestionContext<S> context
-    );
+    ) {
+        return command.tabComplete(dispatcher, context);
+    }
 }

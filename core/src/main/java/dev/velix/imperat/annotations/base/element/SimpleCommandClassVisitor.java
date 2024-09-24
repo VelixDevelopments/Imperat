@@ -19,6 +19,7 @@ import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Pair;
 import dev.velix.imperat.util.TypeUtility;
@@ -423,12 +424,16 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Suggest suggestAnnotation = element.getAnnotation(Suggest.class);
         SuggestionProvider suggestionProvider = element.getAnnotation(SuggestionProvider.class);
         
-        SuggestionResolver<S, T> suggestionResolver = null;
+        TypeSuggestionResolver<S, ?> suggestionResolver = null;
         
         if (suggestAnnotation != null) {
-            suggestionResolver = (SuggestionResolver<S, T>) SuggestionResolver.plain(parameter.getType(), suggestAnnotation.value());
+            suggestionResolver = SuggestionResolver.type(parameter.getType(), suggestAnnotation.value());
         } else if (suggestionProvider != null) {
-            suggestionResolver = imperat.getNamedSuggestionResolver(suggestionProvider.value().toLowerCase());
+            var namedResolver = imperat.getNamedSuggestionResolver(suggestionProvider.value().toLowerCase());
+            if (!(namedResolver instanceof TypeSuggestionResolver<?, ?>)) {
+                throw new UnsupportedOperationException("Named suggestion resolvers must be of type `TypeSuggestionResolver` and make sure the type matches that of the parameter's");
+            }
+            suggestionResolver = (TypeSuggestionResolver<S, ?>) namedResolver;
         }
         
         boolean greedy = parameter.getAnnotation(Greedy.class) != null;

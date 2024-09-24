@@ -139,7 +139,7 @@ public final class CommandTree<S extends Source> {
             results.add(node.data.name());
             results.addAll(node.data.asCommand().aliases());
         } else {
-            SuggestionResolver<S, ?> resolver = imperat.getParameterSuggestionResolver(node.data);
+            SuggestionResolver<S> resolver = imperat.getParameterSuggestionResolver(node.data);
             if (resolver == null) return;
             results.addAll(resolver.autoComplete(context, node.data));
         }

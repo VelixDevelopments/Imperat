@@ -4,6 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
@@ -21,7 +22,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     protected final TypeWrap<?> typeWrap;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
-    protected final SuggestionResolver<?, ?> suggestionResolver;
+    protected final TypeSuggestionResolver<S, ?> suggestionResolver;
     protected String permission;
     protected Description description;
     protected int index;
@@ -32,7 +33,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
             @Nullable String permission,
             Description description,
             boolean optional, boolean flag, boolean greedy,
-            OptionalValueSupplier<?> optionalValueSupplier, SuggestionResolver<?, ?> suggestionResolver
+            OptionalValueSupplier<?> optionalValueSupplier,
+            TypeSuggestionResolver<S, ?> suggestionResolver
     ) {
         this.name = name;
         this.typeWrap = typeWrap;
@@ -136,6 +138,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      * @return the parameter as a flag
      */
     @Override
+    @SuppressWarnings("unchecked")
     public FlagParameter<S> asFlagParameter() {
         return (FlagParameter<S>) this;
     }
@@ -168,8 +171,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      */
     @Override
     @SuppressWarnings("unchecked")
-    public @Nullable <T> SuggestionResolver<S, T> getSuggestionResolver() {
-        return (SuggestionResolver<S, T>) suggestionResolver;
+    public <T> @Nullable TypeSuggestionResolver<S, T> getSuggestionResolver() {
+        return (TypeSuggestionResolver<S, T>) suggestionResolver;
     }
     
     @Override

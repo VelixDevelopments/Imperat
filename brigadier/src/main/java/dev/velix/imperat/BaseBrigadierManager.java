@@ -95,8 +95,8 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             Command<S> command,
             CommandParameter<S> parameter
     ) {
-        SuggestionResolver<S, ?> parameterResolver = dispatcher.getParameterSuggestionResolver(parameter);
-        SuggestionResolver<S, ?> suggestionResolver = parameterResolver == null ? SuggestionResolver.plain(parameter.wrappedType(), parameter.format()) : parameterResolver;
+        SuggestionResolver<S> parameterResolver = dispatcher.getParameterSuggestionResolver(parameter);
+        SuggestionResolver<S> suggestionResolver = parameterResolver == null ? SuggestionResolver.type(parameter.wrappedType(), parameter.format()) : parameterResolver;
         
         //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", parameterResolver == null, parameter.format());
         
@@ -120,7 +120,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
                 suggestionResolver
                         .autoComplete(ctx, parameter)
                         .stream()
-                        .filter(c -> arg.value().isEmpty() || arg.value().isBlank() || c.toLowerCase().startsWith(arg.value().toLowerCase()))
+                        .filter(c -> arg.isEmpty() || c.toLowerCase().startsWith(arg.value().toLowerCase()))
                         .distinct()
                         .sorted(String.CASE_INSENSITIVE_ORDER)
                         .forEach(suggestionResult -> builder.suggest(suggestionResult, tooltip));

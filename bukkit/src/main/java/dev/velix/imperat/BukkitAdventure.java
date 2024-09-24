@@ -1,5 +1,6 @@
-package dev.velix.imperat.adventure;
+package dev.velix.imperat;
 
+import dev.velix.imperat.adventure.AdventureProvider;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.command.CommandSender;

@@ -64,7 +64,7 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         });
 
         this.registerSuggestionResolver(
-                SuggestionResolver.plain(Player.class, proxyServer.getAllPlayers().stream().map(Player::getUsername).toList())
+                SuggestionResolver.type(Player.class, proxyServer.getAllPlayers().stream().map(Player::getUsername).toList())
         );
     }
 

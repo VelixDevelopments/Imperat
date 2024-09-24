@@ -1,7 +1,6 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
-import dev.velix.imperat.adventure.BukkitAdventure;
 import dev.velix.imperat.adventure.CastingAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
@@ -11,7 +10,6 @@ import dev.velix.imperat.exception.InvalidUUIDException;
 import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
-import dev.velix.imperat.resolvers.BukkitPermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;

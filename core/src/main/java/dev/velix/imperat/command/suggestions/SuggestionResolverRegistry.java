@@ -6,25 +6,28 @@ import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.*;
 
 @ApiStatus.Internal
-public final class SuggestionResolverRegistry<S extends Source> extends Registry<Type, SuggestionResolver<S, ?>> {
+public final class SuggestionResolverRegistry<S extends Source> extends Registry<Type, SuggestionResolver<S>> {
     
-    private final Map<String, SuggestionResolver<S, ?>> resolversPerName;
+    private final Map<String, SuggestionResolver<S>> resolversPerName;
     
     private final EnumSuggestionResolver enumSuggestionResolver = new EnumSuggestionResolver();
     private final FlagSuggestionResolver flagSuggestionResolver = new FlagSuggestionResolver();
+    
     private SuggestionResolverRegistry() {
         super();
-        registerResolverForType(SuggestionResolver.plain(Boolean.class, "true", "false"));
+        registerResolverForType(SuggestionResolver.type(Boolean.class, "true", "false"));
         resolversPerName = new HashMap<>();
     }
     
@@ -32,37 +35,39 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         return new SuggestionResolverRegistry<>();
     }
     
-    public <T> void registerResolverForType(SuggestionResolver<S, T> suggestionResolver) {
-        Type resolverType = suggestionResolver.getType().getType();
-        if (TypeUtility.areRelatedTypes(resolverType, Enum.class)) {
-            //we don't register enum related resolvers
-            enumSuggestionResolver.registerEnumResolver(resolverType);
-            return;
-        }
-        
-        if (TypeUtility.areRelatedTypes(resolverType, CommandFlag.class)) {
-            return;
-        }
-        setData(resolverType, suggestionResolver);
+    public <T> void registerResolverForType(TypeSuggestionResolver<S, T> suggestionResolver) {
+        this.registerResolverForType(suggestionResolver.getType().getType(), suggestionResolver);
     }
     
-    public <T> void registerNamedResolver(String name,
-                                          SuggestionResolver<S, T> suggestionResolver) {
+    public void registerResolverForType(Type type, SuggestionResolver<S> suggestionResolver) {
+        if (TypeUtility.areRelatedTypes(type, Enum.class)) {
+            //we preload the enum he registers
+            enumSuggestionResolver.registerEnumResolver(type);
+        }
+        
+        setData(type, suggestionResolver);
+    }
+    
+    public void registerNamedResolver(String name,
+                                      SuggestionResolver<S> suggestionResolver) {
         resolversPerName.put(name, suggestionResolver);
     }
     
-    public @Nullable SuggestionResolver<S, ?> getResolver(Type type) {
-        if (TypeUtility.areRelatedTypes(type, Enum.class)) {
-            return enumSuggestionResolver;
-        }
-        
-        if (TypeUtility.areRelatedTypes(type, CommandFlag.class)) {
-            return flagSuggestionResolver;
-        }
+    public @Nullable SuggestionResolver<S> getResolver(Type type) {
         
         return getData(type).orElseGet(() -> {
+            
+            if (TypeUtility.areRelatedTypes(type, Enum.class)) {
+                return enumSuggestionResolver;
+            }
+            
+            if (TypeUtility.areRelatedTypes(type, CommandFlag.class)) {
+                return flagSuggestionResolver;
+            }
+            
             for (var resolverByType : this.getAll()) {
-                if (resolverByType.getType().isSupertypeOf(type)) {
+                if (resolverByType instanceof TypeSuggestionResolver<S, ?> typeSuggestionResolver
+                        && typeSuggestionResolver.getType().isSupertypeOf(type)) {
                     return resolverByType;
                 }
             }
@@ -70,13 +75,12 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         });
     }
     
-    @SuppressWarnings("unchecked")
-    public @Nullable <T> SuggestionResolver<S, T> getResolverByName(String name) {
-        return (SuggestionResolver<S, T>) resolversPerName.get(name);
+    public @Nullable SuggestionResolver<S> getResolverByName(String name) {
+        return resolversPerName.get(name);
     }
     
     @SuppressWarnings({"rawtypes", "unchecked"})
-    final class EnumSuggestionResolver implements SuggestionResolver<S, Enum> {
+    final class EnumSuggestionResolver implements TypeSuggestionResolver<S, Enum> {
         private final Map<Type, List<String>> PRE_LOADED_ENUMS = new HashMap<>();
         
         public void registerEnumResolver(Type raw) {
@@ -90,7 +94,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         }
         
         @Override
-        public TypeWrap<Enum> getType() {
+        public @NotNull TypeWrap<Enum> getType() {
             return TypeWrap.of(Enum.class);
         }
         
@@ -105,10 +109,10 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         }
     }
     
-    final class FlagSuggestionResolver implements SuggestionResolver<S, CommandFlag> {
+    final class FlagSuggestionResolver implements TypeSuggestionResolver<S, CommandFlag> {
         
         @Override
-        public TypeWrap<CommandFlag> getType() {
+        public @NotNull TypeWrap<CommandFlag> getType() {
             return TypeWrap.of(CommandFlag.class);
         }
         

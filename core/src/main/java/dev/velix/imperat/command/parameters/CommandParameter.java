@@ -7,6 +7,7 @@ import dev.velix.imperat.command.DescriptionHolder;
 import dev.velix.imperat.command.PermissionHolder;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
@@ -31,7 +32,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
             boolean optional,
             boolean greedy,
             OptionalValueSupplier<T> valueSupplier,
-            SuggestionResolver<S, T> suggestionResolver
+            TypeSuggestionResolver<S, ?> suggestionResolver
     ) {
         Preconditions.notNull(name, "name");
         Preconditions.notNull(type, "type");
@@ -237,8 +238,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
      * @param <T> the type of value to be resolved
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
-    @Nullable
-    <T> SuggestionResolver<S, T> getSuggestionResolver();
+    @Nullable <T> TypeSuggestionResolver<S, T> getSuggestionResolver();
     
     /**
      * Formats the usage parameter*

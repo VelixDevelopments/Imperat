@@ -83,7 +83,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @return the parameters without flags
      * @see CommandParameter
      */
-    List<CommandParameter<S>> getPureParameters();
+    List<CommandParameter<S>> getParametersWithoutFlags();
     
     /**
      * Fetches the parameter at the index

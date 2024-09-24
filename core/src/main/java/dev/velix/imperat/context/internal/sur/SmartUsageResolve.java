@@ -46,7 +46,7 @@ public final class SmartUsageResolve<S extends Source> {
         final List<CommandParameter<S>> parameterList = new ArrayList<>(usage.getParameters());
         final ArgumentQueue raws = context.arguments().copy();
         
-        final int lengthWithoutFlags = usage.getPureParameters().size();
+        final int lengthWithoutFlags = usage.getParametersWithoutFlags().size();
         
         while (cursor.canContinue(ShiftTarget.PARAMETER_ONLY, parameterList, raws)) {
             CommandParameter<S> currentParameter = cursor.peekParameter(parameterList);

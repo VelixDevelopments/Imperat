@@ -16,6 +16,7 @@ import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +62,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.name = name;
         setDefaultUsageExecution((source, context) -> {
         });
-        this.autoCompleter = AutoCompleter.advanced(this);
+        this.autoCompleter = AutoCompleter.createNative(this);
         this.commandTree = parent != null ? null : CommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
     }
@@ -214,8 +215,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public @Nullable <T> SuggestionResolver<S, T> getSuggestionResolver() {
-        return (SuggestionResolver<S, T>) SuggestionResolver.plain(Command.class, List.of(this.name()));
+    public @Nullable <T> TypeSuggestionResolver<S, T> getSuggestionResolver() {
+        return (TypeSuggestionResolver<S, T>) SuggestionResolver.type(Command.class, List.of(this.name()));
     }
     
     @Override

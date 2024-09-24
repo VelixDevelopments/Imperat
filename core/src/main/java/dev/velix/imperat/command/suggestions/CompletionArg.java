@@ -13,7 +13,7 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.AvailableSince("1.0.0")
 public record CompletionArg(String value, int index) {
     
-    boolean isEmpty() {
+    public boolean isEmpty() {
         return value.isEmpty() || value.isBlank();
     }
 }
