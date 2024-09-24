@@ -361,12 +361,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             if (parameterElement == null) break;
             Type type = parameterElement.getElement().getParameterizedType();
             
-            if (imperat.canBeSender(type) || imperat.hasContextResolver(type)) {
-                parameterElements.removeFirst();
-                continue;
-            }
-            if (AnnotationHelper.isHelpParameter(parameterElement.getElement())) {
-                //CommandHelp parameter
+            if (imperat.canBeSender(type) || imperat.hasSourceResolver(type) || imperat.hasContextResolver(type)) {
                 parameterElements.removeFirst();
                 continue;
             }

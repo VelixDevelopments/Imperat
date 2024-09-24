@@ -13,11 +13,11 @@ import dev.velix.imperat.exception.NumberOutOfRangeException;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.TypeUtility;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -109,14 +109,15 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     }
     
     @Override
-    public <R> @NotNull R getResolvedSource(TypeWrap<R> type) throws ImperatException {
+    @SuppressWarnings("unchecked")
+    public <R> @NotNull R getResolvedSource(Type type) throws ImperatException {
         if (!dispatcher.hasSourceResolver(type)) {
-            throw new IllegalArgumentException("Found no SourceResolver for type `" + type.getType().getTypeName() + "`");
+            throw new IllegalArgumentException("Found no SourceResolver for type `" + type.getTypeName() + "`");
         }
         var sourceResolver = dispatcher.getSourceResolver(type);
         assert sourceResolver != null;
         
-        return sourceResolver.resolve(this.source());
+        return (R) sourceResolver.resolve(this.source());
     }
     
     /**

@@ -4,10 +4,11 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.internal.ResolvedArgument;
 import dev.velix.imperat.context.internal.ResolvedFlag;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Type;
 
 /**
  * Represents the context capabilities
@@ -56,12 +57,12 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
     
     /**
      * Resolves source into a new type of source
-     * using {@link Imperat#getSourceResolver(TypeWrap)}
+     * using {@link Imperat#getSourceResolver(Type)}
      *
      * @param <R> the type of the resolved source
      * @return the resolved source {@link R}
      */
-    <R> @NotNull R getResolvedSource(TypeWrap<R> type) throws ImperatException;
+    <R> @NotNull R getResolvedSource(Type type) throws ImperatException;
     
     /**
      * Fetches the argument/input resolved by the context

@@ -174,7 +174,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param <R>  the new source type parameter
      * @return the {@link SourceResolver} for specific type
      */
-    <R> @Nullable SourceResolver<S, R> getSourceResolver(TypeWrap<R> type);
+    <R> @Nullable SourceResolver<S, R> getSourceResolver(Type type);
     
     /**
      * Registers the {@link SourceResolver} into an internal registry
@@ -183,7 +183,9 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param sourceResolver the source resolver to register
      * @param <R>            the new source type parameter
      */
-    <R> void registerSourceResolver(TypeWrap<R> type, SourceResolver<S, R> sourceResolver);
+    default <R> void registerSourceResolver(TypeWrap<R> type, SourceResolver<S, R> sourceResolver) {
+        registerSourceResolver(type.getType(), sourceResolver);
+    }
 
     /**
      * Registers the {@link SourceResolver} into an internal registry
@@ -194,7 +196,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     <R> void registerSourceResolver(Type type, SourceResolver<S, R> sourceResolver);
     
-    default boolean hasSourceResolver(TypeWrap<?> wrap) {
+    default boolean hasSourceResolver(Type wrap) {
         return getSourceResolver(wrap) != null;
     }
 }

@@ -443,13 +443,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     
     @Override
     @SuppressWarnings("unchecked")
-    public @Nullable <R> SourceResolver<S, R> getSourceResolver(TypeWrap<R> type) {
-        return (SourceResolver<S, R>) sourceResolverRegistry.getData(type.getType()).orElse(null);
-    }
-    
-    @Override
-    public <R> void registerSourceResolver(TypeWrap<R> type, SourceResolver<S, R> sourceResolver) {
-        sourceResolverRegistry.setData(type.getType(), sourceResolver);
+    public @Nullable <R> SourceResolver<S, R> getSourceResolver(Type type) {
+        return (SourceResolver<S, R>) sourceResolverRegistry.getData(type).orElse(null);
     }
 
     @Override
