@@ -13,23 +13,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public final class UsageContextMatch<S extends Source> implements Iterable<CommandParameter<S>> {
+public final class CommandDispatch<S extends Source> implements Iterable<CommandParameter<S>> {
     
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
     
     @Setter
     private UsageMatchResult result;
     
-    private UsageContextMatch(UsageMatchResult result) {
+    private CommandDispatch(UsageMatchResult result) {
         this.result = result;
     }
     
-    public static <S extends Source> UsageContextMatch<S> of(UsageMatchResult result) {
-        return new UsageContextMatch<>(result);
+    public static <S extends Source> CommandDispatch<S> empty(UsageMatchResult result) {
+        return new CommandDispatch<>(result);
     }
     
-    public static <S extends Source> UsageContextMatch<S> of() {
-        return of(UsageMatchResult.UNKNOWN);
+    public static <S extends Source> CommandDispatch<S> empty() {
+        return empty(UsageMatchResult.UNKNOWN);
     }
     
     public void append(ParameterNode<S, ?> node) {

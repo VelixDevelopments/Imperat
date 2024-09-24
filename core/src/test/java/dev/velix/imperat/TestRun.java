@@ -43,6 +43,8 @@ public class TestRun {
         IMPERAT.registerCommand(new AnnotatedGroupCommand());
         IMPERAT.registerCommand(new TestCommand());
         IMPERAT.registerCommand(new OptionalArgCommand());
+        IMPERAT.registerCommand(new BanCommand());
+        
     }
     
     private static UsageMatchResult testCmdTreeExecution(String cmdName, String input) {
@@ -210,11 +212,19 @@ public class TestRun {
     
     @Test
     public void testBanCmd() {
-        IMPERAT.registerCommand(new BanCommand());
         var cmd = IMPERAT.getCommand("ban");
         assert cmd != null;
         debugCommand(cmd);
         
         Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("ban", "mqzen"));
+    }
+    
+    @Test
+    public void testBanWithFlag() {
+        var cmd = IMPERAT.getCommand("ban");
+        assert cmd != null;
+        debugCommand(cmd);
+        
+        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("ban", "mqzen -s"));
     }
 }

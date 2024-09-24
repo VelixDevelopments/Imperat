@@ -64,7 +64,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
         } else {
             //no annotation
-            //System.out.println("No Annotation");
             for (ParseElement<?> element : clazz.getChildren()) {
                 if (element.isAnnotationPresent(dev.velix.imperat.annotations.Command.class)) {
                     var cmd = loadCommand(null, element, Objects.requireNonNull(element.getAnnotation(dev.velix.imperat.annotations.Command.class)));
@@ -177,7 +176,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (parentCmd != null && cmd != null) {
             cmd.parent(parentCmd);
         }
-        //System.out.println("CMD=" + (cmd == null ?"NULL" : cmd.getName())) ;
         if (parseElement instanceof MethodElement method && cmd != null) {
             //@Command on method
             if (!methodSelector.canBeSelected(imperat, registry, method, true)) {
@@ -214,7 +212,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     if (!methodSelector.canBeSelected(imperat, registry, method, true)) {
                         return cmd;
                     }
-                    //System.out.println("----------> Method= " + method.getElement().getName());
+                    
                     if (method.isAnnotationPresent(Usage.class)) {
                         if (method.getInputCount() == 0) {
                             //default usage for that command.

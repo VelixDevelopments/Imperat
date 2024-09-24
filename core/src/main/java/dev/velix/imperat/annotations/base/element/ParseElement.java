@@ -40,9 +40,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     private <A extends Annotation> void load(@NotNull AnnotationRegistry registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
             Class<A> clazz = (Class<A>) annotation.annotationType();
-            //System.out.println("Checking annotation= " + clazz.getSimpleName());
             if (registry.isRegisteredAnnotation(clazz)) {
-                //System.out.println("Found registered annotation");
                 total.put(clazz, annotation);
             } else if (registry.hasReplacerFor(clazz)) {
                 //we add the custom annotation anyway

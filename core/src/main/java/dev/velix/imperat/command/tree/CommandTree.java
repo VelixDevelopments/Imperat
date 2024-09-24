@@ -147,60 +147,61 @@ public final class CommandTree<S extends Source> {
     
     
     //context matching part
-    public @NotNull UsageContextMatch<S> contextMatch(
+    public @NotNull CommandDispatch<S> contextMatch(
             ArgumentQueue input
     ) {
         
         int depth = 0;
         
         for (ParameterNode<S, ?> child : root.getChildren()) {
-            UsageContextMatch<S> nodeTraversing = UsageContextMatch.of();
+            CommandDispatch<S> nodeTraversing = CommandDispatch.empty();
             var traverse = contextMatchNode(nodeTraversing, input, child, depth);
+            
             if (traverse.result() != UsageMatchResult.UNKNOWN) {
                 return traverse;
             }
             
         }
         
-        return UsageContextMatch.of();
+        return CommandDispatch.empty();
     }
     
-    private @NotNull UsageContextMatch<S> contextMatchNode(
-            UsageContextMatch<S> usageContextMatch,
+    private @NotNull CommandDispatch<S> contextMatchNode(
+            CommandDispatch<S> commandDispatch,
             ArgumentQueue input,
             ParameterNode<S, ?> currentNode,
             int depth
     ) {
         //ImperatDebugger.debug("Traversing node=%s, at depth=%s", node.format(), depth);
         if (depth >= input.size()) {
-            return usageContextMatch;
+            return commandDispatch;
         }
         
         String raw = input.get(depth);
         boolean matchesInput = currentNode.matchesInput(raw);
         if (!matchesInput) {
-            return usageContextMatch;
+            return commandDispatch;
         }
         //GO TO NODE'S children
-        usageContextMatch.append(currentNode);
+        commandDispatch.append(currentNode);
         if (currentNode.isLeaf()) {
             
             //not the deepest search depth (still more raw args than number of nodes)
-            usageContextMatch.setResult((depth != input.size() - 1 && !currentNode.isGreedyParam())
+            commandDispatch.setResult((depth != input.size() - 1 && !currentNode.isGreedyParam())
                     ? UsageMatchResult.INCOMPLETE : UsageMatchResult.COMPLETE);
-            return usageContextMatch;
+            return commandDispatch;
         } else {
             //not the last node → continue traversing
             
             //checking if depth is the last
             if (depth == input.size() - 1) {
                 //depth is last → check for missing required arguments
-                usageContextMatch.append(currentNode);
+                commandDispatch.append(currentNode);
                 
                 if (currentNode.isOptional()) {
                     //so if the node is optional,
                     // we go deeper into the tree, while backtracking the depth of the argument input.
-                    return searchForMatch(currentNode, usageContextMatch, input, depth - 1);
+                    return searchForMatch(currentNode, commandDispatch, input, depth - 1);
                 } else {
                     //ImperatDebugger.debug("Last Depth=%s, Current node= %s", depth, node.format());
                     //node is not the last, and we reached the end of the raw input length
@@ -218,44 +219,44 @@ public final class CommandTree<S extends Source> {
                         //if all optional, then append the all next
                         var child = currentNode.getChild(ParameterNode::isOptional);
                         if (child != null) {
-                            usageContextMatch.append(child);
+                            commandDispatch.append(child);
                             //collect optionals while depth is constant since we reached the end of raw input early
                             if (!child.isLeaf()) {
-                                return searchForMatch(child, usageContextMatch, input, depth - 1);
+                                return searchForMatch(child, commandDispatch, input, depth - 1);
                             }
                         }
                     }
                     
                     //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
-                    var usage = usageContextMatch.toUsage(root.data);
-                    usageContextMatch.setResult(
+                    var usage = commandDispatch.toUsage(root.data);
+                    commandDispatch.setResult(
                             allOptional || usage != null
                                     ? UsageMatchResult.COMPLETE
                                     : UsageMatchResult.INCOMPLETE
                     );
-                    return usageContextMatch;
+                    return commandDispatch;
                 }
                 
             } else {
-                return this.searchForMatch(currentNode, usageContextMatch, input, depth);
+                return this.searchForMatch(currentNode, commandDispatch, input, depth);
             }
             
         }
         
     }
     
-    private UsageContextMatch<S> searchForMatch(
+    private CommandDispatch<S> searchForMatch(
             ParameterNode<S, ?> node,
-            UsageContextMatch<S> usageContextMatch,
+            CommandDispatch<S> commandDispatch,
             ArgumentQueue input,
             int depth
     ) {
         for (ParameterNode<S, ?> child : node.getChildren()) {
-            var traversedChild = contextMatchNode(usageContextMatch, input, child, depth + 1);
+            var traversedChild = contextMatchNode(commandDispatch, input, child, depth + 1);
             if (traversedChild.result() == UsageMatchResult.COMPLETE)
                 return traversedChild;
         }
-        return usageContextMatch;
+        return commandDispatch;
     }
     
 }

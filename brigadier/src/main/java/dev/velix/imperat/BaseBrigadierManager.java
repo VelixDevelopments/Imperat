@@ -95,14 +95,10 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             Command<S> command,
             CommandParameter<S> parameter
     ) {
-        SuggestionResolver<S, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
-        //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", suggestionResolver == null, parameter.format());
-        if (suggestionResolver == null) {
-            String paramFormat = parameter.format();
-            String desc = parameter.description() == Description.EMPTY ? parameter.description().toString() : "";
-            return ((context, builder) -> builder.suggest(paramFormat, new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc)))
-                    .buildFuture());
-        }
+        SuggestionResolver<S, ?> parameterResolver = dispatcher.getParameterSuggestionResolver(parameter);
+        SuggestionResolver<S, ?> suggestionResolver = parameterResolver == null ? SuggestionResolver.plain(parameter.wrappedType(), parameter.format()) : parameterResolver;
+        
+        //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", parameterResolver == null, parameter.format());
         
         return (context, builder) -> {
             
@@ -110,7 +106,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
                 
                 S source = this.wrapCommandSource(context.getSource());
                 String paramFormat = parameter.format();
-                String desc = parameter.description() == Description.EMPTY ? parameter.description().toString() : "";
+                String desc = parameter.description() != Description.EMPTY ? parameter.description().toString() : "";
                 Message tooltip = new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc));
                 
                 String input = context.getInput();

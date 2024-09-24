@@ -6,9 +6,9 @@ import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
+import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.CommandTreeVisualizer;
-import dev.velix.imperat.command.tree.UsageContextMatch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
@@ -125,7 +125,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     }
     
     @Override
-    public @NotNull UsageContextMatch<S> contextMatch(Context<S> context) {
+    public @NotNull CommandDispatch<S> contextMatch(Context<S> context) {
         if (commandTree != null) {
             return commandTree.contextMatch(context.arguments());
         } else {

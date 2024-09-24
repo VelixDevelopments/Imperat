@@ -9,7 +9,7 @@ import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
 import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
-import dev.velix.imperat.command.tree.UsageContextMatch;
+import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.ContextFactory;
@@ -554,7 +554,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return UsageMatchResult.INCOMPLETE;
         }
         
-        UsageContextMatch<S> searchResult = command.contextMatch(context);
+        CommandDispatch<S> searchResult = command.contextMatch(context);
         //executing usage
         
         CommandUsage<S> usage = searchResult.toUsage(command);

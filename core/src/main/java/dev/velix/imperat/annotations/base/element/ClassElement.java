@@ -48,10 +48,8 @@ public final class ClassElement extends ParseElement<Class<?>> {
     
     public <S extends Source> Set<Command<S>> accept(CommandClassVisitor<S> visitor) {
         try {
-            //System.out.println("Starting to visit class");
             return visitor.visitCommandClass(this);
         } catch (Throwable ex) {
-            //System.out.println("some exception happened");
             ex.printStackTrace();
             return Collections.emptySet();
         }
