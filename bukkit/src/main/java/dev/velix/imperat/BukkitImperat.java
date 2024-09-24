@@ -13,7 +13,6 @@ import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
-import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
@@ -57,8 +56,8 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     }
     
     private void registerSourceResolvers() {
-        this.registerSourceResolver(TypeWrap.of(CommandSender.class), BukkitSource::origin);
-        this.registerSourceResolver(TypeWrap.of(Player.class), BukkitSource::asPlayer);
+        this.registerSourceResolver(Player.class, BukkitSource::asPlayer);
+        this.registerSourceResolver(CommandSender.class, BukkitSource::origin);
     }
 
     private void addThrowableHandlers() {

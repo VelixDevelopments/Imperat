@@ -451,7 +451,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public <R> void registerSourceResolver(TypeWrap<R> type, SourceResolver<S, R> sourceResolver) {
         sourceResolverRegistry.setData(type.getType(), sourceResolver);
     }
-    
+
+    @Override
+    public <R> void registerSourceResolver(Type type, SourceResolver<S, R> sourceResolver) {
+        sourceResolverRegistry.setData(type, sourceResolver);
+    }
+
     /**
      * Sets the usage verifier to a new instance
      *

@@ -9,7 +9,6 @@ import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
-import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -50,8 +49,8 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     }
     
     private void registerSourceResolvers() {
-        registerSourceResolver(TypeWrap.of(CommandSender.class), BungeeSource::origin);
-        registerSourceResolver(TypeWrap.of(ProxiedPlayer.class), BungeeSource::asPlayer);
+        registerSourceResolver(CommandSender.class, BungeeSource::origin);
+        registerSourceResolver(ProxiedPlayer.class, BungeeSource::asPlayer);
     }
     
     private void registerValueResolvers() {
