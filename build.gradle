@@ -71,8 +71,8 @@ subprojects {
             }
         }
 
-        //publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-        //signAllPublications()
+        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+        signAllPublications()
     }
 
 }
