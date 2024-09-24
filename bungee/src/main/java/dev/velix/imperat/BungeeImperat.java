@@ -37,6 +37,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         registerSourceResolvers();
         registerValueResolvers();
         registerSuggestionResolvers();
+        registerThrowableResolvers();
     }
     
     private AdventureProvider<CommandSender> loadAdventureProvider(@Nullable AdventureProvider<CommandSender> provider) {
@@ -55,6 +56,13 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     
     private void registerValueResolvers() {
         registerValueResolver(ProxiedPlayer.class, (ctx, param, cursor, raw) -> {
+            if (raw.equalsIgnoreCase("me")) {
+                if (ctx.source().isConsole()) {
+                    throw new UnknownPlayerException(raw);
+                }
+                return ctx.source().asPlayer();
+            }
+            
             ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(raw);
             if (proxiedPlayer == null) {
                 throw new UnknownPlayerException(raw);
@@ -67,6 +75,13 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         registerSuggestionResolver(
                 SuggestionResolver.type(ProxiedPlayer.class, ProxyServer.getInstance().getPlayers()
                         .stream().map(ProxiedPlayer::getName).toList())
+        );
+    }
+    
+    private void registerThrowableResolvers() {
+        this.setThrowableResolver(
+                UnknownPlayerException.class, (exception, imperat, context) ->
+                        context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
         );
     }
     

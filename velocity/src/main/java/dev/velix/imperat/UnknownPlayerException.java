@@ -1,4 +1,6 @@
-package dev.velix.imperat.exception;
+package dev.velix.imperat;
+
+import dev.velix.imperat.exception.ImperatException;
 
 public class UnknownPlayerException extends ImperatException {
 

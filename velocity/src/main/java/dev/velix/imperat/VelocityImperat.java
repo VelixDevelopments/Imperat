@@ -1,7 +1,5 @@
 package dev.velix.imperat;
 
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.plugin.PluginContainer;
@@ -9,7 +7,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.Preconditions;
@@ -17,10 +14,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class VelocityImperat extends BaseImperat<VelocitySource> {
     
-    private final PluginContainer plugin;
+    final PluginContainer plugin;
     private final ProxyServer proxyServer;
-    
-    private final BaseBrigadierManager<VelocitySource> velocityBrigadier;
     
     private VelocityImperat(
             @NotNull String pluginName,
@@ -31,8 +26,6 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         Preconditions.notEmpty(pluginName, "plugin id/name is not valid");
         this.plugin = proxyServer.getPluginManager().getPlugin(pluginName).orElseThrow(() -> new IllegalStateException("Unknown plugin with name '" + pluginName + "'"));
         this.proxyServer = proxyServer;
-        this.velocityBrigadier = VelocityBrigadier.create(this);
-
         this.registerDefaultResolvers();
     }
     
@@ -66,6 +59,10 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         this.registerSuggestionResolver(
                 SuggestionResolver.type(Player.class, proxyServer.getAllPlayers().stream().map(Player::getUsername).toList())
         );
+        this.setThrowableResolver(
+                UnknownPlayerException.class, (exception, imperat, context) ->
+                        context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
+        );
     }
 
     @Override
@@ -73,14 +70,8 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         super.registerCommand(command);
         CommandManager manager = proxyServer.getCommandManager();
         try {
-            LiteralCommandNode<CommandSource> commandNode = velocityBrigadier.parseCommandIntoNode(command);
-            
-            manager.register(
-                    manager.metaBuilder(command.name().toLowerCase())
-                            .aliases(command.aliases().toArray(new String[0]))
-                            .plugin(plugin).build(),
-                    new BrigadierCommand(commandNode)
-            );
+            InternalVelocityCommand internalCmd = new InternalVelocityCommand(this, command, manager);
+            manager.register(internalCmd.getMeta(), internalCmd);
         } catch (final Exception ex) {
             ex.printStackTrace();
         }
