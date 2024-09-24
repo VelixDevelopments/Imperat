@@ -88,7 +88,7 @@ public class TestRun {
     
     @Test
     public void testHelp() {
-        debugCommand(IMPERAT.getCommand("test"));
+        debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
         Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "help"));
     }
     
