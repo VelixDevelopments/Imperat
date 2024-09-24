@@ -31,7 +31,7 @@ public final class BungeeSource implements Source {
     
     @Override
     public void reply(String message) {
-        reply(TextComponent.fromLegacyText(message));
+        reply(TextComponent.fromLegacy(message));
     }
 
     @Override
