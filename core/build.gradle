@@ -22,9 +22,3 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
-static String lombok() {
-    return 'org.projectlombok:lombok:1.18.34'
-}
-
-

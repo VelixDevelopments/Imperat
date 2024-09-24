@@ -8,6 +8,28 @@ plugins {
 allprojects {
     group = "dev.velix"
     version = "1.0.0-b.2"
+
+    ext {
+        kyori = { String module ->
+            kyoriPlatform(module, "4.17.0")
+        }
+
+        kyoriPlatform = { String platform, String version ->
+            return "net.kyori:adventure-" + platform + ":" + version
+        }
+
+        KyoriModule = [
+                API          : "api",
+                MINI_MESSAGE : "text-minimessage",
+                BUKKIT       : "platform-bukkit",
+                BUNGEE       : "platform-bungeecord",
+                SPONGE       : "platform-spongeapi"
+        ]
+
+        lombok = {
+            return 'org.projectlombok:lombok:1.18.34'
+        }
+    }
 }
 
 subprojects {

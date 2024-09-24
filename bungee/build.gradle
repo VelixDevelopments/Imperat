@@ -13,34 +13,6 @@ dependencies {
 
     compileOnly project(":core")
     compileOnly kyori(KyoriModule.API)
-    compileOnly platform(KyoriModule.BUNGEE, "4.3.4")
+    compileOnly kyoriPlatform(KyoriModule.BUNGEE, "4.3.4")
     compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
-}
-
-static String lombok() {
-    return 'org.projectlombok:lombok:1.18.34'
-}
-
-static String kyori(KyoriModule module) {
-    return platform(module, "4.17.0")
-}
-
-static String platform(KyoriModule platform, String version) {
-    "net.kyori:adventure-" + platform.getDisplay() + ":" + version
-}
-
-enum KyoriModule {
-
-    API("api"), MINI_MESSAGE("text-minimessage"), BUKKIT("platform-bukkit"),
-    BUNGEE("platform-bungeecord"), SPONGE("platform-spongeapi");
-
-    private final String display
-
-    KyoriModule(String display) {
-        this.display = display
-    }
-
-    String getDisplay() {
-        return display
-    }
 }

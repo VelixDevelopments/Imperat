@@ -8,38 +8,8 @@ repositories {
 
 dependencies {
     compileOnly project(":core")
-    compileOnlyApi kyori(KyoriModule.API)
-    //compileOnlyApi kyori(KyoriModule.MINI_MESSAGE)
+    compileOnlyApi(kyori(KyoriModule.API))
 
     compileOnly 'org.jetbrains:annotations:24.1.0'
     annotationProcessor('org.jetbrains:annotations:24.1.0')
-
-}
-
-
-static String kyori(KyoriModule module) {
-    return kyoriPlatform(module, "4.17.0")
-}
-
-static String kyoriPlatform(KyoriModule platform, String version) {
-    "net.kyori:adventure-" + platform.getDisplay() + ":" + version
-}
-
-enum KyoriModule {
-
-    API("api"),
-    MINI_MESSAGE("text-minimessage"),
-    BUKKIT("platform-bukkit"),
-    BUNGEE("platform-bungeecord"),
-    SPONGE("platform-spongeapi");
-
-    private final String display
-
-    KyoriModule(String display) {
-        this.display = display
-    }
-
-    String getDisplay() {
-        return display
-    }
 }

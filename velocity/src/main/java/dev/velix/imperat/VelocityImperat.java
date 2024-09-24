@@ -48,12 +48,11 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
     
     
     @Override
-    @SuppressWarnings("unchecked")
     public void registerCommand(Command<VelocitySource> command) {
         super.registerCommand(command);
         CommandManager manager = proxyServer.getCommandManager();
         try {
-            LiteralCommandNode<CommandSource> commandNode = (LiteralCommandNode<CommandSource>) velocityBrigadier.parseCommandIntoNode(command);
+            LiteralCommandNode<CommandSource> commandNode = velocityBrigadier.parseCommandIntoNode(command);
             
             manager.register(
                     manager.metaBuilder(command.name().toLowerCase())
@@ -61,7 +60,7 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
                             .plugin(plugin).build(),
                     new BrigadierCommand(commandNode)
             );
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             ex.printStackTrace();
         }
     }
