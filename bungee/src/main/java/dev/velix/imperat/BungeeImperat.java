@@ -7,6 +7,7 @@ import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
@@ -36,6 +37,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         
         registerSourceResolvers();
         registerValueResolvers();
+        registerSuggestionResolvers();
     }
     
     private AdventureProvider<CommandSender> loadAdventureProvider(@Nullable AdventureProvider<CommandSender> provider) {
@@ -60,6 +62,13 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
             }
             return proxiedPlayer;
         });
+    }
+    
+    private void registerSuggestionResolvers() {
+        registerSuggestionResolver(
+                SuggestionResolver.type(ProxiedPlayer.class, ProxyServer.getInstance().getPlayers()
+                        .stream().map(ProxiedPlayer::getName).toList())
+        );
     }
     
     public static BungeeImperat create(
