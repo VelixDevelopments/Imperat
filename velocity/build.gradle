@@ -4,11 +4,15 @@ repositories {
         name = 'papermc'
         url = 'https://repo.papermc.io/repository/maven-public/'
     }
+    maven {
+        url = "https://libraries.minecraft.net"
+    }
 }
 
 dependencies {
     compileOnly project(":core")
-    implementation project(":brigadier")
+    compileOnly("com.mojang:brigadier:1.0.18")
+    api project(":brigadier")
 
     compileOnly 'com.velocitypowered:velocity-api:3.4.0-SNAPSHOT'
     annotationProcessor 'com.velocitypowered:velocity-api:3.4.0-SNAPSHOT'

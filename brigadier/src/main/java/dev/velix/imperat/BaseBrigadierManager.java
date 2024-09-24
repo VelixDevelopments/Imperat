@@ -16,7 +16,6 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,7 +96,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             CommandParameter<S> parameter
     ) {
         SuggestionResolver<S, ?> suggestionResolver = dispatcher.getParameterSuggestionResolver(parameter);
-        ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", suggestionResolver == null, parameter.format());
+        //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", suggestionResolver == null, parameter.format());
         if (suggestionResolver == null) {
             String paramFormat = parameter.format();
             String desc = parameter.description() == Description.EMPTY ? parameter.description().toString() : "";
