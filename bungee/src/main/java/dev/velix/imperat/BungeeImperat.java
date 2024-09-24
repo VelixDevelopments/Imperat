@@ -113,10 +113,9 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     }
     
     @Override
-    public Object getPlatform() {
+    public Plugin getPlatform() {
         return plugin;
     }
-    
     
     @Override
     public void shutdownPlatform() {
