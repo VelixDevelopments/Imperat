@@ -37,7 +37,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
 
     compileOnly kyori(KyoriModule.API)
-    compileOnly kyoriPlatform(KyoriModule.BUKKIT, "4.3.3")
+    compileOnly kyoriPlatform(KyoriModule.BUKKIT)
 }
 
 processTestResources {

@@ -13,6 +13,6 @@ dependencies {
 
     compileOnly project(":core")
     compileOnly kyori(KyoriModule.API)
-    compileOnly kyoriPlatform(KyoriModule.BUNGEE, "4.3.4")
+    compileOnly kyoriPlatform(KyoriModule.BUNGEE)
     compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
 }

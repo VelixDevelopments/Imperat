@@ -10,12 +10,15 @@ allprojects {
     version = "1.0.0-b.2"
 
     ext {
+        def kyoriVersion = "4.17.0"
+        def kyoriPlatformVersion = "4.3.4"
+
         kyori = { String module ->
-            kyoriPlatform(module, "4.17.0")
+            return "net.kyori:adventure-" + module + ":" + kyoriVersion
         }
 
-        kyoriPlatform = { String platform, String version ->
-            return "net.kyori:adventure-" + platform + ":" + version
+        kyoriPlatform = { String module ->
+            return "net.kyori:adventure-" + module + ":" + kyoriPlatformVersion
         }
 
         KyoriModule = [
