@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     id 'java-library'
     id("com.vanniktech.maven.publish") version "0.29.0"
@@ -71,8 +73,8 @@ subprojects {
             }
         }
 
-        //publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-        //signAllPublications()
+        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+        signAllPublications()
     }
 
 }
