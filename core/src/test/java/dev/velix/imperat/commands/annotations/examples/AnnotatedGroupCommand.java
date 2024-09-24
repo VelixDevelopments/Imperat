@@ -16,7 +16,7 @@ public final class AnnotatedGroupCommand {
     @Usage
     public void mainUsage(
             TestSource source,
-            @Named("group") @SuggestionProvider("groups") Group group
+            @Named("group") Group group
     ) {
         //when he does "/group <group>"
         source.reply("entered group name= " + group.name());

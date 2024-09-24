@@ -430,10 +430,13 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             suggestionResolver = SuggestionResolver.type(parameter.getType(), suggestAnnotation.value());
         } else if (suggestionProvider != null) {
             var namedResolver = imperat.getNamedSuggestionResolver(suggestionProvider.value().toLowerCase());
-            if (!(namedResolver instanceof TypeSuggestionResolver<?, ?>)) {
+            if (namedResolver != null && !(namedResolver instanceof TypeSuggestionResolver<?, ?>))
                 throw new UnsupportedOperationException("Named suggestion resolvers must be of type `TypeSuggestionResolver` and make sure the type matches that of the parameter's");
+            else if (namedResolver != null)
+                suggestionResolver = (TypeSuggestionResolver<S, ?>) namedResolver;
+            else {
+                throw new IllegalStateException("Unregistered named suggestion resolver : " + suggestionProvider.value());
             }
-            suggestionResolver = (TypeSuggestionResolver<S, ?>) namedResolver;
         }
         
         boolean greedy = parameter.getAnnotation(Greedy.class) != null;

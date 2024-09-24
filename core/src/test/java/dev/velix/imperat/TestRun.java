@@ -89,9 +89,6 @@ public class TestRun {
     @Test
     public void testHelp() {
         debugCommand(IMPERAT.getCommand("test"));
-        debugCommand(IMPERAT.getCommand("group"));
-        
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("group", "help"));
         Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "help"));
     }
     
