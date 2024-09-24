@@ -2,7 +2,6 @@ package dev.velix.imperat.brigadier;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import dev.velix.imperat.BukkitUtil;
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -325,13 +324,20 @@ public enum MinecraftArgumentType {
      * @return The created argument type.
      * @throws IllegalArgumentException if not supported in this version
      */
-    @SneakyThrows
     public @NotNull <T> ArgumentType<T> create(Object... arguments) {
-        if (argumentConstructor == null)
+        if (argumentConstructor == null) {
             throw new IllegalArgumentException("Argument type '" + name().toLowerCase() + "' is not available on this version.");
-        if (argumentType != null && arguments.length == 0)
+        }
+
+        if (argumentType != null && arguments.length == 0) {
             return (ArgumentType<T>) argumentType;
-        return argumentConstructor.newInstance(arguments);
+        }
+
+        try {
+            return argumentConstructor.newInstance(arguments);
+        } catch (final Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**
@@ -350,7 +356,7 @@ public enum MinecraftArgumentType {
         throw new IllegalArgumentException("This argument type requires " + parameters.length + " parameter(s) of type(s) " +
                 Arrays.stream(parameters).map(Class::getName).collect(Collectors.joining(", ")) + ". Use #create() instead.");
     }
-    
+
     /**
      * Creates an instance of this argument type, wrapped in an optional.
      *
@@ -358,12 +364,20 @@ public enum MinecraftArgumentType {
      * @param <T>       The argument ttype
      * @return The created argument type optional.
      */
-    @SneakyThrows
     public @NotNull <T> Optional<ArgumentType<T>> createIfPresent(Object... arguments) {
-        if (argumentConstructor == null)
+        if (argumentConstructor == null) {
             return Optional.empty();
-        if (argumentType != null && arguments.length == 0)
+        }
+
+        if (argumentType != null && arguments.length == 0) {
             return Optional.of((ArgumentType<T>) argumentType);
-        return Optional.of(argumentConstructor.newInstance(arguments));
+        }
+
+        try {
+            return Optional.of(argumentConstructor.newInstance(arguments));
+        } catch (final Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
+
 }

@@ -6,7 +6,7 @@ import dev.velix.imperat.command.parameters.NumericRange;
 public class NumberOutOfRangeException extends SourceException {
     
     public NumberOutOfRangeException(
-            final NumericParameter parameter,
+            final NumericParameter<?> parameter,
             final Number value,
             final NumericRange range
     ) {

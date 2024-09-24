@@ -27,9 +27,6 @@ dependencies {
 
     compileOnly project(":core")
 
-    compileOnly "${lombok()}"
-    annotationProcessor "${lombok()}"
-
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly 'org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT'
 

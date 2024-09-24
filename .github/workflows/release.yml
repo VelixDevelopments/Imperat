@@ -15,7 +15,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Maven Central
           onlyRemoveDeployments: true
-  build:
+  release:
     needs: cleanup
     runs-on: ubuntu-latest
     environment: Maven Central

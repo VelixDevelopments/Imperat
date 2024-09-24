@@ -11,9 +11,6 @@ repositories {
 dependencies {
     api project(":adventure")
 
-    compileOnly "${lombok()}"
-    annotationProcessor "${lombok()}"
-
     compileOnly project(":core")
     compileOnly "${kyori(KyoriModule.API)}"
     compileOnly "${kyoriPlatform(KyoriModule.BUNGEE)}"
