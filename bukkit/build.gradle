@@ -27,17 +27,16 @@ dependencies {
 
     compileOnly project(":core")
 
-    compileOnly lombok()
-    annotationProcessor lombok()
+    compileOnly "${lombok()}"
+    annotationProcessor "${lombok()}"
 
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly 'org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT'
 
-    compileOnly("io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT")
     compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
 
-    compileOnly kyori(KyoriModule.API)
-    compileOnly kyoriPlatform(KyoriModule.BUKKIT)
+    compileOnly "${kyori(KyoriModule.API)}"
+    compileOnly "${kyoriPlatform(KyoriModule.BUKKIT)}"
 }
 
 processTestResources {

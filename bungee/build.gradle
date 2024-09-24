@@ -3,16 +3,19 @@ repositories {
     maven {
         url "https://oss.sonatype.org/content/repositories/snapshots"
     }
+    maven {
+        url "https://libraries.minecraft.net"
+    }
 }
 
 dependencies {
     api project(":adventure")
 
-    compileOnly lombok()
-    annotationProcessor lombok()
+    compileOnly "${lombok()}"
+    annotationProcessor "${lombok()}"
 
     compileOnly project(":core")
-    compileOnly kyori(KyoriModule.API)
-    compileOnly kyoriPlatform(KyoriModule.BUNGEE)
-    compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
+    compileOnly "${kyori(KyoriModule.API)}"
+    compileOnly "${kyoriPlatform(KyoriModule.BUNGEE)}"
+    compileOnly("net.md-5:bungeecord-api:1.21-R0.1-SNAPSHOT")
 }
