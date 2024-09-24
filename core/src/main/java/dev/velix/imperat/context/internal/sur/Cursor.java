@@ -18,13 +18,13 @@ public final class Cursor<S extends Source> {
     int parameter, raw;
     
     public void shift(ShiftTarget shift, IntUnaryOperator operator) {
-        if (shift == ShiftTarget.RAW_ONLY)
-            this.raw = operator.applyAsInt(raw);
-        else if (shift == ShiftTarget.PARAMETER_ONLY)
-            this.parameter = operator.applyAsInt(parameter);
-        else {
-            this.raw = operator.applyAsInt(raw);
-            this.parameter = operator.applyAsInt(parameter);
+        switch (shift) {
+            case RAW_ONLY -> this.raw = operator.applyAsInt(raw);
+            case PARAMETER_ONLY -> this.parameter = operator.applyAsInt(parameter);
+            default -> {
+                this.raw = operator.applyAsInt(raw);
+                this.parameter = operator.applyAsInt(parameter);
+            }
         }
     }
     
