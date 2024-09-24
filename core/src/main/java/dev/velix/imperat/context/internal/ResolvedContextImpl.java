@@ -13,6 +13,7 @@ import dev.velix.imperat.exception.NumberOutOfRangeException;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +32,6 @@ import java.util.*;
  */
 @ApiStatus.Internal
 final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> implements ResolvedContext<S> {
-    
     
     private final CommandUsage<S> usage;
     private final FlagRegistry flagRegistry = new FlagRegistry();
@@ -106,6 +106,17 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
         ResolvedArgument<S> argument = allResolvedArgs.get(name);
         if (argument == null) return null;
         return (T) argument.value();
+    }
+    
+    @Override
+    public <R> @NotNull R getResolvedSource(TypeWrap<R> type) throws ImperatException {
+        if (!dispatcher.hasSourceResolver(type)) {
+            throw new IllegalArgumentException("Found no SourceResolver for type `" + type.getType().getTypeName() + "`");
+        }
+        var sourceResolver = dispatcher.getSourceResolver(type);
+        assert sourceResolver != null;
+        
+        return sourceResolver.resolve(this.source());
     }
     
     /**

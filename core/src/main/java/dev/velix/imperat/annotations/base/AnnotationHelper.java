@@ -12,6 +12,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +43,15 @@ public final class AnnotationHelper {
         
         Object[] paramsInstances = new Object[method.getParameters().size()];
         
-        paramsInstances[0] = source;
+        ParameterElement firstParam = method.getParameterAt(0);
+        assert firstParam != null;
+        
+        if (!dispatcher.canBeSender(firstParam.getType())) {
+            paramsInstances[0] = context.getResolvedSource(TypeWrap.of(firstParam.getType()));
+        } else {
+            paramsInstances[0] = source;
+        }
+        
         for (int i = 1, p = 0; i < method.size(); i++, p++) {
             ParameterElement actualParameter = method.getParameterAt(i);
             

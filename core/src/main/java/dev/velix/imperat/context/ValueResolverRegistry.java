@@ -3,6 +3,7 @@ package dev.velix.imperat.context;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.internal.sur.Cursor;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.InvalidUUIDException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Registry;
@@ -10,6 +11,7 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Type;
+import java.util.UUID;
 
 @ApiStatus.Internal
 public final class ValueResolverRegistry<S extends Source> extends Registry<Type, ValueResolver<S, ?>> {
@@ -48,6 +50,13 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
             }
         });
         
+        registerResolver(UUID.class, (context, parameter, cursor, raw) -> {
+            try {
+                return UUID.fromString(raw);
+            } catch (IllegalArgumentException ex) {
+                throw new InvalidUUIDException(raw);
+            }
+        });
     }
     
     public static <S extends Source> ValueResolverRegistry<S> createDefault() {
@@ -67,10 +76,12 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
     }
     
     public ValueResolver<S, ?> getResolver(Type type) {
-        if (TypeUtility.areRelatedTypes(type, Enum.class)) {
-            return enumValueResolver;
-        }
+        
         return getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
+            if (TypeUtility.areRelatedTypes(type, Enum.class)) {
+                return enumValueResolver;
+            }
+            
             for (var registeredType : getKeys()) {
                 if (TypeUtility.areRelatedTypes(type, registeredType)) {
                     return getData(registeredType).orElse(null);
@@ -83,7 +94,6 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
     @ApiStatus.Internal
     @SuppressWarnings({"rawtypes", "unchecked"})
     final class EnumValueResolver implements ValueResolver<S, Enum<?>> {
-        
         
         @Override
         public Enum<?> resolve(

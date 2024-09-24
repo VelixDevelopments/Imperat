@@ -8,6 +8,8 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.jetbrains.annotations.NotNull;
 
 public final class BungeeSource implements Source {
     
@@ -57,4 +59,7 @@ public final class BungeeSource implements Source {
         return ProxyServer.getInstance().getConsole().equals(sender);
     }
     
+    public @NotNull ProxiedPlayer asPlayer() {
+        return (ProxiedPlayer) sender;
+    }
 }

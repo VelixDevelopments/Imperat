@@ -8,8 +8,11 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +33,9 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         this.plugin = plugin;
         ImperatDebugger.setLogger(plugin.getLogger());
         this.adventureProvider = loadAdventureProvider(adventureProvider);
+        
+        registerSourceResolvers();
+        registerValueResolvers();
     }
     
     private AdventureProvider<CommandSender> loadAdventureProvider(@Nullable AdventureProvider<CommandSender> provider) {
@@ -39,6 +45,21 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
             return new BungeeAdventure(plugin);
         }
         return new EmptyAdventure<>();
+    }
+    
+    private void registerSourceResolvers() {
+        registerSourceResolver(TypeWrap.of(CommandSender.class), BungeeSource::origin);
+        registerSourceResolver(TypeWrap.of(ProxiedPlayer.class), BungeeSource::asPlayer);
+    }
+    
+    private void registerValueResolvers() {
+        registerValueResolver(ProxiedPlayer.class, (ctx, param, cursor, raw) -> {
+            ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(raw);
+            if (proxiedPlayer == null) {
+                throw new UnknownPlayerException(raw);
+            }
+            return proxiedPlayer;
+        });
     }
     
     public static BungeeImperat create(

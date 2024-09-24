@@ -4,6 +4,7 @@ import dev.velix.imperat.annotations.base.element.ClassElement;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.TypeWrap;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
@@ -25,10 +26,12 @@ public interface MethodRules {
             })
             .build();
     
+    @SuppressWarnings("unchecked")
     Rule<MethodElement> HAS_KNOWN_SENDER = Rule.buildForMethod()
             .condition((imperat, registry, method) -> {
                 ParameterElement parameterElement = method.getParameterAt(0);
-                return parameterElement != null && imperat.canBeSender(parameterElement.getType());
+                return parameterElement != null && (imperat.canBeSender(parameterElement.getType())
+                        || imperat.hasSourceResolver(TypeWrap.of(parameterElement.getType())));
             })
             .failure((registry, method) -> {
                 ParameterElement parameterElement = method.getParameterAt(0);
@@ -46,7 +49,7 @@ public interface MethodRules {
             .condition((imperat, registry, element) -> {
                 long count = Arrays.stream(element.getDeclaredAnnotations())
                         .filter(annotation -> registry.isMainType(annotation.annotationType())).count();
-                return count == 1 || count == 0;
+                return count == 1;
             })
             .failure((registry, element) -> {
                 StringBuilder builder = new StringBuilder();

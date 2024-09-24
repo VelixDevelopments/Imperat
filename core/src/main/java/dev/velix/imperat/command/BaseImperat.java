@@ -34,6 +34,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private final ContextResolverRegistry<S> contextResolverRegistry;
     private final ValueResolverRegistry<S> valueResolverRegistry;
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
+    private final SourceResolverRegistry<S> sourceResolverRegistry;
+    
     protected @NotNull PermissionResolver<S> permissionResolver;
     private @NotNull ContextFactory<S> contextFactory;
     private @NotNull UsageVerifier<S> verifier;
@@ -50,9 +52,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         contextResolverRegistry = ContextResolverRegistry.createDefault(this);
         valueResolverRegistry = ValueResolverRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
+        sourceResolverRegistry = SourceResolverRegistry.createDefault();
         verifier = UsageVerifier.typeTolerantVerifier();
         this.permissionResolver = permissionResolver;
-        registerProcessors();
+        this.registerProcessors();
         this.regDefThrowableResolvers();
         annotationParser = AnnotationParser.defaultParser(this);
     }
@@ -64,6 +67,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     private void regDefThrowableResolvers() {
+        this.setThrowableResolver(InvalidSourceException.class, (exception, imperat, context) -> {
+            throw new UnsupportedOperationException("Couldn't find any source resolver for type `"
+                    + exception.getTargetType().getType().getTypeName() + "'");
+        });
+        
         this.setThrowableResolver(
                 SourceException.class,
                 (exception, imperat, context) -> {
@@ -75,6 +83,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     }
                 }
         );
+        
+        this.setThrowableResolver(
+                InvalidUUIDException.class, (exception, imperat, context) ->
+                        context.source().error("Invalid uuid-format '" + exception.getRaw() + "'")
+        );
+        
         this.setThrowableResolver(
                 CooldownException.class,
                 (exception, imperat, context) -> {
@@ -425,6 +439,17 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public void registerNamedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver) {
         suggestionResolverRegistry.registerNamedResolver(name, suggestionResolver);
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public @Nullable <R> SourceResolver<S, R> getSourceResolver(TypeWrap<R> type) {
+        return (SourceResolver<S, R>) sourceResolverRegistry.getData(type.getType()).orElse(null);
+    }
+    
+    @Override
+    public <R> void registerSourceResolver(TypeWrap<R> type, SourceResolver<S, R> sourceResolver) {
+        sourceResolverRegistry.setData(type.getType(), sourceResolver);
     }
     
     /**

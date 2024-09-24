@@ -6,7 +6,6 @@ import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.exception.InvalidUUIDException;
 import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
@@ -14,6 +13,7 @@ import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
@@ -28,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.UUID;
 
 public final class BukkitImperat extends BaseImperat<BukkitSource> {
     
@@ -52,8 +51,14 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         }
         this.addThrowableHandlers();
         this.adventureProvider = loadAdventure(adventureProvider);
+        registerSourceResolvers();
         registerValueResolvers();
         registerSuggestionResolvers();
+    }
+    
+    private void registerSourceResolvers() {
+        this.registerSourceResolver(TypeWrap.of(CommandSender.class), BukkitSource::origin);
+        this.registerSourceResolver(TypeWrap.of(Player.class), BukkitSource::asPlayer);
     }
 
     private void addThrowableHandlers() {
@@ -69,10 +74,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
                 UnknownWorldException.class, (exception, imperat, context) ->
                         context.source().error("A world with the name '" + exception.getName() + "' doesn't seem to exist")
         );
-        this.setThrowableResolver(
-                InvalidUUIDException.class, (exception, imperat, context) ->
-                        context.source().error("Invalid uuid-format '" + exception.getRaw() + "'")
-        );
+        
     }
     
     private AdventureProvider<CommandSender> loadAdventure(@Nullable AdventureProvider<CommandSender> provider) {
@@ -198,14 +200,6 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             World world = Bukkit.getWorld(raw.toLowerCase());
             if (world != null) return world;
             throw new UnknownWorldException(raw);
-        });
-        
-        registerValueResolver(UUID.class, (context, parameter, cursor, raw) -> {
-            try {
-                return UUID.fromString(raw);
-            } catch (IllegalArgumentException ex) {
-                throw new InvalidUUIDException(raw);
-            }
         });
     }
     

@@ -4,6 +4,7 @@ import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.*;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -166,4 +167,25 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      */
     void registerNamedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver);
     
+    /**
+     * Fetches the {@link SourceResolver} from an internal registry.
+     *
+     * @param type the target source type
+     * @param <R>  the new source type parameter
+     * @return the {@link SourceResolver} for specific type
+     */
+    <R> @Nullable SourceResolver<S, R> getSourceResolver(TypeWrap<R> type);
+    
+    /**
+     * Registers the {@link SourceResolver} into an internal registry
+     *
+     * @param type           the target source type
+     * @param sourceResolver the source resolver to register
+     * @param <R>            the new source type parameter
+     */
+    <R> void registerSourceResolver(TypeWrap<R> type, SourceResolver<S, R> sourceResolver);
+    
+    default boolean hasSourceResolver(TypeWrap<?> wrap) {
+        return getSourceResolver(wrap) != null;
+    }
 }
