@@ -220,4 +220,5 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         brigadierManager = BukkitBrigadierManager.load(this);
         //TODO apply on all currently registered commands
     }
+    
 }
