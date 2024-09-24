@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.Preconditions;
@@ -63,6 +64,14 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
                 UnknownPlayerException.class, (exception, imperat, context) ->
                         context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
         );
+        
+        this.registerSourceResolver(Player.class, (source) -> {
+            if (source.isConsole()) {
+                throw new SourceException("Only players are allowed to do this !");
+            }
+            return source.asPlayer();
+        });
+        
     }
 
     @Override

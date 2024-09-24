@@ -6,6 +6,7 @@ import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
@@ -56,8 +57,13 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     }
     
     private void registerSourceResolvers() {
-        this.registerSourceResolver(Player.class, BukkitSource::asPlayer);
         this.registerSourceResolver(CommandSender.class, BukkitSource::origin);
+        this.registerSourceResolver(Player.class, (source) -> {
+            if (source.isConsole()) {
+                throw new SourceException("Only players are allowed to do this !");
+            }
+            return source.asPlayer();
+        });
     }
 
     private void addThrowableHandlers() {

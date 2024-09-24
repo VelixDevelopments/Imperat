@@ -5,6 +5,7 @@ import dev.velix.imperat.adventure.BungeeAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -51,7 +52,12 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     
     private void registerSourceResolvers() {
         registerSourceResolver(CommandSender.class, BungeeSource::origin);
-        registerSourceResolver(ProxiedPlayer.class, BungeeSource::asPlayer);
+        this.registerSourceResolver(ProxiedPlayer.class, (source) -> {
+            if (source.isConsole()) {
+                throw new SourceException("Only players are allowed to do this !");
+            }
+            return source.asPlayer();
+        });
     }
     
     private void registerValueResolvers() {
