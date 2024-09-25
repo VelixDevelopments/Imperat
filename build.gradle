@@ -73,8 +73,10 @@ subprojects {
             }
         }
 
-        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-        signAllPublications()
+        if (!gradle.startParameter.taskNames.any { (it == "publishToMavenLocal") }) {
+            publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+            signAllPublications()
+        }
     }
 
 }
