@@ -99,8 +99,8 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         }
         
         @Override
-        public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete) {
-            Type type = parameterToComplete.type();
+        public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
+            Type type = parameter.type();
             return getResults(type)
                     .orElseGet(() -> {
                         registerEnumResolver(type);
@@ -117,9 +117,9 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         }
         
         @Override
-        public Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete) {
-            assert parameterToComplete.isFlag();
-            FlagParameter<S> flagParameter = parameterToComplete.asFlagParameter();
+        public Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
+            assert parameter.isFlag();
+            FlagParameter<S> flagParameter = parameter.asFlagParameter();
             CompletionArg arg = context.getArgToComplete();
             CommandFlag data = flagParameter.getFlagData();
             
@@ -129,14 +129,14 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
             }
             
             //normal flag with a value next!
-            int paramPos = parameterToComplete.position();
+            int paramPos = parameter.position();
             int argPos = arg.index();
             if (argPos > paramPos) {
                 //auto-complete the value for the flag
                 var flagInputResolver = getResolver(TypeWrap.of(data.inputType()).getType());
                 if (flagInputResolver == null)
                     return List.of();
-                return flagInputResolver.autoComplete(context, parameterToComplete);
+                return flagInputResolver.autoComplete(context, parameter);
             } else {
                 //auto-complete the flag-names
                 return autoCompleteFlagNames(data);

@@ -42,7 +42,7 @@ public interface SuggestionResolver<S extends Source> {
             }
             
             @Override
-            public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete) {
+            public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
                 return results;
             }
         };
@@ -58,9 +58,9 @@ public interface SuggestionResolver<S extends Source> {
     
     /**
      * @param context               the context for suggestions
-     * @param parameterToComplete   the parameter of the value to complete
+     * @param parameter             the parameter of the value to complete
      * @return the auto-completed suggestions of the current argument
      */
-    Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameterToComplete);
+    Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter);
     
 }
