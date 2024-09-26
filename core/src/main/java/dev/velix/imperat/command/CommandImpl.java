@@ -59,7 +59,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     CommandImpl(@Nullable Command<S> parent, int position, String name) {
         this.parent = parent;
         this.position = position;
-        this.name = name;
+        this.name = name.toLowerCase();
         setDefaultUsageExecution((source, context) -> {
         });
         this.autoCompleter = AutoCompleter.createNative(this);
@@ -244,7 +244,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     public void addAliases(List<String> aliases) {
-        this.aliases.addAll(aliases);
+        for (String alias : aliases)
+            this.aliases.add(alias.toLowerCase());
     }
     
     /**

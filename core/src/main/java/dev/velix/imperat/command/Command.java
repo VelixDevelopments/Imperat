@@ -13,7 +13,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
-import dev.velix.imperat.util.ListUtils;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -108,7 +107,7 @@ public interface Command<S extends Source> extends CommandParameter<S> {
      * @return Whether this command has this name/alias
      */
     default boolean hasName(String name) {
-        return this.name().equalsIgnoreCase(name) || ListUtils.contains(this.aliases(), name);
+        return this.name().equalsIgnoreCase(name) || this.aliases().contains(name.toLowerCase());
     }
     
     /**

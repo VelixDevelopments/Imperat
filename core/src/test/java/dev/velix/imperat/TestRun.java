@@ -224,4 +224,12 @@ public class TestRun {
         
         Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("ban", "mqzen -s"));
     }
+    
+    @Test
+    public void testUpperCaseCommandName() {
+        IMPERAT.registerCommand(Command.create("UPPER_CAsE")
+                .defaultExecution((src, ctx) -> src.reply("Worked !"))
+                .build());
+        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("upper_case", ""));
+    }
 }
