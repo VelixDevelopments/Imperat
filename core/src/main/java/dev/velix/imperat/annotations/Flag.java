@@ -11,7 +11,4 @@ public @interface Flag {
     
     String[] value();
     
-    
-    Class<?> inputType() default String.class;
-    
 }

@@ -110,9 +110,11 @@ public final class CommandTree<S extends Source> {
         String raw = context.arguments().getOr(depth, "");
         assert raw != null;
         
-        if ((!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
+        if (
+                (!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
                 || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
-                .hasPermission(context.source(), child.data.permission()))) {
+                        .hasPermission(context.source(), child.data.permission()))
+        ) {
             return;
         }
         
@@ -121,10 +123,16 @@ public final class CommandTree<S extends Source> {
             //COMPLETE DIRECTLY
             addChildResults(imperat, context, child, results);
         } else {
+            if (child.data.isFlag() && !child.data.asFlagParameter().isSwitch()) {
+                //auto completing value for flag, using SAME child/flag parameter while incrementing depth by 1
+                collectNodeCompletions(imperat, context, child, depth + 1, maxDepth, results);
+                return;
+            }
             //Keep looking
             for (var innerChild : child.getChildren()) {
                 collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, results);
             }
+            
         }
         
     }
@@ -140,7 +148,9 @@ public final class CommandTree<S extends Source> {
             results.addAll(node.data.asCommand().aliases());
         } else {
             SuggestionResolver<S> resolver = imperat.getParameterSuggestionResolver(node.data);
-            if (resolver == null) return;
+            if (resolver == null) {
+                return;
+            }
             results.addAll(resolver.autoComplete(context, node.data));
         }
     }

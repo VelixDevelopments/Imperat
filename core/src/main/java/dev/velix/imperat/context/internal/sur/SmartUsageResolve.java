@@ -62,7 +62,7 @@ public final class SmartUsageResolve<S extends Source> {
                     //adding the absent optional args with their default values
                     
                     if (optionalEmptyParameter.isFlag()) {
-                        CommandFlag flag = optionalEmptyParameter.asFlagParameter().getFlagData();
+                        CommandFlag flag = optionalEmptyParameter.asFlagParameter().flagData();
                         Object value = null;
                         if (flag instanceof CommandSwitch) value = false;
                         else if (optionalEmptyParameter.asFlagParameter().getDefaultValueSupplier() != null) {
@@ -140,7 +140,7 @@ public final class SmartUsageResolve<S extends Source> {
                         null,
                         null,
                         getDefaultValue(context, currentParameter),
-                        currentParameter.asFlagParameter().getFlagData()
+                        currentParameter.asFlagParameter().flagData()
                 );
                 
                 cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);

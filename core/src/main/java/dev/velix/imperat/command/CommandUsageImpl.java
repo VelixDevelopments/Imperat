@@ -108,7 +108,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         
         for (var param : parameters) {
             if (!param.isFlag()) continue;
-            CommandFlag flag = param.asFlagParameter().getFlagData();
+            CommandFlag flag = param.asFlagParameter().flagData();
             if (flag.acceptsInput(inputFlagAlias)) {
                 return flag;
             }

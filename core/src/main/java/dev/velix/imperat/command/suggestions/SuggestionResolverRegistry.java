@@ -121,7 +121,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
             assert parameter.isFlag();
             FlagParameter<S> flagParameter = parameter.asFlagParameter();
             CompletionArg arg = context.getArgToComplete();
-            CommandFlag data = flagParameter.getFlagData();
+            CommandFlag data = flagParameter.flagData();
             
             if (flagParameter.isSwitch()) {
                 //normal one arg
@@ -137,7 +137,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
                 
                 //flag parameter's suggestion resolver is the same resolver for its data input.
                 if (flagInputResolver == null)
-                    flagInputResolver = parameter.getSuggestionResolver();
+                    flagInputResolver = flagParameter.inputSuggestionResolver();
                 
                 if (flagInputResolver == null) return List.of();
                 else return flagInputResolver.autoComplete(context, parameter);

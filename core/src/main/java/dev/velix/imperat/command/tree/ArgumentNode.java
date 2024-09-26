@@ -28,7 +28,7 @@ public final class ArgumentNode<S extends Source> extends ParameterNode<S, Comma
             }
             String flagInput = input.substring(subStringIndex);
             return data.asFlagParameter()
-                    .getFlagData().acceptsInput(flagInput);
+                    .flagData().acceptsInput(flagInput);
         }
         ParameterType type = ParameterTypes.getParamType(data.type());
         return type == null || type.matchesInput(input);

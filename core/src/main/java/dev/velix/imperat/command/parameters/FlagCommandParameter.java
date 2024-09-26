@@ -4,6 +4,7 @@ import dev.velix.imperat.command.Description;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
@@ -18,38 +19,51 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     
     private final CommandFlag flag;
     private final OptionalValueSupplier<?> supplier;
+    private final TypeSuggestionResolver<S, ?> inputValueSuggestionResolver;
     
     FlagCommandParameter(
             CommandFlag flag,
             String permission,
             Description description,
-            OptionalValueSupplier<?> valueSupplier
+            OptionalValueSupplier<?> valueSupplier,
+            TypeSuggestionResolver<S, ?> inputValueSuggestionResolver
     ) {
-        this(flag.name(), permission, flag.aliases(), description, flag.inputType(), valueSupplier);
+        this(flag.name(), permission, flag.aliases(), description, flag.inputType(), valueSupplier, inputValueSuggestionResolver);
     }
     
-    FlagCommandParameter(String flagName, @Nullable String permission, List<String> aliases, Description description, Type inputType, OptionalValueSupplier<?> supplier) {
+    FlagCommandParameter(
+            String flagName,
+            @Nullable String permission,
+            List<String> aliases,
+            Description description,
+            Type inputType,
+            OptionalValueSupplier<?> supplier,
+            TypeSuggestionResolver<S, ?> inputValueSuggestionResolver
+    ) {
         super(flagName, TypeWrap.of(CommandFlag.class), permission, description,
                 true, true, false, null, null);
         flag = CommandFlag.create(flagName, aliases, inputType);
         this.supplier = supplier;
+        this.inputValueSuggestionResolver = inputValueSuggestionResolver;
     }
     
     FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission,
-                         Description description, OptionalValueSupplier<?> supplier) {
+                         Description description, OptionalValueSupplier<?> supplier, TypeSuggestionResolver<S, ?> inputValueSuggestionResolver) {
         super(commandSwitch.name(), TypeWrap.of(CommandSwitch.class), permission, description,
                 true, true, false,
                 null, null);
         this.flag = commandSwitch;
         this.supplier = supplier;
+        this.inputValueSuggestionResolver = inputValueSuggestionResolver;
     }
     
     FlagCommandParameter(
             CommandSwitch commandSwitch,
             @Nullable String permission,
-            OptionalValueSupplier<?> supplier
+            OptionalValueSupplier<?> supplier,
+            TypeSuggestionResolver<S, ?> suggestionResolver
     ) {
-        this(commandSwitch, permission, Description.EMPTY, supplier);
+        this(commandSwitch, permission, Description.EMPTY, supplier, suggestionResolver);
     }
     
     @Override
@@ -61,7 +75,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
      * @return The flag's data
      */
     @Override
-    public @NotNull CommandFlag getFlagData() {
+    public @NotNull CommandFlag flagData() {
         return flag;
     }
     
@@ -73,5 +87,14 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     @SuppressWarnings("unchecked")
     public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) supplier;
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public @Nullable <T> TypeSuggestionResolver<S, T> inputSuggestionResolver() {
+        if (isSwitch())
+            return null;
+        else
+            return (TypeSuggestionResolver<S, T>) inputValueSuggestionResolver;
     }
 }

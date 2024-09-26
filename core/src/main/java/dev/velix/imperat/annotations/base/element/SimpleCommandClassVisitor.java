@@ -422,7 +422,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         TypeSuggestionResolver<S, ?> suggestionResolver = null;
         
         if (suggestAnnotation != null) {
-            suggestionResolver = SuggestionResolver.type(parameter.getType(), suggestAnnotation.value());
+            suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), suggestAnnotation.value());
         } else if (suggestionProvider != null) {
             var namedResolver = imperat.getNamedSuggestionResolver(suggestionProvider.value().toLowerCase());
             if (namedResolver != null && !(namedResolver instanceof TypeSuggestionResolver<?, ?>))
@@ -463,8 +463,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         
         if (flag != null) {
             String[] flagAliases = flag.value();
+            if (suggestAnnotation != null) {
+                suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), suggestAnnotation.value());
+            }
             return AnnotationParameterDecorator.decorate(
-                    CommandParameter.<S, T>flag(name, (Class<T>) flag.inputType())
+                    CommandParameter.<S, T>flag(name, (Class<T>) parameter.getParameterizedType())
+                            .suggestForInputValue((TypeSuggestionResolver<S, T>) suggestionResolver)
                             .aliases(getAllExceptFirst(flagAliases))
                             .flagDefaultInputValue(optionalValueSupplier)
                             .description(desc)
