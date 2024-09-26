@@ -110,7 +110,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Description description = element.getAnnotation(Description.class);
         
         if (cmdAnnotation instanceof dev.velix.imperat.annotations.Command cmdAnn) {
-            
             final String[] values = cmdAnn.value();
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = cmdAnn.skipSuggestionsChecks();
