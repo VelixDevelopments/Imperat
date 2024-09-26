@@ -133,10 +133,14 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
             int argPos = arg.index();
             if (argPos > paramPos) {
                 //auto-complete the value for the flag
-                var flagInputResolver = getResolver(TypeWrap.of(data.inputType()).getType());
+                SuggestionResolver<S> flagInputResolver = getResolver(TypeWrap.of(data.inputType()).getType());
+                
+                //flag parameter's suggestion resolver is the same resolver for its data input.
                 if (flagInputResolver == null)
-                    return List.of();
-                return flagInputResolver.autoComplete(context, parameter);
+                    flagInputResolver = parameter.getSuggestionResolver();
+                
+                if (flagInputResolver == null) return List.of();
+                else return flagInputResolver.autoComplete(context, parameter);
             } else {
                 //auto-complete the flag-names
                 return autoCompleteFlagNames(data);
