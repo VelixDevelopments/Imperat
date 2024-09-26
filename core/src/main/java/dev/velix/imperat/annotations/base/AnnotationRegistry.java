@@ -1,23 +1,18 @@
 package dev.velix.imperat.annotations.base;
 
+import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.element.ParseElement;
-import dev.velix.imperat.util.collections.ClassMap;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-@ApiStatus.Internal
 public final class AnnotationRegistry {
     
     private final Set<Class<? extends Annotation>> metas = new LinkedHashSet<>();
     private final Set<Class<? extends Annotation>> mains = new LinkedHashSet<>();
-    private final ClassMap<Annotation, AnnotationReplacer<?>> replacers = new ClassMap<>();
+    private final Map<Class<? extends Annotation>, AnnotationReplacer<?>> replacers = new HashMap<>();
 
     public AnnotationRegistry() {
         mains.add(Command.class);

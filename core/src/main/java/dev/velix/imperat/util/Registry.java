@@ -1,7 +1,5 @@
 package dev.velix.imperat.util;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +8,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-@ApiStatus.Internal
 public class Registry<K, V> {
     
     private final Map<K, V> data;
