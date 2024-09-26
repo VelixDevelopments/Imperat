@@ -23,8 +23,6 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
     private final MethodElement method;
     private final MethodCaller.BoundMethodCaller boundMethodCaller;
     private final List<CommandParameter<S>> fullParameters;
-    //private final Help helpAnnotation;
-    
     
     private MethodCommandExecutor(
             Imperat<S> dispatcher,

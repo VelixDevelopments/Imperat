@@ -24,7 +24,7 @@ public final class AnnotationHelper {
     
     public static boolean isMethodHelp(Method method) {
         for (Parameter parameter : method.getParameters()) {
-            if (TypeUtility.areRelatedTypes(parameter.getType(), CommandHelp.class)) {
+            if (TypeUtility.areRelatedTypes(parameter.getParameterizedType(), CommandHelp.class)) {
                 return true;
             }
         }

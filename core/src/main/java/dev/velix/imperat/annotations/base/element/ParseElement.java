@@ -1,7 +1,8 @@
 package dev.velix.imperat.annotations.base.element;
 
-import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.AnnotationMap;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
@@ -26,8 +27,8 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     @Getter
     private final @NotNull E element;
     
-    public ParseElement(
-            @NotNull AnnotationRegistry registry,
+    public <S extends Source> ParseElement(
+            @NotNull AnnotationParser<S> registry,
             @Nullable ParseElement<?> parent,
             @NotNull E element
     ) {
@@ -37,12 +38,12 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     }
     
     @SuppressWarnings("unchecked")
-    private <A extends Annotation> void load(@NotNull AnnotationRegistry registry) {
+    private <A extends Annotation, S extends Source> void load(@NotNull AnnotationParser<S> registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
             Class<A> clazz = (Class<A>) annotation.annotationType();
-            if (registry.isRegisteredAnnotation(clazz)) {
+            if (registry.isKnownAnnotation(clazz)) {
                 total.put(clazz, annotation);
-            } else if (registry.hasReplacerFor(clazz)) {
+            } else if (registry.hasAnnotationReplacerFor(clazz)) {
                 //we add the custom annotation anyway
                 total.put(clazz, annotation);
                 

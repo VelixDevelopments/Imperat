@@ -2,25 +2,20 @@ package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.*;
-import dev.velix.imperat.annotations.base.element.ParseElement;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-public final class AnnotationRegistry {
+final class AnnotationRegistry {
     
-    private final Set<Class<? extends Annotation>> metas = new LinkedHashSet<>();
-    private final Set<Class<? extends Annotation>> mains = new LinkedHashSet<>();
+    private final Set<Class<? extends Annotation>> knownAnnotations = new LinkedHashSet<>();
+    
     private final Map<Class<? extends Annotation>, AnnotationReplacer<?>> replacers = new HashMap<>();
-
-    public AnnotationRegistry() {
-        mains.add(Command.class);
-        mains.add(Inherit.class);
-        mains.add(Usage.class);
-        mains.add(SubCommand.class);
-        
+    
+    AnnotationRegistry() {
         this.registerAnnotationTypes(
+                Command.class, Inherit.class, Usage.class, SubCommand.class,
                 Cooldown.class, Description.class, Permission.class,
                 Suggest.class, SuggestionProvider.class, Default.class, DefaultProvider.class,
                 Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, Range.class, Async.class,
@@ -28,33 +23,29 @@ public final class AnnotationRegistry {
         );
     }
     
-    public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
+    <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
         this.replacers.put(type, replacer);
     }
     
     @SuppressWarnings("unchecked")
-    public <A extends Annotation> @Nullable AnnotationReplacer<A> getAnnotationReplacer(Class<A> type) {
+    <A extends Annotation> @Nullable AnnotationReplacer<A> getAnnotationReplacer(Class<A> type) {
         return (AnnotationReplacer<A>) this.replacers.get(type);
     }
     
-    public boolean hasReplacerFor(Class<? extends Annotation> clazz) {
+    boolean hasReplacerFor(Class<? extends Annotation> clazz) {
         return getAnnotationReplacer(clazz) != null;
     }
     
     @SafeVarargs
-    public final void registerAnnotationTypes(Class<? extends Annotation>... annotationClasses) {
-        metas.addAll(List.of(annotationClasses));
+    final void registerAnnotationTypes(Class<? extends Annotation>... annotationClasses) {
+        knownAnnotations.addAll(List.of(annotationClasses));
     }
     
-    public boolean isMainType(Class<? extends Annotation> type) {
-        return isRegistered(type, mains);
+    boolean isRegisteredAnnotation(Class<? extends Annotation> annotationClass) {
+        return isRegistered(annotationClass, knownAnnotations);
     }
     
-    public boolean isRegisteredMeta(Class<? extends Annotation> annotationClass) {
-        return isRegistered(annotationClass, metas);
-    }
-    
-    private boolean isRegistered(Class<? extends Annotation> annotationClass,
+    private static boolean isRegistered(Class<? extends Annotation> annotationClass,
                                  Collection<Class<? extends Annotation>> annotations) {
         for (Class<? extends Annotation> aC : annotations) {
             if (aC.getName().equals(annotationClass.getName()))
@@ -63,15 +54,5 @@ public final class AnnotationRegistry {
         return false;
     }
     
-    public @Nullable Annotation getMainAnnotation(ParseElement<?> element) {
-        for (Annotation ann : element.getDeclaredAnnotations()) {
-            if (isMainType(ann.annotationType()))
-                return ann;
-        }
-        return null;
-    }
     
-    public <A extends Annotation> boolean isRegisteredAnnotation(Class<A> clazz) {
-        return isMainType(clazz) || isRegisteredMeta(clazz);
-    }
 }

@@ -1,12 +1,12 @@
 package dev.velix.imperat.annotations.base.element.selector;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.AnnotationParser;
 
 @FunctionalInterface
 @SuppressWarnings("rawtypes")
 public interface RuleCondition<E> {
-    boolean test(Imperat imperat, AnnotationRegistry annotationRegistry, E element);
+    boolean test(Imperat imperat, AnnotationParser<?> parser, E element);
     
     default RuleCondition<E> and(RuleCondition<E> other) {
         if (other == null) return this;

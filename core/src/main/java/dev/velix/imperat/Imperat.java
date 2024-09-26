@@ -2,8 +2,10 @@ package dev.velix.imperat;
 
 
 import dev.velix.imperat.annotations.base.AnnotationParser;
+import dev.velix.imperat.annotations.base.AnnotationReader;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
@@ -67,6 +69,15 @@ public non-sealed interface Imperat<S extends Source> extends
     @Contract("null->fail")
     void setAnnotationParser(AnnotationParser<S> parser);
     
+    /**
+     * Registers a type of annotations so that it can be
+     * detected by {@link AnnotationReader} , it's useful as it allows that type of annotation
+     * to be recognized as a true Imperat-related annotation to be used in something like checking if a
+     * {@link CommandParameter} is annotated and checks for the annotations it has.
+     *
+     * @param type the type of annotation
+     */
+    void registerAnnotations(Class<? extends Annotation>... type);
     
     /**
      * Registers annotation replacer

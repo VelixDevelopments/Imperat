@@ -4,7 +4,7 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
-import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.MethodCommandExecutor;
 import dev.velix.imperat.annotations.base.element.selector.ElementSelector;
 import dev.velix.imperat.annotations.parameters.AnnotationParameterDecorator;
@@ -38,8 +38,8 @@ import java.util.*;
 final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisitor<S> {
     
     
-    SimpleCommandClassVisitor(Imperat<S> imperat, AnnotationRegistry registry, ElementSelector<MethodElement> methodSelector) {
-        super(imperat, registry, methodSelector);
+    SimpleCommandClassVisitor(Imperat<S> imperat, AnnotationParser<S> parser, ElementSelector<MethodElement> methodSelector) {
+        super(imperat, parser, methodSelector);
     }
     
     
@@ -178,7 +178,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
         if (parseElement instanceof MethodElement method && cmd != null) {
             //@Command on method
-            if (!methodSelector.canBeSelected(imperat, registry, method, true)) {
+            if (!methodSelector.canBeSelected(imperat, parser, method, true)) {
                 return cmd;
             }
             if (method.getInputCount() == 0) {
@@ -209,7 +209,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         throw new IllegalStateException("Method  '" + method.getElement().getName() + "' Cannot be treated as usage/subcommand, it doesn't have a parent ");
                     }
                     
-                    if (!methodSelector.canBeSelected(imperat, registry, method, true)) {
+                    if (!methodSelector.canBeSelected(imperat, parser, method, true)) {
                         return cmd;
                     }
                     

@@ -1,6 +1,6 @@
 package dev.velix.imperat.annotations.base.element;
 
-import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.reflection.Reflections;
@@ -20,8 +20,8 @@ public final class ClassElement extends ParseElement<Class<?>> {
     
     private final Set<ParseElement<?>> children = new LinkedHashSet<>();
     
-    public ClassElement(
-            @NotNull AnnotationRegistry registry,
+    public <S extends Source> ClassElement(
+            @NotNull AnnotationParser<S> registry,
             @Nullable ClassElement parent,
             @NotNull Class<?> element
     ) {

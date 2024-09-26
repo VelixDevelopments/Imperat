@@ -2,7 +2,7 @@ package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
-import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ public final class MethodElement extends ParseElement<Method> {
     
     public <S extends Source> MethodElement(
             @NotNull Imperat<S> imperat,
-            @NotNull AnnotationRegistry registry,
+            @NotNull AnnotationParser<S> registry,
             @Nullable ClassElement owningElement,
             @NotNull Method element
     ) {

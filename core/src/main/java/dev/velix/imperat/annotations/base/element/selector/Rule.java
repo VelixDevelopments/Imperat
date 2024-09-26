@@ -1,7 +1,7 @@
 package dev.velix.imperat.annotations.base.element.selector;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,11 +13,11 @@ public sealed interface Rule<T> permits Rule.SimpleRule {
     
     @NotNull RuleCondition<T> condition();
     
-    default boolean test(Imperat imperat, AnnotationRegistry registry, T variable) {
+    default boolean test(Imperat imperat, AnnotationParser<?> registry, T variable) {
         return condition().test(imperat, registry, variable);
     }
     
-    void onFailure(AnnotationRegistry registry, T variable);
+    void onFailure(AnnotationParser<?> registry, T variable);
     
     @NotNull Rule<T> and(@Nullable Rule<T> other);
     
@@ -34,7 +34,7 @@ public sealed interface Rule<T> permits Rule.SimpleRule {
     class Builder<T> {
         
         RuleCondition<T> condition;
-        BiConsumer<AnnotationRegistry, T> runnable;
+        BiConsumer<AnnotationParser<?>, T> runnable;
         
         Builder() {
         
@@ -45,7 +45,7 @@ public sealed interface Rule<T> permits Rule.SimpleRule {
             return this;
         }
         
-        public Builder<T> failure(BiConsumer<AnnotationRegistry, T> runnable) {
+        public Builder<T> failure(BiConsumer<AnnotationParser<?>, T> runnable) {
             this.runnable = runnable;
             return this;
         }
@@ -58,15 +58,15 @@ public sealed interface Rule<T> permits Rule.SimpleRule {
     
     final class SimpleRule<T> implements Rule<T> {
         private @NotNull RuleCondition<T> condition;
-        private final @NotNull BiConsumer<AnnotationRegistry, T> onFailure;
+        private final @NotNull BiConsumer<AnnotationParser<?>, T> onFailure;
         
-        public SimpleRule(@NotNull RuleCondition<T> condition, @NotNull BiConsumer<AnnotationRegistry, T> onFailure) {
+        public SimpleRule(@NotNull RuleCondition<T> condition, @NotNull BiConsumer<AnnotationParser<?>, T> onFailure) {
             this.condition = condition;
             this.onFailure = onFailure;
         }
         
         @Override
-        public void onFailure(AnnotationRegistry registry, T variable) {
+        public void onFailure(AnnotationParser<?> registry, T variable) {
             onFailure.accept(registry, variable);
         }
         

@@ -2,6 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationParser;
+import dev.velix.imperat.annotations.base.AnnotationReader;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
@@ -245,6 +246,19 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void setAnnotationParser(AnnotationParser<S> parser) {
         Preconditions.notNull(parser, "Parser");
         this.annotationParser = parser;
+    }
+    
+    /**
+     * Registers a type of annotations so that it can be
+     * detected by {@link AnnotationReader} , it's useful as it allows that type of annotation
+     * to be recognized as a true Imperat-related annotation to be used in something like checking if a
+     * {@link CommandParameter} is annotated and checks for the annotations it has.
+     *
+     * @param type the type of annotation
+     */
+    @Override
+    public void registerAnnotations(Class<? extends Annotation>... type) {
+        annotationParser.registerAnnotations(type);
     }
     
     /**

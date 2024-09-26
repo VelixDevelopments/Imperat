@@ -22,14 +22,21 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     
     private final static Comparator<Method> METHOD_COMPARATOR = Comparator.comparingInt(AnnotationHelper::loadMethodPriority);
     
+    private final Imperat<S> imperat;
     private final Class<?> clazz;
-    private final AnnotationRegistry registry;
+    private final AnnotationParser<S> parser;
     private final ElementSelector<MethodElement> methodSelector;
     private final RootCommandClass<S> rootCommandClass;
     private final ClassElement classElement;
     
-    AnnotationReaderImpl(Imperat<S> imperat, ElementSelector<MethodElement> methodSelector, AnnotationRegistry registry, Object instance) {
-        this.registry = registry;
+    AnnotationReaderImpl(
+            Imperat<S> imperat,
+            ElementSelector<MethodElement> methodSelector,
+            AnnotationParser<S> parser,
+            Object instance
+    ) {
+        this.imperat = imperat;
+        this.parser = parser;
         this.clazz = instance.getClass();
         this.rootCommandClass = new RootCommandClass<>(clazz, instance);
         this.methodSelector = methodSelector;
@@ -37,24 +44,24 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     }
     
     private ClassElement read(Imperat<S> imperat) {
-        return readClass(imperat, registry, null, clazz);
+        return readClass(imperat, parser, null, clazz);
     }
     
     private ClassElement readClass(
             Imperat<S> imperat,
-            AnnotationRegistry registry,
+            AnnotationParser<S> parser,
             @Nullable ClassElement parent,
             @NotNull Class<?> clazz
     ) {
-        ClassElement root = new ClassElement(registry, parent, clazz);
+        ClassElement root = new ClassElement(parser, parent, clazz);
         //Adding methods with their parameters
         Method[] methods = clazz.getDeclaredMethods();
         Arrays.sort(methods, METHOD_COMPARATOR);
         
         for (Method method : methods) {
             //System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
-            MethodElement methodElement = new MethodElement(imperat, registry, root, method);
-            if (methodSelector.canBeSelected(imperat, registry, methodElement, false)) {
+            MethodElement methodElement = new MethodElement(imperat, parser, root, method);
+            if (methodSelector.canBeSelected(imperat, parser, methodElement, false)) {
                 root.addChild(methodElement);
             }
         }
@@ -65,7 +72,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
             assert inherit != null;
             for (Class<?> subClass : inherit.value()) {
                 root.addChild(
-                        readClass(imperat, registry, root, subClass)
+                        readClass(imperat, parser, root, subClass)
                 );
             }
         }
@@ -73,7 +80,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         //Adding inner classes
         for (Class<?> child : clazz.getDeclaredClasses()) {
             root.addChild(
-                    readClass(imperat, registry, root, child)
+                    readClass(imperat, parser, root, child)
             );
         }
         
@@ -88,9 +95,9 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     }
     
     @Override
-    public void accept(Imperat<S> dispatcher, CommandClassVisitor<S> visitor) {
+    public void accept(CommandClassVisitor<S> visitor) {
         for (Command<S> loaded : classElement.accept(visitor)) {
-            dispatcher.registerCommand(loaded);
+            imperat.registerCommand(loaded);
         }
     }
     

@@ -47,7 +47,7 @@ public interface MethodRules {
     Rule<MethodElement> HAS_LEAST_ONLY_ONE_MAIN_ANNOTATION = Rule.buildForMethod()
             .condition((imperat, registry, element) -> {
                 long count = Arrays.stream(element.getDeclaredAnnotations())
-                        .filter(annotation -> registry.isMainType(annotation.annotationType())).count();
+                        .filter(annotation -> registry.isEntryPointAnnotation(annotation.annotationType())).count();
                 return count == 1;
             })
             .failure((registry, element) -> {
@@ -56,7 +56,7 @@ public interface MethodRules {
                 Annotation[] declaredAnnotations = element.getDeclaredAnnotations();
                 for (int i = 0, declaredAnnotationsLength = declaredAnnotations.length; i < declaredAnnotationsLength; i++) {
                     Annotation annotation = declaredAnnotations[i];
-                    if (registry.isMainType(annotation.annotationType())) {
+                    if (registry.isEntryPointAnnotation(annotation.annotationType())) {
                         builder.append("@").append(annotation.annotationType().getSimpleName());
                     }
                     

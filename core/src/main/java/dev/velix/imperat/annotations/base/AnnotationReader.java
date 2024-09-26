@@ -20,15 +20,15 @@ public interface AnnotationReader<S extends Source> {
     static <S extends Source> AnnotationReader<S> read(
             Imperat<S> imperat,
             ElementSelector<MethodElement> methodSelector,
-            AnnotationRegistry registry,
+            AnnotationParser<S> parser,
             Object target
     ) {
-        return new AnnotationReaderImpl<>(imperat, methodSelector, registry, target);
+        return new AnnotationReaderImpl<>(imperat, methodSelector, parser, target);
     }
     
     RootCommandClass<S> getRootClass();
     
-    void accept(Imperat<S> imperat, CommandClassVisitor<S> visitor);
+    void accept(CommandClassVisitor<S> visitor);
     
     
 }

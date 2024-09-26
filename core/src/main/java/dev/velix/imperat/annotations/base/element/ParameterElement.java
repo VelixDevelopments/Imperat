@@ -1,7 +1,8 @@
 package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.annotations.base.AnnotationHelper;
-import dev.velix.imperat.annotations.base.AnnotationRegistry;
+import dev.velix.imperat.annotations.base.AnnotationParser;
+import dev.velix.imperat.context.Source;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -16,8 +17,8 @@ public final class ParameterElement extends ParseElement<Parameter> {
     private final Type type;
     private final ClassElement owningClass;
     
-    public ParameterElement(
-            final AnnotationRegistry registry,
+    <S extends Source> ParameterElement(
+            final AnnotationParser<S> registry,
             final ClassElement owningClass,
             final MethodElement method,
             final Parameter element

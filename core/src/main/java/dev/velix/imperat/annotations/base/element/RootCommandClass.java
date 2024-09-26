@@ -6,6 +6,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+/**
+ * Represents a root command class information
+ *
+ * @param <S> the command source type
+ */
 public final class RootCommandClass<S extends Source> {
     
     private final Class<?> proxyClass;
