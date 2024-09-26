@@ -256,8 +256,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      *
      * @param type the type of annotation
      */
+    @SafeVarargs
     @Override
-    public void registerAnnotations(Class<? extends Annotation>... type) {
+    public final void registerAnnotations(Class<? extends Annotation>... type) {
         annotationParser.registerAnnotations(type);
     }
     
