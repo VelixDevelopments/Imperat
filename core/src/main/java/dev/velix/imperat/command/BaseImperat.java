@@ -202,7 +202,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @param command the annotated command instance to parse
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void registerCommand(Object command) {
+        if (command instanceof Command<?> commandObj) {
+            this.registerCommand((Command<S>) commandObj);
+            return;
+        }
         annotationParser.parseCommandClass(command);
     }
     
