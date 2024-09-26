@@ -39,7 +39,3 @@ dependencies {
 processTestResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-
-compileJava {
-    options.compilerArgs += ["-parameters"]
-}
