@@ -5,6 +5,7 @@ import dev.velix.imperat.TestSource;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.help.CommandHelp;
 
 @SuppressWarnings("unused")
 public final class TestCommands {
@@ -16,7 +17,6 @@ public final class TestCommands {
             .usage(CommandUsage.<TestSource>builder()
                     .parameters(CommandParameter.requiredText("group"))
                     .execute((source, context) -> {
-                        TestRun.USAGE_EXECUTED = true;
                         source.reply("Executing /group " + context.getArgument("group") + " without any other args");
                     })
             
@@ -62,6 +62,11 @@ public final class TestCommands {
                                     )
                                     .execute((source, context) -> {
                                         Integer page = context.getArgument("page");
+                                        
+                                        CommandHelp help = context.getContextResolvedArgument(CommandHelp.class);
+                                        assert help != null;
+                                        help.display();
+                                        
                                         source.sendMsg("Help page= " + page);
                                         TestRun.USAGE_EXECUTED = true;
                                     })

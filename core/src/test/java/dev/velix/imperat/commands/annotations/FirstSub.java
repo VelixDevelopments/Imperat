@@ -13,8 +13,8 @@ public final class FirstSub {
     }
     
     @Usage
-    public void cmdUsage(TestSource source, @Named("arg1") @Suggest({"x", "y", "z", "sexy"}) String arg1) {
-        source.reply("Executing usage in first's main usage, arg1= " + arg1);
+    public void cmdUsage(TestSource source, @Named("otherText") String otherText, @Named("arg1") @Suggest({"x", "y", "z", "sexy"}) String arg1) {
+        source.reply("Executing usage in first's main usage, otherText=" + otherText + ", arg1= " + arg1);
     }
     
     
