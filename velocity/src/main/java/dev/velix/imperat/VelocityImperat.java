@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.Preconditions;

@@ -6,6 +6,7 @@ import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
