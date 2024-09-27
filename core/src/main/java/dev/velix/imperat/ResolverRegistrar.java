@@ -3,6 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.resolvers.*;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     
@@ -199,4 +201,19 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     default boolean hasSourceResolver(Type wrap) {
         return getSourceResolver(wrap) != null;
     }
+    
+    /**
+     * Registers a placeholder
+     *
+     * @param placeholder to register
+     */
+    void registerPlaceholder(Placeholder<S> placeholder);
+    
+    /**
+     * The id/format of this placeholder, must be unique and lowercase
+     *
+     * @param id the id for the placeholder
+     * @return the placeholder
+     */
+    Optional<Placeholder<S>> getPlaceHolder(String id);
 }

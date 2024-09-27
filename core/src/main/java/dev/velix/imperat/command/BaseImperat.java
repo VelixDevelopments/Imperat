@@ -16,6 +16,8 @@ import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.exception.*;
 import dev.velix.imperat.help.HelpProvider;
+import dev.velix.imperat.placeholders.Placeholder;
+import dev.velix.imperat.placeholders.PlaceholderRegistry;
 import dev.velix.imperat.resolvers.*;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
@@ -35,6 +37,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private final ContextResolverRegistry<S> contextResolverRegistry;
     private final ValueResolverRegistry<S> valueResolverRegistry;
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
+    private final PlaceholderRegistry<S> placeholderRegistry;
     private final SourceResolverRegistry<S> sourceResolverRegistry;
     
     protected @NotNull PermissionResolver<S> permissionResolver;
@@ -54,6 +57,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         valueResolverRegistry = ValueResolverRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
         sourceResolverRegistry = SourceResolverRegistry.createDefault();
+        placeholderRegistry = PlaceholderRegistry.createDefault(this);
         verifier = UsageVerifier.typeTolerantVerifier();
         this.permissionResolver = permissionResolver;
         this.registerProcessors();
@@ -461,12 +465,33 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         suggestionResolverRegistry.registerNamedResolver(name, suggestionResolver);
     }
     
+    /**
+     * Registers a placeholder
+     *
+     * @param placeholder to register
+     */
+    @Override
+    public void registerPlaceholder(Placeholder<S> placeholder) {
+        placeholderRegistry.setData(placeholder.id(), placeholder);
+    }
+    
+    /**
+     * The id/format of this placeholder, must be unique and lowercase
+     *
+     * @param id the id for the placeholder
+     * @return the placeholder
+     */
+    @Override
+    public Optional<Placeholder<S>> getPlaceHolder(String id) {
+        return placeholderRegistry.getData(id);
+    }
+    
     @Override
     @SuppressWarnings("unchecked")
     public @Nullable <R> SourceResolver<S, R> getSourceResolver(Type type) {
         return (SourceResolver<S, R>) sourceResolverRegistry.getData(type).orElse(null);
     }
-
+    
     @Override
     public <R> void registerSourceResolver(Type type, SourceResolver<S, R> sourceResolver) {
         sourceResolverRegistry.setData(type, sourceResolver);
