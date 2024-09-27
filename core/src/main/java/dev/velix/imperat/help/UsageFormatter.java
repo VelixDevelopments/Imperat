@@ -11,15 +11,15 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageFormatter {
-    
+
     /**
      * Displays the usage by converting it into
      * an adventure component
      *
-     * @param command    the command
-     * @param usage      the usage to display
-     * @param index      the index of the usage
-     * @param <S>        the sender-type
+     * @param command the command
+     * @param usage   the usage to display
+     * @param index   the index of the usage
+     * @param <S>     the sender-type
      * @return the usage component
      */
     <S extends Source> String format(
@@ -27,5 +27,5 @@ public interface UsageFormatter {
             CommandUsage<S> usage,
             int index
     );
-    
+
 }

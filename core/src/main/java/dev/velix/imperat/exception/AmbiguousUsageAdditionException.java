@@ -5,7 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
 
 public final class AmbiguousUsageAdditionException extends RuntimeException {
-    
+
     public <S extends Source> AmbiguousUsageAdditionException(
             final Command<S> command,
             final CommandUsage<S> first,
@@ -19,6 +19,6 @@ public final class AmbiguousUsageAdditionException extends RuntimeException {
                 )
         );
     }
-    
-    
+
+
 }

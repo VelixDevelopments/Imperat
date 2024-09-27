@@ -10,5 +10,5 @@ public class InvalidUUIDException extends ImperatException {
     public InvalidUUIDException(final String raw) {
         this.raw = raw;
     }
-    
+
 }

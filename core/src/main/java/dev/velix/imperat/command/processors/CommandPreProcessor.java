@@ -14,7 +14,7 @@ import dev.velix.imperat.exception.ImperatException;
  */
 @FunctionalInterface
 public interface CommandPreProcessor<S extends Source> {
-    
+
     /**
      * Processes context BEFORE the resolving operation.
      *
@@ -28,5 +28,5 @@ public interface CommandPreProcessor<S extends Source> {
             Context<S> context,
             CommandUsage<S> usage
     ) throws ImperatException;
-    
+
 }

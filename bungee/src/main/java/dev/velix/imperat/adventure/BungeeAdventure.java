@@ -12,15 +12,15 @@ public final class BungeeAdventure implements AdventureProvider<CommandSender> {
     public BungeeAdventure(final Plugin plugin) {
         this.audiences = BungeeAudiences.create(plugin);
     }
-    
+
     @Override
     public Audience audience(final CommandSender sender) {
         return audiences.sender(sender);
     }
-    
+
     @Override
     public void close() {
         this.audiences.close();
     }
-    
+
 }

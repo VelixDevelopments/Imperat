@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
  * @param <S> the command-source
  */
 public interface SuggestionContext<S extends Source> extends Context<S> {
-    
+
     /**
      * @return The info about the argument being completed
      */
     @NotNull CompletionArg getArgToComplete();
-    
-    
+
+
 }

@@ -5,9 +5,9 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import java.util.Comparator;
 
 final class UsageComparator implements Comparator<CommandUsage<?>> {
-    
+
     private static UsageComparator instance;
-    
+
     static UsageComparator getInstance() {
         if (instance == null) {
             instance = new UsageComparator();
@@ -15,12 +15,12 @@ final class UsageComparator implements Comparator<CommandUsage<?>> {
         }
         return instance;
     }
-    
-    
+
+
     @Override
     public int compare(CommandUsage<?> firstUsage, CommandUsage<?> secondUsage) {
         if (firstUsage.size() == secondUsage.size()) {
-            
+
             for (int i = 0; i < firstUsage.size(); i++) {
                 CommandParameter<?> p1 = firstUsage.getParameter(i);
                 CommandParameter<?> p2 = secondUsage.getParameter(i);
@@ -31,9 +31,9 @@ final class UsageComparator implements Comparator<CommandUsage<?>> {
                     return 1;
                 }
             }
-            
+
         }
-        
+
         return firstUsage.size() - secondUsage.size();
     }
 }

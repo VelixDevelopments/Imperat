@@ -6,7 +6,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 public final class Reflections {
-    
+
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
@@ -18,7 +18,7 @@ public final class Reflections {
     public static <T> FieldAccessor<T> getField(Class<?> target, String name, Class<T> fieldType) {
         return getField(target, name, fieldType, 0);
     }
-    
+
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
@@ -30,7 +30,7 @@ public final class Reflections {
     public static <T> FieldAccessor<T> getField(String className, String name, Class<T> fieldType) {
         return getField(getClass(className), name, fieldType, 0);
     }
-    
+
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
@@ -41,7 +41,7 @@ public final class Reflections {
     public static <T> FieldAccessor<T> getField(Class<?> target, Class<T> fieldType) {
         return getField(target, null, fieldType, 0);
     }
-    
+
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
@@ -53,7 +53,7 @@ public final class Reflections {
     public static <T> FieldAccessor<T> getField(Class<?> target, Class<T> fieldType, int index) {
         return getField(target, null, fieldType, index);
     }
-    
+
     /**
      * Retrieve a field accessor for a specific field type and name.
      *
@@ -65,7 +65,7 @@ public final class Reflections {
     public static <T> FieldAccessor<T> getField(String className, Class<T> fieldType, int index) {
         return getField(getClass(className), fieldType, index);
     }
-    
+
     private static <T> FieldAccessor<T> getField(
             final Class<?> target,
             final String name,
@@ -78,10 +78,10 @@ public final class Reflections {
         for (final Field field : target.getDeclaredFields()) {
             if ((name == null || field.getName().equals(name)) && fieldType.isAssignableFrom(field.getType()) && index-- <= 0) {
                 field.setAccessible(true);
-                
+
                 // A function for retrieving a specific field value
                 return new FieldAccessor<>() {
-                    
+
                     @Override
                     @SuppressWarnings("unchecked")
                     public T get(final Object target) {
@@ -91,7 +91,7 @@ public final class Reflections {
                             throw new RuntimeException("Cannot access reflection.", e);
                         }
                     }
-                    
+
                     @Override
                     public void set(final Object target, final Object value) {
                         try {
@@ -100,7 +100,7 @@ public final class Reflections {
                             throw new RuntimeException("Cannot access reflection.", e);
                         }
                     }
-                    
+
                     @Override
                     public boolean hasField(final Object target) {
                         // targetToLoad instanceof DeclaringClass
@@ -109,14 +109,14 @@ public final class Reflections {
                 };
             }
         }
-        
+
         // Search in parent classes
         if (target.getSuperclass() != null)
             return getField(target.getSuperclass(), name, fieldType, index);
-        
+
         throw new IllegalArgumentException("Cannot find field with type " + fieldType);
     }
-    
+
     /**
      * Finds any {@link Class} of the provided paths
      *
@@ -129,7 +129,7 @@ public final class Reflections {
         }
         return false;
     }
-    
+
     /**
      * A nullable {@link Class#forName(String)} instead of throwing exceptions
      *
@@ -142,7 +142,7 @@ public final class Reflections {
             return null;
         }
     }
-    
+
     /**
      * A nullable {@link Class#getDeclaredConstructor(Class[])} instead of throwing exceptions
      *
@@ -155,5 +155,5 @@ public final class Reflections {
             return null;
         }
     }
-    
+
 }

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  * @param <R> the resulting source
  */
 public interface SourceResolver<S extends Source, R> {
-    
+
     /**
      * Resolves {@link S} into {@link R}
      *
@@ -20,5 +20,5 @@ public interface SourceResolver<S extends Source, R> {
      * @return the resolved source
      */
     @NotNull R resolve(S source) throws ImperatException;
-    
+
 }

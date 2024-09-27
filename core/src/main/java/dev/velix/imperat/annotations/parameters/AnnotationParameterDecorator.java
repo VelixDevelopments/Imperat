@@ -13,10 +13,10 @@ import java.util.Collection;
 import java.util.List;
 
 public final class AnnotationParameterDecorator<S extends Source> extends InputParameter<S> implements AnnotatedParameter<S> {
-    
+
     private final CommandParameter<S> parameter;
     private final ParameterElement element;
-    
+
     AnnotationParameterDecorator(CommandParameter<S> parameter, ParameterElement element) {
         super(
                 parameter.name(), parameter.wrappedType(), parameter.permission(),
@@ -27,7 +27,7 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
         this.parameter = parameter;
         this.element = element;
     }
-    
+
     public static <S extends Source> AnnotationParameterDecorator<S> decorate(
             CommandParameter<S> parameter,
             ParameterElement element
@@ -45,7 +45,7 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
     public <A extends Annotation> @Nullable A getAnnotation(Class<A> clazz) {
         return element.getAnnotation(clazz);
     }
-    
+
     /**
      * @return the annotations associated with this parameter
      */
@@ -54,7 +54,7 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
     public Collection<? extends Annotation> getAnnotations() {
         return List.of(element.getAnnotations());
     }
-    
+
     /**
      * Formats the usage parameter*
      *
@@ -64,7 +64,7 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
     public String format() {
         return parameter.format();
     }
-    
+
     /**
      * Casts the parameter to a flag parameter
      *
@@ -74,5 +74,5 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
     public FlagParameter asFlagParameter() {
         return parameter.asFlagParameter();
     }
-    
+
 }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-public record ResolvedArgument<S extends Source> (
+public record ResolvedArgument<S extends Source>(
         @Nullable String raw,
         CommandParameter<S> parameter,
         int index, @Nullable Object value

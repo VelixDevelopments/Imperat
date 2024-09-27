@@ -23,7 +23,7 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 
 @ApiStatus.Internal
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
-    
+
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
     private final List<CommandParameter<S>> parametersWithoutFlags = new ArrayList<>();
     private final CommandExecution<S> execution;
@@ -33,18 +33,18 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     private @NotNull CooldownHandler<S> cooldownHandler;
     private @Nullable UsageCooldown cooldown = null;
     private CommandCoordinator<S> commandCoordinator;
-    
+
     CommandUsageImpl(CommandExecution<S> execution) {
         this(execution, false);
     }
-    
+
     CommandUsageImpl(CommandExecution<S> execution, boolean help) {
         this.execution = execution;
         this.cooldownHandler = new DefaultCooldownHandler<>(this);
         this.commandCoordinator = CommandCoordinator.sync();
         this.help = help;
     }
-    
+
     /**
      * @return the permission for this usage
      */
@@ -52,7 +52,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public @Nullable String permission() {
         return permission;
     }
-    
+
     /**
      * The permission for this usage
      *
@@ -62,7 +62,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public void permission(String permission) {
         this.permission = permission;
     }
-    
+
     /**
      * @return the description for the
      * command usage
@@ -71,12 +71,12 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public Description description() {
         return description;
     }
-    
+
     @Override
     public void describe(Description description) {
         this.description = description;
     }
-    
+
     /**
      * Checks whether the raw input is a flag
      * registered by this usage
@@ -88,7 +88,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public boolean hasFlag(String input) {
         return getFlagFromRaw(input) != null;
     }
-    
+
     /**
      * Fetches the flag from the input
      *
@@ -99,13 +99,13 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public @Nullable CommandFlag getFlagFromRaw(String rawInput) {
         boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
         boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
-        
+
         if (!isSingle && !isDouble) {
             return null;
         }
-        
+
         String inputFlagAlias = rawInput.substring(isSingle ? 1 : 2);
-        
+
         for (var param : parameters) {
             if (!param.isFlag()) continue;
             CommandFlag flag = param.asFlagParameter().flagData();
@@ -113,11 +113,11 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
                 return flag;
             }
         }
-        
+
         return null;
     }
-    
-    
+
+
     /**
      * Adds parameters to the usage
      *
@@ -132,7 +132,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
             parametersWithoutFlags.add(param);
         }
     }
-    
+
     /**
      * Adds parameters to the usage
      *
@@ -146,7 +146,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
             parametersWithoutFlags.add(p);
         }
     }
-    
+
     /**
      * @return the parameters for this usage
      * @see CommandParameter
@@ -155,18 +155,18 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public List<CommandParameter<S>> getParameters() {
         return parameters;
     }
-    
+
     @Override
     public List<CommandParameter<S>> getParametersWithoutFlags() {
         return parametersWithoutFlags;
     }
-    
+
     @Override
     public @Nullable CommandParameter<S> getParameter(int index) {
         if (index < 0 || index >= parameters.size()) return null;
         return parameters.get(index);
     }
-    
+
     /**
      * @return the execution for this command
      */
@@ -174,7 +174,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public @NotNull CommandExecution<S> getExecution() {
         return execution;
     }
-    
+
     /**
      * @param clazz the type of the parameter to check upon
      * @return Whether the usage has a specific type of parameter
@@ -185,7 +185,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
                 .stream()
                 .anyMatch((param) -> param.type().equals(clazz));
     }
-    
+
     /**
      * @return Gets the minimal possible number
      * of parameters that are acceptable to initiate this
@@ -198,7 +198,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
                 .filter((param) -> !param.isOptional())
                 .count();
     }
-    
+
     /**
      * @return Gets the maximum possible number
      * of parameters that are acceptable to initiate this
@@ -208,7 +208,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public int getMaxLength() {
         return getParameters().size();
     }
-    
+
     /**
      * Searches for a parameter with specific type
      *
@@ -221,10 +221,10 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         for (CommandParameter<S> parameter : getParameters())
             if (parameterPredicate.test(parameter))
                 return true;
-        
+
         return false;
     }
-    
+
     /**
      * @param parameterPredicate the condition
      * @return the parameter to get using a condition
@@ -237,7 +237,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         }
         return null;
     }
-    
+
     /**
      * @return The cooldown for this usage {@link UsageCooldown}
      * returns null if no cooldown has been set
@@ -246,7 +246,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public @Nullable UsageCooldown getCooldown() {
         return cooldown;
     }
-    
+
     /**
      * Sets the command usage's cooldown {@link UsageCooldown}
      *
@@ -256,7 +256,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public void setCooldown(@Nullable UsageCooldown usageCooldown) {
         this.cooldown = usageCooldown;
     }
-    
+
     /**
      * @return the cool down handler {@link CooldownHandler}
      */
@@ -264,7 +264,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public @NotNull CooldownHandler<S> getCooldownHandler() {
         return cooldownHandler;
     }
-    
+
     /**
      * Sets the cooldown handler {@link CooldownHandler}
      *
@@ -274,7 +274,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public void setCooldownHandler(@NotNull CooldownHandler<S> cooldownHandler) {
         this.cooldownHandler = cooldownHandler;
     }
-    
+
     /**
      * @return the coordinator for execution of the command
      */
@@ -282,7 +282,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public CommandCoordinator<S> getCoordinator() {
         return commandCoordinator;
     }
-    
+
     /**
      * Sets the command coordinator
      *
@@ -292,7 +292,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public void setCoordinator(CommandCoordinator<S> commandCoordinator) {
         this.commandCoordinator = commandCoordinator;
     }
-    
+
     /**
      * Executes the usage's actions
      * using the supplied {@link CommandCoordinator}
@@ -305,17 +305,17 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public void execute(Imperat<S> imperat, S source, ExecutionContext<S> context) {
         commandCoordinator.coordinate(imperat, source, context, this.execution);
     }
-    
+
     @Override
     public boolean isHelp() {
         return help;
     }
-    
+
     @Override
     public boolean hasParameters(List<CommandParameter<S>> parameters) {
         return this.parameters.equals(parameters);
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -332,7 +332,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         }
         return true;
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(parameters);

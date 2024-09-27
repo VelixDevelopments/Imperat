@@ -10,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class GroupSuggestionResolver implements TypeSuggestionResolver<TestSource, Group> {
-    
+
     @Override
     public @NotNull TypeWrap<Group> getType() {
         return TypeWrap.of(Group.class);
     }
-    
+
     @Override
     public List<String> autoComplete(
             SuggestionContext<TestSource> context,
@@ -25,5 +25,5 @@ public class GroupSuggestionResolver implements TypeSuggestionResolver<TestSourc
                 .stream().map(Group::name)
                 .toList();
     }
-    
+
 }

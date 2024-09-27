@@ -20,31 +20,31 @@ import java.util.List;
  */
 @Getter
 public final class CommandTree<S extends Source> {
-    
+
     final CommandNode<S> root;
-    
+
     CommandTree(Command<S> command) {
         this.root = new CommandNode<>(command);
         //parse(command);
     }
-    
+
     public static <S extends Source> CommandTree<S> create(Command<S> command) {
         return new CommandTree<>(command);
     }
-    
+
     public static <S extends Source> CommandTree<S> parsed(Command<S> command) {
         CommandTree<S> tree = create(command);
         tree.parseCommandUsages();
         return tree;
     }
-    
+
     //parsing usages part
     public void parseCommandUsages() {
         for (CommandUsage<S> usage : root.data.usages()) {
             parseUsage(usage);
         }
     }
-    
+
     public void parseUsage(CommandUsage<S> usage) {
         List<CommandParameter<S>> parameters = usage.getParameters();
         if (parameters == null || parameters.isEmpty()) {
@@ -52,7 +52,7 @@ public final class CommandTree<S extends Source> {
         }
         addParametersToTree(root, parameters, 0);
     }
-    
+
     private void addParametersToTree(
             ParameterNode<S, ?> currentNode,
             List<CommandParameter<S>> parameters,
@@ -61,13 +61,13 @@ public final class CommandTree<S extends Source> {
         if (index >= parameters.size()) {
             return;
         }
-        
+
         CommandParameter<S> param = parameters.get(index);
-        ParameterNode<S,?> childNode = getChildNode(currentNode, param);
+        ParameterNode<S, ?> childNode = getChildNode(currentNode, param);
         // Recursively add the remaining parameters to the child node
         addParametersToTree(childNode, parameters, index + 1);
     }
-    
+
     private ParameterNode<S, ?> getChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
         for (ParameterNode<S, ?> child : parent.getChildren()) {
             if (child.data.name().equalsIgnoreCase(param.name())
@@ -80,21 +80,21 @@ public final class CommandTree<S extends Source> {
             newNode = new CommandNode<>(param.asCommand());
         else
             newNode = new ArgumentNode<>(param);
-        
+
         parent.addChild(newNode);
         return newNode;
     }
-    
+
     public @NotNull List<String> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
-        
+
         List<String> results = new ArrayList<>();
         for (var child : root.getChildren()) {
             collectNodeCompletions(imperat, context, child, 0, depthToReach, results);
         }
         return results;
     }
-    
+
     private void collectNodeCompletions(
             Imperat<S> imperat,
             SuggestionContext<S> context,
@@ -106,18 +106,18 @@ public final class CommandTree<S extends Source> {
         if (depth > maxDepth) {
             return;
         }
-        
+
         String raw = context.arguments().getOr(depth, "");
         assert raw != null;
-        
+
         if (
                 (!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
-                || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
+                        || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
                         .hasPermission(context.source(), child.data.permission()))
         ) {
             return;
         }
-        
+
         if (depth == maxDepth) {
             //we reached the arg we want to complete, let's complete it using our current node
             //COMPLETE DIRECTLY
@@ -132,11 +132,11 @@ public final class CommandTree<S extends Source> {
             for (var innerChild : child.getChildren()) {
                 collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, results);
             }
-            
+
         }
-        
+
     }
-    
+
     private void addChildResults(
             Imperat<S> imperat,
             SuggestionContext<S> context,
@@ -154,28 +154,28 @@ public final class CommandTree<S extends Source> {
             results.addAll(resolver.autoComplete(context, node.data));
         }
     }
-    
-    
+
+
     //context matching part
     public @NotNull CommandDispatch<S> contextMatch(
             ArgumentQueue input
     ) {
-        
+
         int depth = 0;
-        
+
         for (ParameterNode<S, ?> child : root.getChildren()) {
             CommandDispatch<S> nodeTraversing = CommandDispatch.empty();
             var traverse = contextMatchNode(nodeTraversing, input, child, depth);
-            
+
             if (traverse.result() != CommandDispatch.Result.UNKNOWN) {
                 return traverse;
             }
-            
+
         }
-        
+
         return CommandDispatch.empty();
     }
-    
+
     private @NotNull CommandDispatch<S> contextMatchNode(
             CommandDispatch<S> commandDispatch,
             ArgumentQueue input,
@@ -186,7 +186,7 @@ public final class CommandTree<S extends Source> {
         if (depth >= input.size()) {
             return commandDispatch;
         }
-        
+
         String raw = input.get(depth);
         boolean matchesInput = currentNode.matchesInput(raw);
         if (!matchesInput) {
@@ -195,19 +195,19 @@ public final class CommandTree<S extends Source> {
         //GO TO NODE'S children
         commandDispatch.append(currentNode);
         if (currentNode.isLeaf()) {
-            
+
             //not the deepest search depth (still more raw args than number of nodes)
             commandDispatch.setResult((depth != input.size() - 1 && !currentNode.isGreedyParam())
                     ? CommandDispatch.Result.INCOMPLETE : CommandDispatch.Result.COMPLETE);
             return commandDispatch;
         } else {
             //not the last node → continue traversing
-            
+
             //checking if depth is the last
             if (depth == input.size() - 1) {
                 //depth is last → check for missing required arguments
                 commandDispatch.append(currentNode);
-                
+
                 if (currentNode.isOptional()) {
                     //so if the node is optional,
                     // we go deeper into the tree, while backtracking the depth of the argument input.
@@ -223,7 +223,7 @@ public final class CommandTree<S extends Source> {
                             break;
                         }
                     }
-                    
+
                     //improved logic
                     if (allOptional) {
                         //if all optional, then append the all next
@@ -236,7 +236,7 @@ public final class CommandTree<S extends Source> {
                             }
                         }
                     }
-                    
+
                     //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
                     var usage = commandDispatch.toUsage(root.data);
                     commandDispatch.setResult(
@@ -246,15 +246,15 @@ public final class CommandTree<S extends Source> {
                     );
                     return commandDispatch;
                 }
-                
+
             } else {
                 return this.searchForMatch(currentNode, commandDispatch, input, depth);
             }
-            
+
         }
-        
+
     }
-    
+
     private CommandDispatch<S> searchForMatch(
             ParameterNode<S, ?> node,
             CommandDispatch<S> commandDispatch,
@@ -268,5 +268,5 @@ public final class CommandTree<S extends Source> {
         }
         return commandDispatch;
     }
-    
+
 }

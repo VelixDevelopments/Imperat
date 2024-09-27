@@ -6,10 +6,10 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 
 
 final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command implements TabExecutor {
-    
+
     private final BungeeImperat bungeeCommandDispatcher;
     private final Command<BungeeSource> bungeeCommand;
-    
+
     InternalBungeeCommand(
             BungeeImperat commandDispatcher,
             Command<BungeeSource> bungeeCommand
@@ -22,7 +22,7 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
         this.bungeeCommandDispatcher = commandDispatcher;
         this.bungeeCommand = bungeeCommand;
     }
-    
+
     @Override
     public void execute(CommandSender sender, String[] args) {
         bungeeCommandDispatcher.dispatch(
@@ -31,8 +31,8 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
                 args
         );
     }
-    
-    
+
+
     @Override
     public Iterable<String> onTabComplete(
             CommandSender sender,
@@ -44,5 +44,5 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
                 args
         );
     }
-    
+
 }

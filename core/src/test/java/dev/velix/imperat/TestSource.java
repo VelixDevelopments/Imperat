@@ -9,12 +9,12 @@ public record TestSource(PrintStream origin) implements Source {
     public void sendMsg(String msg) {
         origin.println(msg);
     }
-    
+
     @Override
     public String name() {
         return "mqzen";
     }
-    
+
     @Override
     public void reply(String message) {
         sendMsg(message);
@@ -29,7 +29,7 @@ public record TestSource(PrintStream origin) implements Source {
     public void error(String message) {
         sendMsg(message);
     }
-    
+
     @Override
     public boolean isConsole() {
         return true;

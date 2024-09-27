@@ -7,13 +7,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.TimeUnit;
 
 public interface CooldownHolder {
-    
+
     @Nullable UsageCooldown getCooldown();
-    
+
     void setCooldown(UsageCooldown cooldown);
-    
+
     default void setCooldown(long value, TimeUnit unit) {
         setCooldown(new UsageCooldown(value, unit));
     }
-    
+
 }

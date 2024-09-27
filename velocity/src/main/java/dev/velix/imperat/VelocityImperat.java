@@ -15,10 +15,10 @@ import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
 
 public final class VelocityImperat extends BaseImperat<VelocitySource> {
-    
+
     final PluginContainer plugin;
     private final ProxyServer proxyServer;
-    
+
     private VelocityImperat(
             @NotNull String pluginName,
             @NotNull ProxyServer proxyServer,
@@ -30,7 +30,7 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         this.proxyServer = proxyServer;
         this.registerDefaultResolvers();
     }
-    
+
     public static VelocityImperat create(
             String pluginName,
             ProxyServer server,
@@ -38,7 +38,7 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
     ) {
         return new VelocityImperat(pluginName, server, permissionResolver);
     }
-    
+
     public static VelocityImperat create(
             String pluginName,
             ProxyServer proxyServer
@@ -65,14 +65,14 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
                 UnknownPlayerException.class, (exception, imperat, context) ->
                         context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
         );
-        
+
         this.registerSourceResolver(Player.class, (source) -> {
             if (source.isConsole()) {
                 throw new SourceException("Only players are allowed to do this !");
             }
             return source.asPlayer();
         });
-        
+
     }
 
     @Override
@@ -86,22 +86,22 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public ProxyServer getPlatform() {
         return proxyServer;
     }
-    
+
     @Override
     public void shutdownPlatform() {
         plugin.getExecutorService().shutdown();
     }
-    
+
     @Override
     public String commandPrefix() {
         return "/";
     }
-    
+
     @Override
     public VelocitySource wrapSender(Object sender) {
         return new VelocitySource((CommandSource) sender);

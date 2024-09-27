@@ -10,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
 public final class ArgumentNode<S extends Source> extends ParameterNode<S, CommandParameter<S>> {
-    
+
     ArgumentNode(@NotNull CommandParameter<S> data) {
         super(data);
     }
-    
+
     @Override
     public boolean matchesInput(String input) {
         if (data.isFlag()) {
@@ -33,16 +33,16 @@ public final class ArgumentNode<S extends Source> extends ParameterNode<S, Comma
         ParameterType type = ParameterTypes.getParamType(data.type());
         return type == null || type.matchesInput(input);
     }
-    
+
     @Override
     public String format() {
         return data.format();
     }
-    
+
     @Override
     public int priority() {
         return 1;
     }
-    
-    
+
+
 }

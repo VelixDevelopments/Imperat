@@ -6,34 +6,34 @@ import dev.velix.imperat.command.tree.CommandDispatch;
 import java.io.*;
 
 public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
-    
+
     private InputStream input;
-    
+
     private CommandLineImperat(InputStream inputStream) {
         super(((source, permission) -> true));
         this.input = inputStream;
     }
-    
+
     public static CommandLineImperat create(InputStream inputStream) {
         return new CommandLineImperat(inputStream);
     }
-    
+
     @Override
     public InputStream getPlatform() {
         return input;
     }
-    
+
     @Override
     public void shutdownPlatform() {
         input = null;
         throw new RuntimeException();
     }
-    
+
     @Override
     public String commandPrefix() {
         return "";
     }
-    
+
     @Override
     public ConsoleSource wrapSender(Object sender) {
         if (!(sender instanceof PrintStream printStream)) {
@@ -41,7 +41,7 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
         }
         return new ConsoleSource(printStream);
     }
-    
+
     /**
      * Dispatches the command-line from the input stream provided
      *
@@ -57,7 +57,7 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Dispatches the command-line from the input stream provided
      * while using {@link System#out} as an {@link OutputStream}
@@ -67,5 +67,5 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
     public CommandDispatch.Result dispatch() {
         return dispatch(System.out);
     }
-    
+
 }

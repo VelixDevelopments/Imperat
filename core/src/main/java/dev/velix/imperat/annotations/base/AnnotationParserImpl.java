@@ -13,30 +13,30 @@ import java.lang.annotation.Annotation;
 
 @ApiStatus.Internal
 final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
-    
+
     private final AnnotationRegistry annotationRegistry;
     private final ElementSelector<MethodElement> methodSelector;
     private final CommandClassVisitor<S> visitor;
-    
+
     AnnotationParserImpl(Imperat<S> dispatcher) {
         super(dispatcher);
         this.annotationRegistry = new AnnotationRegistry();
-        
+
         this.methodSelector = ElementSelector.create();
         methodSelector.addRule(
                 MethodRules.IS_PUBLIC.and(MethodRules.RETURNS_VOID)
         );
-        
+
         this.visitor = CommandClassVisitor.newSimpleVisitor(dispatcher, this);
     }
-    
-    
+
+
     @Override
     public <T> void parseCommandClass(T instance) {
         AnnotationReader<S> reader = AnnotationReader.read(dispatcher, methodSelector, this, instance);
         reader.accept(visitor);
     }
-    
+
     /**
      * Registers a type of annotations so that it can be
      * detected by {@link AnnotationReader} , it's useful as it allows that type of annotation
@@ -50,8 +50,8 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public final void registerAnnotations(Class<? extends Annotation>... type) {
         annotationRegistry.registerAnnotationTypes(type);
     }
-    
-    
+
+
     /**
      * Registers {@link AnnotationReplacer}
      *
@@ -62,7 +62,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
         annotationRegistry.registerAnnotationReplacer(type, replacer);
     }
-    
+
     /**
      * Checks the internal registry whether the type of annotation entered is known/registered or not.
      *
@@ -73,7 +73,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public boolean isKnownAnnotation(Class<? extends Annotation> annotationType) {
         return annotationRegistry.isRegisteredAnnotation(annotationType);
     }
-    
+
     /**
      * Checks if the specific type of annotation entered has a {@link AnnotationReplacer}
      * for it in the internal registry for replacers
@@ -85,7 +85,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public boolean hasAnnotationReplacerFor(Class<? extends Annotation> type) {
         return annotationRegistry.hasReplacerFor(type);
     }
-    
+
     /**
      * Fetches the {@link AnnotationReplacer} mapped to the entered annotation type.
      *
@@ -96,5 +96,5 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     public <A extends Annotation> AnnotationReplacer<A> getAnnotationReplacer(Class<A> type) {
         return annotationRegistry.getAnnotationReplacer(type);
     }
-    
+
 }

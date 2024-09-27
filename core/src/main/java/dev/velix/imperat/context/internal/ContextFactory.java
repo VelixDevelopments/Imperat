@@ -16,12 +16,12 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ContextFactory<S extends Source> {
-    
+
     static <S extends Source> ContextFactory<S> defaultFactory() {
         return new DefaultContextFactory<>();
     }
-    
-    
+
+
     /**
      * @param dispatcher the dispatcher/imperat api
      * @param source     the sender/source of this command execution
@@ -36,14 +36,13 @@ public interface ContextFactory<S extends Source> {
             @NotNull Command<S> command,
             @NotNull ArgumentQueue queue
     );
-    
+
     /**
-     *
      * @param dispatcher the dispatcher/imperat api
-     * @param source the source
-     * @param command the command
-     * @param queue the argument input
-     * @param arg the arg being completed
+     * @param source     the source
+     * @param command    the command
+     * @param queue      the argument input
+     * @param arg        the arg being completed
      * @return new context for auto completions with {@link CompletionArg}
      */
     SuggestionContext<S> createSuggestionContext(
@@ -53,7 +52,7 @@ public interface ContextFactory<S extends Source> {
             @NotNull ArgumentQueue queue,
             @NotNull CompletionArg arg
     );
-    
+
     /**
      * @param dispatcher   the dispatcher/imperat api
      * @param plainContext the context plain
@@ -66,5 +65,5 @@ public interface ContextFactory<S extends Source> {
             @NotNull Context<S> plainContext,
             @NotNull CommandUsage<S> usage
     );
-    
+
 }

@@ -7,7 +7,7 @@ public class SourceException extends ImperatException {
 
     private final String message;
     private final ErrorLevel type;
-    
+
     public SourceException(
             final String msg,
             final Object... args
@@ -15,7 +15,7 @@ public class SourceException extends ImperatException {
         this.type = ErrorLevel.SEVERE;
         this.message = String.format(msg, args);
     }
-    
+
     public SourceException(
             final ErrorLevel type,
             final String msg,
@@ -29,7 +29,7 @@ public class SourceException extends ImperatException {
     public String getMessage() {
         return this.message;
     }
-    
+
     public enum ErrorLevel {
         REPLY,
         WARN,

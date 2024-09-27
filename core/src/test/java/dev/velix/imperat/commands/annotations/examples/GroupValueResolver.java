@@ -9,7 +9,7 @@ import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.ValueResolver;
 
 public final class GroupValueResolver implements ValueResolver<TestSource, Group> {
-    
+
     @Override
     public Group resolve(
             ExecutionContext<TestSource> context,

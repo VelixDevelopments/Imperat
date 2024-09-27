@@ -1,3 +1,4 @@
 package dev.velix.imperat.exception;
 
-public final class InvalidSyntaxException extends ImperatException {}
+public final class InvalidSyntaxException extends ImperatException {
+}
