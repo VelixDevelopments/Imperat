@@ -11,7 +11,6 @@ import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
 import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.command.tree.UsageMatchResult;
 import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.exception.*;
@@ -573,17 +572,17 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     
     
     @Override
-    public @NotNull UsageMatchResult dispatch(Context<S> context) {
+    public @NotNull CommandDispatch.Result dispatch(Context<S> context) {
         try {
             return handleExecution(context);
         } catch (Throwable ex) {
             this.handleThrowable(ex, context, BaseImperat.class, "dispatch");
-            return UsageMatchResult.UNKNOWN;
+            return CommandDispatch.Result.UNKNOWN;
         }
     }
     
     @Override
-    public @NotNull UsageMatchResult dispatch(S source, Command<S> command, String[] rawInput) {
+    public @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String[] rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
         
         Context<S> plainContext = getContextFactory()
@@ -593,12 +592,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
     
     @Override
-    public @NotNull UsageMatchResult dispatch(S source, String commandName, String[] rawInput) {
+    public @NotNull CommandDispatch.Result dispatch(S source, String commandName, String[] rawInput) {
         Command<S> command = getCommand(commandName);
         if (command == null) {
             //TODO better message here
             source.reply("Unknown command !");
-            return UsageMatchResult.UNKNOWN;
+            return CommandDispatch.Result.UNKNOWN;
         }
         //temp debugging
         //command.visualize();
@@ -606,19 +605,19 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
     
     @Override
-    public @NotNull UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine) {
+    public @NotNull CommandDispatch.Result dispatch(S sender, String commandName, String rawArgsOneLine) {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
     
     @Override
-    public UsageMatchResult dispatch(S sender, String line) {
+    public CommandDispatch.Result dispatch(S sender, String line) {
         String[] lineArgs = line.split(" ");
         String[] argumentsOnly = new String[lineArgs.length - 1];
         System.arraycopy(lineArgs, 1, argumentsOnly, 0, lineArgs.length - 1);
         return dispatch(sender, lineArgs[0], argumentsOnly);
     }
     
-    private UsageMatchResult handleExecution(Context<S> context) throws ImperatException {
+    private CommandDispatch.Result handleExecution(Context<S> context) throws ImperatException {
         Command<S> command = context.command();
         S source = context.source();
         
@@ -629,7 +628,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         if (context.arguments().isEmpty()) {
             CommandUsage<S> defaultUsage = command.getDefaultUsage();
             executeUsage(command, source, context, defaultUsage);
-            return UsageMatchResult.INCOMPLETE;
+            return CommandDispatch.Result.INCOMPLETE;
         }
         
         CommandDispatch<S> searchResult = command.contextMatch(context);
@@ -637,9 +636,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         
         CommandUsage<S> usage = searchResult.toUsage(command);
         
-        if (searchResult.result() == UsageMatchResult.COMPLETE)
+        if (searchResult.result() == CommandDispatch.Result.COMPLETE)
             executeUsage(command, source, context, usage);
-        else if (searchResult.result() == UsageMatchResult.INCOMPLETE) {
+        else if (searchResult.result() == CommandDispatch.Result.INCOMPLETE) {
             var lastParameter = searchResult.getLastParameter();
             if (lastParameter.isCommand()) {
                 executeUsage(command, source, context, lastParameter.asCommand().getDefaultUsage());

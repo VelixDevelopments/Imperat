@@ -1,7 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.command.BaseImperat;
-import dev.velix.imperat.command.tree.UsageMatchResult;
+import dev.velix.imperat.command.tree.CommandDispatch;
 
 import java.io.*;
 
@@ -48,7 +48,7 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
      * @param outputStream the output stream/command-source origin
      * @return the usage match result
      */
-    public UsageMatchResult dispatch(OutputStream outputStream) {
+    public CommandDispatch.Result dispatch(OutputStream outputStream) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
             String line = reader.readLine();
             ConsoleSource prompt = wrapSender(outputStream);
@@ -64,7 +64,7 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
      *
      * @return the usage match result
      */
-    public UsageMatchResult dispatch() {
+    public CommandDispatch.Result dispatch() {
         return dispatch(System.out);
     }
     

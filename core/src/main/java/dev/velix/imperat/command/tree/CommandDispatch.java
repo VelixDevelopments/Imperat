@@ -18,18 +18,18 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
     
     @Setter
-    private UsageMatchResult result;
+    private Result result;
     
-    private CommandDispatch(UsageMatchResult result) {
+    private CommandDispatch(Result result) {
         this.result = result;
     }
     
-    public static <S extends Source> CommandDispatch<S> empty(UsageMatchResult result) {
+    static <S extends Source> CommandDispatch<S> of(Result result) {
         return new CommandDispatch<>(result);
     }
     
-    public static <S extends Source> CommandDispatch<S> empty() {
-        return empty(UsageMatchResult.UNKNOWN);
+    static <S extends Source> CommandDispatch<S> empty() {
+        return of(Result.UNKNOWN);
     }
     
     public void append(ParameterNode<S, ?> node) {
@@ -47,7 +47,7 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
         return parameters.iterator();
     }
     
-    public UsageMatchResult result() {
+    public Result result() {
         return result;
     }
     
@@ -64,4 +64,27 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
         ImperatDebugger.debug(builder.toString());
     }
     
+    /**
+     * Defines a result from dispatching the command execution.
+     */
+    public enum Result {
+        
+        /**
+         * Defines a complete dispatch of the command,
+         * {@link CommandUsage} cannot be null unless the {@link CommandTree} has issues
+         */
+        COMPLETE,
+        
+        /**
+         * Defines an incomplete execution, due to incomplete usage arguments.
+         * May occur with command default execution(with no args). e.g: `/cmd`
+         */
+        INCOMPLETE,
+        
+        /**
+         * Defines an unknown execution/command, it's the default result
+         */
+        UNKNOWN
+        
+    }
 }

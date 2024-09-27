@@ -3,7 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.tree.UsageMatchResult;
+import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.context.ArgumentQueue;
@@ -47,7 +47,7 @@ public class TestRun {
         
     }
     
-    private static UsageMatchResult testCmdTreeExecution(String cmdName, String input) {
+    private static CommandDispatch.Result testCmdTreeExecution(String cmdName, String input) {
         return IMPERAT.dispatch(SOURCE, cmdName, input);
     }
     
@@ -89,27 +89,27 @@ public class TestRun {
     @Test
     public void testHelp() {
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "help"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "help"));
     }
     
     @Test
     public void testIncompleteSubCommand() {
         //syntax -> /group <group> setperm <permission> [value]
         var result = testCmdTreeExecution("group", "member setperm");
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, result);
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, result);
     }
     
     @Test
     public void testCompleteSubCommand() {
         var result = testCmdTreeExecution("group", "member setperm command.group");
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
     }
     
     @Test
     public void testHelpSubCommand() {
         //syntax -> /group help [page]
         var result = testCmdTreeExecution("group", "help");
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
     }
     
     /*@Test
@@ -119,7 +119,7 @@ public class TestRun {
         var result = testCmdTreeExecution("group", "member");
         
         Assertions.assertEquals(PRE_PROCESSOR_INT, 1);
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
+        Assertions.assertEquals(Result.COMPLETE, result);
         Assertions.assertTrue(USAGE_EXECUTED);
     }
     
@@ -130,7 +130,7 @@ public class TestRun {
         
         var result = testCmdTreeExecution("group", "member");
         Assertions.assertEquals(POST_PROCESSOR_INT, 1);
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
+        Assertions.assertEquals(Result.COMPLETE, result);
         Assertions.assertTrue(USAGE_EXECUTED);
     }*/
     
@@ -141,7 +141,7 @@ public class TestRun {
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
         
         var result = testCmdTreeExecution("test", "first-value first a1 second a3");
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, result);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
     }
     
     @Test
@@ -150,19 +150,19 @@ public class TestRun {
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
         //debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
         
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub1"));
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub1 hi"));
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2"));
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye"));
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3"));
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3 hello"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3 hello"));
         
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4"));
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub4 hi"));
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5"));
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye"));
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6"));
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6 hello"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub4"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub4 hi"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6 hello"));
    
     }
     
@@ -204,7 +204,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("opt");
         assert cmd != null;
         debugCommand(cmd);
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("opt", "hi"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("opt", "hi"));
     }
     
     @Test
@@ -213,7 +213,7 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("ban", "mqzen"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen"));
     }
     
     @Test
@@ -222,7 +222,7 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         
-        Assertions.assertEquals(UsageMatchResult.COMPLETE, testCmdTreeExecution("ban", "mqzen -s"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s"));
     }
     
     @Test
@@ -230,6 +230,6 @@ public class TestRun {
         IMPERAT.registerCommand(Command.create("UPPER_CAsE")
                 .defaultExecution((src, ctx) -> src.reply("Worked !"))
                 .build());
-        Assertions.assertEquals(UsageMatchResult.INCOMPLETE, testCmdTreeExecution("upper_case", ""));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("upper_case", ""));
     }
 }

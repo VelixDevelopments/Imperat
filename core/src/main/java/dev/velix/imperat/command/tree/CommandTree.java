@@ -167,7 +167,7 @@ public final class CommandTree<S extends Source> {
             CommandDispatch<S> nodeTraversing = CommandDispatch.empty();
             var traverse = contextMatchNode(nodeTraversing, input, child, depth);
             
-            if (traverse.result() != UsageMatchResult.UNKNOWN) {
+            if (traverse.result() != CommandDispatch.Result.UNKNOWN) {
                 return traverse;
             }
             
@@ -198,7 +198,7 @@ public final class CommandTree<S extends Source> {
             
             //not the deepest search depth (still more raw args than number of nodes)
             commandDispatch.setResult((depth != input.size() - 1 && !currentNode.isGreedyParam())
-                    ? UsageMatchResult.INCOMPLETE : UsageMatchResult.COMPLETE);
+                    ? CommandDispatch.Result.INCOMPLETE : CommandDispatch.Result.COMPLETE);
             return commandDispatch;
         } else {
             //not the last node → continue traversing
@@ -241,8 +241,8 @@ public final class CommandTree<S extends Source> {
                     var usage = commandDispatch.toUsage(root.data);
                     commandDispatch.setResult(
                             allOptional || usage != null
-                                    ? UsageMatchResult.COMPLETE
-                                    : UsageMatchResult.INCOMPLETE
+                                    ? CommandDispatch.Result.COMPLETE
+                                    : CommandDispatch.Result.INCOMPLETE
                     );
                     return commandDispatch;
                 }
@@ -263,7 +263,7 @@ public final class CommandTree<S extends Source> {
     ) {
         for (ParameterNode<S, ?> child : node.getChildren()) {
             var traversedChild = contextMatchNode(commandDispatch, input, child, depth + 1);
-            if (traversedChild.result() == UsageMatchResult.COMPLETE)
+            if (traversedChild.result() == CommandDispatch.Result.COMPLETE)
                 return traversedChild;
         }
         return commandDispatch;

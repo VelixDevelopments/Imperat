@@ -6,7 +6,7 @@ import dev.velix.imperat.annotations.base.AnnotationReader;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.tree.UsageMatchResult;
+import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
@@ -104,7 +104,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param context the context
      * @return the usage match result
      */
-    @NotNull UsageMatchResult dispatch(Context<S> context);
+    @NotNull CommandDispatch.Result dispatch(Context<S> context);
     
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -116,7 +116,7 @@ public non-sealed interface Imperat<S extends Source> extends
      *
      * @return the usage match result
      */
-    @NotNull UsageMatchResult dispatch(S source, Command<S> command, String... rawInput);
+    @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String... rawInput);
     
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -126,7 +126,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param rawInput    the command's args input
      * @return the usage match result
      */
-    UsageMatchResult dispatch(S sender, String commandName, String[] rawInput);
+    CommandDispatch.Result dispatch(S sender, String commandName, String[] rawInput);
     
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -136,7 +136,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param rawArgsOneLine the command's args input on ONE LINE
      * @return the usage match result
      */
-    UsageMatchResult dispatch(S sender, String commandName, String rawArgsOneLine);
+    CommandDispatch.Result dispatch(S sender, String commandName, String rawArgsOneLine);
     
     /**
      * Dispatches the full command-line
@@ -145,7 +145,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param commandLine the command line to dispatch
      * @return the usage match result
      */
-    UsageMatchResult dispatch(S sender, String commandLine);
+    CommandDispatch.Result dispatch(S sender, String commandLine);
     
     /**
      * @param command the data about the command being written in the chat box
