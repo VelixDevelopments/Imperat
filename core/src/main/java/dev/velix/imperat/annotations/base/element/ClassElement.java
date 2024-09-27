@@ -17,9 +17,9 @@ import java.util.function.Predicate;
 
 @Getter
 public final class ClassElement extends ParseElement<Class<?>> {
-    
+
     private final Set<ParseElement<?>> children = new LinkedHashSet<>();
-    
+
     public <S extends Source> ClassElement(
             @NotNull AnnotationParser<S> registry,
             @Nullable ClassElement parent,
@@ -27,13 +27,13 @@ public final class ClassElement extends ParseElement<Class<?>> {
     ) {
         super(registry, parent, element);
     }
-    
+
     public Object newInstance(Object... constructorArgs) {
         Class<?>[] types = new Class[constructorArgs.length];
         for (int i = 0; i < types.length; i++) {
             types[i] = constructorArgs[i].getClass();
         }
-        
+
         try {
             Constructor<?> cons = Reflections.getConstructor(this.getElement(), types);
             if (cons == null) {
@@ -43,9 +43,9 @@ public final class ClassElement extends ParseElement<Class<?>> {
         } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        
+
     }
-    
+
     public <S extends Source> Set<Command<S>> accept(CommandClassVisitor<S> visitor) {
         try {
             return visitor.visitCommandClass(this);
@@ -54,28 +54,28 @@ public final class ClassElement extends ParseElement<Class<?>> {
             return Collections.emptySet();
         }
     }
-    
-    
+
+
     public @Nullable ParseElement<?> getChildElement(Predicate<ParseElement<?>> predicate) {
         for (var element : getChildren())
             if (predicate.test(element)) return element;
         return null;
     }
-    
+
     public void addChild(ParseElement<?> element) {
         children.add(element);
     }
-    
+
     public boolean isRootClass() {
         return getParent() == null;
     }
-    
-    
+
+
     @Override
     public String getName() {
         return getElement().getName();
     }
-    
+
     public String getSimpleName() {
         return getElement().getSimpleName();
     }

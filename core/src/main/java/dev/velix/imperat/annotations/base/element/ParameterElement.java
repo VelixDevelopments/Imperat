@@ -12,11 +12,11 @@ import java.lang.reflect.Type;
 @ApiStatus.Internal
 @Getter
 public final class ParameterElement extends ParseElement<Parameter> {
-    
+
     private final String name;
     private final Type type;
     private final ClassElement owningClass;
-    
+
     <S extends Source> ParameterElement(
             final AnnotationParser<S> parser,
             final ClassElement owningClass,
@@ -28,10 +28,10 @@ public final class ParameterElement extends ParseElement<Parameter> {
         this.name = AnnotationHelper.getParamName(parser.getImperat(), element);
         this.type = element.getParameterizedType();
     }
-    
+
     @Override
     public String toString() {
         return getElement().getType().getSimpleName() + " " + name;
     }
-    
+
 }

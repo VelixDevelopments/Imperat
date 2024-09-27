@@ -32,25 +32,25 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
-    
-    
+
+
     private final ContextResolverRegistry<S> contextResolverRegistry;
     private final ValueResolverRegistry<S> valueResolverRegistry;
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
     private final PlaceholderRegistry<S> placeholderRegistry;
     private final SourceResolverRegistry<S> sourceResolverRegistry;
-    
+
     protected @NotNull PermissionResolver<S> permissionResolver;
     private @NotNull ContextFactory<S> contextFactory;
     private @NotNull UsageVerifier<S> verifier;
     private @Nullable HelpProvider<S> provider = null;
     private @NotNull AnnotationParser<S> annotationParser;
-    
+
     private final Map<String, Command<S>> commands = new HashMap<>();
     private final List<CommandPreProcessor<S>> globalPreProcessors = new ArrayList<>();
     private final List<CommandPostProcessor<S>> globalPostProcessors = new ArrayList<>();
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
-    
+
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory();
         contextResolverRegistry = ContextResolverRegistry.createDefault(this);
@@ -64,19 +64,19 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         this.regDefThrowableResolvers();
         annotationParser = AnnotationParser.defaultParser(this);
     }
-    
+
     private void registerProcessors() {
         registerGlobalPreProcessor(new UsagePermissionProcessor<>());
         registerGlobalPreProcessor(new UsageCooldownProcessor<>());
         //TODO register creative built-in processors in the future
     }
-    
+
     private void regDefThrowableResolvers() {
         this.setThrowableResolver(InvalidSourceException.class, (exception, imperat, context) -> {
             throw new UnsupportedOperationException("Couldn't find any source resolver for type `"
                     + exception.getTargetType().getType().getTypeName() + "'");
         });
-        
+
         this.setThrowableResolver(
                 SourceException.class,
                 (exception, imperat, context) -> {
@@ -88,12 +88,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     }
                 }
         );
-        
+
         this.setThrowableResolver(
                 InvalidUUIDException.class, (exception, imperat, context) ->
                         context.source().error("Invalid uuid-format '" + exception.getRaw() + "'")
         );
-        
+
         this.setThrowableResolver(
                 CooldownException.class,
                 (exception, imperat, context) -> {
@@ -119,15 +119,15 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                         );
                         return;
                     }
-                    
+
                     var usage = resolvedContext.getDetectedUsage();
                     final int last = context.arguments().size() - 1;
-                    
+
                     final List<CommandParameter<S>> params = new ArrayList<>(usage.getParameters())
                             .stream()
                             .filter((param) -> !param.isOptional() && param.position() > last)
                             .toList();
-                    
+
                     final StringBuilder builder = new StringBuilder();
                     for (int i = 0; i < params.size(); i++) {
                         CommandParameter<S> param = params.get(i);
@@ -135,7 +135,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                         builder.append(param.format());
                         if (i != params.size() - 1)
                             builder.append(' ');
-                        
+
                     }
                     //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
                     source.error(
@@ -166,13 +166,13 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                             || resolvedContext.getDetectedUsage().isHelp()) {
                         throw new IllegalCallerException("Called NoHelpPageCaption in wrong the wrong sequence/part of the code");
                     }
-                    
+
                     int page = resolvedContext.getArgumentOr("page", 1);
                     context.source().error("Page '<page>' doesn't exist!".replace("<page>", String.valueOf(page)));
                 }
         );
     }
-    
+
     /**
      * Registering a command into the dispatcher
      *
@@ -184,22 +184,22 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             for (CommandUsage<S> usage : command.usages()) {
                 if (!verifier.verify(usage))
                     throw new InvalidCommandUsageException(command, usage);
-                
+
                 for (CommandUsage<S> other : command.usages()) {
                     if (other.equals(usage)) continue;
                     if (verifier.areAmbiguous(usage, other))
                         throw new AmbiguousUsageAdditionException(command, usage, other);
                 }
-                
+
             }
             commands.put(command.name().toLowerCase(), command);
         } catch (RuntimeException ex) {
             ImperatDebugger.error(BaseImperat.class, "registerCommand(Command command)", ex);
             shutdownPlatform();
         }
-        
+
     }
-    
+
     /**
      * Registers a command class built by the
      * annotations using a parser
@@ -215,7 +215,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
         annotationParser.parseCommandClass(command);
     }
-    
+
     /**
      * @param name the name/alias of the command
      * @return fetches {@link Command} with specific name/alias
@@ -223,16 +223,16 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public @Nullable Command<S> getCommand(final String name) {
         final String cmdName = name.toLowerCase();
-        
+
         Command<S> result = commands.get(cmdName);
         if (result != null) return result;
         for (Command<S> headCommands : commands.values()) {
             if (headCommands.hasName(cmdName)) return headCommands;
         }
-        
+
         return null;
     }
-    
+
     /**
      * @return {@link PermissionResolver} for the dispatcher
      */
@@ -240,7 +240,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @NotNull PermissionResolver<S> getPermissionResolver() {
         return permissionResolver;
     }
-    
+
     /**
      * Changes the instance of {@link AnnotationParser}
      *
@@ -251,7 +251,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         Preconditions.notNull(parser, "Parser");
         this.annotationParser = parser;
     }
-    
+
     /**
      * Registers a type of annotations so that it can be
      * detected by {@link AnnotationReader} , it's useful as it allows that type of annotation
@@ -265,7 +265,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public final void registerAnnotations(Class<? extends Annotation>... type) {
         annotationParser.registerAnnotations(type);
     }
-    
+
     /**
      * Registers {@link AnnotationReplacer}
      *
@@ -276,7 +276,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
         annotationParser.registerAnnotationReplacer(type, replacer);
     }
-    
+
     /**
      * @param owningCommand the command owning this sub-command
      * @param name          the name of the subcommand you're looking for
@@ -286,15 +286,15 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @Nullable Command<S> getSubCommand(String owningCommand, String name) {
         Command<S> owningCmd = getCommand(owningCommand);
         if (owningCmd == null) return null;
-        
+
         for (Command<S> subCommand : owningCmd.getSubCommands()) {
             Command<S> result = search(subCommand, name);
             if (result != null) return result;
         }
-        
+
         return null;
     }
-    
+
     /**
      * @return the factory for creation of
      * command related contexts {@link Context}
@@ -303,7 +303,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @NotNull ContextFactory<S> getContextFactory() {
         return contextFactory;
     }
-    
+
     /**
      * sets the context factory {@link ContextFactory} for the contexts
      *
@@ -313,7 +313,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void setContextFactory(@NotNull ContextFactory<S> contextFactory) {
         this.contextFactory = contextFactory;
     }
-    
+
     /**
      * Checks whether the type has
      * a registered context-resolver
@@ -326,7 +326,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public boolean hasContextResolver(Type type) {
         return getContextResolver(type) != null;
     }
-    
+
     /**
      * Registers a context resolver factory
      *
@@ -336,7 +336,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void registerContextResolverFactory(ContextResolverFactory<S> factory) {
         contextResolverRegistry.setFactory(factory);
     }
-    
+
     /**
      * @return returns the factory for creation of
      * {@link ContextResolver}
@@ -345,7 +345,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public ContextResolverFactory<S> getContextResolverFactory() {
         return contextResolverRegistry.getFactory();
     }
-    
+
     /**
      * Fetches {@link ContextResolver} for a certain type
      *
@@ -356,7 +356,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public <T> @Nullable ContextResolver<S, T> getContextResolver(Type resolvingContextType) {
         return contextResolverRegistry.getResolver(resolvingContextType);
     }
-    
+
     /**
      * Registers {@link ContextResolver}
      *
@@ -368,7 +368,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                                             @NotNull ContextResolver<S, T> resolver) {
         contextResolverRegistry.registerResolver(type, resolver);
     }
-    
+
     /**
      * Registers {@link ValueResolver}
      *
@@ -379,7 +379,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public <T> void registerValueResolver(Type type, @NotNull ValueResolver<S, T> resolver) {
         valueResolverRegistry.registerResolver(type, resolver);
     }
-    
+
     /**
      * @return all currently registered {@link ValueResolver}
      */
@@ -387,7 +387,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public Collection<? extends ValueResolver<S, ?>> getRegisteredValueResolvers() {
         return valueResolverRegistry.getAll();
     }
-    
+
     /**
      * Fetches {@link ValueResolver} for a certain value
      *
@@ -398,7 +398,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @Nullable ValueResolver<S, ?> getValueResolver(Type resolvingValueType) {
         return valueResolverRegistry.getResolver(resolvingValueType);
     }
-    
+
     /**
      * Fetches the suggestion provider/resolver for a specific type of
      * argument or parameter.
@@ -410,7 +410,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @Nullable SuggestionResolver<S> getSuggestionResolverByType(Type type) {
         return suggestionResolverRegistry.getResolver(type);
     }
-    
+
     /**
      * Checks whether the type can be a command sender
      *
@@ -421,7 +421,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public boolean canBeSender(Type type) {
         return TypeWrap.of(Source.class).isSupertypeOf(type);
     }
-    
+
     /**
      * Registers a suggestion resolver
      *
@@ -431,7 +431,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public <T> void registerSuggestionResolver(TypeSuggestionResolver<S, T> suggestionResolver) {
         suggestionResolverRegistry.registerResolverForType(suggestionResolver);
     }
-    
+
     /**
      * Registers a suggestion resolver to a type
      *
@@ -442,7 +442,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void registerSuggestionResolver(Type type, SuggestionResolver<S> suggestionResolver) {
         suggestionResolverRegistry.registerResolverForType(type, suggestionResolver);
     }
-    
+
     /**
      * Fetches the suggestion provider/resolver for a specific argument
      *
@@ -452,7 +452,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @Nullable SuggestionResolver<S> getNamedSuggestionResolver(String name) {
         return suggestionResolverRegistry.getResolverByName(name);
     }
-    
+
     /**
      * Registers a suggestion resolver linked
      * directly to a unique name
@@ -464,7 +464,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void registerNamedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver) {
         suggestionResolverRegistry.registerNamedResolver(name, suggestionResolver);
     }
-    
+
     /**
      * Registers a placeholder
      *
@@ -474,7 +474,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void registerPlaceholder(Placeholder<S> placeholder) {
         placeholderRegistry.setData(placeholder.id(), placeholder);
     }
-    
+
     /**
      * The id/format of this placeholder, must be unique and lowercase
      *
@@ -514,12 +514,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @Nullable <R> SourceResolver<S, R> getSourceResolver(Type type) {
         return (SourceResolver<S, R>) sourceResolverRegistry.getData(type).orElse(null);
     }
-    
+
     @Override
     public <R> void registerSourceResolver(Type type, SourceResolver<S, R> sourceResolver) {
         sourceResolverRegistry.setData(type, sourceResolver);
     }
-    
+
     /**
      * Sets the usage verifier to a new instance
      *
@@ -529,25 +529,25 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void setUsageVerifier(UsageVerifier<S> usageVerifier) {
         this.verifier = usageVerifier;
     }
-    
+
     @ApiStatus.Internal
     private Command<S> search(Command<S> sub, String name) {
         if (sub.hasName(name)) {
             return sub;
         }
-        
+
         for (Command<S> other : sub.getSubCommands()) {
-            
+
             if (other.hasName(name)) {
                 return other;
             } else {
                 return search(other, name);
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Registers a command pre-processor
      *
@@ -558,7 +558,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         Preconditions.notNull(preProcessor, "Pre-processor");
         globalPreProcessors.add(preProcessor);
     }
-    
+
     /**
      * Registers a command post-processor
      *
@@ -569,7 +569,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         Preconditions.notNull(postProcessor, "Post-processor");
         globalPostProcessors.add(postProcessor);
     }
-    
+
     /**
      * Registers a command pre-processor
      *
@@ -581,7 +581,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         Preconditions.notNull(preProcessor, "Pre-processor");
         globalPreProcessors.add(priority, preProcessor);
     }
-    
+
     /**
      * Registers a command post-processor
      *
@@ -593,8 +593,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         Preconditions.notNull(postProcessor, "Post-processor");
         globalPostProcessors.add(priority, postProcessor);
     }
-    
-    
+
+
     @Override
     public @NotNull CommandDispatch.Result dispatch(Context<S> context) {
         try {
@@ -604,17 +604,17 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return CommandDispatch.Result.UNKNOWN;
         }
     }
-    
+
     @Override
     public @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String[] rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
-        
+
         Context<S> plainContext = getContextFactory()
                 .createContext(this, source, command, rawArguments);
-        
+
         return dispatch(plainContext);
     }
-    
+
     @Override
     public @NotNull CommandDispatch.Result dispatch(S source, String commandName, String[] rawInput) {
         Command<S> command = getCommand(commandName);
@@ -627,12 +627,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         //command.visualize();
         return dispatch(source, command, rawInput);
     }
-    
+
     @Override
     public @NotNull CommandDispatch.Result dispatch(S sender, String commandName, String rawArgsOneLine) {
         return dispatch(sender, commandName, rawArgsOneLine.split(" "));
     }
-    
+
     @Override
     public CommandDispatch.Result dispatch(S sender, String line) {
         String[] lineArgs = line.split(" ");
@@ -640,26 +640,26 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         System.arraycopy(lineArgs, 1, argumentsOnly, 0, lineArgs.length - 1);
         return dispatch(sender, lineArgs[0], argumentsOnly);
     }
-    
+
     private CommandDispatch.Result handleExecution(Context<S> context) throws ImperatException {
         Command<S> command = context.command();
         S source = context.source();
-        
+
         if (!getPermissionResolver().hasPermission(source, command.permission())) {
             throw new PermissionDeniedException();
         }
-        
+
         if (context.arguments().isEmpty()) {
             CommandUsage<S> defaultUsage = command.getDefaultUsage();
             executeUsage(command, source, context, defaultUsage);
             return CommandDispatch.Result.INCOMPLETE;
         }
-        
+
         CommandDispatch<S> searchResult = command.contextMatch(context);
         //executing usage
-        
+
         CommandUsage<S> usage = searchResult.toUsage(command);
-        
+
         if (searchResult.result() == CommandDispatch.Result.COMPLETE)
             executeUsage(command, source, context, usage);
         else if (searchResult.result() == CommandDispatch.Result.INCOMPLETE) {
@@ -677,7 +677,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
         return searchResult.result();
     }
-    
+
     private void executeUsage(
             final Command<S> command,
             final S source,
@@ -686,29 +686,29 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     ) throws ImperatException {
         //global pre-processing
         preProcess(context, usage);
-        
+
         //per command pre-processing
         command.preProcess(this, context, usage);
-        
+
         ResolvedContext<S> resolvedContext = contextFactory.createResolvedContext(this, context, usage);
         resolvedContext.resolve();
-        
+
         //global post-processing
         postProcess(resolvedContext);
-        
+
         //per command post-processing
         command.postProcess(this, resolvedContext, usage);
-        
+
         //executing the usage
         usage.execute(this, source, resolvedContext);
     }
-    
+
     //TODO improve (DRY)
     private void preProcess(
             @NotNull Context<S> context,
             @NotNull CommandUsage<S> usage
     ) {
-        
+
         for (CommandPreProcessor<S> preProcessor : globalPreProcessors) {
             try {
                 preProcessor.process(this, context, usage);
@@ -722,7 +722,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             }
         }
     }
-    
+
     //TODO improve (DRY)
     private void postProcess(
             @NotNull ResolvedContext<S> context
@@ -740,7 +740,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             }
         }
     }
-    
+
     /**
      * @param command the data about the command being written in the chat box
      * @param source  the sender writing the command
@@ -751,7 +751,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public Collection<String> autoComplete(Command<S> command, S source, String[] args) {
         return command.autoCompleter().autoComplete(this, source, args);
     }
-    
+
     /**
      * Gets all registered commands
      *
@@ -761,7 +761,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public Collection<? extends Command<S>> getRegisteredCommands() {
         return commands.values();
     }
-    
+
     /**
      * @return The template for showing help
      */
@@ -769,7 +769,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @Nullable HelpProvider<S> getHelpProvider() {
         return provider;
     }
-    
+
     /**
      * Set the help template to use
      *
@@ -779,7 +779,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public void setHelpProvider(@Nullable HelpProvider<S> template) {
         this.provider = template;
     }
-    
+
     @Override
     @Nullable
     @SuppressWarnings("unchecked")
@@ -794,12 +794,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
         return null;
     }
-    
+
     @Override
     public <T extends Throwable> void setThrowableResolver(Class<T> exception, ThrowableResolver<T, S> handler) {
         this.handlers.put(exception, handler);
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public void handleThrowable(
@@ -821,13 +821,13 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                 handler.resolve(current, this, context);
                 return;
             }
-            
+
             current = current.getCause();
         }
-        
+
         ImperatDebugger.error(owning, methodName, throwable);
     }
-    
+
     @Override
     public void debug(boolean treeVisualizing) {
         for (var cmd : commands.values()) {
@@ -841,5 +841,5 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             }
         }
     }
-    
+
 }

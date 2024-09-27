@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class BukkitPermissionResolver implements PermissionResolver<BukkitSource> {
-    
-    
+
+
     /**
      * @param source     the source of the command (console or other)
      * @param permission the permission
@@ -20,5 +20,5 @@ public final class BukkitPermissionResolver implements PermissionResolver<Bukkit
         if (permission == null || permission.isEmpty()) return true;
         return source.origin().hasPermission(permission);
     }
-    
+
 }

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 final class SuggestionContextImpl<S extends Source> extends ContextImpl<S> implements SuggestionContext<S> {
     private final CompletionArg completionArg;
-    
+
     SuggestionContextImpl(
             Imperat<S> dispatcher,
             Command<S> command,
@@ -21,10 +21,10 @@ final class SuggestionContextImpl<S extends Source> extends ContextImpl<S> imple
         super(dispatcher, command, source, args);
         this.completionArg = completionArg;
     }
-    
+
     @Override
     public @NotNull CompletionArg getArgToComplete() {
         return completionArg;
     }
-    
+
 }

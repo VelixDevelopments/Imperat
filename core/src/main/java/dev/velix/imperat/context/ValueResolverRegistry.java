@@ -15,9 +15,9 @@ import java.util.UUID;
 
 @ApiStatus.Internal
 public final class ValueResolverRegistry<S extends Source> extends Registry<Type, ValueResolver<S, ?>> {
-    
+
     private final EnumValueResolver enumValueResolver = new EnumValueResolver();
-    
+
     private ValueResolverRegistry() {
         super();
         registerResolver(String.class, ((context, parameter, cursor, raw) -> raw));
@@ -49,7 +49,7 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
                 throw exception(raw, Double.class);
             }
         });
-        
+
         registerResolver(UUID.class, (context, parameter, cursor, raw) -> {
             try {
                 return UUID.fromString(raw);
@@ -58,30 +58,30 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
             }
         });
     }
-    
+
     public static <S extends Source> ValueResolverRegistry<S> createDefault() {
         return new ValueResolverRegistry<>();
     }
-    
+
     private SourceException exception(String raw,
                                       Class<?> clazzRequired) {
         return new SourceException(
                 "Error while parsing argument '%s', It's not a valid %s", raw, clazzRequired.getSimpleName()
         );
     }
-    
+
     public <T> void registerResolver(Type type, ValueResolver<S, T> resolver) {
         if (TypeUtility.areRelatedTypes(type, Enum.class)) return;
         setData(type, resolver);
     }
-    
+
     public ValueResolver<S, ?> getResolver(Type type) {
-        
+
         return getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
             if (TypeUtility.areRelatedTypes(type, Enum.class)) {
                 return enumValueResolver;
             }
-            
+
             for (var registeredType : getKeys()) {
                 if (TypeUtility.areRelatedTypes(type, registeredType)) {
                     return getData(registeredType).orElse(null);
@@ -90,11 +90,11 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
             return null;
         });
     }
-    
+
     @ApiStatus.Internal
     @SuppressWarnings({"rawtypes", "unchecked"})
     final class EnumValueResolver implements ValueResolver<S, Enum<?>> {
-        
+
         @Override
         public Enum<?> resolve(
                 ExecutionContext<S> context,

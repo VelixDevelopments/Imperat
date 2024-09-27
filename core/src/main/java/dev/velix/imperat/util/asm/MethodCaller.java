@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
  * A high-level wrapper, responsible for invoking methods reflectively.
  */
 public interface MethodCaller {
-    
+
     /**
      * Calls the method of this caller
      *
@@ -39,7 +39,7 @@ public interface MethodCaller {
      * @return The return result
      */
     Object call(@Nullable Object instance, Object... arguments);
-    
+
     /**
      * Binds this caller to the specified instance. Calls from the bound method
      * caller will no longer need an instance to call from.
@@ -51,12 +51,12 @@ public interface MethodCaller {
     default BoundMethodCaller bindTo(@Nullable Object instance) {
         return arguments -> call(instance, arguments);
     }
-    
+
     /**
      * Represents a {@link MethodCaller} that is attached to an instance
      */
     interface BoundMethodCaller {
-        
+
         /**
          * Calls the method of this caller
          *

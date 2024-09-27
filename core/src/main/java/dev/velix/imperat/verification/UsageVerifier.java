@@ -24,21 +24,21 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageVerifier<S extends Source> {
-    
+
     static <S extends Source> UsageVerifier<S> defaultVerifier() {
         return new SimpleVerifier<>();
     }
-    
+
     static <S extends Source> UsageVerifier<S> typeTolerantVerifier() {
         return new TypeTolerantVerifier<>();
     }
-    
+
     /**
      * @param usage the usage
      * @return Verifies the usage to be acceptable
      */
     boolean verify(CommandUsage<S> usage);
-    
+
     /**
      * @param firstUsage  the first usage
      * @param secondUsage the second usage

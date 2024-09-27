@@ -26,13 +26,13 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
-    
-    
+
+
     /**
      * Resolves the arguments from the given plain input {@link Context}
      */
     void resolve() throws ImperatException;
-    
+
     /**
      * Fetches the arguments of a command/subcommand that got resolved
      * except for the arguments that represent the literal/subcommand name arguments
@@ -43,25 +43,25 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      */
     @Nullable
     ResolvedArgument<S> getResolvedArgument(Command<S> command, String name);
-    
+
     /**
      * @param command the command/subcommand with certain args
      * @return the command/subcommand's resolved args
      */
     List<ResolvedArgument<S>> getResolvedArguments(Command<S> command);
-    
+
     /**
      * @return all {@link Command} that have been used in this context
      */
     @NotNull
     Collection<? extends Command<S>> getCommandsUsed();
-    
+
     /**
      * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
     Collection<? extends ResolvedArgument<S>> getResolvedArguments();
-    
+
     /**
      * Resolves the raw input and
      * the parameters into arguments {@link ResolvedArgument}
@@ -80,7 +80,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
             CommandParameter<S> parameter,
             @Nullable T value
     ) throws ImperatException;
-    
+
     /**
      * Resolves flag the in the context
      *
@@ -95,7 +95,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
             @Nullable Object flagInputValue,
             CommandFlag flagDetected
     );
-    
+
     /**
      * Fetches the last used resolved command
      * of a resolved context!
@@ -103,7 +103,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * @return the last used command/subcommand
      */
     Command<S> getLastUsedCommand();
-    
+
     /**
      * @return The used usage to use it to resolve commands
      */

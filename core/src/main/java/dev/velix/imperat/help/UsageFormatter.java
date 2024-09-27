@@ -11,7 +11,7 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageFormatter {
-    
+
     /**
      * Displays the usage by converting it into
      * an adventure component
@@ -27,5 +27,5 @@ public interface UsageFormatter {
             CommandUsage<S> usage,
             int index
     );
-    
+
 }

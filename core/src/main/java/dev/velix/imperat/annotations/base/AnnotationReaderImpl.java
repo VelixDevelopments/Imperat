@@ -19,16 +19,16 @@ import java.util.Comparator;
 
 @ApiStatus.Internal
 final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S> {
-    
+
     private final static Comparator<Method> METHOD_COMPARATOR = Comparator.comparingInt(AnnotationHelper::loadMethodPriority);
-    
+
     private final Imperat<S> imperat;
     private final Class<?> clazz;
     private final AnnotationParser<S> parser;
     private final ElementSelector<MethodElement> methodSelector;
     private final RootCommandClass<S> rootCommandClass;
     private final ClassElement classElement;
-    
+
     AnnotationReaderImpl(
             Imperat<S> imperat,
             ElementSelector<MethodElement> methodSelector,
@@ -42,11 +42,11 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         this.methodSelector = methodSelector;
         this.classElement = read(imperat);
     }
-    
+
     private ClassElement read(Imperat<S> imperat) {
         return readClass(imperat, parser, null, clazz);
     }
-    
+
     private ClassElement readClass(
             Imperat<S> imperat,
             AnnotationParser<S> parser,
@@ -57,7 +57,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         //Adding methods with their parameters
         Method[] methods = clazz.getDeclaredMethods();
         Arrays.sort(methods, METHOD_COMPARATOR);
-        
+
         for (Method method : methods) {
             //System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
             MethodElement methodElement = new MethodElement(imperat, parser, root, method);
@@ -65,7 +65,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
                 root.addChild(methodElement);
             }
         }
-        
+
         //We add external subcommand classes from @Inherit as children
         if (root.isAnnotationPresent(Inherit.class)) {
             Inherit inherit = root.getAnnotation(Inherit.class);
@@ -76,29 +76,29 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
                 );
             }
         }
-        
+
         //Adding inner classes
         for (Class<?> child : clazz.getDeclaredClasses()) {
             root.addChild(
                     readClass(imperat, parser, root, child)
             );
         }
-        
-        
+
+
         return root;
     }
-    
-    
+
+
     @Override
     public RootCommandClass<S> getRootClass() {
         return rootCommandClass;
     }
-    
+
     @Override
     public void accept(CommandClassVisitor<S> visitor) {
         for (Command<S> loaded : classElement.accept(visitor)) {
             imperat.registerCommand(loaded);
         }
     }
-    
+
 }

@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import static dev.velix.imperat.commodore.CommodoreProvider.isSupported;
 
 public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSource> {
-    
+
     private final Commodore commodore;
-    
+
     public BukkitBrigadierManager(BukkitImperat dispatcher) {
         super(dispatcher);
         this.commodore = CommodoreProvider.getCommodore(dispatcher.getPlatform());
@@ -27,19 +27,19 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
             registerArgumentResolver(OfflinePlayer.class, DefaultArgTypeResolvers.PLAYER);
         }
     }
-    
+
     public static @Nullable BukkitBrigadierManager load(BukkitImperat bukkitCommandDispatcher) {
         if (!isSupported()) {
             return null;
         }
         return new BukkitBrigadierManager(bukkitCommandDispatcher);
     }
-    
+
     @Override
     public BukkitSource wrapCommandSource(Object commandSource) {
         return dispatcher.wrapSender(commodore.wrapNMSCommandSource(commandSource));
     }
-    
+
     public void registerBukkitCommand(
             org.bukkit.command.Command bukkitCmd,
             Command<BukkitSource> imperatCommand

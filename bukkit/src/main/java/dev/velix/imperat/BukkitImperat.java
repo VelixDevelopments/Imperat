@@ -30,13 +30,13 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 public final class BukkitImperat extends BaseImperat<BukkitSource> {
-    
+
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> adventureProvider;
     private Map<String, org.bukkit.command.Command> bukkitOGMapping;
     private BukkitBrigadierManager brigadierManager;
-    
+
     @SuppressWarnings("unchecked")
     private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, @NotNull PermissionResolver<BukkitSource> permissionResolver) {
         super(permissionResolver);
@@ -55,7 +55,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         registerValueResolvers();
         registerSuggestionResolvers();
     }
-    
+
     private void registerSourceResolvers() {
         this.registerSourceResolver(CommandSender.class, BukkitSource::origin);
         this.registerSourceResolver(Player.class, (source) -> {
@@ -65,7 +65,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             return source.asPlayer();
         });
     }
-    
+
     private void addThrowableHandlers() {
         this.setThrowableResolver(
                 UnknownPlayerException.class, (exception, imperat, context) ->
@@ -79,9 +79,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
                 UnknownWorldException.class, (exception, imperat, context) ->
                         context.source().error("A world with the name '" + exception.getName() + "' doesn't seem to exist")
         );
-        
+
     }
-    
+
     private AdventureProvider<CommandSender> loadAdventure(@Nullable AdventureProvider<CommandSender> provider) {
         if (Reflections.findClass("net.kyori.adventure.audience.Audience")) {
             if (provider != null) {
@@ -92,10 +92,10 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
                 return new BukkitAdventure(plugin);
             }
         }
-        
+
         return new EmptyAdventure<>();
     }
-    
+
     /**
      * Creates a bukkit command dispatcher instance
      *
@@ -112,25 +112,25 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         Preconditions.notNull(plugin, "plugin");
         return new BukkitImperat(plugin, audienceProvider, permissionResolver);
     }
-    
-    
+
+
     public static BukkitImperat create(Plugin plugin, @Nullable AdventureProvider<CommandSender> audienceProvider) {
         return create(plugin, audienceProvider, DEFAULT_PERMISSION_RESOLVER);
     }
-    
+
     public static BukkitImperat create(Plugin plugin, @NotNull PermissionResolver<BukkitSource> permissionResolver) {
         return create(plugin, null, permissionResolver);
     }
-    
+
     public static BukkitImperat create(Plugin plugin) {
         return create(plugin, null, DEFAULT_PERMISSION_RESOLVER);
     }
-    
+
     @SuppressWarnings("unchecked")
     public static Class<? extends Entity> getSelectedEntity(@NotNull Type selectorType) {
         return (Class<? extends Entity>) TypeUtility.getInsideGeneric(selectorType, Entity.class);
     }
-    
+
     /**
      * Wraps the sender into a built-in command-sender type
      *
@@ -141,7 +141,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     public BukkitSource wrapSender(Object sender) {
         return new BukkitSource((CommandSender) sender, adventureProvider);
     }
-    
+
     /**
      * @return the platform of the module
      */
@@ -149,18 +149,18 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     public Plugin getPlatform() {
         return plugin;
     }
-    
+
     @Override
     public void shutdownPlatform() {
         this.adventureProvider.close();
         Bukkit.getPluginManager().disablePlugin(plugin);
     }
-    
+
     @Override
     public String commandPrefix() {
         return "/";
     }
-    
+
     /**
      * Registering a command into the dispatcher
      *
@@ -179,7 +179,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             brigadierManager.registerBukkitCommand(internalCmd, command);
         }
     }
-    
+
     @SuppressWarnings("deprecation")
     private void registerValueResolvers() {
         this.registerValueResolver(Player.class, (context, parameter, cursor, raw) -> {
@@ -193,29 +193,29 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             if (player != null) return player;
             throw new UnknownPlayerException(raw);
         });
-        
+
         this.registerValueResolver(OfflinePlayer.class, (context, parameter, cursor, raw) -> {
             if (raw.length() > 16) {
                 throw new UnknownPlayerException(raw);
             }
             return Bukkit.getOfflinePlayer(raw);
         });
-        
+
         this.registerValueResolver(World.class, (context, parameter, cursor, raw) -> {
             World world = Bukkit.getWorld(raw.toLowerCase());
             if (world != null) return world;
             throw new UnknownWorldException(raw);
         });
     }
-    
+
     private void registerSuggestionResolvers() {
         registerSuggestionResolver(BukkitSuggestionResolvers.PLAYER);
         registerSuggestionResolver(BukkitSuggestionResolvers.OFFLINE_PLAYER);
     }
-    
+
     public void applyBrigadier() {
         brigadierManager = BukkitBrigadierManager.load(this);
         //TODO apply on all currently registered commands
     }
-    
+
 }

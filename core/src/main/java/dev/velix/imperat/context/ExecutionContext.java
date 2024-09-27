@@ -16,13 +16,13 @@ import java.lang.reflect.Type;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ExecutionContext<S extends Source> extends Context<S> {
-    
+
     /**
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
      */
     ResolvedFlag getFlag(String flagName);
-    
+
     /**
      * Fetches the flag input value
      * returns null if the flag is a {@link CommandSwitch}
@@ -33,7 +33,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @return the resolved value of the flag input
      */
     @Nullable <T> T getFlagValue(String flagName);
-    
+
     /**
      * Fetches a resolved argument's value
      *
@@ -43,18 +43,18 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @see ResolvedArgument
      */
     <T> @Nullable T getArgument(String name);
-    
+
     default <T> @NotNull T getArgumentOr(String name, T value) {
         final T argValue = getArgument(name);
         if (argValue != null) return argValue;
         return value;
     }
-    
+
     default String getRawArgument(int index) {
         if (index >= arguments().size() || index < 0) return null;
         return arguments().get(index);
     }
-    
+
     /**
      * Resolves source into a new type of source
      * using {@link Imperat#getSourceResolver(Type)}
@@ -63,7 +63,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @return the resolved source {@link R}
      */
     <R> @NotNull R getResolvedSource(Type type) throws ImperatException;
-    
+
     /**
      * Fetches the argument/input resolved by the context
      * using {@link dev.velix.imperat.resolvers.ContextResolver}
@@ -73,5 +73,5 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @return the argument/input resolved by the context
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException;
-    
+
 }

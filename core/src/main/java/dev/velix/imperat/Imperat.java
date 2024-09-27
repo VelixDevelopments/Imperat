@@ -31,36 +31,36 @@ public non-sealed interface Imperat<S extends Source> extends
         ProcessorRegistrar<S>, ResolverRegistrar<S>,
         CommandRegistrar<S>, SourceWrapper<S>,
         CommandHelpHandler<S>, ThrowableHandler<S> {
-    
+
     /**
      * @return the platform of the module
      */
     Object getPlatform();
-    
+
     /**
      * Shuts down the platform
      */
     void shutdownPlatform();
-    
+
     /**
      * @return The command prefix
      */
     String commandPrefix();
-    
+
     /**
      * @return the factory for creation of
      * command related contexts {@link Context}
      */
     ContextFactory<S> getContextFactory();
-    
+
     /**
      * sets the context factory {@link ContextFactory} for the contexts
      *
      * @param contextFactory the context factory to set
      */
     void setContextFactory(ContextFactory<S> contextFactory);
-    
-    
+
+
     /**
      * Changes the instance of {@link AnnotationParser}
      *
@@ -68,7 +68,7 @@ public non-sealed interface Imperat<S extends Source> extends
      */
     @Contract("null->fail")
     void setAnnotationParser(AnnotationParser<S> parser);
-    
+
     /**
      * Registers a type of annotations so that it can be
      * detected by {@link AnnotationReader} , it's useful as it allows that type of annotation
@@ -78,7 +78,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param type the type of annotation
      */
     void registerAnnotations(Class<? extends Annotation>... type);
-    
+
     /**
      * Registers annotation replacer
      *
@@ -90,14 +90,14 @@ public non-sealed interface Imperat<S extends Source> extends
             final Class<A> type,
             final AnnotationReplacer<A> replacer
     );
-    
+
     /**
      * Sets the usage verifier to a new instance
      *
      * @param usageVerifier the usage verifier to set
      */
     void setUsageVerifier(UsageVerifier<S> usageVerifier);
-    
+
     /**
      * Dispatches and executes a command using {@link Context} only
      *
@@ -105,7 +105,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the usage match result
      */
     @NotNull CommandDispatch.Result dispatch(Context<S> context);
-    
+
     /**
      * Dispatches and executes a command with certain raw arguments
      * using {@link Command}
@@ -116,7 +116,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the usage match result
      */
     @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String... rawInput);
-    
+
     /**
      * Dispatches and executes a command with certain raw arguments
      *
@@ -126,7 +126,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the usage match result
      */
     CommandDispatch.Result dispatch(S sender, String commandName, String[] rawInput);
-    
+
     /**
      * Dispatches and executes a command with certain raw arguments
      *
@@ -136,7 +136,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the usage match result
      */
     CommandDispatch.Result dispatch(S sender, String commandName, String rawArgsOneLine);
-    
+
     /**
      * Dispatches the full command-line
      *
@@ -145,7 +145,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the usage match result
      */
     CommandDispatch.Result dispatch(S sender, String commandLine);
-    
+
     /**
      * @param command the data about the command being written in the chat box
      * @param sender  the sender writing the command
@@ -153,7 +153,7 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the suggestions at the current position
      */
     Collection<String> autoComplete(Command<S> command, S sender, String[] args);
-    
+
     /**
      * Debugs all registered commands and their usages.
      *

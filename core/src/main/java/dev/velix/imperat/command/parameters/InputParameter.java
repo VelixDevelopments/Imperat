@@ -16,7 +16,7 @@ import java.util.Objects;
 
 @ApiStatus.Internal
 public abstract class InputParameter<S extends Source> implements CommandParameter<S> {
-    
+
     protected Command<S> parentCommand;
     protected final String name;
     protected final TypeWrap<?> typeWrap;
@@ -26,8 +26,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     protected String permission;
     protected Description description;
     protected int index;
-    
-    
+
+
     protected InputParameter(
             String name, TypeWrap<?> typeWrap,
             @Nullable String permission,
@@ -46,8 +46,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
         this.optionalValueSupplier = optionalValueSupplier;
         this.suggestionResolver = suggestionResolver;
     }
-    
-    
+
+
     /**
      * @return the name of the parameter
      */
@@ -55,18 +55,18 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public String name() {
         return name;
     }
-    
+
     @Override
     public @Nullable Command<S> parent() {
         return parentCommand;
     }
-    
+
     @Override
     public void parent(@NotNull Command<S> parentCommand) {
         this.parentCommand = parentCommand;
     }
-    
-    
+
+
     /**
      * @return the index of this parameter
      */
@@ -74,7 +74,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public int position() {
         return index;
     }
-    
+
     /**
      * Sets the position of this parameter in a syntax
      * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -85,12 +85,12 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public void position(int position) {
         this.index = position;
     }
-    
+
     @Override
     public TypeWrap<?> wrappedType() {
         return typeWrap;
     }
-    
+
     /**
      * The permission for this parameter
      *
@@ -100,12 +100,12 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public @Nullable String permission() {
         return permission;
     }
-    
+
     @Override
     public void permission(String permission) {
         this.permission = permission;
     }
-    
+
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional
@@ -115,7 +115,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) optionalValueSupplier;
     }
-    
+
     /**
      * @return whether this is an optional argument
      */
@@ -123,7 +123,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public boolean isOptional() {
         return optional;
     }
-    
+
     /**
      * @return checks whether this parameter is a flag
      */
@@ -131,7 +131,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public boolean isFlag() {
         return flag;
     }
-    
+
     /**
      * Casts the parameter to a flag parameter
      *
@@ -142,7 +142,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public FlagParameter<S> asFlagParameter() {
         return (FlagParameter<S>) this;
     }
-    
+
     /**
      * @return checks whether this parameter
      * consumes all the args input after it.
@@ -156,13 +156,13 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
         }
         return greedy;
     }
-    
+
     @Override
     public Command<S> asCommand() {
         throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
     }
-    
-    
+
+
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.
@@ -174,23 +174,23 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     public <T> @Nullable TypeSuggestionResolver<S, T> getSuggestionResolver() {
         return (TypeSuggestionResolver<S, T>) suggestionResolver;
     }
-    
+
     @Override
     public Description description() {
         return description;
     }
-    
+
     @Override
     public void describe(final Description description) {
         this.description = description;
     }
-    
+
     @Override
     public boolean similarTo(CommandParameter<?> parameter) {
         return this.name.equalsIgnoreCase(parameter.name())
                 && TypeUtility.matches(typeWrap.getType(), parameter.wrappedType().getType());
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -199,15 +199,15 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
                 && Objects.equals(name, that.name)
                 && Objects.equals(typeWrap, that.typeWrap);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(name, typeWrap);
     }
-    
+
     @Override
     public String toString() {
         return format();
     }
-    
+
 }
