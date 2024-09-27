@@ -16,11 +16,11 @@ import java.util.List;
 
 @ApiStatus.Internal
 public final class FlagCommandParameter<S extends Source> extends InputParameter<S> implements FlagParameter<S> {
-
+    
     private final CommandFlag flag;
     private final OptionalValueSupplier<?> supplier;
     private final TypeSuggestionResolver<S, ?> inputValueSuggestionResolver;
-
+    
     FlagCommandParameter(
             CommandFlag flag,
             String permission,
@@ -30,7 +30,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     ) {
         this(flag.name(), permission, flag.aliases(), description, flag.inputType(), valueSupplier, inputValueSuggestionResolver);
     }
-
+    
     FlagCommandParameter(
             String flagName,
             @Nullable String permission,
@@ -46,7 +46,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
         this.supplier = supplier;
         this.inputValueSuggestionResolver = inputValueSuggestionResolver;
     }
-
+    
     FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission,
                          Description description, OptionalValueSupplier<?> supplier, TypeSuggestionResolver<S, ?> inputValueSuggestionResolver) {
         super(commandSwitch.name(), TypeWrap.of(CommandSwitch.class), permission, description,
@@ -56,7 +56,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
         this.supplier = supplier;
         this.inputValueSuggestionResolver = inputValueSuggestionResolver;
     }
-
+    
     FlagCommandParameter(
             CommandSwitch commandSwitch,
             @Nullable String permission,
@@ -65,12 +65,12 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     ) {
         this(commandSwitch, permission, Description.EMPTY, supplier, suggestionResolver);
     }
-
+    
     @Override
     public String format() {
         return flag.format();
     }
-
+    
     /**
      * @return The flag's data
      */
@@ -78,7 +78,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     public @NotNull CommandFlag flagData() {
         return flag;
     }
-
+    
     /**
      * @return the default value if it's input is not present
      * in case of the parameter being optional
@@ -88,7 +88,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) supplier;
     }
-
+    
     @Override
     @SuppressWarnings("unchecked")
     public @Nullable <T> TypeSuggestionResolver<S, T> inputSuggestionResolver() {

@@ -32,5 +32,5 @@ public final class UsageCooldownProcessor<S extends Source> implements CommandPr
         }
         usage.getCooldownHandler().registerExecutionMoment(source);
     }
-
+    
 }

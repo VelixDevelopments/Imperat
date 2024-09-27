@@ -13,31 +13,31 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public sealed abstract class HelpTemplate<S extends Source> implements HelpProvider<S> permits HelpTemplateImpl, PaginatedHelpTemplate {
-
+    
     protected final UsageFormatter formatter;
-
+    
     public HelpTemplate(UsageFormatter formatter) {
         this.formatter = formatter;
     }
-
+    
     /**
      * @param command the command
      * @return the header
      */
     public abstract String getHeader(Command<S> command, int currentPage, int maxPages);
-
+    
     /**
      * @param command the command
      * @return the footer
      */
     public abstract String getFooter(Command<S> command, int currentPage, int maxPages);
-
-
+    
+    
     @Override
     public void provide(ExecutionContext<S> context) throws ImperatException {
         Command<S> command = context.command();
         S source = context.source();
-
+        
         final int maxUsages = command.usages().size();
         if (maxUsages == 0) {
             throw new NoHelpException();
@@ -47,9 +47,9 @@ public sealed abstract class HelpTemplate<S extends Source> implements HelpProvi
         display(context, formatter, command.usages());
         displayFooterHyphen(command, source, page);
     }
-
+    
     public abstract void displayHeaderHyphen(Command<S> command, S source, int page);
-
+    
     public abstract void displayFooterHyphen(Command<S> command, S source, int page);
-
+    
 }

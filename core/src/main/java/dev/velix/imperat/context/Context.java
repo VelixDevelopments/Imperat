@@ -12,23 +12,23 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Context<S extends Source> {
-
+    
     /**
      * @return The {@link Command} owning this context.
      */
     Command<S> command();
-
+    
     /**
      * @return the {@link Source} of the command
      * @see Source
      */
     @NotNull
     S source();
-
+    
     /**
      * @return the arguments entered by the {@link Source}
      * @see ArgumentQueue
      */
     ArgumentQueue arguments();
-
+    
 }

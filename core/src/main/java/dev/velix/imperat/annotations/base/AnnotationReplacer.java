@@ -15,7 +15,7 @@ import java.util.Collection;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface AnnotationReplacer<A extends Annotation> {
-
+    
     /**
      * The annotation to replace
      *
@@ -24,5 +24,5 @@ public interface AnnotationReplacer<A extends Annotation> {
      */
     @NotNull
     Collection<Annotation> replace(A annotation);
-
+    
 }

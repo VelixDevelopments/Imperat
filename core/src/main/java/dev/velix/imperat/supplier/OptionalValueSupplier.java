@@ -5,7 +5,7 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 
 public interface OptionalValueSupplier<T> {
-
+    
     @SuppressWarnings("unchecked")
     static <T> OptionalValueSupplier<T> of(T def) {
         if (def == null) return null;
@@ -14,19 +14,19 @@ public interface OptionalValueSupplier<T> {
             public Class<T> getValueType() {
                 return (Class<T>) def.getClass();
             }
-
+            
             @Override
             public <S extends Source> T supply(Context<S> context) {
                 return def;
             }
         };
     }
-
+    
     /**
      * @return The type of value to supply
      */
     Class<T> getValueType();
-
+    
     /**
      * Supplies a default-value for optional
      * usage parameters {@link CommandParameter}
@@ -35,5 +35,5 @@ public interface OptionalValueSupplier<T> {
      * @return the resolved default value
      */
     <S extends Source> T supply(Context<S> context);
-
+    
 }

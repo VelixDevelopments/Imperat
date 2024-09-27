@@ -11,10 +11,10 @@ import org.jetbrains.annotations.NotNull;
  * @param <T> the type
  */
 public interface TypeSuggestionResolver<S extends Source, T> extends SuggestionResolver<S> {
-
+    
     /**
      * @return the type that is specific for these suggestions resolving
      */
     @NotNull TypeWrap<T> getType();
-
+    
 }

@@ -22,7 +22,7 @@ import java.util.function.BiConsumer;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface HelpProvider<S extends Source> {
-
+    
     /**
      * Provides the {@link Source} the help menu using {@link ExecutionContext}
      * <p>
@@ -42,7 +42,7 @@ public interface HelpProvider<S extends Source> {
      * @throws ImperatException if any of the above criteria is met.
      */
     void provide(ExecutionContext<S> context) throws ImperatException;
-
+    
     default void display(ExecutionContext<S> context, UsageFormatter formatter, Collection<? extends CommandUsage<S>> usages) throws ImperatException {
         int index = 0;
         for (CommandUsage<S> usage : usages) {
@@ -50,48 +50,48 @@ public interface HelpProvider<S extends Source> {
             index++;
         }
     }
-
+    
     static <S extends Source> NormalBuilder<S> template() {
         return new NormalBuilder<>();
     }
-
+    
     static <S extends Source> PaginationBuilder<S> paginated(int usagesPerPage) {
         return new PaginationBuilder<>(usagesPerPage);
     }
-
+    
     @SuppressWarnings("unchecked")
     abstract class Builder<S extends Source, T extends HelpProvider<S>, B extends Builder<S, T, B>> {
-
+        
         protected UsageFormatter formatter = DefaultFormatter.INSTANCE;
         protected HelpHyphen<S> headerProvider, footerProvider;
         protected BiConsumer<ExecutionContext<S>, Collection<? extends CommandUsage<S>>> displayer;
-
+        
         protected Builder() {
-
+        
         }
-
+        
         public @NotNull B formatter(UsageFormatter formatter) {
             this.formatter = formatter;
             return (B) this;
         }
-
+        
         public @NotNull B header(HelpHyphen<S> headerProvider) {
             this.headerProvider = headerProvider;
             return (B) this;
         }
-
+        
         public @NotNull B footer(HelpHyphen<S> footerProvider) {
             this.footerProvider = footerProvider;
             return (B) this;
         }
-
+        
         public @NotNull B displayer(BiConsumer<ExecutionContext<S>, Collection<? extends CommandUsage<S>>> displayer) {
             this.displayer = displayer;
             return (B) this;
         }
-
+        
         protected abstract T createInstance();
-
+        
         public T build() {
             if (formatter == null) {
                 return null;
@@ -99,24 +99,24 @@ public interface HelpProvider<S extends Source> {
             return createInstance();
         }
     }
-
+    
     final class NormalBuilder<S extends Source> extends Builder<S, HelpTemplate<S>, NormalBuilder<S>> {
         NormalBuilder() {
         }
-
+        
         @Override
         protected HelpTemplate<S> createInstance() {
             return new HelpTemplateImpl<>(formatter, headerProvider, footerProvider, displayer);
         }
     }
-
+    
     final class PaginationBuilder<S extends Source> extends Builder<S, HelpTemplate<S>, PaginationBuilder<S>> {
         private final int syntaxesPerPage;
-
+        
         PaginationBuilder(int syntaxesPerPage) {
             this.syntaxesPerPage = syntaxesPerPage;
         }
-
+        
         @Override
         protected HelpTemplate<S> createInstance() {
             return new TemplatePagination<>(
@@ -125,6 +125,6 @@ public interface HelpProvider<S extends Source> {
             );
         }
     }
-
-
+    
+    
 }

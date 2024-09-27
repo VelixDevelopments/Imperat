@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 
 public interface CommandCoordinator<S extends Source> {
-
+    
     static <S extends Source> CommandCoordinator<S> sync() {
         return (api, source, context, execution) -> {
             try {
@@ -21,7 +21,7 @@ public interface CommandCoordinator<S extends Source> {
             }
         };
     }
-
+    
     static <S extends Source> CommandCoordinator<S> async(final @Nullable ExecutorService service) {
         return ((api, source, context, execution) -> {
             ExecutorService executorService = service;
@@ -37,16 +37,16 @@ public interface CommandCoordinator<S extends Source> {
             }, executorService);
         });
     }
-
+    
     static <S extends Source> CommandCoordinator<S> async() {
         return async(null);
     }
-
+    
     void coordinate(
             @NotNull Imperat<S> imperat,
             @NotNull S source,
             @NotNull ExecutionContext<S> context,
             @NotNull CommandExecution<S> execution
     );
-
+    
 }

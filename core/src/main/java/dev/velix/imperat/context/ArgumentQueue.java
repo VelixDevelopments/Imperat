@@ -11,15 +11,15 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
-
+    
     static ArgumentQueue parse(String[] rawArguments) {
         return StringTokenizer.parseToQueue(String.join(" ", rawArguments), false);
     }
-
+    
     static ArgumentQueue parse(String string) {
         return StringTokenizer.parseToQueue(string, false);
     }
-
+    
     static ArgumentQueue parseAutoCompletion(String[] rawArguments) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < rawArguments.length; i++) {
@@ -29,21 +29,21 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
         }
         return parseAutoCompletion(builder.toString());
     }
-
+    
     static ArgumentQueue parseAutoCompletion(String string) {
         if (string.isEmpty() || string.isBlank()) {
             return StringTokenizer.parseToQueue("", true);
         }
         return StringTokenizer.parseToQueue(string, true);
     }
-
+    
     /**
      * @return a new, empty {@link ArgumentQueue}.
      */
     static ArgumentQueue empty() {
         return new ArgumentQueueImpl();
     }
-
+    
     /**
      * Fetches the element at the specified index
      *
@@ -57,7 +57,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
         }
         return get(index);
     }
-
+    
     /**
      * Joins all present arguments in this stack
      *
@@ -66,7 +66,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
      */
     @NotNull
     String join(String delimiter);
-
+    
     /**
      * Joins all present arguments in this stack, starting from
      * the specified index
@@ -77,7 +77,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
      */
     @NotNull
     String join(@NotNull String delimiter, int startIndex);
-
+    
     /**
      * Returns this argument stack as an immutable view. This can be therefore
      * passed to any conditions or resolvers without having to worry about being
@@ -92,7 +92,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     @NotNull
     @UnmodifiableView
     List<String> asImmutableView();
-
+    
     /**
      * Returns an immutable copy of this stack. This copy will behave
      * independently of the original {@link ArgumentQueue}.
@@ -102,7 +102,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     @NotNull
     @Unmodifiable
     List<String> asImmutableCopy();
-
+    
     /**
      * Returns an independent copy of this argument stack.
      *
@@ -110,5 +110,5 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
      */
     @NotNull
     ArgumentQueue copy();
-
+    
 }

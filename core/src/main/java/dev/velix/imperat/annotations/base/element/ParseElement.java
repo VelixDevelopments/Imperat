@@ -17,16 +17,16 @@ import java.util.Objects;
 
 @ApiStatus.Internal
 public sealed abstract class ParseElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> permits ClassElement, MethodElement, ParameterElement {
-
+    
     //use more memory but better performance, since it's going to be GCed anyway
     private final @NotNull AnnotationMap total = new AnnotationMap();
-
+    
     @Getter
     private final @Nullable ParseElement<?> parent;
-
+    
     @Getter
     private final @NotNull E element;
-
+    
     public <S extends Source> ParseElement(
             @NotNull AnnotationParser<S> registry,
             @Nullable ParseElement<?> parent,
@@ -36,7 +36,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
         this.element = element;
         this.load(registry);
     }
-
+    
     @SuppressWarnings("unchecked")
     private <A extends Annotation, S extends Source> void load(@NotNull AnnotationParser<S> registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
@@ -46,7 +46,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
             } else if (registry.hasAnnotationReplacerFor(clazz)) {
                 //we add the custom annotation anyway
                 total.put(clazz, annotation);
-
+                
                 //adding the replaced annotations
                 AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);
                 assert replacer != null;
@@ -55,7 +55,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
             }
         }
     }
-
+    
     /**
      * Returns this element's annotation for the specified type if
      * such an annotation is <em>present</em>, else null.
@@ -72,7 +72,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public <T extends Annotation> @Nullable T getAnnotation(@NotNull Class<T> annotationClass) {
         return (T) total.get(annotationClass);
     }
-
+    
     /**
      * Returns annotations that are <em>present</em> on this element.
      * <p>
@@ -89,7 +89,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public Annotation[] getAnnotations() {
         return total.values().toArray(new Annotation[0]);
     }
-
+    
     /**
      * Returns annotations that are <em>directly present</em> on this element.
      * This method ignores inherited annotations.
@@ -107,8 +107,8 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public Annotation[] getDeclaredAnnotations() {
         return total.values().toArray(new Annotation[0]);
     }
-
-
+    
+    
     /**
      * Returns an iterator over elements of type {@code T}.
      *
@@ -119,7 +119,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     public Iterator<Annotation> iterator() {
         return total.values().iterator();
     }
-
+    
     @Override
     public String toString() {
         if (element instanceof Method method) {
@@ -130,7 +130,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
         }
         return element.toString();
     }
-
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -138,11 +138,11 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
         return Objects.equals(parent, that.parent)
                 && Objects.equals(element, that.element);
     }
-
+    
     @Override
     public int hashCode() {
         return Objects.hash(parent, element);
     }
-
+    
     public abstract String getName();
 }

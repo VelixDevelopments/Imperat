@@ -9,7 +9,7 @@ import dev.velix.imperat.help.CommandHelp;
 
 @SuppressWarnings("unused")
 public final class TestCommands {
-
+    
     public final static Command<TestSource> GROUP_CMD = Command.<TestSource>create("group")
             .defaultExecution((source, context) -> {
                 source.reply("/group <group>");
@@ -19,7 +19,7 @@ public final class TestCommands {
                     .execute((source, context) -> {
                         source.reply("Executing /group " + context.getArgument("group") + " without any other args");
                     })
-
+            
             )
             .subCommand(
                     Command.<TestSource>create("setperm")
@@ -35,7 +35,7 @@ public final class TestCommands {
                                         Boolean value = ctx.getArgument("value");
                                         source.reply("Executing /group " + group + " setperm " + permission + " " + value);
                                     })
-
+                            
                             )
                             .build()
             )
@@ -62,19 +62,19 @@ public final class TestCommands {
                                     )
                                     .execute((source, context) -> {
                                         Integer page = context.getArgument("page");
-
+                                        
                                         CommandHelp help = context.getContextResolvedArgument(CommandHelp.class);
                                         assert help != null;
                                         help.display();
-
+                                        
                                         source.sendMsg("Help page= " + page);
                                         TestRun.USAGE_EXECUTED = true;
                                     })
-
+                    
                     ).build(), true
             )
             .build();
-
+    
     public final static Command<TestSource> CHAINED_SUBCOMMANDS_CMD =
             Command.<TestSource>create("subs")
                     .subCommand(
@@ -85,7 +85,7 @@ public final class TestCommands {
                                     .usage(CommandUsage.<TestSource>builder()
                                             .parameters(CommandParameter.requiredText("arg1"))
                                             .execute((source, context) -> source.reply("Arg1= " + context.getArgument("arg1")))
-
+                                    
                                     )
                                     .subCommand(
                                             Command.<TestSource>create("second")
@@ -108,9 +108,9 @@ public final class TestCommands {
                                     )
                                     .build()
                     )
-
+                    
                     .build();
-
+    
     public final static Command<TestSource> MULTIPLE_OPTIONAL_CMD =
             Command.<TestSource>create("ot")
                     .usage(
@@ -121,9 +121,9 @@ public final class TestCommands {
                                             CommandParameter.requiredText("r2"),
                                             CommandParameter.optionalText("o2")
                                     )
-
+                    
                     )
                     .build();
-
-
+    
+    
 }

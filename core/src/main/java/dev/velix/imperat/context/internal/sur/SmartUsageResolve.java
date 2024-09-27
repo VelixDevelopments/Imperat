@@ -41,7 +41,7 @@ public final class SmartUsageResolve<S extends Source> {
     ) {
         return new SmartUsageResolve<>(command, usage);
     }
-
+    
     public void resolve(Imperat<S> dispatcher, ResolvedContext<S> context) throws ImperatException {
         final List<CommandParameter<S>> parameterList = new ArrayList<>(usage.getParameters());
         final ArgumentQueue raws = context.arguments().copy();
@@ -304,7 +304,7 @@ public final class SmartUsageResolve<S extends Source> {
     
     
     private @Nullable CommandParameter<S> getNextParam(int start, List<CommandParameter<S>> parameters,
-                                                    Predicate<CommandParameter<S>> parameterCondition) {
+                                                       Predicate<CommandParameter<S>> parameterCondition) {
         if (start >= parameters.size()) return null;
         for (int i = start; i < parameters.size(); i++) {
             if (parameterCondition.test(parameters.get(i)))

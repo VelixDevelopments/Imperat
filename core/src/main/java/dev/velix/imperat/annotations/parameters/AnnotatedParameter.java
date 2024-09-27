@@ -14,7 +14,7 @@ import java.util.Collection;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface AnnotatedParameter<S extends Source> extends CommandParameter<S> {
-
+    
     /**
      * Get the instance of specific annotation
      *
@@ -24,15 +24,15 @@ public interface AnnotatedParameter<S extends Source> extends CommandParameter<S
      */
     @Nullable
     <A extends Annotation> A getAnnotation(Class<A> clazz);
-
+    
     default boolean hasAnnotation(Class<? extends Annotation> clazz) {
         return getAnnotation(clazz) != null;
     }
-
+    
     /**
      * @return the annotations associated with this parameter
      */
     Collection<? extends Annotation> getAnnotations();
-
-
+    
+    
 }

@@ -10,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
 final class DefaultContextFactory<S extends Source> implements ContextFactory<S> {
-
-
+    
+    
     DefaultContextFactory() {
     }
-
+    
     /**
      * @param source  the sender/source of this command execution
      * @param command the command label used
@@ -30,7 +30,7 @@ final class DefaultContextFactory<S extends Source> implements ContextFactory<S>
     ) {
         return new ContextImpl<>(dispatcher, command, source, queue);
     }
-
+    
     @Override
     public SuggestionContext<S> createSuggestionContext(
             @NotNull Imperat<S> dispatcher,
@@ -41,7 +41,7 @@ final class DefaultContextFactory<S extends Source> implements ContextFactory<S>
     ) {
         return new SuggestionContextImpl<>(dispatcher, command, source, queue, arg);
     }
-
+    
     /**
      * @param plainContext the context plain
      * @return the context after resolving args into values for

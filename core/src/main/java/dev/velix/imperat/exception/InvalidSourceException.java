@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Getter
 public class InvalidSourceException extends ImperatException {
-
+    
     private final TypeWrap<?> targetType;
-
+    
     public InvalidSourceException(TypeWrap<?> targetType) {
         super();
         this.targetType = targetType;
     }
-
+    
 }

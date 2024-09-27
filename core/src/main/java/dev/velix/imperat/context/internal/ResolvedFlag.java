@@ -5,9 +5,9 @@ import dev.velix.imperat.context.CommandSwitch;
 
 public record ResolvedFlag(CommandFlag flag, String flagRaw,
                            String flagRawInput, Object value) {
-
+    
     public boolean isSwitch() {
         return flag instanceof CommandSwitch;
     }
-
+    
 }

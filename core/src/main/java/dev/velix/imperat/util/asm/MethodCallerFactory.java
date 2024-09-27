@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
  * Factory for creating {@link MethodCaller}s for methods.
  */
 public interface MethodCallerFactory {
-
+    
     /**
      * Returns a {@link MethodCallerFactory} that uses the new
      * method handles API to create method callers.
@@ -41,7 +41,7 @@ public interface MethodCallerFactory {
     static @NotNull MethodCallerFactory methodHandles() {
         return MethodHandlesCallerFactory.INSTANCE;
     }
-
+    
     /**
      * Creates a new {@link MethodCaller} for the specified method.
      *
@@ -51,5 +51,5 @@ public interface MethodCallerFactory {
      */
     @NotNull
     MethodCaller createFor(@NotNull Method method) throws Throwable;
-
+    
 }

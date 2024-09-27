@@ -13,7 +13,7 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandExecution<S extends Source> {
-
+    
     /**
      * Executes the command's actions
      *
@@ -21,5 +21,5 @@ public interface CommandExecution<S extends Source> {
      * @param context the context of the command
      */
     void execute(final S source, final ExecutionContext<S> context) throws ImperatException;
-
+    
 }

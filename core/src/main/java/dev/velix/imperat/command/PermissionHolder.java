@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
  * This interface allows getting and setting a permission string.
  */
 public interface PermissionHolder {
-
+    
     /**
      * Retrieves the permission associated with this holder.
      *
@@ -15,12 +15,12 @@ public interface PermissionHolder {
      */
     @Nullable
     String permission();
-
+    
     /**
      * Sets the permission for this holder.
      *
      * @param permission the permission string to set, can be {@code null}.
      */
     void permission(String permission);
-
+    
 }

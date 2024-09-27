@@ -8,10 +8,10 @@ import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.Nullable;
 
 public final class NumericParameterDecorator<S extends Source> extends InputParameter<S> implements NumericParameter<S> {
-
+    
     private final CommandParameter<S> parameter;
     private final NumericRange range;
-
+    
     NumericParameterDecorator(CommandParameter<S> parameter, NumericRange range) {
         super(
                 parameter.name(), parameter.wrappedType(), parameter.permission(),
@@ -22,11 +22,11 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
         this.parameter = parameter;
         this.range = range;
     }
-
+    
     public static <S extends Source> NumericParameterDecorator<S> decorate(CommandParameter<S> parameter, NumericRange range) {
         return new NumericParameterDecorator<>(parameter, range);
     }
-
+    
     /**
      * Formats the usage parameter
      * using the command
@@ -37,7 +37,7 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
     public String format() {
         return parameter.format();
     }
-
+    
     /**
      * @return The actual range of the numeric parameter
      * returns null if no range is specified!
@@ -46,5 +46,5 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
     public @Nullable NumericRange getRange() {
         return range;
     }
-
+    
 }

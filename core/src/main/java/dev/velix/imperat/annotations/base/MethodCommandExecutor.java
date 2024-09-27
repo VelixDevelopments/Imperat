@@ -17,34 +17,34 @@ import java.util.List;
 
 @ApiStatus.Internal
 public class MethodCommandExecutor<S extends Source> implements CommandExecution<S> {
-
+    
     private final Imperat<S> dispatcher;
     private final ClassElement methodOwner;
     private final MethodElement method;
     private final MethodCaller.BoundMethodCaller boundMethodCaller;
     private final List<CommandParameter<S>> fullParameters;
-
+    
     private MethodCommandExecutor(
             Imperat<S> dispatcher,
             MethodElement method,
             List<CommandParameter<S>> fullParameters
     ) {
-
+        
         try {
             this.dispatcher = dispatcher;
             this.method = method;
-
+            
             methodOwner = (ClassElement) method.getParent();
             assert methodOwner != null;
             boundMethodCaller = DefaultMethodCallerFactory.INSTANCE.createFor(method.getElement()).bindTo(methodOwner.newInstance());
-
+            
             this.fullParameters = fullParameters;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
         //this.helpAnnotation = help;
     }
-
+    
     public static <S extends Source> MethodCommandExecutor<S> of(
             Imperat<S> imperat,
             MethodElement method,
@@ -52,8 +52,8 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
     ) {
         return new MethodCommandExecutor<>(imperat, method, fullParameters);
     }
-
-
+    
+    
     /**
      * Executes the command's actions
      *
@@ -63,18 +63,18 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
     @Override
     public void execute(S source,
                         ExecutionContext<S> context) throws ImperatException {
-
+        
         var instances = AnnotationHelper.loadParameterInstances(
                 dispatcher, fullParameters,
                 source, context, method
         );
-
+        
         try {
             boundMethodCaller.call(instances);
         } catch (Exception ex) {
             ImperatDebugger.error(methodOwner.getElement(), method.getElement().getName(), ex);
         }
-
+        
     }
-
+    
 }

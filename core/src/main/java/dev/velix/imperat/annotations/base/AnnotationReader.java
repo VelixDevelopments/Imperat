@@ -16,7 +16,7 @@ import org.jetbrains.annotations.ApiStatus;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface AnnotationReader<S extends Source> {
-
+    
     static <S extends Source> AnnotationReader<S> read(
             Imperat<S> imperat,
             ElementSelector<MethodElement> methodSelector,
@@ -25,10 +25,10 @@ public interface AnnotationReader<S extends Source> {
     ) {
         return new AnnotationReaderImpl<>(imperat, methodSelector, parser, target);
     }
-
+    
     RootCommandClass<S> getRootClass();
-
+    
     void accept(CommandClassVisitor<S> visitor);
-
-
+    
+    
 }

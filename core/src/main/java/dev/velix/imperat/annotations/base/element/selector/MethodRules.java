@@ -10,21 +10,21 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 public interface MethodRules {
-
+    
     Rule<MethodElement> IS_PUBLIC = Rule.buildForMethod()
             .condition((imperat, registry, method) -> Modifier.isPublic(method.getModifiers()))
             .failure((registry, method) -> {
                 throw methodError(method, "is not public");
             })
             .build();
-
+    
     Rule<MethodElement> RETURNS_VOID = Rule.buildForMethod()
             .condition((imperat, registry, method) -> method.getReturnType() == void.class)
             .failure((registry, method) -> {
                 throw methodError(method, "should return void");
             })
             .build();
-
+    
     Rule<MethodElement> HAS_KNOWN_SENDER = Rule.buildForMethod()
             .condition((imperat, registry, method) -> {
                 ParameterElement parameterElement = method.getParameterAt(0);
@@ -43,7 +43,7 @@ public interface MethodRules {
                 throw methodError(method, msg);
             })
             .build();
-
+    
     Rule<MethodElement> HAS_LEAST_ONLY_ONE_MAIN_ANNOTATION = Rule.buildForMethod()
             .condition((imperat, registry, element) -> {
                 long count = Arrays.stream(element.getDeclaredAnnotations())
@@ -52,27 +52,27 @@ public interface MethodRules {
             })
             .failure((registry, element) -> {
                 StringBuilder builder = new StringBuilder();
-
+                
                 Annotation[] declaredAnnotations = element.getDeclaredAnnotations();
                 for (int i = 0, declaredAnnotationsLength = declaredAnnotations.length; i < declaredAnnotationsLength; i++) {
                     Annotation annotation = declaredAnnotations[i];
                     if (registry.isEntryPointAnnotation(annotation.annotationType())) {
                         builder.append("@").append(annotation.annotationType().getSimpleName());
                     }
-
+                    
                     if (i != declaredAnnotationsLength - 1) {
                         builder.append(", ");
                     }
                 }
-
+                
                 throw methodError(element, "has more than one main annotations such as: `" + builder + "`");
             })
             .build();
-
+    
     private static IllegalStateException methodError(MethodElement element, String msg) {
         ClassElement parent = (ClassElement) element.getParent();
         assert parent != null;
-
+        
         return new IllegalStateException(
                 String.format("Method '%s' In class '%s' " + msg,
                         element.getElement().getName(), parent.getElement().getName()

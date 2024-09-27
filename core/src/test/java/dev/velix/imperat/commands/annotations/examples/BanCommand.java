@@ -9,12 +9,12 @@ import org.jetbrains.annotations.Nullable;
 @Permission("command.ban")
 @Description("Main command for banning players")
 public final class BanCommand {
-
+    
     @Usage
     public void showUsage(TestSource source) {
         source.reply("/ban <player> [-silent] [duration] [reason...]");
     }
-
+    
     @Usage
     public void banPlayer(
             TestSource source,
@@ -31,5 +31,5 @@ public final class BanCommand {
         else
             source.reply("SILENT= " + msg);
     }
-
+    
 }

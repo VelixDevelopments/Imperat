@@ -45,13 +45,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 abstract class AbstractCommodore implements Commodore {
-
+    
     // ArgumentCommandNode#customSuggestions field
     protected static final Field CUSTOM_SUGGESTIONS_FIELD;
-
+    
     // CommandNode#command
     protected static final Field COMMAND_EXECUTE_FUNCTION_FIELD;
-
+    
     // CommandNode#children, CommandNode#literals, CommandNode#arguments fields
     protected static final Field CHILDREN_FIELD;
     protected static final Field LITERALS_FIELD;
@@ -63,7 +63,7 @@ abstract class AbstractCommodore implements Commodore {
     protected static final com.mojang.brigadier.Command<?> DUMMY_COMMAND;
     protected static final SuggestionProvider<?> DUMMY_SUGGESTION_PROVIDER;
     private static final Method GET_COMMAND_SENDER_METHOD;
-
+    
     static {
         try {
             final Class<?> commandListenerWrapper;
@@ -71,13 +71,13 @@ abstract class AbstractCommodore implements Commodore {
                 commandListenerWrapper = BukkitUtil.ClassesRefUtil.mcClass("commands.CommandListenerWrapper");
             else
                 commandListenerWrapper = BukkitUtil.ClassesRefUtil.nmsClass("CommandListenerWrapper");
-
+            
             CUSTOM_SUGGESTIONS_FIELD = ArgumentCommandNode.class.getDeclaredField("customSuggestions");
             CUSTOM_SUGGESTIONS_FIELD.setAccessible(true);
-
+            
             COMMAND_EXECUTE_FUNCTION_FIELD = CommandNode.class.getDeclaredField("command");
             COMMAND_EXECUTE_FUNCTION_FIELD.setAccessible(true);
-
+            
             CHILDREN_FIELD = CommandNode.class.getDeclaredField("children");
             LITERALS_FIELD = CommandNode.class.getDeclaredField("literals");
             ARGUMENTS_FIELD = CommandNode.class.getDeclaredField("arguments");
@@ -85,10 +85,10 @@ abstract class AbstractCommodore implements Commodore {
             for (Field field : CHILDREN_FIELDS) {
                 field.setAccessible(true);
             }
-
+            
             GET_COMMAND_SENDER_METHOD = commandListenerWrapper.getDeclaredMethod("getBukkitSender");
             GET_COMMAND_SENDER_METHOD.setAccessible(true);
-
+            
             // should never be called
             // if ReflectionCommodore: bukkit handling should override
             // if PaperCommodore: this is only sent to the client, not used for actual command handling
@@ -100,12 +100,12 @@ abstract class AbstractCommodore implements Commodore {
             DUMMY_SUGGESTION_PROVIDER = (context, builder) -> {
                 throw new UnsupportedOperationException();
             };
-
+            
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
-
+    
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected static void removeChild(RootCommandNode root, String name) {
         try {
@@ -117,7 +117,7 @@ abstract class AbstractCommodore implements Commodore {
             throw new RuntimeException(e);
         }
     }
-
+    
     protected static void setRequiredHackyFieldsRecursively(CommandNode<?> node, SuggestionProvider<?> suggestionProvider) {
         // set command execution function so the server sets the executable flag on the command
         try {
@@ -125,9 +125,9 @@ abstract class AbstractCommodore implements Commodore {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-
+        
         if (suggestionProvider != null && node instanceof ArgumentCommandNode<?, ?> argumentNode) {
-
+            
             // set the custom suggestion provider field so tab completions work
             try {
                 CUSTOM_SUGGESTIONS_FIELD.set(argumentNode, suggestionProvider);
@@ -135,12 +135,12 @@ abstract class AbstractCommodore implements Commodore {
                 e.printStackTrace();
             }
         }
-
+        
         for (CommandNode<?> child : node.getChildren()) {
             setRequiredHackyFieldsRecursively(child, suggestionProvider);
         }
     }
-
+    
     protected static <S> LiteralCommandNode<S> renameLiteralNode(LiteralCommandNode<S> node, String newLiteral) {
         LiteralCommandNode<S> clone = new LiteralCommandNode<>(newLiteral, node.getCommand(), node.getRequirement(), node.getRedirect(), node.getRedirectModifier(), node.isFork());
         for (CommandNode<S> child : node.getChildren()) {
@@ -148,7 +148,7 @@ abstract class AbstractCommodore implements Commodore {
         }
         return clone;
     }
-
+    
     /**
      * Gets the aliases known for the given command.
      *
@@ -160,12 +160,12 @@ abstract class AbstractCommodore implements Commodore {
      */
     protected static Collection<String> getAliases(Command command) {
         Objects.requireNonNull(command, "command");
-
+        
         Stream<String> aliasesStream = Stream.concat(
                 Stream.of(command.getLabel()),
                 command.getAliases().stream()
         );
-
+        
         if (command instanceof PluginCommand) {
             String fallbackPrefix = ((PluginCommand) command).getPlugin().getName().toLowerCase().trim();
             aliasesStream = aliasesStream.flatMap(alias -> Stream.of(
@@ -173,10 +173,10 @@ abstract class AbstractCommodore implements Commodore {
                     fallbackPrefix + ":" + alias
             ));
         }
-
+        
         return aliasesStream.distinct().collect(Collectors.toList());
     }
-
+    
     @Override
     public CommandSender wrapNMSCommandSource(Object nmsCmdSource) {
         Preconditions.notNull(nmsCmdSource, "Source from NMS ");
@@ -186,5 +186,5 @@ abstract class AbstractCommodore implements Commodore {
             throw new RuntimeException(e);
         }
     }
-
+    
 }

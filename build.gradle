@@ -22,11 +22,11 @@ allprojects {
         }
 
         KyoriModule = [
-                API          : "api",
-                MINI_MESSAGE : "text-minimessage",
-                BUKKIT       : "platform-bukkit",
-                BUNGEE       : "platform-bungeecord",
-                SPONGE       : "platform-spongeapi"
+                API         : "api",
+                MINI_MESSAGE: "text-minimessage",
+                BUKKIT      : "platform-bukkit",
+                BUNGEE      : "platform-bungeecord",
+                SPONGE      : "platform-spongeapi"
         ]
 
         lombok = {

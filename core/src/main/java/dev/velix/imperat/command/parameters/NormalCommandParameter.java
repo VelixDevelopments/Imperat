@@ -9,7 +9,7 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.Nullable;
 
 class NormalCommandParameter<S extends Source> extends InputParameter<S> {
-
+    
     NormalCommandParameter(String name,
                            TypeWrap<?> type,
                            @Nullable String permission,
@@ -23,7 +23,7 @@ class NormalCommandParameter<S extends Source> extends InputParameter<S> {
                 false, greedy, valueSupplier, suggestionResolver
         );
     }
-
+    
     /**
      * Formats the usage parameter
      *
