@@ -1,5 +1,6 @@
 package dev.velix.imperat.placeholders;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +32,15 @@ final class PlaceholderImpl<S extends Source> implements Placeholder<S> {
     
     @Override
     public boolean isUsedIn(String input) {
-        return pattern.matcher(input).matches();
+        return pattern.matcher(input).find();
+    }
+
+    @Override
+    public String replaceResolved(Imperat<S> imperat, String id, String input) {
+        assert isUsedIn(input);
+        return pattern.matcher(input).replaceAll(
+                resolveInput(id, imperat)
+        );
     }
     
     @Override

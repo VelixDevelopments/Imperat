@@ -91,8 +91,9 @@ public final class AnnotationHelper {
         if (index < 0 || index >= params.size()) return null;
         return params.get(index);
     }
-    
-    public static @NotNull String getParamName(
+
+    public static <S extends Source> @NotNull String getParamName(
+            Imperat<S> imperat,
             Parameter parameter,
             @Nullable Named named,
             @Nullable Flag flag,
@@ -108,17 +109,17 @@ public final class AnnotationHelper {
             name = switchAnnotation.value()[0];
         else
             name = parameter.getName();
-        
-        return name;
+
+        return imperat.replacePlaceholders(name);
     }
-    
-    public static @NotNull String getParamName(Parameter parameter) {
+
+    public static <S extends Source> @NotNull String getParamName(Imperat<S> imperat, Parameter parameter) {
         return getParamName(
+                imperat,
                 parameter,
                 parameter.getAnnotation(Named.class),
                 parameter.getAnnotation(Flag.class),
-                parameter.getAnnotation(Switch.class)
-        );
+                parameter.getAnnotation(Switch.class));
     }
     
     @SuppressWarnings({"unchecked"})

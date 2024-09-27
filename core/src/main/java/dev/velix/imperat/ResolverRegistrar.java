@@ -4,6 +4,7 @@ import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.placeholders.Placeholder;
+import dev.velix.imperat.placeholders.PlaceholderResolver;
 import dev.velix.imperat.resolvers.*;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -214,4 +215,21 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @return the placeholder
      */
     Optional<Placeholder<S>> getPlaceHolder(String id);
+
+    /**
+     * Replaces the placeholders of input by their {@link PlaceholderResolver}
+     *
+     * @param input the input
+     * @return the processed/replaced text input.
+     */
+    @NotNull String replacePlaceholders(String input);
+
+    /**
+     * Replaces the placeholders on each string of the array,
+     * modifying the input array content.
+     *
+     * @param array the array to replace its string contents
+     * @return The placeholder replaced String array
+     */
+    @NotNull String[] replacePlaceholders(String[] array);
 }

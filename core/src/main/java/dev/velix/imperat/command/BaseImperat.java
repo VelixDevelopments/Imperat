@@ -17,6 +17,7 @@ import dev.velix.imperat.exception.*;
 import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderRegistry;
+import dev.velix.imperat.placeholders.PlaceholderResolver;
 import dev.velix.imperat.resolvers.*;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
@@ -484,7 +485,30 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public Optional<Placeholder<S>> getPlaceHolder(String id) {
         return placeholderRegistry.getData(id);
     }
-    
+
+    /**
+     * Replaces the placeholders of input by their {@link PlaceholderResolver}
+     *
+     * @param input the input
+     * @return the processed/replaced text input.
+     */
+    @Override
+    public @NotNull String replacePlaceholders(String input) {
+        return placeholderRegistry.resolvedString(input);
+    }
+
+    /**
+     * Replaces the placeholders on each string of the array,
+     * modifying the input array content.
+     *
+     * @param array the array to replace its string contents
+     * @return The placeholder replaced String array
+     */
+    @Override
+    public @NotNull String[] replacePlaceholders(String[] array) {
+        return placeholderRegistry.resolvedArray(array);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public @Nullable <R> SourceResolver<S, R> getSourceResolver(Type type) {
@@ -762,8 +786,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public <T extends Throwable> ThrowableResolver<T, S> getThrowableResolver(Class<T> exception) {
         Class<?> current = exception;
         while (current != null && Throwable.class.isAssignableFrom(current)) {
-            if (handlers.containsKey(current)) {
-                return (ThrowableResolver<T, S>) handlers.get(current);
+            var resolver = handlers.get(current);
+            if (resolver != null) {
+                return (ThrowableResolver<T, S>) resolver;
             }
             current = current.getSuperclass();
         }
@@ -784,13 +809,13 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             final String methodName
     ) {
         Throwable current = throwable;
-        
+
         while (current != null) {
             if (current instanceof SelfHandledException selfHandledException) {
                 selfHandledException.handle(this, context);
                 return;
             }
-            
+
             ThrowableResolver<? super Throwable, S> handler = (ThrowableResolver<? super Throwable, S>) this.getThrowableResolver(current.getClass());
             if (handler != null) {
                 handler.resolve(current, this, context);

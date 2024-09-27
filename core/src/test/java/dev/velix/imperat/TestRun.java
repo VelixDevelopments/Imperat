@@ -24,9 +24,9 @@ public class TestRun {
     TestRun() {
         USAGE_EXECUTED = false;
     }
-    
-    private final static TestImperat IMPERAT = new TestImperat();
-    private final static TestSource SOURCE = new TestSource(System.out);
+
+    final static TestImperat IMPERAT = new TestImperat();
+    final static TestSource SOURCE = new TestSource(System.out);
     
     public static volatile boolean USAGE_EXECUTED = false;
     public static volatile int POST_PROCESSOR_INT = 0;

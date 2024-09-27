@@ -110,7 +110,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Description description = element.getAnnotation(Description.class);
         
         if (cmdAnnotation instanceof dev.velix.imperat.annotations.Command cmdAnn) {
-            final String[] values = cmdAnn.value();
+            final String[] values = imperat.replacePlaceholders(cmdAnn.value());
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = cmdAnn.skipSuggestionsChecks();
             
@@ -118,11 +118,15 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     .ignoreACPermissions(ignoreAC)
                     .aliases(aliases);
             if (permission != null) {
-                builder.permission(permission.value());
+                builder.permission(
+                        imperat.replacePlaceholders(permission.value())
+                );
             }
             
             if (description != null) {
-                builder.description(description.value());
+                builder.description(
+                        imperat.replacePlaceholders(description.value())
+                );
             }
             
             if (preProcessor != null) {
@@ -136,7 +140,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             return builder.build();
             
         } else if (cmdAnnotation instanceof SubCommand subCommand) {
-            final String[] values = subCommand.value();
+            final String[] values = imperat.replacePlaceholders(subCommand.value());
             assert values != null;
             
             final List<String> aliases = List.of(values).subList(1, values.length);
@@ -147,11 +151,15 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     .aliases(aliases);
             
             if (permission != null) {
-                builder.permission(permission.value());
+                builder.permission(
+                        imperat.replacePlaceholders(permission.value())
+                );
             }
             
             if (description != null) {
-                builder.description(description.value());
+                builder.description(
+                        imperat.replacePlaceholders(description.value())
+                );
             }
             
             if (preProcessor != null) {
@@ -293,8 +301,11 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
     
     
-    private CommandUsage<S> loadUsage(@Nullable Command<S> parentCmd,
-                                      @NotNull Command<S> loadedCmd, MethodElement method) {
+    private CommandUsage<S> loadUsage(
+            @Nullable Command<S> parentCmd,
+            @NotNull Command<S> loadedCmd,
+            MethodElement method
+    ) {
         if (method.getInputCount() == 0) {
             loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, Collections.emptyList())
@@ -319,10 +330,14 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 .execute(execution);
         
         if (description != null)
-            builder.description(description.value());
+            builder.description(
+                    imperat.replacePlaceholders(description.value())
+            );
         
         if (permission != null)
-            builder.permission(permission.value());
+            builder.permission(
+                    imperat.replacePlaceholders(permission.value())
+            );
         
         if (cooldown != null)
             builder.cooldown(cooldown.value(), cooldown.unit());
@@ -406,7 +421,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             throw new IllegalStateException("both @Flag and @Switch at the same time !");
         }
         
-        String name = AnnotationHelper.getParamName(parameter, named, flag, switchAnnotation);
+        String name = AnnotationHelper.getParamName(imperat, parameter, named, flag, switchAnnotation);
         boolean optional = flag != null || switchAnnotation != null
                 || element.isAnnotationPresent(Optional.class)
                 || element.isAnnotationPresent(Default.class)
@@ -421,15 +436,21 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         TypeSuggestionResolver<S, ?> suggestionResolver = null;
         
         if (suggestAnnotation != null) {
-            suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), suggestAnnotation.value());
+            suggestionResolver = SuggestionResolver.type(
+                    TypeWrap.of(parameter.getParameterizedType()),
+                    imperat.replacePlaceholders(suggestAnnotation.value())
+            );
         } else if (suggestionProvider != null) {
-            var namedResolver = imperat.getNamedSuggestionResolver(suggestionProvider.value().toLowerCase());
+            String suggestionResolverName = imperat.replacePlaceholders(suggestionProvider.value().toLowerCase());
+            var namedResolver = imperat.getNamedSuggestionResolver(
+                    suggestionResolverName
+            );
             if (namedResolver != null && !(namedResolver instanceof TypeSuggestionResolver<?, ?>))
                 throw new UnsupportedOperationException("Named suggestion resolvers must be of type `TypeSuggestionResolver` and make sure the type matches that of the parameter's");
             else if (namedResolver != null)
                 suggestionResolver = (TypeSuggestionResolver<S, ?>) namedResolver;
             else {
-                throw new IllegalStateException("Unregistered named suggestion resolver : " + suggestionProvider.value());
+                throw new IllegalStateException("Unregistered named suggestion resolver : " + suggestionResolverName);
             }
         }
         
@@ -443,14 +464,16 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (element.isAnnotationPresent(Description.class)) {
             var descAnn = element.getAnnotation(Description.class);
             assert descAnn != null;
-            desc = dev.velix.imperat.command.Description.of(descAnn.value());
+            desc = dev.velix.imperat.command.Description.of(
+                    imperat.replacePlaceholders(descAnn.value())
+            );
         }
         
         String permission = null;
         if (element.isAnnotationPresent(Permission.class)) {
             var permAnn = element.getAnnotation(Permission.class);
             assert permAnn != null;
-            permission = permAnn.value();
+            permission = imperat.replacePlaceholders(permAnn.value());
         }
         
         OptionalValueSupplier<T> optionalValueSupplier = null;
@@ -463,7 +486,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (flag != null) {
             String[] flagAliases = flag.value();
             if (suggestAnnotation != null) {
-                suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), suggestAnnotation.value());
+                suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), imperat.replacePlaceholders(suggestAnnotation.value()));
             }
             return AnnotationParameterDecorator.decorate(
                     CommandParameter.<S, T>flag(name, (Class<T>) parameter.getParameterizedType())

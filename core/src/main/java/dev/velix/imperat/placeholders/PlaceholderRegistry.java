@@ -22,12 +22,21 @@ public final class PlaceholderRegistry<S extends Source> extends Registry<String
         for (var placeHolder : getAll()) {
             
             if (placeHolder.isUsedIn(result)) {
+                System.out.println("FOUNd" + placeHolder.id());
                 String id = placeHolder.id();
-                result = result.replaceAll(id, placeHolder.resolveInput(id, imperat));
+                result = placeHolder.replaceResolved(imperat, id, result);
             }
             
         }
         return result;
+    }
+
+    public String[] resolvedArray(String[] array) {
+        String[] arr = new String[array.length];
+        for (int i = 0; i < array.length; i++) {
+            arr[i] = resolvedString(array[i]);
+        }
+        return arr;
     }
     
     

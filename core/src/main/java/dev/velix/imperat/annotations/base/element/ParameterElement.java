@@ -18,14 +18,14 @@ public final class ParameterElement extends ParseElement<Parameter> {
     private final ClassElement owningClass;
     
     <S extends Source> ParameterElement(
-            final AnnotationParser<S> registry,
+            final AnnotationParser<S> parser,
             final ClassElement owningClass,
             final MethodElement method,
             final Parameter element
     ) {
-        super(registry, method, element);
+        super(parser, method, element);
         this.owningClass = owningClass;
-        this.name = AnnotationHelper.getParamName(element);
+        this.name = AnnotationHelper.getParamName(parser.getImperat(), element);
         this.type = element.getParameterizedType();
     }
     
