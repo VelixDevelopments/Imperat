@@ -67,7 +67,7 @@ public final class SmartUsageResolve<S extends Source> {
                         if (flag instanceof CommandSwitch) value = false;
                         else if (optionalEmptyParameter.asFlagParameter().getDefaultValueSupplier() != null) {
                             value = optionalEmptyParameter.asFlagParameter()
-                                    .getDefaultValueSupplier().supply(context);
+                                    .getDefaultValueSupplier().supply(context.source());
                         }
 
                         context.resolveFlag(null, null, value, flag);
@@ -318,7 +318,7 @@ public final class SmartUsageResolve<S extends Source> {
         OptionalValueSupplier<T> optionalSupplier = parameter.getDefaultValueSupplier();
         T defaultValue = null;
         if (optionalSupplier != null) {
-            defaultValue = optionalSupplier.supply(context);
+            defaultValue = optionalSupplier.supply(context.source());
         }
         return defaultValue;
     }

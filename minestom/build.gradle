@@ -1,0 +1,18 @@
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
+compileJava.sourceCompatibility = '21'
+compileJava.targetCompatibility = '21'
+
+dependencies {
+    compileOnly project(":core")
+    compileOnly 'com.github.Minestom:Minestom:-SNAPSHOT'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}

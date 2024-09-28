@@ -1,7 +1,6 @@
 package dev.velix.imperat.supplier;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 
 public interface OptionalValueSupplier<T> {
@@ -16,7 +15,7 @@ public interface OptionalValueSupplier<T> {
             }
 
             @Override
-            public <S extends Source> T supply(Context<S> context) {
+            public <S extends Source> T supply(S source) {
                 return def;
             }
         };
@@ -31,9 +30,9 @@ public interface OptionalValueSupplier<T> {
      * Supplies a default-value for optional
      * usage parameters {@link CommandParameter}
      *
-     * @param context the context
+     * @param source the context
      * @return the resolved default value
      */
-    <S extends Source> T supply(Context<S> context);
+    <S extends Source> T supply(S source);
 
 }

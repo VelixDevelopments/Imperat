@@ -115,7 +115,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @return the {@link SuggestionResolver} instance for that type
      */
     @SuppressWarnings("uncecked")
-    default @Nullable SuggestionResolver<S> getParameterSuggestionResolver(CommandParameter<S> parameter) {
+    default @NotNull SuggestionResolver<S> getParameterSuggestionResolver(CommandParameter<S> parameter) {
         SuggestionResolver<S> parameterSpecificResolver = parameter.getSuggestionResolver();
         if (parameterSpecificResolver == null) {
             var resolverByType = getSuggestionResolverByType(parameter.type());

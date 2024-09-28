@@ -153,7 +153,11 @@ public non-sealed interface Imperat<S extends Source> extends
      * @return the suggestions at the current position
      */
     Collection<String> autoComplete(Command<S> command, S sender, String[] args);
-
+    
+    default Collection<String> autoComplete(Command<S> command, S sender, String argsOneLine) {
+        return autoComplete(command, sender, argsOneLine.split(" "));
+    }
+    
     /**
      * Debugs all registered commands and their usages.
      *
