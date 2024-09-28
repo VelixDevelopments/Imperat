@@ -48,9 +48,9 @@ public abstract class AnnotationParser<S extends Source> {
      * to be recognized as a true Imperat-related annotation to be used in something like checking if a
      * {@link CommandParameter} is annotated and checks for the annotations it has.
      *
-     * @param type the type of annotation
+     * @param types the type of annotation
      */
-    public abstract void registerAnnotations(Class<? extends Annotation>... type);
+    public abstract void registerAnnotations(Class<? extends Annotation>... types);
 
     /**
      * Registers {@link AnnotationReplacer}
