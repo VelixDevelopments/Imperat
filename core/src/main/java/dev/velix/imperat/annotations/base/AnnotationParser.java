@@ -8,6 +8,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 
@@ -84,7 +85,7 @@ public abstract class AnnotationParser<S extends Source> {
      * @param <A>  the annotation type parameter
      * @return the {@link AnnotationReplacer} mapped to the entered annotation type.
      */
-    public abstract <A extends Annotation> AnnotationReplacer<A> getAnnotationReplacer(Class<A> type);
+    public abstract <A extends Annotation> @Nullable AnnotationReplacer<A> getAnnotationReplacer(Class<A> type);
 
     public final boolean isEntryPointAnnotation(Class<? extends Annotation> annotation) {
         return annotation == dev.velix.imperat.annotations.Command.class || annotation == Usage.class || annotation == SubCommand.class;

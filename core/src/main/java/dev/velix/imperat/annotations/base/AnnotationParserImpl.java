@@ -8,6 +8,7 @@ import dev.velix.imperat.annotations.base.element.selector.MethodRules;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 
@@ -93,7 +94,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
      * @return the {@link AnnotationReplacer} mapped to the entered annotation type.
      */
     @Override
-    public <A extends Annotation> AnnotationReplacer<A> getAnnotationReplacer(Class<A> type) {
+    public <A extends Annotation> @Nullable AnnotationReplacer<A> getAnnotationReplacer(Class<A> type) {
         return annotationRegistry.getAnnotationReplacer(type);
     }
 
