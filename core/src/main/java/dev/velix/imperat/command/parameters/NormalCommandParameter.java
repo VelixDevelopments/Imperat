@@ -6,6 +6,7 @@ import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.StringUtils;
 import dev.velix.imperat.util.TypeWrap;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 class NormalCommandParameter<S extends Source> extends InputParameter<S> {
@@ -16,8 +17,8 @@ class NormalCommandParameter<S extends Source> extends InputParameter<S> {
                            Description description,
                            boolean optional,
                            boolean greedy,
-                           OptionalValueSupplier<?> valueSupplier,
-                           TypeSuggestionResolver<S, ?> suggestionResolver) {
+                           @NotNull OptionalValueSupplier<?> valueSupplier,
+                           @Nullable TypeSuggestionResolver<S, ?> suggestionResolver) {
         super(
                 name, type, permission, description, optional,
                 false, greedy, valueSupplier, suggestionResolver

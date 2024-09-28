@@ -100,7 +100,7 @@ public interface Command<S extends Source> extends CommandParameter<S> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    default @Nullable <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
+    default <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) OptionalValueSupplier.of(name());
     }
 

@@ -3,6 +3,7 @@ package dev.velix.imperat.supplier.defaults;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.util.TypeWrap;
 
 public final class BooleanValueSupplier implements OptionalValueSupplier<Boolean> {
 
@@ -10,8 +11,8 @@ public final class BooleanValueSupplier implements OptionalValueSupplier<Boolean
      * @return The type of value to supply
      */
     @Override
-    public Class<Boolean> getValueType() {
-        return Boolean.class;
+    public TypeWrap<Boolean> getValueType() {
+        return TypeWrap.of(Boolean.class);
     }
 
     /**

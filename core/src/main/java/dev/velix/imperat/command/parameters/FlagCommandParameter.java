@@ -41,7 +41,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
             TypeSuggestionResolver<S, ?> inputValueSuggestionResolver
     ) {
         super(flagName, TypeWrap.of(CommandFlag.class), permission, description,
-                true, true, false, null, null);
+                true, true, false, OptionalValueSupplier.empty(TypeWrap.of(CommandFlag.class)), null);
         flag = CommandFlag.create(flagName, aliases, inputType);
         this.supplier = supplier;
         this.inputValueSuggestionResolver = inputValueSuggestionResolver;
@@ -51,7 +51,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
                          Description description, OptionalValueSupplier<?> supplier, TypeSuggestionResolver<S, ?> inputValueSuggestionResolver) {
         super(commandSwitch.name(), TypeWrap.of(CommandSwitch.class), permission, description,
                 true, true, false,
-                null, null);
+                OptionalValueSupplier.empty(TypeWrap.of(CommandFlag.class)), null);
         this.flag = commandSwitch;
         this.supplier = supplier;
         this.inputValueSuggestionResolver = inputValueSuggestionResolver;
@@ -85,7 +85,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
+    public <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) supplier;
     }
 

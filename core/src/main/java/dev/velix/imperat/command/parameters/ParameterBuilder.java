@@ -19,7 +19,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
 
     protected String permission = null;
     protected Description description = Description.EMPTY;
-    private @NotNull OptionalValueSupplier<T> valueSupplier = OptionalValueSupplier.of(null);
+    private @NotNull OptionalValueSupplier<T> valueSupplier;
     private TypeSuggestionResolver<S, T> suggestionResolver = null;
 
     ParameterBuilder(String name, TypeWrap<T> type, boolean optional, boolean greedy) {
@@ -27,6 +27,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
         this.type = type;
         this.optional = optional;
         this.greedy = greedy;
+        this.valueSupplier = OptionalValueSupplier.empty(type);
     }
 
     ParameterBuilder(String name, TypeWrap<T> type, boolean optional) {
@@ -63,7 +64,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
     }
 
     public ParameterBuilder<S, T> defaultValue(@Nullable T value) {
-        return defaultValue(OptionalValueSupplier.of(value));
+        return defaultValue(value == null ? OptionalValueSupplier.empty(this.type) : OptionalValueSupplier.of(value));
     }
 
     public ParameterBuilder<S, T> suggest(TypeSuggestionResolver<S, T> suggestionResolver) {

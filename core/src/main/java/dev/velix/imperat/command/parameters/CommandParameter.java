@@ -13,6 +13,7 @@ import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -31,8 +32,8 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
             Description description,
             boolean optional,
             boolean greedy,
-            OptionalValueSupplier<T> valueSupplier,
-            TypeSuggestionResolver<S, ?> suggestionResolver
+            @NotNull OptionalValueSupplier<T> valueSupplier,
+            @Nullable TypeSuggestionResolver<S, ?> suggestionResolver
     ) {
         Preconditions.notNull(name, "name");
         Preconditions.notNull(type, "type");
@@ -174,7 +175,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
      * @return the default value if it's input is not present
      * in case of the parameter being optional
      */
-    <T> OptionalValueSupplier<T> getDefaultValueSupplier();
+    @NotNull <T> OptionalValueSupplier<T> getDefaultValueSupplier();
 
     /**
      * @return whether this is an optional argument

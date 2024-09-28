@@ -33,8 +33,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
             @Nullable String permission,
             Description description,
             boolean optional, boolean flag, boolean greedy,
-            OptionalValueSupplier<?> optionalValueSupplier,
-            TypeSuggestionResolver<S, ?> suggestionResolver
+            @NotNull OptionalValueSupplier<?> optionalValueSupplier,
+            @Nullable TypeSuggestionResolver<S, ?> suggestionResolver
     ) {
         this.name = name;
         this.typeWrap = typeWrap;
@@ -112,7 +112,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> OptionalValueSupplier<T> getDefaultValueSupplier() {
+    public <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
         return (OptionalValueSupplier<T>) optionalValueSupplier;
     }
 
