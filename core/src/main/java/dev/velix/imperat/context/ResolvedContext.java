@@ -53,8 +53,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
     /**
      * @return all {@link Command} that have been used in this context
      */
-    @NotNull
-    Collection<? extends Command<S>> getCommandsUsed();
+    @NotNull Iterable<? extends Command<S>> getCommandsUsed();
 
     /**
      * @return an ordered collection of {@link ResolvedArgument} just like how they were entered

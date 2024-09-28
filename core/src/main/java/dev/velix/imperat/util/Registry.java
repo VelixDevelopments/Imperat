@@ -1,11 +1,14 @@
 package dev.velix.imperat.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Registry<K, V> {
@@ -13,19 +16,27 @@ public class Registry<K, V> {
     private final Map<K, V> data;
 
     public Registry(Supplier<Map<K, V>> data) {
-        this.data = data.get();
+        this(null, null, data);
     }
 
     public Registry() {
         this(HashMap::new);
     }
+    
+    public Registry(@Nullable K key, @Nullable V value, Supplier<Map<K, V>> data) {
+        this.data = data.get();
+        if (key != null && value != null) {
+            this.data.put(key, value);
+        }
+    }
 
     public Optional<V> getData(K key) {
         return Optional.ofNullable(data.get(key));
     }
-
-    public void setData(K key, V value) {
+    
+    public Registry<K, V> setData(K key, V value) {
         data.put(key, value);
+        return this;
     }
 
     public void updateData(K key, Consumer<V> valueUpdater) {
@@ -59,7 +70,18 @@ public class Registry<K, V> {
     public void removeData(K key) {
         data.remove(key);
     }
-
+    
+    public void update(K key, Function<? super V, ? extends V> updater) {
+        data.compute(key, (k, v) -> updater.apply(v));
+    }
+    
+    public void updateIfPresent(K key, Function<? super V, ? extends V> updater) {
+        data.computeIfPresent(key, (k, v) -> updater.apply(v));
+    }
+    
+    public void updateIfAbsent(K key, Function<? super K, ? extends V> updater) {
+        data.computeIfAbsent(key, updater);
+    }
 
     public int size() {
         return data.size();

@@ -12,6 +12,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NumberOutOfRangeException;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.ValueResolver;
+import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -34,16 +35,20 @@ import java.util.*;
 final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> implements ResolvedContext<S> {
 
     private final CommandUsage<S> usage;
-    private final FlagRegistry flagRegistry = new FlagRegistry();
+    private final Registry<String, ResolvedFlag> flagRegistry = new Registry<>();
     //per command/subcommand because the class 'Command' can be also treated as a sub command
-    private final Map<Command<S>, Map<String, ResolvedArgument<S>>> resolvedArgumentsPerCommand = new LinkedHashMap<>();
+    private final Registry<Command<S>, Registry<String, ResolvedArgument<S>>> resolvedArgumentsPerCommand = new Registry<>(LinkedHashMap::new);
     //all resolved arguments EXCEPT for subcommands and flags.
-    private final Map<String, ResolvedArgument<S>> allResolvedArgs = new LinkedHashMap<>();
+    private final Registry<String, ResolvedArgument<S>> allResolvedArgs = new Registry<>(LinkedHashMap::new);
+    
+    //last command used
     private Command<S> lastCommand;
-
-    ResolvedContextImpl(Imperat<S> dispatcher,
-                        Context<S> context,
-                        CommandUsage<S> usage) {
+    
+    ResolvedContextImpl(
+            Imperat<S> dispatcher,
+            Context<S> context,
+            CommandUsage<S> usage
+    ) {
         super(dispatcher, context.command(), context.source(), context.arguments());
         this.lastCommand = context.command();
         this.usage = usage;
@@ -59,10 +64,9 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      */
     @Override
     public @Nullable ResolvedArgument<S> getResolvedArgument(Command<S> command, String name) {
-        Map<String, ResolvedArgument<S>> resolvedArgs = resolvedArgumentsPerCommand.get(command);
-        if (resolvedArgs == null) return null;
-
-        return resolvedArgs.get(name);
+        return resolvedArgumentsPerCommand.getData(command)
+                .flatMap((resolvedArgs) -> resolvedArgs.getData(name))
+                .orElse(null);
     }
 
     /**
@@ -71,17 +75,17 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      */
     @Override
     public List<ResolvedArgument<S>> getResolvedArguments(Command<S> command) {
-        Map<String, ResolvedArgument<S>> argMap = resolvedArgumentsPerCommand.get(command);
-        if (argMap == null) return Collections.emptyList();
-        return new ArrayList<>(argMap.values());
+        return resolvedArgumentsPerCommand.getData(command)
+                .map((argMap) -> (List<ResolvedArgument<S>>) new ArrayList<ResolvedArgument<S>>(argMap.getAll()))
+                .orElse(Collections.emptyList());
     }
 
     /**
      * @return all {@link Command} that have been used in this context
      */
     @Override
-    public @NotNull Collection<? extends Command<S>> getCommandsUsed() {
-        return resolvedArgumentsPerCommand.keySet();
+    public @NotNull Iterable<? extends Command<S>> getCommandsUsed() {
+        return resolvedArgumentsPerCommand.getKeys();
     }
 
     /**
@@ -90,7 +94,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      */
     @Override
     public Collection<? extends ResolvedArgument<S>> getResolvedArguments() {
-        return allResolvedArgs.values();
+        return allResolvedArgs.getAll();
     }
 
     /**
@@ -103,9 +107,8 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getArgument(String name) {
-        ResolvedArgument<S> argument = allResolvedArgs.get(name);
-        if (argument == null) return null;
-        return (T) argument.value();
+        return (T) allResolvedArgs.getData(name)
+                .orElse(null);
     }
 
     @Override
@@ -195,16 +198,13 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
             throw new NumberOutOfRangeException(numericParameter, (Number) value, range);
         }
         final ResolvedArgument<S> argument = new ResolvedArgument<>(raw, parameter, index, value);
-        resolvedArgumentsPerCommand.compute(command, (existingCmd, existingResolvedArgs) -> {
+        resolvedArgumentsPerCommand.update(command, (existingResolvedArgs) -> {
             if (existingResolvedArgs != null) {
-                existingResolvedArgs.put(parameter.name(), argument);
-                return existingResolvedArgs;
+                return existingResolvedArgs.setData(parameter.name(), argument);
             }
-            Map<String, ResolvedArgument<S>> args = new LinkedHashMap<>();
-            args.put(parameter.name(), argument);
-            return args;
+            return new Registry<>(parameter.name(), argument, LinkedHashMap::new);
         });
-        allResolvedArgs.put(parameter.name(), argument);
+        allResolvedArgs.setData(parameter.name(), argument);
     }
 
     /**
