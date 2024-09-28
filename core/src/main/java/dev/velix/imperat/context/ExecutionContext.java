@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 /**
  * Represents the context capabilities
@@ -73,5 +74,9 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @return the argument/input resolved by the context
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException;
-
+    
+    /**
+     * @return the resolved flag arguments
+     */
+    Collection<? extends ResolvedFlag> getResolvedFlags();
 }

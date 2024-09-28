@@ -15,38 +15,41 @@ import org.jetbrains.annotations.NotNull;
  * @param <S>
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface ContextFactory<S extends Source> {
-
-    static <S extends Source> ContextFactory<S> defaultFactory() {
-        return new DefaultContextFactory<>();
+public abstract class ContextFactory<S extends Source> {
+    
+    protected final Imperat<S> imperat;
+    
+    protected ContextFactory(Imperat<S> imperat) {
+        this.imperat = imperat;
+    }
+    
+    
+    public static <S extends Source> ContextFactory<S> defaultFactory(Imperat<S> imperat) {
+        return new DefaultContextFactory<>(imperat);
     }
 
 
     /**
-     * @param dispatcher the dispatcher/imperat api
      * @param source     the sender/source of this command execution
      * @param command    the command label used
      * @param queue      the args input
      * @return new context from the command and args used by {@link Source}
      */
     @NotNull
-    Context<S> createContext(
-            @NotNull Imperat<S> dispatcher,
+    public abstract Context<S> createContext(
             @NotNull S source,
             @NotNull Command<S> command,
             @NotNull ArgumentQueue queue
     );
 
     /**
-     * @param dispatcher the dispatcher/imperat api
      * @param source     the source
      * @param command    the command
      * @param queue      the argument input
      * @param arg        the arg being completed
      * @return new context for auto completions with {@link CompletionArg}
      */
-    SuggestionContext<S> createSuggestionContext(
-            @NotNull Imperat<S> dispatcher,
+    public abstract SuggestionContext<S> createSuggestionContext(
             @NotNull S source,
             @NotNull Command<S> command,
             @NotNull ArgumentQueue queue,
@@ -54,14 +57,12 @@ public interface ContextFactory<S extends Source> {
     );
 
     /**
-     * @param dispatcher   the dispatcher/imperat api
      * @param plainContext the context plain
      * @param usage        the command usage
      * @return the context after resolving args into values for
      * later on parsing it into the execution
      */
-    ResolvedContext<S> createResolvedContext(
-            @NotNull Imperat<S> dispatcher,
+    public abstract ResolvedContext<S> createResolvedContext(
             @NotNull Context<S> plainContext,
             @NotNull CommandUsage<S> usage
     );

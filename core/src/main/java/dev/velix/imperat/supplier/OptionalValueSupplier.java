@@ -2,12 +2,12 @@ package dev.velix.imperat.supplier;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
+import org.jetbrains.annotations.Nullable;
 
 public interface OptionalValueSupplier<T> {
 
     @SuppressWarnings("unchecked")
     static <T> OptionalValueSupplier<T> of(T def) {
-        if (def == null) return null;
         return new OptionalValueSupplier<>() {
             @Override
             public Class<T> getValueType() {
@@ -33,6 +33,6 @@ public interface OptionalValueSupplier<T> {
      * @param source the context
      * @return the resolved default value
      */
-    <S extends Source> T supply(S source);
+    @Nullable <S extends Source> T supply(S source);
 
 }

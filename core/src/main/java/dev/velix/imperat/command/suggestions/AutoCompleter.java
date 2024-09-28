@@ -56,7 +56,7 @@ public final class AutoCompleter<S extends Source> {
         ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(args);
 
         SuggestionContext<S> context = dispatcher.getContextFactory()
-                .createSuggestionContext(dispatcher, sender, command, queue, argToComplete);
+                .createSuggestionContext(sender, command, queue, argToComplete);
 
         return autoComplete(dispatcher, context);
     }

@@ -9,10 +9,11 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
-final class DefaultContextFactory<S extends Source> implements ContextFactory<S> {
-
-
-    DefaultContextFactory() {
+final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
+    
+    
+    DefaultContextFactory(Imperat<S> imperat) {
+        super(imperat);
     }
 
     /**
@@ -23,23 +24,21 @@ final class DefaultContextFactory<S extends Source> implements ContextFactory<S>
      */
     @Override
     public @NotNull Context<S> createContext(
-            @NotNull Imperat<S> dispatcher,
             @NotNull S source,
             @NotNull Command<S> command,
             @NotNull ArgumentQueue queue
     ) {
-        return new ContextImpl<>(dispatcher, command, source, queue);
+        return new ContextImpl<>(imperat, command, source, queue);
     }
 
     @Override
     public SuggestionContext<S> createSuggestionContext(
-            @NotNull Imperat<S> dispatcher,
             @NotNull S source,
             @NotNull Command<S> command,
             @NotNull ArgumentQueue queue,
             @NotNull CompletionArg arg
     ) {
-        return new SuggestionContextImpl<>(dispatcher, command, source, queue, arg);
+        return new SuggestionContextImpl<>(imperat, command, source, queue, arg);
     }
 
     /**
@@ -49,12 +48,11 @@ final class DefaultContextFactory<S extends Source> implements ContextFactory<S>
      */
     @Override
     public ResolvedContext<S> createResolvedContext(
-            @NotNull Imperat<S> dispatcher,
             @NotNull Context<S> plainContext,
             @NotNull CommandUsage<S> usage
     ) {
         return new ResolvedContextImpl<>(
-                dispatcher,
+                imperat,
                 plainContext,
                 usage
         );

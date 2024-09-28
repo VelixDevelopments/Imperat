@@ -142,8 +142,16 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
         ContextResolver<S, T> factoryCr = (ContextResolver<S, T>) factory.create(null);
         return factoryCr == null ? null : factoryCr.resolve(this, null);
     }
-
-
+    
+    /**
+     * @return the resolved flag arguments
+     */
+    @Override
+    public Collection<? extends ResolvedFlag> getResolvedFlags() {
+        return flagRegistry.getAll();
+    }
+    
+    
     @Override
     public ResolvedFlag getFlag(String flagName) {
         return flagRegistry.getData(flagName).orElse(null);

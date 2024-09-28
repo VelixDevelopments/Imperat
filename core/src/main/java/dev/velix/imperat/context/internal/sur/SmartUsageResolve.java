@@ -198,8 +198,12 @@ public final class SmartUsageResolve<S extends Source> {
         if (currentParameter.isGreedy()) {
 
             StringBuilder builder = new StringBuilder();
-            for (int i = cursor.raw; i < raws.size(); i++) {
-                builder.append(cursor.peekRaw(raws)).append(' ');
+            final int maxRaws = raws.size();
+            for (int i = cursor.raw; i < maxRaws; i++) {
+                builder.append(cursor.peekRaw(raws));
+                if (i != maxRaws - 1) {
+                    builder.append(' ');
+                }
                 cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
             }
 
@@ -275,8 +279,13 @@ public final class SmartUsageResolve<S extends Source> {
         if (currentParameter.isGreedy()) {
 
             StringBuilder builder = new StringBuilder();
-            for (int i = cursor.raw; i < raws.size(); i++) {
-                builder.append(cursor.peekRaw(raws)).append(' ');
+            final int maxRaws = raws.size();
+            
+            for (int i = cursor.raw; i < maxRaws; i++) {
+                builder.append(cursor.peekRaw(raws));
+                if (i != maxRaws - 1) {
+                    builder.append(' ');
+                }
                 cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
             }
 

@@ -2,10 +2,7 @@ package dev.velix.imperat.util;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -86,4 +83,21 @@ public class Registry<K, V> {
     public int size() {
         return data.size();
     }
+    
+    public Map<K, V> getMap() {
+        return this.data;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Registry<?, ?> registry)) return false;
+        return Objects.equals(data, registry.data);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(data);
+    }
+    
 }

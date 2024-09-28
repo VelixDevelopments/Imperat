@@ -116,7 +116,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
                 );
 
                 CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
-                SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(dispatcher, source, command, args, arg);
+                SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
                 suggestionResolver
                         .autoComplete(ctx, parameter)
                         .stream()

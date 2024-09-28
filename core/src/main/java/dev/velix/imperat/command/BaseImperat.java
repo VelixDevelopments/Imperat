@@ -52,7 +52,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
 
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
-        contextFactory = ContextFactory.defaultFactory();
+        contextFactory = ContextFactory.defaultFactory(this);
         contextResolverRegistry = ContextResolverRegistry.createDefault(this);
         valueResolverRegistry = ValueResolverRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
@@ -610,7 +610,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
 
         Context<S> plainContext = getContextFactory()
-                .createContext(this, source, command, rawArguments);
+                .createContext(source, command, rawArguments);
 
         return dispatch(plainContext);
     }
@@ -689,8 +689,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
         //per command pre-processing
         command.preProcess(this, context, usage);
-
-        ResolvedContext<S> resolvedContext = contextFactory.createResolvedContext(this, context, usage);
+        
+        ResolvedContext<S> resolvedContext = contextFactory.createResolvedContext(context, usage);
         resolvedContext.resolve();
 
         //global post-processing

@@ -47,10 +47,13 @@ final class SyntaxDataLoader {
         for (int i = 0; i < parameters.size(); i++) {
             CommandParameter<MinestomSource> parameter = parameters.get(i);
             Argument<T> arg = (Argument<T>) argFromParameter(parameter);
-            if (parameter.isOptional() && parameter.getDefaultValueSupplier() != null) {
+            if (parameter.isOptional()) {
                 arg.setDefaultValue(
-                        commandSender -> parameter.<T>getDefaultValueSupplier().supply(imperat.wrapSender(commandSender))
-                );
+                        commandSender -> {
+                            var supplier = parameter.getDefaultValueSupplier();
+                            return (T) supplier.supply(imperat.wrapSender(commandSender));
+                        });
+                
             }
             arg.setSuggestionCallback((sender, context, suggestion) -> {
                 var source = imperat.wrapSender(sender);
@@ -77,6 +80,11 @@ final class SyntaxDataLoader {
         }
         
         if (parameter.isFlag()) {
+            
+            if (parameter.asFlagParameter().isSwitch()) {
+                return ArgumentType.Word(id).filter(Patterns::isInputFlag);
+            }
+            
             return ArgumentType.Group(
                     id, ArgumentType.Word(id).filter(Patterns::isInputFlag),
                     from("value", parameter.asFlagParameter().inputValueType())
