@@ -56,6 +56,8 @@ dependencies {
 Imperat supports the following platforms:
 
 - Bukkit
+- Minestom
+- Velocity
 - Bungeecord
 - CLI (Command Line Interface)
 
