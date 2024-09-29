@@ -1,14 +1,11 @@
 package dev.velix.imperat.util;
 
-import lombok.Getter;
-
 import java.lang.reflect.*;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class TypeWrap<T> {
 
-    @Getter
     private final Type type;
     private final Class<?> rawType;
 
@@ -61,6 +58,10 @@ public abstract class TypeWrap<T> {
             return Array.newInstance(extractRawType(genericArrayType.getGenericComponentType()), 0).getClass();
 
         return null;
+    }
+
+    public Type getType() {
+        return type;
     }
 
     @SuppressWarnings("unchecked")

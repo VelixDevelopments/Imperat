@@ -1,6 +1,5 @@
 package dev.velix.imperat.util.asm;
 
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,16 +27,23 @@ final class MethodHandlesCallerFactory implements MethodCallerFactory {
         String methodString = method.toString();
         boolean isStatic = Modifier.isStatic(method.getModifiers());
         return new MethodCaller() {
-            @SneakyThrows
             @Override
             public Object call(@Nullable Object instance, Object... arguments) {
                 if (!isStatic) {
-                    List<Object> args = new ArrayList<>();
+                    final List<Object> args = new ArrayList<>();
                     args.add(instance);
                     addAll(args, arguments);
-                    return handle.invokeWithArguments(args);
+                    try {
+                        return handle.invokeWithArguments(args);
+                    } catch (final Throwable e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-                return handle.invokeWithArguments(arguments);
+                try {
+                    return handle.invokeWithArguments(arguments);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             @Override

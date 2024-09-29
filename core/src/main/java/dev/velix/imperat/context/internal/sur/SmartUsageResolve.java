@@ -10,7 +10,6 @@ import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.TokenParseException;
 import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +19,9 @@ import java.util.function.Predicate;
 
 public final class SmartUsageResolve<S extends Source> {
 
-    @Getter
     private final Command<S> mainCommand;
     private final CommandUsage<S> usage;
     private final Cursor<S> cursor = new Cursor<>(0, 0);
-    @Getter
     private Command<S> command;
 
     SmartUsageResolve(Command<S> command,
@@ -332,4 +329,11 @@ public final class SmartUsageResolve<S extends Source> {
         return defaultValue;
     }
 
+    public Command<S> getMainCommand() {
+        return mainCommand;
+    }
+
+    public Command<S> getCommand() {
+        return command;
+    }
 }

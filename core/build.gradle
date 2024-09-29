@@ -3,9 +3,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly "${lombok()}"
-    annotationProcessor "${lombok()}"
-
     compileOnly "org.jetbrains:annotations:24.1.0"
     annotationProcessor "org.jetbrains:annotations:24.1.0"
 

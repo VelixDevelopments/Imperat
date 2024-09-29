@@ -9,7 +9,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import java.util.List;
 /**
  * @author Mqzen
  */
-@Getter
 public final class CommandTree<S extends Source> {
 
     final CommandNode<S> root;
@@ -197,7 +195,7 @@ public final class CommandTree<S extends Source> {
         if (currentNode.isLeaf()) {
 
             //not the deepest search depth (still more raw args than number of nodes)
-            commandDispatch.setResult((depth != input.size() - 1 && !currentNode.isGreedyParam())
+            commandDispatch.result((depth != input.size() - 1 && !currentNode.isGreedyParam())
                     ? CommandDispatch.Result.INCOMPLETE : CommandDispatch.Result.COMPLETE);
             return commandDispatch;
         } else {
@@ -239,7 +237,7 @@ public final class CommandTree<S extends Source> {
 
                     //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
                     var usage = commandDispatch.toUsage(root.data);
-                    commandDispatch.setResult(
+                    commandDispatch.result(
                             allOptional || usage != null
                                     ? CommandDispatch.Result.COMPLETE
                                     : CommandDispatch.Result.INCOMPLETE
@@ -269,4 +267,7 @@ public final class CommandTree<S extends Source> {
         return commandDispatch;
     }
 
+    public CommandNode<S> getRoot() {
+        return root;
+    }
 }

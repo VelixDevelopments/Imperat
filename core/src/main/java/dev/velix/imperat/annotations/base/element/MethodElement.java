@@ -4,7 +4,6 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +13,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
 public final class MethodElement extends ParseElement<Method> {
 
     private final List<ParameterElement> parameters = new ArrayList<>();
@@ -63,4 +61,17 @@ public final class MethodElement extends ParseElement<Method> {
     public String getName() {
         return getElement().getName();
     }
+
+    public List<ParameterElement> getParameters() {
+        return parameters;
+    }
+
+    public int getInputCount() {
+        return inputCount;
+    }
+
+    public boolean isHelp() {
+        return help;
+    }
+
 }

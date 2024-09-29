@@ -1,8 +1,5 @@
 package dev.velix.imperat.exception;
 
-import lombok.Getter;
-
-@Getter
 public class SourceException extends ImperatException {
 
     private final String message;
@@ -23,6 +20,10 @@ public class SourceException extends ImperatException {
     ) {
         this.type = type;
         this.message = String.format(msg, args);
+    }
+
+    public ErrorLevel getType() {
+        return type;
     }
 
     @Override

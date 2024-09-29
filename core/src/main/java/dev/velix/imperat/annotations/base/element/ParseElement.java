@@ -4,7 +4,6 @@ import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.AnnotationMap;
-import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,11 +19,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
 
     //use more memory but better performance, since it's going to be GCed anyway
     private final @NotNull AnnotationMap total = new AnnotationMap();
-
-    @Getter
     private final @Nullable ParseElement<?> parent;
-
-    @Getter
     private final @NotNull E element;
 
     public <S extends Source> ParseElement(
@@ -145,4 +140,14 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     }
 
     public abstract String getName();
+
+    public @Nullable ParseElement<?> getParent() {
+        return parent;
+    }
+
+    @NotNull
+    public E getElement() {
+        return element;
+    }
+
 }

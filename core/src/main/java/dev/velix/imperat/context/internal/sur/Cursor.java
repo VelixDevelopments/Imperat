@@ -4,18 +4,19 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
-@Data
-@AllArgsConstructor
 public final class Cursor<S extends Source> {
 
     int parameter, raw;
+
+    public Cursor(int parameter, int raw) {
+        this.parameter = parameter;
+        this.raw = raw;
+    }
 
     public void shift(ShiftTarget shift, IntUnaryOperator operator) {
         switch (shift) {
@@ -75,4 +76,38 @@ public final class Cursor<S extends Source> {
         return nextRaw(context.arguments());
     }
 
+    public int getParameter() {
+        return this.parameter;
+    }
+
+    public int getRaw() {
+        return this.raw;
+    }
+
+    public void setParameter(int parameter) {
+        this.parameter = parameter;
+    }
+
+    public void setRaw(int raw) {
+        this.raw = raw;
+    }
+
+    public boolean equals(final Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Cursor<?> other)) return false;
+        if (this.getParameter() != other.getParameter()) return false;
+        return this.getRaw() == other.getRaw();
+    }
+
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.getParameter();
+        result = result * PRIME + this.getRaw();
+        return result;
+    }
+
+    public String toString() {
+        return "Cursor(parameter=" + this.getParameter() + ", raw=" + this.getRaw() + ")";
+    }
 }

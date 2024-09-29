@@ -6,7 +6,6 @@ import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +18,6 @@ import java.lang.annotation.Annotation;
  *
  * @param <S> the command-sender type
  */
-@Getter
 public abstract class AnnotationParser<S extends Source> {
 
     protected final Imperat<S> imperat;
@@ -89,6 +87,10 @@ public abstract class AnnotationParser<S extends Source> {
 
     public final boolean isEntryPointAnnotation(Class<? extends Annotation> annotation) {
         return annotation == dev.velix.imperat.annotations.Command.class || annotation == Usage.class || annotation == SubCommand.class;
+    }
+
+    public Imperat<S> getImperat() {
+        return imperat;
     }
 
 }

@@ -7,21 +7,17 @@ import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
-import lombok.Getter;
-import lombok.Setter;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-@Getter
-@Setter
 @ApiStatus.AvailableSince("1.0.0")
 final class ContextResolverRegistry<S extends Source> extends Registry<Type, ContextResolver<S, ?>> {
 
     private ContextResolverFactory<S> factory;
 
-    private ContextResolverRegistry(Imperat<S> imperat) {
+    private ContextResolverRegistry(final Imperat<S> imperat) {
         super();
         factory = (parameter -> {
             assert parameter != null;
@@ -30,7 +26,7 @@ final class ContextResolverRegistry<S extends Source> extends Registry<Type, Con
         this.registerResolver(TypeWrap.of(CommandHelp.class).getType(), (ctx, param) -> new CommandHelp(imperat, ctx));
     }
 
-    public static <S extends Source> ContextResolverRegistry<S> createDefault(Imperat<S> imperat) {
+    public static <S extends Source> ContextResolverRegistry<S> createDefault(final Imperat<S> imperat) {
         return new ContextResolverRegistry<>(imperat);
     }
 
@@ -51,5 +47,12 @@ final class ContextResolverRegistry<S extends Source> extends Registry<Type, Con
         });
     }
 
+    public ContextResolverFactory<S> getFactory() {
+        return factory;
+    }
+
+    public void setFactory(ContextResolverFactory<S> factory) {
+        this.factory = factory;
+    }
 
 }

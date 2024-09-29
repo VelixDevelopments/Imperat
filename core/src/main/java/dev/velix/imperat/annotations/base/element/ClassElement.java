@@ -4,7 +4,6 @@ import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.reflection.Reflections;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +14,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
-@Getter
 public final class ClassElement extends ParseElement<Class<?>> {
 
     private final Set<ParseElement<?>> children = new LinkedHashSet<>();
@@ -55,10 +53,8 @@ public final class ClassElement extends ParseElement<Class<?>> {
         }
     }
 
-
     public @Nullable ParseElement<?> getChildElement(Predicate<ParseElement<?>> predicate) {
-        for (var element : getChildren())
-            if (predicate.test(element)) return element;
+        for (var element : getChildren()) if (predicate.test(element)) return element;
         return null;
     }
 
@@ -70,7 +66,6 @@ public final class ClassElement extends ParseElement<Class<?>> {
         return getParent() == null;
     }
 
-
     @Override
     public String getName() {
         return getElement().getName();
@@ -79,4 +74,9 @@ public final class ClassElement extends ParseElement<Class<?>> {
     public String getSimpleName() {
         return getElement().getSimpleName();
     }
+
+    public Set<ParseElement<?>> getChildren() {
+        return children;
+    }
+
 }

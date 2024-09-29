@@ -1,8 +1,5 @@
 package dev.velix.imperat.command.parameters;
 
-import lombok.Getter;
-
-@Getter
 public final class NumericRange {
 
     private final double min, max;
@@ -27,4 +24,13 @@ public final class NumericRange {
     public boolean matches(double value) {
         return value >= min && value <= max;
     }
+
+    public double getMin() {
+        return min;
+    }
+
+    public double getMax() {
+        return max;
+    }
+
 }

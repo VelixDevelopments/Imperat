@@ -5,7 +5,6 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.ImperatDebugger;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,14 +16,13 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
 
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
 
-    @Setter
     private Result result;
 
     private CommandDispatch(Result result) {
         this.result = result;
     }
 
-    static <S extends Source> CommandDispatch<S> of(Result result) {
+    static <S extends Source> CommandDispatch<S> of(final Result result) {
         return new CommandDispatch<>(result);
     }
 
@@ -49,6 +47,10 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
 
     public Result result() {
         return result;
+    }
+
+    public void result(Result result) {
+        this.result = result;
     }
 
     public @Nullable CommandUsage<S> toUsage(Command<S> command) {
