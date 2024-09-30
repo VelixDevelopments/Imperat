@@ -72,6 +72,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     private void regDefThrowableResolvers() {
+        
         this.setThrowableResolver(InvalidSourceException.class, (exception, imperat, context) -> {
             throw new UnsupportedOperationException("Couldn't find any source resolver for type `"
                     + exception.getTargetType().getType().getTypeName() + "'");
@@ -619,8 +620,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @NotNull CommandDispatch.Result dispatch(S source, String commandName, String[] rawInput) {
         Command<S> command = getCommand(commandName);
         if (command == null) {
-            //TODO better message here
-            source.reply("Unknown command !");
+            source.error("Unknown command input: '" + commandName + "'");
             return CommandDispatch.Result.UNKNOWN;
         }
         //temp debugging
