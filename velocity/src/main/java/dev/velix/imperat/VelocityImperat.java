@@ -43,7 +43,12 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
             String pluginName,
             ProxyServer proxyServer
     ) {
-        return create(pluginName, proxyServer, (source, permission) -> source.origin().hasPermission(permission));
+        return create(pluginName, proxyServer, (source, permission) -> {
+            if(permission == null) {
+                return true;
+            }
+            return source.origin().hasPermission(permission);
+        });
     }
 
     private void registerDefaultResolvers() {

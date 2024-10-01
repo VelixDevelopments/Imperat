@@ -62,5 +62,5 @@ final class InternalVelocityCommand implements SimpleCommand {
                 command.permission()
         );
     }
-
+    
 }

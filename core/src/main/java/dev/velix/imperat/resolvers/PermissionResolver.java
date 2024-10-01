@@ -22,12 +22,13 @@ public interface PermissionResolver<S extends Source> {
     boolean hasPermission(@NotNull S source, @Nullable String permission);
 
     default boolean hasUsagePermission(S source, @Nullable CommandUsage<S> usage) {
-        if (usage == null) {
+        if (usage == null || usage.permission() == null) {
             return true;
         }
         if (!hasPermission(source, usage.permission())) return false;
         for (CommandParameter<S> parameter : usage.getParameters()) {
             //if (!parameter.isCommand()) continue;
+            if(parameter.permission() == null)continue;
             if (!hasPermission(source, parameter.permission()))
                 return false;
         }
