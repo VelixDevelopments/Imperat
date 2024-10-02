@@ -31,7 +31,7 @@ dependencies {
     compileOnly 'org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT'
 
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
-    compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
+    //compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
 
     compileOnly "${kyori(KyoriModule.API)}"
     compileOnly "${kyoriPlatform(KyoriModule.BUKKIT)}"

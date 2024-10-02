@@ -58,7 +58,7 @@ public final class SmartUsageResolve<S extends Source> {
 
                     if (optionalEmptyParameter.isFlag()) {
                         CommandFlag flag = optionalEmptyParameter.asFlagParameter().flagData();
-                        Object value = null;
+                        Object value;
                         if (flag instanceof CommandSwitch) value = false;
                         else {
                             optionalEmptyParameter.asFlagParameter().getDefaultValueSupplier();
