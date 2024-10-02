@@ -43,6 +43,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
 
     private BrigadierNode convertRoot(CommandNode<S> root) {
         BrigadierNode bRoot = BrigadierNode.create(literal(root.getData().name()));
+        
         bRoot.withExecution(dispatcher, this)
                 .withRequirement((obj) -> {
                             var source = wrapCommandSource(obj);
@@ -79,7 +80,6 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
 
                     return (hasParentPerm && hasNodePerm);
                 });
-
         if (!(node instanceof CommandNode<?>)) {
             child.suggest(createSuggestionProvider(root.getData(), node.getData()));
         }
@@ -89,46 +89,41 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         }
         return child;
     }
-
-
-    private @NotNull SuggestionProvider<Object> createSuggestionProvider(
+    
+    
+    private @NotNull SuggestionProvider<?> createSuggestionProvider(
             Command<S> command,
             CommandParameter<S> parameter
     ) {
         SuggestionResolver<S> parameterResolver = dispatcher.getParameterSuggestionResolver(parameter);
-        SuggestionResolver<S> suggestionResolver = parameterResolver == null ? SuggestionResolver.type(parameter.wrappedType(), parameter.format()) : parameterResolver;
-
+        
         //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", parameterResolver == null, parameter.format());
 
         return (context, builder) -> {
-
-            try {
-
-                S source = this.wrapCommandSource(context.getSource());
-                String paramFormat = parameter.format();
-                String desc = parameter.description() != Description.EMPTY ? parameter.description().toString() : "";
-                Message tooltip = new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc));
-
-                String input = context.getInput();
-
-                ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
-                        input.startsWith("/") ? input.substring(1) : input
-                );
-
-                CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
-                SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
-                suggestionResolver
-                        .autoComplete(ctx, parameter)
-                        .stream()
-                        .filter(c -> arg.isEmpty() || c.toLowerCase().startsWith(arg.value().toLowerCase()))
-                        .distinct()
-                        .sorted(String.CASE_INSENSITIVE_ORDER)
-                        .forEach(suggestionResult -> builder.suggest(suggestionResult, tooltip));
-
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-            return builder.buildFuture();
+            S source = this.wrapCommandSource(context.getSource());
+            String paramFormat = parameter.format();
+            String desc = parameter.description() != Description.EMPTY ? parameter.description().toString() : "";
+            Message tooltip = new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc));
+            
+            String input = context.getInput();
+            
+            ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
+              input.startsWith("/") ? input.substring(1) : input
+            );
+            
+            CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
+            SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
+            
+            return parameterResolver.asyncAutoComplete(ctx, parameter)
+              .thenCompose((results) -> {
+                  results
+                    .stream()
+                    .filter(c -> arg.isEmpty() || c.toLowerCase().startsWith(arg.value().toLowerCase()))
+                    .distinct()
+                    .sorted(String.CASE_INSENSITIVE_ORDER)
+                    .forEach((res) -> builder.suggest(res, tooltip));
+                  return builder.buildFuture();
+              });
         };
     }
 

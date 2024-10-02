@@ -26,6 +26,7 @@
 package dev.velix.imperat.commodore;
 
 import dev.velix.imperat.util.ImperatDebugger;
+import org.bukkit.command.Command;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,16 +51,21 @@ public final class CommodoreProvider {
     private CommodoreProvider() {
         throw new AssertionError();
     }
-
-    private static @Nullable Commodore load(Plugin plugin) {
+    
+    private static <C extends Command> @Nullable Commodore<C> load(Plugin plugin) {
         if (!SUPPORTED) {
             return null;
+        }
+        
+        try {
+            return (Commodore<C>) new ModernPaperCommodore(plugin);
+        } catch (Throwable e) {
+            printDebugInfo(e);
         }
 
         // try the paper impl
         try {
-            PaperCommodore.ensureSetup();
-            return new PaperCommodore(plugin);
+            return (Commodore<C>) new LegacyPaperCommodore(plugin);
         } catch (Throwable e) {
             //printDebugInfo(e);
             ImperatDebugger.warning("Paper not found, falling back to Reflection for brigadier");
@@ -68,7 +74,7 @@ public final class CommodoreProvider {
         // try reflection impl
         try {
             ReflectionCommodore.ensureSetup();
-            return new ReflectionCommodore(plugin);
+            return (Commodore<C>) new ReflectionCommodore(plugin);
         } catch (Throwable e) {
             printDebugInfo(e);
         }
@@ -100,9 +106,9 @@ public final class CommodoreProvider {
      * @throws BrigadierUnsupportedException if brigadier is not {@link #isSupported() supported}
      *                                       by the server.
      */
-    public static Commodore getCommodore(Plugin plugin) throws BrigadierUnsupportedException {
+    public static <C extends Command> Commodore<C> getCommodore(Plugin plugin) throws BrigadierUnsupportedException {
         Objects.requireNonNull(plugin, "plugin");
-        Commodore commodore = load(plugin);
+        Commodore<C> commodore = load(plugin);
         if (commodore == null) {
             throw new BrigadierUnsupportedException(
                     "Brigadier is not supported by the server. " +

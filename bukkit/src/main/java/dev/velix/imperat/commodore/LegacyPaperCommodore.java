@@ -30,7 +30,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import org.bukkit.command.Command;
+import dev.velix.imperat.WrappedBukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,17 +43,13 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
-final class PaperCommodore extends AbstractCommodore implements Commodore, Listener {
+final class LegacyPaperCommodore extends AbstractCommodore<WrappedBukkitCommand> implements Listener {
 
     private final List<CommodoreCommand> commands = new ArrayList<>();
-
-    PaperCommodore(Plugin plugin) throws ClassNotFoundException {
+    
+    LegacyPaperCommodore(Plugin plugin) throws ClassNotFoundException {
         Class.forName("com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-    }
-
-    static void ensureSetup() {
-        // do nothing - this is only called to trigger the static initializer
     }
 
     @Override
@@ -63,7 +59,7 @@ final class PaperCommodore extends AbstractCommodore implements Commodore, Liste
     }
 
     @Override
-    public void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
+    public void register(WrappedBukkitCommand command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");

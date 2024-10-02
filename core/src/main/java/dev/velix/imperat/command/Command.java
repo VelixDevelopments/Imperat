@@ -10,7 +10,6 @@ import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
@@ -120,16 +119,8 @@ public interface Command<S extends Source> extends CommandParameter<S> {
      * @param context the context of the execution
      */
     @NotNull CommandDispatch<S> contextMatch(Context<S> context);
-
-    /**
-     * Traverses and searches in {@link CommandTree} , visiting every node
-     *
-     * @param dispatcher the dispatcher
-     * @param context    the context
-     * @return the auto-completed results
-     */
-    Collection<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context);
-
+    
+    
     /**
      * Debugs or visualizes all tree nodes
      * from {@link CommandTree}.

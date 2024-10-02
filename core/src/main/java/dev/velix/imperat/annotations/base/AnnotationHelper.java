@@ -7,7 +7,6 @@ import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.ResolvedFlag;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -74,13 +73,12 @@ public final class AnnotationHelper {
             CommandParameter<S> parameter = getUsageParam(fullParameters, p);
             if (parameter == null)
                 continue;
-
+            
+            String name = parameter.name();
             if (parameter.isFlag()) {
-                ResolvedFlag value = context.getFlag(parameter.name());
-                paramsInstances[i] = value.value();
+                paramsInstances[i] = context.getFlagValue(name);
             } else {
-                Object value = context.getArgument(parameter.name());
-                paramsInstances[i] = value;
+                paramsInstances[i] = context.getArgument(name);
             }
 
         }
@@ -140,10 +138,11 @@ public final class AnnotationHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> @Nullable OptionalValueSupplier<T> deduceOptionalValueSupplier(
+    public static <T> @NotNull OptionalValueSupplier<T> deduceOptionalValueSupplier(
             Parameter parameter,
             Default defaultAnnotation,
-            DefaultProvider provider
+            DefaultProvider provider,
+            OptionalValueSupplier<T> fallback
     ) {
 
         if (defaultAnnotation != null) {
@@ -159,7 +158,7 @@ public final class AnnotationHelper {
                         supplierClass.getName() + "' doesn't have an empty accessible constructor !");
             }
         }
-        return null;
+        return fallback;
     }
 
     public static int loadMethodPriority(Method method) {

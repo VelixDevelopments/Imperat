@@ -31,6 +31,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import dev.velix.imperat.BukkitUtil;
+import dev.velix.imperat.WrappedBukkitCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -47,7 +48,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-final class ReflectionCommodore extends AbstractCommodore implements Commodore {
+final class ReflectionCommodore extends AbstractCommodore<WrappedBukkitCommand> {
 
     // obc.CraftServer#console field
     private static final Field CONSOLE_FIELD;
@@ -139,7 +140,7 @@ final class ReflectionCommodore extends AbstractCommodore implements Commodore {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
+    public void register(WrappedBukkitCommand command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");

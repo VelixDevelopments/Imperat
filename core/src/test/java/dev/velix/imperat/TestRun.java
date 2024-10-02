@@ -178,7 +178,9 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{""});
-        Assertions.assertLinesMatch(Stream.of("hi", "bye"), results.stream());
+        results.whenComplete((res, ex) -> {
+            Assertions.assertLinesMatch(Stream.of("hi", "bye"), res.stream());
+        });
     }
 
     @Test
@@ -187,7 +189,9 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", ""});
-        Assertions.assertLinesMatch(Stream.of("othersub", "first", "sub4", "sub1"), results.stream());
+        results.whenComplete((res, ex) -> {
+            Assertions.assertLinesMatch(Stream.of("othersub", "first", "sub4", "sub1"), res.stream());
+        });
     }
 
     @Test
@@ -196,7 +200,9 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "first", ""});
-        Assertions.assertLinesMatch(Stream.of("x", "y", "z", "sexy"), results.stream());
+        results.whenComplete((res, ex) -> {
+            Assertions.assertLinesMatch(Stream.of("x", "y", "z", "sexy"), res.stream());
+        });
     }
 
     @Test

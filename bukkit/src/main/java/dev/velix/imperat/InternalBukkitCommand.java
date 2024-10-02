@@ -38,22 +38,6 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     }
 
     @Override
-    public boolean execute(@NotNull CommandSender sender,
-                           @NotNull String label,
-                           String[] raw) {
-
-        try {
-            BukkitSource source = dispatcher.wrapSender(sender);
-            dispatcher.dispatch(source, StringUtils.stripNamespace(label), raw);
-            return true;
-        } catch (Exception ex) {
-            ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);
-            return false;
-        }
-
-    }
-
-    @Override
     public @NotNull Plugin getPlugin() {
         return dispatcher.getPlatform();
     }
@@ -61,7 +45,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     @Nullable
     @Override
     public String getPermission() {
-        return super.getPermission();
+        return command.permission();
     }
 
     @NotNull
@@ -75,6 +59,22 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     public String getUsage() {
         return super.getUsage();
     }
+    
+    @Override
+    public boolean execute(@NotNull CommandSender sender,
+                           @NotNull String label,
+                           String[] raw) {
+        
+        try {
+            BukkitSource source = dispatcher.wrapSender(sender);
+            dispatcher.dispatch(source, StringUtils.stripNamespace(label), raw);
+            return true;
+        } catch (Exception ex) {
+            ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);
+            return false;
+        }
+        
+    }
 
     @Override
     public @NotNull List<String> tabComplete(
@@ -83,11 +83,9 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
             final String[] args
     ) throws IllegalArgumentException {
         BukkitSource source = dispatcher.wrapSender(sender);
-        var completion = dispatcher.autoComplete(command, source, args);
-        if (completion instanceof List<String> list) {
-            return list;
-        }
-        return new ArrayList<>(completion);
+        var completions = dispatcher.autoComplete(command, source, args).join();
+        if (completions instanceof List<String> list) return list;
+        else return new ArrayList<>(completions);
     }
 
 }

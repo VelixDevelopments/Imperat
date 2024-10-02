@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Represents the context capabilities
@@ -22,7 +23,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
      */
-    ResolvedFlag getFlag(String flagName);
+    Optional<ResolvedFlag> getFlag(String flagName);
 
     /**
      * Fetches the flag input value

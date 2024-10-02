@@ -3,9 +3,11 @@ package dev.velix.imperat.brigadier;
 import dev.velix.imperat.BaseBrigadierManager;
 import dev.velix.imperat.BukkitImperat;
 import dev.velix.imperat.BukkitSource;
+import dev.velix.imperat.WrappedBukkitCommand;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.commodore.Commodore;
 import dev.velix.imperat.commodore.CommodoreProvider;
+import dev.velix.imperat.resolvers.PermissionResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -13,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import static dev.velix.imperat.commodore.CommodoreProvider.isSupported;
 
 public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSource> {
-
-    private final Commodore commodore;
+    
+    private final Commodore<WrappedBukkitCommand> commodore;
 
     public BukkitBrigadierManager(BukkitImperat dispatcher) {
         super(dispatcher);
@@ -41,9 +43,10 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
     }
 
     public void registerBukkitCommand(
-            org.bukkit.command.Command bukkitCmd,
-            Command<BukkitSource> imperatCommand
+      WrappedBukkitCommand bukkitCmd,
+      Command<BukkitSource> imperatCommand,
+      PermissionResolver<BukkitSource> resolver
     ) {
-        commodore.register(bukkitCmd, parseCommandIntoNode(imperatCommand));
+        commodore.register(bukkitCmd, parseCommandIntoNode(imperatCommand), (player) -> resolver.hasPermission(wrapCommandSource(player), bukkitCmd.permission()));
     }
 }

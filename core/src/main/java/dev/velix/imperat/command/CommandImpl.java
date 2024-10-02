@@ -12,7 +12,6 @@ import dev.velix.imperat.command.tree.CommandTreeVisualizer;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -29,7 +28,8 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 final class CommandImpl<S extends Source> implements Command<S> {
-
+    
+    
     private final String name;
     private final int position;
     private final List<String> aliases = new ArrayList<>();
@@ -46,6 +46,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private @Nullable CommandPreProcessor<S> preProcessor;
     private @Nullable CommandPostProcessor<S> postProcessor;
     private Command<S> parent;
+    
+    private final SuggestionResolver<S> suggestionResolver;
 
     CommandImpl(String name) {
         this(null, name);
@@ -65,6 +67,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.autoCompleter = AutoCompleter.createNative(this);
         this.commandTree = parent != null ? null : CommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
+        this.suggestionResolver = SuggestionResolver.forCommand(this);
     }
 
     /**
@@ -129,15 +132,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @NotNull CommandDispatch<S> contextMatch(Context<S> context) {
         if (commandTree != null) {
             return commandTree.contextMatch(context.arguments());
-        } else {
-            throw new IllegalCallerException("Cannot match a sub command in a root's execution !");
-        }
-    }
-
-    @Override
-    public Collection<String> tabComplete(Imperat<S> dispatcher, SuggestionContext<S> context) {
-        if (commandTree != null) {
-            return commandTree.tabComplete(dispatcher, context);
         } else {
             throw new IllegalCallerException("Cannot match a sub command in a root's execution !");
         }
@@ -214,9 +208,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Override
-    @SuppressWarnings("unchecked")
     public @Nullable <T> TypeSuggestionResolver<S, T> getSuggestionResolver() {
-        return (TypeSuggestionResolver<S, T>) SuggestionResolver.type(Command.class, List.of(this.name()));
+        return (TypeSuggestionResolver<S, T>) suggestionResolver;
     }
 
     @Override

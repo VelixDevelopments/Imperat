@@ -107,7 +107,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getArgument(String name) {
-        return (T) allResolvedArgs.getData(name)
+        return (T) allResolvedArgs.getData(name).map(ResolvedArgument::value)
                 .orElse(null);
     }
 
@@ -153,8 +153,8 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     
     
     @Override
-    public ResolvedFlag getFlag(String flagName) {
-        return flagRegistry.getData(flagName).orElse(null);
+    public Optional<ResolvedFlag> getFlag(String flagName) {
+        return flagRegistry.getData(flagName);
     }
 
     /**
@@ -168,11 +168,9 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getFlagValue(String flagName) {
-        ResolvedFlag flag = getFlag(flagName);
-        if (flag == null) {
-            return null;
-        }
-        return (T) flag.value();
+        return (T) getFlag(flagName)
+          .map(ResolvedFlag::value)
+          .orElse(null);
     }
 
 

@@ -44,7 +44,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-abstract class AbstractCommodore implements Commodore {
+abstract class AbstractCommodore<C extends Command> implements Commodore<C> {
 
     // ArgumentCommandNode#customSuggestions field
     protected static final Field CUSTOM_SUGGESTIONS_FIELD;
@@ -91,7 +91,7 @@ abstract class AbstractCommodore implements Commodore {
 
             // should never be called
             // if ReflectionCommodore: bukkit handling should override
-            // if PaperCommodore: this is only sent to the client, not used for actual command handling
+            // if LegacyPaperCommodore: this is only sent to the client, not used for actual command handling
             DUMMY_COMMAND = (ctx) -> {
                 throw new UnsupportedOperationException();
             };

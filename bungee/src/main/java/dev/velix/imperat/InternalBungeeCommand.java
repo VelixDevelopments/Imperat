@@ -42,7 +42,7 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
                 bungeeCommand,
                 bungeeCommandDispatcher.wrapSender(sender),
                 args
-        );
+        ).join();
     }
 
 }

@@ -12,7 +12,9 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Mqzen
@@ -82,27 +84,27 @@ public final class CommandTree<S extends Source> {
         parent.addChild(newNode);
         return newNode;
     }
-
-    public @NotNull List<String> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
+    
+    public @NotNull CompletableFuture<Collection<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
-
-        List<String> results = new ArrayList<>();
+        
+        CompletableFuture<Collection<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
         for (var child : root.getChildren()) {
-            collectNodeCompletions(imperat, context, child, 0, depthToReach, results);
+            future = future.thenCompose((results) -> collectNodeCompletions(imperat, context, child, 0, depthToReach, results));
         }
-        return results;
+        return future;
     }
-
-    private void collectNodeCompletions(
+    
+    private CompletableFuture<Collection<String>> collectNodeCompletions(
             Imperat<S> imperat,
             SuggestionContext<S> context,
             ParameterNode<S, ?> child,
             int depth,
             final int maxDepth,
-            List<String> results
+            Collection<String> results
     ) {
         if (depth > maxDepth) {
-            return;
+            return CompletableFuture.completedFuture(results);
         }
 
         String raw = context.arguments().getOr(depth, "");
@@ -113,44 +115,35 @@ public final class CommandTree<S extends Source> {
                         || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
                         .hasPermission(context.source(), child.data.permission()))
         ) {
-            return;
+            return CompletableFuture.completedFuture(results);
         }
 
         if (depth == maxDepth) {
             //we reached the arg we want to complete, let's complete it using our current node
             //COMPLETE DIRECTLY
-            addChildResults(imperat, context, child, results);
+            return addChildResults(imperat, context, child);
         } else {
             if (child.data.isFlag() && !child.data.asFlagParameter().isSwitch()) {
                 //auto completing value for flag, using SAME child/flag parameter while incrementing depth by 1
-                collectNodeCompletions(imperat, context, child, depth + 1, maxDepth, results);
-                return;
+                return collectNodeCompletions(imperat, context, child, depth + 1, maxDepth, results);
             }
+            CompletableFuture<Collection<String>> future = CompletableFuture.completedFuture(results);
             //Keep looking
             for (var innerChild : child.getChildren()) {
-                collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, results);
+                future = future.thenCompose((res) -> collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, res));
             }
-
+            
+            return future;
         }
-
     }
-
-    private void addChildResults(
+    
+    private CompletableFuture<Collection<String>> addChildResults(
             Imperat<S> imperat,
             SuggestionContext<S> context,
-            ParameterNode<S, ?> node,
-            List<String> results
+            ParameterNode<S, ?> node
     ) {
-        if (node instanceof CommandNode<?>) {
-            results.add(node.data.name());
-            results.addAll(node.data.asCommand().aliases());
-        } else {
-            SuggestionResolver<S> resolver = imperat.getParameterSuggestionResolver(node.data);
-            if (resolver == null) {
-                return;
-            }
-            results.addAll(resolver.autoComplete(context, node.data));
-        }
+        SuggestionResolver<S> resolver = imperat.getParameterSuggestionResolver(node.data);
+        return resolver.asyncAutoComplete(context, node.data);
     }
 
 

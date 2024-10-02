@@ -19,7 +19,6 @@ import java.util.function.Predicate;
 
 public final class SmartUsageResolve<S extends Source> {
 
-    private final Command<S> mainCommand;
     private final CommandUsage<S> usage;
     private final Cursor<S> cursor = new Cursor<>(0, 0);
     private Command<S> command;
@@ -27,7 +26,6 @@ public final class SmartUsageResolve<S extends Source> {
     SmartUsageResolve(Command<S> command,
                       CommandUsage<S> usage) {
 
-        this.mainCommand = command;
         this.command = command;
         this.usage = usage;
     }
@@ -62,9 +60,10 @@ public final class SmartUsageResolve<S extends Source> {
                         CommandFlag flag = optionalEmptyParameter.asFlagParameter().flagData();
                         Object value = null;
                         if (flag instanceof CommandSwitch) value = false;
-                        else if (optionalEmptyParameter.asFlagParameter().getDefaultValueSupplier() != null) {
+                        else {
+                            optionalEmptyParameter.asFlagParameter().getDefaultValueSupplier();
                             value = optionalEmptyParameter.asFlagParameter()
-                                    .getDefaultValueSupplier().supply(context.source());
+                              .getDefaultValueSupplier().supply(context.source());
                         }
 
                         context.resolveFlag(null, null, value, flag);
@@ -322,17 +321,9 @@ public final class SmartUsageResolve<S extends Source> {
 
     private @Nullable <T> T getDefaultValue(Context<S> context, CommandParameter<S> parameter) {
         OptionalValueSupplier<T> optionalSupplier = parameter.getDefaultValueSupplier();
-        T defaultValue = null;
-        if (optionalSupplier != null) {
-            defaultValue = optionalSupplier.supply(context.source());
-        }
-        return defaultValue;
+        return optionalSupplier.supply(context.source());
     }
-
-    public Command<S> getMainCommand() {
-        return mainCommand;
-    }
-
+    
     public Command<S> getCommand() {
         return command;
     }

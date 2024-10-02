@@ -30,6 +30,7 @@ dependencies {
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly 'org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT'
 
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("io.papermc.paper:paper-mojangapi:1.19.1-R0.1-SNAPSHOT")
 
     compileOnly "${kyori(KyoriModule.API)}"
@@ -38,4 +39,8 @@ dependencies {
 
 processTestResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }

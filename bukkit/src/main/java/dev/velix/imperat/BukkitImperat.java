@@ -54,6 +54,8 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         registerSourceResolvers();
         registerValueResolvers();
         registerSuggestionResolvers();
+        
+        
     }
 
     private void registerSourceResolvers() {
@@ -110,9 +112,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
             @NotNull PermissionResolver<BukkitSource> permissionResolver
     ) {
         Preconditions.notNull(plugin, "plugin");
+        Preconditions.notNull(permissionResolver, "permission-resolver");
         return new BukkitImperat(plugin, audienceProvider, permissionResolver);
     }
-
 
     public static BukkitImperat create(Plugin plugin, @Nullable AdventureProvider<CommandSender> audienceProvider) {
         return create(plugin, audienceProvider, DEFAULT_PERMISSION_RESOLVER);
@@ -169,18 +171,17 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     @Override
     public void registerCommand(Command<BukkitSource> command) {
         super.registerCommand(command);
-        var internalCmd = new InternalBukkitCommand(this, command);
+        var internalCmd = WrappedBukkitCommand.wrap(command, new InternalBukkitCommand(this, command));
         if (BukkitUtil.KNOWN_COMMANDS != null) {
             bukkitOGMapping.put(command.name(), internalCmd);
         } else {
             BukkitUtil.COMMAND_MAP.register(command.name(), internalCmd);
         }
         if (brigadierManager != null) {
-            brigadierManager.registerBukkitCommand(internalCmd, command);
+            brigadierManager.registerBukkitCommand(internalCmd, command, permissionResolver);
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void registerValueResolvers() {
         this.registerValueResolver(Player.class, (context, parameter, cursor, raw) -> {
             if (raw.equalsIgnoreCase("me")) {

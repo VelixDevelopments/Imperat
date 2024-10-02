@@ -9,6 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a class that's responsible for
@@ -16,16 +17,16 @@ import java.util.Collection;
  * tab-completion per one command, regardless of the sender type
  */
 @ApiStatus.AvailableSince("1.0.0")
-public final class AutoCompleter<S extends Source> {
-
-    private final Command<S> command;
-
-    private AutoCompleter(Command<S> command) {
+public abstract class AutoCompleter<S extends Source> {
+    
+    protected final Command<S> command;
+    
+    protected AutoCompleter(Command<S> command) {
         this.command = command;
     }
 
     public static <S extends Source> AutoCompleter<S> createNative(Command<S> command) {
-        return new AutoCompleter<>(command);
+        return new NativeAutoCompleter<>(command);
     }
 
     private static @NotNull CompletionArg getLastArg(String[] args) {
@@ -47,7 +48,7 @@ public final class AutoCompleter<S extends Source> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    public Collection<String> autoComplete(
+    public final CompletableFuture<Collection<String>> autoComplete(
             final Imperat<S> dispatcher,
             final S sender,
             final String[] args
@@ -65,14 +66,12 @@ public final class AutoCompleter<S extends Source> {
      * Autocompletes an argument from the whole position of the
      * argument-raw input
      *
-     * @param dispatcher the command dispatcher
+     * @param imperat the command dispatcher
      * @param context    the context for suggestions
      * @return the auto-completed results
      */
-    public Collection<String> autoComplete(
-            Imperat<S> dispatcher,
+    public abstract CompletableFuture<Collection<String>> autoComplete(
+      Imperat<S> imperat,
             SuggestionContext<S> context
-    ) {
-        return command.tabComplete(dispatcher, context);
-    }
+    );
 }

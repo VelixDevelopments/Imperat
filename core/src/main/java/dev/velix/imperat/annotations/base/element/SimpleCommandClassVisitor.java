@@ -412,7 +412,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         ParameterElement element = (ParameterElement) paramElement;
         Parameter parameter = element.getElement();
-
+        
         Named named = parameter.getAnnotation(Named.class);
         Flag flag = parameter.getAnnotation(Flag.class);
         Switch switchAnnotation = parameter.getAnnotation(Switch.class);
@@ -420,7 +420,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (flag != null && switchAnnotation != null) {
             throw new IllegalStateException("both @Flag and @Switch at the same time !");
         }
-
+        
+        TypeWrap<T> parameterType = TypeWrap.of((Class<T>) parameter.getParameterizedType());
+        
         String name = AnnotationHelper.getParamName(imperat, parameter, named, flag, switchAnnotation);
         boolean optional = flag != null || switchAnnotation != null
                 || element.isAnnotationPresent(Optional.class)
@@ -437,7 +439,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         if (suggestAnnotation != null) {
             suggestionResolver = SuggestionResolver.type(
-                    TypeWrap.of(parameter.getParameterizedType()),
+              parameterType,
                     imperat.replacePlaceholders(suggestAnnotation.value())
             );
         } else if (suggestionProvider != null) {
@@ -475,12 +477,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             assert permAnn != null;
             permission = imperat.replacePlaceholders(permAnn.value());
         }
-
-        OptionalValueSupplier<T> optionalValueSupplier = null;
+        
+        OptionalValueSupplier<T> optionalValueSupplier = OptionalValueSupplier.empty(parameterType);
         if (optional) {
             Default defaultAnnotation = parameter.getAnnotation(Default.class);
             DefaultProvider provider = parameter.getAnnotation(DefaultProvider.class);
-            optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(parameter, defaultAnnotation, provider);
+            optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(parameter, defaultAnnotation, provider, optionalValueSupplier);
         }
 
         if (flag != null) {
@@ -489,7 +491,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), imperat.replacePlaceholders(suggestAnnotation.value()));
             }
             return AnnotationParameterDecorator.decorate(
-                    CommandParameter.<S, T>flag(name, (Class<T>) parameter.getParameterizedType())
+              CommandParameter.<S, T>flag(name, (Class<T>) parameterType.getType())
                             .suggestForInputValue((TypeSuggestionResolver<S, T>) suggestionResolver)
                             .aliases(getAllExceptFirst(flagAliases))
                             .flagDefaultInputValue(optionalValueSupplier)
@@ -513,7 +515,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         CommandParameter<S> param =
                 AnnotationParameterDecorator.decorate(
                         CommandParameter.of(
-                                name, TypeWrap.of((Class<T>) parameter.getParameterizedType()), permission, desc,
+                          name, parameterType, permission, desc,
                                 optional, greedy, optionalValueSupplier, suggestionResolver
                         ), element
                 );

@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents the class that handles all
@@ -152,9 +153,9 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param args    the arguments currently written
      * @return the suggestions at the current position
      */
-    Collection<String> autoComplete(Command<S> command, S sender, String[] args);
+    CompletableFuture<Collection<String>> autoComplete(Command<S> command, S sender, String[] args);
     
-    default Collection<String> autoComplete(Command<S> command, S sender, String argsOneLine) {
+    default CompletableFuture<Collection<String>> autoComplete(Command<S> command, S sender, String argsOneLine) {
         return autoComplete(command, sender, argsOneLine.split(" "));
     }
     

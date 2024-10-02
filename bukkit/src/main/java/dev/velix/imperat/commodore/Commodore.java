@@ -39,7 +39,7 @@ import java.util.function.Predicate;
 /**
  * Utility for using Minecraft's 1.13 'brigadier' library in Bukkit plugins.
  */
-public interface Commodore {
+public interface Commodore<C extends Command> {
 
     /**
      * Registers the provided argument data to the dispatcher, against all
@@ -56,7 +56,7 @@ public interface Commodore {
      * @param node           the argument data
      * @param permissionTest the predicate to check whether players should be sent argument data
      */
-    void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest);
+    void register(C command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest);
 
     /**
      * Registers the provided argument data to the dispatcher, against all
@@ -73,7 +73,7 @@ public interface Commodore {
      * @param argumentBuilder the argument data, in a builder form
      * @param permissionTest  the predicate to check whether players should be sent argument data
      */
-    default void register(Command command, LiteralArgumentBuilder<?> argumentBuilder, Predicate<? super Player> permissionTest) {
+    default void register(C command, LiteralArgumentBuilder<?> argumentBuilder, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(argumentBuilder, "argumentBuilder");
         Objects.requireNonNull(permissionTest, "permissionTest");
@@ -91,10 +91,10 @@ public interface Commodore {
      * @param command the command to read aliases from
      * @param node    the argument data
      */
-    default void register(Command command, LiteralCommandNode<?> node) {
+    default void register(C command, LiteralCommandNode<?> node) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
-        register(command, node, command::testPermissionSilent);
+        register(command, node, (p) -> true);
     }
 
     /**
@@ -108,7 +108,7 @@ public interface Commodore {
      * @param command         the command to read aliases from
      * @param argumentBuilder the argument data, in a builder form
      */
-    default void register(Command command, LiteralArgumentBuilder<?> argumentBuilder) {
+    default void register(C command, LiteralArgumentBuilder<?> argumentBuilder) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(argumentBuilder, "argumentBuilder");
         register(command, argumentBuilder.build());
@@ -120,7 +120,7 @@ public interface Commodore {
      * <p>Equivalent to calling
      * {@link CommandDispatcher#register(LiteralArgumentBuilder)}.</p>
      *
-     * <p>Prefer using {@link #register(Command, LiteralCommandNode)}.</p>
+     * <p>Prefer using {@link #register(C, LiteralCommandNode)}.</p>
      *
      * @param node the argument data
      */
@@ -132,7 +132,7 @@ public interface Commodore {
      * <p>Equivalent to calling
      * {@link CommandDispatcher#register(LiteralArgumentBuilder)}.</p>
      *
-     * <p>Prefer using {@link #register(Command, LiteralArgumentBuilder)}.</p>
+     * <p>Prefer using {@link #register(C, LiteralArgumentBuilder)}.</p>
      *
      * @param argumentBuilder the argument data
      */

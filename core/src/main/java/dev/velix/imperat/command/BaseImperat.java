@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
@@ -748,7 +749,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return the suggestions at the current position
      */
     @Override
-    public Collection<String> autoComplete(Command<S> command, S source, String[] args) {
+    public CompletableFuture<Collection<String>> autoComplete(Command<S> command, S source, String[] args) {
         return command.autoCompleter().autoComplete(this, source, args);
     }
 
