@@ -13,7 +13,7 @@ import dev.velix.imperat.exception.ImperatException;
  * @param <S> the command sender type
  */
 @FunctionalInterface
-public interface CommandPreProcessor<S extends Source> {
+public interface CommandPreProcessor<S extends Source> extends CommandProcessor {
 
     /**
      * Processes context BEFORE the resolving operation.

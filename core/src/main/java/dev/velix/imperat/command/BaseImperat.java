@@ -7,6 +7,7 @@ import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
+import dev.velix.imperat.command.processors.CommandProcessor;
 import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
 import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
@@ -34,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
-
     private final ContextResolverRegistry<S> contextResolverRegistry;
     private final ValueResolverRegistry<S> valueResolverRegistry;
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
@@ -48,9 +48,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private @NotNull AnnotationParser<S> annotationParser;
 
     private final Map<String, Command<S>> commands = new HashMap<>();
-    private final List<CommandPreProcessor<S>> globalPreProcessors = new ArrayList<>();
-    private final List<CommandPostProcessor<S>> globalPostProcessors = new ArrayList<>();
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
+    private final Set<CommandPreProcessor<S>> globalPreProcessors = new TreeSet<>(Comparator.comparingDouble(CommandProcessor::priority));
+    private final Set<CommandPostProcessor<S>> globalPostProcessors = new TreeSet<>(Comparator.comparingDouble(CommandProcessor::priority));
 
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
         contextFactory = ContextFactory.defaultFactory(this);
@@ -571,31 +571,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         Preconditions.notNull(postProcessor, "Post-processor");
         globalPostProcessors.add(postProcessor);
     }
-
-    /**
-     * Registers a command pre-processor
-     *
-     * @param priority     the priority for the processor
-     * @param preProcessor the pre-processor to register
-     */
-    @Override
-    public void registerGlobalPreProcessor(int priority, CommandPreProcessor<S> preProcessor) {
-        Preconditions.notNull(preProcessor, "Pre-processor");
-        globalPreProcessors.add(priority, preProcessor);
-    }
-
-    /**
-     * Registers a command post-processor
-     *
-     * @param priority      the priority for the processor
-     * @param postProcessor the post-processor to register
-     */
-    @Override
-    public void registerGlobalPostProcessor(int priority, CommandPostProcessor<S> postProcessor) {
-        Preconditions.notNull(postProcessor, "Post-processor");
-        globalPostProcessors.add(priority, postProcessor);
-    }
-
 
     @Override
     public @NotNull CommandDispatch.Result dispatch(Context<S> context) {
