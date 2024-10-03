@@ -71,12 +71,6 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
 		Objects.requireNonNull(node, "node");
 		Objects.requireNonNull(permissionTest, "permissionTest");
 		
-		try {
-			setRequiredHackyFieldsRecursively(node, DUMMY_SUGGESTION_PROVIDER);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-		
 		Collection<String> aliases = getAliases(command);
 		if (!aliases.contains(node.getLiteral())) {
 			node = renameLiteralNode(node, command.getName());
