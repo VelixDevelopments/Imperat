@@ -49,10 +49,15 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     private final Map<String, Command<S>> commands = new HashMap<>();
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
-    private final Set<CommandPreProcessor<S>> globalPreProcessors = new TreeSet<>(Comparator.comparingDouble(CommandProcessor::priority));
-    private final Set<CommandPostProcessor<S>> globalPostProcessors = new TreeSet<>(Comparator.comparingDouble(CommandProcessor::priority));
+
+    private final Queue<CommandPreProcessor<S>> globalPreProcessors ;
+    private final Queue<CommandPostProcessor<S>> globalPostProcessors;
 
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
+        final Comparator<CommandProcessor> commandProcessorComparator = Comparator.comparingDouble(CommandProcessor::priority);
+        globalPreProcessors = new PriorityQueue<>(commandProcessorComparator);
+        globalPostProcessors = new PriorityQueue<>(commandProcessorComparator);
+
         contextFactory = ContextFactory.defaultFactory(this);
         contextResolverRegistry = ContextResolverRegistry.createDefault(this);
         valueResolverRegistry = ValueResolverRegistry.createDefault();
