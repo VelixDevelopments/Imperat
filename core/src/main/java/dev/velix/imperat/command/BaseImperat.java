@@ -837,7 +837,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             } else {
                 ImperatDebugger.debug("Debugging command '%s'", cmd.name());
                 for (CommandUsage<S> usage : cmd.usages()) {
-                    ImperatDebugger.debug("   - '%s'", usage);
+                    ImperatDebugger.debug("   - '%s'", CommandUsage.format(cmd, usage));
                 }
             }
         }
