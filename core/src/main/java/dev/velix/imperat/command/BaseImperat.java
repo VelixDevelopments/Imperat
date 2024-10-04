@@ -4,6 +4,7 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReader;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
+import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
@@ -49,8 +50,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     private final Map<String, Command<S>> commands = new HashMap<>();
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
-
-    private final Queue<CommandPreProcessor<S>> globalPreProcessors ;
+    
+    private final Queue<CommandPreProcessor<S>> globalPreProcessors;
     private final Queue<CommandPostProcessor<S>> globalPostProcessors;
 
     protected BaseImperat(@NotNull PermissionResolver<S> permissionResolver) {
@@ -340,8 +341,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @param factory the factory to register
      */
     @Override
-    public void registerContextResolverFactory(ContextResolverFactory<S> factory) {
-        contextResolverRegistry.setFactory(factory);
+    public void registerContextResolverFactory(Type type, ContextResolverFactory<S> factory) {
+        contextResolverRegistry.registerFactory(type, factory);
     }
 
     /**
@@ -349,8 +350,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * {@link ContextResolver}
      */
     @Override
-    public ContextResolverFactory<S> getContextResolverFactory() {
-        return contextResolverRegistry.getFactory();
+    public @Nullable ContextResolverFactory<S> getContextResolverFactory(Type type) {
+        return contextResolverRegistry.getFactoryFor(type).orElse(null);
     }
 
     /**
@@ -361,9 +362,21 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public <T> @Nullable ContextResolver<S, T> getContextResolver(Type resolvingContextType) {
-        return contextResolverRegistry.getResolver(resolvingContextType);
+        return contextResolverRegistry.getResolverWithoutParameterElement(resolvingContextType);
     }
-
+    
+    /**
+     * Fetches the context resolver for {@link ParameterElement} of a method
+     *
+     * @param element the element
+     * @return the {@link ContextResolver} for this element
+     */
+    @Override
+    public <T> @Nullable ContextResolver<S, T> getMethodParamContextResolver(@NotNull ParameterElement element) {
+        Preconditions.notNull(element, "element");
+        return contextResolverRegistry.getContextResolver(element.getType(), element);
+    }
+    
     /**
      * Registers {@link ContextResolver}
      *

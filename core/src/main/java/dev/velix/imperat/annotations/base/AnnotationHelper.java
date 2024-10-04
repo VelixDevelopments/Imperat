@@ -52,18 +52,10 @@ public final class AnnotationHelper {
 
         for (int i = 1, p = 0; i < method.size(); i++, p++) {
             ParameterElement actualParameter = method.getParameterAt(i);
-
-            var factory = dispatcher.getContextResolverFactory();
-            var contextResolver = factory.create(actualParameter);
-
-            if (contextResolver != null) {
-                paramsInstances[i] = contextResolver.resolve(context, actualParameter);
-                p--;
-                continue;
-            }
-
+            
             assert actualParameter != null;
-            contextResolver = dispatcher.getContextResolver(actualParameter.getType());
+            var contextResolver = dispatcher.getMethodParamContextResolver(actualParameter);
+
             if (contextResolver != null) {
                 paramsInstances[i] = contextResolver.resolve(context, actualParameter);
                 p--;

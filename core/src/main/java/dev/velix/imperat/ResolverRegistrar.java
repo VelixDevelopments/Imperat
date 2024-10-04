@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
@@ -27,7 +28,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      *
      * @param factory the factory to register
      */
-    void registerContextResolverFactory(ContextResolverFactory<S> factory);
+    void registerContextResolverFactory(Type type, ContextResolverFactory<S> factory);
 
     /**
      * Checks whether the type has
@@ -40,10 +41,12 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     boolean hasContextResolver(Type type);
 
     /**
+     * @param resolvingContextType the type the factory is registered to
      * @return returns the factory for creation of
      * {@link ContextResolver}
      */
-    ContextResolverFactory<S> getContextResolverFactory();
+    @Nullable
+    ContextResolverFactory<S> getContextResolverFactory(Type resolvingContextType);
 
     /**
      * Fetches {@link ContextResolver} for a certain type
@@ -52,8 +55,19 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * @param <T>                  the type of class
      * @return the context resolver
      */
+    @Nullable
     <T> ContextResolver<S, T> getContextResolver(Type resolvingContextType);
-
+    
+    /**
+     * Fetches the context resolver for {@link ParameterElement} of a method
+     *
+     * @param element the element
+     * @param <T>     the type of value this parameter should be resolved into
+     * @return the {@link ContextResolver} for this element
+     */
+    @Nullable
+    <T> ContextResolver<S, T> getMethodParamContextResolver(@NotNull ParameterElement element);
+    
     /**
      * Fetches the {@link ContextResolver} suitable for the {@link CommandParameter}
      *

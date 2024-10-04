@@ -133,14 +133,8 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException {
-        var factory = dispatcher.getContextResolverFactory();
-        if (factory == null) {
-            var cr = dispatcher.getContextResolver(type);
-            if (cr == null) return null;
-            return (T) cr.resolve(this, null);
-        }
-        ContextResolver<S, T> factoryCr = (ContextResolver<S, T>) factory.create(null);
-        return factoryCr == null ? null : factoryCr.resolve(this, null);
+        var resolver = dispatcher.getContextResolver(type);
+        return resolver == null ? null : (T) resolver.resolve(this, null);
     }
     
     /**
