@@ -14,14 +14,14 @@ import java.lang.reflect.Type;
  * @param <S> the command-sender type
  */
 public interface ContextResolverFactory<S extends Source> {
-	
-	/**
-	 * Creates a context resolver based on the parameter
-	 *
-	 * @param parameter the parameter (null if used classic way)
-	 * @return the {@link ContextResolver} specific for that parameter
-	 */
-	@Nullable
-	<T> ContextResolver<S, T> create(Type type, @Nullable ParameterElement parameter);
-	
+
+    /**
+     * Creates a context resolver based on the parameter
+     *
+     * @param parameter the parameter (null if used classic way)
+     * @return the {@link ContextResolver} specific for that parameter
+     */
+    @Nullable
+    <T> ContextResolver<S, T> create(Type type, @Nullable ParameterElement parameter);
+
 }

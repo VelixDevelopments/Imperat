@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public record UsageCooldown(long value, TimeUnit unit) {
-	
-	public long toMillis() {
-		return unit.toMillis(value);
-	}
-	
+
+    public long toMillis() {
+        return unit.toMillis(value);
+    }
+
 }

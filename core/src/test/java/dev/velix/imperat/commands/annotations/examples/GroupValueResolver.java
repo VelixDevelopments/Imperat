@@ -9,22 +9,22 @@ import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.ValueResolver;
 
 public final class GroupValueResolver implements ValueResolver<TestSource, Group> {
-	
-	@Override
-	public Group resolve(
-		ExecutionContext<TestSource> context,
-		CommandParameter<TestSource> parameter,
-		Cursor<TestSource> cursor,
-		String raw
-	) throws ImperatException {
+
+    @Override
+    public Group resolve(
+        ExecutionContext<TestSource> context,
+        CommandParameter<TestSource> parameter,
+        Cursor<TestSource> cursor,
+        String raw
+    ) throws ImperatException {
         /*if (sender.isConsole()) {
             throw new SenderErrorException("Invalid group '%s'", raw);
         }*/
-		var group = GroupRegistry.getInstance()
-			.getData(raw);
-		if (group.isEmpty()) {
-			throw new SourceException("Invalid group '%s'", raw);
-		}
-		return group.get();
-	}
+        var group = GroupRegistry.getInstance()
+            .getData(raw);
+        if (group.isEmpty()) {
+            throw new SourceException("Invalid group '%s'", raw);
+        }
+        return group.get();
+    }
 }

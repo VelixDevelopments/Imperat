@@ -16,198 +16,198 @@ import java.util.Objects;
 
 @ApiStatus.Internal
 public abstract class InputParameter<S extends Source> implements CommandParameter<S> {
-	
-	protected Command<S> parentCommand;
-	protected final String name;
-	protected final TypeWrap<?> typeWrap;
-	protected final boolean optional, flag, greedy;
-	protected final OptionalValueSupplier<?> optionalValueSupplier;
-	protected final TypeSuggestionResolver<S, ?> suggestionResolver;
-	protected String permission;
-	protected Description description;
-	protected int index;
-	
-	
-	protected InputParameter(
-		String name, TypeWrap<?> typeWrap,
-		@Nullable String permission,
-		Description description,
-		boolean optional, boolean flag, boolean greedy,
-		@NotNull OptionalValueSupplier<?> optionalValueSupplier,
-		@Nullable TypeSuggestionResolver<S, ?> suggestionResolver
-	) {
-		this.name = name;
-		this.typeWrap = typeWrap;
-		this.permission = permission;
-		this.description = description;
-		this.optional = optional;
-		this.flag = flag;
-		this.greedy = greedy;
-		this.optionalValueSupplier = optionalValueSupplier;
-		this.suggestionResolver = suggestionResolver;
-	}
-	
-	
-	/**
-	 * @return the name of the parameter
-	 */
-	@Override
-	public String name() {
-		return name;
-	}
-	
-	@Override
-	public @Nullable Command<S> parent() {
-		return parentCommand;
-	}
-	
-	@Override
-	public void parent(@NotNull Command<S> parentCommand) {
-		this.parentCommand = parentCommand;
-	}
-	
-	
-	/**
-	 * @return the index of this parameter
-	 */
-	@Override
-	public int position() {
-		return index;
-	}
-	
-	/**
-	 * Sets the position of this parameter in a syntax
-	 * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
-	 *
-	 * @param position the position to set
-	 */
-	@Override
-	public void position(int position) {
-		this.index = position;
-	}
-	
-	@Override
-	public TypeWrap<?> wrappedType() {
-		return typeWrap;
-	}
-	
-	/**
-	 * The permission for this parameter
-	 *
-	 * @return the parameter permission
-	 */
-	@Override
-	public @Nullable String permission() {
-		return permission;
-	}
-	
-	@Override
-	public void permission(String permission) {
-		this.permission = permission;
-	}
-	
-	/**
-	 * @return the default value if it's input is not present
-	 * in case of the parameter being optional
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
-		return (OptionalValueSupplier<T>) optionalValueSupplier;
-	}
-	
-	/**
-	 * @return whether this is an optional argument
-	 */
-	@Override
-	public boolean isOptional() {
-		return optional;
-	}
-	
-	/**
-	 * @return checks whether this parameter is a flag
-	 */
-	@Override
-	public boolean isFlag() {
-		return flag;
-	}
-	
-	/**
-	 * Casts the parameter to a flag parameter
-	 *
-	 * @return the parameter as a flag
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public FlagParameter<S> asFlagParameter() {
-		return (FlagParameter<S>) this;
-	}
-	
-	/**
-	 * @return checks whether this parameter
-	 * consumes all the args input after it.
-	 */
-	@Override
-	public boolean isGreedy() {
-		if (this.typeWrap.getType() != String.class && greedy) {
-			throw new IllegalStateException(
-				String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type().getTypeName())
-			);
-		}
-		return greedy;
-	}
-	
-	@Override
-	public Command<S> asCommand() {
-		throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
-	}
-	
-	
-	/**
-	 * Fetches the suggestion resolver linked to this
-	 * command parameter.
-	 *
-	 * @return the {@link SuggestionResolver} for a resolving suggestion
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> @Nullable TypeSuggestionResolver<S, T> getSuggestionResolver() {
-		return (TypeSuggestionResolver<S, T>) suggestionResolver;
-	}
-	
-	@Override
-	public Description description() {
-		return description;
-	}
-	
-	@Override
-	public void describe(final Description description) {
-		this.description = description;
-	}
-	
-	@Override
-	public boolean similarTo(CommandParameter<?> parameter) {
-		return this.name.equalsIgnoreCase(parameter.name())
-			&& TypeUtility.matches(typeWrap.getType(), parameter.wrappedType().getType());
-	}
-	
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof InputParameter<?> that)) return false;
-		return Objects.equals(parentCommand, that.parentCommand)
-			&& Objects.equals(name, that.name)
-			&& Objects.equals(typeWrap, that.typeWrap);
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, typeWrap);
-	}
-	
-	@Override
-	public String toString() {
-		return format();
-	}
-	
+
+    protected Command<S> parentCommand;
+    protected final String name;
+    protected final TypeWrap<?> typeWrap;
+    protected final boolean optional, flag, greedy;
+    protected final OptionalValueSupplier<?> optionalValueSupplier;
+    protected final TypeSuggestionResolver<S, ?> suggestionResolver;
+    protected String permission;
+    protected Description description;
+    protected int index;
+
+
+    protected InputParameter(
+        String name, TypeWrap<?> typeWrap,
+        @Nullable String permission,
+        Description description,
+        boolean optional, boolean flag, boolean greedy,
+        @NotNull OptionalValueSupplier<?> optionalValueSupplier,
+        @Nullable TypeSuggestionResolver<S, ?> suggestionResolver
+    ) {
+        this.name = name;
+        this.typeWrap = typeWrap;
+        this.permission = permission;
+        this.description = description;
+        this.optional = optional;
+        this.flag = flag;
+        this.greedy = greedy;
+        this.optionalValueSupplier = optionalValueSupplier;
+        this.suggestionResolver = suggestionResolver;
+    }
+
+
+    /**
+     * @return the name of the parameter
+     */
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public @Nullable Command<S> parent() {
+        return parentCommand;
+    }
+
+    @Override
+    public void parent(@NotNull Command<S> parentCommand) {
+        this.parentCommand = parentCommand;
+    }
+
+
+    /**
+     * @return the index of this parameter
+     */
+    @Override
+    public int position() {
+        return index;
+    }
+
+    /**
+     * Sets the position of this parameter in a syntax
+     * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
+     *
+     * @param position the position to set
+     */
+    @Override
+    public void position(int position) {
+        this.index = position;
+    }
+
+    @Override
+    public TypeWrap<?> wrappedType() {
+        return typeWrap;
+    }
+
+    /**
+     * The permission for this parameter
+     *
+     * @return the parameter permission
+     */
+    @Override
+    public @Nullable String permission() {
+        return permission;
+    }
+
+    @Override
+    public void permission(String permission) {
+        this.permission = permission;
+    }
+
+    /**
+     * @return the default value if it's input is not present
+     * in case of the parameter being optional
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
+        return (OptionalValueSupplier<T>) optionalValueSupplier;
+    }
+
+    /**
+     * @return whether this is an optional argument
+     */
+    @Override
+    public boolean isOptional() {
+        return optional;
+    }
+
+    /**
+     * @return checks whether this parameter is a flag
+     */
+    @Override
+    public boolean isFlag() {
+        return flag;
+    }
+
+    /**
+     * Casts the parameter to a flag parameter
+     *
+     * @return the parameter as a flag
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public FlagParameter<S> asFlagParameter() {
+        return (FlagParameter<S>) this;
+    }
+
+    /**
+     * @return checks whether this parameter
+     * consumes all the args input after it.
+     */
+    @Override
+    public boolean isGreedy() {
+        if (this.typeWrap.getType() != String.class && greedy) {
+            throw new IllegalStateException(
+                String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type().getTypeName())
+            );
+        }
+        return greedy;
+    }
+
+    @Override
+    public Command<S> asCommand() {
+        throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
+    }
+
+
+    /**
+     * Fetches the suggestion resolver linked to this
+     * command parameter.
+     *
+     * @return the {@link SuggestionResolver} for a resolving suggestion
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable TypeSuggestionResolver<S, T> getSuggestionResolver() {
+        return (TypeSuggestionResolver<S, T>) suggestionResolver;
+    }
+
+    @Override
+    public Description description() {
+        return description;
+    }
+
+    @Override
+    public void describe(final Description description) {
+        this.description = description;
+    }
+
+    @Override
+    public boolean similarTo(CommandParameter<?> parameter) {
+        return this.name.equalsIgnoreCase(parameter.name())
+            && TypeUtility.matches(typeWrap.getType(), parameter.wrappedType().getType());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InputParameter<?> that)) return false;
+        return Objects.equals(parentCommand, that.parentCommand)
+            && Objects.equals(name, that.name)
+            && Objects.equals(typeWrap, that.typeWrap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, typeWrap);
+    }
+
+    @Override
+    public String toString() {
+        return format();
+    }
+
 }

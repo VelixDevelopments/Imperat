@@ -15,68 +15,68 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public final class ClassElement extends ParseElement<Class<?>> {
-	
-	private final Set<ParseElement<?>> children = new LinkedHashSet<>();
-	
-	public <S extends Source> ClassElement(
-		@NotNull AnnotationParser<S> registry,
-		@Nullable ClassElement parent,
-		@NotNull Class<?> element
-	) {
-		super(registry, parent, element);
-	}
-	
-	public Object newInstance(Object... constructorArgs) {
-		Class<?>[] types = new Class[constructorArgs.length];
-		for (int i = 0; i < types.length; i++) {
-			types[i] = constructorArgs[i].getClass();
-		}
-		
-		try {
-			Constructor<?> cons = Reflections.getConstructor(this.getElement(), types);
-			if (cons == null) {
-				throw new IllegalCallerException("Class " + this.getElement().getSimpleName() + " doesn't have a constructor matching the arguments");
-			}
-			return cons.newInstance(constructorArgs);
-		} catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-		
-	}
-	
-	public <S extends Source> Set<Command<S>> accept(CommandClassVisitor<S> visitor) {
-		try {
-			return visitor.visitCommandClass(this);
-		} catch (Throwable ex) {
-			ex.printStackTrace();
-			return Collections.emptySet();
-		}
-	}
-	
-	public @Nullable ParseElement<?> getChildElement(Predicate<ParseElement<?>> predicate) {
-		for (var element : getChildren()) if (predicate.test(element)) return element;
-		return null;
-	}
-	
-	public void addChild(ParseElement<?> element) {
-		children.add(element);
-	}
-	
-	public boolean isRootClass() {
-		return getParent() == null;
-	}
-	
-	@Override
-	public String getName() {
-		return getElement().getName();
-	}
-	
-	public String getSimpleName() {
-		return getElement().getSimpleName();
-	}
-	
-	public Set<ParseElement<?>> getChildren() {
-		return children;
-	}
-	
+
+    private final Set<ParseElement<?>> children = new LinkedHashSet<>();
+
+    public <S extends Source> ClassElement(
+        @NotNull AnnotationParser<S> registry,
+        @Nullable ClassElement parent,
+        @NotNull Class<?> element
+    ) {
+        super(registry, parent, element);
+    }
+
+    public Object newInstance(Object... constructorArgs) {
+        Class<?>[] types = new Class[constructorArgs.length];
+        for (int i = 0; i < types.length; i++) {
+            types[i] = constructorArgs[i].getClass();
+        }
+
+        try {
+            Constructor<?> cons = Reflections.getConstructor(this.getElement(), types);
+            if (cons == null) {
+                throw new IllegalCallerException("Class " + this.getElement().getSimpleName() + " doesn't have a constructor matching the arguments");
+            }
+            return cons.newInstance(constructorArgs);
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public <S extends Source> Set<Command<S>> accept(CommandClassVisitor<S> visitor) {
+        try {
+            return visitor.visitCommandClass(this);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+            return Collections.emptySet();
+        }
+    }
+
+    public @Nullable ParseElement<?> getChildElement(Predicate<ParseElement<?>> predicate) {
+        for (var element : getChildren()) if (predicate.test(element)) return element;
+        return null;
+    }
+
+    public void addChild(ParseElement<?> element) {
+        children.add(element);
+    }
+
+    public boolean isRootClass() {
+        return getParent() == null;
+    }
+
+    @Override
+    public String getName() {
+        return getElement().getName();
+    }
+
+    public String getSimpleName() {
+        return getElement().getSimpleName();
+    }
+
+    public Set<ParseElement<?>> getChildren() {
+        return children;
+    }
+
 }

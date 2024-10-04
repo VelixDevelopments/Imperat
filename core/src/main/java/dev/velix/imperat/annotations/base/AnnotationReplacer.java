@@ -15,14 +15,14 @@ import java.util.Collection;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface AnnotationReplacer<A extends Annotation> {
-	
-	/**
-	 * The annotation to replace
-	 *
-	 * @param annotation the annotation
-	 * @return the annotations replaced by this annotation
-	 */
-	@NotNull
-	Collection<Annotation> replace(A annotation);
-	
+
+    /**
+     * The annotation to replace
+     *
+     * @param annotation the annotation
+     * @return the annotations replaced by this annotation
+     */
+    @NotNull
+    Collection<Annotation> replace(A annotation);
+
 }

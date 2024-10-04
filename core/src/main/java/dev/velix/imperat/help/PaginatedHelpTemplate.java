@@ -16,42 +16,42 @@ import java.util.Collection;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends HelpTemplate<S> {
-	
-	protected final int syntaxesPerPage;
-	PaginatedText<CommandUsage<S>> paginatedText;
-	
-	public PaginatedHelpTemplate(UsageFormatter formatter,
-	                             int syntaxesPerPage) {
-		super(formatter);
-		this.syntaxesPerPage = syntaxesPerPage;
-		paginatedText = new PaginatedText<>(syntaxesPerPage);
-	}
-	
-	@Override
-	public void display(ExecutionContext<S> context, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
-		
-		Integer page = context.getArgumentOr("page", 1);
-		TextPage<CommandUsage<S>> textPage = paginatedText.getPage(page);
-		if (textPage == null) {
-			throw new NoHelpPageException();
-		}
-		S source = context.source();
-		int index = 0;
-		for (var usage : textPage.asList()) {
-			source.reply(formatter.format(context.command(), usage, index));
-			index++;
-		}
-	}
-	
-	@Override
-	public void provide(ExecutionContext<S> context) throws ImperatException {
-		
-		var commandUsages = context.command().usages();
-		commandUsages.forEach(paginatedText::add);
-		
-		paginatedText.paginate();
-		super.provide(context);
-		paginatedText.clear();
-		
-	}
+
+    protected final int syntaxesPerPage;
+    PaginatedText<CommandUsage<S>> paginatedText;
+
+    public PaginatedHelpTemplate(UsageFormatter formatter,
+                                 int syntaxesPerPage) {
+        super(formatter);
+        this.syntaxesPerPage = syntaxesPerPage;
+        paginatedText = new PaginatedText<>(syntaxesPerPage);
+    }
+
+    @Override
+    public void display(ExecutionContext<S> context, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
+
+        Integer page = context.getArgumentOr("page", 1);
+        TextPage<CommandUsage<S>> textPage = paginatedText.getPage(page);
+        if (textPage == null) {
+            throw new NoHelpPageException();
+        }
+        S source = context.source();
+        int index = 0;
+        for (var usage : textPage.asList()) {
+            source.reply(formatter.format(context.command(), usage, index));
+            index++;
+        }
+    }
+
+    @Override
+    public void provide(ExecutionContext<S> context) throws ImperatException {
+
+        var commandUsages = context.command().usages();
+        commandUsages.forEach(paginatedText::add);
+
+        paginatedText.paginate();
+        super.provide(context);
+        paginatedText.clear();
+
+    }
 }

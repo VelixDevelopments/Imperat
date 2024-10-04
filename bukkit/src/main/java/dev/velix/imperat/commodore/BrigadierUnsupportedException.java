@@ -29,8 +29,8 @@ package dev.velix.imperat.commodore;
  * Exception thrown when the server does not support Brigadier.
  */
 public final class BrigadierUnsupportedException extends UnsupportedOperationException {
-	
-	BrigadierUnsupportedException(String message) {
-		super(message);
-	}
+
+    BrigadierUnsupportedException(String message) {
+        super(message);
+    }
 }

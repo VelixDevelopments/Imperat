@@ -9,10 +9,10 @@ import org.jetbrains.annotations.NotNull;
 
 @Command("opt")
 public class OptionalArgCommand {
-	
-	@Usage
-	public void mainUsage(TestSource source, @Named("a") String arg1, @Named("b") @Default("hello-world") @NotNull String b) {
-		source.reply("A=" + arg1 + ", B= " + b);
-	}
-	
+
+    @Usage
+    public void mainUsage(TestSource source, @Named("a") String arg1, @Named("b") @Default("hello-world") @NotNull String b) {
+        source.reply("A=" + arg1 + ", B= " + b);
+    }
+
 }

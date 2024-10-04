@@ -26,151 +26,151 @@ import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static com.mojang.brigadier.builder.RequiredArgumentBuilder.argument;
 
 public abstract non-sealed class BaseBrigadierManager<S extends Source> implements BrigadierManager<S> {
-	
-	protected final Imperat<S> dispatcher;
-	protected final List<ArgumentTypeResolver> resolvers = new ArrayList<>();
-	
-	protected BaseBrigadierManager(Imperat<S> dispatcher) {
-		this.dispatcher = dispatcher;
-	}
-	
-	@Override
-	public <CN extends com.mojang.brigadier.tree.CommandNode<?>> @NotNull CN parseCommandIntoNode(@NotNull Command<S> command) {
-		var tree = command.tree();
-		var root = tree.getRoot();
-		return convertRoot(root).toInternalNode();
-	}
-	
-	private BrigadierNode convertRoot(CommandNode<S> root) {
-		BrigadierNode bRoot = BrigadierNode.create(literal(root.getData().name()));
-		
-		bRoot.withExecution(dispatcher, this)
-			.withRequirement((obj) -> {
-					var source = wrapCommandSource(obj);
-					return root.getData().isIgnoringACPerms()
-						|| dispatcher.getPermissionResolver().hasPermission(source, root.getData().permission());
-				}
-			);
-		
-		for (var child : root.getChildren()) {
-			bRoot.addChild(convertNode(root, root, child));
-		}
-		return bRoot;
-	}
-	
-	private BrigadierNode convertNode(CommandNode<S> root, ParameterNode<?, ?> parent, ParameterNode<S, ?> node) {
-		BrigadierNode child = BrigadierNode.create(node instanceof CommandNode<?> ? literal(node.getData().name()) : argument(node.getData().name(), getArgumentType(node.getData())));
-		child.withExecution(dispatcher, this)
-			.withRequirement((obj) -> {
-				var permissionResolver = dispatcher.getPermissionResolver();
-				var source = wrapCommandSource(obj);
-				
-				boolean isIgnoringAC = root.getData().isIgnoringACPerms();
-				if (parent != root && parent instanceof CommandNode<?> parentCmdNode) {
-					isIgnoringAC = isIgnoringAC && parentCmdNode.getData().isIgnoringACPerms();
-				}
-				if (node instanceof CommandNode<?> commandNode) {
-					isIgnoringAC = isIgnoringAC && commandNode.getData().isIgnoringACPerms();
-				}
-				if (isIgnoringAC) {
-					return true;
-				}
-				boolean hasParentPerm = permissionResolver.hasPermission(source, parent.getData().permission());
-				boolean hasNodePerm = permissionResolver.hasPermission(source, node.getData().permission());
-				
-				return (hasParentPerm && hasNodePerm);
-			});
-		if (!(node instanceof CommandNode<?>)) {
-			child.suggest(createSuggestionProvider(root.getData(), node.getData()));
-		}
-		
-		for (var innerChild : node.getChildren()) {
-			child.addChild(convertNode(root, node, innerChild));
-		}
-		return child;
-	}
-	
-	
-	private @NotNull SuggestionProvider<?> createSuggestionProvider(
-		Command<S> command,
-		CommandParameter<S> parameter
-	) {
-		SuggestionResolver<S> parameterResolver = dispatcher.getParameterSuggestionResolver(parameter);
-		
-		//ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", parameterResolver == null, parameter.format());
-		
-		return (context, builder) -> {
-			S source = this.wrapCommandSource(context.getSource());
-			String paramFormat = parameter.format();
-			String desc = parameter.description() != Description.EMPTY ? parameter.description().toString() : "";
-			Message tooltip = new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc));
-			
-			String input = context.getInput();
-			
-			ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
-				input.startsWith("/") ? input.substring(1) : input
-			);
-			
-			CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
-			SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
-			
-			return parameterResolver.asyncAutoComplete(ctx, parameter)
-				.thenCompose((results) -> {
-					results
-						.stream()
-						.filter(c -> arg.isEmpty() || c.toLowerCase().startsWith(arg.value().toLowerCase()))
-						.distinct()
-						.sorted(String.CASE_INSENSITIVE_ORDER)
-						.forEach((res) -> builder.suggest(res, tooltip));
-					return builder.buildFuture();
-				});
-		};
-	}
-	
-	
-	//resolvers methods
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> void registerArgumentResolver(
-		Class<T> type,
-		ArgumentTypeResolver argumentTypeResolver
-	) {
-		resolvers.add((param) -> {
-			if (param.isFlag()) {
-				
-				FlagParameter<S> flagParameter = (FlagParameter<S>) param.asFlagParameter();
-				if (flagParameter.isSwitch()) {
-					return argumentTypeResolver.resolveArgType(flagParameter);
-				}
-				
-				return param.type() == flagParameter.flagData().inputType()
-					? argumentTypeResolver.resolveArgType(param) : null;
-			}
-			return TypeUtility.matches(param.type(), type) ? argumentTypeResolver.resolveArgType(param) : null;
-		});
-	}
-	
-	@Override
-	public void registerArgumentResolver(ArgumentTypeResolver argumentTypeResolver) {
-		resolvers.add(argumentTypeResolver);
-	}
-	
-	@Override
-	public @NotNull ArgumentType<?> getArgumentType(CommandParameter<S> parameter) {
-		for (var resolver : resolvers) {
-			var resolved = resolver.resolveArgType(parameter);
-			if (resolved != null)
-				return resolved;
-		}
-		return getStringArgType(parameter);
-	}
-	
-	
-	private StringArgumentType getStringArgType(CommandParameter<S> parameter) {
-		if (parameter.isGreedy()) return StringArgumentType.greedyString();
-		else return StringArgumentType.string();
-	}
-	
-	
+
+    protected final Imperat<S> dispatcher;
+    protected final List<ArgumentTypeResolver> resolvers = new ArrayList<>();
+
+    protected BaseBrigadierManager(Imperat<S> dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+    @Override
+    public <CN extends com.mojang.brigadier.tree.CommandNode<?>> @NotNull CN parseCommandIntoNode(@NotNull Command<S> command) {
+        var tree = command.tree();
+        var root = tree.getRoot();
+        return convertRoot(root).toInternalNode();
+    }
+
+    private BrigadierNode convertRoot(CommandNode<S> root) {
+        BrigadierNode bRoot = BrigadierNode.create(literal(root.getData().name()));
+
+        bRoot.withExecution(dispatcher, this)
+            .withRequirement((obj) -> {
+                    var source = wrapCommandSource(obj);
+                    return root.getData().isIgnoringACPerms()
+                        || dispatcher.getPermissionResolver().hasPermission(source, root.getData().permission());
+                }
+            );
+
+        for (var child : root.getChildren()) {
+            bRoot.addChild(convertNode(root, root, child));
+        }
+        return bRoot;
+    }
+
+    private BrigadierNode convertNode(CommandNode<S> root, ParameterNode<?, ?> parent, ParameterNode<S, ?> node) {
+        BrigadierNode child = BrigadierNode.create(node instanceof CommandNode<?> ? literal(node.getData().name()) : argument(node.getData().name(), getArgumentType(node.getData())));
+        child.withExecution(dispatcher, this)
+            .withRequirement((obj) -> {
+                var permissionResolver = dispatcher.getPermissionResolver();
+                var source = wrapCommandSource(obj);
+
+                boolean isIgnoringAC = root.getData().isIgnoringACPerms();
+                if (parent != root && parent instanceof CommandNode<?> parentCmdNode) {
+                    isIgnoringAC = isIgnoringAC && parentCmdNode.getData().isIgnoringACPerms();
+                }
+                if (node instanceof CommandNode<?> commandNode) {
+                    isIgnoringAC = isIgnoringAC && commandNode.getData().isIgnoringACPerms();
+                }
+                if (isIgnoringAC) {
+                    return true;
+                }
+                boolean hasParentPerm = permissionResolver.hasPermission(source, parent.getData().permission());
+                boolean hasNodePerm = permissionResolver.hasPermission(source, node.getData().permission());
+
+                return (hasParentPerm && hasNodePerm);
+            });
+        if (!(node instanceof CommandNode<?>)) {
+            child.suggest(createSuggestionProvider(root.getData(), node.getData()));
+        }
+
+        for (var innerChild : node.getChildren()) {
+            child.addChild(convertNode(root, node, innerChild));
+        }
+        return child;
+    }
+
+
+    private @NotNull SuggestionProvider<?> createSuggestionProvider(
+        Command<S> command,
+        CommandParameter<S> parameter
+    ) {
+        SuggestionResolver<S> parameterResolver = dispatcher.getParameterSuggestionResolver(parameter);
+
+        //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", parameterResolver == null, parameter.format());
+
+        return (context, builder) -> {
+            S source = this.wrapCommandSource(context.getSource());
+            String paramFormat = parameter.format();
+            String desc = parameter.description() != Description.EMPTY ? parameter.description().toString() : "";
+            Message tooltip = new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc));
+
+            String input = context.getInput();
+
+            ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
+                input.startsWith("/") ? input.substring(1) : input
+            );
+
+            CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
+            SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
+
+            return parameterResolver.asyncAutoComplete(ctx, parameter)
+                .thenCompose((results) -> {
+                    results
+                        .stream()
+                        .filter(c -> arg.isEmpty() || c.toLowerCase().startsWith(arg.value().toLowerCase()))
+                        .distinct()
+                        .sorted(String.CASE_INSENSITIVE_ORDER)
+                        .forEach((res) -> builder.suggest(res, tooltip));
+                    return builder.buildFuture();
+                });
+        };
+    }
+
+
+    //resolvers methods
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> void registerArgumentResolver(
+        Class<T> type,
+        ArgumentTypeResolver argumentTypeResolver
+    ) {
+        resolvers.add((param) -> {
+            if (param.isFlag()) {
+
+                FlagParameter<S> flagParameter = (FlagParameter<S>) param.asFlagParameter();
+                if (flagParameter.isSwitch()) {
+                    return argumentTypeResolver.resolveArgType(flagParameter);
+                }
+
+                return param.type() == flagParameter.flagData().inputType()
+                    ? argumentTypeResolver.resolveArgType(param) : null;
+            }
+            return TypeUtility.matches(param.type(), type) ? argumentTypeResolver.resolveArgType(param) : null;
+        });
+    }
+
+    @Override
+    public void registerArgumentResolver(ArgumentTypeResolver argumentTypeResolver) {
+        resolvers.add(argumentTypeResolver);
+    }
+
+    @Override
+    public @NotNull ArgumentType<?> getArgumentType(CommandParameter<S> parameter) {
+        for (var resolver : resolvers) {
+            var resolved = resolver.resolveArgType(parameter);
+            if (resolved != null)
+                return resolved;
+        }
+        return getStringArgType(parameter);
+    }
+
+
+    private StringArgumentType getStringArgType(CommandParameter<S> parameter) {
+        if (parameter.isGreedy()) return StringArgumentType.greedyString();
+        else return StringArgumentType.string();
+    }
+
+
 }
