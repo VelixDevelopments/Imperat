@@ -14,64 +14,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class MethodElement extends ParseElement<Method> {
-
-    private final List<ParameterElement> parameters = new ArrayList<>();
-    private int inputCount = 0;
-    private boolean help = false;
-
-    public <S extends Source> MethodElement(
-            @NotNull Imperat<S> imperat,
-            @NotNull AnnotationParser<S> registry,
-            @Nullable ClassElement owningElement,
-            @NotNull Method element
-    ) {
-        super(registry, owningElement, element);
-        for (Parameter parameter : element.getParameters()) {
-
-            if (AnnotationHelper.isHelpParameter(parameter)) {
-                help = true;
-            } else if (!imperat.canBeSender(parameter.getType())
-                    && !imperat.hasContextResolver(parameter.getType())
-            ) {
-                inputCount++;
-            }
-            parameters.add(new ParameterElement(registry, owningElement, this, parameter));
-        }
-    }
-
-    public @Nullable ParameterElement getParameterAt(int index) {
-        if (index < 0 || index >= size()) return null;
-        return parameters.get(index);
-    }
-
-
-    public int size() {
-        return parameters.size();
-    }
-
-    public Type getReturnType() {
-        return getElement().getReturnType();
-    }
-
-    public int getModifiers() {
-        return getElement().getModifiers();
-    }
-
-    @Override
-    public String getName() {
-        return getElement().getName();
-    }
-
-    public List<ParameterElement> getParameters() {
-        return parameters;
-    }
-
-    public int getInputCount() {
-        return inputCount;
-    }
-
-    public boolean isHelp() {
-        return help;
-    }
-
+	
+	private final List<ParameterElement> parameters = new ArrayList<>();
+	private int inputCount = 0;
+	private boolean help = false;
+	
+	public <S extends Source> MethodElement(
+		@NotNull Imperat<S> imperat,
+		@NotNull AnnotationParser<S> registry,
+		@Nullable ClassElement owningElement,
+		@NotNull Method element
+	) {
+		super(registry, owningElement, element);
+		for (Parameter parameter : element.getParameters()) {
+			
+			if (AnnotationHelper.isHelpParameter(parameter)) {
+				help = true;
+			} else if (!imperat.canBeSender(parameter.getType())
+				&& !imperat.hasContextResolver(parameter.getType())
+			) {
+				inputCount++;
+			}
+			parameters.add(new ParameterElement(registry, owningElement, this, parameter));
+		}
+	}
+	
+	public @Nullable ParameterElement getParameterAt(int index) {
+		if (index < 0 || index >= size()) return null;
+		return parameters.get(index);
+	}
+	
+	
+	public int size() {
+		return parameters.size();
+	}
+	
+	public Type getReturnType() {
+		return getElement().getReturnType();
+	}
+	
+	public int getModifiers() {
+		return getElement().getModifiers();
+	}
+	
+	@Override
+	public String getName() {
+		return getElement().getName();
+	}
+	
+	public List<ParameterElement> getParameters() {
+		return parameters;
+	}
+	
+	public int getInputCount() {
+		return inputCount;
+	}
+	
+	public boolean isHelp() {
+		return help;
+	}
+	
 }

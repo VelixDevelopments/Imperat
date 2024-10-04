@@ -12,40 +12,40 @@ import java.util.Iterator;
  */
 @ApiStatus.Internal
 final class TokenIterator implements Iterator<Character> {
-
-    private final String source;
-    private int position = -1;
-
-    TokenIterator(String input) {
-        this.source = input;
-    }
-
-    public @Nullable Character peek() {
-        try {
-            return source.charAt(position + 1);
-        } catch (StringIndexOutOfBoundsException ex) {
-            return null;
-        }
-    }
-
-    @Override
-    public boolean hasNext() {
-        return peek() != null;
-    }
-
-    @Override
-    public Character next() throws TokenParseException {
-        if (!hasNext())
-            throw createException();
-
-        Character res = peek();
-        position++;
-        return res;
-    }
-
-    TokenParseException createException() {
-        return new TokenParseException("Buffer overrun while parsing args");
-    }
-
-
+	
+	private final String source;
+	private int position = -1;
+	
+	TokenIterator(String input) {
+		this.source = input;
+	}
+	
+	public @Nullable Character peek() {
+		try {
+			return source.charAt(position + 1);
+		} catch (StringIndexOutOfBoundsException ex) {
+			return null;
+		}
+	}
+	
+	@Override
+	public boolean hasNext() {
+		return peek() != null;
+	}
+	
+	@Override
+	public Character next() throws TokenParseException {
+		if (!hasNext())
+			throw createException();
+		
+		Character res = peek();
+		position++;
+		return res;
+	}
+	
+	TokenParseException createException() {
+		return new TokenParseException("Buffer overrun while parsing args");
+	}
+	
+	
 }

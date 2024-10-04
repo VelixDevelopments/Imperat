@@ -17,51 +17,51 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandFlag {
-
-    static CommandFlag create(String name, List<String> alias, Type inputType) {
-        return new CommandFlagImpl(name, alias, inputType);
-    }
-
-    /**
-     * The main name of the flag
-     *
-     * @return the name(unique) of the flag
-     */
-    @NotNull
-    String name();
-
-    /**
-     * @return the alias of the flag
-     */
-    @NotNull
-    List<String> aliases();
-
-    /**
-     * @return the type of input
-     * from the flag
-     */
-    Type inputType();
-
-    default boolean hasAlias(String alias) {
-        return aliases().contains(alias.toLowerCase());
-    }
-
-    default String format() {
-
-        String display = this.name();
-        String valueFormat = (this instanceof CommandSwitch) ? "" : " <value>";
-        return StringUtils.normalizedParameterFormatting("-" + display
-                + valueFormat, true);
-    }
-
-    default boolean acceptsInput(String input) {
-        return this.name().equalsIgnoreCase(input) || hasAlias(input);
-    }
-
-
-    record CommandFlagImpl(String name, List<String> aliases, Type inputType)
-            implements CommandFlag {
-    }
-
-
+	
+	static CommandFlag create(String name, List<String> alias, Type inputType) {
+		return new CommandFlagImpl(name, alias, inputType);
+	}
+	
+	/**
+	 * The main name of the flag
+	 *
+	 * @return the name(unique) of the flag
+	 */
+	@NotNull
+	String name();
+	
+	/**
+	 * @return the alias of the flag
+	 */
+	@NotNull
+	List<String> aliases();
+	
+	/**
+	 * @return the type of input
+	 * from the flag
+	 */
+	Type inputType();
+	
+	default boolean hasAlias(String alias) {
+		return aliases().contains(alias.toLowerCase());
+	}
+	
+	default String format() {
+		
+		String display = this.name();
+		String valueFormat = (this instanceof CommandSwitch) ? "" : " <value>";
+		return StringUtils.normalizedParameterFormatting("-" + display
+			+ valueFormat, true);
+	}
+	
+	default boolean acceptsInput(String input) {
+		return this.name().equalsIgnoreCase(input) || hasAlias(input);
+	}
+	
+	
+	record CommandFlagImpl(String name, List<String> aliases, Type inputType)
+		implements CommandFlag {
+	}
+	
+	
 }

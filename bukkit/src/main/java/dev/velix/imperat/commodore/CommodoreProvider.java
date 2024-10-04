@@ -37,7 +37,7 @@ import java.util.Objects;
  */
 public final class CommodoreProvider {
     private static boolean SUPPORTED;
-
+    
     static {
         try {
             Class.forName("com.mojang.brigadier.CommandDispatcher");
@@ -47,7 +47,7 @@ public final class CommodoreProvider {
             SUPPORTED = false;
         }
     }
-
+    
     private CommodoreProvider() {
         throw new AssertionError();
     }
@@ -62,7 +62,7 @@ public final class CommodoreProvider {
         } catch (Throwable e) {
             printDebugInfo(e);
         }
-
+        
         // try the paper impl
         try {
             return (Commodore<C>) new LegacyPaperCommodore(plugin);
@@ -70,7 +70,7 @@ public final class CommodoreProvider {
             //printDebugInfo(e);
             ImperatDebugger.warning("Paper not found, falling back to Reflection for brigadier");
         }
-
+        
         // try reflection impl
         try {
             ReflectionCommodore.ensureSetup();
@@ -78,17 +78,17 @@ public final class CommodoreProvider {
         } catch (Throwable e) {
             printDebugInfo(e);
         }
-
+        
         return null;
     }
-
+    
     private static void printDebugInfo(Throwable e) {
         if (System.getProperty("commodore.visualize") != null) {
             System.err.println("Exception while initialising commodore:");
             e.printStackTrace(System.err);
         }
     }
-
+    
     /**
      * Checks to see if the Brigadier command system is supported by the server.
      *
@@ -97,7 +97,7 @@ public final class CommodoreProvider {
     public static boolean isSupported() {
         return SUPPORTED;
     }
-
+    
     /**
      * Obtains a {@link Commodore} instance for the given plugin.
      *
@@ -111,11 +111,11 @@ public final class CommodoreProvider {
         Commodore<C> commodore = load(plugin);
         if (commodore == null) {
             throw new BrigadierUnsupportedException(
-                    "Brigadier is not supported by the server. " +
-                            "Set -Dcommodore.visualize=true for visualize info."
+              "Brigadier is not supported by the server. " +
+                "Set -Dcommodore.visualize=true for visualize info."
             );
         }
         return commodore;
     }
-
+	
 }

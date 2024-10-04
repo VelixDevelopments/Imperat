@@ -13,10 +13,11 @@ import org.jetbrains.annotations.NotNull;
 @ApiStatus.AvailableSince("1.0.0")
 @FunctionalInterface
 public interface HelpHyphen<S extends Source> {
-
-    /**
-     * @param content the content of this hyphen
-     * @return the value of the {@link HyphenContent}
-     */
-    @NotNull String value(HyphenContent<S> content);
+	
+	/**
+	 * @param content the content of this hyphen
+	 * @return the value of the {@link HyphenContent}
+	 */
+	@NotNull
+	String value(HyphenContent<S> content);
 }

@@ -14,19 +14,19 @@ import dev.velix.imperat.exception.ImperatException;
  */
 @FunctionalInterface
 public interface CommandPreProcessor<S extends Source> extends CommandProcessor {
-
-    /**
-     * Processes context BEFORE the resolving operation.
-     *
-     * @param imperat the api
-     * @param context the context
-     * @param usage   The usage detected
-     * @throws ImperatException the exception to throw if something happens
-     */
-    void process(
-            Imperat<S> imperat,
-            Context<S> context,
-            CommandUsage<S> usage
-    ) throws ImperatException;
-
+	
+	/**
+	 * Processes context BEFORE the resolving operation.
+	 *
+	 * @param imperat the api
+	 * @param context the context
+	 * @param usage   The usage detected
+	 * @throws ImperatException the exception to throw if something happens
+	 */
+	void process(
+		Imperat<S> imperat,
+		Context<S> context,
+		CommandUsage<S> usage
+	) throws ImperatException;
+	
 }

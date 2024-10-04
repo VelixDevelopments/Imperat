@@ -8,7 +8,8 @@
 **Imperat** is a high-performance, general-purpose command dispatching framework built in Java.
 Designed to be platform-agnostic, Imperat is capable of handling massive numbers of commands efficiently.
 Whether you're building microservices, game engines, or any other system that requires command dispatching,
-Imperat provides a flexible and powerful foundation, that can handle complex command graphs incluing middle optional arguments, 
+Imperat provides a flexible and powerful foundation, that can handle complex command graphs incluing middle optional
+arguments,
 with a smart algorithm called `SmartUsageResolve`.
 
 ## Features

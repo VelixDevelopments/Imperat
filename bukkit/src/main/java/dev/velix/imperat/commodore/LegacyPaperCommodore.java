@@ -44,69 +44,69 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 final class LegacyPaperCommodore extends AbstractCommodore<WrappedBukkitCommand> implements Listener {
-
-    private final List<CommodoreCommand> commands = new ArrayList<>();
-    
-    LegacyPaperCommodore(Plugin plugin) throws ClassNotFoundException {
-        Class.forName("com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent");
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
-    }
-
-    @Override
-    public void register(LiteralCommandNode<?> node) {
-        Objects.requireNonNull(node, "node");
-        this.commands.add(new CommodoreCommand(node, null));
-    }
-
-    @Override
-    public void register(WrappedBukkitCommand command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
-        Objects.requireNonNull(command, "command");
-        Objects.requireNonNull(node, "node");
-        Objects.requireNonNull(permissionTest, "permissionTest");
-
-        try {
-            setRequiredHackyFieldsRecursively(node, DUMMY_SUGGESTION_PROVIDER);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-
-        Collection<String> aliases = getAliases(command);
-        if (!aliases.contains(node.getLiteral())) {
-            node = renameLiteralNode(node, command.getName());
-        }
-
-        for (String alias : aliases) {
-            if (node.getLiteral().equals(alias)) {
-                this.commands.add(new CommodoreCommand(node, permissionTest));
-            } else {
-                LiteralCommandNode<Object> redirectNode = LiteralArgumentBuilder.literal(alias)
-                        .redirect((LiteralCommandNode<Object>) node)
-                        .build();
-                this.commands.add(new CommodoreCommand(redirectNode, permissionTest));
-            }
-        }
-    }
-
-    @EventHandler
-    @SuppressWarnings("deprecation") // draft API, ok...
-    public void onPlayerSendCommandsEvent(AsyncPlayerSendCommandsEvent<?> event) {
-        if (event.isAsynchronous() || !event.hasFiredAsync()) {
-            for (CommodoreCommand command : this.commands) {
-                command.apply(event.getPlayer(), event.getCommandNode());
-            }
-        }
-    }
-
-    private record CommodoreCommand(LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
-
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        public void apply(Player player, RootCommandNode<?> root) {
-            if (this.permissionTest != null && !this.permissionTest.test(player)) {
-                return;
-            }
-            removeChild(root, this.node.getName());
-            root.addChild((CommandNode) this.node);
-        }
-    }
-
+	
+	private final List<CommodoreCommand> commands = new ArrayList<>();
+	
+	LegacyPaperCommodore(Plugin plugin) throws ClassNotFoundException {
+		Class.forName("com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent");
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+	}
+	
+	@Override
+	public void register(LiteralCommandNode<?> node) {
+		Objects.requireNonNull(node, "node");
+		this.commands.add(new CommodoreCommand(node, null));
+	}
+	
+	@Override
+	public void register(WrappedBukkitCommand command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
+		Objects.requireNonNull(command, "command");
+		Objects.requireNonNull(node, "node");
+		Objects.requireNonNull(permissionTest, "permissionTest");
+		
+		try {
+			setRequiredHackyFieldsRecursively(node, DUMMY_SUGGESTION_PROVIDER);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
+		Collection<String> aliases = getAliases(command);
+		if (!aliases.contains(node.getLiteral())) {
+			node = renameLiteralNode(node, command.getName());
+		}
+		
+		for (String alias : aliases) {
+			if (node.getLiteral().equals(alias)) {
+				this.commands.add(new CommodoreCommand(node, permissionTest));
+			} else {
+				LiteralCommandNode<Object> redirectNode = LiteralArgumentBuilder.literal(alias)
+					.redirect((LiteralCommandNode<Object>) node)
+					.build();
+				this.commands.add(new CommodoreCommand(redirectNode, permissionTest));
+			}
+		}
+	}
+	
+	@EventHandler
+	@SuppressWarnings("deprecation") // draft API, ok...
+	public void onPlayerSendCommandsEvent(AsyncPlayerSendCommandsEvent<?> event) {
+		if (event.isAsynchronous() || !event.hasFiredAsync()) {
+			for (CommodoreCommand command : this.commands) {
+				command.apply(event.getPlayer(), event.getCommandNode());
+			}
+		}
+	}
+	
+	private record CommodoreCommand(LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
+		
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public void apply(Player player, RootCommandNode<?> root) {
+			if (this.permissionTest != null && !this.permissionTest.test(player)) {
+				return;
+			}
+			removeChild(root, this.node.getName());
+			root.addChild((CommandNode) this.node);
+		}
+	}
+	
 }

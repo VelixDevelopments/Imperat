@@ -17,28 +17,28 @@ import java.util.function.Supplier;
  */
 @FunctionalInterface
 public interface ContextResolver<S extends Source, T> {
-
-
-    static <S extends Source, T> ContextResolver<S, T> of(T value) {
-        return (c, p) -> value;
-    }
-
-    static <S extends Source, T> ContextResolver<S, T> of(Supplier<T> supplier) {
-        return of(supplier.get());
-    }
-
-    /**
-     * Resolves a parameter's default value
-     * if it has been not input by the user
-     *
-     * @param context   the context
-     * @param parameter the parameter (null if used the classic way)
-     * @return the resolved default-value
-     */
-    @Nullable
-    T resolve(
-            @NotNull ExecutionContext<S> context,
-            @Nullable ParameterElement parameter
-    ) throws ImperatException;
-
+	
+	
+	static <S extends Source, T> ContextResolver<S, T> of(T value) {
+		return (c, p) -> value;
+	}
+	
+	static <S extends Source, T> ContextResolver<S, T> of(Supplier<T> supplier) {
+		return of(supplier.get());
+	}
+	
+	/**
+	 * Resolves a parameter's default value
+	 * if it has been not input by the user
+	 *
+	 * @param context   the context
+	 * @param parameter the parameter (null if used the classic way)
+	 * @return the resolved default-value
+	 */
+	@Nullable
+	T resolve(
+		@NotNull ExecutionContext<S> context,
+		@Nullable ParameterElement parameter
+	) throws ImperatException;
+	
 }

@@ -10,31 +10,31 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 class NormalCommandParameter<S extends Source> extends InputParameter<S> {
-
-    NormalCommandParameter(String name,
-                           TypeWrap<?> type,
-                           @Nullable String permission,
-                           Description description,
-                           boolean optional,
-                           boolean greedy,
-                           @NotNull OptionalValueSupplier<?> valueSupplier,
-                           @Nullable TypeSuggestionResolver<S, ?> suggestionResolver) {
-        super(
-                name, type, permission, description, optional,
-                false, greedy, valueSupplier, suggestionResolver
-        );
-    }
-
-    /**
-     * Formats the usage parameter
-     *
-     * @return the formatted parameter
-     */
-    @Override
-    public String format() {
-        var content = name();
-        if (isGreedy())
-            content += "...";
-        return StringUtils.normalizedParameterFormatting(content, isOptional());
-    }
+	
+	NormalCommandParameter(String name,
+	                       TypeWrap<?> type,
+	                       @Nullable String permission,
+	                       Description description,
+	                       boolean optional,
+	                       boolean greedy,
+	                       @NotNull OptionalValueSupplier<?> valueSupplier,
+	                       @Nullable TypeSuggestionResolver<S, ?> suggestionResolver) {
+		super(
+			name, type, permission, description, optional,
+			false, greedy, valueSupplier, suggestionResolver
+		);
+	}
+	
+	/**
+	 * Formats the usage parameter
+	 *
+	 * @return the formatted parameter
+	 */
+	@Override
+	public String format() {
+		var content = name();
+		if (isGreedy())
+			content += "...";
+		return StringUtils.normalizedParameterFormatting(content, isOptional());
+	}
 }

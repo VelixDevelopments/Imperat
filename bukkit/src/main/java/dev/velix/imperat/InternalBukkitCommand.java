@@ -16,76 +16,76 @@ import java.util.List;
 
 @ApiStatus.Internal
 final class InternalBukkitCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
-
-    @NotNull
-    private final BukkitImperat dispatcher;
-
-    @NotNull
-    private final Command<BukkitSource> command;
-
-    InternalBukkitCommand(
-            final @NotNull BukkitImperat dispatcher,
-            final @NotNull Command<BukkitSource> command
-    ) {
-        super(
-                command.name(),
-                command.description().toString(),
-                CommandUsage.format(command, command.getDefaultUsage()),
-                command.aliases()
-        );
-        this.dispatcher = dispatcher;
-        this.command = command;
-    }
-
-    @Override
-    public @NotNull Plugin getPlugin() {
-        return dispatcher.getPlatform();
-    }
-
-    @Nullable
-    @Override
-    public String getPermission() {
-        return command.permission();
-    }
-
-    @NotNull
-    @Override
-    public String getDescription() {
-        return super.getDescription();
-    }
-
-    @NotNull
-    @Override
-    public String getUsage() {
-        return super.getUsage();
-    }
-    
-    @Override
-    public boolean execute(@NotNull CommandSender sender,
-                           @NotNull String label,
-                           String[] raw) {
-        
-        try {
-            BukkitSource source = dispatcher.wrapSender(sender);
-            dispatcher.dispatch(source, StringUtils.stripNamespace(label), raw);
-            return true;
-        } catch (Exception ex) {
-            ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);
-            return false;
-        }
-        
-    }
-
-    @Override
-    public @NotNull List<String> tabComplete(
-            final @NotNull CommandSender sender,
-            final @NotNull String alias,
-            final String[] args
-    ) throws IllegalArgumentException {
-        BukkitSource source = dispatcher.wrapSender(sender);
-        var completions = dispatcher.autoComplete(command, source, args).join();
-        if (completions instanceof List<String> list) return list;
-        else return new ArrayList<>(completions);
-    }
-
+	
+	@NotNull
+	private final BukkitImperat dispatcher;
+	
+	@NotNull
+	private final Command<BukkitSource> command;
+	
+	InternalBukkitCommand(
+		final @NotNull BukkitImperat dispatcher,
+		final @NotNull Command<BukkitSource> command
+	) {
+		super(
+			command.name(),
+			command.description().toString(),
+			CommandUsage.format(command, command.getDefaultUsage()),
+			command.aliases()
+		);
+		this.dispatcher = dispatcher;
+		this.command = command;
+	}
+	
+	@Override
+	public @NotNull Plugin getPlugin() {
+		return dispatcher.getPlatform();
+	}
+	
+	@Nullable
+	@Override
+	public String getPermission() {
+		return command.permission();
+	}
+	
+	@NotNull
+	@Override
+	public String getDescription() {
+		return super.getDescription();
+	}
+	
+	@NotNull
+	@Override
+	public String getUsage() {
+		return super.getUsage();
+	}
+	
+	@Override
+	public boolean execute(@NotNull CommandSender sender,
+	                       @NotNull String label,
+	                       String[] raw) {
+		
+		try {
+			BukkitSource source = dispatcher.wrapSender(sender);
+			dispatcher.dispatch(source, StringUtils.stripNamespace(label), raw);
+			return true;
+		} catch (Exception ex) {
+			ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);
+			return false;
+		}
+		
+	}
+	
+	@Override
+	public @NotNull List<String> tabComplete(
+		final @NotNull CommandSender sender,
+		final @NotNull String alias,
+		final String[] args
+	) throws IllegalArgumentException {
+		BukkitSource source = dispatcher.wrapSender(sender);
+		var completions = dispatcher.autoComplete(command, source, args).join();
+		if (completions instanceof List<String> list) return list;
+		else return new ArrayList<>(completions);
+	}
+	
 }

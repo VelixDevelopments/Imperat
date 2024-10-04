@@ -13,7 +13,7 @@ import dev.velix.imperat.exception.ImperatException;
  * @param <S> the command sender type
  */
 public interface CommandPostProcessor<S extends Source> extends CommandProcessor {
-
+    
     /**
      * Processes context AFTER the resolving operation.
      *
@@ -22,8 +22,8 @@ public interface CommandPostProcessor<S extends Source> extends CommandProcessor
      * @throws ImperatException the exception to throw if something happens
      */
     void process(
-            Imperat<S> imperat,
-            ResolvedContext<S> context
+      Imperat<S> imperat,
+      ResolvedContext<S> context
     ) throws ImperatException;
-
+	
 }

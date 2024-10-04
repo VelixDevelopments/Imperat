@@ -5,19 +5,19 @@ import dev.velix.imperat.help.HelpProvider;
 import org.jetbrains.annotations.Nullable;
 
 public sealed interface CommandHelpHandler<S extends Source> permits Imperat {
-
-
-    /**
-     * @return The template for showing help
-     */
-    @Nullable
-    HelpProvider<S> getHelpProvider();
-
-    /**
-     * Set the help template to use
-     *
-     * @param template the help template
-     */
-    void setHelpProvider(@Nullable HelpProvider<S> template);
-
+	
+	
+	/**
+	 * @return The template for showing help
+	 */
+	@Nullable
+	HelpProvider<S> getHelpProvider();
+	
+	/**
+	 * Set the help template to use
+	 *
+	 * @param template the help template
+	 */
+	void setHelpProvider(@Nullable HelpProvider<S> template);
+	
 }
