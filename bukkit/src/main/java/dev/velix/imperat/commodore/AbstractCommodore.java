@@ -39,8 +39,8 @@ import org.bukkit.command.PluginCommand;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -159,7 +159,7 @@ abstract class AbstractCommodore<C extends Command> implements Commodore<C> {
      * @return the aliases
      */
     protected static Collection<String> getAliases(Command command) {
-        Objects.requireNonNull(command, "command");
+        if (command == null) return Collections.emptyList();
 
         Stream<String> aliasesStream = Stream.concat(
             Stream.of(command.getLabel()),

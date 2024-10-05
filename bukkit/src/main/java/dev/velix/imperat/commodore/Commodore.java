@@ -120,7 +120,7 @@ public interface Commodore<C extends Command> {
      * <p>Equivalent to calling
      * {@link CommandDispatcher#register(LiteralArgumentBuilder)}.</p>
      *
-     * <p>Prefer using {@link #register(C, LiteralCommandNode)}.</p>
+     * <p>Prefer using {@link Commodore#register(C, LiteralCommandNode)}.</p>
      *
      * @param node the argument data
      */
@@ -132,7 +132,7 @@ public interface Commodore<C extends Command> {
      * <p>Equivalent to calling
      * {@link CommandDispatcher#register(LiteralArgumentBuilder)}.</p>
      *
-     * <p>Prefer using {@link #register(C, LiteralArgumentBuilder)}.</p>
+     * <p>Prefer using {@link Commodore#register(C, LiteralArgumentBuilder)}.</p>
      *
      * @param argumentBuilder the argument data
      */

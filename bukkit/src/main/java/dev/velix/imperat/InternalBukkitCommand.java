@@ -3,7 +3,6 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.util.ImperatDebugger;
-import dev.velix.imperat.util.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
@@ -67,7 +66,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
 
         try {
             BukkitSource source = dispatcher.wrapSender(sender);
-            dispatcher.dispatch(source, StringUtils.stripNamespace(label), raw);
+            dispatcher.dispatch(source, this.command, raw);
             return true;
         } catch (Exception ex) {
             ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);

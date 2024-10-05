@@ -30,6 +30,10 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
         return of(Result.UNKNOWN);
     }
 
+    static <S extends Source> CommandDispatch<S> incomplete() {
+        return of(Result.INCOMPLETE);
+    }
+
     public void append(ParameterNode<S, ?> node) {
         if (node == null) return;
         if (parameters.contains(node.data)) return;

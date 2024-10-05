@@ -39,7 +39,7 @@ final class BrigadierNode {
         setExecution((context) -> {
             String input = context.getInput();
             S sender = manager.wrapCommandSource(context.getSource());
-            dispatcher.dispatch(sender, context.getRootNode().getName(), input);
+            dispatcher.dispatch(sender, input);
             return Command.SINGLE_SUCCESS;
         });
         return this;

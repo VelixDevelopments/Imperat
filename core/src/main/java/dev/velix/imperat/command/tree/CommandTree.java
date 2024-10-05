@@ -151,6 +151,8 @@ public final class CommandTree<S extends Source> {
     public @NotNull CommandDispatch<S> contextMatch(
         ArgumentQueue input
     ) {
+        if (input.isEmpty())
+            return CommandDispatch.incomplete();
 
         int depth = 0;
 

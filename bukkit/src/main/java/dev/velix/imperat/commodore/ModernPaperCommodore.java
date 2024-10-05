@@ -14,40 +14,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ALL")
 final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand> {
 
+    private final Plugin plugin;
     private final LifecycleEventManager<Plugin> manager;
-    private final List<WrappedBrigNode> commands = new ArrayList<>();
-
     ModernPaperCommodore(Plugin plugin) throws ClassNotFoundException {
         Class.forName("io.papermc.paper.command.brigadier.Commands");
+        this.plugin = plugin;
         this.manager = plugin.getLifecycleManager();
-        manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
-            Commands registrar = event.registrar();
-            commands.forEach(command -> {
-                var bukkitCmd = command.command;
-                String desc;
-                List<String> aliases = new ArrayList<>();
-                if (bukkitCmd == null) {
-                    desc = "";
-                } else {
-                    desc = bukkitCmd.description().toString();
-                    aliases = bukkitCmd.getAliases();
-                }
-                registrar.register(
-                    plugin.getPluginMeta(), (LiteralCommandNode<CommandSourceStack>) command.node,
-                    desc, aliases
-                );
-
-            });
-        });
     }
 
     /**
@@ -71,20 +49,17 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");
 
-        Collection<String> aliases = getAliases(command);
-        if (!aliases.contains(node.getLiteral())) {
-            node = renameLiteralNode(node, command.getName());
-        }
-        for (String alias : aliases) {
-            WrappedBrigNode brigNode = new WrappedBrigNode(command,
-                node.getLiteral().equals(alias) ? node :
-                    LiteralArgumentBuilder.literal(alias)
-                        .redirect((LiteralCommandNode<Object>) node)
-                        .build()
+        manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            Commands registrar = event.registrar();
+
+            String desc = command == null ? null : command.description().toString();
+
+            registrar.register(
+                plugin.getPluginMeta(), (LiteralCommandNode<CommandSourceStack>) node,
+                desc, getAliases(command)
             );
 
-            this.commands.add(brigNode);
-        }
+        });
     }
 
     /**
@@ -99,7 +74,7 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
      */
     @Override
     public void register(LiteralCommandNode<?> node) {
-        commands.add(new WrappedBrigNode(null, node));
+        register(null, node);
     }
 
     @Override
@@ -110,7 +85,4 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
         throw new UnsupportedOperationException();
     }
 
-    record WrappedBrigNode(WrappedBukkitCommand command, LiteralCommandNode<?> node) {
-
-    }
 }
