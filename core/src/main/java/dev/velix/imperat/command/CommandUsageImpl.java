@@ -26,7 +26,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
     private final List<CommandParameter<S>> parametersWithoutFlags = new ArrayList<>();
-    private final CommandExecution<S> execution;
+    private final @NotNull CommandExecution<S> execution;
     private final boolean help;
     private String permission = null;
     private Description description = Description.of("N/A");
@@ -34,11 +34,11 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     private @Nullable UsageCooldown cooldown = null;
     private CommandCoordinator<S> commandCoordinator;
 
-    CommandUsageImpl(CommandExecution<S> execution) {
+    CommandUsageImpl(@NotNull CommandExecution<S> execution) {
         this(execution, false);
     }
 
-    CommandUsageImpl(CommandExecution<S> execution, boolean help) {
+    CommandUsageImpl(@NotNull CommandExecution<S> execution, boolean help) {
         this.execution = execution;
         this.cooldownHandler = new DefaultCooldownHandler<>(this);
         this.commandCoordinator = CommandCoordinator.sync();

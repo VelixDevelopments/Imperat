@@ -14,6 +14,11 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandExecution<S extends Source> {
 
+    static <S extends Source> CommandExecution<S> empty() {
+        return (source, context) -> {
+        };
+    }
+
     /**
      * Executes the command's actions
      *

@@ -227,7 +227,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     class Builder<S extends Source> {
 
         private final List<CommandParameter<S>> parameters = new ArrayList<>();
-        private CommandExecution<S> execution;
+        private CommandExecution<S> execution = CommandExecution.empty();
         private String description = "N/A";
         private String permission = null;
         private UsageCooldown cooldown = null;
