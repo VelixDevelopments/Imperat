@@ -168,7 +168,7 @@ public class TestRun {
 
     @Test
     public void testArgParsing() {
-        ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(new String[]{""});
+        ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(new String[]{""}, true);
         Assertions.assertEquals(1, queue.size());
     }
 

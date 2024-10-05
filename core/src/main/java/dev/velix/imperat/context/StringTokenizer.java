@@ -13,7 +13,7 @@ public final class StringTokenizer {
     private StringTokenizer() {
     }
 
-    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion) {
+    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion, boolean extraSpace) {
         if (argumentsInOneLine.isEmpty())
             return !autoCompletion ? ArgumentQueue.empty() : new ArgumentQueueImpl(" ");
 
@@ -28,7 +28,14 @@ public final class StringTokenizer {
             toCollect.add(arg);
         }
 
+        if (autoCompletion && extraSpace)
+            toCollect.add(" ");
+
         return toCollect;
+    }
+
+    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion) {
+        return parseToQueue(argumentsInOneLine, autoCompletion, false);
     }
 
     private static String nextArg(TokenIterator iterator, Character character) throws TokenParseException {

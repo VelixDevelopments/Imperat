@@ -15,7 +15,6 @@ import dev.velix.imperat.command.tree.ParameterNode;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
-import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 
@@ -95,7 +94,6 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         Command<S> command,
         CommandParameter<S> parameter
     ) {
-        SuggestionResolver<S> parameterResolver = dispatcher.getParameterSuggestionResolver(parameter);
 
         //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", parameterResolver == null, parameter.format());
 
@@ -106,15 +104,21 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             Message tooltip = new LiteralMessage(paramFormat + (desc.isEmpty() ? "" : " - " + desc));
 
             String input = context.getInput();
+            boolean hadExtraSpace = Character.isWhitespace(input.charAt(input.length() - 1));
 
-            ArgumentQueue args = ArgumentQueue.parseAutoCompletion(
-                input.startsWith("/") ? input.substring(1) : input
-            );
+            //ImperatDebugger.debug("input= '%s', last-space='%s'", input, hadExtraSpace);
+
+            String[] processed = processedInput(input);
+            //ImperatDebugger.debug("processed array= '%s'", Arrays.toString(processed));
+
+            ArgumentQueue args = ArgumentQueue.parseAutoCompletion(processed, hadExtraSpace);
+            //ImperatDebugger.debug("Parsed queue= '%s'",args.join(":"));
+            //ImperatDebugger.debug("Last-argument='%s'", args.getLast());
 
             CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
             SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
 
-            return parameterResolver.asyncAutoComplete(ctx, parameter)
+            return dispatcher.getParameterSuggestionResolver(parameter).asyncAutoComplete(ctx, parameter)
                 .thenCompose((results) -> {
                     results
                         .stream()
@@ -127,6 +131,17 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         };
     }
 
+    private String[] processedInput(final String input) {
+        String result = input;
+        if (result.charAt(0) == '/')
+            result = result.substring(1);
+
+        String[] split = result.split(" ");
+        String[] argumentsOnly = new String[split.length - 1];
+        System.arraycopy(split, 1, argumentsOnly, 0, split.length - 1);
+
+        return argumentsOnly;
+    }
 
     //resolvers methods
 

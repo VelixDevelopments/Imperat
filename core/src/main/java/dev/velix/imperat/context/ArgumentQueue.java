@@ -20,21 +20,25 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
         return StringTokenizer.parseToQueue(string, false);
     }
 
-    static ArgumentQueue parseAutoCompletion(String[] rawArguments) {
+    static ArgumentQueue parseAutoCompletion(String[] argumentsOnly, boolean extraLastSpace) {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < rawArguments.length; i++) {
-            builder.append(rawArguments[i]);
-            if (i != rawArguments.length - 1)
+        for (int i = 0; i < argumentsOnly.length; i++) {
+            var arg = argumentsOnly[i];
+            builder.append(arg);
+            if (!extraLastSpace) {
+                if (i != argumentsOnly.length - 1)
+                    builder.append(" ");
+            } else
                 builder.append(" ");
         }
-        return parseAutoCompletion(builder.toString());
+        return parseAutoCompletion(builder.toString(), extraLastSpace);
     }
 
-    static ArgumentQueue parseAutoCompletion(String string) {
+    static ArgumentQueue parseAutoCompletion(String string, boolean extraLastSpace) {
         if (string.isEmpty() || string.isBlank()) {
             return StringTokenizer.parseToQueue("", true);
         }
-        return StringTokenizer.parseToQueue(string, true);
+        return StringTokenizer.parseToQueue(string, true, extraLastSpace);
     }
 
     /**
