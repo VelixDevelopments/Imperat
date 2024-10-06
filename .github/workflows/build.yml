@@ -25,12 +25,7 @@ jobs:
       - name: 📐 Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: 👷 Gradle Build
-        run: |
-          chmod +x ./gradlew
-          ./gradlew build
-
       - name: 🧪 Gradle Test
         run: |
           chmod +x ./gradlew
-          ./gradlew test
+          ./gradlew build  test
