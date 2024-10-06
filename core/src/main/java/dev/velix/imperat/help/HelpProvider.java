@@ -18,7 +18,7 @@ import java.util.function.BiConsumer;
  * provide/send a help message to the {@link Source}
  * through the command's {@link Context}
  *
- * @param <S> the type of command source
+ * @param <S> the valueType of command source
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface HelpProvider<S extends Source> {

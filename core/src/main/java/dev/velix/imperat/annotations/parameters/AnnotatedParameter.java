@@ -18,9 +18,9 @@ public interface AnnotatedParameter<S extends Source> extends CommandParameter<S
     /**
      * Get the instance of specific annotation
      *
-     * @param clazz the type of annotation
-     * @param <A>   the type of the annotation
-     * @return the specific instance of an annotation of a certain type {@linkplain A}
+     * @param clazz the valueType of annotation
+     * @param <A>   the valueType of the annotation
+     * @return the specific instance of an annotation of a certain valueType {@linkplain A}
      */
     @Nullable
     <A extends Annotation> A getAnnotation(Class<A> clazz);

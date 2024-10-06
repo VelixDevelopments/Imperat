@@ -17,10 +17,10 @@ public final class TestImperat extends BaseImperat<TestSource> {
     }
 
     /**
-     * Wraps the sender into a built-in command-sender type
+     * Wraps the sender into a built-in command-sender valueType
      *
      * @param sender the sender's actual value
-     * @return the wrapped command-sender type
+     * @return the wrapped command-sender valueType
      */
     @Override
     public TestSource wrapSender(Object sender) {

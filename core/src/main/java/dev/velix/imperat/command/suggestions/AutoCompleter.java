@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Represents a class that's responsible for
  * Handling all auto-completion processes during
- * tab-completion per one command, regardless of the sender type
+ * tab-completion per one command, regardless of the sender valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
 public abstract class AutoCompleter<S extends Source> {

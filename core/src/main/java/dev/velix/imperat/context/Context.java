@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * Represents the processes context of a command
  * entered by {@link Source}
  *
- * @param <S> the command sender type
+ * @param <S> the command sender valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Context<S extends Source> {

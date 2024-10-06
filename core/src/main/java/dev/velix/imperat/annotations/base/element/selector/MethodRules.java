@@ -38,7 +38,7 @@ public interface MethodRules {
             if (parameterElement == null) {
                 msg = "Method '" + method.getName() + "' has no parameters";
             } else {
-                msg = "First parameter of type '" + parameterElement.getType().getTypeName() + "' is not a sub-type of `" + Source.class.getName() + "'";
+                msg = "First parameter of valueType '" + parameterElement.getType().getTypeName() + "' is not a sub-valueType of `" + Source.class.getName() + "'";
             }
             throw methodError(method, msg);
         })

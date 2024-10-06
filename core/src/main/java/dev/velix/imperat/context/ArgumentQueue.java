@@ -1,5 +1,6 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.*;
 
 import java.util.Deque;
@@ -13,11 +14,11 @@ import java.util.List;
 public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
 
     static ArgumentQueue parse(String[] rawArguments) {
-        return StringTokenizer.parseToQueue(String.join(" ", rawArguments), false);
+        return StringUtils.parseToQueue(String.join(" ", rawArguments), false);
     }
 
     static ArgumentQueue parse(String string) {
-        return StringTokenizer.parseToQueue(string, false);
+        return StringUtils.parseToQueue(string, false);
     }
 
     static ArgumentQueue parseAutoCompletion(String[] argumentsOnly, boolean extraLastSpace) {
@@ -36,9 +37,9 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
 
     static ArgumentQueue parseAutoCompletion(String string, boolean extraLastSpace) {
         if (string.isEmpty() || string.isBlank()) {
-            return StringTokenizer.parseToQueue("", true);
+            return StringUtils.parseToQueue("", true);
         }
-        return StringTokenizer.parseToQueue(string, true, extraLastSpace);
+        return StringUtils.parseToQueue(string, true, extraLastSpace);
     }
 
     /**
@@ -47,6 +48,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     static ArgumentQueue empty() {
         return new ArgumentQueueImpl();
     }
+
 
     /**
      * Fetches the element at the specified index

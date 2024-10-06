@@ -40,7 +40,7 @@ public abstract class TypeWrap<T> {
         } else if (superclass instanceof Class) {
             return Object.class;
         } else {
-            throw new IllegalArgumentException("TypeWrap must be created with a parameterized type.");
+            throw new IllegalArgumentException("TypeWrap must be created with a parameterized valueType.");
         }
     }
 

@@ -31,7 +31,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * OR if the value hasn't been resolved somehow
      *
      * @param flagName the flag name
-     * @param <T>      the type of the flag value resolved
+     * @param <T>      the valueType of the flag value resolved
      * @return the resolved value of the flag input
      */
     @Nullable
@@ -41,7 +41,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * Fetches a resolved argument's value
      *
      * @param name the name of the command
-     * @param <T>  the type of this value
+     * @param <T>  the valueType of this value
      * @return the value of the resolved argument
      * @see ResolvedArgument
      */
@@ -59,10 +59,10 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
     }
 
     /**
-     * Resolves source into a new type of source
+     * Resolves source into a new valueType of source
      * using {@link Imperat#getSourceResolver(Type)}
      *
-     * @param <R> the type of the resolved source
+     * @param <R> the valueType of the resolved source
      * @return the resolved source {@link R}
      */
     <R> @NotNull R getResolvedSource(Type type) throws ImperatException;
@@ -71,8 +71,8 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * Fetches the argument/input resolved by the context
      * using {@link dev.velix.imperat.resolvers.ContextResolver}
      *
-     * @param type type of argument to return
-     * @param <T>  the type of this argument parsed value
+     * @param type valueType of argument to return
+     * @param <T>  the valueType of this argument parsed value
      * @return the argument/input resolved by the context
      */
     <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException;

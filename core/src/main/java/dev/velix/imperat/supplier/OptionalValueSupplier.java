@@ -47,7 +47,7 @@ public interface OptionalValueSupplier<T> {
     }
 
     /**
-     * @return The type of value to supply
+     * @return The valueType of value to supply
      */
     TypeWrap<T> getValueType();
 

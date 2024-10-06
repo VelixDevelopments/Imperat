@@ -12,8 +12,8 @@ import org.jetbrains.annotations.ApiStatus;
  * converting the parameter into a value for
  * the argument input, just using the context, parameter required and the raw input.
  *
- * @param <S> the type of the command sender/source
- * @param <T> the type of value that the parameter requires
+ * @param <S> the valueType of the command sender/source
+ * @param <T> the valueType of value that the parameter requires
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface ValueResolver<S extends Source, T> {

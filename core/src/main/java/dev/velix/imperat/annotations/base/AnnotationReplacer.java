@@ -11,7 +11,7 @@ import java.util.Collection;
  * Replaces a custom annotation made by the user, with annotations
  * made from the basic pre-made annotations such as {@link Command}
  *
- * @param <A> the type of annotation to replace with other annotations
+ * @param <A> the valueType of annotation to replace with other annotations
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface AnnotationReplacer<A extends Annotation> {

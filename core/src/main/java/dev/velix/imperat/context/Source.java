@@ -16,7 +16,7 @@ public interface Source {
     String name();
 
     /**
-     * @return The original command sender type instance
+     * @return The original command sender valueType instance
      */
     Object origin();
 

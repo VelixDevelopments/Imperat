@@ -176,14 +176,14 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     }
 
     /**
-     * @param clazz the type of the parameter to check upon
-     * @return Whether the usage has a specific type of parameter
+     * @param clazz the valueType of the parameter to check upon
+     * @return Whether the usage has a specific valueType of parameter
      */
     @Override
     public boolean hasParamType(Class<?> clazz) {
         return getParameters()
             .stream()
-            .anyMatch((param) -> param.type().equals(clazz));
+            .anyMatch((param) -> param.valueType().equals(clazz));
     }
 
     /**
@@ -210,7 +210,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     }
 
     /**
-     * Searches for a parameter with specific type
+     * Searches for a parameter with specific valueType
      *
      * @param parameterPredicate the parameter condition
      * @return whether this usage has atLeast on {@link CommandParameter} with specific condition

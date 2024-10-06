@@ -18,14 +18,14 @@ public interface FlagParameter<S extends Source> extends CommandParameter<S> {
     CommandFlag flagData();
 
     /**
-     * @return The type of input value
+     * @return The valueType of input value
      */
     default Type inputValueType() {
         return flagData().inputType();
     }
 
     /**
-     * @param <T> the type of flag input value
+     * @param <T> the valueType of flag input value
      * @return the {@link TypeSuggestionResolver} for input value of this flag
      * null if the flag is {@link CommandSwitch}, check using {@link FlagParameter#isSwitch()}
      */

@@ -19,7 +19,7 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
 
     AnnotationParameterDecorator(CommandParameter<S> parameter, ParameterElement element) {
         super(
-            parameter.name(), parameter.wrappedType(), parameter.permission(),
+            parameter.name(), parameter.type(), parameter.permission(),
             parameter.description(), parameter.isOptional(),
             parameter.isFlag(), parameter.isGreedy(),
             parameter.getDefaultValueSupplier(), parameter.getSuggestionResolver()
@@ -38,8 +38,8 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
     /**
      * Get the instance of specific annotation
      *
-     * @param clazz the type of annotation
-     * @return the specific instance of an annotation of a certain type {@linkplain A}
+     * @param clazz the valueType of annotation
+     * @return the specific instance of an annotation of a certain valueType {@linkplain A}
      */
     @Override
     public <A extends Annotation> @Nullable A getAnnotation(Class<A> clazz) {

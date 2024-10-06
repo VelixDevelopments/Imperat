@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.CommandSwitch;
 import dev.velix.imperat.context.Source;
@@ -8,6 +9,7 @@ import dev.velix.imperat.supplier.OptionalValueSupplier;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, CommandFlag> {
@@ -18,7 +20,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     private TypeSuggestionResolver<S, T> suggestionResolver;
 
     private FlagBuilder(String name, Class<T> inputType) {
-        super(name, CommandFlag.class, true, false);
+        super(name, ParameterTypes.flag(CommandFlag.create(name, Collections.emptyList(), inputType)), true, false);
         this.inputType = inputType;
     }
 
@@ -47,7 +49,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
 
     public FlagBuilder<S, T> flagDefaultInputValue(OptionalValueSupplier<T> valueSupplier) {
         if (inputType == null) {
-            throw new IllegalArgumentException("Flag of type switches, cannot have a default value supplier !");
+            throw new IllegalArgumentException("Flag of valueType switches, cannot have a default value supplier !");
         }
         this.defaultValueSupplier = valueSupplier;
         return this;
@@ -55,7 +57,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
 
     public FlagBuilder<S, T> suggestForInputValue(TypeSuggestionResolver<S, T> suggestionResolver) {
         if (inputType == null) {
-            throw new IllegalArgumentException("Flag of type switches, cannot have a default value supplier !");
+            throw new IllegalArgumentException("Flag of valueType switches, cannot have a default value supplier !");
         }
         this.suggestionResolver = suggestionResolver;
         return this;

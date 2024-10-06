@@ -24,7 +24,7 @@ public final class MinestomSource implements Source {
     }
 
     /**
-     * @return The original command sender type instance
+     * @return The original command sender valueType instance
      */
     @Override
     public CommandSender origin() {

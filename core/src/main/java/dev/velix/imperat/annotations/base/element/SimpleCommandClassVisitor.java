@@ -15,6 +15,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.StrictParameterList;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Source;
@@ -448,7 +449,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 suggestionResolverName
             );
             if (namedResolver != null && !(namedResolver instanceof TypeSuggestionResolver<?, ?>))
-                throw new UnsupportedOperationException("Named suggestion resolvers must be of type `TypeSuggestionResolver` and make sure the type matches that of the parameter's");
+                throw new UnsupportedOperationException("Named suggestion resolvers must be of valueType `TypeSuggestionResolver` and make sure the valueType matches that of the parameter's");
             else if (namedResolver != null)
                 suggestionResolver = (TypeSuggestionResolver<S, ?>) namedResolver;
             else {
@@ -459,7 +460,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         boolean greedy = parameter.getAnnotation(Greedy.class) != null;
 
         if (greedy && parameter.getType() != String.class) {
-            throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy type '" + parameter.getType().getName() + "'");
+            throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy valueType '" + parameter.getType().getName() + "'");
         }
 
         dev.velix.imperat.command.Description desc = dev.velix.imperat.command.Description.EMPTY;
@@ -515,12 +516,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         CommandParameter<S> param =
             AnnotationParameterDecorator.decorate(
                 CommandParameter.of(
-                    name, parameterType, permission, desc,
+                    name, ParameterTypes.from(parameterType), permission, desc,
                     optional, greedy, optionalValueSupplier, suggestionResolver
                 ), element
             );
 
-        if (TypeUtility.isNumericType(TypeWrap.of(param.type()))
+        if (TypeUtility.isNumericType(TypeWrap.of(param.valueType()))
             && element.isAnnotationPresent(Range.class)) {
             Range range = element.getAnnotation(Range.class);
             assert range != null;

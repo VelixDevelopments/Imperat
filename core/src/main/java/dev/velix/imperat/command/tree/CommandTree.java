@@ -71,7 +71,7 @@ public final class CommandTree<S extends Source> {
     private ParameterNode<S, ?> getChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
         for (ParameterNode<S, ?> child : parent.getChildren()) {
             if (child.data.name().equalsIgnoreCase(param.name())
-                && TypeUtility.matches(child.data.type(), param.type())) {
+                && TypeUtility.matches(child.data.valueType(), param.valueType())) {
                 return child;
             }
         }

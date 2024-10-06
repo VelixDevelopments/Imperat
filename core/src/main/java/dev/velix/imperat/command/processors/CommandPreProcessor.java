@@ -10,7 +10,7 @@ import dev.velix.imperat.exception.ImperatException;
  * Defines a functional interface that processes a {@link Context}
  * BEFORE the resolving of the arguments into values.
  *
- * @param <S> the command sender type
+ * @param <S> the command sender valueType
  */
 @FunctionalInterface
 public interface CommandPreProcessor<S extends Source> extends CommandProcessor {

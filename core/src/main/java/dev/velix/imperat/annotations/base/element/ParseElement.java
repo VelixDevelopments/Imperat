@@ -52,12 +52,12 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     }
 
     /**
-     * Returns this element's annotation for the specified type if
+     * Returns this element's annotation for the specified valueType if
      * such an annotation is <em>present</em>, else null.
      *
      * @param annotationClass the Class object corresponding to the
-     *                        annotation type
-     * @return this element's annotation for the specified annotation type if
+     *                        annotation valueType
+     * @return this element's annotation for the specified annotation valueType if
      * present on this element, else null
      * @throws NullPointerException if the given annotation class is null
      * @since 1.5
@@ -105,7 +105,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
 
 
     /**
-     * Returns an iterator over elements of type {@code T}.
+     * Returns an iterator over elements of valueType {@code T}.
      *
      * @return an Iterator.
      */

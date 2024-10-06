@@ -5,12 +5,13 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.DescriptionHolder;
 import dev.velix.imperat.command.PermissionHolder;
+import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
-import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
 
     static <S extends Source, T> CommandParameter<S> of(
         String name,
-        TypeWrap<T> type,
+        ParameterType<S, T> type,
         @Nullable String permission,
         Description description,
         boolean optional,
@@ -37,7 +38,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
     ) {
         Preconditions.notNull(name, "name");
         Preconditions.notNull(type, "type");
-        Preconditions.checkArgument(!TypeUtility.matches(type.getType(), Object.class), "Type cannot be `Object`");
+        Preconditions.checkArgument(!type.equalsExactly(Object.class), "Type cannot be `Object`");
 
         return new NormalCommandParameter<>(
             name, type, permission, description, optional,
@@ -45,76 +46,71 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
         );
     }
 
-    static <S extends Source, T> ParameterBuilder<S, T> required(String name, TypeWrap<T> type) {
+    static <S extends Source, T> ParameterBuilder<S, T> required(String name, ParameterType<S, T> type) {
         return new ParameterBuilder<>(name, type, false);
     }
 
-    static <S extends Source, T> ParameterBuilder<S, T> required(String name, Class<T> type) {
-        return required(name, TypeWrap.of(type));
-    }
-
     static <S extends Source> ParameterBuilder<S, Integer> requiredInt(String name) {
-        return required(name, Integer.class);
+        return required(name, ParameterTypes.numeric(Integer.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Long> requiredLong(String name) {
-        return required(name, Long.class);
+        return required(name, ParameterTypes.numeric(Long.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Double> requiredDouble(String name) {
-        return required(name, Double.class);
+        return required(name, ParameterTypes.numeric(Double.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Float> requiredFloat(String name) {
-        return required(name, Float.class);
+        return required(name, ParameterTypes.numeric(Float.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Boolean> requiredBoolean(String name) {
-        return required(name, Boolean.class);
+        return required(name, ParameterTypes.bool());
     }
 
     static <S extends Source> ParameterBuilder<S, String> requiredText(String name) {
-        return required(name, String.class);
+        return required(name, ParameterTypes.string());
     }
 
+    //TODO REPLACE GREEDY SYSTEM WITH PARAMETER TYPE SYSTEM
     static <S extends Source> ParameterBuilder<S, String> requiredGreedy(String name) {
-        return new ParameterBuilder<>(name, String.class, false, true);
+        return new ParameterBuilder<>(name, ParameterTypes.string(), false, true);
     }
 
-    static <S extends Source, T> ParameterBuilder<S, T> optional(String name, TypeWrap<T> token) {
+    static <S extends Source, T> ParameterBuilder<S, T> optional(String name, ParameterType<S, T> token) {
         return new ParameterBuilder<>(name, token, true);
     }
 
-    static <S extends Source, T> ParameterBuilder<S, T> optional(String name, Class<T> type) {
-        return optional(name, TypeWrap.of(type));
-    }
 
     static <S extends Source> ParameterBuilder<S, Integer> optionalInt(String name) {
-        return optional(name, Integer.class);
+        return optional(name, ParameterTypes.numeric(Integer.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Long> optionalLong(String name) {
-        return optional(name, Long.class);
+        return optional(name, ParameterTypes.numeric(Long.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Double> optionalDouble(String name) {
-        return optional(name, Double.class);
+        return optional(name, ParameterTypes.numeric(Double.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Float> optionalFloat(String name) {
-        return optional(name, Float.class);
+        return optional(name, ParameterTypes.numeric(Float.class));
     }
 
     static <S extends Source> ParameterBuilder<S, Boolean> optionalBoolean(String name) {
-        return optional(name, Boolean.class);
+        return optional(name, ParameterTypes.bool());
     }
 
     static <S extends Source> ParameterBuilder<S, String> optionalText(String name) {
-        return optional(name, String.class);
+        return optional(name, ParameterTypes.string());
     }
 
+    //TODO REPLACE GREEDY SYSTEM WITH PARAMETER TYPE SYSTEM
     static <S extends Source> ParameterBuilder<S, String> optionalGreedy(String name) {
-        return new ParameterBuilder<>(name, String.class, true, true);
+        return new ParameterBuilder<>(name, ParameterTypes.string(), true, true);
     }
 
     static <S extends Source, T> FlagBuilder<S, T> flag(
@@ -161,16 +157,18 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
     void position(int position);
 
     /**
-     * @return the value type-token of this parameter
+     * @return the value valueType-token of this parameter
      */
     TypeWrap<?> wrappedType();
 
     /**
-     * @return the value type of this parameter
+     * @return the value valueType of this parameter
      */
-    default Type type() {
+    default Type valueType() {
         return wrappedType().getType();
     }
+
+    @NotNull ParameterType<S, ?> type();
 
     /**
      * @return the default value if it's input is not present
@@ -238,7 +236,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
      * Fetches the suggestion resolver linked to this
      * command parameter.
      *
-     * @param <T> the type of value to be resolved
+     * @param <T> the valueType of value to be resolved
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Nullable
@@ -260,13 +258,13 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
     }
 
     /**
-     * Checks if this parameter has same name and type to the other {@link CommandParameter}
+     * Checks if this parameter has same name and valueType to the other {@link CommandParameter}
      * unlike `CommandParameter#equals(Object)`,
      * if both parameters are only different in their parent {@link Command},
      * it would still return true
      *
      * @param parameter the parameter to compare to
-     * @return Whether this parameter has same name and type to the other {@link CommandParameter} or not
+     * @return Whether this parameter has same name and valueType to the other {@link CommandParameter} or not
      */
     boolean similarTo(CommandParameter<?> parameter);
 

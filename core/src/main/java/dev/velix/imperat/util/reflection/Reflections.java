@@ -8,11 +8,11 @@ import java.lang.reflect.Field;
 public final class Reflections {
 
     /**
-     * Retrieve a field accessor for a specific field type and name.
+     * Retrieve a field accessor for a specific field valueType and name.
      *
-     * @param target    - the targetToLoad type.
+     * @param target    - the targetToLoad valueType.
      * @param name      - the name of the field, or NULL to ignore.
-     * @param fieldType - a compatible field type.
+     * @param fieldType - a compatible field valueType.
      * @return The field accessor.
      */
     public static <T> FieldAccessor<T> getField(Class<?> target, String name, Class<T> fieldType) {
@@ -20,11 +20,11 @@ public final class Reflections {
     }
 
     /**
-     * Retrieve a field accessor for a specific field type and name.
+     * Retrieve a field accessor for a specific field valueType and name.
      *
      * @param className - lookup name of the class, see {@link #getClass(String)}.
      * @param name      - the name of the field, or NULL to ignore.
-     * @param fieldType - a compatible field type.
+     * @param fieldType - a compatible field valueType.
      * @return The field accessor.
      */
     public static <T> FieldAccessor<T> getField(String className, String name, Class<T> fieldType) {
@@ -32,10 +32,10 @@ public final class Reflections {
     }
 
     /**
-     * Retrieve a field accessor for a specific field type and name.
+     * Retrieve a field accessor for a specific field valueType and name.
      *
-     * @param target    - the targetToLoad type.
-     * @param fieldType - a compatible field type.
+     * @param target    - the targetToLoad valueType.
+     * @param fieldType - a compatible field valueType.
      * @return The field accessor.
      */
     public static <T> FieldAccessor<T> getField(Class<?> target, Class<T> fieldType) {
@@ -43,10 +43,10 @@ public final class Reflections {
     }
 
     /**
-     * Retrieve a field accessor for a specific field type and name.
+     * Retrieve a field accessor for a specific field valueType and name.
      *
-     * @param target    - the targetToLoad type.
-     * @param fieldType - a compatible field type.
+     * @param target    - the targetToLoad valueType.
+     * @param fieldType - a compatible field valueType.
      * @param index     - the number of compatible fields to skip.
      * @return The field accessor.
      */
@@ -55,10 +55,10 @@ public final class Reflections {
     }
 
     /**
-     * Retrieve a field accessor for a specific field type and name.
+     * Retrieve a field accessor for a specific field valueType and name.
      *
      * @param className - lookup name of the class, see {@link #getClass(String)}.
-     * @param fieldType - a compatible field type.
+     * @param fieldType - a compatible field valueType.
      * @param index     - the number of compatible fields to skip.
      * @return The field accessor.
      */
@@ -114,7 +114,7 @@ public final class Reflections {
         if (target.getSuperclass() != null)
             return getField(target.getSuperclass(), name, fieldType, index);
 
-        throw new IllegalArgumentException("Cannot find field with type " + fieldType);
+        throw new IllegalArgumentException("Cannot find field with valueType " + fieldType);
     }
 
     /**

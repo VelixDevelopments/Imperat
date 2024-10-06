@@ -8,24 +8,24 @@ import org.jetbrains.annotations.Nullable;
 public sealed interface ThrowableHandler<S extends Source> permits Imperat {
 
     /**
-     * Retrieves the {@link ThrowableResolver} responsible for handling the specified type
+     * Retrieves the {@link ThrowableResolver} responsible for handling the specified valueType
      * of throwable. If no specific resolver is found, it may return null or a default resolver.
      *
      * @param exception The class of the throwable to get the resolver for.
-     * @param <T>       The type of the throwable.
-     * @return The {@link ThrowableResolver} capable of handling the throwable of the specified type,
+     * @param <T>       The valueType of the throwable.
+     * @return The {@link ThrowableResolver} capable of handling the throwable of the specified valueType,
      * or null if no specific resolver is registered.
      */
     @Nullable
     <T extends Throwable> ThrowableResolver<T, S> getThrowableResolver(final Class<T> exception);
 
     /**
-     * Registers a new {@link ThrowableResolver} for the specified type of throwable.
+     * Registers a new {@link ThrowableResolver} for the specified valueType of throwable.
      * This allows customizing the handling of specific throwable types within the application.
      *
      * @param exception The class of the throwable to set the resolver for.
-     * @param handler   The {@link ThrowableResolver} to be registered for the specified throwable type.
-     * @param <T>       The type of the throwable.
+     * @param handler   The {@link ThrowableResolver} to be registered for the specified throwable valueType.
+     * @param <T>       The valueType of the throwable.
      */
     <T extends Throwable> void setThrowableResolver(
         final Class<T> exception,

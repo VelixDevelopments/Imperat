@@ -135,8 +135,8 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     }
 
     /**
-     * @param clazz the type of the parameter to check upon
-     * @return Whether the usage has a specific type of parameter
+     * @param clazz the valueType of the parameter to check upon
+     * @return Whether the usage has a specific valueType of parameter
      */
     boolean hasParamType(Class<?> clazz);
 
@@ -155,7 +155,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     int getMaxLength();
 
     /**
-     * Searches for a parameter with specific type
+     * Searches for a parameter with specific valueType
      *
      * @param parameterPredicate the parameter condition
      * @return whether this usage has atLeast on {@link CommandParameter} with specific condition

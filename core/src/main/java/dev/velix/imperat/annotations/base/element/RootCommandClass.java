@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * Represents a root command class information
  *
- * @param <S> the command source type
+ * @param <S> the command source valueType
  */
 public final class RootCommandClass<S extends Source> {
 

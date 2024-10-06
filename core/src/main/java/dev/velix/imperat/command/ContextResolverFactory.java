@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  * Represents a context resolver factory
  * that is responsible for creating {@link ContextResolver}
  *
- * @param <S> the command-sender type
+ * @param <S> the command-sender valueType
  */
 public interface ContextResolverFactory<S extends Source> {
 

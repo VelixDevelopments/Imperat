@@ -179,10 +179,10 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
                     return argumentTypeResolver.resolveArgType(flagParameter);
                 }
 
-                return param.type() == flagParameter.flagData().inputType()
+                return param.valueType() == flagParameter.flagData().inputType()
                     ? argumentTypeResolver.resolveArgType(param) : null;
             }
-            return TypeUtility.matches(param.type(), type) ? argumentTypeResolver.resolveArgType(param) : null;
+            return TypeUtility.matches(param.valueType(), type) ? argumentTypeResolver.resolveArgType(param) : null;
         });
     }
 

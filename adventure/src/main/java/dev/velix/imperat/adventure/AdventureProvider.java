@@ -11,7 +11,7 @@ import net.kyori.adventure.text.ComponentLike;
  * within the application, typically in a context like a game server or
  * chat system where audiences are dynamically determined.
  *
- * @param <S> the type of the source from which the {@link Audience} can be derived
+ * @param <S> the valueType of the source from which the {@link Audience} can be derived
  */
 @SuppressWarnings("unchecked")
 public interface AdventureProvider<S> {

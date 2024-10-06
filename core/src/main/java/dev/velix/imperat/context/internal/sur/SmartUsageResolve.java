@@ -120,7 +120,7 @@ public final class SmartUsageResolve<S extends Source> {
                     //flag value raw input is NOT NULL, resolving the value input
                     ValueResolver<S, ?> valueResolver = dispatcher.getValueResolver(flag.inputType());
                     if (valueResolver == null) {
-                        throw new SourceException("Cannot find resolver for flag with input type '" + flag.name() + "'");
+                        throw new SourceException("Cannot find resolver for flag with input valueType '" + flag.name() + "'");
                     }
                     context.resolveFlag(
                         currentRaw,
@@ -152,7 +152,7 @@ public final class SmartUsageResolve<S extends Source> {
             //argument input
             ValueResolver<S, ?> resolver = dispatcher.getValueResolver(currentParameter);
             if (resolver == null)
-                throw new SourceException("Cannot find resolver for type '" + currentParameter.type().getTypeName() + "'");
+                throw new SourceException("Cannot find resolver for valueType '" + currentParameter.valueType().getTypeName() + "'");
 
             if (currentParameter.isOptional()) {
                 //visualize("Optional parameter '%s' at position %s", currentParameter.getName(), position.parameter);

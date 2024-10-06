@@ -29,7 +29,7 @@ public final class BukkitSource implements Source {
     }
 
     /**
-     * @return The original command sender type instance
+     * @return The original command sender valueType instance
      */
     @Override
     public CommandSender origin() {

@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Selects a {@link ParseElement} based on specific list of {@link Rule}
  *
- * @param <E> the type of {@link ParseElement} to select
+ * @param <E> the valueType of {@link ParseElement} to select
  */
 public sealed interface ElementSelector<E extends ParseElement<?>> permits SimpleElementSelector {
 

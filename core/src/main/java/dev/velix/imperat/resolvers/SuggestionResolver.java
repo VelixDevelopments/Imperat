@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
  * Represents a suggestion providing interface
  * for an argument/parameter
  *
- * @param <S> the command-sender type
+ * @param <S> the command-sender valueType
  * @see CommandParameter
  */
 @ApiStatus.AvailableSince("1.0.0")
@@ -40,11 +40,11 @@ public interface SuggestionResolver<S extends Source> {
         }, list);
     }
 
-    static <S extends Source, T> TypeSuggestionResolver<S, T> type(Class<T> type, List<String> results) {
+    static <S extends Source, T> TypeSuggestionResolver<S, T> type(Class<T> type, Collection<String> results) {
         return type(TypeWrap.of(type), results);
     }
 
-    static <S extends Source, T> TypeSuggestionResolver<S, T> type(TypeWrap<T> type, List<String> results) {
+    static <S extends Source, T> TypeSuggestionResolver<S, T> type(TypeWrap<T> type, Collection<String> results) {
         return new TypeSuggestionResolver<>() {
 
             @Override
@@ -53,7 +53,7 @@ public interface SuggestionResolver<S extends Source> {
             }
 
             @Override
-            public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
+            public Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
                 return results;
             }
         };

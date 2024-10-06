@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
  * It also caches the settings that the user can
  * change or modify in the api.
  *
- * @param <S> the command sender type
+ * @param <S> the command sender valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
 public non-sealed interface Imperat<S extends Source> extends
@@ -71,21 +71,21 @@ public non-sealed interface Imperat<S extends Source> extends
     void setAnnotationParser(AnnotationParser<S> parser);
 
     /**
-     * Registers a type of annotations so that it can be
-     * detected by {@link AnnotationReader} , it's useful as it allows that type of annotation
+     * Registers a valueType of annotations so that it can be
+     * detected by {@link AnnotationReader} , it's useful as it allows that valueType of annotation
      * to be recognized as a true Imperat-related annotation to be used in something like checking if a
      * {@link CommandParameter} is annotated and checks for the annotations it has.
      *
-     * @param type the type of annotation
+     * @param type the valueType of annotation
      */
     void registerAnnotations(Class<? extends Annotation>... type);
 
     /**
      * Registers annotation replacer
      *
-     * @param type     the type to replace the annotation by
+     * @param type     the valueType to replace the annotation by
      * @param replacer the replacer
-     * @param <A>      the type of annotation to replace
+     * @param <A>      the valueType of annotation to replace
      */
     <A extends Annotation> void registerAnnotationReplacer(
         final Class<A> type,

@@ -29,7 +29,7 @@ import java.util.*;
  * the results (resolved arguments) will be used later on to
  * find the command usage object then use the found command usage to execute the action.
  *
- * @param <S> the sender type
+ * @param <S> the sender valueType
  */
 @ApiStatus.Internal
 final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> implements ResolvedContext<S> {
@@ -115,7 +115,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @SuppressWarnings("unchecked")
     public <R> @NotNull R getResolvedSource(Type type) throws ImperatException {
         if (!dispatcher.hasSourceResolver(type)) {
-            throw new IllegalArgumentException("Found no SourceResolver for type `" + type.getTypeName() + "`");
+            throw new IllegalArgumentException("Found no SourceResolver for valueType `" + type.getTypeName() + "`");
         }
         var sourceResolver = dispatcher.getSourceResolver(type);
         assert sourceResolver != null;
@@ -127,7 +127,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * Fetches the argument/input resolved by the context
      * using {@link ContextResolver}
      *
-     * @param type type of argument to return
+     * @param type valueType of argument to return
      * @return the argument/input resolved by the context
      */
     @Override
@@ -183,11 +183,13 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
 
 
     @Override
-    public <T> void resolveArgument(Command<S> command,
-                                    @Nullable String raw,
-                                    int index,
-                                    CommandParameter<S> parameter,
-                                    @Nullable T value) throws ImperatException {
+    public <T> void resolveArgument(
+        Command<S> command,
+        @Nullable String raw,
+        int index,
+        CommandParameter<S> parameter,
+        @Nullable T value
+    ) throws ImperatException {
 
         if (value != null && TypeUtility.isNumericType(value.getClass())
             && parameter instanceof NumericParameter<S> numericParameter

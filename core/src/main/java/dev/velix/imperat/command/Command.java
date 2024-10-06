@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 /**
  * Represents a wrapper for the actual command's data
  *
- * @param <S> the command sender type
+ * @param <S> the command sender valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Command<S extends Source> extends CommandParameter<S> {
@@ -309,7 +309,7 @@ public interface Command<S extends Source> extends CommandParameter<S> {
     }
 
     /**
-     * @return the value type of this parameter
+     * @return the value valueType of this parameter
      */
     @Override
     default TypeWrap<?> wrappedType() {

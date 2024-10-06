@@ -12,10 +12,10 @@ import java.lang.reflect.Type;
  * Represents a usage verifier where it checks for ambiguity in a slightly
  * different way than the {@link SimpleVerifier}.
  * Example: If you have two usages of a command: `/command <arg1>` and `/command <arg2>`,
- * while arg1 is a parameter of type String, and arg2 is a parameter of type Boolean,
+ * while arg1 is a parameter of valueType String, and arg2 is a parameter of valueType Boolean,
  * It will not consider this an ambiguity unless both parameters are of same {@link Type} !
  *
- * @param <S> the command sender type
+ * @param <S> the command sender valueType
  */
 @ApiStatus.Internal
 final class TypeTolerantVerifier<S extends Source> extends SimpleVerifier<S> {
@@ -51,7 +51,7 @@ final class TypeTolerantVerifier<S extends Source> extends SimpleVerifier<S> {
 
     private boolean areSimilarParameters(CommandParameter<S> param1, CommandParameter<S> param2) {
         if (!param1.isCommand() && !param2.isCommand()) {
-            return TypeUtility.matches(param1.type(), param2.type());
+            return TypeUtility.matches(param1.valueType(), param2.valueType());
         } else if (param1.isCommand() && param2.isCommand()) {
             return param1.equals(param2);
         }

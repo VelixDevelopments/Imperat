@@ -102,7 +102,7 @@ public final class ValueResolverRegistry<S extends Source> extends Registry<Type
             Cursor<S> cursor,
             String raw
         ) throws ImperatException {
-            var enumType = (Class<? extends Enum>) parameter.type();
+            var enumType = (Class<? extends Enum>) parameter.valueType();
             try {
                 return Enum.valueOf(enumType, raw.toUpperCase());
             } catch (EnumConstantNotPresentException ex) {

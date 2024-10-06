@@ -9,7 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
  * This class represents the execution/action of this command that's triggered when
  * the sender asks for this command to be executed.
  *
- * @param <S> the command sender type
+ * @param <S> the command sender valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CommandExecution<S extends Source> {

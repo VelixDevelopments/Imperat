@@ -81,7 +81,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private void regDefThrowableResolvers() {
 
         this.setThrowableResolver(InvalidSourceException.class, (exception, imperat, context) -> {
-            throw new UnsupportedOperationException("Couldn't find any source resolver for type `"
+            throw new UnsupportedOperationException("Couldn't find any source resolver for valueType `"
                 + exception.getTargetType().getType().getTypeName() + "'");
         });
 
@@ -261,12 +261,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * Registers a type of annotations so that it can be
-     * detected by {@link AnnotationReader} , it's useful as it allows that type of annotation
+     * Registers a valueType of annotations so that it can be
+     * detected by {@link AnnotationReader} , it's useful as it allows that valueType of annotation
      * to be recognized as a true Imperat-related annotation to be used in something like checking if a
      * {@link CommandParameter} is annotated and checks for the annotations it has.
      *
-     * @param type the type of annotation
+     * @param type the valueType of annotation
      */
     @SafeVarargs
     @Override
@@ -277,7 +277,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     /**
      * Registers {@link AnnotationReplacer}
      *
-     * @param type     the type to replace the annotation by
+     * @param type     the valueType to replace the annotation by
      * @param replacer the replacer
      */
     @Override
@@ -323,11 +323,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * Checks whether the type has
+     * Checks whether the valueType has
      * a registered context-resolver
      *
-     * @param type the type
-     * @return whether the type has
+     * @param type the valueType
+     * @return whether the valueType has
      * a context-resolver
      */
     @Override
@@ -355,9 +355,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * Fetches {@link ContextResolver} for a certain type
+     * Fetches {@link ContextResolver} for a certain valueType
      *
-     * @param resolvingContextType the type for this resolver
+     * @param resolvingContextType the valueType for this resolver
      * @return the context resolver
      */
     @Override
@@ -380,7 +380,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     /**
      * Registers {@link ContextResolver}
      *
-     * @param type     the class-type of value being resolved from context
+     * @param type     the class-valueType of value being resolved from context
      * @param resolver the resolver for this value
      */
     @Override
@@ -392,7 +392,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     /**
      * Registers {@link ValueResolver}
      *
-     * @param type     the class-type of value being resolved from context
+     * @param type     the class-valueType of value being resolved from context
      * @param resolver the resolver for this value
      */
     @Override
@@ -412,7 +412,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * Fetches {@link ValueResolver} for a certain value
      *
      * @param resolvingValueType the value that the resolver ends providing it from the context
-     * @return the context resolver of a certain type
+     * @return the context resolver of a certain valueType
      */
     @Override
     public @Nullable ValueResolver<S, ?> getValueResolver(Type resolvingValueType) {
@@ -420,11 +420,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * Fetches the suggestion provider/resolver for a specific type of
+     * Fetches the suggestion provider/resolver for a specific valueType of
      * argument or parameter.
      *
-     * @param type the type
-     * @return the {@link SuggestionResolver} instance for that type
+     * @param type the valueType
+     * @return the {@link SuggestionResolver} instance for that valueType
      */
     @Override
     public @Nullable SuggestionResolver<S> getSuggestionResolverByType(Type type) {
@@ -432,10 +432,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * Checks whether the type can be a command sender
+     * Checks whether the valueType can be a command sender
      *
-     * @param type the type
-     * @return whether the type can be a command sender
+     * @param type the valueType
+     * @return whether the valueType can be a command sender
      */
     @Override
     public boolean canBeSender(Type type) {
@@ -453,9 +453,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * Registers a suggestion resolver to a type
+     * Registers a suggestion resolver to a valueType
      *
-     * @param type               the type
+     * @param type               the valueType
      * @param suggestionResolver the suggestion resolver.
      */
     @Override

@@ -68,7 +68,7 @@ final class SyntaxDataLoader {
     }
 
     private static Argument<?> argFromParameter(CommandParameter<MinestomSource> parameter) {
-        var type = parameter.type();
+        var type = parameter.valueType();
         var id = parameter.name();
 
         if (parameter.isCommand()) {
@@ -132,14 +132,14 @@ final class SyntaxDataLoader {
         if (TypeUtility.matches(type, Component.class))
             return ArgumentType.Component(id);
         
-        /*if (TypeUtility.matches(type, RelativeVec.class))
+        /*if (TypeUtility.matches(valueType, RelativeVec.class))
             return ArgumentType.RelativeVec3(id);
         
-        if (TypeUtility.matches(type, RelativeVec2.class))
+        if (TypeUtility.matches(valueType, RelativeVec2.class))
             return ArgumentType.RelativeVec2(id);
         */
 
-        throw new IllegalArgumentException("Unsupported parameter type: " + type);
+        throw new IllegalArgumentException("Unsupported parameter valueType: " + type);
     }
 
 }

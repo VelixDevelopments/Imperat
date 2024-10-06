@@ -100,7 +100,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
 
         @Override
         public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
-            Type type = parameter.type();
+            Type type = parameter.valueType();
             return getResults(type)
                 .orElseGet(() -> {
                     registerEnumResolver(type);

@@ -1,8 +1,6 @@
 package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.parameters.types.ParameterType;
-import dev.velix.imperat.command.parameters.types.ParameterTypes;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.ApiStatus;
@@ -30,8 +28,9 @@ public final class ArgumentNode<S extends Source> extends ParameterNode<S, Comma
             return data.asFlagParameter()
                 .flagData().acceptsInput(flagInput);
         }
-        ParameterType type = ParameterTypes.getParamType(data.type());
-        return type == null || type.matchesInput(input);
+        var type = data.type();
+        return type.matchesInput(input);
+        //return valueType == null || valueType.matchesInput(input);
     }
 
     @Override

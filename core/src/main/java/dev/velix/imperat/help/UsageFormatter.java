@@ -19,7 +19,7 @@ public interface UsageFormatter {
      * @param command the command
      * @param usage   the usage to display
      * @param index   the index of the usage
-     * @param <S>     the sender-type
+     * @param <S>     the sender-valueType
      * @return the usage component
      */
     <S extends Source> String format(

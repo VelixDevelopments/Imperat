@@ -8,7 +8,7 @@ import dev.velix.imperat.util.TypeWrap;
 public final class BooleanValueSupplier implements OptionalValueSupplier<Boolean> {
 
     /**
-     * @return The type of value to supply
+     * @return The valueType of value to supply
      */
     @Override
     public TypeWrap<Boolean> getValueType() {

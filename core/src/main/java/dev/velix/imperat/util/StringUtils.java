@@ -1,8 +1,10 @@
 package dev.velix.imperat.util;
 
+import dev.velix.imperat.context.ArgumentQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,5 +47,21 @@ public final class StringUtils {
         return prefix + parameterContent + suffix;
     }
 
+    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion, boolean extraSpace) {
+        if (argumentsInOneLine.isEmpty())
+            return !autoCompletion ? ArgumentQueue.empty() : ArgumentQueue.parse(" ");
+
+        ArgumentQueue toCollect = ArgumentQueue.empty();
+        toCollect.addAll(Arrays.asList(argumentsInOneLine.split(" ")));
+
+        if (autoCompletion && extraSpace)
+            toCollect.add(" ");
+
+        return toCollect;
+    }
+
+    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion) {
+        return parseToQueue(argumentsInOneLine, autoCompletion, false);
+    }
 }
 

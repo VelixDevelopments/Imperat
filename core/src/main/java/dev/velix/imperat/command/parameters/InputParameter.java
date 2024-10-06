@@ -2,11 +2,11 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
+import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
-import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
 
     protected Command<S> parentCommand;
     protected final String name;
-    protected final TypeWrap<?> typeWrap;
+    protected final ParameterType<S, ?> type;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
     protected final TypeSuggestionResolver<S, ?> suggestionResolver;
@@ -29,7 +29,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
 
 
     protected InputParameter(
-        String name, TypeWrap<?> typeWrap,
+        String name,
+        @NotNull ParameterType<S, ?> type,
         @Nullable String permission,
         Description description,
         boolean optional, boolean flag, boolean greedy,
@@ -37,7 +38,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
         @Nullable TypeSuggestionResolver<S, ?> suggestionResolver
     ) {
         this.name = name;
-        this.typeWrap = typeWrap;
+        this.type = type;
         this.permission = permission;
         this.description = description;
         this.optional = optional;
@@ -87,8 +88,13 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     }
 
     @Override
+    public @NotNull ParameterType<S, ?> type() {
+        return type;
+    }
+
+    @Override
     public TypeWrap<?> wrappedType() {
-        return typeWrap;
+        return type.wrappedType();
     }
 
     /**
@@ -149,9 +155,9 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      */
     @Override
     public boolean isGreedy() {
-        if (this.typeWrap.getType() != String.class && greedy) {
+        if (this.type.type() != String.class && greedy) {
             throw new IllegalStateException(
-                String.format("Usage parameter '%s' cannot be greedy while having value-type '%s'", name, type().getTypeName())
+                String.format("Usage parameter '%s' cannot be greedy while having value-valueType '%s'", name, valueType().getTypeName())
             );
         }
         return greedy;
@@ -188,7 +194,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     @Override
     public boolean similarTo(CommandParameter<?> parameter) {
         return this.name.equalsIgnoreCase(parameter.name())
-            && TypeUtility.matches(typeWrap.getType(), parameter.wrappedType().getType());
+            && type.isRelatedToType(parameter.wrappedType().getType());
     }
 
     @Override
@@ -197,12 +203,12 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
         if (!(o instanceof InputParameter<?> that)) return false;
         return Objects.equals(parentCommand, that.parentCommand)
             && Objects.equals(name, that.name)
-            && Objects.equals(typeWrap, that.typeWrap);
+            && Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, typeWrap);
+        return Objects.hash(name, type);
     }
 
     @Override

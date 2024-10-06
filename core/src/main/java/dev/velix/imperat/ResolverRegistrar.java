@@ -31,17 +31,17 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     void registerContextResolverFactory(Type type, ContextResolverFactory<S> factory);
 
     /**
-     * Checks whether the type has
+     * Checks whether the valueType has
      * a registered context-resolver
      *
-     * @param type the type
-     * @return whether the type has
+     * @param type the valueType
+     * @return whether the valueType has
      * a context-resolver
      */
     boolean hasContextResolver(Type type);
 
     /**
-     * @param resolvingContextType the type the factory is registered to
+     * @param resolvingContextType the valueType the factory is registered to
      * @return returns the factory for creation of
      * {@link ContextResolver}
      */
@@ -49,10 +49,10 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     ContextResolverFactory<S> getContextResolverFactory(Type resolvingContextType);
 
     /**
-     * Fetches {@link ContextResolver} for a certain type
+     * Fetches {@link ContextResolver} for a certain valueType
      *
-     * @param resolvingContextType the type for this resolver
-     * @param <T>                  the type of class
+     * @param resolvingContextType the valueType for this resolver
+     * @param <T>                  the valueType of class
      * @return the context resolver
      */
     @Nullable
@@ -62,7 +62,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * Fetches the context resolver for {@link ParameterElement} of a method
      *
      * @param element the element
-     * @param <T>     the type of value this parameter should be resolved into
+     * @param <T>     the valueType of value this parameter should be resolved into
      * @return the {@link ContextResolver} for this element
      */
     @Nullable
@@ -72,19 +72,19 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * Fetches the {@link ContextResolver} suitable for the {@link CommandParameter}
      *
      * @param commandParameter the parameter of a command's usage
-     * @param <T>              the type of value that will be resolved by {@link ValueResolver}
-     * @return the context resolver for this parameter's value type
+     * @param <T>              the valueType of value that will be resolved by {@link ValueResolver}
+     * @return the context resolver for this parameter's value valueType
      */
     default <T> ContextResolver<S, T> getContextResolver(CommandParameter<S> commandParameter) {
-        return getContextResolver(commandParameter.type());
+        return getContextResolver(commandParameter.valueType());
     }
 
     /**
      * Registers {@link ContextResolver}
      *
-     * @param type     the class-type of value being resolved from context
+     * @param type     the class-valueType of value being resolved from context
      * @param resolver the resolver for this value
-     * @param <T>      the type of value being resolved from context
+     * @param <T>      the valueType of value being resolved from context
      */
     <T> void registerContextResolver(Type type, @NotNull ContextResolver<S, T> resolver);
 
@@ -92,7 +92,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * Fetches {@link ValueResolver} for a certain value
      *
      * @param resolvingValueType the value that the resolver ends providing it from the context
-     * @return the value resolver of a certain type
+     * @return the value resolver of a certain valueType
      */
     @Nullable
     ValueResolver<S, ?> getValueResolver(Type resolvingValueType);
@@ -101,18 +101,18 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * Fetches the {@link ValueResolver} suitable for the {@link CommandParameter}
      *
      * @param commandParameter the parameter of a command's usage
-     * @return the value resolver for this parameter's value type
+     * @return the value resolver for this parameter's value valueType
      */
     default ValueResolver<S, ?> getValueResolver(CommandParameter<S> commandParameter) {
-        return getValueResolver(commandParameter.type());
+        return getValueResolver(commandParameter.valueType());
     }
 
     /**
      * Registers {@link ValueResolver}
      *
-     * @param type     the class-type of value being resolved from context
+     * @param type     the class-valueType of value being resolved from context
      * @param resolver the resolver for this value
-     * @param <T>      the type of value being resolved from context
+     * @param <T>      the valueType of value being resolved from context
      */
     <T> void registerValueResolver(Type type, @NotNull ValueResolver<S, T> resolver);
 
@@ -122,17 +122,17 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     Collection<? extends ValueResolver<S, ?>> getRegisteredValueResolvers();
 
     /**
-     * Fetches the suggestion provider/resolver for a specific type of
+     * Fetches the suggestion provider/resolver for a specific valueType of
      * argument or parameter.
      *
-     * @param parameter the parameter symbolizing the type and argument name
-     * @return the {@link SuggestionResolver} instance for that type
+     * @param parameter the parameter symbolizing the valueType and argument name
+     * @return the {@link SuggestionResolver} instance for that valueType
      */
     @SuppressWarnings("uncecked")
     default @NotNull SuggestionResolver<S> getParameterSuggestionResolver(CommandParameter<S> parameter) {
         SuggestionResolver<S> parameterSpecificResolver = parameter.getSuggestionResolver();
         if (parameterSpecificResolver == null) {
-            var resolverByType = getSuggestionResolverByType(parameter.type());
+            var resolverByType = getSuggestionResolverByType(parameter.valueType());
             if (resolverByType != null) return resolverByType;
             else return SuggestionResolver.type(String.class, Collections.singletonList(parameter.format()));
         } else
@@ -140,11 +140,11 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     }
 
     /**
-     * Fetches the suggestion provider/resolver for a specific type of
+     * Fetches the suggestion provider/resolver for a specific valueType of
      * argument or parameter.
      *
-     * @param type the type
-     * @return the {@link SuggestionResolver} instance for that type
+     * @param type the valueType
+     * @return the {@link SuggestionResolver} instance for that valueType
      */
     @Nullable
     SuggestionResolver<S> getSuggestionResolverByType(Type type);
@@ -162,14 +162,14 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * Registers a suggestion resolver
      *
      * @param suggestionResolver the suggestion resolver to register
-     * @param <T>                the type of value that the suggestion resolver will work with.
+     * @param <T>                the valueType of value that the suggestion resolver will work with.
      */
     <T> void registerSuggestionResolver(TypeSuggestionResolver<S, T> suggestionResolver);
 
     /**
-     * Registers a suggestion resolver to a type
+     * Registers a suggestion resolver to a valueType
      *
-     * @param type               the type
+     * @param type               the valueType
      * @param suggestionResolver the suggestion resolver.
      */
     void registerSuggestionResolver(Type type, SuggestionResolver<S> suggestionResolver);
@@ -185,18 +185,18 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     /**
      * Fetches the {@link SourceResolver} from an internal registry.
      *
-     * @param type the target source type
-     * @param <R>  the new source type parameter
-     * @return the {@link SourceResolver} for specific type
+     * @param type the target source valueType
+     * @param <R>  the new source valueType parameter
+     * @return the {@link SourceResolver} for specific valueType
      */
     <R> @Nullable SourceResolver<S, R> getSourceResolver(Type type);
 
     /**
      * Registers the {@link SourceResolver} into an internal registry
      *
-     * @param type           the target source type
+     * @param type           the target source valueType
      * @param sourceResolver the source resolver to register
-     * @param <R>            the new source type parameter
+     * @param <R>            the new source valueType parameter
      */
     default <R> void registerSourceResolver(TypeWrap<R> type, SourceResolver<S, R> sourceResolver) {
         registerSourceResolver(type.getType(), sourceResolver);
@@ -205,9 +205,9 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     /**
      * Registers the {@link SourceResolver} into an internal registry
      *
-     * @param type           the target source type
+     * @param type           the target source valueType
      * @param sourceResolver the source resolver to register
-     * @param <R>            the new source type parameter
+     * @param <R>            the new source valueType parameter
      */
     <R> void registerSourceResolver(Type type, SourceResolver<S, R> sourceResolver);
 

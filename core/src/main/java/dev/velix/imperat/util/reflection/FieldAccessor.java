@@ -3,7 +3,7 @@ package dev.velix.imperat.util.reflection;
 /**
  * An interface for retrieving the field content. (Credits: TinyProtocol)
  *
- * @param <T> - field type.
+ * @param <T> - field valueType.
  * @author Kristian
  */
 public interface FieldAccessor<T> {

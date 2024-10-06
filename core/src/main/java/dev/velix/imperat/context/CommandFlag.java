@@ -37,7 +37,7 @@ public interface CommandFlag {
     List<String> aliases();
 
     /**
-     * @return the type of input
+     * @return the valueType of input
      * from the flag
      */
     Type inputType();

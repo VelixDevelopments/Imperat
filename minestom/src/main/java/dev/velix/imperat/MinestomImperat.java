@@ -51,15 +51,15 @@ public final class MinestomImperat extends BaseImperat<MinestomSource> {
     }
 
     /**
-     * Wraps the sender into a built-in command-sender type
+     * Wraps the sender into a built-in command-sender valueType
      *
      * @param sender the sender's actual value
-     * @return the wrapped command-sender type
+     * @return the wrapped command-sender valueType
      */
     @Override
     public MinestomSource wrapSender(Object sender) {
         if (!(sender instanceof CommandSender commandSender)) {
-            throw new IllegalArgumentException("platform sender is not of type `" + CommandSender.class.getName() + "`");
+            throw new IllegalArgumentException("platform sender is not of valueType `" + CommandSender.class.getName() + "`");
         }
         return new MinestomSource(commandSender);
     }

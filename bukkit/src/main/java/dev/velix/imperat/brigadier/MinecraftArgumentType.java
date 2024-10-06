@@ -281,7 +281,7 @@ public enum MinecraftArgumentType {
     }
 
     /**
-     * Checks if this argument type is supported in this Minecraft version
+     * Checks if this argument valueType is supported in this Minecraft version
      *
      * @return If this is supported
      */
@@ -290,7 +290,7 @@ public enum MinecraftArgumentType {
     }
 
     /**
-     * Checks if this argument type requires parameters
+     * Checks if this argument valueType requires parameters
      *
      * @return If this requires parameters
      */
@@ -299,34 +299,34 @@ public enum MinecraftArgumentType {
     }
 
     /**
-     * Returns the argument type represented by this enum value, otherwise
+     * Returns the argument valueType represented by this enum value, otherwise
      * throws an exception
      *
-     * @param <T> The argument type
-     * @return The argument type
+     * @param <T> The argument valueType
+     * @return The argument valueType
      * @throws IllegalArgumentException if not supported in this version
      * @throws IllegalArgumentException if this argument requires arguments. See {@link #create(Object...)}
      */
     public @NotNull <T> ArgumentType<T> get() {
         if (argumentConstructor == null)
-            throw new IllegalArgumentException("Argument type '" + name().toLowerCase() + "' is not available on this version.");
+            throw new IllegalArgumentException("Argument valueType '" + name().toLowerCase() + "' is not available on this version.");
         if (argumentType != null)
             return (ArgumentType<T>) argumentType;
-        throw new IllegalArgumentException("This argument type requires " + parameters.length + " parameter(s) of type(s) " +
+        throw new IllegalArgumentException("This argument valueType requires " + parameters.length + " parameter(s) of valueType(s) " +
             Arrays.stream(parameters).map(Class::getName).collect(Collectors.joining(", ")) + ". Use #create() instead.");
     }
 
     /**
-     * Creates an instance of this argument type
+     * Creates an instance of this argument valueType
      *
-     * @param arguments Arguments to construct the argument type with
+     * @param arguments Arguments to construct the argument valueType with
      * @param <T>       The argument ttype
-     * @return The created argument type.
+     * @return The created argument valueType.
      * @throws IllegalArgumentException if not supported in this version
      */
     public @NotNull <T> ArgumentType<T> create(Object... arguments) {
         if (argumentConstructor == null) {
-            throw new IllegalArgumentException("Argument type '" + name().toLowerCase() + "' is not available on this version.");
+            throw new IllegalArgumentException("Argument valueType '" + name().toLowerCase() + "' is not available on this version.");
         }
 
         if (argumentType != null && arguments.length == 0) {
@@ -341,11 +341,11 @@ public enum MinecraftArgumentType {
     }
 
     /**
-     * Returns the argument type represented by this enum value, wrapped
+     * Returns the argument valueType represented by this enum value, wrapped
      * inside an {@link Optional}
      *
-     * @param <T> The argument type
-     * @return The argument type optional
+     * @param <T> The argument valueType
+     * @return The argument valueType optional
      * @throws IllegalArgumentException if this argument requires arguments. See {@link #createIfPresent(Object...)}
      */
     public @NotNull <T> Optional<ArgumentType<T>> getIfPresent() {
@@ -353,16 +353,16 @@ public enum MinecraftArgumentType {
             return Optional.empty();
         if (argumentType != null)
             return Optional.of((ArgumentType<T>) argumentType);
-        throw new IllegalArgumentException("This argument type requires " + parameters.length + " parameter(s) of type(s) " +
+        throw new IllegalArgumentException("This argument valueType requires " + parameters.length + " parameter(s) of valueType(s) " +
             Arrays.stream(parameters).map(Class::getName).collect(Collectors.joining(", ")) + ". Use #create() instead.");
     }
 
     /**
-     * Creates an instance of this argument type, wrapped in an optional.
+     * Creates an instance of this argument valueType, wrapped in an optional.
      *
-     * @param arguments Arguments to construct the argument type with
+     * @param arguments Arguments to construct the argument valueType with
      * @param <T>       The argument ttype
-     * @return The created argument type optional.
+     * @return The created argument valueType optional.
      */
     public @NotNull <T> Optional<ArgumentType<T>> createIfPresent(Object... arguments) {
         if (argumentConstructor == null) {

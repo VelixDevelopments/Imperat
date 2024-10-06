@@ -123,7 +123,7 @@ public final class AnnotationHelper {
         emptyConstructor.setAccessible(true);
         OptionalValueSupplier<T> valueSupplier = (OptionalValueSupplier<T>) emptyConstructor.newInstance();
         if (!TypeUtility.matches(valueSupplier.reflectionType(), parameter.getType())) {
-            throw new IllegalArgumentException("Optional supplier of value-type '" + valueSupplier.reflectionType().getTypeName() + "' doesn't match the optional value type '" + parameter.getType().getName() + "'");
+            throw new IllegalArgumentException("Optional supplier of value-valueType '" + valueSupplier.reflectionType().getTypeName() + "' doesn't match the optional value valueType '" + parameter.getType().getName() + "'");
         }
 
         return valueSupplier;

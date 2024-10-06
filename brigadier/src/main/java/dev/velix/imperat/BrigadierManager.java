@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  * A class that manages parsing {@link Command}
  * into brigadier {@link CommandNode}
  *
- * @param <S> the command-source type
+ * @param <S> the command-source valueType
  */
 public sealed interface BrigadierManager<S extends Source> permits BaseBrigadierManager {
 
@@ -26,24 +26,24 @@ public sealed interface BrigadierManager<S extends Source> permits BaseBrigadier
     S wrapCommandSource(Object commandSource);
 
     /**
-     * Registers the argument type to its class type
+     * Registers the argument valueType to its class valueType
      *
-     * @param type                 the type to register to the value-type obj
-     * @param argumentTypeResolver the value type resolver
-     * @param <T>                  the type parameter for the type.
+     * @param type                 the valueType to register to the value-valueType obj
+     * @param argumentTypeResolver the value valueType resolver
+     * @param <T>                  the valueType parameter for the valueType.
      */
     <T> void registerArgumentResolver(Class<T> type, ArgumentTypeResolver argumentTypeResolver);
 
     /**
-     * Registers the argument type resolver
+     * Registers the argument valueType resolver
      *
-     * @param argumentTypeResolver the value type resolver
+     * @param argumentTypeResolver the value valueType resolver
      */
     void registerArgumentResolver(ArgumentTypeResolver argumentTypeResolver);
 
 
     /**
-     * Fetches the argument type from the parameter
+     * Fetches the argument valueType from the parameter
      *
      * @param parameter the parameter
      * @return the {@link ArgumentType} for the {@link CommandParameter}

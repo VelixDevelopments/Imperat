@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  * Resolves a default non-overridable value for
  * missing required arguments
  *
- * @param <T> the type of resolver's parameter
+ * @param <T> the valueType of resolver's parameter
  */
 @FunctionalInterface
 public interface ContextResolver<S extends Source, T> {

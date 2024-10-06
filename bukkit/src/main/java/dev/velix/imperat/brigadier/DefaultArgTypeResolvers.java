@@ -21,7 +21,7 @@ class DefaultArgTypeResolvers {
 
         if (parameter.isNumeric()) {
             NumericRange range = parameter.asNumeric().getRange();
-            return numeric(parameter.type(), range);
+            return numeric(parameter.valueType(), range);
         }
 
         return null;
@@ -34,8 +34,8 @@ class DefaultArgTypeResolvers {
 
     //TODO add entity selector
     /*public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
-        Class<? extends Entity> type = BukkitImperat.getSelectedEntity(parameter.getType());
-        if (Player.class.isAssignableFrom(type)) // EntitySelector<Player>
+        Class<? extends Entity> valueType = BukkitImperat.getSelectedEntity(parameter.getType());
+        if (Player.class.isAssignableFrom(valueType)) // EntitySelector<Player>
             return MULTI_PLAYER;
         return MULTI_ENTITY;
     };*/
@@ -52,7 +52,7 @@ class DefaultArgTypeResolvers {
         } else if (TypeUtility.matches(type, double.class)) {
             return DoubleArgumentType.doubleArg(getMin(range), getMax(range));
         } else {
-            throw new IllegalArgumentException("Unsupported numeric type: " + type);
+            throw new IllegalArgumentException("Unsupported numeric valueType: " + type);
         }
     }
 

@@ -23,8 +23,8 @@ public final class AnnotationFactory {
      * Creates a new annotation with no values. Any default values will
      * automatically be used.
      *
-     * @param type The annotation type
-     * @param <T>  Annotation type
+     * @param type The annotation valueType
+     * @param <T>  Annotation valueType
      * @return The newly created annotation
      */
     public static @NotNull <T extends Annotation> T create(@NotNull Class<T> type) {
@@ -38,9 +38,9 @@ public final class AnnotationFactory {
      * Note that the map may also use {@link Supplier}s instead of direct
      * values.
      *
-     * @param type    The annotation type
+     * @param type    The annotation valueType
      * @param members The annotation members
-     * @param <T>     Annotation type
+     * @param <T>     Annotation valueType
      * @return The newly created annotation
      */
     public static @NotNull <T extends Annotation> T create(@NotNull Class<T> type,
@@ -61,8 +61,8 @@ public final class AnnotationFactory {
      * Note that the map may also use {@link Supplier}s instead of direct
      * values.
      *
-     * @param type The annotation type
-     * @param <T>  Annotation type
+     * @param type The annotation valueType
+     * @param <T>  Annotation valueType
      * @return The newly created annotation
      */
     public static @NotNull <T extends Annotation> T create(@NotNull Class<T> type,
@@ -87,7 +87,7 @@ public final class AnnotationFactory {
     /**
      * Implementation of {@link Annotation#hashCode()}.
      *
-     * @param type    The annotation type
+     * @param type    The annotation valueType
      * @param members The annotation members
      * @return The annotation's hashcode.
      */
@@ -104,7 +104,7 @@ public final class AnnotationFactory {
     /**
      * Implementation of {@link Annotation#equals(Object)}.
      *
-     * @param type    The annotation type
+     * @param type    The annotation valueType
      * @param members The annotation members
      * @param other   The other annotation to compare
      * @return if they are equal
@@ -125,7 +125,7 @@ public final class AnnotationFactory {
     /**
      * Implementation of {@link Annotation#toString()}.
      *
-     * @param type    The annotation type
+     * @param type    The annotation valueType
      * @param members The annotation members
      * @return The annotation's hashcode.
      */

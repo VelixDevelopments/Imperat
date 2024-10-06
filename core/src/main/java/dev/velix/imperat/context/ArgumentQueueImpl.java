@@ -17,6 +17,7 @@ final class ArgumentQueueImpl extends LinkedList<String> implements ArgumentQueu
         this.unmodifiableView = Collections.unmodifiableList(this);
     }
 
+
     public ArgumentQueueImpl(@NotNull String... rawArgs) {
         Collections.addAll(this, rawArgs);
         this.unmodifiableView = Collections.unmodifiableList(this);

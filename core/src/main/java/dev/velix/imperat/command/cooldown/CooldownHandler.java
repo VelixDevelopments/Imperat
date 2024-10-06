@@ -10,7 +10,7 @@ import java.util.Optional;
  * Cool-down checker and handler for the command usages
  * {@link CommandUsage}
  *
- * @param <S> the sender-type
+ * @param <S> the sender-valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface CooldownHandler<S extends Source> {

@@ -13,7 +13,7 @@ abstract class TypeVisitor {
     public final void visit(@Nullable Type... types) {
         for (final Type type : types) {
             if (type == null || !visited.add(type)) {
-                // null owner type, or already visited;
+                // null owner valueType, or already visited;
                 continue;
             }
 
@@ -30,7 +30,7 @@ abstract class TypeVisitor {
                 } else if (type instanceof GenericArrayType) {
                     visitGenericArrayType((GenericArrayType) type);
                 } else {
-                    throw new AssertionError("Unknown type: " + type);
+                    throw new AssertionError("Unknown valueType: " + type);
                 }
                 succeeded = true;
             } finally {

@@ -71,7 +71,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * @param index     the position of this argument
      * @param parameter the parameter of the argument
      * @param value     the resolved value of the argument
-     * @param <T>       the type of resolved value of the argument
+     * @param <T>       the valueType of resolved value of the argument
      */
     <T> void resolveArgument(
         Command<S> command,
