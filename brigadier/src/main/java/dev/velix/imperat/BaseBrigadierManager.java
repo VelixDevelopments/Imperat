@@ -4,7 +4,11 @@ import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -22,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
-import static com.mojang.brigadier.builder.RequiredArgumentBuilder.argument;
 
+@SuppressWarnings("unchecked")
 public abstract non-sealed class BaseBrigadierManager<S extends Source> implements BrigadierManager<S> {
 
     protected final Imperat<S> dispatcher;
@@ -34,63 +38,70 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
     }
 
     @Override
-    public <CN extends com.mojang.brigadier.tree.CommandNode<?>> @NotNull CN parseCommandIntoNode(@NotNull Command<S> command) {
+    public @NotNull <T> LiteralCommandNode<T> parseCommandIntoNode(@NotNull Command<S> command) {
         var tree = command.tree();
         var root = tree.getRoot();
-        return convertRoot(root).toInternalNode();
+        return this.<T>convertRoot(root).build();
     }
 
-    private BrigadierNode convertRoot(CommandNode<S> root) {
-        BrigadierNode bRoot = BrigadierNode.create(literal(root.getData().name()));
-
-        bRoot.withExecution(dispatcher, this)
-            .withRequirement((obj) -> {
-                    var source = wrapCommandSource(obj);
-                    return root.getData().isIgnoringACPerms()
-                        || dispatcher.getPermissionResolver().hasPermission(source, root.getData().permission());
-                }
-            );
+    @SuppressWarnings("unchecked")
+    private <T> LiteralArgumentBuilder<T> convertRoot(CommandNode<S> root) {
+        LiteralArgumentBuilder<T> builder = (LiteralArgumentBuilder<T>) literal(root.getData().name())
+            .requires((obj) -> {
+                var source = wrapCommandSource(obj);
+                return root.getData().isIgnoringACPerms()
+                    || dispatcher.getPermissionResolver().hasPermission(source, root.getData().permission());
+            });
+        executor(builder);
 
         for (var child : root.getChildren()) {
-            bRoot.addChild(convertNode(root, root, child));
+            builder.then(convertNode(root, root, child));
         }
-        return bRoot;
+        return builder;
     }
 
-    private BrigadierNode convertNode(CommandNode<S> root, ParameterNode<?, ?> parent, ParameterNode<S, ?> node) {
-        BrigadierNode child = BrigadierNode.create(node instanceof CommandNode<?> ? literal(node.getData().name()) : argument(node.getData().name(), getArgumentType(node.getData())));
-        child.withExecution(dispatcher, this)
-            .withRequirement((obj) -> {
-                var permissionResolver = dispatcher.getPermissionResolver();
-                var source = wrapCommandSource(obj);
+    private <T> com.mojang.brigadier.tree.CommandNode<T> convertNode(CommandNode<S> root, ParameterNode<?, ?> parent, ParameterNode<S, ?> node) {
 
-                boolean isIgnoringAC = root.getData().isIgnoringACPerms();
-                if (parent != root && parent instanceof CommandNode<?> parentCmdNode) {
-                    isIgnoringAC = isIgnoringAC && parentCmdNode.getData().isIgnoringACPerms();
-                }
-                if (node instanceof CommandNode<?> commandNode) {
-                    isIgnoringAC = isIgnoringAC && commandNode.getData().isIgnoringACPerms();
-                }
-                if (isIgnoringAC) {
-                    return true;
-                }
-                boolean hasParentPerm = permissionResolver.hasPermission(source, parent.getData().permission());
-                boolean hasNodePerm = permissionResolver.hasPermission(source, node.getData().permission());
+        ArgumentBuilder<T, ?> childBuilder = node instanceof CommandNode<?> ?
+            LiteralArgumentBuilder.literal(node.getData().name())
+            : RequiredArgumentBuilder.argument(node.getData().name(), getArgumentType(node.getData()));
 
-                return (hasParentPerm && hasNodePerm);
-            });
+        childBuilder.requires((obj) -> {
+            var permissionResolver = dispatcher.getPermissionResolver();
+            var source = wrapCommandSource(obj);
+
+            boolean isIgnoringAC = root.getData().isIgnoringACPerms();
+            if (parent != root && parent instanceof CommandNode<?> parentCmdNode) {
+                isIgnoringAC = isIgnoringAC && parentCmdNode.getData().isIgnoringACPerms();
+            }
+            if (node instanceof CommandNode<?> commandNode) {
+                isIgnoringAC = isIgnoringAC && commandNode.getData().isIgnoringACPerms();
+            }
+            if (isIgnoringAC) {
+                return true;
+            }
+            boolean hasParentPerm = permissionResolver.hasPermission(source, parent.getData().permission());
+            boolean hasNodePerm = permissionResolver.hasPermission(source, node.getData().permission());
+
+            return (hasParentPerm && hasNodePerm);
+        });
+
+        executor(childBuilder);
         if (!(node instanceof CommandNode<?>)) {
-            child.suggest(createSuggestionProvider(root.getData(), node.getData()));
+            ((RequiredArgumentBuilder<T, ?>) childBuilder).suggests(
+                createSuggestionProvider(root.getData(), node.getData())
+            );
         }
 
         for (var innerChild : node.getChildren()) {
-            child.addChild(convertNode(root, node, innerChild));
+            childBuilder.then(convertNode(root, node, innerChild));
         }
-        return child;
+
+        return childBuilder.build();
     }
 
 
-    private @NotNull SuggestionProvider<?> createSuggestionProvider(
+    private @NotNull <T> SuggestionProvider<T> createSuggestionProvider(
         Command<S> command,
         CommandParameter<S> parameter
     ) {
@@ -129,6 +140,15 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
                     return builder.buildFuture();
                 });
         };
+    }
+
+    private void executor(ArgumentBuilder<?, ?> builder) {
+        builder.executes((context) -> {
+            String input = context.getInput();
+            S sender = this.wrapCommandSource(context.getSource());
+            dispatcher.dispatch(sender, input);
+            return com.mojang.brigadier.Command.SINGLE_SUCCESS;
+        });
     }
 
     private String[] processedInput(final String input) {

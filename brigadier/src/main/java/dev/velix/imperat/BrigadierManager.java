@@ -2,6 +2,7 @@ package dev.velix.imperat;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A class that manages parsing {@link Command}
- * into brigadier {@link BrigadierNode}
+ * into brigadier {@link CommandNode}
  *
  * @param <S> the command-source type
  */
@@ -55,6 +56,6 @@ public sealed interface BrigadierManager<S extends Source> permits BaseBrigadier
      *
      * @return the parsed node
      */
-    <CN extends CommandNode<?>> CN parseCommandIntoNode(Command<S> command);
+    <T> LiteralCommandNode<T> parseCommandIntoNode(Command<S> command);
 
 }
