@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("ALL")
 final class LegacyPaperCommodore extends AbstractCommodore<WrappedBukkitCommand> implements Listener {
 
     private final List<CommodoreCommand> commands = new ArrayList<>();
