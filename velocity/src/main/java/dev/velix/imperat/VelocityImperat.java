@@ -10,7 +10,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.types.ParameterPlayer;
 import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,19 +53,9 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
 
     private void registerDefaultResolvers() {
         // Player
-        this.registerValueResolver(Player.class, (context, parameter, cursor, raw) -> {
-            if (raw.equalsIgnoreCase("me")) {
-                if (context.source().isConsole()) {
-                    throw new UnknownPlayerException(raw);
-                }
-                return context.source().asPlayer();
-            }
-            return proxyServer.getPlayer(raw.toLowerCase()).orElseThrow(() -> new UnknownPlayerException(raw));
-        });
+        this.registerParamType(Player.class, new ParameterPlayer(proxyServer));
 
-        this.registerSuggestionResolver(
-            SuggestionResolver.type(Player.class, proxyServer.getAllPlayers().stream().map(Player::getUsername).toList())
-        );
+
         this.setThrowableResolver(
             UnknownPlayerException.class, (exception, imperat, context) ->
                 context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")

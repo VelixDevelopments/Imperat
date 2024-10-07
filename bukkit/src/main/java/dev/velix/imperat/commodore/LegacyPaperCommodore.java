@@ -88,7 +88,6 @@ final class LegacyPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
     }
 
     @EventHandler
-    @SuppressWarnings("deprecation") // draft API, ok...
     public void onPlayerSendCommandsEvent(AsyncPlayerSendCommandsEvent<?> event) {
         if (event.isAsynchronous() || !event.hasFiredAsync()) {
             for (CommodoreCommand command : this.commands) {

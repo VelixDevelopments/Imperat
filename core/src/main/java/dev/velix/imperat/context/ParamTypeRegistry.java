@@ -12,6 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
+import java.util.UUID;
 
 @ApiStatus.Internal
 public final class ParamTypeRegistry<S extends Source> extends Registry<Type, ParameterType<S, ?>> {
@@ -22,6 +23,7 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Pa
         super();
         registerResolver(Boolean.class, ParameterTypes.bool());
         registerResolver(String.class, ParameterTypes.string());
+        registerResolver(UUID.class, ParameterTypes.uuid());
         registerResolver(CommandFlag.class, ParameterTypes.flag());
     }
 

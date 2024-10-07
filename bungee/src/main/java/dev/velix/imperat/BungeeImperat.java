@@ -9,11 +9,10 @@ import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.type.ParameterProxiedPlayer;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +37,6 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
 
         registerSourceResolvers();
         registerValueResolvers();
-        registerSuggestionResolvers();
         registerThrowableResolvers();
     }
 
@@ -62,27 +60,7 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     }
 
     private void registerValueResolvers() {
-        registerValueResolver(ProxiedPlayer.class, (ctx, param, cursor, raw) -> {
-            if (raw.equalsIgnoreCase("me")) {
-                if (ctx.source().isConsole()) {
-                    throw new UnknownPlayerException(raw);
-                }
-                return ctx.source().asPlayer();
-            }
-
-            ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(raw);
-            if (proxiedPlayer == null) {
-                throw new UnknownPlayerException(raw);
-            }
-            return proxiedPlayer;
-        });
-    }
-
-    private void registerSuggestionResolvers() {
-        registerSuggestionResolver(
-            SuggestionResolver.type(ProxiedPlayer.class, ProxyServer.getInstance().getPlayers()
-                .stream().map(ProxiedPlayer::getName).toList())
-        );
+        registerParamType(ProxiedPlayer.class, new ParameterProxiedPlayer());
     }
 
     private void registerThrowableResolvers() {

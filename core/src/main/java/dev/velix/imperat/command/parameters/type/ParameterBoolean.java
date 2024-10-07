@@ -10,7 +10,6 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 
@@ -35,6 +34,7 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
     public @Nullable Boolean resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
         var raw = commandInputStream.currentRaw();
+        assert raw != null;
         if (raw.equalsIgnoreCase("true") || raw.equalsIgnoreCase("false")) {
             return Boolean.parseBoolean(raw);
         }
@@ -57,12 +57,6 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
 
         return Boolean.parseBoolean(input);
     }
-
-    @Override
-    public Collection<String> suggestions() {
-        return super.suggestions();
-    }
-
     public ParameterBoolean<S> setAllowVariants(boolean allowVariants) {
         this.allowVariants = allowVariants;
         if (allowVariants) {

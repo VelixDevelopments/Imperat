@@ -33,4 +33,8 @@ public final class ParameterTypes {
     public static @NotNull <S extends Source> ParameterCommand<S> command() {
         return new ParameterCommand<>();
     }
+
+    public static <S extends Source> ParameterUUID<S> uuid() {
+        return new ParameterUUID<>();
+    }
 }

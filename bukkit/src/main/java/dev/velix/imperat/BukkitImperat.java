@@ -11,6 +11,9 @@ import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
 import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.type.ParameterOfflinePlayer;
+import dev.velix.imperat.type.ParameterPlayer;
+import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeUtility;
@@ -53,9 +56,6 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         this.adventureProvider = loadAdventure(adventureProvider);
         registerSourceResolvers();
         registerValueResolvers();
-        registerSuggestionResolvers();
-
-
     }
 
     private void registerSourceResolvers() {
@@ -183,35 +183,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     }
 
     private void registerValueResolvers() {
-        this.registerValueResolver(Player.class, (context, parameter, cursor, raw) -> {
-            if (raw.equalsIgnoreCase("me")) {
-                if (context.source().isConsole()) {
-                    throw new UnknownPlayerException(raw);
-                }
-                return context.source().asPlayer();
-            }
-            final Player player = Bukkit.getPlayer(raw.toLowerCase());
-            if (player != null) return player;
-            throw new UnknownPlayerException(raw);
-        });
-
-        this.registerValueResolver(OfflinePlayer.class, (context, parameter, cursor, raw) -> {
-            if (raw.length() > 16) {
-                throw new UnknownPlayerException(raw);
-            }
-            return Bukkit.getOfflinePlayer(raw);
-        });
-
-        this.registerValueResolver(World.class, (context, parameter, cursor, raw) -> {
-            World world = Bukkit.getWorld(raw.toLowerCase());
-            if (world != null) return world;
-            throw new UnknownWorldException(raw);
-        });
-    }
-
-    private void registerSuggestionResolvers() {
-        registerSuggestionResolver(BukkitSuggestionResolvers.PLAYER);
-        registerSuggestionResolver(BukkitSuggestionResolvers.OFFLINE_PLAYER);
+        this.registerParamType(Player.class, new ParameterPlayer());
+        this.registerParamType(OfflinePlayer.class, new ParameterOfflinePlayer());
+        this.registerParamType(World.class, new ParameterWorld());
     }
 
     public void applyBrigadier() {
