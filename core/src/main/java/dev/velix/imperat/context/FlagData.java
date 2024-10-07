@@ -1,10 +1,10 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -13,13 +13,19 @@ import java.util.List;
  * <p>
  * A flag has merely 2 types:
  * 1) A true flag is a flag that has an input value next to it in the raw input
- * 2) A {@link CommandSwitch}
+ * 2) A switch (flag that it's value input is represented by its mere presence
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface CommandFlag {
+public interface FlagData<S extends Source> {
 
-    static CommandFlag create(String name, List<String> alias, Type inputType) {
-        return new CommandFlagImpl(name, alias, inputType);
+    //TODO fix FLAGS STRUCTURE
+    static <S extends Source, T> FlagData<S> create(String name, List<String> alias, ParameterType<S, T> inputType) {
+        return new FlagDataImpl<>(name, alias, inputType);
+    }
+
+    //TODO fix FLAGS STRUCTURE
+    static <S extends Source, T> FlagData<S> createSwitch(String name, List<String> aliases) {
+        return create(name, aliases, null);
     }
 
     /**
@@ -40,7 +46,7 @@ public interface CommandFlag {
      * @return the valueType of input
      * from the flag
      */
-    Type inputType();
+    <T> ParameterType<S, T> inputType();
 
     default boolean hasAlias(String alias) {
         return aliases().contains(alias.toLowerCase());
@@ -49,7 +55,7 @@ public interface CommandFlag {
     default String format() {
 
         String display = this.name();
-        String valueFormat = (this instanceof CommandSwitch) ? "" : " <value>";
+        String valueFormat = this.inputType() == null ? "" : " <value>";
         return StringUtils.normalizedParameterFormatting("-" + display
             + valueFormat, true);
     }
@@ -59,9 +65,12 @@ public interface CommandFlag {
     }
 
 
-    record CommandFlagImpl(String name, List<String> aliases, Type inputType)
-        implements CommandFlag {
+    record FlagDataImpl<S extends Source>(String name, List<String> aliases, ParameterType<S, ?> inputType)
+        implements FlagData<S> {
     }
 
+    default boolean isSwitch() {
+        return inputType() == null;
+    }
 
 }

@@ -1,8 +1,9 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.sur.CommandInputStream;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
@@ -17,13 +18,13 @@ public interface ParameterType<S extends Source, T> {
 
     Type type();
 
-    @Nullable T resolve(ResolvedContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException;
+    @Nullable T resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException;
 
     Collection<String> suggestions();
 
     TypeSuggestionResolver<S, T> getSuggestionResolver();
 
-    boolean matchesInput(String input);
+    boolean matchesInput(String input, CommandParameter<S> parameter);
 
     default boolean isRelatedToType(Type type) {
         return TypeUtility.areRelatedTypes(type, this.type());

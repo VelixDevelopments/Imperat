@@ -5,8 +5,8 @@ import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.ParameterBuilder;
-import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,7 +58,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @return the flag from the raw input, null if it cannot be a flag
      */
     @Nullable
-    CommandFlag getFlagFromRaw(String rawInput);
+    FlagData getFlagFromRaw(String rawInput);
 
     /**
      * Adds parameters to the usage

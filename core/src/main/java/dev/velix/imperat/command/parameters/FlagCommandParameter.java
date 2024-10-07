@@ -1,9 +1,10 @@
 package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Description;
-import dev.velix.imperat.context.CommandFlag;
-import dev.velix.imperat.context.CommandSwitch;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
@@ -11,59 +12,30 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
-import java.util.List;
-
 @ApiStatus.Internal
 public final class FlagCommandParameter<S extends Source> extends InputParameter<S> implements FlagParameter<S> {
 
-    private final CommandFlag flag;
-    private final OptionalValueSupplier<?> supplier;
+    private final FlagData<S> flag;
+    private final OptionalValueSupplier<?> inputValueSupplier;
     private final TypeSuggestionResolver<S, ?> inputValueSuggestionResolver;
 
     FlagCommandParameter(
-        CommandFlag flag,
+        FlagData<S> flag,
         String permission,
         Description description,
-        OptionalValueSupplier<?> valueSupplier,
+        OptionalValueSupplier<?> inputValueSupplier,
         TypeSuggestionResolver<S, ?> inputValueSuggestionResolver
     ) {
-        this(flag.name(), permission, flag.aliases(), description, flag.inputType(), valueSupplier, inputValueSuggestionResolver);
-    }
-
-    FlagCommandParameter(
-        String flagName,
-        @Nullable String permission,
-        List<String> aliases,
-        Description description,
-        Type inputType,
-        OptionalValueSupplier<?> supplier,
-        TypeSuggestionResolver<S, ?> inputValueSuggestionResolver
-    ) {
-        super(flagName, TypeWrap.of(CommandFlag.class), permission, description,
-            true, true, false, OptionalValueSupplier.empty(TypeWrap.of(CommandFlag.class)), null);
-        flag = CommandFlag.create(flagName, aliases, inputType);
-        this.supplier = supplier;
-        this.inputValueSuggestionResolver = inputValueSuggestionResolver;
-    }
-
-    FlagCommandParameter(CommandSwitch commandSwitch, @Nullable String permission,
-                         Description description, OptionalValueSupplier<?> supplier, TypeSuggestionResolver<S, ?> inputValueSuggestionResolver) {
-        super(commandSwitch.name(), TypeWrap.of(CommandSwitch.class), permission, description,
+        super(
+            flag.name(), ParameterTypes.flag(),
+            permission, description,
             true, true, false,
-            OptionalValueSupplier.empty(TypeWrap.of(CommandFlag.class)), null);
-        this.flag = commandSwitch;
-        this.supplier = supplier;
+            OptionalValueSupplier.empty(TypeWrap.of(CommandFlag.class)),
+            inputValueSuggestionResolver
+        );
+        this.flag = flag;
+        this.inputValueSupplier = inputValueSupplier;
         this.inputValueSuggestionResolver = inputValueSuggestionResolver;
-    }
-
-    FlagCommandParameter(
-        CommandSwitch commandSwitch,
-        @Nullable String permission,
-        OptionalValueSupplier<?> supplier,
-        TypeSuggestionResolver<S, ?> suggestionResolver
-    ) {
-        this(commandSwitch, permission, Description.EMPTY, supplier, suggestionResolver);
     }
 
     @Override
@@ -75,7 +47,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
      * @return The flag's data
      */
     @Override
-    public @NotNull CommandFlag flagData() {
+    public @NotNull FlagData<S> flagData() {
         return flag;
     }
 
@@ -86,7 +58,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     @Override
     @SuppressWarnings("unchecked")
     public <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
-        return (OptionalValueSupplier<T>) supplier;
+        return (OptionalValueSupplier<T>) inputValueSupplier;
     }
 
     @Override

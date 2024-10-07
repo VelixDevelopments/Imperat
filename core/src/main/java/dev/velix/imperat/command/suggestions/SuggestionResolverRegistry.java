@@ -1,14 +1,13 @@
 package dev.velix.imperat.command.suggestions;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
-import dev.velix.imperat.context.CommandFlag;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
-import dev.velix.imperat.util.Registry;
-import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -18,34 +17,31 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 @ApiStatus.Internal
-public final class SuggestionResolverRegistry<S extends Source> extends Registry<Type, SuggestionResolver<S>> {
+public final class SuggestionResolverRegistry<S extends Source> {
 
     private final Map<String, SuggestionResolver<S>> resolversPerName;
 
     private final EnumSuggestionResolver enumSuggestionResolver = new EnumSuggestionResolver();
     private final FlagSuggestionResolver flagSuggestionResolver = new FlagSuggestionResolver();
 
-    private SuggestionResolverRegistry() {
+    private final Imperat<S> imperat;
+
+    private SuggestionResolverRegistry(Imperat<S> imperat) {
         super();
-        registerResolverForType(SuggestionResolver.type(Boolean.class, "true", "false"));
+        this.imperat = imperat;
         resolversPerName = new HashMap<>();
     }
 
-    public static <S extends Source> SuggestionResolverRegistry<S> createDefault() {
-        return new SuggestionResolverRegistry<>();
+    public static <S extends Source> SuggestionResolverRegistry<S> createDefault(Imperat<S> imperat) {
+        return new SuggestionResolverRegistry<>(imperat);
     }
 
-    public <T> void registerResolverForType(TypeSuggestionResolver<S, T> suggestionResolver) {
-        this.registerResolverForType(suggestionResolver.getType().getType(), suggestionResolver);
+    public FlagSuggestionResolver getFlagSuggestionResolver() {
+        return flagSuggestionResolver;
     }
 
-    public void registerResolverForType(Type type, SuggestionResolver<S> suggestionResolver) {
-        if (TypeUtility.areRelatedTypes(type, Enum.class)) {
-            //we preload the enum he registers
-            enumSuggestionResolver.registerEnumResolver(type);
-        }
-
-        setData(type, suggestionResolver);
+    public EnumSuggestionResolver getEnumSuggestionResolver() {
+        return enumSuggestionResolver;
     }
 
     public void registerNamedResolver(String name,
@@ -53,34 +49,12 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         resolversPerName.put(name, suggestionResolver);
     }
 
-    public @Nullable SuggestionResolver<S> getResolver(Type type) {
-
-        return getData(type).orElseGet(() -> {
-
-            if (TypeUtility.areRelatedTypes(type, Enum.class)) {
-                return enumSuggestionResolver;
-            }
-
-            if (TypeUtility.areRelatedTypes(type, CommandFlag.class)) {
-                return flagSuggestionResolver;
-            }
-
-            for (var resolverByType : this.getAll()) {
-                if (resolverByType instanceof TypeSuggestionResolver<S, ?> typeSuggestionResolver
-                    && typeSuggestionResolver.getType().isSupertypeOf(type)) {
-                    return resolverByType;
-                }
-            }
-            return null;
-        });
-    }
-
     public @Nullable SuggestionResolver<S> getResolverByName(String name) {
         return resolversPerName.get(name);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    final class EnumSuggestionResolver implements TypeSuggestionResolver<S, Enum> {
+    public final class EnumSuggestionResolver implements TypeSuggestionResolver<S, Enum> {
         private final Map<Type, List<String>> PRE_LOADED_ENUMS = new HashMap<>();
 
         public void registerEnumResolver(Type raw) {
@@ -109,11 +83,11 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
         }
     }
 
-    final class FlagSuggestionResolver implements TypeSuggestionResolver<S, CommandFlag> {
+    public final class FlagSuggestionResolver implements TypeSuggestionResolver<S, FlagData> {
 
         @Override
-        public @NotNull TypeWrap<CommandFlag> getType() {
-            return TypeWrap.of(CommandFlag.class);
+        public @NotNull TypeWrap<FlagData> getType() {
+            return TypeWrap.of(FlagData.class);
         }
 
         @Override
@@ -121,7 +95,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
             assert parameter.isFlag();
             FlagParameter<S> flagParameter = parameter.asFlagParameter();
             CompletionArg arg = context.getArgToComplete();
-            CommandFlag data = flagParameter.flagData();
+            FlagData data = flagParameter.flagData();
 
             if (flagParameter.isSwitch()) {
                 //normal one arg
@@ -133,8 +107,8 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
             int argPos = arg.index();
             if (argPos > paramPos) {
                 //auto-complete the value for the flag
-                SuggestionResolver<S> flagInputResolver = getResolver(TypeWrap.of(data.inputType()).getType());
-
+                var inputType = imperat.getParameterType(data.inputType().type());
+                SuggestionResolver<S> flagInputResolver = inputType == null ? null : inputType.getSuggestionResolver();
                 //flag parameter's suggestion resolver is the same resolver for its data input.
                 if (flagInputResolver == null)
                     flagInputResolver = flagParameter.inputSuggestionResolver();
@@ -148,7 +122,7 @@ public final class SuggestionResolverRegistry<S extends Source> extends Registry
 
         }
 
-        private List<String> autoCompleteFlagNames(CommandFlag data) {
+        private List<String> autoCompleteFlagNames(FlagData data) {
             List<String> results = new ArrayList<>();
             results.add("-" + data.name());
             for (var alias : data.aliases()) {

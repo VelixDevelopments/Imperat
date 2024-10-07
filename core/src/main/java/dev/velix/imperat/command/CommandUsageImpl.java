@@ -5,8 +5,8 @@ import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.CommandFlag;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -96,7 +96,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @return the flag from the raw input, null if it cannot be a flag
      */
     @Override
-    public @Nullable CommandFlag getFlagFromRaw(String rawInput) {
+    public @Nullable FlagData getFlagFromRaw(String rawInput) {
         boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
         boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
 
@@ -108,7 +108,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
         for (var param : parameters) {
             if (!param.isFlag()) continue;
-            CommandFlag flag = param.asFlagParameter().flagData();
+            FlagData flag = param.asFlagParameter().flagData();
             if (flag.acceptsInput(inputFlagAlias)) {
                 return flag;
             }

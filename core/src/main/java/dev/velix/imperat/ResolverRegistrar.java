@@ -3,16 +3,21 @@ package dev.velix.imperat;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderResolver;
-import dev.velix.imperat.resolvers.*;
+import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.resolvers.SourceResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -72,7 +77,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
      * Fetches the {@link ContextResolver} suitable for the {@link CommandParameter}
      *
      * @param commandParameter the parameter of a command's usage
-     * @param <T>              the valueType of value that will be resolved by {@link ValueResolver}
+     * @param <T>              the valueType of value that will be resolved by {@link ParameterType#resolve(ExecutionContext, CommandInputStream)}
      * @return the context resolver for this parameter's value valueType
      */
     default <T> ContextResolver<S, T> getContextResolver(CommandParameter<S> commandParameter) {
@@ -89,37 +94,23 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     <T> void registerContextResolver(Type type, @NotNull ContextResolver<S, T> resolver);
 
     /**
-     * Fetches {@link ValueResolver} for a certain value
+     * Fetches {@link ParameterType} for a certain value
      *
      * @param resolvingValueType the value that the resolver ends providing it from the context
      * @return the value resolver of a certain valueType
      */
     @Nullable
-    ValueResolver<S, ?> getValueResolver(Type resolvingValueType);
+    ParameterType<S, ?> getParameterType(Type resolvingValueType);
 
     /**
-     * Fetches the {@link ValueResolver} suitable for the {@link CommandParameter}
-     *
-     * @param commandParameter the parameter of a command's usage
-     * @return the value resolver for this parameter's value valueType
-     */
-    default ValueResolver<S, ?> getValueResolver(CommandParameter<S> commandParameter) {
-        return getValueResolver(commandParameter.valueType());
-    }
-
-    /**
-     * Registers {@link ValueResolver}
+     * Registers {@link ParameterType}
      *
      * @param type     the class-valueType of value being resolved from context
      * @param resolver the resolver for this value
      * @param <T>      the valueType of value being resolved from context
      */
-    <T> void registerValueResolver(Type type, @NotNull ValueResolver<S, T> resolver);
+    <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver);
 
-    /**
-     * @return all currently registered {@link ValueResolver}
-     */
-    Collection<? extends ValueResolver<S, ?>> getRegisteredValueResolvers();
 
     /**
      * Fetches the suggestion provider/resolver for a specific valueType of
@@ -158,21 +149,6 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     @Nullable
     SuggestionResolver<S> getNamedSuggestionResolver(String name);
 
-    /**
-     * Registers a suggestion resolver
-     *
-     * @param suggestionResolver the suggestion resolver to register
-     * @param <T>                the valueType of value that the suggestion resolver will work with.
-     */
-    <T> void registerSuggestionResolver(TypeSuggestionResolver<S, T> suggestionResolver);
-
-    /**
-     * Registers a suggestion resolver to a valueType
-     *
-     * @param type               the valueType
-     * @param suggestionResolver the suggestion resolver.
-     */
-    void registerSuggestionResolver(Type type, SuggestionResolver<S> suggestionResolver);
 
     /**
      * Registers a suggestion resolver

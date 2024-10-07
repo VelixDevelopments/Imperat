@@ -3,6 +3,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.commands.annotations.examples.BanCommand;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
@@ -20,7 +21,6 @@ import static dev.velix.imperat.TestRun.SOURCE;
 public class TestSmartUsageResolve {
 
     TestSmartUsageResolve() {
-
     }
 
     private final static ContextFactory<TestSource> FACTORY = IMPERAT.getContextFactory();
@@ -57,6 +57,7 @@ public class TestSmartUsageResolve {
 
     @Test
     public void banWithSwitchFlag() {
+        IMPERAT.registerCommand(new BanCommand());
 
         test(
             "ban mqzen",

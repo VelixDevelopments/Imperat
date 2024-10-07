@@ -115,7 +115,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
 
     static <S extends Source, T> FlagBuilder<S, T> flag(
         String name,
-        Class<T> inputType
+        ParameterType<S, T> inputType
     ) {
         return FlagBuilder.ofFlag(name, inputType);
     }
@@ -268,4 +268,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
      */
     boolean similarTo(CommandParameter<?> parameter);
 
+    default boolean isRequired() {
+        return !isOptional();
+    }
 }

@@ -2,6 +2,8 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
@@ -82,6 +84,11 @@ public interface Command<S extends Source> extends CommandParameter<S> {
         addAliases(List.of(aliases));
     }
 
+    @Override
+    default @NotNull ParameterType<S, ?> type() {
+        return ParameterTypes.command();
+    }
+
     /**
      * Sets the position of this command in a syntax
      * DO NOT USE THIS FOR ANY REASON unless it's necessary to do so
@@ -92,6 +99,7 @@ public interface Command<S extends Source> extends CommandParameter<S> {
     default void position(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
     }
+
 
     /**
      * @return the default value if it's input is not present

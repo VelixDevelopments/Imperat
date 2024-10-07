@@ -1,14 +1,16 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.sur.CommandInputStream;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 
@@ -26,10 +28,11 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
 
     ParameterBoolean() {
         super(TypeWrap.of(Boolean.class));
+        withSuggestions("true", "false");
     }
 
     @Override
-    public @Nullable Boolean resolve(ResolvedContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable Boolean resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
         var raw = commandInputStream.currentRaw();
         if (raw.equalsIgnoreCase("true") || raw.equalsIgnoreCase("false")) {
@@ -44,7 +47,7 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
     }
 
     @Override
-    public boolean matchesInput(String input) {
+    public boolean matchesInput(String input, CommandParameter<S> parameter) {
 
         if (!allowVariants && (input.equalsIgnoreCase("true") || input.equalsIgnoreCase("false")))
             return true;
@@ -55,8 +58,18 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
         return Boolean.parseBoolean(input);
     }
 
+    @Override
+    public Collection<String> suggestions() {
+        return super.suggestions();
+    }
+
     public ParameterBoolean<S> setAllowVariants(boolean allowVariants) {
         this.allowVariants = allowVariants;
+        if (allowVariants) {
+            suggestions.addAll(VARIANTS.keySet());
+        } else {
+            suggestions.removeAll(VARIANTS.keySet());
+        }
         return this;
     }
 

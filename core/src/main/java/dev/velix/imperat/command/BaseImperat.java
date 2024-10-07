@@ -6,6 +6,7 @@ import dev.velix.imperat.annotations.base.AnnotationReader;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.CommandProcessor;
@@ -20,7 +21,10 @@ import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderRegistry;
 import dev.velix.imperat.placeholders.PlaceholderResolver;
-import dev.velix.imperat.resolvers.*;
+import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.resolvers.SourceResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
@@ -37,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     private final ContextResolverRegistry<S> contextResolverRegistry;
-    private final ValueResolverRegistry<S> valueResolverRegistry;
+    private final ParamTypeRegistry<S> paramTypeRegistry;
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
     private final PlaceholderRegistry<S> placeholderRegistry;
     private final SourceResolverRegistry<S> sourceResolverRegistry;
@@ -61,8 +65,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
         contextFactory = ContextFactory.defaultFactory(this);
         contextResolverRegistry = ContextResolverRegistry.createDefault(this);
-        valueResolverRegistry = ValueResolverRegistry.createDefault();
-        suggestionResolverRegistry = SuggestionResolverRegistry.createDefault();
+        paramTypeRegistry = ParamTypeRegistry.createDefault();
+        suggestionResolverRegistry = SuggestionResolverRegistry.createDefault(this);
         sourceResolverRegistry = SourceResolverRegistry.createDefault();
         placeholderRegistry = PlaceholderRegistry.createDefault(this);
         verifier = UsageVerifier.typeTolerantVerifier();
@@ -390,33 +394,26 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * Registers {@link ValueResolver}
+     * Registers {@link dev.velix.imperat.command.parameters.type.ParameterType}
      *
      * @param type     the class-valueType of value being resolved from context
      * @param resolver the resolver for this value
      */
     @Override
-    public <T> void registerValueResolver(Type type, @NotNull ValueResolver<S, T> resolver) {
-        valueResolverRegistry.registerResolver(type, resolver);
+    public <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver) {
+        paramTypeRegistry.registerResolver(type, resolver);
     }
 
-    /**
-     * @return all currently registered {@link ValueResolver}
-     */
-    @Override
-    public Collection<? extends ValueResolver<S, ?>> getRegisteredValueResolvers() {
-        return valueResolverRegistry.getAll();
-    }
 
     /**
-     * Fetches {@link ValueResolver} for a certain value
+     * Fetches {@link ParameterType} for a certain value
      *
      * @param resolvingValueType the value that the resolver ends providing it from the context
      * @return the context resolver of a certain valueType
      */
     @Override
-    public @Nullable ValueResolver<S, ?> getValueResolver(Type resolvingValueType) {
-        return valueResolverRegistry.getResolver(resolvingValueType);
+    public @Nullable ParameterType<S, ?> getParameterType(Type resolvingValueType) {
+        return paramTypeRegistry.getResolver(resolvingValueType).orElse(null);
     }
 
     /**
@@ -428,7 +425,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      */
     @Override
     public @Nullable SuggestionResolver<S> getSuggestionResolverByType(Type type) {
-        return suggestionResolverRegistry.getResolver(type);
+        return paramTypeRegistry.getResolver(type)
+            .map(ParameterType::getSuggestionResolver)
+            .orElse(null);
     }
 
     /**
@@ -440,27 +439,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public boolean canBeSender(Type type) {
         return TypeWrap.of(Source.class).isSupertypeOf(type);
-    }
-
-    /**
-     * Registers a suggestion resolver
-     *
-     * @param suggestionResolver the suggestion resolver to register
-     */
-    @Override
-    public <T> void registerSuggestionResolver(TypeSuggestionResolver<S, T> suggestionResolver) {
-        suggestionResolverRegistry.registerResolverForType(suggestionResolver);
-    }
-
-    /**
-     * Registers a suggestion resolver to a valueType
-     *
-     * @param type               the valueType
-     * @param suggestionResolver the suggestion resolver.
-     */
-    @Override
-    public void registerSuggestionResolver(Type type, SuggestionResolver<S> suggestionResolver) {
-        suggestionResolverRegistry.registerResolverForType(type, suggestionResolver);
     }
 
     /**

@@ -1,7 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
-import dev.velix.imperat.context.CommandFlag;
-import dev.velix.imperat.context.CommandSwitch;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import org.jetbrains.annotations.NotNull;
@@ -15,19 +14,22 @@ public interface FlagParameter<S extends Source> extends CommandParameter<S> {
      * @return The flag's data
      */
     @NotNull
-    CommandFlag flagData();
+    FlagData<S> flagData();
 
     /**
      * @return The valueType of input value
      */
     default Type inputValueType() {
-        return flagData().inputType();
+        var type = flagData().inputType();
+        if (type == null)
+            return Boolean.class;
+        return type.type();
     }
 
     /**
      * @param <T> the valueType of flag input value
      * @return the {@link TypeSuggestionResolver} for input value of this flag
-     * null if the flag is {@link CommandSwitch}, check using {@link FlagParameter#isSwitch()}
+     * null if the flag is switch, check using {@link FlagParameter#isSwitch()}
      */
     @Nullable
     <T> TypeSuggestionResolver<S, T> inputSuggestionResolver();
@@ -41,6 +43,6 @@ public interface FlagParameter<S extends Source> extends CommandParameter<S> {
     }
 
     default boolean isSwitch() {
-        return flagData() instanceof CommandSwitch;
+        return flagData().inputType() == null;
     }
 }

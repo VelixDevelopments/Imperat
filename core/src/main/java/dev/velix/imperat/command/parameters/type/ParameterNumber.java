@@ -1,8 +1,9 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.sur.CommandInputStream;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.util.TypeUtility;
@@ -32,7 +33,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     }
 
     @Override
-    public @Nullable N resolve(ResolvedContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable N resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
         String input = commandInputStream.currentRaw();
         try {
@@ -43,7 +44,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     }
 
     @Override
-    public boolean matchesInput(String input) {
+    public boolean matchesInput(String input, CommandParameter<S> parameter) {
         try {
             parse(input);
             return true;

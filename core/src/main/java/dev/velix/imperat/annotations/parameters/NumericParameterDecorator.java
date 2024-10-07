@@ -14,7 +14,7 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
 
     NumericParameterDecorator(CommandParameter<S> parameter, NumericRange range) {
         super(
-            parameter.name(), parameter.wrappedType(), parameter.permission(),
+            parameter.name(), parameter.type(), parameter.permission(),
             parameter.description(), parameter.isOptional(), parameter.isFlag(),
             parameter.isFlag(), parameter.getDefaultValueSupplier(),
             parameter.getSuggestionResolver()

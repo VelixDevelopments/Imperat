@@ -3,9 +3,11 @@ package dev.velix.imperat.context;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.internal.ResolvedArgument;
+import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.context.internal.Argument;
+import dev.velix.imperat.context.internal.CommandFlag;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.resolvers.ValueResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,13 +44,13 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * @return the argument resolved from raw into a value
      */
     @Nullable
-    ResolvedArgument<S> getResolvedArgument(Command<S> command, String name);
+    Argument<S> getResolvedArgument(Command<S> command, String name);
 
     /**
      * @param command the command/subcommand with certain args
      * @return the command/subcommand's resolved args
      */
-    List<ResolvedArgument<S>> getResolvedArguments(Command<S> command);
+    List<Argument<S>> getResolvedArguments(Command<S> command);
 
     /**
      * @return all {@link Command} that have been used in this context
@@ -57,14 +59,14 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
     Iterable<? extends Command<S>> getCommandsUsed();
 
     /**
-     * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
+     * @return an ordered collection of {@link Argument} just like how they were entered
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
-    Collection<? extends ResolvedArgument<S>> getResolvedArguments();
+    Collection<? extends Argument<S>> getResolvedArguments();
 
     /**
      * Resolves the raw input and
-     * the parameters into arguments {@link ResolvedArgument}
+     * the parameters into arguments {@link Argument}
      *
      * @param command   the command owning the argument
      * @param raw       the raw input
@@ -84,17 +86,23 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
     /**
      * Resolves flag the in the context
      *
+     * @param flagDetected   the optional flag-parameter detected
      * @param flagRaw        the flag itself raw input
      * @param flagInputRaw   the flag's value if present
-     * @param flagInputValue the flag's input value resolved by {@link ValueResolver}
-     * @param flagDetected   the optional flag-parameter detected
+     * @param flagInputValue the flag's input value resolved by {@link ParameterType#resolve(ExecutionContext, CommandInputStream)}
      */
-    void resolveFlag(
+    default void resolveFlag(
+        FlagData flagDetected,
         String flagRaw,
         @Nullable String flagInputRaw,
-        @Nullable Object flagInputValue,
-        CommandFlag flagDetected
-    );
+        @Nullable Object flagInputValue
+    ) {
+        resolveFlag(
+            new CommandFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue)
+        );
+    }
+
+    void resolveFlag(CommandFlag flag);
 
     /**
      * Fetches the last used resolved command

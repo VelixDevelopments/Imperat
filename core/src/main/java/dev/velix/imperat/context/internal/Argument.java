@@ -6,14 +6,14 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-public record ResolvedArgument<S extends Source>(
+public record Argument<S extends Source>(
     @Nullable String raw,
     CommandParameter<S> parameter,
     int index, @Nullable Object value
 ) {
     @Override
     public String toString() {
-        return "ResolvedArgument{" +
+        return "Argument{" +
             "raw='" + raw + '\'' +
             ", parameter=" + parameter.format() +
             ", index=" + index +

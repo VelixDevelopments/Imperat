@@ -29,7 +29,7 @@ public final class ArgumentNode<S extends Source> extends ParameterNode<S, Comma
                 .flagData().acceptsInput(flagInput);
         }
         var type = data.type();
-        return type.matchesInput(input);
+        return type.matchesInput(input, data);
         //return valueType == null || valueType.matchesInput(input);
     }
 

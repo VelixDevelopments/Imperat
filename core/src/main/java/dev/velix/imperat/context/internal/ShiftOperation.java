@@ -1,8 +1,8 @@
-package dev.velix.imperat.context.internal.sur;
+package dev.velix.imperat.context.internal;
 
 import java.util.function.IntUnaryOperator;
 
-public enum ShiftOperation {
+enum ShiftOperation {
     RIGHT(value -> value + 1),
 
     LEFT(value -> value - 1);

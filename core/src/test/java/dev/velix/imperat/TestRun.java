@@ -4,8 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.commands.annotations.TestCommand;
-import dev.velix.imperat.commands.annotations.examples.*;
+import dev.velix.imperat.commands.annotations.examples.BanCommand;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -34,15 +33,13 @@ public class TestRun {
 
     static {
         IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
-        IMPERAT.registerValueResolver(Group.class, new GroupValueResolver());
-        IMPERAT.registerSuggestionResolver(new GroupSuggestionResolver());
 
         //IMPERAT.registerCommand(GROUP_CMD);
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
         //IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
-        IMPERAT.registerCommand(new AnnotatedGroupCommand());
-        IMPERAT.registerCommand(new TestCommand());
-        IMPERAT.registerCommand(new OptionalArgCommand());
+        //IMPERAT.registerCommand(new AnnotatedGroupCommand());
+        //IMPERAT.registerCommand(new TestCommand());
+        //IMPERAT.registerCommand(new OptionalArgCommand());
         IMPERAT.registerCommand(new BanCommand());
 
     }

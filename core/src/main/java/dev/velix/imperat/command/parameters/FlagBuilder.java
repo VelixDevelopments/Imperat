@@ -1,26 +1,25 @@
 package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
-import dev.velix.imperat.context.CommandFlag;
-import dev.velix.imperat.context.CommandSwitch;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, CommandFlag> {
 
-    private final Type inputType;
+    private final ParameterType<S, T> inputType;
     private final List<String> aliases = new ArrayList<>();
     private OptionalValueSupplier<T> defaultValueSupplier = null;
     private TypeSuggestionResolver<S, T> suggestionResolver;
 
-    private FlagBuilder(String name, Class<T> inputType) {
-        super(name, ParameterTypes.flag(CommandFlag.create(name, Collections.emptyList(), inputType)), true, false);
+    private FlagBuilder(String name, ParameterType<S, T> inputType) {
+        super(name, ParameterTypes.flag(), true, false);
         this.inputType = inputType;
     }
 
@@ -29,7 +28,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
         this(name, null);
     }
 
-    public static <S extends Source, T> FlagBuilder<S, T> ofFlag(String name, Class<T> inputType) {
+    public static <S extends Source, T> FlagBuilder<S, T> ofFlag(String name, ParameterType<S, T> inputType) {
         return new FlagBuilder<>(name, inputType);
     }
 
@@ -64,14 +63,13 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public FlagParameter<S> build() {
-        if (inputType != null) {
-            CommandFlag flag = CommandFlag.create(name, aliases, inputType);
-            return new FlagCommandParameter<>(flag, permission, description, defaultValueSupplier, suggestionResolver);
-        } else {
-            CommandSwitch commandSwitch = CommandSwitch.create(name, aliases);
-            return new FlagCommandParameter<>(commandSwitch, permission, OptionalValueSupplier.of(false), suggestionResolver);
+        FlagData<S> flag = FlagData.create(name, aliases, inputType);
+        if (inputType == null) {
+            defaultValueSupplier = (OptionalValueSupplier<T>) OptionalValueSupplier.of(false);
         }
+        return new FlagCommandParameter<>(flag, permission, description, defaultValueSupplier, suggestionResolver);
     }
 
 }

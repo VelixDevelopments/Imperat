@@ -1,8 +1,9 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.sur.CommandInputStream;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -17,9 +18,10 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     }
 
     @Override
-    public @Nullable String resolve(ResolvedContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
+    public @Nullable String resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
         StringBuilder builder = new StringBuilder();
         final Character current = inputStream.currentLetter();
+        if (current == null) return null;
 
         if (!isQuoteChar(current)) {
             return inputStream.currentRaw();
@@ -31,12 +33,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
             //we shift to next char
             next = inputStream.popLetter().orElse(null);
             if (next == null) break;
-            if (Character.isWhitespace(current)) {
-                continue;
-            }
-
-            if (next == BACKSLASH) {
-                //skip
+            if (Character.isWhitespace(current) || next == BACKSLASH) {
                 continue;
             }
 
@@ -53,7 +50,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     }
 
     @Override
-    public boolean matchesInput(String input) {
+    public boolean matchesInput(String input, CommandParameter<S> parameter) {
         return true;
     }
 }

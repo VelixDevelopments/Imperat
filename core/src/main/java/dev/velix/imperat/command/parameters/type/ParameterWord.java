@@ -1,8 +1,9 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.sur.CommandInputStream;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.util.Preconditions;
@@ -24,11 +25,12 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
     }
 
     @Override
-    public @Nullable String resolve(ResolvedContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable String resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
         var nextRaw = commandInputStream.currentRaw();
         if (restrictions.isEmpty()) {
             return nextRaw;
         }
+        assert nextRaw != null;
         return Optional.of(nextRaw).filter(restrictions::contains)
             .orElseThrow(() -> new SourceException("Word '%s' is not within the given restrictions=%s", nextRaw, restrictions.toString()));
     }
@@ -39,7 +41,7 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
     }
 
     @Override
-    public boolean matchesInput(String input) {
+    public boolean matchesInput(String input, CommandParameter<S> parameter) {
         if (!restrictions.isEmpty()) {
             return restrictions.contains(input);
         }

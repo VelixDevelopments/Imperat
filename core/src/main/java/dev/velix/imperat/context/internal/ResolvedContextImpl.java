@@ -6,12 +6,12 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
-import dev.velix.imperat.context.*;
-import dev.velix.imperat.context.internal.sur.SmartUsageResolve;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NumberOutOfRangeException;
 import dev.velix.imperat.resolvers.ContextResolver;
-import dev.velix.imperat.resolvers.ValueResolver;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
@@ -35,11 +35,11 @@ import java.util.*;
 final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> implements ResolvedContext<S> {
 
     private final CommandUsage<S> usage;
-    private final Registry<String, ResolvedFlag> flagRegistry = new Registry<>();
+    private final Registry<String, CommandFlag> flagRegistry = new Registry<>();
     //per command/subcommand because the class 'Command' can be also treated as a sub command
-    private final Registry<Command<S>, Registry<String, ResolvedArgument<S>>> resolvedArgumentsPerCommand = new Registry<>(LinkedHashMap::new);
+    private final Registry<Command<S>, Registry<String, Argument<S>>> resolvedArgumentsPerCommand = new Registry<>(LinkedHashMap::new);
     //all resolved arguments EXCEPT for subcommands and flags.
-    private final Registry<String, ResolvedArgument<S>> allResolvedArgs = new Registry<>(LinkedHashMap::new);
+    private final Registry<String, Argument<S>> allResolvedArgs = new Registry<>(LinkedHashMap::new);
 
     //last command used
     private Command<S> lastCommand;
@@ -63,7 +63,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * @return the argument resolved from raw into a value
      */
     @Override
-    public @Nullable ResolvedArgument<S> getResolvedArgument(Command<S> command, String name) {
+    public @Nullable Argument<S> getResolvedArgument(Command<S> command, String name) {
         return resolvedArgumentsPerCommand.getData(command)
             .flatMap((resolvedArgs) -> resolvedArgs.getData(name))
             .orElse(null);
@@ -74,9 +74,9 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * @return the command/subcommand's resolved args in as a new array-list
      */
     @Override
-    public List<ResolvedArgument<S>> getResolvedArguments(Command<S> command) {
+    public List<Argument<S>> getResolvedArguments(Command<S> command) {
         return resolvedArgumentsPerCommand.getData(command)
-            .map((argMap) -> (List<ResolvedArgument<S>>) new ArrayList<ResolvedArgument<S>>(argMap.getAll()))
+            .map((argMap) -> (List<Argument<S>>) new ArrayList<Argument<S>>(argMap.getAll()))
             .orElse(Collections.emptyList());
     }
 
@@ -89,11 +89,11 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     }
 
     /**
-     * @return an ordered collection of {@link ResolvedArgument} just like how they were entered
+     * @return an ordered collection of {@link Argument} just like how they were entered
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
     @Override
-    public Collection<? extends ResolvedArgument<S>> getResolvedArguments() {
+    public Collection<? extends Argument<S>> getResolvedArguments() {
         return allResolvedArgs.getAll();
     }
 
@@ -102,12 +102,12 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      *
      * @param name the name of the command
      * @return the value of the resolved argument
-     * @see ResolvedArgument
+     * @see Argument
      */
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getArgument(String name) {
-        return (T) allResolvedArgs.getData(name).map(ResolvedArgument::value)
+        return (T) allResolvedArgs.getData(name).map(Argument::value)
             .orElse(null);
     }
 
@@ -141,19 +141,19 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * @return the resolved flag arguments
      */
     @Override
-    public Collection<? extends ResolvedFlag> getResolvedFlags() {
+    public Collection<? extends CommandFlag> getResolvedFlags() {
         return flagRegistry.getAll();
     }
 
 
     @Override
-    public Optional<ResolvedFlag> getFlag(String flagName) {
+    public Optional<CommandFlag> getFlag(String flagName) {
         return flagRegistry.getData(flagName);
     }
 
     /**
      * Fetches the flag input value
-     * returns null if the flag is a {@link CommandSwitch}
+     * returns null if the flag is a switch
      * OR if the value hasn't been resolved somehow
      *
      * @param flagName the flag name
@@ -163,7 +163,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getFlagValue(String flagName) {
         return (T) getFlag(flagName)
-            .map(ResolvedFlag::value)
+            .map(CommandFlag::value)
             .orElse(null);
     }
 
@@ -176,9 +176,9 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
         if (arguments().isEmpty())
             return;
 
-        SmartUsageResolve<S> handler = SmartUsageResolve.create(command(), usage);
-        handler.resolve(dispatcher, this);
-        this.lastCommand = handler.getCommand();
+        SmartUsageResolve<S> sur = SmartUsageResolve.create(command(), this, usage);
+        sur.resolve();
+        this.lastCommand = sur.getCommand();
     }
 
 
@@ -199,7 +199,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
             NumericRange range = numericParameter.getRange();
             throw new NumberOutOfRangeException(numericParameter, (Number) value, range);
         }
-        final ResolvedArgument<S> argument = new ResolvedArgument<>(raw, parameter, index, value);
+        final Argument<S> argument = new Argument<>(raw, parameter, index, value);
         resolvedArgumentsPerCommand.update(command, (existingResolvedArgs) -> {
             if (existingResolvedArgs != null) {
                 return existingResolvedArgs.setData(parameter.name(), argument);
@@ -209,23 +209,9 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
         allResolvedArgs.setData(parameter.name(), argument);
     }
 
-    /**
-     * Resolves flag the in the context
-     *
-     * @param flagRaw        the flag itself raw input
-     * @param flagInputRaw   the flag's value if present
-     * @param flagInputValue the input value resolved using {@link ValueResolver}
-     * @param flagDetected   the optional flag-parameter detected
-     */
     @Override
-    public void resolveFlag(
-        String flagRaw,
-        @Nullable String flagInputRaw,
-        @Nullable Object flagInputValue,
-        CommandFlag flagDetected
-    ) {
-        flagRegistry.setData(flagDetected.name(),
-            new ResolvedFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue));
+    public void resolveFlag(CommandFlag flag) {
+        flagRegistry.setData(flag.flag().name(), flag);
     }
 
     /**

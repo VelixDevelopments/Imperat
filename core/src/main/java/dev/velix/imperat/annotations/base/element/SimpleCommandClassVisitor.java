@@ -15,7 +15,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.StrictParameterList;
-import dev.velix.imperat.command.parameters.type.ParameterTypes;
+import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Source;
@@ -422,7 +422,11 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             throw new IllegalStateException("both @Flag and @Switch at the same time !");
         }
 
-        TypeWrap<T> parameterType = TypeWrap.of((Class<T>) parameter.getParameterizedType());
+        TypeWrap<T> parameterTypeWrap = TypeWrap.of((Class<T>) parameter.getParameterizedType());
+        var type = (ParameterType<S, T>) imperat.getParameterType(parameterTypeWrap.getType());
+        if (type == null) {
+            throw new IllegalArgumentException("Unknown type detected '" + parameterTypeWrap.getType().getTypeName() + "'");
+        }
 
         String name = AnnotationHelper.getParamName(imperat, parameter, named, flag, switchAnnotation);
         boolean optional = flag != null || switchAnnotation != null
@@ -440,7 +444,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         if (suggestAnnotation != null) {
             suggestionResolver = SuggestionResolver.type(
-                parameterType,
+                parameterTypeWrap,
                 imperat.replacePlaceholders(suggestAnnotation.value())
             );
         } else if (suggestionProvider != null) {
@@ -479,7 +483,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             permission = imperat.replacePlaceholders(permAnn.value());
         }
 
-        OptionalValueSupplier<T> optionalValueSupplier = OptionalValueSupplier.empty(parameterType);
+        OptionalValueSupplier<T> optionalValueSupplier = OptionalValueSupplier.empty(parameterTypeWrap);
         if (optional) {
             Default defaultAnnotation = parameter.getAnnotation(Default.class);
             DefaultProvider provider = parameter.getAnnotation(DefaultProvider.class);
@@ -491,8 +495,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             if (suggestAnnotation != null) {
                 suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), imperat.replacePlaceholders(suggestAnnotation.value()));
             }
+
             return AnnotationParameterDecorator.decorate(
-                CommandParameter.<S, T>flag(name, (Class<T>) parameterType.getType())
+                CommandParameter.flag(name, type)
                     .suggestForInputValue((TypeSuggestionResolver<S, T>) suggestionResolver)
                     .aliases(getAllExceptFirst(flagAliases))
                     .flagDefaultInputValue(optionalValueSupplier)
@@ -516,7 +521,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         CommandParameter<S> param =
             AnnotationParameterDecorator.decorate(
                 CommandParameter.of(
-                    name, ParameterTypes.from(parameterType), permission, desc,
+                    name, type, permission, desc,
                     optional, greedy, optionalValueSupplier, suggestionResolver
                 ), element
             );
