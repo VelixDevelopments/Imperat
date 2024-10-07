@@ -113,7 +113,12 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public boolean hasNextLetter() {
         return Optional.ofNullable(currentRaw())
-            .map((raw) -> (letterPos < raw.length())).orElse(false);
+            .map((raw) -> {
+                if (letterPos >= raw.length()) {
+                    return peekRaw().isPresent();
+                }
+                return true;
+            }).orElse(false);
     }
 
     @Override

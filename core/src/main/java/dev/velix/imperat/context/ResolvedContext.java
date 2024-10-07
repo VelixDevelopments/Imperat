@@ -92,7 +92,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * @param flagInputValue the flag's input value resolved by {@link ParameterType#resolve(ExecutionContext, CommandInputStream)}
      */
     default void resolveFlag(
-        FlagData flagDetected,
+        FlagData<S> flagDetected,
         String flagRaw,
         @Nullable String flagInputRaw,
         @Nullable Object flagInputValue

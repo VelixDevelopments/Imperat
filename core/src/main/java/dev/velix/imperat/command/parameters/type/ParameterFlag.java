@@ -35,8 +35,13 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
 
         if (!flagParameter.isSwitch()) {
             ParameterType<S, ?> inputType = flagParameter.flagData().inputType();
-            rawInput = commandInputStream.popRaw().orElseThrow();
-            input = inputType.resolve(context, commandInputStream);
+            rawInput = commandInputStream.popRaw().orElse(null);
+            if (rawInput != null) {
+                input = inputType.resolve(context, commandInputStream);
+            }
+        } else {
+            System.out.println("SWITCH INPUT = TRUE");
+            input = true;
         }
         return new CommandFlag(flagParameter.flagData(), rawFlag, rawInput, input);
     }

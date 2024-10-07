@@ -212,6 +212,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     public void resolveFlag(CommandFlag flag) {
         flagRegistry.setData(flag.flag().name(), flag);
+        System.out.println("REGISTERING " + flag.flag().name() + " to value " + flag.value());
     }
 
     /**

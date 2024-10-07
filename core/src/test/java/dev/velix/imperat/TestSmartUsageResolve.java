@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static dev.velix.imperat.TestRun.IMPERAT;
 import static dev.velix.imperat.TestRun.SOURCE;
@@ -46,11 +47,13 @@ public class TestSmartUsageResolve {
         System.arraycopy(split, 1, raws, 0, split.length - 1);
         //System.arraycopy(split, 1, raws, 0, raws.length - 1);
 
+        var input = ResolvedArgsData.of(
+            inputResolve(split[0], raws)
+        );
+        input.debug();
         Assertions.assertTrue(expected
             .matches(
-                ResolvedArgsData.of(
-                    inputResolve(split[0], raws)
-                )
+                input
             )
         );
     }
@@ -58,7 +61,6 @@ public class TestSmartUsageResolve {
     @Test
     public void banWithSwitchFlag() {
         IMPERAT.registerCommand(new BanCommand());
-
         test(
             "ban mqzen",
             ResolvedArgsData.empty()
@@ -67,16 +69,17 @@ public class TestSmartUsageResolve {
                 .arg("duration", null)
                 .arg("reason", "Breaking server laws")
         );
-
-
-        test("ban mqzen -s",
+        // /ban <user> [reason]
+        // /ban mqzen "for being a good man"
+        test(
+            "ban mqzen -s",
             ResolvedArgsData.empty()
                 .arg("player", "mqzen")
                 .flag("silent", true)
                 .arg("duration", null)
                 .arg("reason", "Breaking server laws")
-        );
 
+        );
         test(
             "ban mqzen -s 1d",
             ResolvedArgsData.empty()
@@ -86,10 +89,8 @@ public class TestSmartUsageResolve {
                 .arg("reason", "Breaking server laws")
 
         );
-
-
         test(
-            "ban mqzen -s 1d A disgrace to community",
+            "ban mqzen -s 1d \"A disgrace to community\"",
             ResolvedArgsData.empty()
                 .arg("player", "mqzen")
                 .flag("silent", true)
@@ -144,18 +145,44 @@ public class TestSmartUsageResolve {
             System.out.println(other.resolvedFlags.getMap());
              */
 
+
             if (args.size() != other.args.size() || resolvedFlags.size() != other.resolvedFlags.size()) return false;
 
             for (var entry : this.args.entrySet()) {
                 var thisObj = entry.getValue();
                 var otherObj = other.args.get(entry.getKey());
-                if (otherObj == null) break;
-                if (!thisObj.equals(otherObj)) {
+                if (!Objects.equals(thisObj, otherObj)) {
                     return false;
                 }
             }
 
-            return resolvedFlags.equals(other.resolvedFlags);
+            for (String flagKey : resolvedFlags.getKeys()) {
+                Object flagValue = resolvedFlags.getData(flagKey).orElse(null);
+                if (!other.resolvedFlags.getMap().containsKey(flagKey)) {
+                    return false;
+                }
+                if (!Objects.equals(flagValue, other.resolvedFlags.getData(flagKey)
+                    .orElse(null))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void debug() {
+
+            System.out.println("----------------");
+            System.out.println("Args: ");
+            for (var arg : args.keySet()) {
+                System.out.println(" '" + arg + "' -> " + args.get(arg));
+            }
+
+            System.out.println("Flags: ");
+            for (var flag : resolvedFlags.getKeys()) {
+                var flagInputValue = resolvedFlags.getData(flag).orElse(null);
+                System.out.println(" '" + flag + "' -> " + flagInputValue);
+            }
+
         }
     }
 

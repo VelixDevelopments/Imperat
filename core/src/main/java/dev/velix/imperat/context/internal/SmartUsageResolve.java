@@ -64,7 +64,6 @@ final class SmartUsageResolve<S extends Source> {
 
             String currentRaw = stream.currentRaw();
             if (currentRaw == null) {
-                //ImperatDebugger.visualize("Filling empty optional args");
                 if (currentParameter.isOptional()) {
                     handleEmptyOptional(currentParameter);
                 }
@@ -102,15 +101,18 @@ final class SmartUsageResolve<S extends Source> {
                     getDefaultValue(context, currentParameter),
                     currentParameter.asFlagParameter().flagData()
                 );
-                stream.skipParameter();
+                stream.skip();
                 continue;
             }
             //TODO fix the infinity error
+            //ImperatDebugger.debug("FLAG DETECTED=`%s`, current-raw=`%s`, current-param=`%s`", (flag == null ? null : flag.name()), currentRaw, currentParameter.name());
             var value = currentParameter.type().resolve(context, stream);
+            //ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`", currentRaw, currentParameter.name());
             if (value instanceof CommandFlag commandFlag) {
                 context.resolveFlag(commandFlag);
                 stream.skip();
             } else if (currentParameter.isOptional()) {
+                //ImperatDebugger.debug("Resolving optional %s", currentParameter.name());
                 resolveOptional(
                     currentRaw,
                     currentParameter,

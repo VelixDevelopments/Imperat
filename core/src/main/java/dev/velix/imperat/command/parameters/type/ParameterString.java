@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ParameterString<S extends Source> extends BaseParameterType<S, String> {
 
-    private final static char DOUBLE_QUOTE = '"', SINGLE_QUOTE = '\'', BACKSLASH = '\\';
+    private final static char DOUBLE_QUOTE = '"', SINGLE_QUOTE = '\'';
 
     ParameterString() {
         super(TypeWrap.of(String.class));
@@ -33,10 +33,6 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
             //we shift to next char
             next = inputStream.popLetter().orElse(null);
             if (next == null) break;
-            if (Character.isWhitespace(current) || next == BACKSLASH) {
-                continue;
-            }
-
             builder.append(next);
 
         } while (inputStream.hasNextLetter() &&

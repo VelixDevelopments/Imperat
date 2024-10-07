@@ -58,7 +58,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @return the flag from the raw input, null if it cannot be a flag
      */
     @Nullable
-    FlagData getFlagFromRaw(String rawInput);
+    FlagData<S> getFlagFromRaw(String rawInput);
 
     /**
      * Adds parameters to the usage
