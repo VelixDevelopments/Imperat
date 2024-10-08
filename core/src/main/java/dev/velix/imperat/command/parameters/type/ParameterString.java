@@ -20,11 +20,23 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     @Override
     public @Nullable String resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
         StringBuilder builder = new StringBuilder();
+        final CommandParameter<S> parameter = inputStream.currentParameter();
+        assert parameter != null;
+
         final Character current = inputStream.currentLetter();
         if (current == null) return null;
 
         if (!isQuoteChar(current)) {
-            return inputStream.currentRaw();
+            builder.append(inputStream.currentRaw());
+
+            if (parameter.isGreedy()) {
+                while (inputStream.hasNextRaw()) {
+                    inputStream.popRaw()
+                        .ifPresent(builder::append);
+                }
+            }
+
+            return builder.toString();
         }
 
         Character next;
@@ -37,6 +49,13 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
 
         } while (inputStream.hasNextLetter() &&
             inputStream.peekLetter().filter((ch) -> !isQuoteChar(ch)).isPresent());
+
+        if (parameter.isGreedy()) {
+            while (inputStream.hasNextRaw()) {
+                inputStream.popRaw()
+                    .ifPresent(builder::append);
+            }
+        }
 
         return builder.toString();
     }
