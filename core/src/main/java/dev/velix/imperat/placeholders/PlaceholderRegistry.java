@@ -22,7 +22,6 @@ public final class PlaceholderRegistry<S extends Source> extends Registry<String
         for (var placeHolder : getAll()) {
 
             if (placeHolder.isUsedIn(result)) {
-                System.out.println("FOUNd" + placeHolder.id());
                 String id = placeHolder.id();
                 result = placeHolder.replaceResolved(imperat, id, result);
             }

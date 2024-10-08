@@ -57,7 +57,6 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         Arrays.sort(methods, METHOD_COMPARATOR);
 
         for (Method method : methods) {
-            //System.out.println(clazz.getSimpleName() + ": adding method=" + method.getName());
             MethodElement methodElement = new MethodElement(imperat, parser, root, method);
             if (methodSelector.canBeSelected(imperat, parser, methodElement, false)) {
                 root.addChild(methodElement);

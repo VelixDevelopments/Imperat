@@ -40,7 +40,6 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
                 input = inputType.resolve(context, commandInputStream);
             }
         } else {
-            System.out.println("SWITCH INPUT = TRUE");
             input = true;
         }
         return new CommandFlag(flagParameter.flagData(), rawFlag, rawInput, input);
