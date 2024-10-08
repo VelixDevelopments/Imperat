@@ -33,7 +33,7 @@ public class TestRun {
 
     static {
         IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
-
+        IMPERAT.registerDependencyResolver(Group.class, () -> new Group("my-global-group"));
         //IMPERAT.registerCommand(GROUP_CMD);
         IMPERAT.registerParamType(Group.class, new ParameterGroup());
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
@@ -144,11 +144,21 @@ public class TestRun {
     }
 
     @Test
+    public void testExec() {
+        debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
+        Assertions.assertDoesNotThrow(() -> {
+            var result = IMPERAT.dispatch(SOURCE, "test");
+            Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, result);
+        });
+    }
+
+    @Test
     public void testInnerClassParsing() {
         System.out.println("----------------------------");
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
         //debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
 
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", ""));
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi"));
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2"));
@@ -188,9 +198,7 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", ""});
-        results.whenComplete((res, ex) -> {
-            Assertions.assertLinesMatch(Stream.of("othersub", "first", "sub4", "sub1"), res.stream());
-        });
+        results.whenComplete((res, ex) -> Assertions.assertLinesMatch(Stream.of("othersub", "first", "sub4", "sub1"), res.stream()));
     }
 
     @Test

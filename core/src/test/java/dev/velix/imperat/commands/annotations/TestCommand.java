@@ -3,14 +3,20 @@ package dev.velix.imperat.commands.annotations;
 import dev.velix.imperat.TestRun;
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.*;
+import dev.velix.imperat.commands.annotations.examples.Group;
 import dev.velix.imperat.help.CommandHelp;
+import dev.velix.imperat.util.ImperatDebugger;
 
 @Command("test")
 @Inherit(FirstSub.class)
 public class TestCommand {
 
+    @Dependency
+    private Group someDependency;
+
     @Usage
     public void defaultExec(TestSource source) {
+        ImperatDebugger.debug("SOME DEPENDENCY PRINT= " + someDependency.name());
         source.reply("Default execution of test(root) command");
     }
 

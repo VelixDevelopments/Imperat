@@ -10,12 +10,15 @@ import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
+import dev.velix.imperat.resolvers.DependencySupplier;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
@@ -91,6 +94,21 @@ public non-sealed interface Imperat<S extends Source> extends
         final Class<A> type,
         final AnnotationReplacer<A> replacer
     );
+
+    /**
+     * Registers the dependency to the type
+     *
+     * @param type     the type for the dependency
+     * @param resolver the resolver
+     */
+    void registerDependencyResolver(Type type, DependencySupplier resolver);
+
+    /**
+     * Resolves dependency of certain type
+     *
+     * @param type the type
+     */
+    <T> @Nullable T resolveDependency(Type type);
 
     /**
      * Sets the usage verifier to a new instance

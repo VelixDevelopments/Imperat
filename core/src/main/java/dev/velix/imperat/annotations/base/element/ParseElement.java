@@ -17,19 +17,20 @@ import java.util.Objects;
 @ApiStatus.Internal
 public sealed abstract class ParseElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> permits ClassElement, MethodElement, ParameterElement {
 
-    //use more memory but better performance, since it's going to be GCed anyway
-    private final @NotNull AnnotationMap total = new AnnotationMap();
-    private final @Nullable ParseElement<?> parent;
-    private final @NotNull E element;
+    protected final AnnotationParser<?> parser;
+    protected final @NotNull AnnotationMap annotations = new AnnotationMap();
+    protected final @Nullable ParseElement<?> parent;
+    protected final @NotNull E element;
 
     public <S extends Source> ParseElement(
-        @NotNull AnnotationParser<S> registry,
+        @NotNull AnnotationParser<S> parser,
         @Nullable ParseElement<?> parent,
         @NotNull E element
     ) {
+        this.parser = parser;
         this.parent = parent;
         this.element = element;
-        this.load(registry);
+        this.load(parser);
     }
 
     @SuppressWarnings("unchecked")
@@ -37,16 +38,16 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
         for (Annotation annotation : element.getDeclaredAnnotations()) {
             Class<A> clazz = (Class<A>) annotation.annotationType();
             if (registry.isKnownAnnotation(clazz)) {
-                total.put(clazz, annotation);
+                annotations.put(clazz, annotation);
             } else if (registry.hasAnnotationReplacerFor(clazz)) {
                 //we add the custom annotation anyway
-                total.put(clazz, annotation);
+                annotations.put(clazz, annotation);
 
                 //adding the replaced annotations
                 AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);
                 assert replacer != null;
                 replacer.replace((A) annotation)
-                    .forEach((replacedAnnotation) -> total.put(clazz, annotation));
+                    .forEach((replacedAnnotation) -> annotations.put(clazz, annotation));
             }
         }
     }
@@ -65,7 +66,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Annotation> @Nullable T getAnnotation(@NotNull Class<T> annotationClass) {
-        return (T) total.get(annotationClass);
+        return (T) annotations.get(annotationClass);
     }
 
     /**
@@ -82,7 +83,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
      */
     @Override
     public Annotation[] getAnnotations() {
-        return total.values().toArray(new Annotation[0]);
+        return annotations.values().toArray(new Annotation[0]);
     }
 
     /**
@@ -100,7 +101,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
      */
     @Override
     public Annotation[] getDeclaredAnnotations() {
-        return total.values().toArray(new Annotation[0]);
+        return annotations.values().toArray(new Annotation[0]);
     }
 
 
@@ -112,7 +113,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     @NotNull
     @Override
     public Iterator<Annotation> iterator() {
-        return total.values().iterator();
+        return annotations.values().iterator();
     }
 
     @Override

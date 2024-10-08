@@ -36,7 +36,7 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
 
             methodOwner = (ClassElement) method.getParent();
             assert methodOwner != null;
-            boundMethodCaller = DefaultMethodCallerFactory.INSTANCE.createFor(method.getElement()).bindTo(methodOwner.newInstance());
+            boundMethodCaller = DefaultMethodCallerFactory.INSTANCE.createFor(method.getElement()).bindTo(methodOwner.getObjectInstance());
 
             this.fullParameters = fullParameters;
         } catch (Throwable e) {

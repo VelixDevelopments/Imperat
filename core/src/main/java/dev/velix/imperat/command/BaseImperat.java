@@ -21,12 +21,10 @@ import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderRegistry;
 import dev.velix.imperat.placeholders.PlaceholderResolver;
-import dev.velix.imperat.resolvers.ContextResolver;
-import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.resolvers.SourceResolver;
-import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.*;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
+import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -51,6 +49,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     private @NotNull UsageVerifier<S> verifier;
     private @Nullable HelpProvider<S> provider = null;
     private @NotNull AnnotationParser<S> annotationParser;
+
+    private final Registry<Type, DependencySupplier> dependencyResolverRegistry = new Registry<>();
 
     private final Map<String, Command<S>> commands = new HashMap<>();
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
@@ -287,6 +287,29 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
         annotationParser.registerAnnotationReplacer(type, replacer);
+    }
+
+    /**
+     * Registers the dependency to the type
+     *
+     * @param type     the type for the dependency
+     * @param resolver the resolver
+     */
+    @Override
+    public void registerDependencyResolver(Type type, DependencySupplier resolver) {
+        this.dependencyResolverRegistry.setData(type, resolver);
+    }
+
+    /**
+     * Resolves dependency of certain type
+     *
+     * @param type the type
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable T resolveDependency(Type type) {
+        return (T) dependencyResolverRegistry.getData(type)
+            .map(DependencySupplier::get).orElse(null);
     }
 
     /**

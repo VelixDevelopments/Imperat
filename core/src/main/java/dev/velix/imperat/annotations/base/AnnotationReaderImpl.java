@@ -23,7 +23,6 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     private final static Comparator<Method> METHOD_COMPARATOR = Comparator.comparingInt(AnnotationHelper::loadMethodPriority);
 
     private final Imperat<S> imperat;
-    private final Class<?> clazz;
     private final AnnotationParser<S> parser;
     private final ElementSelector<MethodElement> methodSelector;
     private final RootCommandClass<S> rootCommandClass;
@@ -37,14 +36,13 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     ) {
         this.imperat = imperat;
         this.parser = parser;
-        this.clazz = instance.getClass();
-        this.rootCommandClass = new RootCommandClass<>(clazz, instance);
+        this.rootCommandClass = new RootCommandClass<>(instance.getClass(), instance);
         this.methodSelector = methodSelector;
         this.classElement = read(imperat);
     }
 
     private ClassElement read(Imperat<S> imperat) {
-        return readClass(imperat, parser, null, clazz);
+        return readClass(imperat, parser, null, rootCommandClass.proxyClass());
     }
 
     private ClassElement readClass(
