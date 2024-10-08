@@ -36,7 +36,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     }
 
     static ArgumentQueue parseAutoCompletion(String string, boolean extraLastSpace) {
-        if (string.isEmpty() || string.isBlank()) {
+        if (string.isEmpty()) {
             return StringUtils.parseToQueue("", true);
         }
         return StringUtils.parseToQueue(string, true, extraLastSpace);

@@ -284,6 +284,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
     @Override
     public @Nullable CommandUsage<S> getUsage(List<CommandParameter<S>> parameters) {
+        if (parameters.isEmpty()) {
+            //default
+            return defaultUsage;
+        }
         return usages.get(parameters);
     }
 

@@ -4,7 +4,8 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.commands.annotations.examples.BanCommand;
+import dev.velix.imperat.commands.annotations.TestCommand;
+import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -15,8 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
-import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
+import static dev.velix.imperat.commands.TestCommands.*;
 
 public class TestRun {
 
@@ -35,12 +35,14 @@ public class TestRun {
         IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
 
         //IMPERAT.registerCommand(GROUP_CMD);
+        IMPERAT.registerParamType(Group.class, new ParameterGroup());
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
-        //IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
-        //IMPERAT.registerCommand(new AnnotatedGroupCommand());
-        //IMPERAT.registerCommand(new TestCommand());
-        //IMPERAT.registerCommand(new OptionalArgCommand());
+        IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
+        IMPERAT.registerCommand(new AnnotatedGroupCommand());
+        IMPERAT.registerCommand(new TestCommand());
+        IMPERAT.registerCommand(new OptionalArgCommand());
         IMPERAT.registerCommand(new BanCommand());
+        IMPERAT.registerCommand(new GitCommand());
 
     }
 
@@ -165,7 +167,7 @@ public class TestRun {
 
     @Test
     public void testArgParsing() {
-        ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(new String[]{""}, true);
+        ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(new String[]{" "}, true);
         Assertions.assertEquals(1, queue.size());
     }
 

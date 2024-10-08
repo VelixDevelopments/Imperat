@@ -628,10 +628,15 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
 
         CommandDispatch<S> searchResult = command.contextMatch(context);
-        //executing usage
+        searchResult.visualize();
+
 
         CommandUsage<S> usage = searchResult.toUsage(command);
+        if (usage == null) {
+            throw new InvalidSyntaxException();
+        }
 
+        //executing usage
         if (searchResult.result() == CommandDispatch.Result.COMPLETE)
             executeUsage(command, source, context, usage);
         else if (searchResult.result() == CommandDispatch.Result.INCOMPLETE) {
@@ -639,10 +644,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             if (lastParameter.isCommand()) {
                 executeUsage(command, source, context, lastParameter.asCommand().getDefaultUsage());
             } else {
-                if (usage != null)
-                    executeUsage(command, source, context, usage);
-                else
-                    throw new IllegalStateException("Matched Usage is null while the result is INCOMPLETE, this error is internal and almost impossible to occur, please contact mqzen or iiahmedyt on discord");
+                executeUsage(command, source, context, usage);
             }
         } else {
             throw new InvalidSyntaxException();

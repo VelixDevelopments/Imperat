@@ -36,7 +36,7 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
 
     public void append(ParameterNode<S, ?> node) {
         if (node == null) return;
-        if (parameters.contains(node.data)) return;
+        //if (parameters.contains(node.data)) return;
         parameters.add(node.data);
     }
 

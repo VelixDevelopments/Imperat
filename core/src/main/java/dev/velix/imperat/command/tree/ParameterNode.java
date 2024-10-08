@@ -70,4 +70,7 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
         return getChild((child) -> child instanceof CommandNode<?>);
     }
 
+    public boolean isRequired() {
+        return data.isRequired();
+    }
 }

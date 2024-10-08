@@ -3,6 +3,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.annotations.examples.BanCommand;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
@@ -32,12 +33,15 @@ public class TestSmartUsageResolve {
         Assertions.assertNotNull(cmd);
 
         Context<TestSource> context = FACTORY.createContext(SOURCE, cmd, queue);
-        CommandUsage<TestSource> usage = cmd.contextMatch(context).toUsage(cmd);
+        CommandDispatch<TestSource> res = cmd.contextMatch(context);
+        res.visualize();
+
+        CommandUsage<TestSource> usage = res.toUsage(cmd);
         Assertions.assertNotNull(usage);
 
         ResolvedContext<TestSource> resolvedContext = FACTORY.createResolvedContext(context, usage);
         Assertions.assertDoesNotThrow(resolvedContext::resolve);
-
+        Assertions.assertDoesNotThrow(() -> usage.execute(IMPERAT, SOURCE, resolvedContext));
         return resolvedContext;
     }
 
@@ -98,6 +102,14 @@ public class TestSmartUsageResolve {
                 .arg("reason", "A disgrace to community")
 
         );
+    }
+
+
+    @Test
+    public void testInputFlag() {
+        test("git", ResolvedArgsData.empty());
+        test("git commit", ResolvedArgsData.empty().flag("message", null));
+        test("git commit -m \"ksm 7yate\"", ResolvedArgsData.empty().flag("message", "ksm 7yate"));
     }
 
 

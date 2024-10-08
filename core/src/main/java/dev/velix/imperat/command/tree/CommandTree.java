@@ -151,8 +151,9 @@ public final class CommandTree<S extends Source> {
     public @NotNull CommandDispatch<S> contextMatch(
         ArgumentQueue input
     ) {
-        if (input.isEmpty())
+        if (input.isEmpty()) {
             return CommandDispatch.incomplete();
+        }
 
         int depth = 0;
 
@@ -199,7 +200,11 @@ public final class CommandTree<S extends Source> {
             //checking if depth is the last
             if (depth == input.size() - 1) {
                 //depth is last → check for missing required arguments
-                commandDispatch.append(currentNode);
+                //commandDispatch.append(currentNode);
+
+                if (currentNode instanceof CommandNode<?>) {
+                    commandDispatch.result(CommandDispatch.Result.INCOMPLETE);
+                }
 
                 if (currentNode.isOptional()) {
                     //so if the node is optional,
@@ -230,10 +235,19 @@ public final class CommandTree<S extends Source> {
                         }
                     }
 
+                    //adding rest of required args
+                    var requiredChild = currentNode.getChild(ParameterNode::isRequired);
+
+                    if (requiredChild != null) {
+                        commandDispatch.append(requiredChild);
+                        if (!requiredChild.isLeaf()) {
+                            return searchForMatch(requiredChild, commandDispatch, input, depth - 1);
+                        }
+                    }
                     //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
                     var usage = commandDispatch.toUsage(root.data);
                     commandDispatch.result(
-                        allOptional || usage != null
+                        allOptional || (usage != null && !(currentNode instanceof CommandNode<?>))
                             ? CommandDispatch.Result.COMPLETE
                             : CommandDispatch.Result.INCOMPLETE
                     );
