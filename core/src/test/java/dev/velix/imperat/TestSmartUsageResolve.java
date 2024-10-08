@@ -94,7 +94,7 @@ public class TestSmartUsageResolve {
 
         );
         test(
-            "ban mqzen -s 1d \"A disgrace to community\"",
+            "ban mqzen -s 1d \"A\" disgrace to community",
             ResolvedArgsData.empty()
                 .arg("player", "mqzen")
                 .flag("silent", true)

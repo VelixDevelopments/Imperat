@@ -27,13 +27,10 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         if (current == null) return null;
 
         if (!isQuoteChar(current)) {
-            builder.append(inputStream.currentRaw());
 
+            builder.append(inputStream.currentRaw());
             if (parameter.isGreedy()) {
-                while (inputStream.hasNextRaw()) {
-                    inputStream.popRaw()
-                        .ifPresent(builder::append);
-                }
+                handleGreedy(builder, inputStream);
             }
 
             return builder.toString();
@@ -51,10 +48,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
             inputStream.peekLetter().filter((ch) -> !isQuoteChar(ch)).isPresent());
 
         if (parameter.isGreedy()) {
-            while (inputStream.hasNextRaw()) {
-                inputStream.popRaw()
-                    .ifPresent(builder::append);
-            }
+            handleGreedy(builder, inputStream);
         }
 
         return builder.toString();
@@ -67,5 +61,18 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     @Override
     public boolean matchesInput(String input, CommandParameter<S> parameter) {
         return true;
+    }
+
+    private void handleGreedy(StringBuilder builder, CommandInputStream<S> inputStream) {
+        builder.append(" ");
+        while (inputStream.hasNextRaw()) {
+            inputStream.popRaw()
+                .ifPresent((raw) -> {
+                    builder.append(raw);
+                    if (inputStream.peekRaw().isPresent()) {
+                        builder.append(" ");
+                    }
+                });
+        }
     }
 }
