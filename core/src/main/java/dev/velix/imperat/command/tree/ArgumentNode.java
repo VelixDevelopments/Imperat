@@ -2,7 +2,6 @@ package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,22 +14,8 @@ public final class ArgumentNode<S extends Source> extends ParameterNode<S, Comma
 
     @Override
     public boolean matchesInput(String input) {
-        if (data.isFlag()) {
-            int subStringIndex;
-            if (Patterns.SINGLE_FLAG.matcher(input).matches()) {
-                subStringIndex = 1;
-            } else if (Patterns.DOUBLE_FLAG.matcher(input).matches()) {
-                subStringIndex = 2;
-            } else {
-                subStringIndex = 0;
-            }
-            String flagInput = input.substring(subStringIndex);
-            return data.asFlagParameter()
-                .flagData().acceptsInput(flagInput);
-        }
         var type = data.type();
         return type.matchesInput(input, data);
-        //return valueType == null || valueType.matchesInput(input);
     }
 
     @Override
