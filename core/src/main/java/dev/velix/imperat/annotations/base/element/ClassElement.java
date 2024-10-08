@@ -37,6 +37,7 @@ public final class ClassElement extends ParseElement<Class<?>> {
             if (!field.isAnnotationPresent(Dependency.class)) {
                 continue;
             }
+
             if (Modifier.isFinal(field.getModifiers())) {
                 throw new IllegalArgumentException("Field '" + field.getName() + "' cannot be declared final while being annotated with `@Dependency`");
             }
