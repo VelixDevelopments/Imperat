@@ -33,6 +33,11 @@ allprojects {
 
 subprojects {
     plugins.apply("java-library")
+
+    if (project.name == "paper") {
+        return
+    }
+
     plugins.apply("com.vanniktech.maven.publish")
 
     mavenPublishing {

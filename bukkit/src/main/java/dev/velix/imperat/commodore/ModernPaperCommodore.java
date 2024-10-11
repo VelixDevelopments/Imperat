@@ -6,14 +6,19 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.WrappedBukkitCommand;
 import dev.velix.imperat.command.Command;
+import dev.velix.imperat.util.reflection.Reflections;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
+import io.papermc.paper.plugin.lifecycle.event.registrar.RegistrarEvent;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEventType;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -22,6 +27,17 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
 
     private final Plugin plugin;
     private final LifecycleEventManager<Plugin> manager;
+    private final LifecycleEventType.Prioritizable commandsField = Reflections.getField(LifecycleEvents.class, LifecycleEventType.Prioritizable.class).get(null);
+    private final Method registrarEventRegistar;
+
+    {
+        try {
+            registrarEventRegistar = RegistrarEvent.class.getDeclaredMethod("registrar");
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     ModernPaperCommodore(Plugin plugin) throws ClassNotFoundException {
         Class.forName("io.papermc.paper.command.brigadier.Commands");
         this.plugin = plugin;
@@ -49,8 +65,13 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");
 
-        manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
-            Commands registrar = event.registrar();
+        manager.registerEventHandler(commandsField, event -> {
+            Commands registrar = null;
+            try {
+                registrar = (Commands) registrarEventRegistar.invoke(event);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
 
             String desc = command == null ? null : command.description().toString();
 

@@ -1,0 +1,24 @@
+repositories {
+    mavenCentral()
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/central' }
+    maven {
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        url = "https://libraries.minecraft.net"
+    }
+}
+
+dependencies {
+    compileOnly("com.mojang:brigadier:1.0.18")
+    compileOnlyApi("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+}
+
+processTestResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
