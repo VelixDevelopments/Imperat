@@ -26,7 +26,7 @@ dependencies {
     api project(":brigadier")
 
     compileOnly project(":core")
-    compileOnlyApi project(":paper")
+    compileOnly project(":paper")
 
     compileOnly("com.mojang:brigadier:1.0.18")
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
