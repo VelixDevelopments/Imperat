@@ -41,7 +41,7 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
 
     @Override
     public boolean matchesInput(String input, CommandParameter<BukkitSource> parameter) {
-        return Bukkit.getPlayer(input.toLowerCase()) != null;
+        return input.length() <= 16;
     }
 
     @Override

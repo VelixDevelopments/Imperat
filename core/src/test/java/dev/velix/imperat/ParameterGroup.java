@@ -1,6 +1,5 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.commands.annotations.examples.Group;
 import dev.velix.imperat.commands.annotations.examples.GroupRegistry;
@@ -32,11 +31,6 @@ public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
             .orElseThrow(() -> new SourceException("Unknown group '%s'", raw));
     }
 
-    @Override
-    public boolean matchesInput(String input, CommandParameter<TestSource> parameter) {
-        return GroupRegistry.getInstance()
-            .getData(input).isPresent();
-    }
 
     @Override
     public Collection<String> suggestions() {

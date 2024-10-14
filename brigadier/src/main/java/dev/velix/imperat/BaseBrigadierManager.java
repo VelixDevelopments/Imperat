@@ -126,7 +126,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             //ImperatDebugger.debug("Parsed queue= '%s'",args.join(":"));
             //ImperatDebugger.debug("Last-argument='%s'", args.getLast());
 
-            CompletionArg arg = new CompletionArg(args.getLast(), args.size() - 1);
+            CompletionArg arg = new CompletionArg(args.isEmpty() ? "" : args.getLast(), args.size() - 1);
             SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
 
             return dispatcher.getParameterSuggestionResolver(parameter).asyncAutoComplete(ctx, parameter)

@@ -370,14 +370,15 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
         LinkedList<ParameterElement> parameterElements = new LinkedList<>(method.getParameters());
 
+        ParameterElement senderParam = null;
         while (!parameterElements.isEmpty()) {
 
             ParameterElement parameterElement = parameterElements.peek();
             if (parameterElement == null) break;
             Type type = parameterElement.getElement().getParameterizedType();
 
-            if (imperat.canBeSender(type) || imperat.hasSourceResolver(type) || imperat.hasContextResolver(type)) {
-                parameterElements.removeFirst();
+            if ((senderParam == null && (imperat.canBeSender(type) || imperat.hasSourceResolver(type))) || imperat.hasContextResolver(type)) {
+                senderParam = parameterElements.removeFirst();
                 continue;
             }
 

@@ -6,6 +6,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -16,15 +17,13 @@ import java.util.Objects;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class ParameterEnum<S extends Source> extends BaseParameterType<S, Enum<?>> {
 
-    ParameterEnum(TypeWrap<Enum<?>> typeWrap) {
+    public ParameterEnum(TypeWrap<Enum<?>> typeWrap) {
         super(typeWrap);
+        Class<? extends Enum<?>> type = (Class<? extends Enum<?>>) typeWrap.getType();
+        for (var constantEnum : type.getEnumConstants()) {
+            suggestions.add(constantEnum.name());
+        }
     }
-
-    public ParameterEnum() {
-        super(new TypeWrap<>() {
-        });
-    }
-
     @Override
     public @NotNull Enum<?> resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
@@ -34,6 +33,7 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
         var raw = commandInputStream.currentRaw();
         try {
             assert raw != null;
+
             return Enum.valueOf((Class<? extends Enum>) enumType, raw.toUpperCase());
         } catch (EnumConstantNotPresentException ex) {
             throw new SourceException("Invalid " + enumType.getTypeName() + " '" + raw + "'");
@@ -46,6 +46,7 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
             if (!typeWrap.isSubtypeOf(Enum.class)) {
                 return true;
             }
+            ImperatDebugger.debug("type-enum-name= " + typeWrap.getType().getTypeName());
             Enum.valueOf((Class<? extends Enum>) typeWrap.getType(), input);
             return true;
         } catch (EnumConstantNotPresentException ex) {

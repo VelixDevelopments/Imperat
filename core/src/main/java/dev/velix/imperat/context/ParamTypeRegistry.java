@@ -17,7 +17,6 @@ import java.util.UUID;
 @ApiStatus.Internal
 public final class ParamTypeRegistry<S extends Source> extends Registry<Type, ParameterType<S, ?>> {
 
-    private final ParameterEnum<S> genericEnumType = new ParameterEnum<>();
 
     private ParamTypeRegistry() {
         super();
@@ -51,7 +50,9 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Pa
         //TODO make check for enum
         return Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
             if (TypeUtility.areRelatedTypes(type, Enum.class)) {
-                return genericEnumType;
+                ParameterEnum<S> preloadedEnumType = new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
+                registerResolver(type, preloadedEnumType);
+                return preloadedEnumType;
             }
 
             for (var registeredType : getKeys()) {

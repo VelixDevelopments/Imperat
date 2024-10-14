@@ -21,7 +21,6 @@ import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -30,28 +29,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.Map;
 
 public final class BukkitImperat extends BaseImperat<BukkitSource> {
 
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> adventureProvider;
-    private Map<String, org.bukkit.command.Command> bukkitOGMapping;
     private BukkitBrigadierManager brigadierManager;
 
-    @SuppressWarnings("unchecked")
     private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, @NotNull PermissionResolver<BukkitSource> permissionResolver) {
         super(permissionResolver);
         this.plugin = plugin;
         ImperatDebugger.setLogger(plugin.getLogger());
-        if (BukkitUtil.KNOWN_COMMANDS != null) {
-            try {
-                bukkitOGMapping = (Map<String, org.bukkit.command.Command>) BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
-            } catch (IllegalAccessException e) {
-                ImperatDebugger.warning("Failed to access the internal command map");
-            }
-        }
         this.addThrowableHandlers();
         this.adventureProvider = loadAdventure(adventureProvider);
         registerSourceResolvers();
@@ -172,11 +161,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     public void registerCommand(Command<BukkitSource> command) {
         super.registerCommand(command);
         var internalCmd = WrappedBukkitCommand.wrap(command, new InternalBukkitCommand(this, command));
-        if (BukkitUtil.KNOWN_COMMANDS != null) {
-            bukkitOGMapping.put(command.name(), internalCmd);
-        } else {
-            BukkitUtil.COMMAND_MAP.register(command.name(), internalCmd);
-        }
+
+        BukkitUtil.COMMAND_MAP.register(this.plugin.getName(), internalCmd);
+
         if (brigadierManager != null) {
             brigadierManager.registerBukkitCommand(internalCmd, command, permissionResolver);
         }
@@ -185,12 +172,11 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private void registerValueResolvers() {
         this.registerParamType(Player.class, new ParameterPlayer());
         this.registerParamType(OfflinePlayer.class, new ParameterOfflinePlayer());
-        this.registerParamType(World.class, new ParameterWorld());
+        this.registerParamType(Reflections.getClass("org.bukkit.World"), new ParameterWorld());
     }
 
     public void applyBrigadier() {
         brigadierManager = BukkitBrigadierManager.load(this);
-        //TODO apply on all currently registered commands
     }
 
 }

@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.resolvers.TypeSuggestionResolver;
@@ -35,6 +36,11 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
     @Override
     public TypeSuggestionResolver<S, T> getSuggestionResolver() {
         return suggestionResolver;
+    }
+
+    @Override
+    public boolean matchesInput(String input, CommandParameter<S> parameter) {
+        return true;
     }
 
     @Override

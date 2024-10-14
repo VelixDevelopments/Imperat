@@ -103,7 +103,6 @@ final class SmartUsageResolve<S extends Source> {
                 stream.skip();
                 continue;
             }
-            //TODO fix the infinity error
             //ImperatDebugger.debug("FLAG DETECTED=`%s`, current-raw=`%s`, current-param=`%s`", (flag == null ? null : flag.name()), currentRaw, currentParameter.name());
             var value = currentParameter.type().resolve(context, stream);
             //ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`", currentRaw, currentParameter.name());
