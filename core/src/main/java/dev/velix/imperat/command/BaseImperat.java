@@ -229,6 +229,17 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
+     * Unregisters a command from the internal registry
+     *
+     * @param name the name of the command to unregister
+     */
+    @Override
+    public void unregisterCommand(String name) {
+        Preconditions.notNull(name, "commandToRemove");
+        commands.remove(name.toLowerCase());
+    }
+
+    /**
      * @param name the name/alias of the command
      * @return fetches {@link Command} with specific name/alias
      */
@@ -700,7 +711,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         usage.execute(this, source, resolvedContext);
     }
 
-    //TODO improve (DRY)
     private void preProcess(
         @NotNull Context<S> context,
         @NotNull CommandUsage<S> usage
@@ -720,7 +730,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
     }
 
-    //TODO improve (DRY)
     private void postProcess(
         @NotNull ResolvedContext<S> context
     ) {

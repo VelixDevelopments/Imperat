@@ -11,12 +11,15 @@ import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.type.ParameterProxiedPlayer;
 import dev.velix.imperat.util.ImperatDebugger;
+import dev.velix.imperat.util.StringUtils;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashSet;
 
 public final class BungeeImperat extends BaseImperat<BungeeSource> {
 
@@ -34,7 +37,6 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         this.plugin = plugin;
         ImperatDebugger.setLogger(plugin.getLogger());
         this.adventureProvider = loadAdventureProvider(adventureProvider);
-
         registerSourceResolvers();
         registerValueResolvers();
         registerThrowableResolvers();
@@ -100,6 +102,26 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
     public void registerCommand(Command<BungeeSource> command) {
         super.registerCommand(command);
         plugin.getProxy().getPluginManager().registerCommand(plugin, new InternalBungeeCommand(this, command));
+    }
+
+    /**
+     * Unregisters a command from the internal registry
+     *
+     * @param name the name of the command to unregister
+     */
+    @Override
+    public void unregisterCommand(String name) {
+        Command<BungeeSource> imperatCmd = getCommand(name);
+        super.unregisterCommand(name);
+        if (imperatCmd == null) return;
+        for (var entry : new HashSet<>(plugin.getProxy().getPluginManager().getCommands())) {
+            var key = StringUtils.stripNamespace(entry.getKey());
+
+            if (imperatCmd.hasName(key)) {
+                plugin.getProxy().getPluginManager()
+                    .unregisterCommand(entry.getValue());
+            }
+        }
     }
 
     @Override

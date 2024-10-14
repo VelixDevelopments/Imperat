@@ -6,13 +6,16 @@ import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class BukkitUtil {
 
     public static CommandMap COMMAND_MAP;
+    public static @Nullable Field KNOWN_COMMANDS;
 
     static {
         try {
@@ -30,6 +33,10 @@ public final class BukkitUtil {
         final Class<?> craftServer = Bukkit.getServer().getClass();
         final FieldAccessor<SimpleCommandMap> accessor = Reflections.getField(craftServer, SimpleCommandMap.class);
         COMMAND_MAP = accessor.get(Bukkit.getServer());
+        if (COMMAND_MAP != null) {
+            KNOWN_COMMANDS = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            KNOWN_COMMANDS.setAccessible(true);
+        }
     }
 
     public static final class ClassesRefUtil {

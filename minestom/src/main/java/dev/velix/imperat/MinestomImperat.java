@@ -8,6 +8,9 @@ import net.minestom.server.ServerProcess;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.List;
+
 public final class MinestomImperat extends BaseImperat<MinestomSource> {
 
     private MinestomImperat(@NotNull PermissionResolver<MinestomSource> permissionResolver) {
@@ -72,6 +75,22 @@ public final class MinestomImperat extends BaseImperat<MinestomSource> {
     @Override
     public void registerCommand(Command<MinestomSource> command) {
         super.registerCommand(command);
-        MinecraftServer.getCommandManager().register();
+        MinecraftServer.getCommandManager().register(new InternalMinestomCommand(this, command));
+    }
+
+    /**
+     * Unregisters a command from the internal registry
+     *
+     * @param name the name of the command to unregister
+     */
+    @Override
+    public void unregisterCommand(String name) {
+        super.unregisterCommand(name);
+        for (var cmd : new HashSet<>(MinecraftServer.getCommandManager().getCommands())) {
+            if (cmd.getName().equalsIgnoreCase(name) || List.of(cmd.getAliases()).contains(name.toLowerCase())) {
+                MinecraftServer.getCommandManager().unregister(cmd);
+            }
+        }
+
     }
 }

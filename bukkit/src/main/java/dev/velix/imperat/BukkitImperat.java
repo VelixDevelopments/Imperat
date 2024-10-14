@@ -16,6 +16,7 @@ import dev.velix.imperat.type.ParameterPlayer;
 import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
+import dev.velix.imperat.util.StringUtils;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
@@ -29,6 +30,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public final class BukkitImperat extends BaseImperat<BukkitSource> {
 
@@ -36,11 +40,22 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> adventureProvider;
     private BukkitBrigadierManager brigadierManager;
+    private Map<String, org.bukkit.command.Command> bukkitCommands = new HashMap<>();
 
+    @SuppressWarnings("unchecked")
     private BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, @NotNull PermissionResolver<BukkitSource> permissionResolver) {
         super(permissionResolver);
         this.plugin = plugin;
         ImperatDebugger.setLogger(plugin.getLogger());
+        try {
+            if (BukkitUtil.KNOWN_COMMANDS != null) {
+                this.bukkitCommands = (Map<String, org.bukkit.command.Command>)
+                    BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
         this.addThrowableHandlers();
         this.adventureProvider = loadAdventure(adventureProvider);
         registerSourceResolvers();
@@ -166,6 +181,34 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
 
         if (brigadierManager != null) {
             brigadierManager.registerBukkitCommand(internalCmd, command, permissionResolver);
+        }
+    }
+
+    /**
+     * Unregisters a command from the internal registry
+     *
+     * @param name the name of the command to unregister
+     */
+    @Override
+    public void unregisterCommand(String name) {
+        Command<BukkitSource> imperatCmd = getCommand(name);
+        super.unregisterCommand(name);
+
+        if (imperatCmd == null) return;
+        for (var entry : new HashSet<>(bukkitCommands.entrySet())) {
+            var originalKey = entry.getKey();
+            var key = StringUtils.stripNamespace(originalKey);
+
+            if (imperatCmd.hasName(key)) {
+                bukkitCommands.remove(originalKey);
+            }
+        }
+        try {
+            if (BukkitUtil.KNOWN_COMMANDS != null) {
+                BukkitUtil.KNOWN_COMMANDS.set(BukkitUtil.COMMAND_MAP, bukkitCommands);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 

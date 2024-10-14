@@ -82,6 +82,18 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         }
     }
 
+    /**
+     * Unregisters a command from the internal registry
+     *
+     * @param name the name of the command to unregister
+     */
+    @Override
+    public void unregisterCommand(String name) {
+        super.unregisterCommand(name);
+        CommandManager manager = proxyServer.getCommandManager();
+        manager.unregister(name);
+    }
+
     @Override
     public ProxyServer getPlatform() {
         return proxyServer;
