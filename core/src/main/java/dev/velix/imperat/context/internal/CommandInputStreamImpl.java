@@ -4,8 +4,8 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.exception.TokenOutOfRangeException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -33,8 +33,9 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     @Override
-    public @Nullable CommandParameter<S> currentParameter() {
-        return usage.getParameter(cursor.parameter);
+    public @NotNull CommandParameter<S> currentParameter() {
+        return Optional.ofNullable(usage.getParameter(cursor.parameter))
+            .orElseThrow(TokenOutOfRangeException::new);
     }
 
     @Override
@@ -47,19 +48,20 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public Optional<CommandParameter<S>> popParameter() {
         cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-        return Optional.ofNullable(currentParameter());
+        return Optional.of(currentParameter());
     }
 
     @Override
-    public String currentRaw() {
-        if (cursor.raw >= queue.size()) return null;
+    public @NotNull String currentRaw() {
+        if (cursor.raw >= queue.size())
+            throw new TokenOutOfRangeException();
         return queue.get(cursor.raw);
     }
 
     @Override
-    public Character currentLetter() {
+    public @NotNull Character currentLetter() {
         if (cursor.raw >= queue.size()) {
-            return null;
+            throw new TokenOutOfRangeException();
         }
         @NotNull String raw = Objects.requireNonNull(currentRaw());
         return raw.charAt(letterPos);
@@ -107,12 +109,12 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public Optional<String> popRaw() {
         cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
-        return Optional.ofNullable(currentRaw());
+        return Optional.of(currentRaw());
     }
 
     @Override
     public boolean hasNextLetter() {
-        return Optional.ofNullable(currentRaw())
+        return Optional.of(currentRaw())
             .map((raw) -> {
                 if (letterPos >= raw.length()) {
                     return peekRaw().isPresent();
@@ -142,12 +144,8 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     @Override
-    public int rawsLength() {
-        return queue.size();
+    public boolean skipLetter() {
+        return popLetter().isPresent();
     }
 
-    @Override
-    public int parametersLength() {
-        return usage.size();
-    }
 }

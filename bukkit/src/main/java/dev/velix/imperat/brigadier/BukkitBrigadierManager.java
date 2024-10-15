@@ -24,6 +24,7 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
         if (isSupported()) {
             registerArgumentResolver(String.class, DefaultArgTypeResolvers.STRING);
             registerArgumentResolver(DefaultArgTypeResolvers.NUMERIC);
+            registerArgumentResolver(DefaultArgTypeResolvers.ENTITY_SELECTOR);
             registerArgumentResolver(Boolean.class, DefaultArgTypeResolvers.BOOLEAN);
             registerArgumentResolver(Player.class, DefaultArgTypeResolvers.PLAYER);
             registerArgumentResolver(OfflinePlayer.class, DefaultArgTypeResolvers.PLAYER);
@@ -47,6 +48,7 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
         Command<BukkitSource> imperatCommand,
         PermissionResolver<BukkitSource> resolver
     ) {
-        commodore.register(bukkitCmd, parseCommandIntoNode(imperatCommand), (player) -> resolver.hasPermission(wrapCommandSource(player), bukkitCmd.permission()));
+        commodore.register(bukkitCmd, parseCommandIntoNode(imperatCommand),
+            (player) -> resolver.hasPermission(wrapCommandSource(player), bukkitCmd.permission()));
     }
 }

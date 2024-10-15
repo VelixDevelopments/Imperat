@@ -163,4 +163,7 @@ public final class TypeUtility {
             || TypeWrap.of(type2).isSupertypeOf(type1);
     }
 
+    public static boolean isNumber(String str) {
+        return isDouble(str);
+    }
 }

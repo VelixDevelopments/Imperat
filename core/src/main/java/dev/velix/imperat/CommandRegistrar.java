@@ -32,6 +32,11 @@ public sealed interface CommandRegistrar<S extends Source> permits Imperat {
     void unregisterCommand(String name);
 
     /**
+     * Unregisters all commands from the internal registry
+     */
+    void unregisterAllCommands();
+
+    /**
      * @param name the name/alias of the command
      * @return fetches {@link Command} with specific name
      */

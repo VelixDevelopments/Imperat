@@ -17,19 +17,16 @@ import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.StringUtils;
-import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -132,10 +129,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         return create(plugin, null, DEFAULT_PERMISSION_RESOLVER);
     }
 
-    @SuppressWarnings("unchecked")
-    public static Class<? extends Entity> getSelectedEntity(@NotNull Type selectorType) {
-        return (Class<? extends Entity>) TypeUtility.getInsideGeneric(selectorType, Entity.class);
-    }
+
 
     /**
      * Wraps the sender into a built-in command-sender valueType
@@ -210,6 +204,23 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Unregisters all commands from the internal registry
+     */
+    @Override
+    public void unregisterAllCommands() {
+        super.unregisterAllCommands();
+        if (BukkitUtil.KNOWN_COMMANDS != null) {
+            bukkitCommands.clear();
+            try {
+                BukkitUtil.KNOWN_COMMANDS.set(BukkitUtil.COMMAND_MAP, bukkitCommands);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        //BukkitUtil.COMMAND_MAP.clearCommands();
     }
 
     private void registerValueResolvers() {

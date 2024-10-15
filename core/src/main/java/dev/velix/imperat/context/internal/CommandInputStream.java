@@ -19,13 +19,13 @@ public interface CommandInputStream<S extends Source> {
 
     Optional<CommandParameter<S>> popParameter();
 
-    @Nullable Character currentLetter();
+    @NotNull Character currentLetter();
 
     Optional<Character> peekLetter();
 
     Optional<Character> popLetter();
 
-    @Nullable String currentRaw();
+    @NotNull String currentRaw();
 
     Optional<String> peekRaw();
 
@@ -47,6 +47,8 @@ public interface CommandInputStream<S extends Source> {
         cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
         return cursor.raw > prevRaw;
     }
+
+    boolean skipLetter();
 
     default boolean skipRaw() {
         final Cursor<S> cursor = cursor();
@@ -79,5 +81,30 @@ public interface CommandInputStream<S extends Source> {
         return getUsage().size();
     }
 
+    default boolean skipTill(char target) {
+        boolean reached = false;
+        while (hasNextLetter()) {
+            if (currentLetter() == target) {
+                reached = true;
+                break;
+            }
+            popLetter();
+        }
+        //skipping current letter (which equals the target)
+        skipLetter();
+        return reached;
+    }
+
+    default String collectBeforeFirst(char c) {
+        StringBuilder builder = new StringBuilder();
+        while (hasNextLetter()) {
+            var current = currentLetter();
+            if (current == c) {
+                break;
+            }
+            builder.append(current);
+        }
+        return builder.toString();
+    }
 
 }

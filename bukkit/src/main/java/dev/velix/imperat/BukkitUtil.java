@@ -1,14 +1,18 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.util.ImperatDebugger;
+import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.reflection.FieldAccessor;
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,5 +100,10 @@ public final class BukkitUtil {
             }
         }
 
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Class<? extends Entity> getSelectedEntity(@NotNull Type selectorType) {
+        return (Class<? extends Entity>) TypeUtility.getInsideGeneric(selectorType, Entity.class);
     }
 }

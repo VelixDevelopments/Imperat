@@ -2,8 +2,12 @@ package dev.velix.imperat.brigadier;
 
 import com.mojang.brigadier.arguments.*;
 import dev.velix.imperat.ArgumentTypeResolver;
+import dev.velix.imperat.BukkitUtil;
 import dev.velix.imperat.command.parameters.NumericRange;
+import dev.velix.imperat.command.parameters.type.ParameterWord;
 import dev.velix.imperat.util.TypeUtility;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -12,6 +16,7 @@ class DefaultArgTypeResolvers {
 
     public final static ArgumentTypeResolver STRING = (parameter -> {
         if (parameter.isGreedy()) return StringArgumentType.greedyString();
+        if (parameter.type() instanceof ParameterWord<?>) return StringArgumentType.word();
         return StringArgumentType.string();
     });
 
@@ -33,12 +38,12 @@ class DefaultArgTypeResolvers {
     private static final ArgumentType<?> MULTI_ENTITY = entity(false, false);
 
     //TODO add entity selector
-    /*public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
-        Class<? extends Entity> valueType = BukkitImperat.getSelectedEntity(parameter.getType());
-        if (Player.class.isAssignableFrom(valueType)) // EntitySelector<Player>
+    public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
+        Class<? extends Entity> valueType = BukkitUtil.getSelectedEntity(parameter.type().type());
+        if (Player.class.isAssignableFrom(valueType)) // TargetSelector<Player>
             return MULTI_PLAYER;
         return MULTI_ENTITY;
-    };*/
+    };
 
     private static ArgumentType<? extends Number> numeric(
         Type type,

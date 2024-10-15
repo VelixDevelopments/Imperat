@@ -240,6 +240,14 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
+     * Unregisters all commands from the internal registry
+     */
+    @Override
+    public void unregisterAllCommands() {
+        commands.clear();
+    }
+
+    /**
      * @param name the name/alias of the command
      * @return fetches {@link Command} with specific name/alias
      */
