@@ -34,10 +34,13 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
         @NotNull CommandInputStream<BukkitSource> commandInputStream
     ) throws ImperatException {
 
-        String raw = commandInputStream.currentRaw();
+        String raw = commandInputStream.currentRaw().orElse(null);
+        if (raw == null)
+            return TargetSelector.of();
+
         char last = raw.charAt(raw.length() - 1);
 
-        if (commandInputStream.currentLetter() != SelectionType.MENTION_CHARACTER) {
+        if (commandInputStream.currentLetter().filter((c) -> c != SelectionType.MENTION_CHARACTER).isPresent()) {
             Player target = Bukkit.getPlayer(raw);
             if (target == null)
                 return TargetSelector.of();

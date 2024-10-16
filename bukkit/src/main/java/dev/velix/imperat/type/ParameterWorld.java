@@ -43,7 +43,7 @@ public class ParameterWorld extends BaseParameterType<BukkitSource, World> {
 
     @Override
     public @Nullable World resolve(ExecutionContext<BukkitSource> context, @NotNull CommandInputStream<BukkitSource> commandInputStream) throws ImperatException {
-        String raw = commandInputStream.currentRaw();
+        String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null) return null;
 
         World world = Bukkit.getWorld(raw.toLowerCase());

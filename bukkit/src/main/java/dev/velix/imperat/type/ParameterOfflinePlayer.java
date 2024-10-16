@@ -42,8 +42,9 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
         ExecutionContext<BukkitSource> context,
         @NotNull CommandInputStream<BukkitSource> commandInputStream
     ) throws ImperatException {
-        String name = commandInputStream.currentRaw();
+        String name = commandInputStream.currentRaw().orElse(null);
         if (name == null) return null;
+
         if (name.length() > 16) {
             throw new UnknownPlayerException(name);
         }
@@ -67,7 +68,7 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
 
     @Override
     public boolean matchesInput(String input, CommandParameter<BukkitSource> parameter) {
-        return input.length() <= 16; //TODO impl other logic
+        return input.length() <= 16;
     }
 
 

@@ -29,7 +29,7 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
         ExecutionContext<VelocitySource> context,
         @NotNull CommandInputStream<VelocitySource> commandInputStream
     ) throws ImperatException {
-        String currentRaw = commandInputStream.currentRaw();
+        String currentRaw = commandInputStream.currentRaw().orElse(null);
         if (currentRaw == null) return null;
 
         if (currentRaw.equalsIgnoreCase("me")) {

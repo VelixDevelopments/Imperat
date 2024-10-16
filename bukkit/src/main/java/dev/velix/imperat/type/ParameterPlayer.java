@@ -26,8 +26,9 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
         ExecutionContext<BukkitSource> context,
         @NotNull CommandInputStream<BukkitSource> commandInputStream
     ) throws ImperatException {
-        String raw = commandInputStream.currentRaw();
+        String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null) return null;
+
         if (raw.equalsIgnoreCase("me")) {
             if (context.source().isConsole()) {
                 throw new UnknownPlayerException(raw);
