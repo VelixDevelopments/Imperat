@@ -7,6 +7,7 @@ import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
@@ -32,6 +33,7 @@ public class TestRun {
     public static volatile int PRE_PROCESSOR_INT = 0;
 
     static {
+        ImperatDebugger.setEnabled(true);
         IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
         IMPERAT.registerDependencyResolver(Group.class, () -> new Group("my-global-group"));
         //IMPERAT.registerCommand(GROUP_CMD);

@@ -22,10 +22,11 @@ public final class ParameterUUID<S extends Source> extends BaseParameterType<S, 
         ExecutionContext<S> context,
         @NotNull CommandInputStream<S> commandInputStream
     ) throws ImperatException {
-        String raw = commandInputStream.currentRaw();
+        String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null) {
             return null;
         }
+
         try {
             return UUID.fromString(raw);
         } catch (Exception ex) {

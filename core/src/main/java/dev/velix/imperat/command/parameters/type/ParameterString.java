@@ -7,7 +7,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class ParameterString<S extends Source> extends BaseParameterType<S, String> {
 
@@ -18,17 +17,18 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     }
 
     @Override
-    public @Nullable String resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
+    public @NotNull String resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
         StringBuilder builder = new StringBuilder();
-        final CommandParameter<S> parameter = inputStream.currentParameter();
-        assert parameter != null;
+        final CommandParameter<S> parameter = inputStream.currentParameter().orElse(null);
+        if (parameter == null) return builder.toString();
 
-        final Character current = inputStream.currentLetter();
-        if (current == null) return null;
+        final Character current = inputStream.currentLetter().orElse(null);
+        if (current == null)
+            return builder.toString();
 
         if (!isQuoteChar(current)) {
 
-            builder.append(inputStream.currentRaw());
+            builder.append(inputStream.currentRaw().orElse(""));
             if (parameter.isGreedy()) {
                 handleGreedy(builder, inputStream);
             }
@@ -56,11 +56,6 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
 
     private boolean isQuoteChar(char ch) {
         return ch == DOUBLE_QUOTE || ch == SINGLE_QUOTE;
-    }
-
-    @Override
-    public boolean matchesInput(String input, CommandParameter<S> parameter) {
-        return true;
     }
 
     private void handleGreedy(StringBuilder builder, CommandInputStream<S> inputStream) {

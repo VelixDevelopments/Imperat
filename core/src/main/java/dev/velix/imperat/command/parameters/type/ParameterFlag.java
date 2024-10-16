@@ -20,15 +20,21 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
 
     @Override
     public @Nullable CommandFlag resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
-        CommandParameter<S> currentParameter = commandInputStream.currentParameter();
-        assert currentParameter != null;
+        var currentParameter = commandInputStream.currentParameter()
+            .orElse(null);
+        if (currentParameter == null)
+            return null;
+
         if (!currentParameter.isFlag()) {
             throw new IllegalArgumentException();
         }
 
         FlagParameter<S> flagParameter = currentParameter.asFlagParameter();
 
-        String rawFlag = commandInputStream.currentRaw();
+        String rawFlag = commandInputStream.currentRaw().orElse(null);
+        if (rawFlag == null) {
+            throw new IllegalArgumentException();
+        }
 
         String rawInput = null;
         Object input = null;

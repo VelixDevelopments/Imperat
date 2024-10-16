@@ -637,8 +637,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             source.error("Unknown command input: '" + commandName + "'");
             return CommandDispatch.Result.UNKNOWN;
         }
-        //temp debugging
-        //command.visualize();
+        command.visualizeTree();
         return dispatch(source, command, rawInput);
     }
 

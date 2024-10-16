@@ -5,7 +5,6 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -13,19 +12,19 @@ public interface CommandInputStream<S extends Source> {
 
     @NotNull Cursor<S> cursor();
 
-    @Nullable CommandParameter<S> currentParameter();
+    @NotNull Optional<CommandParameter<S>> currentParameter();
 
     Optional<CommandParameter<S>> peekParameter();
 
     Optional<CommandParameter<S>> popParameter();
 
-    @NotNull Character currentLetter();
+    @NotNull Optional<Character> currentLetter();
 
     Optional<Character> peekLetter();
 
     Optional<Character> popLetter();
 
-    @NotNull String currentRaw();
+    @NotNull Optional<String> currentRaw();
 
     Optional<String> peekRaw();
 
@@ -83,8 +82,10 @@ public interface CommandInputStream<S extends Source> {
 
     default boolean skipTill(char target) {
         boolean reached = false;
+
         while (hasNextLetter()) {
-            if (currentLetter() == target) {
+            if (currentLetter().map((current) -> current == target)
+                .orElse(false)) {
                 reached = true;
                 break;
             }
@@ -93,13 +94,14 @@ public interface CommandInputStream<S extends Source> {
         //skipping current letter (which equals the target)
         skipLetter();
         return reached;
+
     }
 
     default String collectBeforeFirst(char c) {
         StringBuilder builder = new StringBuilder();
         while (hasNextLetter()) {
-            var current = currentLetter();
-            if (current == c) {
+            var current = currentLetter().orElse(null);
+            if (current == null || current == c) {
                 break;
             }
             builder.append(current);

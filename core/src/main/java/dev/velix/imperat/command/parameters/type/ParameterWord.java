@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public final class ParameterWord<S extends Source> extends BaseParameterType<S, String> {
 
@@ -28,10 +27,9 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
     public @Nullable String resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
         var nextRaw = commandInputStream.currentRaw();
         if (restrictions.isEmpty()) {
-            return nextRaw;
+            return nextRaw.orElse(null);
         }
-        assert nextRaw != null;
-        return Optional.of(nextRaw).filter(restrictions::contains)
+        return nextRaw.filter(restrictions::contains)
             .orElseThrow(() -> new SourceException("Word '%s' is not within the given restrictions=%s", nextRaw, restrictions.toString()));
     }
 

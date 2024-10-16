@@ -33,8 +33,9 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
     @Override
     public @Nullable Boolean resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
-        var raw = commandInputStream.currentRaw();
+        var raw = commandInputStream.currentRaw().orElse(null);
         assert raw != null;
+
         if (raw.equalsIgnoreCase("true") || raw.equalsIgnoreCase("false")) {
             return Boolean.parseBoolean(raw);
         }

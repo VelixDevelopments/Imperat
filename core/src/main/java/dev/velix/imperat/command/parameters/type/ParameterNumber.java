@@ -35,7 +35,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     @Override
     public @Nullable N resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
-        String input = commandInputStream.currentRaw();
+        String input = commandInputStream.currentRaw().orElse(null);
         try {
             return parse(input);
         } catch (NumberFormatException ex) {

@@ -4,10 +4,8 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.exception.TokenOutOfRangeException;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 import java.util.Optional;
 
 final class CommandInputStreamImpl<S extends Source> implements CommandInputStream<S> {
@@ -33,9 +31,8 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     @Override
-    public @NotNull CommandParameter<S> currentParameter() {
-        return Optional.ofNullable(usage.getParameter(cursor.parameter))
-            .orElseThrow(TokenOutOfRangeException::new);
+    public @NotNull Optional<CommandParameter<S>> currentParameter() {
+        return Optional.ofNullable(usage.getParameter(cursor.parameter));
     }
 
     @Override
@@ -48,54 +45,55 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public Optional<CommandParameter<S>> popParameter() {
         cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-        return Optional.of(currentParameter());
+        return currentParameter();
     }
 
     @Override
-    public @NotNull String currentRaw() {
+    public @NotNull Optional<String> currentRaw() {
         if (cursor.raw >= queue.size())
-            throw new TokenOutOfRangeException();
-        return queue.get(cursor.raw);
+            return Optional.empty();
+        return Optional.of(queue.get(cursor.raw));
     }
 
     @Override
-    public @NotNull Character currentLetter() {
+    public @NotNull Optional<Character> currentLetter() {
         if (cursor.raw >= queue.size()) {
-            throw new TokenOutOfRangeException();
+            return Optional.empty();
         }
-        @NotNull String raw = Objects.requireNonNull(currentRaw());
-        return raw.charAt(letterPos);
+        return currentRaw().map((raw) -> raw.charAt(letterPos));
     }
 
     @Override
     public Optional<Character> peekLetter() {
         int nextLetterPos = letterPos + 1;
-        String currentRaw = Objects.requireNonNull(currentRaw());
-        if (nextLetterPos == currentRaw.length()) {
-            return Optional.of(WHITE_SPACE);
-        } else if (nextLetterPos > currentRaw.length()) {
-            //next raw
-            return peekRaw().map((nextRaw) -> nextRaw.charAt(0));
-        } else {
-            //nextLetterPos < currentRaw.length()
-            return Optional.of(currentRaw.charAt(nextLetterPos));
-        }
+        return currentRaw().flatMap((currentRaw) -> {
+            if (nextLetterPos == currentRaw.length()) {
+                return Optional.of(WHITE_SPACE);
+            } else if (nextLetterPos > currentRaw.length()) {
+                //next raw
+                return peekRaw().map((nextRaw) -> nextRaw.charAt(0));
+            } else {
+                //nextLetterPos < currentRaw.length()
+                return Optional.of(currentRaw.charAt(nextLetterPos));
+            }
+        });
     }
 
     @Override
     public Optional<Character> popLetter() {
         letterPos++;
-        String currentRaw = Objects.requireNonNull(currentRaw());
-        if (letterPos == currentRaw.length()) {
-            return Optional.of(WHITE_SPACE);
-        } else if (letterPos > currentRaw.length()) {
-            //next raw
-            letterPos = 0;
-            return popRaw().map((nextRaw) -> nextRaw.charAt(0));
-        } else {
-            //nextLetterPos < currentRaw.length()
-            return Optional.of(currentRaw.charAt(letterPos));
-        }
+        return currentRaw().flatMap((currentRaw) -> {
+            if (letterPos == currentRaw.length()) {
+                return Optional.of(WHITE_SPACE);
+            } else if (letterPos > currentRaw.length()) {
+                //next raw
+                letterPos = 0;
+                return popRaw().map((nextRaw) -> nextRaw.charAt(0));
+            } else {
+                //nextLetterPos < currentRaw.length()
+                return Optional.of(currentRaw.charAt(letterPos));
+            }
+        });
     }
 
     @Override
@@ -109,12 +107,12 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public Optional<String> popRaw() {
         cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
-        return Optional.of(currentRaw());
+        return currentRaw();
     }
 
     @Override
     public boolean hasNextLetter() {
-        return Optional.of(currentRaw())
+        return currentRaw()
             .map((raw) -> {
                 if (letterPos >= raw.length()) {
                     return peekRaw().isPresent();

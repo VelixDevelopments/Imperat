@@ -23,7 +23,7 @@ public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
         ExecutionContext<TestSource> context,
         @NotNull CommandInputStream<TestSource> commandInputStream
     ) throws ImperatException {
-        String raw = commandInputStream.currentRaw();
+        String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null) {
             return null;
         }

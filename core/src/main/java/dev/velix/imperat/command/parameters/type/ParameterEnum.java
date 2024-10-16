@@ -12,7 +12,6 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class ParameterEnum<S extends Source> extends BaseParameterType<S, Enum<?>> {
@@ -27,14 +26,15 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
     @Override
     public @NotNull Enum<?> resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
-        Type enumType = TypeUtility.matches(typeWrap.getType(), Enum.class)
-            ? Objects.requireNonNull(commandInputStream.currentParameter()).valueType() : typeWrap.getType();
+        Type enumType = commandInputStream.currentParameter()
+            .filter(param -> TypeUtility.matches(typeWrap.getType(), Enum.class))
+            .map(CommandParameter::valueType)
+            .orElse(typeWrap.getType());
 
         var raw = commandInputStream.currentRaw();
         try {
-            assert raw != null;
-
-            return Enum.valueOf((Class<? extends Enum>) enumType, raw.toUpperCase());
+            assert raw.isPresent();
+            return Enum.valueOf((Class<? extends Enum>) enumType, raw.get());
         } catch (EnumConstantNotPresentException ex) {
             throw new SourceException("Invalid " + enumType.getTypeName() + " '" + raw + "'");
         }

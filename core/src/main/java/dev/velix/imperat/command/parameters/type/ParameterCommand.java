@@ -18,10 +18,8 @@ public final class ParameterCommand<S extends Source> extends BaseParameterType<
 
     @Override
     public @Nullable Command<S> resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
-        var currentParameter = commandInputStream.currentParameter();
-        if (currentParameter == null)
-            return null;
-        return currentParameter.asCommand();
+        return commandInputStream.currentParameter()
+            .map(CommandParameter::asCommand).orElse(null);
     }
 
     @Override

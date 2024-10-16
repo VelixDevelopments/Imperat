@@ -59,10 +59,10 @@ final class SmartUsageResolve<S extends Source> {
         final int lengthWithoutFlags = usage.getParametersWithoutFlags().size();
         while (stream.hasNextParameter()) {
 
-            CommandParameter<S> currentParameter = stream.currentParameter();
-            assert currentParameter != null;
+            CommandParameter<S> currentParameter = stream.currentParameter().orElse(null);
+            if (currentParameter == null) break;
 
-            String currentRaw = stream.currentRaw();
+            String currentRaw = stream.currentRaw().orElse(null);
             if (currentRaw == null) {
                 if (currentParameter.isOptional()) {
                     handleEmptyOptional(currentParameter);
