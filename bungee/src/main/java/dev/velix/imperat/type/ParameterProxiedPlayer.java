@@ -13,8 +13,6 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-
 public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource, ProxiedPlayer> {
 
     public ParameterProxiedPlayer() {
@@ -48,9 +46,4 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
         return ProxyServer.getInstance().getPlayer(input) != null;
     }
 
-    @Override
-    public Collection<String> suggestions() {
-        return ProxyServer.getInstance().getPlayers()
-            .stream().map(ProxiedPlayer::getName).toList();
-    }
 }

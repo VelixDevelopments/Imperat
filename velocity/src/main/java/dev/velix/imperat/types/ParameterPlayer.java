@@ -13,8 +13,6 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-
 public final class ParameterPlayer extends BaseParameterType<VelocitySource, Player> {
 
     private final ProxyServer proxyServer;
@@ -46,8 +44,4 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
         return proxyServer.getPlayer(input).isPresent();
     }
 
-    @Override
-    public Collection<String> suggestions() {
-        return proxyServer.getAllPlayers().stream().map(Player::getUsername).toList();
-    }
 }

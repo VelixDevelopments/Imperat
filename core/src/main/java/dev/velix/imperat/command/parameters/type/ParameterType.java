@@ -12,15 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
 
 public interface ParameterType<S extends Source, T> {
 
     Type type();
 
     @Nullable T resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException;
-
-    Collection<String> suggestions();
 
     TypeSuggestionResolver<S, T> getSuggestionResolver();
 

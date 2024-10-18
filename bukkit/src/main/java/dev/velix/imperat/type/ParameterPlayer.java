@@ -13,8 +13,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-
 public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
 
     public ParameterPlayer() {
@@ -45,9 +43,4 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
         return input.length() <= 16;
     }
 
-    @Override
-    public Collection<String> suggestions() {
-        return Bukkit.getOnlinePlayers().stream()
-            .map(Player::getName).toList();
-    }
 }

@@ -1,7 +1,6 @@
-package dev.velix.imperat;
+package dev.velix.imperat.util;
 
-import dev.velix.imperat.util.ImperatDebugger;
-import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.BukkitImperat;
 import dev.velix.imperat.util.reflection.FieldAccessor;
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
@@ -13,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,5 +106,12 @@ public final class BukkitUtil {
     @SuppressWarnings("unchecked")
     public static Class<? extends Entity> getSelectedEntity(@NotNull Type selectorType) {
         return (Class<? extends Entity>) TypeUtility.getInsideGeneric(selectorType, Entity.class);
+    }
+
+    public static <T> Set<T> mergedSet(Set<T> set1, Set<T> set2, Supplier<Set<T>> supplier) {
+        Set<T> merged = supplier.get();
+        merged.addAll(set1);
+        merged.addAll(set2);
+        return merged;
     }
 }

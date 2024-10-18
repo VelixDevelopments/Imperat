@@ -2,9 +2,9 @@ package dev.velix.imperat.brigadier;
 
 import com.mojang.brigadier.arguments.*;
 import dev.velix.imperat.ArgumentTypeResolver;
-import dev.velix.imperat.BukkitUtil;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.type.ParameterWord;
+import dev.velix.imperat.util.BukkitUtil;
 import dev.velix.imperat.util.TypeUtility;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;

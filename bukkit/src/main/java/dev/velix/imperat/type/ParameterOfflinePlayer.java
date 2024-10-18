@@ -19,8 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spigotmc.SpigotConfig;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.UUID;
 
 public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, OfflinePlayer> {
@@ -72,9 +70,4 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
     }
 
 
-    @Override
-    public Collection<String> suggestions() {
-        return Arrays.stream(Bukkit.getOfflinePlayers())
-            .map(OfflinePlayer::getName).toList();
-    }
 }

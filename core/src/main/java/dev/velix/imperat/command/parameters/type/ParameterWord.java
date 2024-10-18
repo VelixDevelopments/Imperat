@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public final class ParameterWord<S extends Source> extends BaseParameterType<S, String> {
@@ -31,11 +30,6 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
         }
         return nextRaw.filter(restrictions::contains)
             .orElseThrow(() -> new SourceException("Word '%s' is not within the given restrictions=%s", nextRaw, restrictions.toString()));
-    }
-
-    @Override
-    public Collection<String> suggestions() {
-        return restrictions;
     }
 
     @Override

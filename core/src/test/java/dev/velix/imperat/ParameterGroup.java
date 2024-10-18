@@ -11,8 +11,6 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-
 public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     ParameterGroup() {
         super(TypeWrap.of(Group.class));
@@ -32,9 +30,4 @@ public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     }
 
 
-    @Override
-    public Collection<String> suggestions() {
-        return GroupRegistry.getInstance().getAll().stream()
-            .map(Group::name).toList();
-    }
 }

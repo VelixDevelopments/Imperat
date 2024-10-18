@@ -1,7 +1,7 @@
 package dev.velix.imperat.brigadier;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import dev.velix.imperat.BukkitUtil;
+import dev.velix.imperat.util.BukkitUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

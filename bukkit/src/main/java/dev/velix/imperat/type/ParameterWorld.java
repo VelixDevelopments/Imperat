@@ -7,7 +7,6 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownWorldException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
@@ -15,11 +14,7 @@ import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class ParameterWorld extends BaseParameterType<BukkitSource, World> {
 
@@ -56,23 +51,4 @@ public class ParameterWorld extends BaseParameterType<BukkitSource, World> {
         return super.matchesInput(input, parameter);
     }
 
-    @Override
-    public Collection<String> suggestions() {
-        try {
-            List<?> worlds = (List<?>) GET_WORLDS.invoke(null);
-
-            return worlds.stream()
-                .map((obj) -> {
-                    try {
-                        return (String) GET_NAME.invoke(obj);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(String::toLowerCase).toList();
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            ImperatDebugger.error(ParameterWorld.class, "suggestions", e);
-            return Collections.emptyList();
-        }
-    }
 }

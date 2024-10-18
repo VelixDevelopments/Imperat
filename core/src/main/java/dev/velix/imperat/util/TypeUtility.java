@@ -71,6 +71,26 @@ public final class TypeUtility {
         }
     }
 
+    public static boolean isShort(String str) {
+        if (str == null) return false;
+        try {
+            Short.parseShort(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean isByte(String str) {
+        if (str == null) return false;
+        try {
+            Byte.parseByte(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     public static boolean isLong(String str) {
         if (str == null) return false;
         try {

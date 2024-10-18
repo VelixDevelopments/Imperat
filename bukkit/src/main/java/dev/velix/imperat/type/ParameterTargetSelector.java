@@ -1,31 +1,47 @@
 package dev.velix.imperat.type;
 
 import dev.velix.imperat.BukkitSource;
+import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
+import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.resolvers.TypeSuggestionResolver;
+import dev.velix.imperat.selector.EntityCondition;
+import dev.velix.imperat.selector.SelectionParameterInput;
 import dev.velix.imperat.selector.SelectionType;
-import dev.velix.imperat.selector.TargetCriteria;
 import dev.velix.imperat.selector.TargetSelector;
+import dev.velix.imperat.selector.field.SelectionField;
+import dev.velix.imperat.selector.field.filters.PredicateField;
+import dev.velix.imperat.selector.field.operators.OperatorField;
 import dev.velix.imperat.util.TypeWrap;
+import dev.velix.imperat.util.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 public final class ParameterTargetSelector extends BaseParameterType<BukkitSource, TargetSelector> {
 
     private final static char PARAMETER_START = '[';
     private final static char PARAMETER_END = ']';
 
+    private final TypeSuggestionResolver<BukkitSource, TargetSelector> suggestionResolver;
     private ParameterTargetSelector() {
         super(TypeWrap.of(TargetSelector.class));
+        SelectionType.TYPES.stream()
+            .filter(type -> type != SelectionType.UNKNOWN)
+            .map(SelectionType::id)
+            .forEach((id) -> suggestions.add(String.valueOf(SelectionType.MENTION_CHARACTER + id)));
+        suggestionResolver = new TargetSelectorSuggestionResolver();
     }
 
     @Override
@@ -37,6 +53,12 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
         String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null)
             return TargetSelector.of();
+
+        if (Version.isOrOver(13)) {
+            return TargetSelector.of(
+                Bukkit.selectEntities(context.source().origin(), raw)
+            );
+        }
 
         char last = raw.charAt(raw.length() - 1);
 
@@ -59,31 +81,133 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
             throw new SourceException("Unknown selection type '%s'", commandInputStream.currentLetter());
         }
 
-        List<TargetCriteria> criteria = new ArrayList<>();
+        List<SelectionParameterInput<?>> inputParameters = new ArrayList<>();
 
         boolean parameterized = commandInputStream.popLetter().map((c) -> c == PARAMETER_START).orElse(false) && last == PARAMETER_END;
         if (parameterized) {
             String params = commandInputStream.collectBeforeFirst(PARAMETER_END);
-            criteria = TargetCriteria.all(params, commandInputStream);
+            inputParameters = SelectionParameterInput.parseAll(params, commandInputStream);
         }
+
         List<Entity> entities = type.getTargetEntities(context, commandInputStream);
-        List<Entity> toCollect = new ArrayList<>();
+        List<Entity> selected = new ArrayList<>();
 
-        Predicate<Entity> entityPredicted = (entity) -> true;
-        for (var singleCriteria : criteria) {
-            entityPredicted = entityPredicted.and(
-                (entity) -> singleCriteria.matches(context.source(), entity, toCollect)
-            );
-        }
-
+        EntityCondition entityPredicted = getEntityPredicate(commandInputStream, inputParameters);
         for (Entity entity : entities) {
-            if (entityPredicted.test(entity)) {
-                toCollect.add(entity);
+            if (entityPredicted.test(context.source(), entity)) {
+                selected.add(entity);
             }
         }
+        operateFields(inputParameters, selected);
 
-        return TargetSelector.of(toCollect);
+        return TargetSelector.of(selected);
     }
 
+    @SuppressWarnings("unchecked")
+    private static @NotNull <V> EntityCondition getEntityPredicate(@NotNull CommandInputStream<BukkitSource> commandInputStream, List<SelectionParameterInput<?>> inputParameters) {
+        EntityCondition entityPredicted = (sender, entity) -> true;
+        for (var input : inputParameters) {
+            if (!(input.getField() instanceof PredicateField<?>)) continue;
+            PredicateField<V> predicateField = (PredicateField<V>) input.getField();
+            entityPredicted = entityPredicted.and(
+                (sender, entity) -> predicateField.isApplicable(sender, entity, (V) input.getValue(), commandInputStream)
+            );
 
+        }
+        return entityPredicted;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> void operateFields(List<SelectionParameterInput<?>> inputParameters, List<Entity> selected) {
+        for (var input : inputParameters) {
+            if (input.getField() instanceof OperatorField<?>) {
+                OperatorField<V> operatorField = (OperatorField<V>) input.getField();
+                operatorField.operate((V) input.getValue(), selected);
+            }
+        }
+    }
+
+    /**
+     * Returns the suggestion resolver associated with this parameter type.
+     *
+     * @return the suggestion resolver for generating suggestions based on the parameter type.
+     */
+    @Override
+    public TypeSuggestionResolver<BukkitSource, TargetSelector> getSuggestionResolver() {
+        return suggestionResolver;
+    }
+
+    private final class TargetSelectorSuggestionResolver implements TypeSuggestionResolver<BukkitSource, TargetSelector> {
+
+        private final List<String> ids = SelectionType.TYPES.stream()
+            .map((st) -> String.valueOf(st.id()))
+            .toList();
+
+        private final List<String> SELECTION_FIELDS_NAMES = SelectionField.ALL.stream()
+            .map(SelectionField::getName)
+            .toList();
+
+        /**
+         * @return the valueType that is specific for these suggestions resolving
+         */
+        @Override
+        public @NotNull TypeWrap<TargetSelector> getType() {
+            return TypeWrap.of(TargetSelector.class);
+        }
+
+        /**
+         * @param context   the context for suggestions
+         * @param parameter the parameter of the value to complete
+         * @return the auto-completed suggestions of the current argument
+         */
+        @Override
+        public Collection<String> autoComplete(
+            SuggestionContext<BukkitSource> context,
+            CommandParameter<BukkitSource> parameter
+        ) {
+            CompletionArg argToComplete = context.getArgToComplete();
+            if (argToComplete.isEmpty()) {
+                return suggestions;
+            }
+            String argValue = argToComplete.value();
+
+            if (argValue.equals(String.valueOf(SelectionType.MENTION_CHARACTER))) {
+                return ids;
+            }
+            char lastChar = argValue.charAt(argValue.length() - 1);
+            if (lastChar == PARAMETER_START || lastChar == SelectionField.SEPARATOR) {
+                return SELECTION_FIELDS_NAMES;
+            }
+
+            if (argValue.indexOf(PARAMETER_START) == -1) {
+                return Collections.singleton("[]");
+            }
+            //TODO recode this
+            if (lastChar == SelectionField.VALUE_EQUALS) {
+
+                final String name = getFieldName(argValue);
+                SelectionField<?> field = SelectionField.ALL.stream()
+                    .filter((selectionField) -> selectionField.getName().equalsIgnoreCase(name))
+                    .findFirst().orElse(null);
+
+                //TODO get values from the type of this field
+
+            }
+            return Collections.singleton(String.valueOf(PARAMETER_END));
+        }
+    }
+
+    private static @NotNull String getFieldName(String argValue) {
+        int start = argValue.lastIndexOf(SelectionField.SEPARATOR);
+        StringBuilder fieldName = new StringBuilder();
+
+        for (int cursor = start + 1; cursor < argValue.length(); cursor++) {
+            if (argValue.charAt(cursor) == SelectionField.VALUE_EQUALS) {
+                break;
+            }
+            fieldName.append(argValue.charAt(cursor));
+        }
+
+        return fieldName.toString();
+    }
 }
