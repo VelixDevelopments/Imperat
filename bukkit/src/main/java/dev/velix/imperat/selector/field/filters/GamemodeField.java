@@ -10,10 +10,16 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.HumanEntity;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 final class GamemodeField extends PredicateField<GameMode> {
 
     GamemodeField(String name) {
         super(name, TypeWrap.of(GameMode.class));
+        Arrays.stream(GameMode.values())
+            .map(GameMode::name)
+            .map(String::toLowerCase)
+            .forEach(suggestions::add);
     }
 
     @Override

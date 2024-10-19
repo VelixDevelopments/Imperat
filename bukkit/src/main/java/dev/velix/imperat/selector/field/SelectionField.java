@@ -3,6 +3,7 @@ package dev.velix.imperat.selector.field;
 import dev.velix.imperat.exception.ImperatException;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 //selection field for mojang entity/target-selectors in minecraft
 
@@ -40,4 +41,11 @@ public interface SelectionField<V> extends SelectionFields {
      */
     V parseFieldValue(String value) throws ImperatException;
 
+
+    /**
+     * Retrieves a list of suggestions related to this selection field's value
+     *
+     * @return A list of suggestion strings.
+     */
+    List<String> getSuggestions();
 }

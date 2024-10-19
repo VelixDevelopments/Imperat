@@ -11,7 +11,7 @@ import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public final class LevelField extends PredicateField<Range<Integer>> {
+final class LevelField extends PredicateField<Range<Integer>> {
 
     private final RangedNumericField<Integer> numericField;
 

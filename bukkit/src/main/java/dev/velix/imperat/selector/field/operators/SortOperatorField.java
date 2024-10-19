@@ -5,12 +5,17 @@ import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.Entity;
 
+import java.util.Arrays;
 import java.util.List;
 
 final class SortOperatorField extends OperatorField<SortOption> {
 
     SortOperatorField(String name) {
         super(name, TypeWrap.of(SortOption.class));
+        Arrays.stream(SortOption.values())
+            .map(SortOption::name)
+            .map(String::toLowerCase)
+            .forEach(suggestions::add);
     }
 
     /**

@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @param <V> The type of the value that this field handles.
  */
-public abstract class OperatorField<V> extends AbstractField<V> {
+public abstract class OperatorField<V> extends AbstractField<V> implements OperatorFields {
 
     protected OperatorField(String name, TypeWrap<V> type) {
         super(name, type);

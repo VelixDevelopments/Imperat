@@ -3,6 +3,8 @@ package dev.velix.imperat.selector.field;
 import dev.velix.imperat.util.TypeWrap;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AbstractField is an abstract base class that implements the SelectionField
@@ -23,6 +25,13 @@ public abstract class AbstractField<V> implements SelectionField<V> {
      * related to type management in this field.
      */
     protected final Type type;
+
+
+    /**
+     * A list that holds suggestion strings related to the selection field's value.
+     * This list can be used to provide autocomplete or assistive suggestions for the user.
+     */
+    protected final List<String> suggestions = new ArrayList<>();
 
     /**
      * Constructs an AbstractField instance with the specified name and type.
@@ -57,5 +66,15 @@ public abstract class AbstractField<V> implements SelectionField<V> {
     @Override
     public Type getValueType() {
         return type;
+    }
+
+    /**
+     * Retrieves a list of suggestions related to this selection field's value
+     *
+     * @return A list of suggestion strings.
+     */
+    @Override
+    public List<String> getSuggestions() {
+        return suggestions;
     }
 }

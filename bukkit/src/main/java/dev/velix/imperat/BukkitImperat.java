@@ -11,8 +11,10 @@ import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
 import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.type.ParameterOfflinePlayer;
 import dev.velix.imperat.type.ParameterPlayer;
+import dev.velix.imperat.type.ParameterTargetSelector;
 import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.BukkitUtil;
 import dev.velix.imperat.util.ImperatDebugger;
@@ -227,6 +229,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private void registerValueResolvers() {
         this.registerParamType(Player.class, new ParameterPlayer());
         this.registerParamType(OfflinePlayer.class, new ParameterOfflinePlayer());
+        this.registerParamType(TargetSelector.class, new ParameterTargetSelector());
         this.registerParamType(Reflections.getClass("org.bukkit.World"), new ParameterWorld());
     }
 

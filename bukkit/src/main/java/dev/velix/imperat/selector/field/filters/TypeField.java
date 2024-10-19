@@ -9,6 +9,8 @@ import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 final class TypeField extends PredicateField<EntityType> {
     /**
      * Constructs an AbstractField instance with the specified name and type.
@@ -17,6 +19,10 @@ final class TypeField extends PredicateField<EntityType> {
      */
     TypeField(String name) {
         super(name, TypeWrap.of(EntityType.class));
+        Arrays.stream(EntityType.values())
+            .map(EntityType::name)
+            .map(String::toLowerCase)
+            .forEach(suggestions::add);
     }
 
     @Override

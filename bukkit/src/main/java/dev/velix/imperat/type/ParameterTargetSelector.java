@@ -35,7 +35,8 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
     private final static char PARAMETER_END = ']';
 
     private final TypeSuggestionResolver<BukkitSource, TargetSelector> suggestionResolver;
-    private ParameterTargetSelector() {
+
+    public ParameterTargetSelector() {
         super(TypeWrap.of(TargetSelector.class));
         SelectionType.TYPES.stream()
             .filter(type -> type != SelectionType.UNKNOWN)
@@ -52,10 +53,13 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
 
         String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null)
-            return TargetSelector.of();
+            return TargetSelector.empty();
 
         if (Version.isOrOver(13)) {
+            SelectionType type = commandInputStream.popLetter()
+                .map(SelectionType::from).orElse(SelectionType.UNKNOWN);
             return TargetSelector.of(
+                type,
                 Bukkit.selectEntities(context.source().origin(), raw)
             );
         }
@@ -65,10 +69,11 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
         if (commandInputStream.currentLetter().filter((c) -> c != SelectionType.MENTION_CHARACTER).isPresent()) {
             Player target = Bukkit.getPlayer(raw);
             if (target == null)
-                return TargetSelector.of();
+                return TargetSelector.empty();
 
-            return TargetSelector.of(target);
+            return TargetSelector.of(SelectionType.UNKNOWN, target);
         }
+
         if (context.source().isConsole()) {
             throw new SourceException("Only players can use this");
         }
@@ -100,7 +105,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
         }
         operateFields(inputParameters, selected);
 
-        return TargetSelector.of(selected);
+        return TargetSelector.of(type, selected);
     }
 
     @SuppressWarnings("unchecked")
@@ -190,8 +195,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
                     .filter((selectionField) -> selectionField.getName().equalsIgnoreCase(name))
                     .findFirst().orElse(null);
 
-                //TODO get values from the type of this field
-
+                return field == null ? Collections.emptyList() : field.getSuggestions();
             }
             return Collections.singleton(String.valueOf(PARAMETER_END));
         }

@@ -4,10 +4,7 @@ import com.mojang.brigadier.arguments.*;
 import dev.velix.imperat.ArgumentTypeResolver;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.type.ParameterWord;
-import dev.velix.imperat.util.BukkitUtil;
 import dev.velix.imperat.util.TypeUtility;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -34,16 +31,10 @@ class DefaultArgTypeResolvers {
 
     private static final ArgumentType<?> SINGLE_PLAYER = entity(true, true);
     public static final ArgumentTypeResolver PLAYER = parameter -> SINGLE_PLAYER;
-    private static final ArgumentType<?> MULTI_PLAYER = entity(false, true);
     private static final ArgumentType<?> MULTI_ENTITY = entity(false, false);
 
     //TODO add entity selector
-    public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
-        Class<? extends Entity> valueType = BukkitUtil.getSelectedEntity(parameter.type().type());
-        if (Player.class.isAssignableFrom(valueType)) // TargetSelector<Player>
-            return MULTI_PLAYER;
-        return MULTI_ENTITY;
-    };
+    public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> MULTI_ENTITY;
 
     private static ArgumentType<? extends Number> numeric(
         Type type,

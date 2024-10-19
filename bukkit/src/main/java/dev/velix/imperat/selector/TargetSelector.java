@@ -8,18 +8,24 @@ import java.util.List;
 
 public final class TargetSelector implements Iterable<Entity> {
 
+    private final SelectionType type;
     private final List<Entity> selectedEntities;
 
-    private TargetSelector(List<Entity> selectedEntities) {
+    private TargetSelector(SelectionType type, List<Entity> selectedEntities) {
+        this.type = type;
         this.selectedEntities = selectedEntities;
     }
 
-    public static TargetSelector of(List<Entity> list) {
-        return new TargetSelector(list);
+    public static TargetSelector of(SelectionType type, List<Entity> list) {
+        return new TargetSelector(type, list);
     }
 
-    public static TargetSelector of(Entity... list) {
-        return of(List.of(list));
+    public static TargetSelector of(SelectionType type, Entity... list) {
+        return of(type, List.of(list));
+    }
+
+    public static TargetSelector empty() {
+        return of(SelectionType.UNKNOWN, List.of());
     }
 
     /**
