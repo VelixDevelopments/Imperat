@@ -5,7 +5,7 @@ import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandFlag;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
@@ -17,14 +17,14 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
 
     private final FlagData<S> flag;
     private final OptionalValueSupplier<?> inputValueSupplier;
-    private final TypeSuggestionResolver<S, ?> inputValueSuggestionResolver;
+    private final SuggestionResolver<S> inputValueSuggestionResolver;
 
     FlagCommandParameter(
         FlagData<S> flag,
         String permission,
         Description description,
         OptionalValueSupplier<?> inputValueSupplier,
-        TypeSuggestionResolver<S, ?> inputValueSuggestionResolver
+        SuggestionResolver<S> inputValueSuggestionResolver
     ) {
         super(
             flag.name(), ParameterTypes.flag(),
@@ -62,11 +62,10 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public @Nullable <T> TypeSuggestionResolver<S, T> inputSuggestionResolver() {
+    public @Nullable SuggestionResolver<S> inputSuggestionResolver() {
         if (isSwitch())
             return null;
         else
-            return (TypeSuggestionResolver<S, T>) inputValueSuggestionResolver;
+            return inputValueSuggestionResolver;
     }
 }

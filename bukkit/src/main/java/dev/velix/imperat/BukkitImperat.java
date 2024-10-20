@@ -230,7 +230,8 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         this.registerParamType(Player.class, new ParameterPlayer());
         this.registerParamType(OfflinePlayer.class, new ParameterOfflinePlayer());
         this.registerParamType(TargetSelector.class, new ParameterTargetSelector());
-        this.registerParamType(Reflections.getClass("org.bukkit.World"), new ParameterWorld());
+        var worldClass = Reflections.getClass("org.bukkit.World");
+        this.registerParamType(worldClass, new ParameterWorld(worldClass));
     }
 
     public void applyBrigadier() {

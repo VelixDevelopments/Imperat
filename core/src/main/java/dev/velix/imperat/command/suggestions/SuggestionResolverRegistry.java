@@ -7,10 +7,7 @@ import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -54,7 +51,7 @@ public final class SuggestionResolverRegistry<S extends Source> {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public final class EnumSuggestionResolver implements TypeSuggestionResolver<S, Enum> {
+    public final class EnumSuggestionResolver implements SuggestionResolver<S> {
         private final Map<Type, List<String>> PRE_LOADED_ENUMS = new HashMap<>();
 
         public void registerEnumResolver(Type raw) {
@@ -68,11 +65,6 @@ public final class SuggestionResolverRegistry<S extends Source> {
         }
 
         @Override
-        public @NotNull TypeWrap<Enum> getType() {
-            return TypeWrap.of(Enum.class);
-        }
-
-        @Override
         public List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
             Type type = parameter.valueType();
             return getResults(type)
@@ -83,19 +75,15 @@ public final class SuggestionResolverRegistry<S extends Source> {
         }
     }
 
-    public final class FlagSuggestionResolver implements TypeSuggestionResolver<S, FlagData> {
+    public final class FlagSuggestionResolver implements SuggestionResolver<S> {
 
-        @Override
-        public @NotNull TypeWrap<FlagData> getType() {
-            return TypeWrap.of(FlagData.class);
-        }
 
         @Override
         public Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
             assert parameter.isFlag();
             FlagParameter<S> flagParameter = parameter.asFlagParameter();
             CompletionArg arg = context.getArgToComplete();
-            FlagData data = flagParameter.flagData();
+            FlagData<S> data = flagParameter.flagData();
 
             if (flagParameter.isSwitch()) {
                 //normal one arg

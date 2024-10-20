@@ -6,20 +6,25 @@ import dev.velix.imperat.VelocitySource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 public final class ParameterPlayer extends BaseParameterType<VelocitySource, Player> {
 
     private final ProxyServer proxyServer;
-
+    private final PlayerSuggestionResolver playerSuggestionResolver;
     public ParameterPlayer(ProxyServer server) {
         super(TypeWrap.of(Player.class));
         this.proxyServer = server;
+        this.playerSuggestionResolver = new PlayerSuggestionResolver(server);
     }
 
     @Override
@@ -41,7 +46,35 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
 
     @Override
     public boolean matchesInput(String input, CommandParameter<VelocitySource> parameter) {
-        return proxyServer.getPlayer(input).isPresent();
+        return input.length() < 16;
     }
 
+    /**
+     * Returns the suggestion resolver associated with this parameter type.
+     *
+     * @return the suggestion resolver for generating suggestions based on the parameter type.
+     */
+    @Override
+    public SuggestionResolver<VelocitySource> getSuggestionResolver() {
+        return playerSuggestionResolver;
+    }
+
+    private final static class PlayerSuggestionResolver implements SuggestionResolver<VelocitySource> {
+
+        private final ProxyServer proxyServer;
+
+        PlayerSuggestionResolver(ProxyServer server) {
+            this.proxyServer = server;
+        }
+
+        /**
+         * @param context   the context for suggestions
+         * @param parameter the parameter of the value to complete
+         * @return the auto-completed suggestions of the current argument
+         */
+        @Override
+        public Collection<String> autoComplete(SuggestionContext<VelocitySource> context, CommandParameter<VelocitySource> parameter) {
+            return proxyServer.getAllPlayers().stream().map(Player::getUsername).toList();
+        }
+    }
 }

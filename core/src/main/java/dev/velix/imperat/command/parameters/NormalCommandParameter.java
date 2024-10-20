@@ -3,7 +3,7 @@ package dev.velix.imperat.command.parameters;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ class NormalCommandParameter<S extends Source> extends InputParameter<S> {
                            boolean optional,
                            boolean greedy,
                            @NotNull OptionalValueSupplier<?> valueSupplier,
-                           @Nullable TypeSuggestionResolver<S, ?> suggestionResolver) {
+                           @Nullable SuggestionResolver<S> suggestionResolver) {
         super(
             name, type, permission, description, optional,
             false, greedy, valueSupplier, suggestionResolver

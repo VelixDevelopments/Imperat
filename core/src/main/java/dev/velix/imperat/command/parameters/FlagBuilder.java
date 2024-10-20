@@ -5,7 +5,7 @@ import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandFlag;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     private final ParameterType<S, T> inputType;
     private final List<String> aliases = new ArrayList<>();
     private OptionalValueSupplier<T> defaultValueSupplier = null;
-    private TypeSuggestionResolver<S, T> suggestionResolver;
+    private SuggestionResolver<S> suggestionResolver;
 
     private FlagBuilder(String name, ParameterType<S, T> inputType) {
         super(name, ParameterTypes.flag(), true, false);
@@ -54,7 +54,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
         return this;
     }
 
-    public FlagBuilder<S, T> suggestForInputValue(TypeSuggestionResolver<S, T> suggestionResolver) {
+    public FlagBuilder<S, T> suggestForInputValue(SuggestionResolver<S> suggestionResolver) {
         if (inputType == null) {
             throw new IllegalArgumentException("Flag of valueType switches, cannot have a default value supplier !");
         }

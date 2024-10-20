@@ -125,7 +125,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
         if (parameterSpecificResolver == null) {
             var resolverByType = getSuggestionResolverByType(parameter.valueType());
             if (resolverByType != null) return resolverByType;
-            else return SuggestionResolver.type(String.class, Collections.singletonList(parameter.format()));
+            else return SuggestionResolver.plain(Collections.singletonList(parameter.format()));
         } else
             return parameterSpecificResolver;
     }

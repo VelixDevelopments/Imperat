@@ -4,9 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,40 +30,13 @@ public interface SuggestionResolver<S extends Source> {
         return plain(Arrays.asList(results));
     }
 
-    static <S extends Source> TypeSuggestionResolver<S, Command<S>> forCommand(Command<S> command) {
+    static <S extends Source> SuggestionResolver<S> forCommand(Command<S> command) {
         List<String> list = new ArrayList<>();
         list.add(command.name());
         list.addAll(command.aliases());
-        return type(new TypeWrap<>() {
-        }, list);
+        return plain(list);
     }
 
-    static <S extends Source, T> TypeSuggestionResolver<S, T> type(Class<T> type, Collection<String> results) {
-        return type(TypeWrap.of(type), results);
-    }
-
-    static <S extends Source, T> TypeSuggestionResolver<S, T> type(TypeWrap<T> type, Collection<String> results) {
-        return new TypeSuggestionResolver<>() {
-
-            @Override
-            public @NotNull TypeWrap<T> getType() {
-                return type;
-            }
-
-            @Override
-            public Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
-                return results;
-            }
-        };
-    }
-
-    static <S extends Source, T> TypeSuggestionResolver<S, T> type(Class<T> type, String... results) {
-        return type(type, List.of(results));
-    }
-
-    static <S extends Source, T> TypeSuggestionResolver<S, T> type(TypeWrap<T> type, String... results) {
-        return type(type, List.of(results));
-    }
 
     /**
      * @param context   the context for suggestions

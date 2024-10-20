@@ -15,7 +15,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -210,8 +209,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Override
-    public @Nullable <T> TypeSuggestionResolver<S, T> getSuggestionResolver() {
-        return (TypeSuggestionResolver<S, T>) suggestionResolver;
+    public @Nullable SuggestionResolver<S> getSuggestionResolver() {
+        return suggestionResolver;
     }
 
     @Override

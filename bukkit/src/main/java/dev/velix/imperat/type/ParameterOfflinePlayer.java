@@ -6,10 +6,12 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import net.minecraft.server.v1_13_R2.MinecraftServer;
 import org.bukkit.Bukkit;
@@ -19,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spigotmc.SpigotConfig;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 
 public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, OfflinePlayer> {
@@ -69,5 +73,18 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
         return input.length() <= 16;
     }
 
+    private final static class PlayerSuggestionResolver implements SuggestionResolver<BukkitSource> {
 
+        /**
+         * @param context   the context for suggestions
+         * @param parameter the parameter of the value to complete
+         * @return the auto-completed suggestions of the current argument
+         */
+        @Override
+        public Collection<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameter) {
+            return Arrays.stream(Bukkit.getOfflinePlayers())
+                .map(OfflinePlayer::getName)
+                .toList();
+        }
+    }
 }

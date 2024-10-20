@@ -5,7 +5,6 @@ import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,11 +59,8 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
      * @return the suggestion resolver for generating suggestions based on the parameter type.
      */
     @Override
-    public TypeSuggestionResolver<S, T> getSuggestionResolver() {
-        return SuggestionResolver.type(
-            typeWrap,
-            suggestions
-        );
+    public SuggestionResolver<S> getSuggestionResolver() {
+        return SuggestionResolver.plain(suggestions);
     }
 
     /**

@@ -5,7 +5,6 @@ import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,7 +21,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     protected final ParameterType<S, ?> type;
     protected final boolean optional, flag, greedy;
     protected final OptionalValueSupplier<?> optionalValueSupplier;
-    protected final TypeSuggestionResolver<S, ?> suggestionResolver;
+    protected final SuggestionResolver<S> suggestionResolver;
     protected String permission;
     protected Description description;
     protected int index;
@@ -35,7 +34,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
         Description description,
         boolean optional, boolean flag, boolean greedy,
         @NotNull OptionalValueSupplier<?> optionalValueSupplier,
-        @Nullable TypeSuggestionResolver<S, ?> suggestionResolver
+        @Nullable SuggestionResolver<S> suggestionResolver
     ) {
         this.name = name;
         this.type = type;
@@ -176,9 +175,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> @Nullable TypeSuggestionResolver<S, T> getSuggestionResolver() {
-        return (TypeSuggestionResolver<S, T>) suggestionResolver;
+    public @Nullable SuggestionResolver<S> getSuggestionResolver() {
+        return suggestionResolver;
     }
 
     @Override

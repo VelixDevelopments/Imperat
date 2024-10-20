@@ -5,7 +5,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ public interface ParameterType<S extends Source, T> {
 
     @Nullable T resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException;
 
-    TypeSuggestionResolver<S, T> getSuggestionResolver();
+    SuggestionResolver<S> getSuggestionResolver();
 
     boolean matchesInput(String input, CommandParameter<S> parameter);
 

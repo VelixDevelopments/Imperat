@@ -4,17 +4,22 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
 
+    private final PlayerSuggestionResolver SUGGESTION_RESOLVER = new PlayerSuggestionResolver();
     public ParameterPlayer() {
         super(TypeWrap.of(Player.class));
     }
@@ -43,4 +48,26 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
         return input.length() <= 16;
     }
 
+    /**
+     * Returns the suggestion resolver associated with this parameter type.
+     *
+     * @return the suggestion resolver for generating suggestions based on the parameter type.
+     */
+    @Override
+    public SuggestionResolver<BukkitSource> getSuggestionResolver() {
+        return SUGGESTION_RESOLVER;
+    }
+
+    private final static class PlayerSuggestionResolver implements SuggestionResolver<BukkitSource> {
+
+        /**
+         * @param context   the context for suggestions
+         * @param parameter the parameter of the value to complete
+         * @return the auto-completed suggestions of the current argument
+         */
+        @Override
+        public Collection<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameter) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+        }
+    }
 }

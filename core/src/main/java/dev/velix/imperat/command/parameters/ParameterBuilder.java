@@ -4,7 +4,6 @@ import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +19,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
     protected String permission = null;
     protected Description description = Description.EMPTY;
     private @NotNull OptionalValueSupplier<T> valueSupplier;
-    private TypeSuggestionResolver<S, T> suggestionResolver = null;
+    private SuggestionResolver<S> suggestionResolver = null;
 
     ParameterBuilder(String name, ParameterType<S, T> type, boolean optional, boolean greedy) {
         this.name = name;
@@ -59,13 +58,13 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
         return defaultValue(value == null ? OptionalValueSupplier.empty(this.type.wrappedType()) : OptionalValueSupplier.of(value));
     }
 
-    public ParameterBuilder<S, T> suggest(TypeSuggestionResolver<S, T> suggestionResolver) {
+    public ParameterBuilder<S, T> suggest(SuggestionResolver<S> suggestionResolver) {
         this.suggestionResolver = suggestionResolver;
         return this;
     }
 
     public ParameterBuilder<S, T> suggest(String... suggestions) {
-        return suggest(SuggestionResolver.type(type.wrappedType(), suggestions));
+        return suggest(SuggestionResolver.plain(suggestions));
     }
 
     public CommandParameter<S> build() {

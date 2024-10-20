@@ -20,7 +20,6 @@ import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
@@ -441,11 +440,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Suggest suggestAnnotation = element.getAnnotation(Suggest.class);
         SuggestionProvider suggestionProvider = element.getAnnotation(SuggestionProvider.class);
 
-        TypeSuggestionResolver<S, ?> suggestionResolver = null;
+        SuggestionResolver<S> suggestionResolver = null;
 
         if (suggestAnnotation != null) {
-            suggestionResolver = SuggestionResolver.type(
-                parameterTypeWrap,
+            suggestionResolver = SuggestionResolver.plain(
                 imperat.replacePlaceholders(suggestAnnotation.value())
             );
         } else if (suggestionProvider != null) {
@@ -453,10 +451,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             var namedResolver = imperat.getNamedSuggestionResolver(
                 suggestionResolverName
             );
-            if (namedResolver != null && !(namedResolver instanceof TypeSuggestionResolver<?, ?>))
-                throw new UnsupportedOperationException("Named suggestion resolvers must be of valueType `TypeSuggestionResolver` and make sure the valueType matches that of the parameter's");
-            else if (namedResolver != null)
-                suggestionResolver = (TypeSuggestionResolver<S, ?>) namedResolver;
+            if (namedResolver != null)
+                suggestionResolver = namedResolver;
             else {
                 throw new IllegalStateException("Unregistered named suggestion resolver : " + suggestionResolverName);
             }
@@ -494,12 +490,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (flag != null) {
             String[] flagAliases = flag.value();
             if (suggestAnnotation != null) {
-                suggestionResolver = SuggestionResolver.type(TypeWrap.of(parameter.getParameterizedType()), imperat.replacePlaceholders(suggestAnnotation.value()));
+                suggestionResolver = SuggestionResolver.plain(imperat.replacePlaceholders(suggestAnnotation.value()));
             }
 
             return AnnotationParameterDecorator.decorate(
                 CommandParameter.flag(name, type)
-                    .suggestForInputValue((TypeSuggestionResolver<S, T>) suggestionResolver)
+                    .suggestForInputValue(suggestionResolver)
                     .aliases(getAllExceptFirst(flagAliases))
                     .flagDefaultInputValue(optionalValueSupplier)
                     .description(desc)

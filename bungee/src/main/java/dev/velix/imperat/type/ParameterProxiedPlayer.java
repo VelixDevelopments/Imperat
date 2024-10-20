@@ -4,17 +4,22 @@ import dev.velix.imperat.BungeeSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource, ProxiedPlayer> {
 
+    private final ProxiedPlayerSuggestionResolver PROXIED_PLAYER_SUGGESTION_RESOLVER = new ProxiedPlayerSuggestionResolver();
     public ParameterProxiedPlayer() {
         super(TypeWrap.of(ProxiedPlayer.class));
     }
@@ -44,6 +49,31 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
     @Override
     public boolean matchesInput(String input, CommandParameter<BungeeSource> parameter) {
         return ProxyServer.getInstance().getPlayer(input) != null;
+    }
+
+    /**
+     * Returns the suggestion resolver associated with this parameter type.
+     *
+     * @return the suggestion resolver for generating suggestions based on the parameter type.
+     */
+    @Override
+    public SuggestionResolver<BungeeSource> getSuggestionResolver() {
+        return PROXIED_PLAYER_SUGGESTION_RESOLVER;
+    }
+
+    private final static class ProxiedPlayerSuggestionResolver implements SuggestionResolver<BungeeSource> {
+
+        /**
+         * @param context   the context for suggestions
+         * @param parameter the parameter of the value to complete
+         * @return the auto-completed suggestions of the current argument
+         */
+        @Override
+        public Collection<String> autoComplete(SuggestionContext<BungeeSource> context, CommandParameter<BungeeSource> parameter) {
+            return ProxyServer.getInstance().getPlayers().stream()
+                .map(ProxiedPlayer::getName)
+                .toList();
+        }
     }
 
 }

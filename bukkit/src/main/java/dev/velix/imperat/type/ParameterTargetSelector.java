@@ -8,7 +8,7 @@ import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
-import dev.velix.imperat.resolvers.TypeSuggestionResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.selector.SelectionParameterInput;
 import dev.velix.imperat.selector.SelectionType;
@@ -31,14 +31,14 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
     private final static char PARAMETER_START = '[';
     private final static char PARAMETER_END = ']';
 
-    private final TypeSuggestionResolver<BukkitSource, TargetSelector> suggestionResolver;
+    private final SuggestionResolver<BukkitSource> suggestionResolver;
 
     public ParameterTargetSelector() {
         super(TypeWrap.of(TargetSelector.class));
         SelectionType.TYPES.stream()
             .filter(type -> type != SelectionType.UNKNOWN)
             .map(SelectionType::id)
-            .forEach((id) -> suggestions.add(String.valueOf(SelectionType.MENTION_CHARACTER + id)));
+            .forEach((id) -> suggestions.add(SelectionType.MENTION_CHARACTER + id));
         suggestionResolver = new TargetSelectorSuggestionResolver();
     }
 
@@ -135,19 +135,11 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
      * @return the suggestion resolver for generating suggestions based on the parameter type.
      */
     @Override
-    public TypeSuggestionResolver<BukkitSource, TargetSelector> getSuggestionResolver() {
+    public SuggestionResolver<BukkitSource> getSuggestionResolver() {
         return suggestionResolver;
     }
 
-    private final class TargetSelectorSuggestionResolver implements TypeSuggestionResolver<BukkitSource, TargetSelector> {
-
-        /**
-         * @return the valueType that is specific for these suggestions resolving
-         */
-        @Override
-        public @NotNull TypeWrap<TargetSelector> getType() {
-            return TypeWrap.of(TargetSelector.class);
-        }
+    private final class TargetSelectorSuggestionResolver implements SuggestionResolver<BukkitSource> {
 
         /**
          * @param context   the context for suggestions
