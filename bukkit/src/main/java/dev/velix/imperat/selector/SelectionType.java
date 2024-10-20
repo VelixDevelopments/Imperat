@@ -19,9 +19,9 @@ import java.util.concurrent.ThreadLocalRandom;
 @SuppressWarnings("unchecked")
 public interface SelectionType {
 
-    char MENTION_CHARACTER = '@';
+    String MENTION_CHARACTER = "@";
 
-    char id();
+    String id();
 
     @NotNull <E extends Entity> List<E> getTargetEntities(
         @NotNull ExecutionContext<BukkitSource> context,
@@ -31,8 +31,8 @@ public interface SelectionType {
 
     SelectionType COMMAND_EXECUTOR = new SelectionType() {
         @Override
-        public char id() {
-            return 's';
+        public String id() {
+            return "s";
         }
 
         @Override
@@ -51,8 +51,8 @@ public interface SelectionType {
 
     SelectionType CLOSEST_PLAYER = new SelectionType() {
         @Override
-        public char id() {
-            return 'p';
+        public String id() {
+            return "p";
         }
 
         @Override
@@ -87,8 +87,8 @@ public interface SelectionType {
 
     SelectionType RANDOM_PLAYER = new SelectionType() {
         @Override
-        public char id() {
-            return 'r';
+        public String id() {
+            return "r";
         }
 
         @Override
@@ -104,8 +104,8 @@ public interface SelectionType {
 
     SelectionType ALL_PLAYERS = new SelectionType() {
         @Override
-        public char id() {
-            return 'a';
+        public String id() {
+            return "a";
         }
 
         @Override
@@ -121,8 +121,8 @@ public interface SelectionType {
 
     SelectionType ALL_ENTITIES = new SelectionType() {
         @Override
-        public char id() {
-            return 'e';
+        public String id() {
+            return "e";
         }
 
         @Override
@@ -143,8 +143,8 @@ public interface SelectionType {
 
     SelectionType UNKNOWN = new SelectionType() {
         @Override
-        public char id() {
-            return 69;
+        public String id() {
+            return "unknown";
         }
 
         @Override
@@ -166,9 +166,9 @@ public interface SelectionType {
         ALL_PLAYERS
     );
 
-    static @NotNull SelectionType from(char id) {
+    static @NotNull SelectionType from(String id) {
         for (var type : TYPES)
-            if (type.id() == id)
+            if (type.id().equalsIgnoreCase(id))
                 return type;
         return SelectionType.UNKNOWN;
     }

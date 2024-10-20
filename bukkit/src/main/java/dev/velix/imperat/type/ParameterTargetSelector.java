@@ -3,7 +3,6 @@ package dev.velix.imperat.type;
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
-import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
@@ -14,7 +13,6 @@ import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.selector.SelectionParameterInput;
 import dev.velix.imperat.selector.SelectionType;
 import dev.velix.imperat.selector.TargetSelector;
-import dev.velix.imperat.selector.field.SelectionField;
 import dev.velix.imperat.selector.field.filters.PredicateField;
 import dev.velix.imperat.selector.field.operators.OperatorField;
 import dev.velix.imperat.util.TypeWrap;
@@ -26,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public final class ParameterTargetSelector extends BaseParameterType<BukkitSource, TargetSelector> {
@@ -57,7 +54,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
 
         if (Version.isOrOver(13)) {
             SelectionType type = commandInputStream.popLetter()
-                .map(SelectionType::from).orElse(SelectionType.UNKNOWN);
+                .map((s) -> SelectionType.from(String.valueOf(s))).orElse(SelectionType.UNKNOWN);
             return TargetSelector.of(
                 type,
                 Bukkit.selectEntities(context.source().origin(), raw)
@@ -66,7 +63,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
 
         char last = raw.charAt(raw.length() - 1);
 
-        if (commandInputStream.currentLetter().filter((c) -> c != SelectionType.MENTION_CHARACTER).isPresent()) {
+        if (commandInputStream.currentLetter().filter((c) -> String.valueOf(c).equalsIgnoreCase(SelectionType.MENTION_CHARACTER)).isPresent()) {
             Player target = Bukkit.getPlayer(raw);
             if (target == null)
                 return TargetSelector.empty();
@@ -79,7 +76,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
         }
 
         SelectionType type = commandInputStream.popLetter()
-            .map(SelectionType::from).orElse(SelectionType.UNKNOWN);
+            .map((s) -> SelectionType.from(String.valueOf(s))).orElse(SelectionType.UNKNOWN);
         //update current
 
         if (type == SelectionType.UNKNOWN) {
@@ -144,14 +141,6 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
 
     private final class TargetSelectorSuggestionResolver implements TypeSuggestionResolver<BukkitSource, TargetSelector> {
 
-        private final List<String> ids = SelectionType.TYPES.stream()
-            .map((st) -> String.valueOf(st.id()))
-            .toList();
-
-        private final List<String> SELECTION_FIELDS_NAMES = SelectionField.ALL.stream()
-            .map(SelectionField::getName)
-            .toList();
-
         /**
          * @return the valueType that is specific for these suggestions resolving
          */
@@ -170,48 +159,8 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
             SuggestionContext<BukkitSource> context,
             CommandParameter<BukkitSource> parameter
         ) {
-            CompletionArg argToComplete = context.getArgToComplete();
-            if (argToComplete.isEmpty()) {
-                return suggestions;
-            }
-            String argValue = argToComplete.value();
-
-            if (argValue.equals(String.valueOf(SelectionType.MENTION_CHARACTER))) {
-                return ids;
-            }
-            char lastChar = argValue.charAt(argValue.length() - 1);
-            if (lastChar == PARAMETER_START || lastChar == SelectionField.SEPARATOR) {
-                return SELECTION_FIELDS_NAMES;
-            }
-
-            if (argValue.indexOf(PARAMETER_START) == -1) {
-                return Collections.singleton("[]");
-            }
-            //TODO recode this
-            if (lastChar == SelectionField.VALUE_EQUALS) {
-
-                final String name = getFieldName(argValue);
-                SelectionField<?> field = SelectionField.ALL.stream()
-                    .filter((selectionField) -> selectionField.getName().equalsIgnoreCase(name))
-                    .findFirst().orElse(null);
-
-                return field == null ? Collections.emptyList() : field.getSuggestions();
-            }
-            return Collections.singleton(String.valueOf(PARAMETER_END));
+            return suggestions;
         }
     }
 
-    private static @NotNull String getFieldName(String argValue) {
-        int start = argValue.lastIndexOf(SelectionField.SEPARATOR);
-        StringBuilder fieldName = new StringBuilder();
-
-        for (int cursor = start + 1; cursor < argValue.length(); cursor++) {
-            if (argValue.charAt(cursor) == SelectionField.VALUE_EQUALS) {
-                break;
-            }
-            fieldName.append(argValue.charAt(cursor));
-        }
-
-        return fieldName.toString();
-    }
 }
