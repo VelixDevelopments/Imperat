@@ -54,13 +54,13 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
     @Override
     public boolean matchesInput(String input, CommandParameter<S> parameter) {
         int subStringIndex;
-        if (Patterns.SINGLE_FLAG.matcher(input).matches()) {
+        if (Patterns.SINGLE_FLAG.matcher(input).matches())
             subStringIndex = 1;
-        } else if (Patterns.DOUBLE_FLAG.matcher(input).matches()) {
+        else if (Patterns.DOUBLE_FLAG.matcher(input).matches())
             subStringIndex = 2;
-        } else {
+        else
             subStringIndex = 0;
-        }
+
         String flagInput = input.substring(subStringIndex);
         return parameter.asFlagParameter().flagData()
             .acceptsInput(flagInput);

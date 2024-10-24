@@ -167,6 +167,11 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
         return wrappedType().getType();
     }
 
+    /**
+     * Retrieves the parameter type associated with this command parameter.
+     *
+     * @return the {@link ParameterType} of the command parameter
+     */
     @NotNull ParameterType<S, ?> type();
 
     /**

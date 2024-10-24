@@ -25,9 +25,9 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
     /**
      * Encapsulates type information for the parameter being handled.
      * This instance is used to obtain and manage type-related information
-     * and operations specific to the parameter type {@code T}.
+     * and operations specific to the parameter type .
      */
-    protected final TypeWrap<T> typeWrap;
+    protected final Type type;
     /**
      * A list storing suggestions for parameter types
      * in a command processing framework.
@@ -37,10 +37,10 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
     /**
      * Constructs a new BaseParameterType with the given TypeWrap.
      *
-     * @param typeWrap The wrapping object that holds information about the type of the parameter.
+     * @param type The wrapping object that holds information about the type of the parameter.
      */
-    protected BaseParameterType(TypeWrap<T> typeWrap) {
-        this.typeWrap = typeWrap;
+    protected BaseParameterType(TypeWrap<T> type) {
+        this.type = type.getType();
     }
 
     /**
@@ -50,7 +50,7 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
      */
     @Override
     public Type type() {
-        return typeWrap.getType();
+        return type;
     }
 
     /**

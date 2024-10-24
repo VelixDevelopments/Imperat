@@ -1,17 +1,17 @@
 package dev.velix.imperat.exception;
 
-import dev.velix.imperat.util.TypeWrap;
+import java.lang.reflect.Type;
 
 public class InvalidSourceException extends ImperatException {
 
-    private final TypeWrap<?> targetType;
+    private final Type targetType;
 
-    public InvalidSourceException(TypeWrap<?> targetType) {
+    public InvalidSourceException(Type targetType) {
         super();
         this.targetType = targetType;
     }
 
-    public TypeWrap<?> getTargetType() {
+    public Type getTargetType() {
         return targetType;
     }
 

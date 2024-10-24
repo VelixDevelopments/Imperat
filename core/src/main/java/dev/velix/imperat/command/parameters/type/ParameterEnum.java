@@ -27,9 +27,9 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
     public @NotNull Enum<?> resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
         Type enumType = commandInputStream.currentParameter()
-            .filter(param -> TypeUtility.matches(typeWrap.getType(), Enum.class))
+            .filter(param -> TypeUtility.matches(type, Enum.class))
             .map(CommandParameter::valueType)
-            .orElse(typeWrap.getType());
+            .orElse(type);
 
         var raw = commandInputStream.currentRaw();
         try {
@@ -43,11 +43,11 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
     @Override
     public boolean matchesInput(String input, CommandParameter<S> parameter) {
         try {
-            if (!typeWrap.isSubtypeOf(Enum.class)) {
+            if (!TypeWrap.of(type).isSubtypeOf(Enum.class)) {
                 return true;
             }
-            ImperatDebugger.debug("type-enum-name= " + typeWrap.getType().getTypeName());
-            Enum.valueOf((Class<? extends Enum>) typeWrap.getType(), input);
+            ImperatDebugger.debug("type-enum-name= " + type.getTypeName());
+            Enum.valueOf((Class<? extends Enum>) type, input);
             return true;
         } catch (EnumConstantNotPresentException ex) {
             return false;
