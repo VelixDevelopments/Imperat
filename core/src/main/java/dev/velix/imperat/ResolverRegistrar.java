@@ -122,9 +122,14 @@ public sealed interface ResolverRegistrar<S extends Source> permits Imperat {
     @SuppressWarnings("uncecked")
     default @NotNull SuggestionResolver<S> getParameterSuggestionResolver(CommandParameter<S> parameter) {
         SuggestionResolver<S> parameterSpecificResolver = parameter.getSuggestionResolver();
+        //ImperatDebugger.debug("Getting the suggestion resolver for param '%s'", parameter.format());
         if (parameterSpecificResolver == null) {
+            //ImperatDebugger.debug("Found no specific argument suggestion resolver for param '%s'", parameter.format());
             var resolverByType = getSuggestionResolverByType(parameter.valueType());
-            if (resolverByType != null) return resolverByType;
+            if (resolverByType != null) {
+                //ImperatDebugger.debug("Found resolver by type for param '%s'", parameter.format() );
+                return resolverByType;
+            }
             else return SuggestionResolver.plain(Collections.singletonList(parameter.format()));
         } else
             return parameterSpecificResolver;

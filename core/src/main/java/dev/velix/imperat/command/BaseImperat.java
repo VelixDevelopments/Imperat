@@ -86,7 +86,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
         this.setThrowableResolver(InvalidSourceException.class, (exception, imperat, context) -> {
             throw new UnsupportedOperationException("Couldn't find any source resolver for valueType `"
-                + exception.getTargetType().getType().getTypeName() + "'");
+                + exception.getTargetType().getTypeName() + "'");
         });
 
         this.setThrowableResolver(

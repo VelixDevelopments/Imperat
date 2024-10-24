@@ -105,6 +105,7 @@ public interface CommandInputStream<S extends Source> {
                 break;
             }
             builder.append(current);
+            skipLetter();
         }
         return builder.toString();
     }

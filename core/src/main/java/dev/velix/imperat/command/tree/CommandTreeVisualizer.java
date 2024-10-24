@@ -1,7 +1,6 @@
 package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +22,7 @@ public final class CommandTreeVisualizer<S extends Source> {
         if (tree == null) return;
         StringBuilder builder = new StringBuilder();
         visualizeNode(tree.root, builder, 0);
-        ImperatDebugger.debug(builder.toString());
+        //ImperatDebugger.debug(builder.toString());
     }
 
     private void visualizeNode(ParameterNode<S, ?> node, StringBuilder builder, int depth) {

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -81,10 +82,16 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         final @NotNull String alias,
         final String[] args
     ) throws IllegalArgumentException {
+        //ImperatDebugger.debug("Starting bukkit tab-completion");
         BukkitSource source = dispatcher.wrapSender(sender);
-        var completions = dispatcher.autoComplete(command, source, args).join();
-        if (completions instanceof List<String> list) return list;
-        else return new ArrayList<>(completions);
+        try {
+            var completions = dispatcher.autoComplete(command, source, args).join();
+            //ImperatDebugger.debug("Size of completions= %s", completions.size());
+            return new ArrayList<>(completions);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 
 }

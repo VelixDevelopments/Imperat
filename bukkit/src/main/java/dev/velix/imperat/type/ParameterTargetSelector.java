@@ -63,7 +63,8 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
 
         char last = raw.charAt(raw.length() - 1);
 
-        if (commandInputStream.currentLetter().filter((c) -> String.valueOf(c).equalsIgnoreCase(SelectionType.MENTION_CHARACTER)).isPresent()) {
+        if (commandInputStream.currentLetter()
+            .filter((c) -> String.valueOf(c).equalsIgnoreCase(SelectionType.MENTION_CHARACTER)).isEmpty()) {
             Player target = Bukkit.getPlayer(raw);
             if (target == null)
                 return TargetSelector.empty();
@@ -71,22 +72,26 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
             return TargetSelector.of(SelectionType.UNKNOWN, target);
         }
 
-        if (context.source().isConsole()) {
+        /*if (context.source().isConsole()) {
             throw new SourceException("Only players can use this");
-        }
+        }*/
+
+
 
         SelectionType type = commandInputStream.popLetter()
             .map((s) -> SelectionType.from(String.valueOf(s))).orElse(SelectionType.UNKNOWN);
         //update current
 
         if (type == SelectionType.UNKNOWN) {
-            throw new SourceException("Unknown selection type '%s'", commandInputStream.currentLetter());
+            throw new SourceException("Unknown selection type '%s'", commandInputStream.currentLetter().orElseThrow());
         }
 
         List<SelectionParameterInput<?>> inputParameters = new ArrayList<>();
 
         boolean parameterized = commandInputStream.popLetter().map((c) -> c == PARAMETER_START).orElse(false) && last == PARAMETER_END;
         if (parameterized) {
+            commandInputStream.skipLetter();
+
             String params = commandInputStream.collectBeforeFirst(PARAMETER_END);
             inputParameters = SelectionParameterInput.parseAll(params, commandInputStream);
         }
@@ -151,7 +156,11 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
             SuggestionContext<BukkitSource> context,
             CommandParameter<BukkitSource> parameter
         ) {
-            return suggestions;
+            //ImperatDebugger.debug("SUGGESTING for TargetSelector");
+            List<String> completions = new ArrayList<>(suggestions);
+            Bukkit.getOnlinePlayers().stream().
+                map(Player::getName).forEach(completions::add);
+            return completions;
         }
     }
 

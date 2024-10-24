@@ -1,7 +1,6 @@
 package dev.velix.imperat.type;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
@@ -39,6 +38,7 @@ public class ParameterWorld extends BaseParameterType<BukkitSource, World> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public ParameterWorld(Class<?> type) {
         super(TypeWrap.of((Class<World>) type));
     }
@@ -53,10 +53,6 @@ public class ParameterWorld extends BaseParameterType<BukkitSource, World> {
         throw new UnknownWorldException(raw);
     }
 
-    @Override
-    public boolean matchesInput(String input, CommandParameter<BukkitSource> parameter) {
-        return super.matchesInput(input, parameter);
-    }
 
     /**
      * Returns the suggestion resolver associated with this parameter type.

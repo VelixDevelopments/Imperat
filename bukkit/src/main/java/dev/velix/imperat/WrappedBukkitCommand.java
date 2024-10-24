@@ -9,6 +9,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 @ApiStatus.Internal
 public final class WrappedBukkitCommand extends Command implements PermissionHolder, DescriptionHolder {
 
@@ -83,5 +85,25 @@ public final class WrappedBukkitCommand extends Command implements PermissionHol
     @Override
     public void permission(String permission) {
         command.setPermission(permission);
+    }
+
+    /**
+     * Executed on tab completion for this command, returning a list of
+     * options the player can tab through.
+     *
+     * @param sender Source object which is executing this command
+     * @param alias  the alias being used
+     * @param args   All arguments passed to the command, split via ' '
+     * @return a list of tab-completions for the specified arguments. This
+     * will never be null. List may be immutable.
+     * @throws IllegalArgumentException if sender, alias, or args is null
+     */
+    @Override
+    public @NotNull List<String> tabComplete(
+        @NotNull CommandSender sender,
+        @NotNull String alias,
+        @NotNull String[] args
+    ) throws IllegalArgumentException {
+        return command.tabComplete(sender, alias, args);
     }
 }

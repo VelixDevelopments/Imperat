@@ -64,8 +64,15 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
     public void visualize() {
         ImperatDebugger.debug("Result => " + result.name());
         StringBuilder builder = new StringBuilder();
+        int size = parameters.size();
+
+        int i = 0;
         for (var node : parameters) {
-            builder.append(node.format()).append(" -> ");
+            builder.append(node.format());
+            if (i != size - 1) {
+                builder.append(" -> ");
+            }
+            i++;
         }
         ImperatDebugger.debug(builder.toString());
     }

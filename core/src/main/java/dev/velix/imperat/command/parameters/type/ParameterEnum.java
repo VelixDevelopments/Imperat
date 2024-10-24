@@ -6,7 +6,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +34,7 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
         try {
             assert raw.isPresent();
             return Enum.valueOf((Class<? extends Enum>) enumType, raw.get());
-        } catch (EnumConstantNotPresentException ex) {
+        } catch (IllegalArgumentException | EnumConstantNotPresentException ex) {
             throw new SourceException("Invalid " + enumType.getTypeName() + " '" + raw + "'");
         }
     }
@@ -46,10 +45,10 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
             if (!TypeWrap.of(type).isSubtypeOf(Enum.class)) {
                 return true;
             }
-            ImperatDebugger.debug("type-enum-name= " + type.getTypeName());
+            //ImperatDebugger.debug("type-enum-name= " + type.getTypeName());
             Enum.valueOf((Class<? extends Enum>) type, input);
             return true;
-        } catch (EnumConstantNotPresentException ex) {
+        } catch (IllegalArgumentException | EnumConstantNotPresentException ex) {
             return false;
         }
     }

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -55,8 +56,12 @@ public abstract class AutoCompleter<S extends Source> {
 
         SuggestionContext<S> context = dispatcher.getContextFactory()
             .createSuggestionContext(sender, command, queue, argToComplete);
-
-        return autoComplete(dispatcher, context);
+        //ImperatDebugger.debug("auto completing !");
+        return autoComplete(dispatcher, context)
+            .exceptionally((ex) -> {
+                dispatcher.handleThrowable(ex, context, AutoCompleter.class, "autoComplete(dispatcher, sender, args)");
+                return Collections.emptyList();
+            });
     }
 
     /**

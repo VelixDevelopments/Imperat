@@ -110,17 +110,22 @@ public final class CommandTree<S extends Source> {
         String raw = context.arguments().getOr(depth, "");
         assert raw != null;
 
-        if (
-            (!raw.isBlank() || !raw.isEmpty()) && !child.matchesInput(raw)
-                || (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
-                .hasPermission(context.source(), child.data.permission()))
-        ) {
+        if (raw.isEmpty() || raw.isBlank()) {
+            return CompletableFuture.completedFuture(results);
+        }
+
+        boolean hasNoPermission = (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
+            .hasPermission(context.source(), child.data.permission()));
+
+        if (hasNoPermission) {
+            //ImperatDebugger.debug("Ending tab completion quickly");
             return CompletableFuture.completedFuture(results);
         }
 
         if (depth == maxDepth) {
             //we reached the arg we want to complete, let's complete it using our current node
             //COMPLETE DIRECTLY
+            //ImperatDebugger.debug("Adding childs results");
             return addChildResults(imperat, context, child);
         } else {
             if (child.data.isFlag() && !child.data.asFlagParameter().isSwitch()) {
@@ -143,7 +148,11 @@ public final class CommandTree<S extends Source> {
         ParameterNode<S, ?> node
     ) {
         SuggestionResolver<S> resolver = imperat.getParameterSuggestionResolver(node.data);
-        return resolver.asyncAutoComplete(context, node.data);
+        return resolver.asyncAutoComplete(context, node.data)
+            .thenApply((results) -> {
+                results.removeIf((entry) -> !node.matchesInput(entry));
+                return results;
+            });
     }
 
 
