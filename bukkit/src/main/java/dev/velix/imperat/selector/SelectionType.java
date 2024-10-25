@@ -156,7 +156,7 @@ public interface SelectionType {
         }
 
     };
-    ;
+
 
     List<SelectionType> TYPES = List.of(
         COMMAND_EXECUTOR,
