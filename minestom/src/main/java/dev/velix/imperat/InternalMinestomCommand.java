@@ -4,7 +4,7 @@ import net.minestom.server.command.builder.Command;
 
 import static dev.velix.imperat.SyntaxDataLoader.*;
 
-public final class InternalMinestomCommand extends Command {
+final class InternalMinestomCommand extends Command {
 
     MinestomImperat imperat;
     dev.velix.imperat.command.Command<MinestomSource> imperatCommand;
