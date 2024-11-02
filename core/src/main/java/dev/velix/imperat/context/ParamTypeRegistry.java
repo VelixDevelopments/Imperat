@@ -48,7 +48,6 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Pa
         if (TypeUtility.isNumericType(TypeWrap.of(type)))
             return Optional.of(ParameterTypes.numeric((Class<? extends Number>) type));
 
-        //TODO make check for enum
         return Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
             if (TypeUtility.areRelatedTypes(type, Enum.class)) {
                 ParameterEnum<S> preloadedEnumType = new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
