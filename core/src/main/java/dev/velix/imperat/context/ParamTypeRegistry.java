@@ -24,6 +24,7 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Pa
         registerResolver(String.class, ParameterTypes.string());
         registerResolver(UUID.class, ParameterTypes.uuid());
         registerResolver(CommandFlag.class, ParameterTypes.flag());
+
     }
 
     public static <S extends Source> ParamTypeRegistry<S> createDefault() {
@@ -44,7 +45,7 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Pa
 
     @SuppressWarnings("unchecked")
     public Optional<ParameterType<S, ?>> getResolver(Type type) {
-        if (TypeWrap.of(type).isSubtypeOf(Number.class))
+        if (TypeUtility.isNumericType(TypeWrap.of(type)))
             return Optional.of(ParameterTypes.numeric((Class<? extends Number>) type));
 
         //TODO make check for enum
