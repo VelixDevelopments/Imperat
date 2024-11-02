@@ -14,4 +14,5 @@ public @interface Cooldown {
 
     TimeUnit unit();
 
+    String permission() default "";
 }

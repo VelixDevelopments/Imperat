@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class DefaultCooldownHandler<S extends Source> implements CooldownHandler<S> {
+final class DefaultCooldownHandler<S extends Source> implements CooldownHandler<S> {
 
     private final Map<S, Long> lastTimeExecuted = new HashMap<>();
     private final CommandUsage<S> usage;
 
-    public DefaultCooldownHandler(CommandUsage<S> usage) {
+    DefaultCooldownHandler(CommandUsage<S> usage) {
         this.usage = usage;
     }
 

@@ -2,7 +2,6 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
-import dev.velix.imperat.command.cooldown.DefaultCooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
@@ -40,7 +39,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
     CommandUsageImpl(@NotNull CommandExecution<S> execution, boolean help) {
         this.execution = execution;
-        this.cooldownHandler = new DefaultCooldownHandler<>(this);
+        this.cooldownHandler = CooldownHandler.createDefault(this);
         this.commandCoordinator = CommandCoordinator.sync();
         this.help = help;
     }
@@ -96,7 +95,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @return the flag from the raw input, null if it cannot be a flag
      */
     @Override
-    public @Nullable FlagData getFlagFromRaw(String rawInput) {
+    public @Nullable FlagData<S> getFlagFromRaw(String rawInput) {
         boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
         boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
 
@@ -108,7 +107,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
         for (var param : parameters) {
             if (!param.isFlag()) continue;
-            FlagData flag = param.asFlagParameter().flagData();
+            FlagData<S> flag = param.asFlagParameter().flagData();
             if (flag.acceptsInput(inputFlagAlias)) {
                 return flag;
             }

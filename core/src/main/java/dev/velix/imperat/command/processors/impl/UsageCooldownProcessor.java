@@ -24,13 +24,19 @@ public final class UsageCooldownProcessor<S extends Source> implements CommandPr
         CommandUsage<S> usage
     ) throws ImperatException {
         var source = context.source();
-        if (usage.getCooldownHandler().hasCooldown(source)) {
-            throw new CooldownException(
-                usage.getCooldownHandler().getUsageCooldown().orElseThrow().toMillis(),
-                usage.getCooldownHandler().getLastTimeExecuted(source).orElse(0L)
-            );
+        var handler = usage.getCooldownHandler();
+        var cooldown = usage.getCooldown();
+
+        if (handler.hasCooldown(source)) {
+            assert cooldown != null;
+            if (!imperat.getPermissionResolver().hasPermission(source, cooldown.permission())) {
+                throw new CooldownException(
+                    cooldown.toMillis(),
+                    handler.getLastTimeExecuted(source).orElse(0L)
+                );
+            }
         }
-        usage.getCooldownHandler().registerExecutionMoment(source);
+        handler.registerExecutionMoment(source);
     }
 
 }

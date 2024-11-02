@@ -72,4 +72,8 @@ public interface CooldownHandler<S extends Source> {
      * @return the last time the sender executed {@link CommandUsage}
      */
     Optional<Long> getLastTimeExecuted(S source);
+
+    static <S extends Source> CooldownHandler<S> createDefault(CommandUsage<S> usage) {
+        return new DefaultCooldownHandler<>(usage);
+    }
 }

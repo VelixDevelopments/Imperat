@@ -14,7 +14,11 @@ public interface CooldownHolder {
     void setCooldown(UsageCooldown cooldown);
 
     default void setCooldown(long value, TimeUnit unit) {
-        setCooldown(new UsageCooldown(value, unit));
+        setCooldown(value, unit, null);
+    }
+
+    default void setCooldown(long value, TimeUnit unit, @Nullable String permission) {
+        setCooldown(new UsageCooldown(value, unit, permission));
     }
 
 }

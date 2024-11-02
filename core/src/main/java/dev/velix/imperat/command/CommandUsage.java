@@ -253,7 +253,11 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
         }
 
         public Builder<S> cooldown(long value, TimeUnit unit) {
-            this.cooldown = new UsageCooldown(value, unit);
+            return cooldown(value, unit, null);
+        }
+
+        public Builder<S> cooldown(long value, TimeUnit unit, @Nullable String permission) {
+            this.cooldown = new UsageCooldown(value, unit, permission);
             return this;
         }
 

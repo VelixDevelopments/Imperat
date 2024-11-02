@@ -339,8 +339,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 imperat.replacePlaceholders(permission.value())
             );
 
-        if (cooldown != null)
-            builder.cooldown(cooldown.value(), cooldown.unit());
+        if (cooldown != null) {
+            String cooldownPerm = cooldown.permission();
+            builder.cooldown(cooldown.value(), cooldown.unit(), cooldownPerm.isEmpty() ? null : cooldownPerm);
+        }
 
         if (async != null)
             builder.coordinator(CommandCoordinator.async());
