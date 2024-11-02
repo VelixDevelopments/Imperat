@@ -4,7 +4,9 @@ import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Source;
 
-public sealed interface ProcessorRegistrar<S extends Source> permits Imperat {
+import java.util.Queue;
+
+public sealed interface ProcessorRegistrar<S extends Source> permits ImperatConfig {
 
     /**
      * Registers a command pre-processor
@@ -19,5 +21,17 @@ public sealed interface ProcessorRegistrar<S extends Source> permits Imperat {
      * @param postProcessor the post-processor to register
      */
     void registerGlobalPostProcessor(CommandPostProcessor<S> postProcessor);
+
+    /**
+     * @return gets the pre-processors in the chain of execution
+     * @see CommandPreProcessor
+     */
+    Queue<CommandPreProcessor<S>> getPreProcessors();
+
+    /**
+     * @return gets the post-processors in the chain of execution
+     * @see CommandPostProcessor
+     */
+    Queue<CommandPostProcessor<S>> getPostProcessors();
 
 }

@@ -5,97 +5,35 @@ import dev.velix.imperat.adventure.BungeeAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.exception.SourceException;
-import dev.velix.imperat.exception.UnknownPlayerException;
-import dev.velix.imperat.resolvers.BungeePermissionResolver;
-import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.type.ParameterProxiedPlayer;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.StringUtils;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 
 public final class BungeeImperat extends BaseImperat<BungeeSource> {
 
-    private final static BungeePermissionResolver DEFAULT_PERMISSION_RESOLVER = new BungeePermissionResolver();
-
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> adventureProvider;
 
-    private BungeeImperat(
-        final Plugin plugin,
-        final AdventureProvider<CommandSender> adventureProvider,
-        final PermissionResolver<BungeeSource> permissionResolver
+    BungeeImperat(
+        Plugin plugin,
+        AdventureProvider<CommandSender> adventureProvider,
+        ImperatConfig<BungeeSource> config
     ) {
-        super(permissionResolver);
+        super(config);
         this.plugin = plugin;
         ImperatDebugger.setLogger(plugin.getLogger());
-        this.adventureProvider = loadAdventureProvider(adventureProvider);
-        registerSourceResolvers();
-        registerValueResolvers();
-        registerThrowableResolvers();
+        this.adventureProvider = adventureProvider != null ? adventureProvider : loadAdventureProvider();
     }
 
-    private AdventureProvider<CommandSender> loadAdventureProvider(@Nullable AdventureProvider<CommandSender> provider) {
-        if (provider != null) {
-            return provider;
-        } else if (Reflections.findClass("net.kyori.adventure.platform.bungeecord.BungeeAudiences")) {
+    private AdventureProvider<CommandSender> loadAdventureProvider() {
+        if (Reflections.findClass("net.kyori.adventure.platform.bungeecord.BungeeAudiences")) {
             return new BungeeAdventure(plugin);
         }
         return new EmptyAdventure<>();
-    }
-
-    private void registerSourceResolvers() {
-        registerSourceResolver(CommandSender.class, BungeeSource::origin);
-        this.registerSourceResolver(ProxiedPlayer.class, (source) -> {
-            if (source.isConsole()) {
-                throw new SourceException("Only players are allowed to do this !");
-            }
-            return source.asPlayer();
-        });
-    }
-
-    private void registerValueResolvers() {
-        registerParamType(ProxiedPlayer.class, new ParameterProxiedPlayer());
-    }
-
-    private void registerThrowableResolvers() {
-        this.setThrowableResolver(
-            UnknownPlayerException.class, (exception, imperat, context) ->
-                context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
-        );
-    }
-
-    public static BungeeImperat create(
-        @NotNull Plugin plugin,
-        @Nullable AdventureProvider<CommandSender> audiences,
-        @NotNull PermissionResolver<BungeeSource> permissionResolver
-    ) {
-        return new BungeeImperat(plugin, audiences, permissionResolver);
-    }
-
-    public static BungeeImperat create(
-        Plugin plugin,
-        @Nullable AdventureProvider<CommandSender> audienceProvider
-    ) {
-        return create(plugin, audienceProvider, DEFAULT_PERMISSION_RESOLVER);
-    }
-
-    public static BungeeImperat create(
-        Plugin plugin,
-        @NotNull PermissionResolver<BungeeSource> permissionResolver
-    ) {
-        return create(plugin, null, permissionResolver);
-    }
-
-    public static BungeeImperat create(Plugin plugin) {
-        return create(plugin, null, DEFAULT_PERMISSION_RESOLVER);
     }
 
     @Override
@@ -104,29 +42,19 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         plugin.getProxy().getPluginManager().registerCommand(plugin, new InternalBungeeCommand(this, command));
     }
 
-    /**
-     * Unregisters a command from the internal registry
-     *
-     * @param name the name of the command to unregister
-     */
     @Override
     public void unregisterCommand(String name) {
         Command<BungeeSource> imperatCmd = getCommand(name);
         super.unregisterCommand(name);
         if (imperatCmd == null) return;
+
         for (var entry : new HashSet<>(plugin.getProxy().getPluginManager().getCommands())) {
             var key = StringUtils.stripNamespace(entry.getKey());
 
             if (imperatCmd.hasName(key)) {
-                plugin.getProxy().getPluginManager()
-                    .unregisterCommand(entry.getValue());
+                plugin.getProxy().getPluginManager().unregisterCommand(entry.getValue());
             }
         }
-    }
-
-    @Override
-    public String commandPrefix() {
-        return "/";
     }
 
     @Override
@@ -144,5 +72,4 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
         this.adventureProvider.close();
         this.plugin.onDisable();
     }
-
 }

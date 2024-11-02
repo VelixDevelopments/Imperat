@@ -20,6 +20,7 @@ import java.util.Collection;
 public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource, ProxiedPlayer> {
 
     private final ProxiedPlayerSuggestionResolver PROXIED_PLAYER_SUGGESTION_RESOLVER = new ProxiedPlayerSuggestionResolver();
+
     public ParameterProxiedPlayer() {
         super(TypeWrap.of(ProxiedPlayer.class));
     }

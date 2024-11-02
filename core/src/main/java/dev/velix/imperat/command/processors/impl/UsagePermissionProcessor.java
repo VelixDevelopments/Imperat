@@ -24,7 +24,7 @@ public final class UsagePermissionProcessor<S extends Source> implements Command
     ) throws ImperatException {
         var source = context.source();
 
-        if (!imperat.getPermissionResolver().hasUsagePermission(source, usage)) {
+        if (!imperat.config().getPermissionResolver().hasUsagePermission(source, usage)) {
             throw new PermissionDeniedException();
         }
 

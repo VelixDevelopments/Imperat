@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static dev.velix.imperat.TestRun.IMPERAT;
 
 public class TestPlaceholder {
-    PlaceholderRegistry<TestSource> placeholderRegistry = PlaceholderRegistry.createDefault(IMPERAT);
+    PlaceholderRegistry<TestSource> placeholderRegistry = PlaceholderRegistry.createDefault(IMPERAT.config());
 
     public TestPlaceholder() {
         placeholderRegistry.setData("%description%", Placeholder.<TestSource>builder("%description%")

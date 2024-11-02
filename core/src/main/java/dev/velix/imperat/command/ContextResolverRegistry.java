@@ -1,6 +1,6 @@
 package dev.velix.imperat.command;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
@@ -15,16 +15,16 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 @ApiStatus.AvailableSince("1.0.0")
-final class ContextResolverRegistry<S extends Source> extends Registry<Type, ContextResolver<S, ?>> implements ContextResolverFactory<S> {
+public final class ContextResolverRegistry<S extends Source> extends Registry<Type, ContextResolver<S, ?>> implements ContextResolverFactory<S> {
 
     private final Registry<Type, ContextResolverFactory<S>> factories = new Registry<>();
 
-    private ContextResolverRegistry(final Imperat<S> imperat) {
+    private ContextResolverRegistry(final ImperatConfig<S> config) {
         super();
-        this.registerResolver(TypeWrap.of(CommandHelp.class).getType(), (ctx, param) -> new CommandHelp(imperat, ctx));
+        this.registerResolver(TypeWrap.of(CommandHelp.class).getType(), (ctx, param) -> new CommandHelp(config, ctx));
     }
 
-    public static <S extends Source> ContextResolverRegistry<S> createDefault(final Imperat<S> imperat) {
+    public static <S extends Source> ContextResolverRegistry<S> createDefault(final ImperatConfig<S> imperat) {
         return new ContextResolverRegistry<>(imperat);
     }
 
@@ -41,7 +41,7 @@ final class ContextResolverRegistry<S extends Source> extends Registry<Type, Con
     }
 
     @SuppressWarnings("unchecked")
-    <T> @Nullable ContextResolver<S, T> getContextResolver(Type type, @Nullable ParameterElement element) {
+    public <T> @Nullable ContextResolver<S, T> getContextResolver(Type type, @Nullable ParameterElement element) {
         //we search for factories mainly
         return (ContextResolver<S, T>) getFactoryFor(type)
             .flatMap((factory) -> Optional.ofNullable(factory.create(type, element)))

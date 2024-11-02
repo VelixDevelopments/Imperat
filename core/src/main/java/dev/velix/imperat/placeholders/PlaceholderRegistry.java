@@ -1,18 +1,18 @@
 package dev.velix.imperat.placeholders;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.Registry;
 
 public final class PlaceholderRegistry<S extends Source> extends Registry<String, Placeholder<S>> {
 
-    private final Imperat<S> imperat;
+    private final ImperatConfig<S> imperat;
 
-    PlaceholderRegistry(Imperat<S> imperat) {
+    PlaceholderRegistry(ImperatConfig<S> imperat) {
         this.imperat = imperat;
     }
 
-    public static <S extends Source> PlaceholderRegistry<S> createDefault(Imperat<S> imperat) {
+    public static <S extends Source> PlaceholderRegistry<S> createDefault(ImperatConfig<S> imperat) {
         return new PlaceholderRegistry<>(imperat);
     }
 

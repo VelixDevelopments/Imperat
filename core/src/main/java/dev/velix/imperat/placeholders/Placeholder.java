@@ -1,6 +1,6 @@
 package dev.velix.imperat.placeholders;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
@@ -25,11 +25,11 @@ public sealed interface Placeholder<S extends Source> permits PlaceholderImpl {
 
     boolean isUsedIn(String input);
 
-    default String resolveInput(String id, Imperat<S> imperat) {
+    default String resolveInput(String id, ImperatConfig<S> imperat) {
         return resolver().resolve(id, imperat);
     }
 
-    String replaceResolved(Imperat<S> imperat, String id, String input);
+    String replaceResolved(ImperatConfig<S> imperat, String id, String input);
 
     static <S extends Source> Builder<S> builder(String id) {
         return new Builder<>(id);

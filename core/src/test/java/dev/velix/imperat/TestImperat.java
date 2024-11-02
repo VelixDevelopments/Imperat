@@ -7,13 +7,8 @@ import java.io.PrintStream;
 
 public final class TestImperat extends BaseImperat<TestSource> {
 
-    TestImperat() {
-        super((source, permission) -> true);
-    }
-
-    @Override
-    public String commandPrefix() {
-        return "/";
+    TestImperat(ImperatConfig<TestSource> config) {
+        super(config);
     }
 
     /**
@@ -43,6 +38,7 @@ public final class TestImperat extends BaseImperat<TestSource> {
     public void shutdownPlatform() {
 
     }
+
 
     @Override
     public void registerCommand(Command<TestSource> command) {

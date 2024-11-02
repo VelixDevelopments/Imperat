@@ -22,6 +22,7 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
             suggestions.add(constantEnum.name());
         }
     }
+
     @Override
     public @NotNull Enum<?> resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 

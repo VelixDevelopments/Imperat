@@ -50,7 +50,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             .requires((obj) -> {
                 var source = wrapCommandSource(obj);
                 return root.getData().isIgnoringACPerms()
-                    || dispatcher.getPermissionResolver().hasPermission(source, root.getData().permission());
+                    || dispatcher.config().getPermissionResolver().hasPermission(source, root.getData().permission());
             });
         executor(builder);
 
@@ -67,7 +67,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             : RequiredArgumentBuilder.argument(node.getData().name(), getArgumentType(node.getData()));
 
         childBuilder.requires((obj) -> {
-            var permissionResolver = dispatcher.getPermissionResolver();
+            var permissionResolver = dispatcher.config().getPermissionResolver();
             var source = wrapCommandSource(obj);
 
             boolean isIgnoringAC = root.getData().isIgnoringACPerms();
@@ -127,9 +127,9 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             //ImperatDebugger.debug("Last-argument='%s'", args.getLast());
 
             CompletionArg arg = new CompletionArg(args.isEmpty() ? "" : args.getLast(), args.size() - 1);
-            SuggestionContext<S> ctx = dispatcher.getContextFactory().createSuggestionContext(source, command, args, arg);
+            SuggestionContext<S> ctx = dispatcher.config().getContextFactory().createSuggestionContext(source, command, args, arg);
 
-            return dispatcher.getParameterSuggestionResolver(parameter).asyncAutoComplete(ctx, parameter)
+            return dispatcher.config().getParameterSuggestionResolver(parameter).asyncAutoComplete(ctx, parameter)
                 .thenCompose((results) -> {
                     results
                         .stream()

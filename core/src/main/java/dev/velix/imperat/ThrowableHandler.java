@@ -5,7 +5,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ThrowableResolver;
 import org.jetbrains.annotations.Nullable;
 
-public sealed interface ThrowableHandler<S extends Source> permits Imperat {
+public sealed interface ThrowableHandler<S extends Source> permits ImperatConfig {
 
     /**
      * Retrieves the {@link ThrowableResolver} responsible for handling the specified valueType
@@ -18,19 +18,6 @@ public sealed interface ThrowableHandler<S extends Source> permits Imperat {
      */
     @Nullable
     <T extends Throwable> ThrowableResolver<T, S> getThrowableResolver(final Class<T> exception);
-
-    /**
-     * Registers a new {@link ThrowableResolver} for the specified valueType of throwable.
-     * This allows customizing the handling of specific throwable types within the application.
-     *
-     * @param exception The class of the throwable to set the resolver for.
-     * @param handler   The {@link ThrowableResolver} to be registered for the specified throwable valueType.
-     * @param <T>       The valueType of the throwable.
-     */
-    <T extends Throwable> void setThrowableResolver(
-        final Class<T> exception,
-        final ThrowableResolver<T, S> handler
-    );
 
     /**
      * Handles a given throwable by finding the appropriate exception handler or using

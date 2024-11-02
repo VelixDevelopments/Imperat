@@ -1,6 +1,6 @@
 package dev.velix.imperat.placeholders;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +14,7 @@ public interface PlaceholderResolver<S extends Source> {
      * @return the placeholder to return
      */
     @NotNull
-    String resolve(String placeHolderId, Imperat<S> imperat);
+    String resolve(String placeHolderId, ImperatConfig<S> imperat);
 
 
 }

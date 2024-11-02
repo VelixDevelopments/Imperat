@@ -21,6 +21,7 @@ public final class ClassElement extends ParseElement<Class<?>> {
 
     private final Set<ParseElement<?>> children = new LinkedHashSet<>();
     private final Object instance;
+
     public <S extends Source> ClassElement(
         @NotNull AnnotationParser<S> parser,
         @Nullable ClassElement parent,
@@ -44,7 +45,7 @@ public final class ClassElement extends ParseElement<Class<?>> {
 
             field.setAccessible(true);
             try {
-                var supplied = parser.getImperat().resolveDependency(field.getType());
+                var supplied = parser.getImperat().config().resolveDependency(field.getType());
                 field.set(instance, supplied);
             } catch (IllegalAccessException e) {
                 exception = e;

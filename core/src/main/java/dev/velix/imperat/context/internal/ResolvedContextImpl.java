@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -45,7 +45,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     private Command<S> lastCommand;
 
     ResolvedContextImpl(
-        Imperat<S> dispatcher,
+        ImperatConfig<S> dispatcher,
         Context<S> context,
         CommandUsage<S> usage
     ) {

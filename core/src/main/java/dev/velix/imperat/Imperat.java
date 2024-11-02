@@ -1,24 +1,13 @@
 package dev.velix.imperat;
 
 
-import dev.velix.imperat.annotations.base.AnnotationParser;
-import dev.velix.imperat.annotations.base.AnnotationReader;
-import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.ContextFactory;
-import dev.velix.imperat.resolvers.DependencySupplier;
-import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,10 +20,8 @@ import java.util.concurrent.CompletableFuture;
  * @param <S> the command sender valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
-public non-sealed interface Imperat<S extends Source> extends
-    ProcessorRegistrar<S>, ResolverRegistrar<S>,
-    CommandRegistrar<S>, SourceWrapper<S>,
-    CommandHelpHandler<S>, ThrowableHandler<S> {
+public non-sealed interface Imperat<S extends Source> extends AnnotationInjector<S>, CommandRegistrar<S>, SourceWrapper<S> {
+
 
     /**
      * @return the platform of the module
@@ -46,76 +33,13 @@ public non-sealed interface Imperat<S extends Source> extends
      */
     void shutdownPlatform();
 
-    /**
-     * @return The command prefix
-     */
-    String commandPrefix();
 
     /**
-     * @return the factory for creation of
-     * command related contexts {@link Context}
-     */
-    ContextFactory<S> getContextFactory();
-
-    /**
-     * sets the context factory {@link ContextFactory} for the contexts
+     * The config for imperat
      *
-     * @param contextFactory the context factory to set
+     * @return the config holding all variables.
      */
-    void setContextFactory(ContextFactory<S> contextFactory);
-
-
-    /**
-     * Changes the instance of {@link AnnotationParser}
-     *
-     * @param parser the parser
-     */
-    @Contract("null->fail")
-    void setAnnotationParser(AnnotationParser<S> parser);
-
-    /**
-     * Registers a valueType of annotations so that it can be
-     * detected by {@link AnnotationReader} , it's useful as it allows that valueType of annotation
-     * to be recognized as a true Imperat-related annotation to be used in something like checking if a
-     * {@link CommandParameter} is annotated and checks for the annotations it has.
-     *
-     * @param type the valueType of annotation
-     */
-    void registerAnnotations(Class<? extends Annotation>... type);
-
-    /**
-     * Registers annotation replacer
-     *
-     * @param type     the valueType to replace the annotation by
-     * @param replacer the replacer
-     * @param <A>      the valueType of annotation to replace
-     */
-    <A extends Annotation> void registerAnnotationReplacer(
-        final Class<A> type,
-        final AnnotationReplacer<A> replacer
-    );
-
-    /**
-     * Registers the dependency to the type
-     *
-     * @param type     the type for the dependency
-     * @param resolver the resolver
-     */
-    void registerDependencyResolver(Type type, DependencySupplier resolver);
-
-    /**
-     * Resolves dependency of certain type
-     *
-     * @param type the type
-     */
-    <T> @Nullable T resolveDependency(Type type);
-
-    /**
-     * Sets the usage verifier to a new instance
-     *
-     * @param usageVerifier the usage verifier to set
-     */
-    void setUsageVerifier(UsageVerifier<S> usageVerifier);
+    ImperatConfig<S> config();
 
     /**
      * Dispatches and executes a command using {@link Context} only
@@ -185,4 +109,5 @@ public non-sealed interface Imperat<S extends Source> extends
      * @param treeVisualizing whether to display them in the form of tree
      */
     void debug(boolean treeVisualizing);
+
 }

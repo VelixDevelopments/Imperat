@@ -485,7 +485,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     public void addHelpCommand(Imperat<S> dispatcher, List<CommandParameter<S>> params, CommandExecution<S> helpExecution) {
-        if (params.isEmpty() && dispatcher.getHelpProvider() instanceof PaginatedHelpTemplate) {
+        if (params.isEmpty() && dispatcher.config().getHelpProvider() instanceof PaginatedHelpTemplate) {
             params.add(
                 CommandParameter.<S>optionalInt("page")
                     .description("help-page")

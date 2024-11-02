@@ -22,7 +22,7 @@ public final class CustomCooldownProcessor<S extends Source> implements CommandP
         CooldownHandler<S> cooldownHandler = usage.getCooldownHandler();
         S source = context.source();
 
-        if (cooldownHandler.hasCooldown(source) && !imperat.getPermissionResolver().hasPermission(source, "yourpermission")) {
+        if (cooldownHandler.hasCooldown(source) && !imperat.config().getPermissionResolver().hasPermission(source, "yourpermission")) {
             //if there's a cooldown and the source doesn't have a specific permission, let's send him the cooldown message through the exception below
             throw new CooldownException(
                 cooldownHandler.getUsageCooldown().orElseThrow().toMillis(),

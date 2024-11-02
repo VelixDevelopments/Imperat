@@ -25,7 +25,7 @@ public class TestRun {
         USAGE_EXECUTED = false;
     }
 
-    final static TestImperat IMPERAT = new TestImperat();
+    final static TestImperat IMPERAT;
     final static TestSource SOURCE = new TestSource(System.out);
 
     public static volatile boolean USAGE_EXECUTED = false;
@@ -34,10 +34,11 @@ public class TestRun {
 
     static {
         ImperatDebugger.setEnabled(true);
-        IMPERAT.setUsageVerifier(UsageVerifier.typeTolerantVerifier());
-        IMPERAT.registerDependencyResolver(Group.class, () -> new Group("my-global-group"));
-        //IMPERAT.registerCommand(GROUP_CMD);
-        IMPERAT.registerParamType(Group.class, new ParameterGroup());
+        IMPERAT = TestImperatConfig.builder()
+            .usageVerifier(UsageVerifier.typeTolerantVerifier())
+            .dependencyResolver(Group.class, () -> new Group("my-global-group"))
+            .parameterType(Group.class, new ParameterGroup()).build();
+
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
         IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
         IMPERAT.registerCommand(new AnnotatedGroupCommand());

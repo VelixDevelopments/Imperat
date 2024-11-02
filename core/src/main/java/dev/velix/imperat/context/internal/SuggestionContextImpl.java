@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
@@ -12,7 +12,7 @@ final class SuggestionContextImpl<S extends Source> extends ContextImpl<S> imple
     private final CompletionArg completionArg;
 
     SuggestionContextImpl(
-        Imperat<S> dispatcher,
+        ImperatConfig<S> dispatcher,
         Command<S> command,
         S source,
         ArgumentQueue args,

@@ -77,7 +77,6 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
         }*/
 
 
-
         SelectionType type = commandInputStream.popLetter()
             .map((s) -> SelectionType.from(String.valueOf(s))).orElse(SelectionType.UNKNOWN);
         //update current

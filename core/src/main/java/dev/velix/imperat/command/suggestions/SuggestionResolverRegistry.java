@@ -1,6 +1,6 @@
 package dev.velix.imperat.command.suggestions;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.context.FlagData;
@@ -21,15 +21,15 @@ public final class SuggestionResolverRegistry<S extends Source> {
     private final EnumSuggestionResolver enumSuggestionResolver = new EnumSuggestionResolver();
     private final FlagSuggestionResolver flagSuggestionResolver = new FlagSuggestionResolver();
 
-    private final Imperat<S> imperat;
+    private final ImperatConfig<S> imperat;
 
-    private SuggestionResolverRegistry(Imperat<S> imperat) {
+    private SuggestionResolverRegistry(ImperatConfig<S> imperat) {
         super();
         this.imperat = imperat;
         resolversPerName = new HashMap<>();
     }
 
-    public static <S extends Source> SuggestionResolverRegistry<S> createDefault(Imperat<S> imperat) {
+    public static <S extends Source> SuggestionResolverRegistry<S> createDefault(ImperatConfig<S> imperat) {
         return new SuggestionResolverRegistry<>(imperat);
     }
 

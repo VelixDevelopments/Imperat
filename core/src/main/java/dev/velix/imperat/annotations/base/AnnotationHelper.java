@@ -1,6 +1,7 @@
 package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
@@ -54,7 +55,7 @@ public final class AnnotationHelper {
             ParameterElement actualParameter = method.getParameterAt(i);
 
             assert actualParameter != null;
-            var contextResolver = dispatcher.getMethodParamContextResolver(actualParameter);
+            var contextResolver = dispatcher.config().getMethodParamContextResolver(actualParameter);
 
             if (contextResolver != null) {
                 paramsInstances[i] = contextResolver.resolve(context, actualParameter);
@@ -83,7 +84,7 @@ public final class AnnotationHelper {
     }
 
     public static <S extends Source> @NotNull String getParamName(
-        Imperat<S> imperat,
+        ImperatConfig<S> imperat,
         Parameter parameter,
         @Nullable Named named,
         @Nullable Flag flag,
@@ -103,7 +104,7 @@ public final class AnnotationHelper {
         return imperat.replacePlaceholders(name);
     }
 
-    public static <S extends Source> @NotNull String getParamName(Imperat<S> imperat, Parameter parameter) {
+    public static <S extends Source> @NotNull String getParamName(ImperatConfig<S> imperat, Parameter parameter) {
         return getParamName(
             imperat,
             parameter,

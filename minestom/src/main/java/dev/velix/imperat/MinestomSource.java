@@ -74,4 +74,9 @@ public final class MinestomSource implements Source {
     public boolean isConsole() {
         return sender instanceof ConsoleSender;
     }
+
+    public Player asPlayer() {
+        return as(Player.class);
+    }
+
 }

@@ -30,7 +30,7 @@ public interface MethodRules {
             ParameterElement parameterElement = method.getParameterAt(0);
             if (parameterElement == null) return false;
             return imperat.canBeSender(parameterElement.getType())
-                || imperat.hasSourceResolver(parameterElement.getType());
+                || imperat.config().hasSourceResolver(parameterElement.getType());
         })
         .failure((registry, method) -> {
             ParameterElement parameterElement = method.getParameterAt(0);

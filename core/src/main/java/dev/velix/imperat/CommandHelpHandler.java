@@ -4,7 +4,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.HelpProvider;
 import org.jetbrains.annotations.Nullable;
 
-public sealed interface CommandHelpHandler<S extends Source> permits Imperat {
+public sealed interface CommandHelpHandler<S extends Source> permits ImperatConfig {
 
 
 	/**

@@ -114,7 +114,7 @@ public final class CommandTree<S extends Source> {
             return CompletableFuture.completedFuture(results);
         }
 
-        boolean hasNoPermission = (!root.data.isIgnoringACPerms() && !imperat.getPermissionResolver()
+        boolean hasNoPermission = (!root.data.isIgnoringACPerms() && !imperat.config().getPermissionResolver()
             .hasPermission(context.source(), child.data.permission()));
 
         if (hasNoPermission) {
@@ -147,7 +147,7 @@ public final class CommandTree<S extends Source> {
         SuggestionContext<S> context,
         ParameterNode<S, ?> node
     ) {
-        SuggestionResolver<S> resolver = imperat.getParameterSuggestionResolver(node.data);
+        SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
         return resolver.asyncAutoComplete(context, node.data)
             .thenApply((results) -> {
                 results.removeIf((entry) -> !node.matchesInput(entry));

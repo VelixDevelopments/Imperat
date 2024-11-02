@@ -40,6 +40,7 @@ public interface Commands extends Registrar {
     @Unmodifiable
     Set<String> register(LiteralCommandNode<CommandSourceStack> var1, @Nullable String var2, Collection<String> var3);
 
-    @Unmodifiable Set<String> register(PluginMeta var1, LiteralCommandNode<CommandSourceStack> var2, @Nullable String var3, Collection<String> var4);
+    @Unmodifiable
+    Set<String> register(PluginMeta var1, LiteralCommandNode<CommandSourceStack> var2, @Nullable String var3, Collection<String> var4);
 
 }

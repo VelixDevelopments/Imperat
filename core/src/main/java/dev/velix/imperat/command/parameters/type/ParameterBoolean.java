@@ -58,6 +58,7 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
 
         return Boolean.parseBoolean(input);
     }
+
     public ParameterBoolean<S> setAllowVariants(boolean allowVariants) {
         this.allowVariants = allowVariants;
         if (allowVariants) {

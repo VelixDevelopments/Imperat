@@ -12,6 +12,7 @@ public final class ImperatDebugger {
 
     private static @NotNull Logger LOGGER = Logger.getLogger("IMPERAT");
     private static boolean enabled = false;
+
     private ImperatDebugger() {
     }
 

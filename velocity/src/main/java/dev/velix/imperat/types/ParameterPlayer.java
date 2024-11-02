@@ -21,6 +21,7 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
 
     private final ProxyServer proxyServer;
     private final PlayerSuggestionResolver playerSuggestionResolver;
+
     public ParameterPlayer(ProxyServer server) {
         super(TypeWrap.of(Player.class));
         this.proxyServer = server;

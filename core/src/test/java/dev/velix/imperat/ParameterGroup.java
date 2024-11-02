@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     private final GroupSuggestionResolver suggestionResolver = new GroupSuggestionResolver();
+
     ParameterGroup() {
         super(TypeWrap.of(Group.class));
         //static plain suggestions

@@ -1,6 +1,7 @@
 package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
@@ -38,8 +39,11 @@ import java.util.*;
 final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisitor<S> {
 
 
+    private final ImperatConfig<S> config;
+
     SimpleCommandClassVisitor(Imperat<S> imperat, AnnotationParser<S> parser, ElementSelector<MethodElement> methodSelector) {
         super(imperat, parser, methodSelector);
+        this.config = imperat.config();
     }
 
 
@@ -110,7 +114,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Description description = element.getAnnotation(Description.class);
 
         if (cmdAnnotation instanceof dev.velix.imperat.annotations.Command cmdAnn) {
-            final String[] values = imperat.replacePlaceholders(cmdAnn.value());
+            final String[] values = config.replacePlaceholders(cmdAnn.value());
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = cmdAnn.skipSuggestionsChecks();
 
@@ -119,13 +123,13 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 .aliases(aliases);
             if (permission != null) {
                 builder.permission(
-                    imperat.replacePlaceholders(permission.value())
+                    config.replacePlaceholders(permission.value())
                 );
             }
 
             if (description != null) {
                 builder.description(
-                    imperat.replacePlaceholders(description.value())
+                    config.replacePlaceholders(description.value())
                 );
             }
 
@@ -140,7 +144,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             return builder.build();
 
         } else if (cmdAnnotation instanceof SubCommand subCommand) {
-            final String[] values = imperat.replacePlaceholders(subCommand.value());
+            final String[] values = config.replacePlaceholders(subCommand.value());
             assert values != null;
 
             final List<String> aliases = List.of(values).subList(1, values.length);
@@ -152,13 +156,13 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             if (permission != null) {
                 builder.permission(
-                    imperat.replacePlaceholders(permission.value())
+                    config.replacePlaceholders(permission.value())
                 );
             }
 
             if (description != null) {
                 builder.description(
-                    imperat.replacePlaceholders(description.value())
+                    config.replacePlaceholders(description.value())
                 );
             }
 
@@ -331,12 +335,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         if (description != null)
             builder.description(
-                imperat.replacePlaceholders(description.value())
+                config.replacePlaceholders(description.value())
             );
 
         if (permission != null)
             builder.permission(
-                imperat.replacePlaceholders(permission.value())
+                config.replacePlaceholders(permission.value())
             );
 
         if (cooldown != null) {
@@ -378,7 +382,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             if (parameterElement == null) break;
             Type type = parameterElement.getElement().getParameterizedType();
 
-            if ((senderParam == null && (imperat.canBeSender(type) || imperat.hasSourceResolver(type))) || imperat.hasContextResolver(type)) {
+            if ((senderParam == null && (imperat.canBeSender(type) || config.hasSourceResolver(type))) || config.hasContextResolver(type)) {
                 senderParam = parameterElements.removeFirst();
                 continue;
             }
@@ -425,12 +429,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
 
         TypeWrap<T> parameterTypeWrap = TypeWrap.of((Class<T>) parameter.getParameterizedType());
-        var type = (ParameterType<S, T>) imperat.getParameterType(parameterTypeWrap.getType());
+        var type = (ParameterType<S, T>) config.getParameterType(parameterTypeWrap.getType());
         if (type == null) {
             throw new IllegalArgumentException("Unknown type detected '" + parameterTypeWrap.getType().getTypeName() + "'");
         }
 
-        String name = AnnotationHelper.getParamName(imperat, parameter, named, flag, switchAnnotation);
+        String name = AnnotationHelper.getParamName(config, parameter, named, flag, switchAnnotation);
         boolean optional = flag != null || switchAnnotation != null
             || element.isAnnotationPresent(Optional.class)
             || element.isAnnotationPresent(Default.class)
@@ -446,11 +450,11 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         if (suggestAnnotation != null) {
             suggestionResolver = SuggestionResolver.plain(
-                imperat.replacePlaceholders(suggestAnnotation.value())
+                config.replacePlaceholders(suggestAnnotation.value())
             );
         } else if (suggestionProvider != null) {
-            String suggestionResolverName = imperat.replacePlaceholders(suggestionProvider.value().toLowerCase());
-            var namedResolver = imperat.getNamedSuggestionResolver(
+            String suggestionResolverName = config.replacePlaceholders(suggestionProvider.value().toLowerCase());
+            var namedResolver = config.getNamedSuggestionResolver(
                 suggestionResolverName
             );
             if (namedResolver != null)
@@ -471,7 +475,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             var descAnn = element.getAnnotation(Description.class);
             assert descAnn != null;
             desc = dev.velix.imperat.command.Description.of(
-                imperat.replacePlaceholders(descAnn.value())
+                config.replacePlaceholders(descAnn.value())
             );
         }
 
@@ -479,7 +483,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (element.isAnnotationPresent(Permission.class)) {
             var permAnn = element.getAnnotation(Permission.class);
             assert permAnn != null;
-            permission = imperat.replacePlaceholders(permAnn.value());
+            permission = config.replacePlaceholders(permAnn.value());
         }
 
         OptionalValueSupplier<T> optionalValueSupplier = OptionalValueSupplier.empty(parameterTypeWrap);
@@ -492,7 +496,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (flag != null) {
             String[] flagAliases = flag.value();
             if (suggestAnnotation != null) {
-                suggestionResolver = SuggestionResolver.plain(imperat.replacePlaceholders(suggestAnnotation.value()));
+                suggestionResolver = SuggestionResolver.plain(config.replacePlaceholders(suggestAnnotation.value()));
             }
 
             return AnnotationParameterDecorator.decorate(

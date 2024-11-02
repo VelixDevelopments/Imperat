@@ -9,65 +9,43 @@ import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.UnknownPlayerException;
-import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.types.ParameterPlayer;
-import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
+
 
 public final class VelocityImperat extends BaseImperat<VelocitySource> {
 
     final PluginContainer plugin;
     private final ProxyServer proxyServer;
 
-    private VelocityImperat(
-        @NotNull String pluginName,
+    VelocityImperat(
+        @NotNull PluginContainer plugin,
         @NotNull ProxyServer proxyServer,
-        @NotNull PermissionResolver<VelocitySource> permissionResolver
+        @NotNull ImperatConfig<VelocitySource> config
     ) {
-        super(permissionResolver);
-        Preconditions.notEmpty(pluginName, "plugin id/name is not valid");
-        this.plugin = proxyServer.getPluginManager().getPlugin(pluginName).orElseThrow(() -> new IllegalStateException("Unknown plugin with name '" + pluginName + "'"));
+        super(config);
+        this.plugin = plugin;
         this.proxyServer = proxyServer;
-        this.registerDefaultResolvers();
-    }
-
-    public static VelocityImperat create(
-        String pluginName,
-        ProxyServer server,
-        @NotNull PermissionResolver<VelocitySource> permissionResolver
-    ) {
-        return new VelocityImperat(pluginName, server, permissionResolver);
-    }
-
-    public static VelocityImperat create(
-        String pluginName,
-        ProxyServer proxyServer
-    ) {
-        return create(pluginName, proxyServer, (source, permission) -> {
-            if (permission == null) {
-                return true;
-            }
-            return source.origin().hasPermission(permission);
-        });
+        registerDefaultResolvers();
     }
 
     private void registerDefaultResolvers() {
-        // Player
-        this.registerParamType(Player.class, new ParameterPlayer(proxyServer));
+        // Register Player and other source/value resolvers
+        config.registerParamType(Player.class, new ParameterPlayer(proxyServer));
 
-
-        this.setThrowableResolver(
+        // Define custom exception handling for unknown players
+        config.setThrowableResolver(
             UnknownPlayerException.class, (exception, imperat, context) ->
                 context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
         );
 
-        this.registerSourceResolver(Player.class, (source) -> {
+        // Register source resolver for Player
+        config.registerSourceResolver(Player.class, (source) -> {
             if (source.isConsole()) {
-                throw new SourceException("Only players are allowed to do this !");
+                throw new SourceException("Only players are allowed to do this!");
             }
             return source.asPlayer();
         });
-
     }
 
     @Override
@@ -77,21 +55,15 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         try {
             InternalVelocityCommand internalCmd = new InternalVelocityCommand(this, command, manager);
             manager.register(internalCmd.getMeta(), internalCmd);
-        } catch (final Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception ex) {
+            config.handleThrowable(ex, null, VelocityImperat.class, "registerCommand");
         }
     }
 
-    /**
-     * Unregisters a command from the internal registry
-     *
-     * @param name the name of the command to unregister
-     */
     @Override
     public void unregisterCommand(String name) {
         super.unregisterCommand(name);
-        CommandManager manager = proxyServer.getCommandManager();
-        manager.unregister(name);
+        proxyServer.getCommandManager().unregister(name);
     }
 
     @Override
@@ -102,11 +74,6 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
     @Override
     public void shutdownPlatform() {
         plugin.getExecutorService().shutdown();
-    }
-
-    @Override
-    public String commandPrefix() {
-        return "/";
     }
 
     @Override

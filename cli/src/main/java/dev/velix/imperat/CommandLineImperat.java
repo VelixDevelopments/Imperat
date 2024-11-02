@@ -9,13 +9,9 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
 
     private InputStream input;
 
-    private CommandLineImperat(InputStream inputStream) {
-        super(((source, permission) -> true));
+    CommandLineImperat(InputStream inputStream, ImperatConfig<ConsoleSource> config) {
+        super(config);
         this.input = inputStream;
-    }
-
-    public static CommandLineImperat create(InputStream inputStream) {
-        return new CommandLineImperat(inputStream);
     }
 
     @Override
@@ -29,10 +25,6 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
         throw new RuntimeException();
     }
 
-    @Override
-    public String commandPrefix() {
-        return "";
-    }
 
     @Override
     public ConsoleSource wrapSender(Object sender) {

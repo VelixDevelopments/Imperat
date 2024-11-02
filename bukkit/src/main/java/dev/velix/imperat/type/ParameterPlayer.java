@@ -20,6 +20,7 @@ import java.util.Collection;
 public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
 
     private final PlayerSuggestionResolver SUGGESTION_RESOLVER = new PlayerSuggestionResolver();
+
     public ParameterPlayer() {
         super(TypeWrap.of(Player.class));
     }

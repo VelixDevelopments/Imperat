@@ -2,39 +2,29 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.resolvers.PermissionResolver;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.List;
 
 public final class MinestomImperat extends BaseImperat<MinestomSource> {
 
-    private MinestomImperat(@NotNull PermissionResolver<MinestomSource> permissionResolver) {
-        super(permissionResolver);
+    private final ServerProcess serverProcess;
+
+    MinestomImperat(@NotNull ServerProcess serverProcess, @NotNull ImperatConfig<MinestomSource> config) {
+        super(config);
+        this.serverProcess = serverProcess;
     }
 
-    public static MinestomImperat create(@NotNull PermissionResolver<MinestomSource> permissionResolver) {
-        return new MinestomImperat(permissionResolver);
-    }
-
-    public static MinestomImperat create() {
-        return create((source, permission) -> {
-            if (permission == null)
-                return true;
-            return source.origin().hasPermission(permission);
-        });
-    }
 
     /**
      * @return the platform of the module
      */
     @Override
     public ServerProcess getPlatform() {
-        return MinecraftServer.process();
+        return serverProcess;
     }
 
     /**
@@ -42,15 +32,7 @@ public final class MinestomImperat extends BaseImperat<MinestomSource> {
      */
     @Override
     public void shutdownPlatform() {
-        MinecraftServer.getServer().stop();
-    }
-
-    /**
-     * @return The command prefix
-     */
-    @Override
-    public String commandPrefix() {
-        return "/";
+        serverProcess.stop();
     }
 
     /**
@@ -86,11 +68,8 @@ public final class MinestomImperat extends BaseImperat<MinestomSource> {
     @Override
     public void unregisterCommand(String name) {
         super.unregisterCommand(name);
-        for (var cmd : new HashSet<>(MinecraftServer.getCommandManager().getCommands())) {
-            if (cmd.getName().equalsIgnoreCase(name) || List.of(cmd.getAliases()).contains(name.toLowerCase())) {
-                MinecraftServer.getCommandManager().unregister(cmd);
-            }
-        }
-
+        MinecraftServer.getCommandManager().getCommands().stream()
+            .filter(cmd -> cmd.getName().equalsIgnoreCase(name) || List.of(cmd.getAliases()).contains(name.toLowerCase()))
+            .forEach(MinecraftServer.getCommandManager()::unregister);
     }
 }

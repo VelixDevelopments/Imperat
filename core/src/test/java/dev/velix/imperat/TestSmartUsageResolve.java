@@ -25,7 +25,7 @@ public class TestSmartUsageResolve {
     TestSmartUsageResolve() {
     }
 
-    private final static ContextFactory<TestSource> FACTORY = IMPERAT.getContextFactory();
+    private final static ContextFactory<TestSource> FACTORY = IMPERAT.config().getContextFactory();
 
     private static ResolvedContext<TestSource> inputResolve(String command, String... args) {
         ArgumentQueue queue = ArgumentQueue.parse(args);
