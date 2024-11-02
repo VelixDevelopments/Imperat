@@ -4,7 +4,6 @@ import dev.velix.imperat.command.parameters.type.ParameterEnum;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.internal.CommandFlag;
-import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
@@ -29,13 +28,6 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Pa
 
     public static <S extends Source> ParamTypeRegistry<S> createDefault() {
         return new ParamTypeRegistry<>();
-    }
-
-    private SourceException exception(String raw,
-                                      Class<?> clazzRequired) {
-        return new SourceException(
-            "Error while parsing argument '%s', It's not a valid %s", raw, clazzRequired.getSimpleName()
-        );
     }
 
     public <T> void registerResolver(Type type, ParameterType<S, T> resolver) {
