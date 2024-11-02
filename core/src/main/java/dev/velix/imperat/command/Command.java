@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-//TODO create processed String instance to wrap around a string with
-
 /**
  * Represents a wrapper for the actual command's data
  *
