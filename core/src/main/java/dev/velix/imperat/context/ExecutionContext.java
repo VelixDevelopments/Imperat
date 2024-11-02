@@ -1,6 +1,6 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.internal.Argument;
 import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.exception.ImperatException;
@@ -60,7 +60,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
 
     /**
      * Resolves source into a new valueType of source
-     * using {@link Imperat#getSourceResolver(Type)}
+     * using {@link ImperatConfig#getSourceResolver(Type)}
      *
      * @param <R> the valueType of the resolved source
      * @return the resolved source {@link R}
