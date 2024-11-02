@@ -392,7 +392,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      */
     @Override
     public void registerNamedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver) {
-        suggestionResolverRegistry.registerNamedResolver(name, suggestionResolver);
+        suggestionResolverRegistry.registerNamedResolver(name.toLowerCase(), suggestionResolver);
     }
 
     /**
