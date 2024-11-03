@@ -5,6 +5,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +33,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
             if (parameter.isGreedy()) {
                 handleGreedy(builder, inputStream);
             }
+            ImperatDebugger.debug("Read string input= '%s'", builder.toString());
 
             return builder.toString();
         }
@@ -50,6 +52,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         if (parameter.isGreedy()) {
             handleGreedy(builder, inputStream);
         }
+        ImperatDebugger.debug("Read string input= '%s'", builder.toString());
 
         return builder.toString();
     }
