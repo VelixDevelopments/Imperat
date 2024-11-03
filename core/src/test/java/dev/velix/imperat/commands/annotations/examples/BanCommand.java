@@ -25,7 +25,7 @@ public final class BanCommand {
     ) {
         //TODO actual ban logic
         String durationFormat = duration == null ? "FOREVER" : "for " + duration;
-        String msg = "Banning " + player + " " + durationFormat + " due to " + reason;
+        String msg = "Banning " + player + " " + durationFormat + " due to '" + reason + "'";
         if (!silent)
             source.reply("NOT SILENT= " + msg);
         else

@@ -88,70 +88,51 @@ public final class CommandTree<S extends Source> {
     public @NotNull CompletableFuture<Collection<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
 
+        var source = context.source();
+        ParameterNode<S, ?> node = root;
+        for (int i = 0; i < depthToReach; i++) {
+            String raw = context.arguments().getOr(i, null);
+            if (raw == null) {
+                break;
+            }
+            var child = node.getChild((c) -> {
+                boolean hasPerm = (root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver()
+                    .hasPermission(source, c.data.permission()));
+                boolean matches = c.matchesInput(raw);
+
+                return hasPerm && matches;
+            });
+            if (child == null) {
+                break;
+            }
+            node = child;
+        }
+
+        //ImperatDebugger.debug("Node-data= '%s'", node.data.format());
         CompletableFuture<Collection<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
-        for (var child : root.getChildren()) {
-            future = future.thenCompose((results) -> collectNodeCompletions(imperat, context, child, 0, depthToReach, results));
+        for (var child : node.getChildren()) {
+            future = future.thenCompose((results) -> addChildResults(imperat, context, child, results));
         }
         return future;
     }
 
-    private CompletableFuture<Collection<String>> collectNodeCompletions(
-        Imperat<S> imperat,
-        SuggestionContext<S> context,
-        ParameterNode<S, ?> child,
-        int depth,
-        final int maxDepth,
-        Collection<String> results
-    ) {
-        if (depth > maxDepth) {
-            return CompletableFuture.completedFuture(results);
-        }
 
-        String raw = context.arguments().getOr(depth, "");
-        assert raw != null;
-
-        if (raw.isEmpty() || raw.isBlank()) {
-            return CompletableFuture.completedFuture(results);
-        }
-
-        boolean hasNoPermission = (!root.data.isIgnoringACPerms() && !imperat.config().getPermissionResolver()
-            .hasPermission(context.source(), child.data.permission()));
-
-        if (hasNoPermission) {
-            //ImperatDebugger.debug("Ending tab completion quickly");
-            return CompletableFuture.completedFuture(results);
-        }
-
-        if (depth == maxDepth) {
-            //we reached the arg we want to complete, let's complete it using our current node
-            //COMPLETE DIRECTLY
-            //ImperatDebugger.debug("Adding childs results");
-            return addChildResults(imperat, context, child);
-        } else {
-            if (child.data.isFlag() && !child.data.asFlagParameter().isSwitch()) {
-                //auto completing value for flag, using SAME child/flag parameter while incrementing depth by 1
-                return collectNodeCompletions(imperat, context, child, depth + 1, maxDepth, results);
-            }
-            CompletableFuture<Collection<String>> future = CompletableFuture.completedFuture(results);
-            //Keep looking
-            for (var innerChild : child.getChildren()) {
-                future = future.thenCompose((res) -> collectNodeCompletions(imperat, context, innerChild, depth + 1, maxDepth, res));
-            }
-
-            return future;
-        }
-    }
 
     private CompletableFuture<Collection<String>> addChildResults(
         Imperat<S> imperat,
         SuggestionContext<S> context,
-        ParameterNode<S, ?> node
+        ParameterNode<S, ?> node,
+        Collection<String> oldResults
     ) {
         SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
         return resolver.asyncAutoComplete(context, node.data)
             .thenApply((results) -> {
                 results.removeIf((entry) -> !node.matchesInput(entry));
                 return results;
+            })
+            .thenApply((res) -> {
+                oldResults.addAll(res);
+                return oldResults;
             });
     }
 

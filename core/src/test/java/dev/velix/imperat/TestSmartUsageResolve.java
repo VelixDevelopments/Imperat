@@ -94,7 +94,7 @@ public class TestSmartUsageResolve {
 
         );
         test(
-            "ban mqzen -s 1d \"A\" disgrace to community",
+            "ban mqzen -s 1d A disgrace to community",
             ResolvedArgsData.empty()
                 .arg("player", "mqzen")
                 .flag("silent", true)
@@ -109,7 +109,7 @@ public class TestSmartUsageResolve {
     public void testInputFlag() {
         test("git", ResolvedArgsData.empty());
         test("git commit", ResolvedArgsData.empty().flag("message", null));
-        test("git commit -m \"ksm 7yate\"", ResolvedArgsData.empty().flag("message", "ksm 7yate"));
+        test("git commit -m \"allah akbar\"", ResolvedArgsData.empty().flag("message", "allah akbar"));
     }
 
 
@@ -186,13 +186,13 @@ public class TestSmartUsageResolve {
             System.out.println("----------------");
             System.out.println("Args: ");
             for (var arg : args.keySet()) {
-                System.out.println(" '" + arg + "' -> " + args.get(arg));
+                System.out.println(" '" + arg + "' -> '" + args.get(arg) + "'");
             }
 
             System.out.println("Flags: ");
             for (var flag : resolvedFlags.getKeys()) {
                 var flagInputValue = resolvedFlags.getData(flag).orElse(null);
-                System.out.println(" '" + flag + "' -> " + flagInputValue);
+                System.out.println(" '" + flag + "' -> '" + flagInputValue + "'");
             }
 
         }
