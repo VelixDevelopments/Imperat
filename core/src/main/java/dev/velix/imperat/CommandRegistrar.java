@@ -10,11 +10,23 @@ import java.util.Collection;
 public sealed interface CommandRegistrar<S extends Source> permits Imperat {
 
     /**
-     * Registering a command into the dispatcher
+     * Registers a command into the dispatcher
      *
      * @param command the command to register
      */
     void registerCommand(Command<S> command);
+
+    /**
+     * Registers some commands into the dispatcher
+     *
+     * @param commands the commands to register
+     */
+    @SuppressWarnings("all")
+    default void registerCommands(Command<S>... commands) {
+        for (final var command : commands) {
+            this.registerCommand(command);
+        }
+    }
 
     /**
      * Registers a command class built by the
@@ -23,6 +35,18 @@ public sealed interface CommandRegistrar<S extends Source> permits Imperat {
      * @param command the annotated command instance to parse
      */
     void registerCommand(Object command);
+
+    /**
+     * Registers some commands into the dispatcher
+     * annotations using a parser
+     *
+     * @param commands the commands to register
+     */
+    default void registerCommands(Object... commands) {
+        for (final var command : commands) {
+            this.registerCommand(command);
+        }
+    }
 
     /**
      * Unregisters a command from the internal registry
