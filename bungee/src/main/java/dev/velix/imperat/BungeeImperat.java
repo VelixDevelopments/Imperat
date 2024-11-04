@@ -1,15 +1,13 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.adventure.AdventureProvider;
-import dev.velix.imperat.adventure.BungeeAdventure;
-import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.StringUtils;
-import dev.velix.imperat.util.reflection.Reflections;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 
@@ -20,20 +18,13 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
 
     BungeeImperat(
         Plugin plugin,
-        AdventureProvider<CommandSender> adventureProvider,
+        @NotNull AdventureProvider<CommandSender> adventureProvider,
         ImperatConfig<BungeeSource> config
     ) {
         super(config);
         this.plugin = plugin;
+        this.adventureProvider = adventureProvider;
         ImperatDebugger.setLogger(plugin.getLogger());
-        this.adventureProvider = adventureProvider != null ? adventureProvider : loadAdventureProvider();
-    }
-
-    private AdventureProvider<CommandSender> loadAdventureProvider() {
-        if (Reflections.findClass("net.kyori.adventure.platform.bungeecord.BungeeAudiences")) {
-            return new BungeeAdventure(plugin);
-        }
-        return new EmptyAdventure<>();
     }
 
     @Override

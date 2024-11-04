@@ -8,6 +8,7 @@ import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.type.ParameterProxiedPlayer;
 import dev.velix.imperat.util.reflection.Reflections;
+import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -30,7 +31,7 @@ public final class BungeeConfigBuilder extends ConfigBuilder<BungeeSource, Bunge
     }
 
     private AdventureProvider<CommandSender> loadAdventureProvider() {
-        if (Reflections.findClass("net.kyori.adventure.platform.bungeecord.BungeeAudiences")) {
+        if (Reflections.findClass(() -> BungeeAudiences.class)) {
             return new BungeeAdventure(plugin);
         }
         return new EmptyAdventure<>();

@@ -14,6 +14,7 @@ import dev.velix.imperat.type.ParameterTargetSelector;
 import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -92,12 +93,12 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
     }
 
     private static AdventureProvider<CommandSender> loadAdventure(Plugin plugin, @Nullable AdventureProvider<CommandSender> provider) {
-        if (Reflections.findClass("net.kyori.adventure.audience.Audience")) {
+        if (Reflections.findClass(() -> Audience.class)) {
             if (provider != null) {
                 return provider;
             } else if (Audience.class.isAssignableFrom(CommandSender.class)) {
                 return new CastingAdventure<>();
-            } else if (Reflections.findClass("net.kyori.adventure.platform.bukkit.BukkitAudiences")) {
+            } else if (Reflections.findClass(() -> BukkitAudiences.class)) {
                 return new BukkitAdventure(plugin);
             }
         }
