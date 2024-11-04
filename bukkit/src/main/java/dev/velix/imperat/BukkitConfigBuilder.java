@@ -63,7 +63,6 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
             UnknownWorldException.class, (exception, imperat, context) ->
                 context.source().error("A world with the name '" + exception.getName() + "' doesn't seem to exist")
         );
-
     }
 
     private void registerValueResolvers() {
