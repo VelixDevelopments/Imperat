@@ -6,7 +6,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
-import dev.velix.imperat.command.processors.CommandProcessor;
+import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
 import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
@@ -48,8 +48,8 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
 
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
 
-    private final Queue<CommandPreProcessor<S>> globalPreProcessors;
-    private final Queue<CommandPostProcessor<S>> globalPostProcessors;
+    private @NotNull CommandProcessingChain<S, CommandPreProcessor<S>> globalPreProcessors;
+    private @NotNull CommandProcessingChain<S, CommandPostProcessor<S>> globalPostProcessors;
 
     private String commandPrefix = "/";
 
@@ -64,16 +64,13 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         verifier = UsageVerifier.typeTolerantVerifier();
         regDefThrowableResolvers();
 
-        final Comparator<CommandProcessor> commandProcessorComparator = Comparator.comparingInt(CommandProcessor::priority);
-        globalPreProcessors = new PriorityQueue<>(commandProcessorComparator);
-        globalPostProcessors = new PriorityQueue<>(commandProcessorComparator);
+        globalPreProcessors = CommandProcessingChain.<S>preProcessors()
+            .then(new UsagePermissionProcessor<>())
+            .then(new UsageCooldownProcessor<>())
+            .build();
 
-        registerProcessors();
-    }
-
-    private void registerProcessors() {
-        registerGlobalPreProcessor(new UsagePermissionProcessor<>());
-        registerGlobalPreProcessor(new UsageCooldownProcessor<>());
+        globalPostProcessors = CommandProcessingChain.<S>postProcessors()
+            .build();
     }
 
     private void regDefThrowableResolvers() {
@@ -191,25 +188,25 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
     }
 
     /**
-     * Registers a command pre-processor
+     * Sets the whole pre-processing chain
      *
-     * @param preProcessor the pre-processor to register
+     * @param chain the chain to set
      */
     @Override
-    public void registerGlobalPreProcessor(CommandPreProcessor<S> preProcessor) {
-        Preconditions.notNull(preProcessor, "Pre-processor");
-        globalPreProcessors.add(preProcessor);
+    public void setPreProcessorsChain(CommandProcessingChain<S, CommandPreProcessor<S>> chain) {
+        Preconditions.notNull(chain, "pre-processors chain");
+        this.globalPreProcessors = chain;
     }
 
     /**
-     * Registers a command post-processor
+     * Sets the whole post-processing chain
      *
-     * @param postProcessor the post-processor to register
+     * @param chain the chain to set
      */
     @Override
-    public void registerGlobalPostProcessor(CommandPostProcessor<S> postProcessor) {
-        Preconditions.notNull(postProcessor, "Post-processor");
-        globalPostProcessors.add(postProcessor);
+    public void setPostProcessorsChain(CommandProcessingChain<S, CommandPostProcessor<S>> chain) {
+        Preconditions.notNull(chain, "post-processors chain");
+        this.globalPostProcessors = chain;
     }
 
     /**
@@ -217,7 +214,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      * @see CommandPreProcessor
      */
     @Override
-    public Queue<CommandPreProcessor<S>> getPreProcessors() {
+    public CommandProcessingChain<S, CommandPreProcessor<S>> getPreProcessors() {
         return globalPreProcessors;
     }
 
@@ -226,7 +223,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      * @see CommandPostProcessor
      */
     @Override
-    public Queue<CommandPostProcessor<S>> getPostProcessors() {
+    public CommandProcessingChain<S, CommandPostProcessor<S>> getPostProcessors() {
         return globalPostProcessors;
     }
 

@@ -4,6 +4,7 @@ import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
+import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.exception.ThrowableResolver;
@@ -24,7 +25,7 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
     }
 
 
-    // Command Prefix
+    // CommandProcessingChain Prefix
     public ConfigBuilder<S, I> commandPrefix(String cmdPrefix) {
         config.setCommandPrefix(cmdPrefix);
         return this;
@@ -61,15 +62,25 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
         return this;
     }
 
-    // Command Pre-Processor
+    // CommandProcessingChain Pre-Processor
     public ConfigBuilder<S, I> preProcessor(CommandPreProcessor<S> preProcessor) {
-        config.registerGlobalPreProcessor(preProcessor);
+        config.getPreProcessors().add(preProcessor);
         return this;
     }
 
-    // Command Post-Processor
+    // CommandProcessingChain Post-Processor
     public ConfigBuilder<S, I> postProcessor(CommandPostProcessor<S> postProcessor) {
-        config.registerGlobalPostProcessor(postProcessor);
+        config.getPostProcessors().add(postProcessor);
+        return this;
+    }
+
+    public ConfigBuilder<S, I> preProcessingChain(CommandProcessingChain<S, CommandPreProcessor<S>> chain) {
+        this.config.setPreProcessorsChain(chain);
+        return this;
+    }
+
+    public ConfigBuilder<S, I> postProcessingChain(CommandProcessingChain<S, CommandPostProcessor<S>> chain) {
+        this.config.setPostProcessorsChain(chain);
         return this;
     }
 

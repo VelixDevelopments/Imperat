@@ -58,7 +58,7 @@ abstract class AbstractCommodore<C extends Command> implements Commodore<C> {
     protected static final Field ARGUMENTS_FIELD;
     // An array of the CommandNode fields above: [#children, #literals, #arguments]
     protected static final Field[] CHILDREN_FIELDS;
-    // Dummy instance of Command used to ensure the executable bit gets set on
+    // Dummy instance of CommandProcessingChain used to ensure the executable bit gets set on
     // mock commands when they're encoded into data sent to the client
     protected static final com.mojang.brigadier.Command<?> DUMMY_COMMAND;
     protected static final SuggestionProvider<?> DUMMY_SUGGESTION_PROVIDER;

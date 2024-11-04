@@ -164,7 +164,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
 
     @Override
     public Command<S> asCommand() {
-        throw new UnsupportedOperationException("Non-Command Parameter cannot be converted into a command parameter");
+        throw new UnsupportedOperationException("Non-CommandProcessingChain Parameter cannot be converted into a command parameter");
     }
 
 

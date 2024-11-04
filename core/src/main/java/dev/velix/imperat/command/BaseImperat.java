@@ -82,7 +82,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             }
             commands.put(command.name().toLowerCase(), command);
         } catch (RuntimeException ex) {
-            ImperatDebugger.error(BaseImperat.class, "registerCommand(Command command)", ex);
+            ImperatDebugger.error(BaseImperat.class, "registerCommand(CommandProcessingChain command)", ex);
             shutdownPlatform();
         }
 

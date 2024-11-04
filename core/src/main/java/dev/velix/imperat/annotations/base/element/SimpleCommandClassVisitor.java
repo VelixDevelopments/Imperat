@@ -63,7 +63,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             Command<S> cmd = loadCommand(null, clazz, commandAnnotation);
 
-            //if cmd=null → loading @Command methods only from this class
+            //if cmd=null → loading @CommandProcessingChain methods only from this class
             if (cmd != null) {
                 loadCommandMethods(clazz);
                 commands.add(cmd);
@@ -189,7 +189,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             cmd.parent(parentCmd);
         }
         if (parseElement instanceof MethodElement method && cmd != null) {
-            //@Command on method
+            //@CommandProcessingChain on method
             if (!methodSelector.canBeSelected(imperat, parser, method, true)) {
                 return cmd;
             }
