@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-public interface CommandProcessingChain<S extends Source, P extends CommandProcessor<S>> extends Iterable<P> {
+public interface CommandProcessingChain<S extends Source, P extends CommandProcessor> extends Iterable<P> {
 
     @NotNull
     Queue<P> getProcessors();
@@ -15,7 +15,7 @@ public interface CommandProcessingChain<S extends Source, P extends CommandProce
 
     void add(P preProcessor);
 
-    final class Builder<S extends Source, P extends CommandProcessor<S>> {
+    final class Builder<S extends Source, P extends CommandProcessor> {
         private final PriorityQueue<P> processors;
 
         public Builder() {
