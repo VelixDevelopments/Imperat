@@ -13,6 +13,7 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     private final static char WHITE_SPACE = ' ';
 
     private int letterPos = 0;
+    private final String inputLine;
 
     private final Cursor<S> cursor;
 
@@ -21,6 +22,7 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
 
     CommandInputStreamImpl(ArgumentQueue queue, CommandUsage<S> usage) {
         this.queue = queue;
+        this.inputLine = queue.getOriginalRaw();
         this.usage = usage;
         this.cursor = new Cursor<>(this, 0, 0);
     }
@@ -57,48 +59,29 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
 
     @Override
     public @NotNull Optional<Character> currentLetter() {
-        if (cursor.raw >= queue.size()) {
+        if (letterPos >= inputLine.length()) {
             return Optional.empty();
         }
-        return currentRaw().map((raw) -> raw.charAt(letterPos));
+        return Optional.of(inputLine.charAt(letterPos));
     }
 
     @Override
     public Optional<Character> peekLetter() {
         int nextLetterPos = letterPos + 1;
-        return currentRaw().flatMap((currentRaw) -> {
-            if (nextLetterPos == currentRaw.length()) {
-                return Optional.of(WHITE_SPACE);
-            } else if (nextLetterPos > currentRaw.length()) {
-                //next raw
-                return peekRaw().map((nextRaw) -> nextRaw.charAt(0));
-            } else {
-                //nextLetterPos < currentRaw.length()
-                return Optional.of(currentRaw.charAt(nextLetterPos));
-            }
-        });
+        if (nextLetterPos >= inputLine.length()) return Optional.empty();
+        return Optional.of(inputLine.charAt(nextLetterPos));
     }
 
     @Override
     public Optional<Character> popLetter() {
         letterPos++;
-        return currentRaw().flatMap((currentRaw) -> {
-            if (letterPos == currentRaw.length()) {
-                return Optional.of(WHITE_SPACE);
-            } else if (letterPos > currentRaw.length()) {
-                //next raw
-                letterPos = 0;
-                return popRaw().map((nextRaw) -> nextRaw.charAt(0));
-            } else {
-                //nextLetterPos < currentRaw.length()
-                return Optional.of(currentRaw.charAt(letterPos));
-            }
-        });
+        return currentLetter();
     }
 
     @Override
     public Optional<String> peekRaw() {
         int next = cursor.raw + 1;
+
         return Optional.ofNullable(
             queue.getOr(next, null)
         );
@@ -107,18 +90,14 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public Optional<String> popRaw() {
         cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
-        return currentRaw();
+        return currentRaw().stream().peek((raw) -> {
+            letterPos += raw.length() + 1; //we shift the raw length + the white space
+        }).findFirst();
     }
 
     @Override
     public boolean hasNextLetter() {
-        return currentRaw()
-            .map((raw) -> {
-                if (letterPos >= raw.length()) {
-                    return peekRaw().isPresent();
-                }
-                return true;
-            }).orElse(false);
+        return letterPos < inputLine.length();
     }
 
     @Override
@@ -139,6 +118,20 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public @NotNull CommandUsage<S> getUsage() {
         return usage;
+    }
+
+    @Override
+    public boolean skip() {
+        final Cursor<S> cursor = cursor();
+        int prevRaw = cursor.raw;
+        cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+
+        var currentRaw = currentRaw().orElse(null);
+        if (currentRaw == null) return false;
+
+        int diff = inputLine.indexOf(WHITE_SPACE, letterPos) + 1 - letterPos;
+        letterPos += diff;
+        return cursor.raw > prevRaw;
     }
 
     @Override

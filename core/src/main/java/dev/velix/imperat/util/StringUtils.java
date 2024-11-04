@@ -4,11 +4,11 @@ import dev.velix.imperat.context.ArgumentQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class StringUtils {
+    public final static char DOUBLE_QUOTE = '"', SINGLE_QUOTE = '\'';
 
     /**
      * Pattern to extract snowflake IDs. Useful for JDA
@@ -49,10 +49,40 @@ public final class StringUtils {
 
     public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion, boolean extraSpace) {
         if (argumentsInOneLine.isEmpty())
-            return !autoCompletion ? ArgumentQueue.empty() : ArgumentQueue.parse(" ");
+            return !autoCompletion ? ArgumentQueue.empty(argumentsInOneLine) : ArgumentQueue.parse(" ");
 
-        ArgumentQueue toCollect = ArgumentQueue.empty();
-        toCollect.addAll(Arrays.asList(argumentsInOneLine.split(" ")));
+        ArgumentQueue toCollect = ArgumentQueue.empty(argumentsInOneLine);
+        System.out.println("ARGUMENT ONE LINE= '" + argumentsInOneLine + "'");
+        char[] chars = argumentsInOneLine.toCharArray();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+
+            if (isQuoteChar(c) && i != chars.length - 1) {
+                int start = i + 1;
+                while (start < chars.length && !isEndOfQuote(c, chars[start])) {
+                    builder.append(chars[start]);
+                    start++;
+                }
+                i = start;
+
+                toCollect.add(builder.toString());
+                builder = new StringBuilder();
+                continue;
+            }
+
+            if (Character.isWhitespace(c)) {
+                toCollect.add(builder.toString());
+                builder = new StringBuilder();
+                continue;
+            }
+
+            builder.append(c);
+
+        }
+        if (!builder.isEmpty()) {
+            toCollect.add(builder.toString());
+        }
 
         if (autoCompletion && extraSpace)
             toCollect.add(" ");
@@ -62,6 +92,15 @@ public final class StringUtils {
 
     public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion) {
         return parseToQueue(argumentsInOneLine, autoCompletion, false);
+    }
+
+
+    public static boolean isQuoteChar(char ch) {
+        return ch == DOUBLE_QUOTE || ch == SINGLE_QUOTE;
+    }
+
+    public static boolean isEndOfQuote(char quoteStarter, char value) {
+        return isQuoteChar(value) && isQuoteChar(quoteStarter) && quoteStarter == value;
     }
 }
 

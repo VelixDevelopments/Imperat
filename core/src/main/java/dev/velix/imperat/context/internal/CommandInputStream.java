@@ -40,12 +40,7 @@ public interface CommandInputStream<S extends Source> {
 
     @NotNull CommandUsage<S> getUsage();
 
-    default boolean skip() {
-        final Cursor<S> cursor = cursor();
-        int prevRaw = cursor.raw;
-        cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
-        return cursor.raw > prevRaw;
-    }
+    boolean skip();
 
     boolean skipLetter();
 
