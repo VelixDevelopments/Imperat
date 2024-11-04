@@ -18,6 +18,10 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
     final PluginContainer plugin;
     private final ProxyServer proxyServer;
 
+    public static VelocityConfigBuilder builder(@NotNull PluginContainer plugin, @NotNull ProxyServer proxyServer) {
+        return new VelocityConfigBuilder(plugin, proxyServer);
+    }
+
     VelocityImperat(
         @NotNull PluginContainer plugin,
         @NotNull ProxyServer proxyServer,

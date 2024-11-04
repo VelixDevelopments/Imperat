@@ -9,19 +9,9 @@ public final class CommandLineConfigBuilder extends ConfigBuilder<ConsoleSource,
 
     private final InputStream inputStream;
 
-    private CommandLineConfigBuilder(InputStream inputStream) {
+    CommandLineConfigBuilder(InputStream inputStream) {
         this.inputStream = inputStream;
         config.registerSourceResolver(PrintStream.class, ConsoleSource::origin);
-    }
-
-    /**
-     * Creates a new CommandLineConfigBuilder instance.
-     *
-     * @param inputStream the input stream for command line input
-     * @return a new CommandLineConfigBuilder instance
-     */
-    public static CommandLineConfigBuilder builder(InputStream inputStream) {
-        return new CommandLineConfigBuilder(inputStream);
     }
 
     /**

@@ -14,7 +14,7 @@ public final class VelocityConfigBuilder extends ConfigBuilder<VelocitySource, V
     private final PluginContainer plugin;
     private final ProxyServer proxyServer;
 
-    private VelocityConfigBuilder(@NotNull PluginContainer plugin, @NotNull ProxyServer proxyServer) {
+    VelocityConfigBuilder(@NotNull PluginContainer plugin, @NotNull ProxyServer proxyServer) {
         this.plugin = plugin;
         this.proxyServer = proxyServer;
         addThrowableHandlers();
@@ -42,10 +42,6 @@ public final class VelocityConfigBuilder extends ConfigBuilder<VelocitySource, V
 
     private void registerValueResolvers() {
         config.registerParamType(Player.class, new ParameterPlayer(proxyServer));
-    }
-
-    public static VelocityConfigBuilder builder(@NotNull PluginContainer plugin, @NotNull ProxyServer proxyServer) {
-        return new VelocityConfigBuilder(plugin, proxyServer);
     }
 
     @Override

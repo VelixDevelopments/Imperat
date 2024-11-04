@@ -8,6 +8,7 @@ import dev.velix.imperat.util.StringUtils;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 
@@ -15,6 +16,10 @@ public final class BungeeImperat extends BaseImperat<BungeeSource> {
 
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> adventureProvider;
+
+    public static BungeeConfigBuilder builder(Plugin plugin) {
+        return new BungeeConfigBuilder(plugin, null);
+    }
 
     BungeeImperat(
         Plugin plugin,

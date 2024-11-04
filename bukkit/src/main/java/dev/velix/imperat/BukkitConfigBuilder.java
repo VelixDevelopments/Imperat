@@ -27,13 +27,12 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
     private final static BukkitPermissionResolver DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionResolver();
 
     private final Plugin plugin;
-    private final AdventureProvider<CommandSender> adventureProvider;
+    private AdventureProvider<CommandSender> adventureProvider;
 
     private boolean supportBrigadier = false;
 
-    BukkitConfigBuilder(Plugin plugin, @Nullable AdventureProvider<CommandSender> adventureProvider) {
+    BukkitConfigBuilder(Plugin plugin) {
         this.plugin = plugin;
-        this.adventureProvider = adventureProvider;
 
         config.setPermissionResolver(DEFAULT_PERMISSION_RESOLVER);
         addThrowableHandlers();
@@ -74,12 +73,8 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         config.registerParamType(worldClass, new ParameterWorld(worldClass));
     }
 
-    public static BukkitConfigBuilder builder(Plugin plugin) {
-        return builder(plugin, null);
-    }
-
-    public static BukkitConfigBuilder builder(Plugin plugin, @Nullable AdventureProvider<CommandSender> adventureProvider) {
-        return new BukkitConfigBuilder(plugin, loadAdventure(plugin, adventureProvider));
+    public void setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {
+        this.adventureProvider = adventureProvider;
     }
 
     public BukkitConfigBuilder applyBrigadier(boolean supportBrigadier) {
@@ -89,14 +84,15 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
 
     @Override
     public @NotNull BukkitImperat build() {
+        if (this.adventureProvider == null) {
+            this.adventureProvider = this.loadAdventure();
+        }
         return new BukkitImperat(plugin, adventureProvider, supportBrigadier, this.config);
     }
 
-    private static AdventureProvider<CommandSender> loadAdventure(Plugin plugin, @Nullable AdventureProvider<CommandSender> provider) {
+    private AdventureProvider<CommandSender> loadAdventure() {
         if (Reflections.findClass(() -> Audience.class)) {
-            if (provider != null) {
-                return provider;
-            } else if (Audience.class.isAssignableFrom(CommandSender.class)) {
+            if (Audience.class.isAssignableFrom(CommandSender.class)) {
                 return new CastingAdventure<>();
             } else if (Reflections.findClass(() -> BukkitAudiences.class)) {
                 return new BukkitAdventure(plugin);

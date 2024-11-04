@@ -10,6 +10,7 @@ import dev.velix.imperat.util.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +22,10 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private final AdventureProvider<CommandSender> adventureProvider;
     private BukkitBrigadierManager brigadierManager;
     private Map<String, org.bukkit.command.Command> bukkitCommands = new HashMap<>();
+
+    public static BukkitConfigBuilder builder(Plugin plugin) {
+        return new BukkitConfigBuilder(plugin);
+    }
 
     @SuppressWarnings("unchecked")
     BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, boolean supportBrigadier, ImperatConfig<BukkitSource> config) {

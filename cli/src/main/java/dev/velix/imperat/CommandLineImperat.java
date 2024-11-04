@@ -9,6 +9,16 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
 
     private InputStream input;
 
+    /**
+     * Creates a new CommandLineConfigBuilder instance.
+     *
+     * @param inputStream the input stream for command line input
+     * @return a new CommandLineConfigBuilder instance
+     */
+    public static CommandLineConfigBuilder builder(InputStream inputStream) {
+        return new CommandLineConfigBuilder(inputStream);
+    }
+
     CommandLineImperat(InputStream inputStream, ImperatConfig<ConsoleSource> config) {
         super(config);
         this.input = inputStream;

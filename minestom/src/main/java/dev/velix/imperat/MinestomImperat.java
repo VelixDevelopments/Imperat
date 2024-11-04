@@ -13,6 +13,10 @@ public final class MinestomImperat extends BaseImperat<MinestomSource> {
 
     private final ServerProcess serverProcess;
 
+    public static MinestomConfigBuilder builder(@NotNull ServerProcess serverProcess) {
+        return new MinestomConfigBuilder(serverProcess);
+    }
+
     MinestomImperat(@NotNull ServerProcess serverProcess, @NotNull ImperatConfig<MinestomSource> config) {
         super(config);
         this.serverProcess = serverProcess;

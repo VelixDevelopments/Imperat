@@ -11,7 +11,7 @@ public final class MinestomConfigBuilder extends ConfigBuilder<MinestomSource, M
 
     private final ServerProcess serverProcess;
 
-    private MinestomConfigBuilder(@NotNull ServerProcess serverProcess) {
+    MinestomConfigBuilder(@NotNull ServerProcess serverProcess) {
         this.serverProcess = serverProcess;
         registerDefaultResolvers();
         addThrowableHandlers();
@@ -33,10 +33,6 @@ public final class MinestomConfigBuilder extends ConfigBuilder<MinestomSource, M
             UnknownPlayerException.class, (exception, imperat, context) ->
                 context.source().error("A player with the name '" + exception.getName() + "' is not online.")
         );
-    }
-
-    public static MinestomConfigBuilder builder(@NotNull ServerProcess serverProcess) {
-        return new MinestomConfigBuilder(serverProcess);
     }
 
     @Override

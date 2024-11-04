@@ -19,18 +19,22 @@ public final class BungeeConfigBuilder extends ConfigBuilder<BungeeSource, Bunge
 
     private final static BungeePermissionResolver DEFAULT_PERMISSION_RESOLVER = new BungeePermissionResolver();
     private final Plugin plugin;
-    private final AdventureProvider<CommandSender> adventureProvider;
 
-    private BungeeConfigBuilder(Plugin plugin, @Nullable AdventureProvider<CommandSender> adventureProvider) {
+    private AdventureProvider<CommandSender> adventureProvider;
+
+    BungeeConfigBuilder(Plugin plugin, @Nullable AdventureProvider<CommandSender> adventureProvider) {
         this.plugin = plugin;
-        this.adventureProvider = adventureProvider != null ? adventureProvider : loadAdventureProvider();
         config.setPermissionResolver(DEFAULT_PERMISSION_RESOLVER);
         addThrowableHandlers();
         registerSourceResolvers();
         registerValueResolvers();
     }
 
-    private AdventureProvider<CommandSender> loadAdventureProvider() {
+    public void setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {
+        this.adventureProvider = adventureProvider;
+    }
+
+    private AdventureProvider<CommandSender> loadAdventure() {
         if (Reflections.findClass(() -> BungeeAudiences.class)) {
             return new BungeeAdventure(plugin);
         }
@@ -58,16 +62,11 @@ public final class BungeeConfigBuilder extends ConfigBuilder<BungeeSource, Bunge
         config.registerParamType(ProxiedPlayer.class, new ParameterProxiedPlayer());
     }
 
-    public static BungeeConfigBuilder builder(Plugin plugin) {
-        return builder(plugin, null);
-    }
-
-    public static BungeeConfigBuilder builder(Plugin plugin, @Nullable AdventureProvider<CommandSender> adventureProvider) {
-        return new BungeeConfigBuilder(plugin, adventureProvider);
-    }
-
     @Override
     public @NotNull BungeeImperat build() {
+        if (this.adventureProvider == null) {
+            this.adventureProvider = this.loadAdventure();
+        }
         return new BungeeImperat(plugin, adventureProvider, this.config);
     }
 }
