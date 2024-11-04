@@ -31,6 +31,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import dev.velix.imperat.util.BukkitUtil;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -123,7 +124,7 @@ abstract class AbstractCommodore<C extends Command> implements Commodore<C> {
         try {
             COMMAND_EXECUTE_FUNCTION_FIELD.set(node, DUMMY_COMMAND);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            ImperatDebugger.error(AbstractCommodore.class, "static<init>", e);
         }
 
         if (suggestionProvider != null && node instanceof ArgumentCommandNode<?, ?> argumentNode) {
@@ -132,7 +133,7 @@ abstract class AbstractCommodore<C extends Command> implements Commodore<C> {
             try {
                 CUSTOM_SUGGESTIONS_FIELD.set(argumentNode, suggestionProvider);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                ImperatDebugger.error(AbstractCommodore.class, "static<init>", e);
             }
         }
 
