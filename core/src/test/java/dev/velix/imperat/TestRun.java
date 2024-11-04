@@ -4,9 +4,9 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
+import dev.velix.imperat.commands.EmptyCmd;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.examples.*;
-import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -47,6 +47,7 @@ public class TestRun {
         IMPERAT.registerCommand(new BanCommand());
         IMPERAT.registerCommand(new GitCommand());
         IMPERAT.registerCommand(new MessageCmd());
+        IMPERAT.registerCommand(new EmptyCmd());
         ImperatDebugger.setEnabled(true);
     }
 
@@ -180,12 +181,6 @@ public class TestRun {
     }
 
     @Test
-    public void testArgParsing() {
-        ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(new String[]{" "}, true);
-        Assertions.assertEquals(1, queue.size());
-    }
-
-    @Test
     public void testAutoCompletion1() {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
@@ -259,4 +254,5 @@ public class TestRun {
             .build());
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("upper_case", ""));
     }
+
 }

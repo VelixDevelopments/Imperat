@@ -13,6 +13,7 @@ import dev.velix.imperat.util.Registry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,7 +29,11 @@ public class TestSmartUsageResolve {
     private final static ContextFactory<TestSource> FACTORY = IMPERAT.config().getContextFactory();
 
     private static ResolvedContext<TestSource> inputResolve(String command, String... args) {
+        System.out.println("-------------");
+        System.out.println("args= " + Arrays.toString(args));
         ArgumentQueue queue = ArgumentQueue.parse(args);
+        System.out.println("QUEUE: " + queue.join(","));
+
         Command<TestSource> cmd = IMPERAT.getCommand(command);
         Assertions.assertNotNull(cmd);
 
@@ -110,6 +115,12 @@ public class TestSmartUsageResolve {
         test("git", ResolvedArgsData.empty());
         test("git commit", ResolvedArgsData.empty().flag("message", null));
         test("git commit -m \"allah akbar\"", ResolvedArgsData.empty().flag("message", "allah akbar"));
+    }
+
+    @Test
+    public void testInputParse() {
+        ArgumentQueue queue = ArgumentQueue.parse("Its me again and this is my msg: \"sorry for interruption\"");
+        queue.forEach(System.out::println);
     }
 
 
