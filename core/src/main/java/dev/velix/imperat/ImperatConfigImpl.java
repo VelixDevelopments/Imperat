@@ -7,8 +7,7 @@ import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.CommandProcessingChain;
-import dev.velix.imperat.command.processors.impl.UsageCooldownProcessor;
-import dev.velix.imperat.command.processors.impl.UsagePermissionProcessor;
+import dev.velix.imperat.command.processors.impl.DefaultProcessors;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ParamTypeRegistry;
@@ -65,8 +64,8 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         regDefThrowableResolvers();
 
         globalPreProcessors = CommandProcessingChain.<S>preProcessors()
-            .then(new UsagePermissionProcessor<>())
-            .then(new UsageCooldownProcessor<>())
+            .then(DefaultProcessors.preUsagePermission())
+            .then(DefaultProcessors.preUsageCooldown())
             .build();
 
         globalPostProcessors = CommandProcessingChain.<S>postProcessors()

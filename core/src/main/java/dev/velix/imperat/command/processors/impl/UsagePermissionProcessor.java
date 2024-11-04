@@ -9,6 +9,10 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.PermissionDeniedException;
 
 public final class UsagePermissionProcessor<S extends Source> implements CommandPreProcessor<S> {
+
+    UsagePermissionProcessor() {
+
+    }
     /**
      * Processes context BEFORE the resolving operation.
      *

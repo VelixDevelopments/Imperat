@@ -9,6 +9,10 @@ import dev.velix.imperat.exception.CooldownException;
 import dev.velix.imperat.exception.ImperatException;
 
 public final class UsageCooldownProcessor<S extends Source> implements CommandPreProcessor<S> {
+
+    UsageCooldownProcessor() {
+
+    }
     /**
      * Processes context BEFORE the resolving operation.
      *
