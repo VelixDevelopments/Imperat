@@ -1,6 +1,5 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.Command;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;

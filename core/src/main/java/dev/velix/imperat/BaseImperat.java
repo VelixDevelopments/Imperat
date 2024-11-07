@@ -1,10 +1,10 @@
-package dev.velix.imperat.command;
+package dev.velix.imperat;
 
-import dev.velix.imperat.Imperat;
-import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReader;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
+import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
@@ -70,22 +70,19 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         try {
             var verifier = config.getUsageVerifier();
             for (CommandUsage<S> usage : command.usages()) {
-                if (!verifier.verify(usage))
-                    throw new InvalidCommandUsageException(command, usage);
+                if (!verifier.verify(usage)) throw new InvalidCommandUsageException(command, usage);
 
                 for (CommandUsage<S> other : command.usages()) {
                     if (other.equals(usage)) continue;
                     if (verifier.areAmbiguous(usage, other))
                         throw new AmbiguousUsageAdditionException(command, usage, other);
                 }
-
             }
             commands.put(command.name().toLowerCase(), command);
         } catch (RuntimeException ex) {
             ImperatDebugger.error(BaseImperat.class, "registerCommand(CommandProcessingChain command)", ex);
             shutdownPlatform();
         }
-
     }
 
     /**
@@ -130,8 +127,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public @Nullable Command<S> getCommand(final String name) {
         final String cmdName = name.toLowerCase();
+        final Command<S> result = commands.get(cmdName);
 
-        Command<S> result = commands.get(cmdName);
         if (result != null) return result;
         for (Command<S> headCommands : commands.values()) {
             if (headCommands.hasName(cmdName)) return headCommands;
@@ -393,6 +390,5 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             }
         }
     }
-
 
 }

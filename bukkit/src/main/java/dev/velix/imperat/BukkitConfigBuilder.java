@@ -20,7 +20,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, BukkitImperat> {
 
@@ -90,7 +89,8 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         return new BukkitImperat(plugin, adventureProvider, supportBrigadier, this.config);
     }
 
-    private AdventureProvider<CommandSender> loadAdventure() {
+    @SuppressWarnings("ConstantConditions")
+    private @NotNull AdventureProvider<CommandSender> loadAdventure() {
         if (Reflections.findClass(() -> Audience.class)) {
             if (Audience.class.isAssignableFrom(CommandSender.class)) {
                 return new CastingAdventure<>();

@@ -1,6 +1,5 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.command.BaseImperat;
 import dev.velix.imperat.command.tree.CommandDispatch;
 
 import java.io.*;
