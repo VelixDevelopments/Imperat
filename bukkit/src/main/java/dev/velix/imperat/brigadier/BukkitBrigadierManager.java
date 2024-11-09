@@ -49,6 +49,6 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
         PermissionResolver<BukkitSource> resolver
     ) {
         commodore.register(bukkitCmd, parseCommandIntoNode(imperatCommand),
-            (player) -> resolver.hasPermission(wrapCommandSource(player), bukkitCmd.permission()));
+            (player) -> resolver.hasPermission(dispatcher.wrapSender(player), bukkitCmd.permission()));
     }
 }

@@ -127,8 +127,9 @@ public final class CommandTree<S extends Source> {
         SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
         return resolver.asyncAutoComplete(context, node.data)
             .thenApply((results) -> {
-                results.removeIf((entry) -> !node.matchesInput(entry));
-                return results;
+                List<String> data = new ArrayList<>(results);
+                data.removeIf((entry) -> !node.matchesInput(entry));
+                return data;
             })
             .thenApply((res) -> {
                 oldResults.addAll(res);
