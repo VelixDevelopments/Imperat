@@ -52,7 +52,6 @@ public final class StringUtils {
             return !autoCompletion ? ArgumentQueue.empty(argumentsInOneLine) : ArgumentQueue.parse(" ");
 
         ArgumentQueue toCollect = ArgumentQueue.empty(argumentsInOneLine);
-        System.out.println("ARGUMENT ONE LINE= '" + argumentsInOneLine + "'");
         char[] chars = argumentsInOneLine.toCharArray();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < chars.length; i++) {
