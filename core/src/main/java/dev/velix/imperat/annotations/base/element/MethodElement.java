@@ -31,6 +31,7 @@ public final class MethodElement extends ParseElement<Method> {
             if (AnnotationHelper.isHelpParameter(parameter)) {
                 help = true;
             } else if (!imperat.canBeSender(parameter.getType())
+                && !imperat.config().hasSourceResolver(parameter.getType())
                 && !imperat.config().hasContextResolver(parameter.getType())
             ) {
                 inputCount++;
