@@ -11,7 +11,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.function.BiConsumer;
 
 /**
  * A class that whose only purpose is to
@@ -27,7 +26,7 @@ public interface HelpProvider<S extends Source> {
      * Provides the {@link Source} the help menu using {@link ExecutionContext}
      * <p>
      * Displays each {@link CommandUsage} formatted by {@link UsageFormatter} to the source
-     * through the method {@link HelpProvider#display(ExecutionContext, UsageFormatter, Collection)}
+     * through the method {@link HelpProvider#display(ExecutionContext, Source, UsageFormatter, Collection)}
      * <p>
      * if command usages are empty/no command usages, it will throw {@link NoHelpException}
      * <p>
@@ -39,14 +38,15 @@ public interface HelpProvider<S extends Source> {
      * </p>
      *
      * @param context the command's context
+     * @param source
      * @throws ImperatException if any of the above criteria is met.
      */
-    void provide(ExecutionContext<S> context) throws ImperatException;
+    void provide(ExecutionContext<S> context, Source source) throws ImperatException;
 
-    default void display(ExecutionContext<S> context, UsageFormatter formatter, Collection<? extends CommandUsage<S>> usages) throws ImperatException {
+    default void display(ExecutionContext<S> context, Source source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> usages) throws ImperatException {
         int index = 0;
         for (CommandUsage<S> usage : usages) {
-            context.source().reply(formatter.format(context.command(), usage, index));
+            source.reply(formatter.format(context.command(), usage, index));
             index++;
         }
     }
@@ -64,7 +64,7 @@ public interface HelpProvider<S extends Source> {
 
         protected UsageFormatter formatter = DefaultFormatter.INSTANCE;
         protected HelpHyphen<S> headerProvider, footerProvider;
-        protected BiConsumer<ExecutionContext<S>, Collection<? extends CommandUsage<S>>> displayer;
+        protected UsageDisplayer<S> displayer;
 
         protected Builder() {
 
@@ -85,7 +85,7 @@ public interface HelpProvider<S extends Source> {
             return (B) this;
         }
 
-        public @NotNull B displayer(BiConsumer<ExecutionContext<S>, Collection<? extends CommandUsage<S>>> displayer) {
+        public @NotNull B displayer(UsageDisplayer<S> displayer) {
             this.displayer = displayer;
             return (B) this;
         }

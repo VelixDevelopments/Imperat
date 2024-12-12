@@ -4,7 +4,7 @@ import dev.velix.imperat.context.Source;
 
 import java.io.PrintStream;
 
-public final class ConsoleSource implements Source {
+public class ConsoleSource implements Source {
 
     private final PrintStream outputStream;
 

@@ -24,7 +24,7 @@ public final class AnnotatedGroupCommand {
 
     @SubCommand(value = "help", attachDirectly = true)
     public void help(TestSource source, CommandHelp help) {
-        help.display();
+        help.display(source);
     }
 
     @SubCommand("setperm")

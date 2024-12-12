@@ -45,11 +45,18 @@ public final class AnnotationHelper {
         ParameterElement firstParam = method.getParameterAt(0);
         assert firstParam != null;
 
-        if (!dispatcher.canBeSender(firstParam.getType())) {
-            paramsInstances[0] = context.getResolvedSource(firstParam.getType());
+        if (dispatcher.canBeSender(firstParam.getType())) {
+
+            if (source.getClass().equals(firstParam.getType())) {
+                paramsInstances[0] = source;
+            } else {
+                paramsInstances[0] = context.getResolvedSource(firstParam.getType());
+            }
+
         } else {
-            paramsInstances[0] = source;
+            paramsInstances[0] = context.getResolvedSource(firstParam.getType());
         }
+
 
         for (int i = 1, p = 0; i < method.size(); i++, p++) {
             ParameterElement actualParameter = method.getParameterAt(i);

@@ -65,7 +65,7 @@ public final class TestCommands {
 
                         CommandHelp help = context.getContextResolvedArgument(CommandHelp.class);
                         assert help != null;
-                        help.display();
+                        help.display(source);
 
                         source.sendMsg("Help page= " + page);
                         TestRun.USAGE_EXECUTED = true;

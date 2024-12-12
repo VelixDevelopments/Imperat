@@ -26,12 +26,12 @@ final class TemplatePagination<S extends Source> extends PaginatedHelpTemplate<S
     }
 
     @Override
-    public void displayHeaderHyphen(Command<S> command, S source, int page) {
+    public void displayHeaderHyphen(Command<S> command, Source source, int page) {
         source.reply(getHeader(command, page, paginatedText.getMaxPages()));
     }
 
     @Override
-    public void displayFooterHyphen(Command<S> command, S source, int page) {
+    public void displayFooterHyphen(Command<S> command, Source source, int page) {
         source.reply(getHeader(command, page, paginatedText.getMaxPages()));
     }
 }

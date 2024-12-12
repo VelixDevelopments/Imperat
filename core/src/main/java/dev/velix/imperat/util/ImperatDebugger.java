@@ -39,12 +39,10 @@ public final class ImperatDebugger {
     }
 
     public static void error(Class<?> owningClass, String name, @NotNull Throwable ex) {
-        if (!enabled) return;
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s'", owningClass.getName(), name), ex);
     }
 
     public static void error(Class<?> owningClass, String name, Throwable ex, String message) {
-        if (!enabled) return;
         LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s' due to '%s'", owningClass.getName(), name, message), ex);
     }
 

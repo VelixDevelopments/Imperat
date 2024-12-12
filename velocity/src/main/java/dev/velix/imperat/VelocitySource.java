@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.text.ComponentLike;
 
-public final class VelocitySource implements Source {
+public class VelocitySource implements Source {
 
     private final CommandSource origin;
 

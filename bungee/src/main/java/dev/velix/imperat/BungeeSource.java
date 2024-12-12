@@ -11,7 +11,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public final class BungeeSource implements Source {
+public class BungeeSource implements Source {
 
     private final CommandSender sender;
     private final AdventureProvider<CommandSender> adventureProvider;

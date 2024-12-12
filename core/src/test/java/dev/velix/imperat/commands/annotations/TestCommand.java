@@ -32,7 +32,7 @@ public class TestCommand {
 
     @SubCommand(value = "help", attachDirectly = true)
     public void help(TestSource source, CommandHelp help) {
-        help.display();
+        help.display(source);
         source.reply("executed /test help");
         TestRun.USAGE_EXECUTED = true;
     }

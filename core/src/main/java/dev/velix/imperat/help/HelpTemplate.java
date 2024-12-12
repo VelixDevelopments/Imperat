@@ -34,9 +34,8 @@ public sealed abstract class HelpTemplate<S extends Source> implements HelpProvi
 
 
     @Override
-    public void provide(ExecutionContext<S> context) throws ImperatException {
+    public void provide(ExecutionContext<S> context, Source source) throws ImperatException {
         Command<S> command = context.command();
-        S source = context.source();
 
         final int maxUsages = command.usages().size();
         if (maxUsages == 0) {
@@ -44,12 +43,12 @@ public sealed abstract class HelpTemplate<S extends Source> implements HelpProvi
         }
         int page = context.getArgumentOr("page", 1);
         displayHeaderHyphen(command, source, page);
-        display(context, formatter, command.usages());
+        display(context, source, formatter, command.usages());
         displayFooterHyphen(command, source, page);
     }
 
-    public abstract void displayHeaderHyphen(Command<S> command, S source, int page);
+    public abstract void displayHeaderHyphen(Command<S> command, Source source, int page);
 
-    public abstract void displayFooterHyphen(Command<S> command, S source, int page);
+    public abstract void displayFooterHyphen(Command<S> command, Source source, int page);
 
 }

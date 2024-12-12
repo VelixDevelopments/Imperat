@@ -7,17 +7,21 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public final class BukkitSource implements Source {
+public class BukkitSource implements Source {
 
-    private final CommandSender sender;
-    private final AdventureProvider<CommandSender> provider;
+    protected final CommandSender sender;
+    protected final AdventureProvider<CommandSender> provider;
 
-    BukkitSource(
+    protected BukkitSource(
         final CommandSender sender,
         final AdventureProvider<CommandSender> provider
     ) {
         this.sender = sender;
         this.provider = provider;
+    }
+
+    public AdventureProvider<CommandSender> getProvider() {
+        return provider;
     }
 
     /**

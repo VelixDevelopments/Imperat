@@ -25,9 +25,7 @@
 
 package dev.velix.imperat.commodore;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -41,38 +39,8 @@ import java.util.function.Predicate;
  */
 public interface Commodore<C extends Command> {
 
-    /**
-     * Registers the provided argument data to the dispatcher, against all
-     * aliases defined for the {@code command}.
-     *
-     * <p>Additionally applies the CraftBukkit {@link SuggestionProvider}
-     * to all arguments within the node, so ASK_SERVER suggestions can continue
-     * to function for the command.</p>
-     *
-     * <p>Players will only be sent argument data if they pass the provided
-     * {@code permissionTest}.</p>
-     *
-     * @param command        the command to read aliases from
-     * @param node           the argument data
-     * @param permissionTest the predicate to check whether players should be sent argument data
-     */
     void register(C command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest);
 
-    /**
-     * Registers the provided argument data to the dispatcher, against all
-     * aliases defined for the {@code command}.
-     *
-     * <p>Additionally applies the CraftBukkit {@link SuggestionProvider}
-     * to all arguments within the node, so ASK_SERVER suggestions can continue
-     * to function for the command.</p>
-     *
-     * <p>Players will only be sent argument data if they pass the provided
-     * {@code permissionTest}.</p>
-     *
-     * @param command         the command to read aliases from
-     * @param argumentBuilder the argument data, in a builder form
-     * @param permissionTest  the predicate to check whether players should be sent argument data
-     */
     default void register(C command, LiteralArgumentBuilder<?> argumentBuilder, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(argumentBuilder, "argumentBuilder");
@@ -80,60 +48,20 @@ public interface Commodore<C extends Command> {
         register(command, argumentBuilder.build(), permissionTest);
     }
 
-    /**
-     * Registers the provided argument data to the dispatcher, against all
-     * aliases defined for the {@code command}.
-     *
-     * <p>Additionally applies the CraftBukkit {@link SuggestionProvider}
-     * to all arguments within the node, so ASK_SERVER suggestions can continue
-     * to function for the command.</p>
-     *
-     * @param command the command to read aliases from
-     * @param node    the argument data
-     */
     default void register(C command, LiteralCommandNode<?> node) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
         register(command, node, (p) -> true);
     }
 
-    /**
-     * Registers the provided argument data to the dispatcher, against all
-     * aliases defined for the {@code command}.
-     *
-     * <p>Additionally applies the CraftBukkit {@link SuggestionProvider}
-     * to all arguments within the node, so ASK_SERVER suggestions can continue
-     * to function for the command.</p>
-     *
-     * @param command         the command to read aliases from
-     * @param argumentBuilder the argument data, in a builder form
-     */
     default void register(C command, LiteralArgumentBuilder<?> argumentBuilder) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(argumentBuilder, "argumentBuilder");
         register(command, argumentBuilder.build());
     }
 
-    /**
-     * Registers the provided argument data to the dispatcher.
-     * Equivalent to calling
-     * {@link CommandDispatcher#register(LiteralArgumentBuilder)}
-     * <p>
-     * Prefer using {@link Commodore#register(C, LiteralCommandNode)}
-     *
-     * @param node the argument data
-     */
     void register(LiteralCommandNode<?> node);
 
-    /**
-     * Registers the provided argument data to the dispatcher.
-     * Equivalent to calling
-     * {@link CommandDispatcher#register(LiteralArgumentBuilder)}
-     * <p>
-     * Prefer using {@link Commodore#register(C, LiteralArgumentBuilder)}
-     *
-     * @param argumentBuilder the argument data
-     */
     default void register(LiteralArgumentBuilder<?> argumentBuilder) {
         Objects.requireNonNull(argumentBuilder, "argumentBuilder");
         register(argumentBuilder.build());

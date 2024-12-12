@@ -8,18 +8,17 @@ import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.function.BiConsumer;
 
 final class HelpTemplateImpl<S extends Source> extends HelpTemplate<S> {
 
     private final HelpHyphen<S> headerProvider, footerProvider;
-    private final @Nullable BiConsumer<ExecutionContext<S>, Collection<? extends CommandUsage<S>>> displayerFunc;
+    private final @Nullable UsageDisplayer<S> displayerFunc;
 
     HelpTemplateImpl(
         UsageFormatter formatter,
         HelpHyphen<S> headerProvider,
         HelpHyphen<S> footerProvider,
-        @Nullable BiConsumer<ExecutionContext<S>, Collection<? extends CommandUsage<S>>> displayerFunc
+        @Nullable UsageDisplayer<S> displayerFunc
     ) {
         super(formatter);
         this.headerProvider = headerProvider;
@@ -38,21 +37,21 @@ final class HelpTemplateImpl<S extends Source> extends HelpTemplate<S> {
     }
 
     @Override
-    public void displayHeaderHyphen(Command<S> command, S source, int page) {
+    public void displayHeaderHyphen(Command<S> command, Source source, int page) {
         source.reply(getHeader(command, 1, 1));
     }
 
     @Override
-    public void displayFooterHyphen(Command<S> command, S source, int page) {
+    public void displayFooterHyphen(Command<S> command, Source source, int page) {
         source.reply(getHeader(command, 1, 1));
     }
 
 
     @Override
-    public void display(ExecutionContext<S> context, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
+    public void display(ExecutionContext<S> context, Source source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
         if (displayerFunc == null)
-            super.display(context, formatter, commandUsages);
+            super.display(context, source, formatter, commandUsages);
         else
-            displayerFunc.accept(context, commandUsages);
+            displayerFunc.accept(context, source, commandUsages);
     }
 }

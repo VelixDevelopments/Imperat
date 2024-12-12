@@ -21,16 +21,15 @@ public final class CommandHelp {
         this.context = context;
     }
 
-
-    public <S extends Source> void display() {
+    public <S extends Source> void display(Source source) {
         try {
             HelpProvider<S> provider = (HelpProvider<S>) dispatcher.getHelpProvider();
-            if (provider != null)
-                provider.provide((ExecutionContext<S>) context);
+            if (provider != null) {
+                provider.provide((ExecutionContext<S>) context, source);
+            }
         } catch (Throwable ex) {
             ((ImperatConfig<S>) dispatcher).handleThrowable(ex, (Context<S>) context, this.getClass(), "display(source, page)");
         }
     }
-
 
 }

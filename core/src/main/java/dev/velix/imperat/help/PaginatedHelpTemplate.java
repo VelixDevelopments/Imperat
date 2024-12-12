@@ -28,14 +28,13 @@ public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends
     }
 
     @Override
-    public void display(ExecutionContext<S> context, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
+    public void display(ExecutionContext<S> context, Source source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
 
         Integer page = context.getArgumentOr("page", 1);
         TextPage<CommandUsage<S>> textPage = paginatedText.getPage(page);
         if (textPage == null) {
             throw new NoHelpPageException();
         }
-        S source = context.source();
         int index = 0;
         for (var usage : textPage.asList()) {
             source.reply(formatter.format(context.command(), usage, index));
@@ -44,13 +43,13 @@ public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends
     }
 
     @Override
-    public void provide(ExecutionContext<S> context) throws ImperatException {
+    public void provide(ExecutionContext<S> context, Source source) throws ImperatException {
 
         var commandUsages = context.command().usages();
         commandUsages.forEach(paginatedText::add);
 
         paginatedText.paginate();
-        super.provide(context);
+        super.provide(context, source);
         paginatedText.clear();
 
     }

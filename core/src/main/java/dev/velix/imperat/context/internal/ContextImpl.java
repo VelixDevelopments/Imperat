@@ -23,6 +23,11 @@ class ContextImpl<S extends Source> implements Context<S> {
     }
 
     @Override
+    public ImperatConfig<S> imperat() {
+        return dispatcher;
+    }
+
+    @Override
     public @NotNull Command<S> command() {
         return commandUsed;
     }
