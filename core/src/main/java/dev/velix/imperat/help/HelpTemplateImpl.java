@@ -43,7 +43,7 @@ final class HelpTemplateImpl<S extends Source> extends HelpTemplate<S> {
 
     @Override
     public void displayFooterHyphen(Command<S> command, Source source, int page) {
-        source.reply(getHeader(command, 1, 1));
+        source.reply(getFooter(command, 1, 1));
     }
 
 
