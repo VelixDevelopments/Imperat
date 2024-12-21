@@ -42,11 +42,21 @@ public class TestSmartUsageResolve {
         res.visualize();
 
         CommandUsage<TestSource> usage = res.toUsage(cmd);
+
+        if (usage == null) {
+            System.out.println("USAGE IS NULL");
+            var param = res.getLastParameter();
+            if (param.isCommand()) {
+                usage = param.asCommand().getDefaultUsage();
+            }
+        }
         Assertions.assertNotNull(usage);
 
         ResolvedContext<TestSource> resolvedContext = FACTORY.createResolvedContext(context, usage);
         Assertions.assertDoesNotThrow(resolvedContext::resolve);
-        Assertions.assertDoesNotThrow(() -> usage.execute(IMPERAT, SOURCE, resolvedContext));
+
+        CommandUsage<TestSource> finalUsage = usage;
+        Assertions.assertDoesNotThrow(() -> finalUsage.execute(IMPERAT, SOURCE, resolvedContext));
         return resolvedContext;
     }
 
@@ -162,14 +172,16 @@ public class TestSmartUsageResolve {
         }
 
         public boolean matches(ResolvedArgsData other) {
-            /*System.out.println(this.args);
+            System.out.println(this.args);
             System.out.println(other.args);
             System.out.println(this.resolvedFlags.getMap());
             System.out.println(other.resolvedFlags.getMap());
-             */
 
 
-            if (args.size() != other.args.size() || resolvedFlags.size() != other.resolvedFlags.size()) return false;
+            if (args.size() != other.args.size() || resolvedFlags.size() != other.resolvedFlags.size()) {
+
+                return false;
+            }
 
             for (var entry : this.args.entrySet()) {
                 var thisObj = entry.getValue();

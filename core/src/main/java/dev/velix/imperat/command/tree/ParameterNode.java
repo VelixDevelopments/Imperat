@@ -77,4 +77,8 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
     public boolean isCommand() {
         return this instanceof CommandNode || data.isCommand();
     }
+
+    public boolean isTrueFlag() {
+        return this.data.isFlag() && !this.data.asFlagParameter().isSwitch();
+    }
 }

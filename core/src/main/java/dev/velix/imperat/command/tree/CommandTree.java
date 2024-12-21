@@ -189,6 +189,7 @@ public final class CommandTree<S extends Source> {
                 //check for incomplete executions
                 if (currentNode.isCommand()) {
                     ImperatDebugger.debug("The last node at last depth is command=%s", currentNode.format());
+                    addOptionalChildren(commandDispatch, currentNode);
                     commandDispatch.result(CommandDispatch.Result.INCOMPLETE);
                     return commandDispatch;
                 }
@@ -225,7 +226,15 @@ public final class CommandTree<S extends Source> {
                 //Last depth and last node => perfecto
                 commandDispatch.result(CommandDispatch.Result.COMPLETE);
             } else {
-                commandDispatch.result(CommandDispatch.Result.UNKNOWN);
+                CommandDispatch.Result result;
+                if (currentNode.isTrueFlag() && isLastDepth(depth + 1, input)) {
+                    result = CommandDispatch.Result.COMPLETE;
+                } else if (!currentNode.isGreedyParam()) {
+                    result = CommandDispatch.Result.UNKNOWN;
+                } else {
+                    result = CommandDispatch.Result.COMPLETE;
+                }
+                commandDispatch.result(result);
             }
 
         }
