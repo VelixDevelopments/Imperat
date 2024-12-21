@@ -131,7 +131,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public @NotNull CommandDispatch<S> contextMatch(Context<S> context) {
         if (commandTree != null) {
             var copy = context.arguments().copy();
-            copy.removeIf((arg) -> arg.isEmpty() || arg.isBlank());
+            copy.removeIf(String::isBlank);
             return commandTree.contextMatch(copy);
         } else {
             throw new IllegalCallerException("Cannot match a sub command in a root's execution !");

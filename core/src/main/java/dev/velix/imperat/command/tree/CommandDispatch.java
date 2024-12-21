@@ -26,7 +26,7 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
         return new CommandDispatch<>(result);
     }
 
-    static <S extends Source> CommandDispatch<S> empty() {
+    static <S extends Source> CommandDispatch<S> unknown() {
         return of(Result.UNKNOWN);
     }
 
@@ -38,6 +38,11 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
         if (node == null) return;
         //if (parameters.contains(node.data)) return;
         parameters.add(node.data);
+    }
+
+    public void append(CommandParameter<S> parameter) {
+        if (parameter == null) return;
+        parameters.add(parameter);
     }
 
     public CommandParameter<S> getLastParameter() {
@@ -59,6 +64,12 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
 
     public @Nullable CommandUsage<S> toUsage(Command<S> command) {
         return command.getUsage(parameters);
+    }
+
+    public @NotNull CommandDispatch<S> copy() {
+        CommandDispatch<S> commandDispatch = CommandDispatch.of(result);
+        parameters.forEach(commandDispatch::append);
+        return commandDispatch;
     }
 
     public void visualize() {

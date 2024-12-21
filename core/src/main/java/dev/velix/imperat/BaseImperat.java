@@ -272,12 +272,9 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
         CommandDispatch<S> searchResult = command.contextMatch(context);
         searchResult.visualize();
-
+        System.out.println("result = " + searchResult.result().name());
 
         CommandUsage<S> usage = searchResult.toUsage(command);
-        if (usage == null) {
-            throw new InvalidSyntaxException();
-        }
 
         //executing usage
         if (searchResult.result() == CommandDispatch.Result.COMPLETE)
@@ -286,8 +283,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             var lastParameter = searchResult.getLastParameter();
             if (lastParameter.isCommand()) {
                 executeUsage(command, source, context, lastParameter.asCommand().getDefaultUsage());
-            } else {
+            } else if (usage != null) {
                 executeUsage(command, source, context, usage);
+            } else {
+                //usage is null and last param is not command
+                throw new InvalidSyntaxException();
             }
         } else {
             throw new InvalidSyntaxException();

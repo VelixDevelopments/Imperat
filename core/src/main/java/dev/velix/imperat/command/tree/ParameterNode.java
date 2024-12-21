@@ -39,7 +39,7 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
 
     public abstract String format();
 
-    public boolean isLeaf() {
+    public boolean isLast() {
         return nextNodes.isEmpty();
     }
 
@@ -67,10 +67,14 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
     }
 
     public ParameterNode<S, ?> getNextParameterChild() {
-        return getChild((child) -> child instanceof CommandNode<?>);
+        return getChild((child) -> true);
     }
 
     public boolean isRequired() {
         return data.isRequired();
+    }
+
+    public boolean isCommand() {
+        return this instanceof CommandNode || data.isCommand();
     }
 }

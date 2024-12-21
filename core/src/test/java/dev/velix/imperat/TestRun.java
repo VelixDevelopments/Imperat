@@ -5,6 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.EmptyCmd;
+import dev.velix.imperat.commands.annotations.KitCommand;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.util.ImperatDebugger;
@@ -48,6 +49,7 @@ public class TestRun {
         IMPERAT.registerCommand(new GitCommand());
         IMPERAT.registerCommand(new MessageCmd());
         IMPERAT.registerCommand(new EmptyCmd());
+        IMPERAT.registerCommand(new KitCommand());
         ImperatDebugger.setEnabled(true);
     }
 
@@ -158,13 +160,16 @@ public class TestRun {
     }
 
     @Test
+    public void tempo() {
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1"));
+    }
+    @Test
     public void testInnerClassParsing() {
         System.out.println("----------------------------");
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
         //debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
 
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", ""));
-        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi"));
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye"));
@@ -253,6 +258,14 @@ public class TestRun {
             .defaultExecution((src, ctx) -> src.reply("Worked !"))
             .build());
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("upper_case", ""));
+    }
+
+    @Test
+    public void testKitCmd() {
+        var cmd = IMPERAT.getCommand("kit");
+        assert cmd != null;
+        debugCommand(cmd);
+        Assertions.assertEquals(CommandDispatch.Result.UNKNOWN, testCmdTreeExecution("kit", "create test"));
     }
 
 }

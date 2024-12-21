@@ -8,8 +8,10 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -149,8 +151,9 @@ public final class CommandTree<S extends Source> {
         int depth = 0;
 
         for (ParameterNode<S, ?> child : root.getChildren()) {
-            CommandDispatch<S> nodeTraversing = CommandDispatch.empty();
-            var traverse = contextMatchNode(nodeTraversing, input, child, depth);
+            CommandDispatch<S> nodeTraversing = CommandDispatch.unknown();
+
+            var traverse = dispatchNode(nodeTraversing, input, child, depth);
 
             if (traverse.result() != CommandDispatch.Result.UNKNOWN) {
                 return traverse;
@@ -158,10 +161,111 @@ public final class CommandTree<S extends Source> {
 
         }
 
-        return CommandDispatch.empty();
+        return CommandDispatch.unknown();
     }
 
-    private @NotNull CommandDispatch<S> contextMatchNode(
+    private @NotNull CommandDispatch<S> dispatchNode(
+        CommandDispatch<S> commandDispatch,
+        ArgumentQueue input,
+        ParameterNode<S, ?> currentNode,
+        int depth
+    ) {
+        if (depth >= input.size()) {
+            return commandDispatch;
+        }
+
+        ImperatDebugger.debug("Current depth=%s, node=%s", depth, currentNode.format());
+        if (!currentNode.matchesInput(input.get(depth))) {
+            ImperatDebugger.debug("Node '%s' doesn't match input '%s'", currentNode.format(), input.get(depth));
+            return commandDispatch;
+        }
+
+        ImperatDebugger.debug("Appending node=%s, at depth=%s", currentNode.format(), depth);
+        commandDispatch.append(currentNode);
+
+        if (!currentNode.isLast()) {
+            if (isLastDepth(depth, input)) {
+                ImperatDebugger.debug("Reached the end of the input at depth=%s", depth);
+                //check for incomplete executions
+                if (currentNode.isCommand()) {
+                    ImperatDebugger.debug("The last node at last depth is command=%s", currentNode.format());
+                    commandDispatch.result(CommandDispatch.Result.INCOMPLETE);
+                    return commandDispatch;
+                }
+
+                //means that there's missing arguments that need to be input
+                //check if the missing arguments are optional to ignore and complete this
+                //by finding the next required argument
+
+                ImperatDebugger.debug("Finding missing required argument");
+                ParameterNode<S, ?> requiredParameterNode = findRequiredNodeDeeply(currentNode);
+                if (requiredParameterNode == null) {
+                    ImperatDebugger.debug("No missing required args, it's complete now");
+                    //we ignore it and assume the result is complete
+                    commandDispatch.result(CommandDispatch.Result.COMPLETE);
+                    //but don't forget to add optionals if there are
+                    addOptionalChildren(commandDispatch, currentNode);
+                } else {
+                    ImperatDebugger.debug("There are missing required args !!, the usage is UNKNOWN");
+                    commandDispatch.result(requiredParameterNode.isCommand() ? CommandDispatch.Result.COMPLETE : CommandDispatch.Result.UNKNOWN);
+                }
+            } else {
+                ImperatDebugger.debug("we still in the middle of the input at depth=%s", depth);
+                for (var child : currentNode.getChildren()) {
+                    var result = dispatchNode(commandDispatch, input, child, depth + 1);
+                    if (result.result() == CommandDispatch.Result.COMPLETE) {
+                        return result;
+                    }
+                }
+            }
+        } else {
+            ImperatDebugger.debug("We reached the end of the node, at node=%s", currentNode.format());
+            //node is the last
+            if (isLastDepth(depth, input)) {
+                //Last depth and last node => perfecto
+                commandDispatch.result(CommandDispatch.Result.COMPLETE);
+            } else {
+                commandDispatch.result(CommandDispatch.Result.UNKNOWN);
+            }
+
+        }
+        return commandDispatch;
+    }
+
+    private @Nullable ParameterNode<S, ?> findRequiredNodeDeeply(ParameterNode<S, ?> currentNode) {
+        for (var child : currentNode.getChildren()) {
+            if (child.isRequired()) {
+                return child;
+            } else {
+                var deepReq = findRequiredNodeDeeply(child);
+                if (deepReq != null) {
+                    return deepReq;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void addOptionalChildren(CommandDispatch<S> dispatch, ParameterNode<S, ?> currentNode) {
+        ParameterNode<S, ?> childOptional = currentNode.getChild(ParameterNode::isOptional);
+        if (childOptional == null) return;
+
+        dispatch.append(childOptional);
+
+        if (!childOptional.isLast()) {
+            addOptionalChildren(dispatch, childOptional);
+        }
+    }
+
+    private boolean isLastDepth(int index, ArgumentQueue input) {
+        return index == input.size() - 1;
+    }
+
+    public CommandNode<S> getRoot() {
+        return root;
+    }
+
+    /*private @NotNull CommandDispatch<S> contextMatchNode(
         CommandDispatch<S> commandDispatch,
         ArgumentQueue input,
         ParameterNode<S, ?> currentNode,
@@ -179,81 +283,77 @@ public final class CommandTree<S extends Source> {
         }
         //GO TO NODE'S children
         commandDispatch.append(currentNode);
-        if (currentNode.isLeaf()) {
+        if (currentNode.isLast()) {
 
             //not the deepest search depth (still more raw args than number of nodes)
             commandDispatch.result((depth != input.size() - 1 && !currentNode.isGreedyParam())
                 ? CommandDispatch.Result.INCOMPLETE : CommandDispatch.Result.COMPLETE);
-            return commandDispatch;
         } else {
             //not the last node → continue traversing
 
             //checking if depth is the last
-            if (depth == input.size() - 1) {
-                //depth is last → check for missing required arguments
-                //commandDispatch.append(currentNode);
-
-                if (currentNode instanceof CommandNode<?>) {
-                    commandDispatch.result(CommandDispatch.Result.INCOMPLETE);
-                }
-
-                if (currentNode.isOptional()) {
-                    //so if the node is optional,
-                    // we go deeper into the tree, while backtracking the depth of the argument input.
-                    return searchForMatch(currentNode, commandDispatch, input, depth - 1);
-                } else {
-                    //ImperatDebugger.debug("Last Depth=%s, Current node= %s", depth, node.format());
-                    //node is not the last, and we reached the end of the raw input length
-                    //We check if there's any missing optional
-                    boolean allOptional = true;
-                    for (ParameterNode<S, ?> child : currentNode.getChildren()) {
-                        if (!child.isOptional()) {
-                            allOptional = false;
-                            break;
-                        }
-                    }
-
-                    //improved logic
-                    if (allOptional) {
-                        //if all optional, then append the all next
-                        var child = currentNode.getChild(ParameterNode::isOptional);
-                        if (child != null) {
-                            commandDispatch.append(child);
-                            //collect optionals while depth is constant since we reached the end of raw input early
-                            if (!child.isLeaf()) {
-                                return searchForMatch(child, commandDispatch, input, depth - 1);
-                            }
-                        }
-                    }
-
-                    //adding rest of required args
-                    var requiredChild = currentNode.getChild(ParameterNode::isRequired);
-
-                    if (requiredChild != null) {
-                        commandDispatch.append(requiredChild);
-                        if (!requiredChild.isLeaf()) {
-                            return searchForMatch(requiredChild, commandDispatch, input, depth - 1);
-                        }
-                    }
-                    //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
-                    var usage = commandDispatch.toUsage(root.data);
-                    commandDispatch.result(
-                        allOptional || (usage != null && !(currentNode instanceof CommandNode<?>))
-                            ? CommandDispatch.Result.COMPLETE
-                            : CommandDispatch.Result.INCOMPLETE
-                    );
-                    return commandDispatch;
-                }
-
-            } else {
+            if(depth < input.size()-1) {
                 return this.searchForMatch(currentNode, commandDispatch, input, depth);
             }
+            //depth is last → check for missing required arguments
+            //commandDispatch.append(currentNode);
+            if (currentNode.isCommand()) {
+                commandDispatch.result(CommandDispatch.Result.INCOMPLETE);
+                return commandDispatch;
+            }
+
+            if (currentNode.isOptional()) {
+                //so if the node is optional,
+                // we go deeper into the tree, while backtracking the depth of the argument input.
+                return searchForMatch(currentNode, commandDispatch, input, depth - 1);
+            }
+            //ImperatDebugger.debug("Last Depth=%s, Current node= %s", depth, node.format());
+            //node is not the last, and we reached the end of the raw input length
+            //We check if there's any missing optional
+            boolean allOptional = true;
+            for (ParameterNode<S, ?> child : currentNode.getChildren()) {
+                if (!child.isOptional()) {
+                    allOptional = false;
+                    break;
+                }
+            }
+
+            //improved logic
+            if (allOptional) {
+                //if all optional, then append the all next
+                var child = currentNode.getChild(ParameterNode::isOptional);
+                if (child != null) {
+                    commandDispatch.append(child);
+                    //collect optionals while depth is constant since we reached the end of raw input early
+                    if (!child.isLast()) {
+                        return searchForMatch(child, commandDispatch, input, depth - 1);
+                    }
+                }
+            }
+
+            //adding rest of required args
+            var requiredChild = currentNode.getChild(ParameterNode::isRequired);
+
+            if (requiredChild != null) {
+                //commandDispatch.append(requiredChild);
+                if (!requiredChild.isLast()) {
+                    return searchForMatch(requiredChild, commandDispatch, input, depth - 1);
+                }
+            }
+            //ImperatDebugger.debug("All optional after last depth ? = %s", (allOptional) );
+            var usage = commandDispatch.toUsage(root.data);
+            commandDispatch.result(
+                allOptional || (usage != null && !(currentNode instanceof CommandNode<?>))
+                    ? CommandDispatch.Result.COMPLETE
+                    : CommandDispatch.Result.INCOMPLETE
+            );
 
         }
+        return commandDispatch;
 
     }
-
-    private CommandDispatch<S> searchForMatch(
+*/
+   /* private CommandDispatch<S> searchForMatch(
         ParameterNode<S, ?> node,
         CommandDispatch<S> commandDispatch,
         ArgumentQueue input,
@@ -265,9 +365,7 @@ public final class CommandTree<S extends Source> {
                 return traversedChild;
         }
         return commandDispatch;
-    }
+    }*/
 
-    public CommandNode<S> getRoot() {
-        return root;
-    }
+
 }
