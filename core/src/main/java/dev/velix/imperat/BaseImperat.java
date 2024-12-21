@@ -272,7 +272,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
         CommandDispatch<S> searchResult = command.contextMatch(context);
         searchResult.visualize();
-        System.out.println("result = " + searchResult.result().name());
 
         CommandUsage<S> usage = searchResult.toUsage(command);
 
