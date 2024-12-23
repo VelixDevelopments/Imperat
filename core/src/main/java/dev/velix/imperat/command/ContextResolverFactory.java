@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  *
  * @param <S> the command-sender valueType
  */
-public interface ContextResolverFactory<S extends Source> {
+public interface ContextResolverFactory<S extends Source, T> {
 
     /**
      * Creates a context resolver based on the parameter
@@ -22,6 +22,6 @@ public interface ContextResolverFactory<S extends Source> {
      * @return the {@link ContextResolver} specific for that parameter
      */
     @Nullable
-    <T> ContextResolver<S, T> create(Type type, @Nullable ParameterElement parameter);
+    ContextResolver<S, T> create(Type type, @Nullable ParameterElement parameter);
 
 }

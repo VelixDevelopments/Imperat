@@ -24,7 +24,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
      *
      * @param factory the factory to register
      */
-    void registerContextResolverFactory(Type type, ContextResolverFactory<S> factory);
+    <T> void registerContextResolverFactory(Type type, ContextResolverFactory<S, T> factory);
 
 
     /**

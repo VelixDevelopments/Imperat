@@ -283,7 +283,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      * @param factory the factory to register
      */
     @Override
-    public void registerContextResolverFactory(Type type, ContextResolverFactory<S> factory) {
+    public <T> void registerContextResolverFactory(Type type, ContextResolverFactory<S, T> factory) {
         contextResolverRegistry.registerFactory(type, factory);
     }
 
@@ -292,8 +292,9 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      * {@link ContextResolver}
      */
     @Override
-    public @Nullable ContextResolverFactory<S> getContextResolverFactory(Type type) {
-        return contextResolverRegistry.getFactoryFor(type).orElse(null);
+    @SuppressWarnings("unchecked")
+    public <T> @Nullable ContextResolverFactory<S, T> getContextResolverFactory(Type type) {
+        return (ContextResolverFactory<S, T>) contextResolverRegistry.getFactoryFor(type).orElse(null);
     }
 
     /**

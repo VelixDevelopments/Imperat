@@ -85,7 +85,7 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
     }
 
     // Context Resolver Factory
-    public ConfigBuilder<S, I> contextResolverFactory(Type type, ContextResolverFactory<S> factory) {
+    public <T> ConfigBuilder<S, I> contextResolverFactory(Type type, ContextResolverFactory<S, T> factory) {
         config.registerContextResolverFactory(type, factory);
         return this;
     }

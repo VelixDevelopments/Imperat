@@ -90,7 +90,7 @@ public sealed interface ImperatConfig<S extends Source> extends
      * {@link ContextResolver}
      */
     @Nullable
-    ContextResolverFactory<S> getContextResolverFactory(Type resolvingContextType);
+    <T> ContextResolverFactory<S, T> getContextResolverFactory(Type resolvingContextType);
 
     /**
      * @return {@link PermissionResolver} for the dispatcher
