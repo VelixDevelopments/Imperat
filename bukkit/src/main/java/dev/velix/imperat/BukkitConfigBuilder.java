@@ -8,11 +8,13 @@ import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
 import dev.velix.imperat.selector.TargetSelector;
-import dev.velix.imperat.type.*;
+import dev.velix.imperat.type.ParameterOfflinePlayer;
+import dev.velix.imperat.type.ParameterPlayer;
+import dev.velix.imperat.type.ParameterTargetSelector;
+import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -68,7 +70,6 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         config.registerParamType(TargetSelector.class, new ParameterTargetSelector());
         var worldClass = Reflections.getClass("org.bukkit.World");
         config.registerParamType(worldClass, new ParameterWorld(worldClass));
-        config.registerParamType(ChatColor.class, new ParameterColorBungee());
     }
 
     public void setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {
