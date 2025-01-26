@@ -11,4 +11,5 @@ public @interface Switch {
 
     String[] value();
 
+    boolean free() default false;
 }

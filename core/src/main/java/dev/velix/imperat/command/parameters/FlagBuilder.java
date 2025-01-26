@@ -15,6 +15,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
 
     private final ParameterType<S, T> inputType;
     private final List<String> aliases = new ArrayList<>();
+    private boolean free;
     private OptionalValueSupplier<T> defaultValueSupplier = null;
     private SuggestionResolver<S> suggestionResolver;
 
@@ -62,10 +63,15 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
         return this;
     }
 
+    public FlagBuilder<S, T> setFree(boolean free) {
+        this.free = free;
+        return this;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public FlagParameter<S> build() {
-        FlagData<S> flag = FlagData.create(name, aliases, inputType);
+        FlagData<S> flag = FlagData.create(name, aliases, inputType, free);
         if (inputType == null) {
             defaultValueSupplier = (OptionalValueSupplier<T>) OptionalValueSupplier.of(false);
         }

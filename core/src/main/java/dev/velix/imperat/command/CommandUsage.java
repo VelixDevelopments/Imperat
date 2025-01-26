@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -59,6 +60,13 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      */
     @Nullable
     FlagData<S> getFlagFromRaw(String rawInput);
+
+    @Nullable FlagData<S> getFreeFlagFromRaw(String rawInput);
+
+    /**
+     * @return The allowed free flags of this usage instance
+     */
+    Set<FlagData<S>> getAllowedFreeFlags();
 
     /**
      * Adds parameters to the usage

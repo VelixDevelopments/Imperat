@@ -501,6 +501,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             return AnnotationParameterDecorator.decorate(
                 CommandParameter.flag(name, type)
+                    .setFree(flag.free())
                     .suggestForInputValue(suggestionResolver)
                     .aliases(getAllExceptFirst(flagAliases))
                     .flagDefaultInputValue(optionalValueSupplier)
@@ -513,6 +514,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             String[] switchAliases = switchAnnotation.value();
             return AnnotationParameterDecorator.decorate(
                 CommandParameter.<S>flagSwitch(name)
+                    .setFree(switchAnnotation.free())
                     .aliases(getAllExceptFirst(switchAliases))
                     .description(desc)
                     .permission(permission)

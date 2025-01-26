@@ -4,6 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
@@ -90,16 +91,21 @@ final class SmartUsageResolve<S extends Source> {
             FlagData<S> flag = usage.getFlagFromRaw(currentRaw);
             if (flag == null && currentParameter.isFlag()) {
                 assert currentParameter.isFlag();
-                //non identified
-                //TODO write Free-flags logic
-                //TODO check if it's free flag
 
-                context.resolveFlag(
-                    null,
-                    null,
-                    getDefaultValue(context, currentParameter),
-                    currentParameter.asFlagParameter().flagData()
-                );
+                flag = usage.getFreeFlagFromRaw(currentRaw);
+                if (flag == null) {
+                    context.resolveFlag(
+                        null,
+                        null,
+                        getDefaultValue(context, currentParameter),
+                        currentParameter.asFlagParameter().flagData()
+                    );
+
+                } else {
+                    //FOUND FREE FLAG
+                    var value = ParameterTypes.<S>flag().resolveFreeFlag(context, stream, flag);
+                    context.resolveFlag(value);
+                }
                 stream.skip();
                 continue;
             }

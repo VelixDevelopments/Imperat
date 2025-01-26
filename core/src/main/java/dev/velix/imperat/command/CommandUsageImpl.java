@@ -11,10 +11,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static dev.velix.imperat.util.Patterns.DOUBLE_FLAG;
@@ -23,6 +20,7 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 @ApiStatus.Internal
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
+    private final Set<FlagData<S>> allowedFreeFlags = new HashSet<>();
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
     private final List<CommandParameter<S>> parametersWithoutFlags = new ArrayList<>();
     private final @NotNull CommandExecution<S> execution;
@@ -116,6 +114,27 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         return null;
     }
 
+    @Override
+    public @Nullable FlagData<S> getFreeFlagFromRaw(String rawInput) {
+        boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
+        boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
+
+        if (!isSingle && !isDouble) {
+            return null;
+        }
+        String inputFlagAlias = rawInput.substring(isSingle ? 1 : 2);
+
+        for (var freeFlag : allowedFreeFlags) {
+            if (freeFlag.acceptsInput(inputFlagAlias)) return freeFlag;
+        }
+        return null;
+    }
+
+    @Override
+    public Set<FlagData<S>> getAllowedFreeFlags() {
+        return allowedFreeFlags;
+    }
+
 
     /**
      * Adds parameters to the usage
@@ -125,11 +144,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     @SafeVarargs
     @Override
     public final void addParameters(CommandParameter<S>... params) {
-        Collections.addAll(parameters, params);
-        for (var param : params) {
-            if (param.isFlag()) continue;
-            parametersWithoutFlags.add(param);
-        }
+        addParameters(Arrays.asList(params));
     }
 
     /**
@@ -139,10 +154,14 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      */
     @Override
     public void addParameters(List<CommandParameter<S>> params) {
-        for (var p : params) {
-            parameters.add(p);
-            if (p.isFlag()) continue;
-            parametersWithoutFlags.add(p);
+        for (var param : params) {
+            if (param.isFlag() && param.asFlagParameter().flagData().isFree()) {
+                allowedFreeFlags.add(param.asFlagParameter().flagData());
+                continue;
+            }
+            parameters.add(param);
+            if (param.isFlag()) continue;
+            parametersWithoutFlags.add(param);
         }
     }
 

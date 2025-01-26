@@ -19,8 +19,12 @@ import java.util.List;
 public interface FlagData<S extends Source> {
 
     //TODO fix FLAGS STRUCTURE
+    static <S extends Source, T> FlagData<S> create(String name, List<String> alias, ParameterType<S, T> inputType, boolean free) {
+        return new FlagDataImpl<>(name, alias, inputType, free);
+    }
+
     static <S extends Source, T> FlagData<S> create(String name, List<String> alias, ParameterType<S, T> inputType) {
-        return new FlagDataImpl<>(name, alias, inputType);
+        return create(name, alias, inputType, false);
     }
 
     //TODO fix FLAGS STRUCTURE
@@ -41,6 +45,11 @@ public interface FlagData<S extends Source> {
      */
     @NotNull
     List<String> aliases();
+
+    /**
+     * @return whether the flag is free
+     */
+    boolean isFree();
 
     /**
      * @return the valueType of input
@@ -65,8 +74,13 @@ public interface FlagData<S extends Source> {
     }
 
 
-    record FlagDataImpl<S extends Source>(String name, List<String> aliases, ParameterType<S, ?> inputType)
-        implements FlagData<S> {
+    record FlagDataImpl<S extends Source>(String name, List<String> aliases, ParameterType<S, ?> inputType,
+                                          boolean free) implements FlagData<S> {
+        @Override
+        public boolean isFree() {
+            return free;
+        }
+
     }
 
     default boolean isSwitch() {

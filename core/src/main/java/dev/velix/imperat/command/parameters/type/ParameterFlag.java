@@ -3,6 +3,7 @@ package dev.velix.imperat.command.parameters.type;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.context.internal.CommandInputStream;
@@ -16,6 +17,30 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
 
     protected ParameterFlag() {
         super(TypeWrap.of(CommandFlag.class));
+    }
+
+    public CommandFlag resolveFreeFlag(
+        ExecutionContext<S> context,
+        @NotNull CommandInputStream<S> commandInputStream,
+        FlagData<S> freeFlag
+    ) throws ImperatException {
+        String rawFlag = commandInputStream.currentRaw().orElse(null);
+        if (rawFlag == null) {
+            throw new IllegalArgumentException();
+        }
+        String rawInput = null;
+        Object input = null;
+
+        if (!freeFlag.isSwitch()) {
+            ParameterType<S, ?> inputType = freeFlag.inputType();
+            rawInput = commandInputStream.popRaw().orElse(null);
+            if (rawInput != null) {
+                input = inputType.resolve(context, commandInputStream);
+            }
+        } else {
+            input = true;
+        }
+        return new CommandFlag(freeFlag, rawFlag, rawInput, input);
     }
 
     @Override
