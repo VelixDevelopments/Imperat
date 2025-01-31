@@ -11,10 +11,7 @@ import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -59,14 +56,13 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @return the flag from the raw input, null if it cannot be a flag
      */
     @Nullable
-    FlagData<S> getFlagFromRaw(String rawInput);
+    FlagData<S> getFlagParameterFromRaw(String rawInput);
 
-    @Nullable FlagData<S> getFreeFlagFromRaw(String rawInput);
+    void addFlag(CommandParameter<S> flagParam);
 
-    /**
-     * @return The allowed free flags of this usage instance
-     */
-    Set<FlagData<S>> getAllowedFreeFlags();
+    void addFlag(FlagData<S> flagData);
+
+    Set<FlagData<S>> getUsedFreeFlags();
 
     /**
      * Adds parameters to the usage
@@ -240,6 +236,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
         private String permission = null;
         private UsageCooldown cooldown = null;
         private CommandCoordinator<S> commandCoordinator = CommandCoordinator.sync();
+        private final Set<FlagData<S>> flags = new HashSet<>();
 
         Builder() {
 
@@ -305,6 +302,11 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
             return this;
         }
 
+        public Builder<S> registerFlags(Set<FlagData<S>> flags) {
+            this.flags.addAll(flags);
+            return this;
+        }
+
         public CommandUsage<S> build(@NotNull Command<S> command, boolean help) {
             CommandUsageImpl<S> impl = new CommandUsageImpl<>(execution, help);
             impl.setCoordinator(commandCoordinator);
@@ -314,6 +316,8 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
             impl.addParameters(
                 parameters.stream().peek((p) -> p.parent(command)).toList()
             );
+            flags.forEach(impl::addFlag);
+            impl.getUsedFreeFlags().forEach(command::registerFlag);
             return impl;
         }
 
@@ -325,6 +329,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
         public CommandUsage<S> buildAsHelp(@NotNull Command<S> command) {
             return build(command, true);
         }
+
 
     }
 }

@@ -19,6 +19,7 @@ import dev.velix.imperat.command.parameters.StrictParameterList;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
@@ -351,7 +352,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (async != null)
             builder.coordinator(CommandCoordinator.async());
 
-        return builder.build(loadedCmd, method.isHelp());
+        return builder
+            .registerFlags(usageData.freeFlags)
+            .build(loadedCmd, method.isHelp());
 
     }
 
@@ -367,13 +370,19 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Command<S> currentParent = parentCmd;
         while (currentParent != null) {
             currentParent.mainUsage().getParameters()
-                .forEach(mainUsageParameters::addFirst);
+                .forEach((param) -> {
+                    if (!(param.isFlag() && param.asFlagParameter().flagData().isFree())) {
+                        mainUsageParameters.addFirst(param);
+                    }
+                });
 
             currentParent = currentParent.parent();
         }
 
         LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
         LinkedList<ParameterElement> parameterElements = new LinkedList<>(method.getParameters());
+
+        Set<FlagData<S>> freeFlags = new HashSet<>();
 
         ParameterElement senderParam = null;
         while (!parameterElements.isEmpty()) {
@@ -388,6 +397,11 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
 
             CommandParameter<S> commandParameter = loadParameter(parameterElement);
+            if (commandParameter.isFlag() && commandParameter.asFlagParameter().flagData().isFree()) {
+                freeFlags.add(commandParameter.asFlagParameter().flagData());
+                parameterElements.removeFirst();
+                continue;
+            }
 
             CommandParameter<S> mainParameter = mainUsageParameters.peek();
             if (mainParameter == null) {
@@ -409,7 +423,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             mainUsageParameters.removeFirst();
             parameterElements.removeFirst();
         }
-        return new MethodUsageData<>(toLoad, total);
+        return new MethodUsageData<>(toLoad, total, freeFlags);
     }
 
     @SuppressWarnings("unchecked")
@@ -551,7 +565,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
     private record MethodUsageData<S extends Source>(
         List<CommandParameter<S>> personalParameters,
-        List<CommandParameter<S>> inheritedTotalParameters
+        List<CommandParameter<S>> inheritedTotalParameters,
+        Set<FlagData<S>> freeFlags
     ) {
 
     }

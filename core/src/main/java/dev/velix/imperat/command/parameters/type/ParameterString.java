@@ -21,7 +21,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     public @NotNull String resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
         StringBuilder builder = new StringBuilder();
         final CommandParameter<S> parameter = inputStream.currentParameter().orElse(null);
-        if (parameter == null) return builder.toString();
+        //if (parameter == null) return builder.toString();
 
         final Character current = inputStream.currentLetter().orElse(null);
         if (current == null)
@@ -29,7 +29,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
 
         if (!isQuoteChar(current)) {
 
-            if (parameter.isGreedy()) {
+            if (parameter != null && parameter.isGreedy()) {
                 handleGreedy(builder, inputStream);
             } else {
                 builder.append(inputStream.currentRaw().orElse(""));

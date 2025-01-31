@@ -68,6 +68,9 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
             dispatcher, fullParameters,
             source, context, method
         );
+        for (int i = 0; i < instances.length; i++) {
+            ImperatDebugger.debug("Object #%s = '%s'", i, instances[i]);
+        }
 
         try {
             boundMethodCaller.call(instances);

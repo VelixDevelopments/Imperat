@@ -4,6 +4,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
+import dev.velix.imperat.command.parameters.type.ParameterFlag;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.FlagData;
@@ -12,6 +13,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.Nullable;
 
 final class SmartUsageResolve<S extends Source> {
@@ -88,27 +90,27 @@ final class SmartUsageResolve<S extends Source> {
                 continue;
             }
 
-            FlagData<S> flag = usage.getFlagFromRaw(currentRaw);
-            if (flag == null && currentParameter.isFlag()) {
+            FlagData<S> flag = usage.getFlagParameterFromRaw(currentRaw);
+            if (currentParameter.isFlag()) {
                 assert currentParameter.isFlag();
 
-                flag = usage.getFreeFlagFromRaw(currentRaw);
                 if (flag == null) {
-                    context.resolveFlag(
-                        null,
-                        null,
-                        getDefaultValue(context, currentParameter),
-                        currentParameter.asFlagParameter().flagData()
-                    );
-
+                    //NOT FREE FLAG AND ALSO NOT A PARAMETER FLAG, UNKNOWN FLAG
+                    throw new SourceException("Unknown flag '%s'", currentRaw);
                 } else {
-                    //FOUND FREE FLAG
-                    var value = ParameterTypes.<S>flag().resolveFreeFlag(context, stream, flag);
-                    context.resolveFlag(value);
+                    ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
+                    context.resolveFlag(parameterFlag.resolve(context, stream));
                 }
                 stream.skip();
                 continue;
+            } else if (Patterns.isInputFlag(currentRaw) && command.getFlagFromRaw(currentRaw).isPresent()) {
+                //FOUND FREE FLAG
+                ParameterFlag<S> parameterFlag = ParameterTypes.flag();
+                context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, command.getFlagFromRaw(currentRaw).get()));
+                stream.skipRaw();
+                continue;
             }
+
             //ImperatDebugger.debug("FLAG DETECTED=`%s`, current-raw=`%s`, current-param=`%s`", (flag == null ? null : flag.name()), currentRaw, currentParameter.name());
             var value = currentParameter.type().resolve(context, stream);
             //ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`", currentRaw, currentParameter.name());
@@ -131,6 +133,25 @@ final class SmartUsageResolve<S extends Source> {
 
         }
 
+        var lastParam = usage.getParameter(usage.size() - 1);
+        while (stream.hasNextRaw()) {
+
+            if (lastParam != null && lastParam.isGreedy()) {
+                break;
+            }
+
+            String currentRaw = stream.currentRaw().orElse(null);
+            if (currentRaw == null) {
+                break;
+            }
+            var freeFlagData = command.getFlagFromRaw(currentRaw);
+            if (Patterns.isInputFlag(currentRaw) && freeFlagData.isPresent()) {
+                FlagData<S> freeFlag = freeFlagData.get();
+                var value = ParameterTypes.<S>flag().resolveFreeFlag(context, stream, freeFlag);
+                context.resolveFlag(value);
+            }
+            stream.skipRaw();
+        }
     }
 
 

@@ -71,8 +71,20 @@ public final class AnnotationHelper {
             }
 
             CommandParameter<S> parameter = getUsageParam(fullParameters, p);
-            if (parameter == null)
+            if (parameter == null) {
+                if (actualParameter.isAnnotationPresent(Flag.class)) {
+                    Flag flag = actualParameter.getAnnotation(Flag.class);
+                    assert flag != null;
+                    if (flag.free()) {
+                        paramsInstances[i] = context.getFlagValue(flag.value()[0]);
+                    } else {
+                        throw new IllegalArgumentException();
+                    }
+
+                }
+                p--;
                 continue;
+            }
 
             String name = parameter.name();
             if (parameter.isFlag()) {

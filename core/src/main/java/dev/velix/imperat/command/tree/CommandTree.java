@@ -24,9 +24,11 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class CommandTree<S extends Source> {
 
+    final Command<S> rootCommand;
     final CommandNode<S> root;
 
     CommandTree(Command<S> command) {
+        this.rootCommand = command;
         this.root = new CommandNode<>(command);
         //parse(command);
     }
@@ -49,6 +51,11 @@ public final class CommandTree<S extends Source> {
     }
 
     public void parseUsage(CommandUsage<S> usage) {
+
+        for (var flag : usage.getUsedFreeFlags()) {
+            rootCommand.registerFlag(flag);
+        }
+
         List<CommandParameter<S>> parameters = usage.getParameters();
         if (parameters == null || parameters.isEmpty()) {
             return;
@@ -185,8 +192,13 @@ public final class CommandTree<S extends Source> {
 
         if (!currentNode.isFlag() && Patterns.isInputFlag(rawInput)) {
             //FREE FLAG
-            ImperatDebugger.debug("Ignoring free-flag '%s'", rawInput);
-            return dispatchNode(commandDispatch, input, currentNode, depth + 1);
+            var flagData = rootCommand.getFlagFromRaw(rawInput);
+            if (flagData.isEmpty()) {
+                return commandDispatch;
+            }
+            var flag = flagData.get();
+            int depthIncrease = flag.isSwitch() ? 1 : 2;
+            return dispatchNode(commandDispatch, input, currentNode, depth + depthIncrease);
         }
 
         ImperatDebugger.debug("Appending node=%s, at depth=%s", currentNode.format(), depth);
@@ -235,8 +247,16 @@ public final class CommandTree<S extends Source> {
                 //Last depth and last node => perfecto
                 commandDispatch.result(CommandDispatch.Result.COMPLETE);
             } else {
+                String nextRaw = input.getOr(depth + 1, null);
+                assert nextRaw != null;
+
+                ImperatDebugger.debug("nextRaw=%s, at depth=%s, max-depth=%s", nextRaw, depth + 1, input.size() - 1);
+                ImperatDebugger.debug("isInputFlag-nextRaw='%s',  isFreeFlagRegisteredToCommand='%s'", Patterns.isInputFlag(nextRaw), rootCommand.getFlagFromRaw(nextRaw).isPresent());
+
                 CommandDispatch.Result result;
                 if (currentNode.isTrueFlag() && isLastDepth(depth + 1, input)) {
+                    result = CommandDispatch.Result.COMPLETE;
+                } else if (Patterns.isInputFlag(nextRaw) && rootCommand.getFlagFromRaw(nextRaw).isPresent()) {
                     result = CommandDispatch.Result.COMPLETE;
                 } else if (!currentNode.isGreedyParam()) {
                     result = CommandDispatch.Result.UNKNOWN;

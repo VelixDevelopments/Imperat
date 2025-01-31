@@ -10,6 +10,7 @@ import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.CommandTreeVisualizer;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
@@ -47,6 +48,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private Command<S> parent;
 
     private final SuggestionResolver<S> suggestionResolver;
+    private final Set<FlagData<S>> freeFlags = new HashSet<>();
 
     CommandImpl(String name) {
         this(null, name);
@@ -502,6 +504,23 @@ final class CommandImpl<S extends Source> implements Command<S> {
             true
         );
     }
+
+    @Override
+    public void registerFlag(FlagData<S> flag) {
+        freeFlags.add(flag);
+    }
+
+    @Override
+    public Optional<FlagData<S>> getFlagFromRaw(String raw) {
+        return freeFlags.stream()
+            .filter((data) -> data.acceptsInput(raw)).findFirst();
+    }
+
+    @Override
+    public Set<FlagData<S>> getRegisteredFlags() {
+        return freeFlags;
+    }
+
 
     @Override
     public boolean equals(Object o) {

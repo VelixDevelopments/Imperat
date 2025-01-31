@@ -11,8 +11,16 @@ public final class Patterns {
         throw new AssertionError();
     }
 
+    public static boolean isSingleFlag(String input) {
+        return SINGLE_FLAG.matcher(input).matches();
+    }
+
+    public static boolean isDoubleFlag(String input) {
+        return DOUBLE_FLAG.matcher(input).matches();
+    }
+
     public static boolean isInputFlag(String input) {
-        return SINGLE_FLAG.matcher(input).matches() || DOUBLE_FLAG.matcher(input).matches();
+        return isSingleFlag(input) || isDoubleFlag(input);
     }
 
 

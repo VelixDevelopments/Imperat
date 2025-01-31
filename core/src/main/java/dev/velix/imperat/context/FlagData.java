@@ -1,6 +1,7 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,7 @@ public interface FlagData<S extends Source> {
     }
 
     //TODO fix FLAGS STRUCTURE
-    static <S extends Source, T> FlagData<S> createSwitch(String name, List<String> aliases) {
+    static <S extends Source> FlagData<S> createSwitch(String name, List<String> aliases) {
         return create(name, aliases, null);
     }
 
@@ -70,6 +71,7 @@ public interface FlagData<S extends Source> {
     }
 
     default boolean acceptsInput(String input) {
+        input = input.substring(Patterns.isDoubleFlag(input) ? 2 : Patterns.isSingleFlag(input) ? 1 : 0);
         return this.name().equalsIgnoreCase(input) || hasAlias(input);
     }
 

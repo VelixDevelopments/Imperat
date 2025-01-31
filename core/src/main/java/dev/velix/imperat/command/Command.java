@@ -1,5 +1,6 @@
 package dev.velix.imperat.command;
 
+import dev.velix.imperat.FlagRegistrar;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.ParameterType;
@@ -31,7 +32,7 @@ import java.util.function.Predicate;
  * @param <S> the command sender valueType
  */
 @ApiStatus.AvailableSince("1.0.0")
-public interface Command<S extends Source> extends CommandParameter<S> {
+public interface Command<S extends Source> extends CommandParameter<S>, FlagRegistrar<S> {
 
     static <S extends Source> Command.Builder<S> create(String name) {
         return create(null, name);

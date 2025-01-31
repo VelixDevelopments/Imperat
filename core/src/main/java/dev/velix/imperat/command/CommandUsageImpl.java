@@ -20,7 +20,6 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 @ApiStatus.Internal
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
-    private final Set<FlagData<S>> allowedFreeFlags = new HashSet<>();
     private final List<CommandParameter<S>> parameters = new ArrayList<>();
     private final List<CommandParameter<S>> parametersWithoutFlags = new ArrayList<>();
     private final @NotNull CommandExecution<S> execution;
@@ -31,6 +30,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     private @Nullable UsageCooldown cooldown = null;
     private CommandCoordinator<S> commandCoordinator;
 
+    private final Set<FlagData<S>> freeflags = new HashSet<>();
     CommandUsageImpl(@NotNull CommandExecution<S> execution) {
         this(execution, false);
     }
@@ -83,7 +83,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      */
     @Override
     public boolean hasFlag(String input) {
-        return getFlagFromRaw(input) != null;
+        return getFlagParameterFromRaw(input) != null;
     }
 
     /**
@@ -93,7 +93,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @return the flag from the raw input, null if it cannot be a flag
      */
     @Override
-    public @Nullable FlagData<S> getFlagFromRaw(String rawInput) {
+    public @Nullable FlagData<S> getFlagParameterFromRaw(String rawInput) {
         boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
         boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
 
@@ -110,29 +110,22 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
                 return flag;
             }
         }
-
         return null;
     }
 
     @Override
-    public @Nullable FlagData<S> getFreeFlagFromRaw(String rawInput) {
-        boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
-        boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
-
-        if (!isSingle && !isDouble) {
-            return null;
-        }
-        String inputFlagAlias = rawInput.substring(isSingle ? 1 : 2);
-
-        for (var freeFlag : allowedFreeFlags) {
-            if (freeFlag.acceptsInput(inputFlagAlias)) return freeFlag;
-        }
-        return null;
+    public void addFlag(CommandParameter<S> flagParam) {
+        freeflags.add(flagParam.asFlagParameter().flagData());
     }
 
     @Override
-    public Set<FlagData<S>> getAllowedFreeFlags() {
-        return allowedFreeFlags;
+    public void addFlag(FlagData<S> flagData) {
+        freeflags.add(flagData);
+    }
+
+    @Override
+    public Set<FlagData<S>> getUsedFreeFlags() {
+        return freeflags;
     }
 
 
@@ -156,7 +149,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public void addParameters(List<CommandParameter<S>> params) {
         for (var param : params) {
             if (param.isFlag() && param.asFlagParameter().flagData().isFree()) {
-                allowedFreeFlags.add(param.asFlagParameter().flagData());
+                freeflags.add(param.asFlagParameter().flagData());
                 continue;
             }
             parameters.add(param);
