@@ -19,7 +19,6 @@ import java.util.List;
 @ApiStatus.AvailableSince("1.0.0")
 public interface FlagData<S extends Source> {
 
-    //TODO fix FLAGS STRUCTURE
     static <S extends Source, T> FlagData<S> create(String name, List<String> alias, ParameterType<S, T> inputType, boolean free) {
         return new FlagDataImpl<>(name, alias, inputType, free);
     }
@@ -28,7 +27,6 @@ public interface FlagData<S extends Source> {
         return create(name, alias, inputType, false);
     }
 
-    //TODO fix FLAGS STRUCTURE
     static <S extends Source> FlagData<S> createSwitch(String name, List<String> aliases) {
         return create(name, aliases, null);
     }
