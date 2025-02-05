@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = "dev.velix"
-    version = "1.5.2"
+    version = "1.6.0"
 
     ext {
         def kyoriVersion = "4.17.0"
