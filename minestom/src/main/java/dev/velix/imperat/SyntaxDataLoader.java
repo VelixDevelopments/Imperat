@@ -99,6 +99,10 @@ final class SyntaxDataLoader {
         if (TypeUtility.matches(type, String.class))
             return ArgumentType.String(id);
 
+        if (TypeUtility.matches(type, Integer.class)) {
+            return ArgumentType.Integer(id);
+        }
+
         if (TypeUtility.matches(type, boolean.class))
             return ArgumentType.Boolean(id);
 

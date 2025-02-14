@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
+import net.minestom.server.command.ArgumentParserType;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
@@ -24,9 +25,10 @@ final class ArgumentDecorator<T> extends Argument<T> {
     }
 
     @Override
-    public String parser() {
+    public ArgumentParserType parser() {
         return argument.parser();
     }
+
 
     @Override
     public boolean isOptional() {
