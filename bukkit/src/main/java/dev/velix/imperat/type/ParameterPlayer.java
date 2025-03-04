@@ -1,6 +1,7 @@
 package dev.velix.imperat.type;
 
 import dev.velix.imperat.BukkitSource;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
 
@@ -47,6 +49,11 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
     @Override
     public boolean matchesInput(String input, CommandParameter<BukkitSource> parameter) {
         return input.length() <= 16;
+    }
+
+    @Override
+    public @NotNull Player fromString(Imperat<BukkitSource> imperat, String input) {
+        return Objects.requireNonNull(Bukkit.getPlayer(input));
     }
 
     /**

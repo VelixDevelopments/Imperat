@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -56,6 +57,11 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
             return VARIANTS.get(input.toLowerCase(Locale.ENGLISH)) != null;
         }
 
+        return Boolean.parseBoolean(input);
+    }
+
+    @Override
+    public @NotNull Boolean fromString(Imperat<S> imperat, String input) {
         return Boolean.parseBoolean(input);
     }
 

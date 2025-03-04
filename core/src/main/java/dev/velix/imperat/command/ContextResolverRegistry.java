@@ -6,7 +6,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.util.Registry;
-import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -47,23 +46,13 @@ public final class ContextResolverRegistry<S extends Source> extends Registry<Ty
         if (factory == null) {
             return factories.getData(type)
                 .map((defaultFactory) -> ((ContextResolverFactory<S, T>) defaultFactory).create(type, element))
-                .orElse(null);
+                .orElse((ContextResolver<S, T>) getData(type).orElse(null));
         }
         return factory.create(type, element);
     }
 
     public <T> @Nullable ContextResolver<S, T> getResolverWithoutParameterElement(Type type) {
-        //
-        ContextResolver<S, T> resultFromFactory = getContextResolver(type, null);
-        if (resultFromFactory == null) {
-            for (var registeredType : getKeys()) {
-                if (TypeUtility.areRelatedTypes(type, registeredType)) {
-                    return getResolverWithoutParameterElement(registeredType);
-                }
-            }
-            return null;
-        }
-        return resultFromFactory;
+        return getContextResolver(type, null);
     }
 
 }

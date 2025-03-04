@@ -12,6 +12,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,11 +58,10 @@ public final class AnnotationHelper {
             paramsInstances[0] = context.getResolvedSource(firstParam.getType());
         }
 
-
         for (int i = 1, p = 0; i < method.size(); i++, p++) {
             ParameterElement actualParameter = method.getParameterAt(i);
-
             assert actualParameter != null;
+
             var contextResolver = dispatcher.config().getMethodParamContextResolver(actualParameter);
 
             if (contextResolver != null) {
@@ -87,6 +87,7 @@ public final class AnnotationHelper {
             }
 
             String name = parameter.name();
+
             if (parameter.isFlag()) {
                 paramsInstances[i] = context.getFlagValue(name);
             } else {
@@ -150,16 +151,21 @@ public final class AnnotationHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> @NotNull OptionalValueSupplier<T> deduceOptionalValueSupplier(
+    public static <S extends Source, T> @NotNull OptionalValueSupplier<T> deduceOptionalValueSupplier(
+        Imperat<S> imperat,
         Parameter parameter,
         Default defaultAnnotation,
         DefaultProvider provider,
         OptionalValueSupplier<T> fallback
-    ) {
+    ) throws ImperatException {
 
         if (defaultAnnotation != null) {
             String def = defaultAnnotation.value();
-            return (OptionalValueSupplier<T>) OptionalValueSupplier.of(def);
+            var type = imperat.config().getParameterType(TypeWrap.of(parameter.getType()).getType());
+            if (type == null) {
+                return (OptionalValueSupplier<T>) OptionalValueSupplier.empty(TypeWrap.of(parameter.getType()));
+            }
+            return (OptionalValueSupplier<T>) OptionalValueSupplier.of(type.fromString(imperat, def));
         } else if (provider != null) {
             Class<? extends OptionalValueSupplier<?>> supplierClass = provider.value();
             try {
@@ -173,21 +179,36 @@ public final class AnnotationHelper {
         return fallback;
     }
 
-    public static int loadMethodPriority(Method method) {
-        int count = method.getParameterCount();
-        if (AnnotationHelper.isMethodHelp(method)) {
-            count--;
+    /*public static <S extends Source> int loadMethodPriority(Method method, ImperatConfig<S> config) {
+
+        int actualParamInputs = 0;
+        for(var param : method.getParameters()) {
+            if(config.hasContextResolver(param.getType()) || config.hasSourceResolver(param.getType())) {
+                continue;
+            }
+            actualParamInputs++;
         }
 
-        if (method.isAnnotationPresent(Usage.class)) {
+        if(method.isAnnotationPresent(Usage.class) && actualParamInputs >= 1) {
+            //MAIN USAGE
+            return -100;
+        }
+        else if (method.isAnnotationPresent(Usage.class)) {
             //if default -> -1 else -> 0;
-            return count == 1 ? -1 : 0;
+            return 1;
         } else if (method.isAnnotationPresent(SubCommand.class)) {
-            return 2 + count;
-        }
-        return 100;
-    }
 
+            if(method.getAnnotation(SubCommand.class).attachDirectly()) {
+                return -2;
+            }
+            else {
+                return -1;
+            }
+        }
+
+        return 0;
+    }
+*/
 
     public static boolean isHelpParameter(Parameter element) {
         return TypeUtility.areRelatedTypes(element.getType(), CommandHelp.class);

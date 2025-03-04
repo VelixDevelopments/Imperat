@@ -3,6 +3,7 @@ package dev.velix.imperat.type;
 import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
 import dev.velix.imperat.BukkitSource;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
@@ -29,6 +30,7 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
 
     protected final boolean ifCachedOnly;
 
+    private final PlayerSuggestionResolver playerSuggestionResolver = new PlayerSuggestionResolver();
     public ParameterOfflinePlayer(boolean ifCachedOnly) {
         super(TypeWrap.of(OfflinePlayer.class));
         this.ifCachedOnly = ifCachedOnly;
@@ -71,6 +73,16 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
     @Override
     public boolean matchesInput(String input, CommandParameter<BukkitSource> parameter) {
         return input.length() <= 16;
+    }
+
+    @Override
+    public @NotNull OfflinePlayer fromString(Imperat<BukkitSource> imperat, String input) {
+        return Bukkit.getOfflinePlayer(input);
+    }
+
+    @Override
+    public SuggestionResolver<BukkitSource> getSuggestionResolver() {
+        return playerSuggestionResolver;
     }
 
     private final static class PlayerSuggestionResolver implements SuggestionResolver<BukkitSource> {

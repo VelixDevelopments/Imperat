@@ -1,6 +1,7 @@
 package dev.velix.imperat.type;
 
 import dev.velix.imperat.BukkitSource;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
@@ -141,6 +142,11 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
     @Override
     public SuggestionResolver<BukkitSource> getSuggestionResolver() {
         return suggestionResolver;
+    }
+
+    @Override
+    public @NotNull TargetSelector fromString(Imperat<BukkitSource> imperat, String input) {
+        return TargetSelector.empty();
     }
 
     private final class TargetSelectorSuggestionResolver implements SuggestionResolver<BukkitSource> {

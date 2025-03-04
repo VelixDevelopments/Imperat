@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
@@ -26,6 +27,15 @@ public final class ParameterCommand<S extends Source> extends BaseParameterType<
     public boolean matchesInput(String input, CommandParameter<S> parameter) {
         return parameter.isCommand() &&
             parameter.asCommand().hasName(input.toLowerCase());
+    }
+
+    @Override
+    public @NotNull Command<S> fromString(Imperat<S> imperat, String input) {
+        var cmd = imperat.getCommand(input);
+        if (input == null || input.isBlank() || cmd == null) {
+            throw new RuntimeException(String.format("Unknown command parsed '%s'", input));
+        }
+        return cmd;
     }
 
 }

@@ -2,6 +2,7 @@ package dev.velix.imperat.types;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.VelocitySource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
@@ -48,6 +49,11 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
     @Override
     public boolean matchesInput(String input, CommandParameter<VelocitySource> parameter) {
         return input.length() < 16;
+    }
+
+    @Override
+    public @NotNull Player fromString(Imperat<VelocitySource> imperat, String input) {
+        return proxyServer.getPlayer(input).orElseThrow();
     }
 
     /**

@@ -9,18 +9,18 @@ import dev.velix.imperat.annotations.base.element.RootCommandClass;
 import dev.velix.imperat.annotations.base.element.selector.ElementSelector;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.List;
 
 @ApiStatus.Internal
 final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S> {
 
-    private final static Comparator<Method> METHOD_COMPARATOR = Comparator.comparingInt(AnnotationHelper::loadMethodPriority);
+    //private final Comparator<Method> METHOD_COMPARATOR;
 
     private final Imperat<S> imperat;
     private final AnnotationParser<S> parser;
@@ -38,6 +38,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         this.parser = parser;
         this.rootCommandClass = new RootCommandClass<>(instance.getClass(), instance);
         this.methodSelector = methodSelector;
+        //METHOD_COMPARATOR = Comparator.comparingInt(m -> AnnotationHelper.loadMethodPriority(m, imperat.config()));
         this.classElement = read(imperat);
     }
 
@@ -53,9 +54,14 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     ) {
         ClassElement root = new ClassElement(parser, parent, clazz);
         //Adding methods with their parameters
-        Method[] methods = clazz.getDeclaredMethods();
-        Arrays.sort(methods, METHOD_COMPARATOR);
-
+        List<Method> methods;
+        try {
+            methods = MethodOrderHelper.getMethodsInSourceOrder(clazz);
+        } catch (Exception e) {
+            ImperatDebugger.error(AnnotationReaderImpl.class, "readClass", e);
+            throw new RuntimeException(e);
+        }
+        //Arrays.sort(methods, METHOD_COMPARATOR);
         for (Method method : methods) {
             MethodElement methodElement = new MethodElement(imperat, parser, root, method);
             if (methodSelector.canBeSelected(imperat, parser, methodElement, false)) {

@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.context.ExecutionContext;
@@ -89,5 +90,10 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
         String flagInput = input.substring(subStringIndex);
         return parameter.asFlagParameter().flagData()
             .acceptsInput(flagInput);
+    }
+
+    @Override
+    public @NotNull CommandFlag fromString(Imperat<S> imperat, String input) {
+        return new CommandFlag(null, input, null, null);
     }
 }

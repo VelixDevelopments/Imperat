@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -38,6 +39,11 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
             return restrictions.contains(input);
         }
         return true;
+    }
+
+    @Override
+    public @NotNull String fromString(Imperat<S> imperat, String input) {
+        return input;
     }
 
     public ParameterWord<S> withRestriction(String restriction) {

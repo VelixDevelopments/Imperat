@@ -1,6 +1,7 @@
 package dev.velix.imperat.type;
 
 import dev.velix.imperat.BukkitSource;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
@@ -79,5 +80,10 @@ public class ParameterWorld extends BaseParameterType<BukkitSource, World> {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Override
+    public @NotNull World fromString(Imperat<BukkitSource> imperat, String input) {
+        return Objects.requireNonNull(Bukkit.getWorld(input));
     }
 }

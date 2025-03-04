@@ -361,7 +361,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
         registerSubCommand(command);
 
         final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : mainUsage();
-
         CommandUsage<S> combo = prime.mergeWithCommand(command, command.mainUsage());
         //adding the merged command usage
 

@@ -2,8 +2,8 @@ package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
-import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.*;
+import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.MethodCommandExecutor;
@@ -21,8 +21,10 @@ import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
@@ -367,16 +369,19 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         //WHATEVER HAPPENS, NEVER MESS WITH THIS IMPLEMENTATION OR ELSE I WILL FUCKING DESTROY YOU
         final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
-        Command<S> currentParent = parentCmd;
-        while (currentParent != null) {
-            currentParent.mainUsage().getParameters()
-                .forEach((param) -> {
-                    if (!(param.isFlag() && param.asFlagParameter().flagData().isFree())) {
-                        mainUsageParameters.addFirst(param);
-                    }
-                });
 
-            currentParent = currentParent.parent();
+        if (!(method.getAnnotation(SubCommand.class) != null && Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly())) {
+            Command<S> currentParent = parentCmd;
+            while (currentParent != null) {
+                currentParent.mainUsage().getParameters()
+                    .forEach((param) -> {
+                        if (!(param.isFlag() && param.asFlagParameter().flagData().isFree())) {
+                            mainUsageParameters.addFirst(param);
+                        }
+                    });
+
+                currentParent = currentParent.parent();
+            }
         }
 
         LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
@@ -504,7 +509,11 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (optional) {
             Default defaultAnnotation = parameter.getAnnotation(Default.class);
             DefaultProvider provider = parameter.getAnnotation(DefaultProvider.class);
-            optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(parameter, defaultAnnotation, provider, optionalValueSupplier);
+            try {
+                optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(imperat, parameter, defaultAnnotation, provider, optionalValueSupplier);
+            } catch (ImperatException e) {
+                ImperatDebugger.error(AnnotationHelper.class, "deduceOptionalValueSupplier", e);
+            }
         }
 
         if (flag != null) {

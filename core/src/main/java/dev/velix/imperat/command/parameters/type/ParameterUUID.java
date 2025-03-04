@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -42,5 +43,10 @@ public final class ParameterUUID<S extends Source> extends BaseParameterType<S, 
         } catch (Exception ex) {
             return false;
         }
+    }
+
+    @Override
+    public @NotNull UUID fromString(Imperat<S> imperat, String input) {
+        return UUID.fromString(input);
     }
 }

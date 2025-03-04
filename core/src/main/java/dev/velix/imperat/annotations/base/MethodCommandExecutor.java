@@ -69,7 +69,8 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
             source, context, method
         );
         for (int i = 0; i < instances.length; i++) {
-            ImperatDebugger.debug("Object #%s = '%s'", i, instances[i]);
+            var instance = instances[i];
+            ImperatDebugger.debug("Object #%s = '%s', type='%s'", i, instance, instance != null ? instances[i].getClass().getName() : "N/A");
         }
 
         try {

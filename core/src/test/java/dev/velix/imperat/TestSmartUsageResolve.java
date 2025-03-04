@@ -133,6 +133,11 @@ public class TestSmartUsageResolve {
         queue.forEach(System.out::println);
     }
 
+    @Test
+    public void testKit() {
+        test("kit create test", ResolvedArgsData.empty().arg("kit", "test")
+            .arg("weight", 1));
+    }
 
     static class ResolvedArgsData {
 

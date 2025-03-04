@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -56,6 +57,11 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     public abstract String display();
 
     public abstract N parse(String input) throws NumberFormatException;
+
+    @Override
+    public @NotNull N fromString(Imperat<S> imperat, String input) {
+        return parse(input);
+    }
 
     static class ParameterInt<S extends Source> extends ParameterNumber<S, Integer> {
 
@@ -123,5 +129,6 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
         public Double parse(String input) throws NumberFormatException {
             return Double.parseDouble(input);
         }
+
     }
 }

@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -37,4 +38,6 @@ public interface ParameterType<S extends Source, T> {
     default TypeWrap<T> wrappedType() {
         return (TypeWrap<T>) TypeWrap.of(type());
     }
+
+    @NotNull T fromString(Imperat<S> imperat, String input);
 }

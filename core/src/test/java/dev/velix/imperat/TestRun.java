@@ -265,7 +265,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("kit");
         assert cmd != null;
         debugCommand(cmd);
-        Assertions.assertEquals(CommandDispatch.Result.UNKNOWN, testCmdTreeExecution("kit", "create test"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kit", "create test"));
     }
 
 }

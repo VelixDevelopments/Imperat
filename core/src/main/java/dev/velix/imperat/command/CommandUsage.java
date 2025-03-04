@@ -111,7 +111,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * and takes the targetToLoad's execution as well
      *
      * <p>
-     * it also it also includes the subcommand's parameter itself
+     * it also includes the subcommand's parameter itself
      * into the command's usage !
      * </p>
      *
@@ -132,6 +132,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
 
         return CommandUsage.<S>builder()
             .coordinator(usage.getCoordinator())
+            .description(subCommand.description().toString())
             .cooldown(usage.getCooldown())
             .parameters(comboParams)
             .execute(usage.getExecution())

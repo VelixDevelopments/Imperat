@@ -38,4 +38,10 @@ public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     public SuggestionResolver<TestSource> getSuggestionResolver() {
         return suggestionResolver;
     }
+
+    @Override
+    public @NotNull Group fromString(Imperat<TestSource> imperat, String input) {
+        return GroupRegistry.getInstance().getData(input)
+            .orElseThrow();
+    }
 }
