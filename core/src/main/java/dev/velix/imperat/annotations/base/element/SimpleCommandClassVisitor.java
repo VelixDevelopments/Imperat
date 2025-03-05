@@ -313,13 +313,35 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         @NotNull Command<S> loadedCmd,
         MethodElement method
     ) {
-        if (method.getInputCount() == 0) {
-            loadedCmd.setDefaultUsageExecution(
-                MethodCommandExecutor.of(imperat, method, Collections.emptyList())
-            );
-            return null;
+        int inputCount = method.getInputCount();
+        if (parentCmd != null) {
+            int parentalParams = 0;
+
+            if (!(method.isAnnotationPresent(SubCommand.class) && Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly())) {
+                Command<S> parent = parentCmd;
+                while (parent != null) {
+                    parentalParams += parent.mainUsage().size();
+                    parent = parent.parent();
+                }
+            }
+
+            inputCount = Math.abs(method.getInputCount() - parentalParams);
         }
 
+        if (inputCount == 0) {
+            if (parentCmd != null) {
+                MethodUsageData<S> usageData = loadParameters(method, parentCmd);
+                loadedCmd.setDefaultUsageExecution(
+                    MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
+                );
+            } else {
+                loadedCmd.setDefaultUsageExecution(
+                    MethodCommandExecutor.of(imperat, method, Collections.emptyList())
+                );
+            }
+
+            return null;
+        }
         ClassElement methodOwner = (ClassElement) method.getParent();
         assert methodOwner != null;
 

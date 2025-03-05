@@ -12,6 +12,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NumberOutOfRangeException;
 import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.ApiStatus;
@@ -231,6 +232,14 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     public CommandUsage<S> getDetectedUsage() {
         return usage;
+    }
+
+    @Override
+    public void debug() {
+        for (var arg : allResolvedArgs.getAll()) {
+            ImperatDebugger.debug("Argument '%s' at index #%s with input='%s' with value='%s'",
+                arg.parameter().format(), arg.index(), arg.raw(), arg.value());
+        }
     }
 
 }

@@ -276,13 +276,19 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         CommandUsage<S> usage = searchResult.toUsage(command);
 
         //executing usage
-        if (searchResult.result() == CommandDispatch.Result.COMPLETE)
+        if (searchResult.result() == CommandDispatch.Result.COMPLETE) {
+            ImperatDebugger.debug("Executing usage '%s'", usage != null ? CommandUsage.format(command, usage) : "NULL");
             executeUsage(command, source, context, usage);
+        }
         else if (searchResult.result() == CommandDispatch.Result.INCOMPLETE) {
             var lastParameter = searchResult.getLastParameter();
+            ImperatDebugger.debug("Executing subcommand-main-usage '%s'", CommandUsage.format(command, lastParameter.asCommand().mainUsage()));
+            ImperatDebugger.debug("Last param = '%s'", lastParameter.format());
             if (lastParameter.isCommand()) {
-                executeUsage(command, source, context, lastParameter.asCommand().getDefaultUsage());
+                ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, lastParameter.asCommand().mainUsage()));
+                executeUsage(command, source, context, lastParameter.asCommand().mainUsage());
             } else if (usage != null) {
+                ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
                 executeUsage(command, source, context, usage);
             } else {
                 //usage is null and last param is not command
@@ -308,6 +314,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
         ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
         resolvedContext.resolve();
+        resolvedContext.debug();
 
         //global post-processing
         postProcess(resolvedContext);

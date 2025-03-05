@@ -51,8 +51,8 @@ public class TestCommand {
         }
 
         @Usage
-        public void sub1Main(TestSource source, @Named("a") String a) {
-            source.reply("sub1-main a=" + a);
+        public void sub1Main(TestSource source, @Named("otherText") String otherText, @Named("a") String a) {
+            source.reply("otherText=" + otherText + ", sub1-main a=" + a);
         }
 
         @SubCommand("sub2")
@@ -65,7 +65,7 @@ public class TestCommand {
             }
 
             @Usage
-            public void sub2Main(TestSource source, @Named("b") String b) {
+            public void sub2Main(TestSource source, @Named("otherText") String otherText, @Named("a") String a, @Named("b") String b) {
                 source.reply("sub2-main b=" + b);
             }
 
@@ -78,7 +78,7 @@ public class TestCommand {
                 }
 
                 @Usage
-                public void sub3Main(TestSource source, @Named("c") String c) {
+                public void sub3Main(TestSource source, @Named("otherText") String otherText, @Named("a") String a, @Named("b") String b, @Named("c") String c) {
                     source.reply("sub3 c=" + c);
                 }
 

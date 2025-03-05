@@ -64,6 +64,12 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
     public void execute(S source,
                         ExecutionContext<S> context) throws ImperatException {
 
+        ImperatDebugger.debug("Debugging params:-");
+        for (var param : fullParameters) {
+            ImperatDebugger.debug("-%s", param.format());
+        }
+        ImperatDebugger.debug("SIZE=%s", fullParameters.size());
+
         var instances = AnnotationHelper.loadParameterInstances(
             dispatcher, fullParameters,
             source, context, method

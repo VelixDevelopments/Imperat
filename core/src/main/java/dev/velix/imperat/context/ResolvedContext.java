@@ -116,4 +116,6 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * @return The used usage to use it to resolve commands
      */
     CommandUsage<S> getDetectedUsage();
+
+    void debug();
 }
