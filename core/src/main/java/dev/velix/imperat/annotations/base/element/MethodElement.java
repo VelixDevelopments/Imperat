@@ -26,18 +26,18 @@ public final class MethodElement extends ParseElement<Method> {
         @NotNull Method element
     ) {
         super(registry, owningElement, element);
-        for (Parameter parameter : element.getParameters()) {
-
+        var params = element.getParameters();
+        for(int i = 1; i< params.length; i++) {
+            Parameter parameter = params[i];
             if (AnnotationHelper.isHelpParameter(parameter)) {
                 help = true;
-            } else if (!imperat.canBeSender(parameter.getType())
-                && !imperat.config().hasSourceResolver(parameter.getType())
-                && !imperat.config().hasContextResolver(parameter.getType())
-            ) {
+            } else if (!imperat.config().hasContextResolver(parameter.getType())) {
                 inputCount++;
             }
-            parameters.add(new ParameterElement(registry, owningElement, this, parameter));
         }
+        for(Parameter parameter : params)
+            parameters.add(new ParameterElement(registry, owningElement, this, parameter));
+
     }
 
     public @Nullable ParameterElement getParameterAt(int index) {

@@ -194,18 +194,18 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (parseElement instanceof MethodElement method && cmd != null) {
             //@CommandProcessingChain on method
             if (!methodSelector.canBeSelected(imperat, parser, method, true)) {
+                ImperatDebugger.debug("Method '%s' has failed verification", method.getName());
                 return cmd;
             }
+
             if (method.getInputCount() == 0) {
                 //default usage for that command.
-
                 cmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, Collections.emptyList())
                 );
 
             } else {
                 var usage = loadUsage(parentCmd, cmd, method);
-                //ImperatDebugger.debugParameters("sub usage params: " , usage.getParameters());
 
                 if (usage != null) {
                     cmd.addUsage(usage);
@@ -229,18 +229,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     }
 
                     if (method.isAnnotationPresent(Usage.class)) {
-                        if (method.getInputCount() == 0) {
-                            //default usage for that command.
-                            cmd.setDefaultUsageExecution(
-                                MethodCommandExecutor.of(imperat, method, Collections.emptyList())
-                            );
 
-                        } else {
-                            var usage = loadUsage(parentCmd, cmd, method);
-                            if (usage != null) {
-                                cmd.addUsage(usage);
-                            }
+                        var usage = loadUsage(parentCmd, cmd, method);
+                        if (usage != null) {
+                            cmd.addUsage(usage);
                         }
+
                     } else if (method.isAnnotationPresent(SubCommand.class)) {
                         var subAnn = method.getAnnotation(SubCommand.class);
                         assert subAnn != null;
@@ -328,6 +322,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             inputCount = Math.abs(method.getInputCount() - parentalParams);
         }
 
+        ImperatDebugger.debug("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
         if (inputCount == 0) {
             if (parentCmd != null) {
                 MethodUsageData<S> usageData = loadParameters(method, parentCmd);
