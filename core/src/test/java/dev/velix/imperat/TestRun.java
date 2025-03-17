@@ -190,9 +190,9 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"b"});
         var res = results.join();
-        Assertions.assertEquals(List.of("help", "hi", "bye"), new ArrayList<>(res));
+        Assertions.assertEquals(List.of("bye", "help", "hi"), new ArrayList<>(res));
     }
 
     @Test
@@ -200,9 +200,9 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "s"});
         var res = results.join();
-        Assertions.assertLinesMatch(List.of("othersub", "first", "sub4", "sub1"), new ArrayList<>(res));
+        Assertions.assertEquals(List.of("sub1", "sub4", "first", "othersub"), new ArrayList<>(res));
     }
 
 
