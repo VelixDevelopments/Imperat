@@ -5,6 +5,7 @@ import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,25 +32,25 @@ public final class ImperatDebugger {
 
     public static void debug(String msg, Object... args) {
         if (!enabled) return;
-        LOGGER.log(Level.INFO, String.format(msg, args));
+        LOGGER.log(Level.INFO, ()-> String.format(msg, args));
     }
 
     public static void warning(String msg, Object... args) {
         if (!enabled) return;
-        LOGGER.log(Level.WARNING, String.format(msg, args));
+        LOGGER.log(Level.WARNING, ()-> String.format(msg, args));
     }
 
     public static void error(Class<?> owningClass, String method, @NotNull Throwable ex) {
-        LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s'", owningClass.getName(), method), ex);
+        LOGGER.log(Level.SEVERE, ex, ()-> String.format("Error in class '%s', in method '%s'", owningClass.getName(), method));
     }
 
     public static void error(Class<?> owningClass, String method, Throwable ex, String message) {
-        LOGGER.log(Level.SEVERE, String.format("Error in class '%s', in method '%s' due to '%s'", owningClass.getName(), method, message), ex);
+        LOGGER.log(Level.SEVERE, ex, ()-> String.format("Error in class '%s', in method '%s' due to '%s'", owningClass.getName(), method, message));
     }
 
     public static <S extends Source> void debugParameters(String msg, List<CommandParameter<S>> parameters) {
         if (!enabled) return;
-        LOGGER.log(Level.INFO, String.format(msg, parameters.stream().map(CommandParameter::format)
+        LOGGER.log(Level.INFO, ()-> String.format(msg, parameters.stream().map(CommandParameter::format)
             .collect(Collectors.joining(","))));
     }
 
