@@ -199,7 +199,7 @@ public class TestRun {
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"b"});
         var res = results.join();
-        Assertions.assertEquals(List.of("bye", "help", "hi"), new ArrayList<>(res));
+        Assertions.assertEquals(List.of("bye"), new ArrayList<>(res));
     }
 
     @Test
@@ -209,7 +209,7 @@ public class TestRun {
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "s"});
         var res = results.join();
-        Assertions.assertEquals(List.of("sub1", "sub4", "first", "othersub"), new ArrayList<>(res));
+        Assertions.assertEquals(List.of("sub4", "sub1"), new ArrayList<>(res));
     }
 
 
