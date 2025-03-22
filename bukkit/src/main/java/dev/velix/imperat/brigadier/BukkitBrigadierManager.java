@@ -3,7 +3,6 @@ package dev.velix.imperat.brigadier;
 import dev.velix.imperat.BaseBrigadierManager;
 import dev.velix.imperat.BukkitImperat;
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.WrappedBukkitCommand;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.commodore.Commodore;
 import dev.velix.imperat.commodore.CommodoreProvider;
@@ -16,7 +15,7 @@ import static dev.velix.imperat.commodore.CommodoreProvider.isSupported;
 
 public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSource> {
 
-    private final Commodore<WrappedBukkitCommand> commodore;
+    private final Commodore<org.bukkit.command.Command> commodore;
 
     public BukkitBrigadierManager(BukkitImperat dispatcher) {
         super(dispatcher);
@@ -44,11 +43,11 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
     }
 
     public void registerBukkitCommand(
-        WrappedBukkitCommand bukkitCmd,
+        org.bukkit.command.Command bukkitCmd,
         Command<BukkitSource> imperatCommand,
         PermissionResolver<BukkitSource> resolver
     ) {
         commodore.register(bukkitCmd, parseCommandIntoNode(imperatCommand),
-            (player) -> resolver.hasPermission(dispatcher.wrapSender(player), bukkitCmd.permission()));
+            (player) -> resolver.hasPermission(dispatcher.wrapSender(player), bukkitCmd.getPermission()));
     }
 }

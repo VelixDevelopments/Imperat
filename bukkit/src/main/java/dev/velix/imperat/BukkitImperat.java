@@ -80,7 +80,8 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     @Override
     public void registerCommand(Command<BukkitSource> command) {
         super.registerCommand(command);
-        var internalCmd = WrappedBukkitCommand.wrap(command, new InternalBukkitCommand(this, command));
+
+        var internalCmd = new InternalBukkitCommand(this, command);
 
         BukkitUtil.COMMAND_MAP.register(this.plugin.getName(), internalCmd);
 

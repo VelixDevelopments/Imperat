@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import dev.velix.imperat.WrappedBukkitCommand;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.util.reflection.Reflections;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -23,7 +22,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ALL")
-final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand> {
+final class ModernPaperCommodore extends AbstractCommodore {
 
     private final Plugin plugin;
     private final LifecycleEventManager<Plugin> manager;
@@ -60,7 +59,7 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
      * @param permissionTest the predicate to check whether players should be sent argument data
      */
     @Override
-    public void register(WrappedBukkitCommand command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
+    public void register(org.bukkit.command.Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");
@@ -73,7 +72,7 @@ final class ModernPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
                 throw new RuntimeException(e);
             }
 
-            String desc = command == null ? null : command.description().toString();
+            String desc = command == null ? null : command.getDescription().toString();
 
             registrar.register(
                 plugin.getPluginMeta(), (LiteralCommandNode<CommandSourceStack>) node,

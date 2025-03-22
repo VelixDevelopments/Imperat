@@ -30,7 +30,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import dev.velix.imperat.WrappedBukkitCommand;
+import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,7 +43,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ALL")
-final class LegacyPaperCommodore extends AbstractCommodore<WrappedBukkitCommand> implements Listener {
+final class LegacyPaperCommodore extends AbstractCommodore implements Listener {
 
     private final List<CommodoreCommand> commands = new ArrayList<>();
 
@@ -59,7 +59,7 @@ final class LegacyPaperCommodore extends AbstractCommodore<WrappedBukkitCommand>
     }
 
     @Override
-    public void register(WrappedBukkitCommand command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
+    public void register(Command command, LiteralCommandNode<?> node, Predicate<? super Player> permissionTest) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(permissionTest, "permissionTest");

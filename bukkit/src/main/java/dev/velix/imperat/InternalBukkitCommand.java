@@ -85,9 +85,10 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         //ImperatDebugger.debug("Starting bukkit tab-completion");
         BukkitSource source = dispatcher.wrapSender(sender);
         try {
-            var completions = dispatcher.autoComplete(command, source, args).join();
             //ImperatDebugger.debug("Size of completions= %s", completions.size());
-            return new ArrayList<>(completions);
+            List<String> completions = new ArrayList<>(dispatcher.autoComplete(command, source, args).join());
+            ImperatDebugger.debug("Completions= " + String.join(",", completions));
+            return completions;
         } catch (Exception ex) {
             ex.printStackTrace();
             return Collections.emptyList();
