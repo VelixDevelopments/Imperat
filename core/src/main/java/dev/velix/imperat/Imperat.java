@@ -7,8 +7,6 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -100,7 +98,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      */
     CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String[] args);
 
-    default CompletableFuture<Collection<String>> autoComplete(Command<S> command, S sender, String argsOneLine) {
+    default CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String argsOneLine) {
         return autoComplete(command, sender, argsOneLine.split(" "));
     }
 
