@@ -9,6 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -97,7 +98,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      * @param args    the arguments currently written
      * @return the suggestions at the current position
      */
-    CompletableFuture<Collection<String>> autoComplete(Command<S> command, S sender, String[] args);
+    CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String[] args);
 
     default CompletableFuture<Collection<String>> autoComplete(Command<S> command, S sender, String argsOneLine) {
         return autoComplete(command, sender, argsOneLine.split(" "));
