@@ -25,6 +25,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -369,7 +370,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return the suggestions at the current position
      */
     @Override
-    public CompletableFuture<Collection<String>> autoComplete(Command<S> command, S source, String[] args) {
+    public CompletableFuture<List<String>> autoComplete(Command<S> command, S source, String[] args) {
         return command.autoCompleter().autoComplete(this, source, args);
     }
 

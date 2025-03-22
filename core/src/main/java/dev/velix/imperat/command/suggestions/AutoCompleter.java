@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -46,7 +47,7 @@ public abstract class AutoCompleter<S extends Source> {
      * @param args       the args for raw input
      * @return the auto-completed results
      */
-    public final CompletableFuture<Collection<String>> autoComplete(
+    public final CompletableFuture<List<String>> autoComplete(
         final Imperat<S> dispatcher,
         final S sender,
         final String[] args
@@ -72,7 +73,7 @@ public abstract class AutoCompleter<S extends Source> {
      * @param context the context for suggestions
      * @return the auto-completed results
      */
-    public abstract CompletableFuture<Collection<String>> autoComplete(
+    public abstract CompletableFuture<List<String>> autoComplete(
         Imperat<S> imperat,
         SuggestionContext<S> context
     );

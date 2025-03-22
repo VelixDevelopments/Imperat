@@ -31,6 +31,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import dev.velix.imperat.util.BukkitUtil;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -39,7 +40,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.Plugin;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -108,6 +108,7 @@ final class ReflectionCommodore extends AbstractCommodore {
     ReflectionCommodore(Plugin plugin) {
         this.plugin = plugin;
         this.plugin.getServer().getPluginManager().registerEvents(new ServerReloadListener(this), this.plugin);
+        ImperatDebugger.debug("Using ReflectionCommodore !");
     }
 
     static void ensureSetup() {
@@ -147,8 +148,8 @@ final class ReflectionCommodore extends AbstractCommodore {
         try {
             SuggestionProvider<?> wrapper = (SuggestionProvider<?>) COMMAND_WRAPPER_CONSTRUCTOR.newInstance(this.plugin.getServer(), command);
             setRequiredHackyFieldsRecursively(node, wrapper);
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } catch (Throwable ex) {
+            ImperatDebugger.error(ReflectionCommodore.class, "register(Command, LiteralCommandNode<?>, Predicate<? super Player>", ex);
         }
 
         Collection<String> aliases = getAliases(command);
@@ -175,6 +176,9 @@ final class ReflectionCommodore extends AbstractCommodore {
         @SuppressWarnings({"rawtypes", "unchecked"})
         @EventHandler
         public void onLoad(ServerLoadEvent e) {
+            if(e.getType() == ServerLoadEvent.LoadType.STARTUP) {
+                return;
+            }
             CommandDispatcher dispatcher = this.commodore.getDispatcher();
             RootCommandNode root = dispatcher.getRoot();
 

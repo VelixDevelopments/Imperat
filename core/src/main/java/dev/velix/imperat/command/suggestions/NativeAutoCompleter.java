@@ -6,6 +6,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 final class NativeAutoCompleter<S extends Source> extends AutoCompleter<S> {
@@ -23,7 +24,7 @@ final class NativeAutoCompleter<S extends Source> extends AutoCompleter<S> {
      * @return the auto-completed results
      */
     @Override
-    public CompletableFuture<Collection<String>> autoComplete(Imperat<S> imperat, SuggestionContext<S> context) {
+    public CompletableFuture<List<String>> autoComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         var tree = command.tree();
         return tree.tabComplete(imperat, context);
     }

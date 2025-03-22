@@ -43,9 +43,9 @@ public interface SuggestionResolver<S extends Source> {
      * @param parameter the parameter of the value to complete
      * @return the auto-completed suggestions of the current argument
      */
-    Collection<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter);
+    List<String> autoComplete(SuggestionContext<S> context, CommandParameter<S> parameter);
 
-    default CompletableFuture<Collection<String>> asyncAutoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
+    default CompletableFuture<List<String>> asyncAutoComplete(SuggestionContext<S> context, CommandParameter<S> parameter) {
         return CompletableFuture.supplyAsync(() -> autoComplete(context, parameter));
     }
 }

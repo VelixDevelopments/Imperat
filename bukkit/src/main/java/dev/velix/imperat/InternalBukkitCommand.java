@@ -90,7 +90,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
             ImperatDebugger.debug("Completions= " + String.join(",", completions));
             return completions;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            ImperatDebugger.error(InternalBukkitCommand.class, "tabComplete", ex);
             return Collections.emptyList();
         }
     }

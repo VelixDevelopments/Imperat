@@ -6,6 +6,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.help.CommandHelp;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unused")
 public final class TestCommands {
@@ -126,4 +127,35 @@ public final class TestCommands {
             .build();
 
 
+    public final static Command<TestSource> BAN_COMMAND = Command.<TestSource>create("ban")
+            .permission("command.ban")
+            .description("Main command for banning players")
+            .usage(
+                CommandUsage.<TestSource>builder()
+                    .parameters(
+                        CommandParameter.requiredText("player"),
+                        CommandParameter.<TestSource>flagSwitch("silent").aliases("s"),
+                        CommandParameter.optionalText("duration"),
+                        CommandParameter.<TestSource>optionalGreedy("reason").defaultValue("Breaking server laws")
+                    )
+                    .execute((source, context)-> {
+                        //getting arguments' values:
+                        String player = context.getArgument("player");
+                        String duration = context.getArgument("duration"); //may be null since we inserted it as optional
+                        String reason = context.getArgument("reason");
+
+                        //getting silent flag value, (false if the sender doesn't add '-s' or '-silent')
+                        Boolean silent = context.getFlagValue("silent");
+                        assert silent != null;
+
+                        //TODO actual ban logic
+                        String durationFormat = duration == null ? "FOREVER" : "for " + duration;
+                        String msg = "Banning " + player + " " + durationFormat + " due to '" + reason + "'";
+                        if (!silent)
+                            source.reply("NOT SILENT= " + msg);
+                        else
+                            source.reply("SILENT= " + msg);
+                    })
+            )
+            .build();
 }

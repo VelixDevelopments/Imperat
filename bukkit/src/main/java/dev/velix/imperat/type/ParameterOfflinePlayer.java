@@ -24,6 +24,7 @@ import org.spigotmc.SpigotConfig;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, OfflinePlayer> {
@@ -93,7 +94,7 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
          * @return the auto-completed suggestions of the current argument
          */
         @Override
-        public Collection<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameter) {
+        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameter) {
             return Arrays.stream(Bukkit.getOfflinePlayers())
                 .map(OfflinePlayer::getName)
                 .toList();

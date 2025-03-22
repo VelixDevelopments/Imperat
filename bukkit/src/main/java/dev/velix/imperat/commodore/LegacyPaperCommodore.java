@@ -30,6 +30,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,6 +51,7 @@ final class LegacyPaperCommodore extends AbstractCommodore implements Listener {
     LegacyPaperCommodore(Plugin plugin) throws ClassNotFoundException {
         Class.forName("com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        ImperatDebugger.debug("Using LegacyPaperCommodore !");
     }
 
     @Override

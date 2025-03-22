@@ -96,7 +96,7 @@ public final class CommandTree<S extends Source> {
         return newNode;
     }
 
-    public @NotNull CompletableFuture<Collection<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
+    public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
 
         var source = context.source();
@@ -120,7 +120,7 @@ public final class CommandTree<S extends Source> {
         }
 
         //ImperatDebugger.debug("Node-data= '%s'", node.data.format());
-        CompletableFuture<Collection<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
+        CompletableFuture<List<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
         for (var child : node.getChildren()) {
             future = future.thenCompose((results) -> addChildResults(imperat, context, child, results));
         }
@@ -129,11 +129,11 @@ public final class CommandTree<S extends Source> {
 
 
 
-    private CompletableFuture<Collection<String>> addChildResults(
+    private CompletableFuture<List<String>> addChildResults(
         Imperat<S> imperat,
         SuggestionContext<S> context,
         ParameterNode<S, ?> node,
-        Collection<String> oldResults
+        List<String> oldResults
     ) {
         SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
         return resolver.asyncAutoComplete(context, node.data)
