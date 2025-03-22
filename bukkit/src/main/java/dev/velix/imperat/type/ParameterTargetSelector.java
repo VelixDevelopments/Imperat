@@ -24,7 +24,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public final class ParameterTargetSelector extends BaseParameterType<BukkitSource, TargetSelector> {
@@ -157,7 +156,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
          * @return the auto-completed suggestions of the current argument
          */
         @Override
-        public Collection<String> autoComplete(
+        public List<String> autoComplete(
             SuggestionContext<BukkitSource> context,
             CommandParameter<BukkitSource> parameter
         ) {

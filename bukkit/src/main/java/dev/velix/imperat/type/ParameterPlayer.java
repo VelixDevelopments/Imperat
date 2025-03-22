@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
@@ -74,7 +74,7 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
          * @return the auto-completed suggestions of the current argument
          */
         @Override
-        public Collection<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameter) {
+        public List<String> autoComplete(SuggestionContext<BukkitSource> context, CommandParameter<BukkitSource> parameter) {
             return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         }
     }
