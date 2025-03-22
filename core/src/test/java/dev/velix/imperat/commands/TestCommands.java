@@ -6,7 +6,6 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.help.CommandHelp;
-import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unused")
 public final class TestCommands {
