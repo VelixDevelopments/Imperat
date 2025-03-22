@@ -142,21 +142,6 @@ public final class CommandTree<S extends Source> {
             })
             .thenApply((res) -> {
                 oldResults.addAll(res);
-                var toComplete = context.getArgToComplete();
-                if(!toComplete.isEmpty()) {
-                    String input = context.getArgToComplete().value();
-                    return new ArrayList<>(oldResults.stream()
-                            .sorted(Comparator
-                            // Primary sort: matches starting with input come first
-                            .comparingInt((String str) ->
-                                    str.toLowerCase().startsWith(input) ? 0 : 1)
-                            // Secondary sort: matches containing input (but not starting) come next
-                            .thenComparingInt((String str) ->
-                                    str.toLowerCase().contains(input) ? 0 : 1)
-                            // Tertiary sort: alphabetical order (case-insensitive)
-                            .thenComparing(String.CASE_INSENSITIVE_ORDER)
-                    ).toList());
-                }
                 return oldResults;
             });
     }
