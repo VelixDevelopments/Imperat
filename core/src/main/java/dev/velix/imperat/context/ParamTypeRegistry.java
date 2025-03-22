@@ -7,7 +7,7 @@ import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
 import java.util.Optional;

@@ -1,7 +1,7 @@
 package dev.velix.imperat.command.parameters.type;
 
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 public final class ParameterTypes {
 

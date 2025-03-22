@@ -2,9 +2,13 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 final class UsageMap<S extends Source> extends HashMap<List<CommandParameter<S>>, CommandUsage<S>> implements Iterable<CommandUsage<S>> {
 

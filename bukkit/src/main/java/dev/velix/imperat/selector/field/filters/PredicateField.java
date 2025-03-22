@@ -7,7 +7,7 @@ import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.selector.field.AbstractField;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 /**
  * The PredicateField interface extends the SelectionField interface to add filtering

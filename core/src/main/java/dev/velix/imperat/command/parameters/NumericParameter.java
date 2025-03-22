@@ -2,7 +2,7 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.NumericComparator;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 /**
  * Represents a behavior that deals with numeric

@@ -7,7 +7,6 @@ import com.velocitypowered.api.command.SimpleCommand;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 final class InternalVelocityCommand implements SimpleCommand {
@@ -48,11 +47,7 @@ final class InternalVelocityCommand implements SimpleCommand {
 
     @Override
     public List<String> suggest(Invocation invocation) {
-        var collection = imperat.autoComplete(command, imperat.wrapSender(invocation.source()), invocation.arguments()).join();
-        if (collection instanceof List<String> list) {
-            return list;
-        }
-        return new ArrayList<>(collection);
+        return imperat.autoComplete(command, imperat.wrapSender(invocation.source()), invocation.arguments()).join();
     }
 
     @Override

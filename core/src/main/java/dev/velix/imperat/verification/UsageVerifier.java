@@ -2,7 +2,7 @@ package dev.velix.imperat.verification;
 
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.*;
 
 /**
  * Verifies that the {@link CommandUsage} is suitable

@@ -5,8 +5,7 @@ import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.reflection.Reflections;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

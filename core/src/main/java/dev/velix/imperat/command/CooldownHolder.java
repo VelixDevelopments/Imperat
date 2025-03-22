@@ -2,7 +2,7 @@ package dev.velix.imperat.command;
 
 
 import dev.velix.imperat.command.cooldown.UsageCooldown;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.util.concurrent.TimeUnit;
 

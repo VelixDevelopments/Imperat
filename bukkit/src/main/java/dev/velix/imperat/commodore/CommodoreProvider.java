@@ -28,7 +28,8 @@ package dev.velix.imperat.commodore;
 import dev.velix.imperat.util.ImperatDebugger;
 import org.bukkit.command.Command;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
+
 import java.util.Objects;
 
 /**

@@ -23,7 +23,7 @@
  */
 package dev.velix.imperat.util.asm;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Method;
 

@@ -2,7 +2,12 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.command.tree.CommandDispatch;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
 

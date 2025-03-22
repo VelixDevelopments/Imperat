@@ -3,8 +3,7 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;

@@ -2,8 +2,7 @@ package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 @ApiStatus.Internal
 public final class CommandNode<S extends Source> extends ParameterNode<S, Command<S>> {

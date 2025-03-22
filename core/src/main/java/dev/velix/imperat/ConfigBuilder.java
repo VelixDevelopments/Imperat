@@ -10,9 +10,13 @@ import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.exception.ThrowableResolver;
 import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.placeholders.Placeholder;
-import dev.velix.imperat.resolvers.*;
+import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.resolvers.DependencySupplier;
+import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.resolvers.SourceResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.verification.UsageVerifier;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
 

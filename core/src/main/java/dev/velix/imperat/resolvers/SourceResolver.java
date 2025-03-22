@@ -2,7 +2,7 @@ package dev.velix.imperat.resolvers;
 
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 /**
  * An interface whose single responsibility is to resolve {@link S}

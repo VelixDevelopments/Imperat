@@ -7,7 +7,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import static dev.velix.imperat.util.StringUtils.isQuoteChar;
 

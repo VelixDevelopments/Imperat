@@ -1,11 +1,12 @@
 package dev.velix.imperat.context;
 
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.*;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringJoiner;
 
 @ApiStatus.Internal
 final class ArgumentQueueImpl extends LinkedList<String> implements ArgumentQueue {

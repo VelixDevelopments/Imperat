@@ -2,8 +2,24 @@ package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
-import dev.velix.imperat.annotations.*;
+import dev.velix.imperat.annotations.Async;
+import dev.velix.imperat.annotations.Cooldown;
+import dev.velix.imperat.annotations.Default;
+import dev.velix.imperat.annotations.DefaultProvider;
+import dev.velix.imperat.annotations.Description;
+import dev.velix.imperat.annotations.Flag;
+import dev.velix.imperat.annotations.Greedy;
+import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Optional;
+import dev.velix.imperat.annotations.Permission;
+import dev.velix.imperat.annotations.PostProcessor;
+import dev.velix.imperat.annotations.PreProcessor;
+import dev.velix.imperat.annotations.Range;
+import dev.velix.imperat.annotations.SubCommand;
+import dev.velix.imperat.annotations.Suggest;
+import dev.velix.imperat.annotations.SuggestionProvider;
+import dev.velix.imperat.annotations.Switch;
+import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.MethodCommandExecutor;
@@ -28,15 +44,19 @@ import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @ApiStatus.Internal
 final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisitor<S> {

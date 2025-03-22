@@ -11,7 +11,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.*;
 
 import java.util.List;
 

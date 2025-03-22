@@ -3,7 +3,7 @@ package dev.velix.imperat.annotations.base.element.selector;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.element.ParseElement;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.util.List;
 

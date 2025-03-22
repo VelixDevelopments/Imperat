@@ -20,7 +20,7 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.util.TypeUtility;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.util.ArrayList;
 import java.util.List;

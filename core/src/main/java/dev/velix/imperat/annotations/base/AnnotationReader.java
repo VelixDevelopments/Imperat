@@ -6,7 +6,7 @@ import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.RootCommandClass;
 import dev.velix.imperat.annotations.base.element.selector.ElementSelector;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.*;
 
 /**
  * Represents a class that has a single responsibility of

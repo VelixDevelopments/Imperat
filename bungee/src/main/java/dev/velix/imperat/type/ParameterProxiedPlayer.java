@@ -13,10 +13,9 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
-import java.util.Collection;
+import java.util.List;
 
 public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource, ProxiedPlayer> {
 
@@ -76,7 +75,7 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
          * @return the auto-completed suggestions of the current argument
          */
         @Override
-        public Collection<String> autoComplete(SuggestionContext<BungeeSource> context, CommandParameter<BungeeSource> parameter) {
+        public List<String> autoComplete(SuggestionContext<BungeeSource> context, CommandParameter<BungeeSource> parameter) {
             return ProxyServer.getInstance().getPlayers().stream()
                 .map(ProxiedPlayer::getName)
                 .toList();

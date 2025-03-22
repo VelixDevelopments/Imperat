@@ -3,8 +3,7 @@ package dev.velix.imperat;
 import com.mojang.brigadier.arguments.ArgumentType;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 /**
  * A resolver that specifies {@link ArgumentType}

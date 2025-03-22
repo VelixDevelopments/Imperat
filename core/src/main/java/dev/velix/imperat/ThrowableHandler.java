@@ -3,7 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ThrowableResolver;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 public sealed interface ThrowableHandler<S extends Source> permits ImperatConfig {
 

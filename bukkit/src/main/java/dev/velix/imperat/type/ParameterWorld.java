@@ -12,8 +12,7 @@ import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

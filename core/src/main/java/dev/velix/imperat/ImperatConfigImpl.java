@@ -1,7 +1,11 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.annotations.base.element.ParameterElement;
-import dev.velix.imperat.command.*;
+import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.ContextResolverFactory;
+import dev.velix.imperat.command.ContextResolverRegistry;
+import dev.velix.imperat.command.SourceResolverRegistry;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
@@ -14,21 +18,37 @@ import dev.velix.imperat.context.ParamTypeRegistry;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
-import dev.velix.imperat.exception.*;
+import dev.velix.imperat.exception.CooldownException;
+import dev.velix.imperat.exception.InvalidSourceException;
+import dev.velix.imperat.exception.InvalidSyntaxException;
+import dev.velix.imperat.exception.InvalidUUIDException;
+import dev.velix.imperat.exception.NoHelpException;
+import dev.velix.imperat.exception.NoHelpPageException;
+import dev.velix.imperat.exception.PermissionDeniedException;
+import dev.velix.imperat.exception.SelfHandledException;
+import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.ThrowableResolver;
 import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderRegistry;
 import dev.velix.imperat.placeholders.PlaceholderResolver;
-import dev.velix.imperat.resolvers.*;
+import dev.velix.imperat.resolvers.ContextResolver;
+import dev.velix.imperat.resolvers.DependencySupplier;
+import dev.velix.imperat.resolvers.PermissionResolver;
+import dev.velix.imperat.resolvers.SourceResolver;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.verification.UsageVerifier;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
 

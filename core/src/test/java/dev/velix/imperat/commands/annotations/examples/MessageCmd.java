@@ -1,8 +1,12 @@
 package dev.velix.imperat.commands.annotations.examples;
 
 import dev.velix.imperat.TestSource;
-import dev.velix.imperat.annotations.*;
-import org.jetbrains.annotations.NotNull;
+import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.Greedy;
+import dev.velix.imperat.annotations.Named;
+import dev.velix.imperat.annotations.Suggest;
+import dev.velix.imperat.annotations.Usage;
+import org.jetbrains.annotations.*;
 
 @Command({"message"})
 public class MessageCmd {

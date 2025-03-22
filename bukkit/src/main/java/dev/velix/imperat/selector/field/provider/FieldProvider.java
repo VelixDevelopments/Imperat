@@ -3,7 +3,7 @@ package dev.velix.imperat.selector.field.provider;
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.selector.field.SelectionField;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 /**
  * <p>

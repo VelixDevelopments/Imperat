@@ -4,11 +4,10 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 

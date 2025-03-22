@@ -1,6 +1,6 @@
 package dev.velix.imperat;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.io.InputStream;
 import java.io.PrintStream;

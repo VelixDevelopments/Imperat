@@ -1,11 +1,34 @@
 package dev.velix.imperat.annotations.base;
 
+import dev.velix.imperat.annotations.Async;
+import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.Cooldown;
+import dev.velix.imperat.annotations.Default;
+import dev.velix.imperat.annotations.DefaultProvider;
+import dev.velix.imperat.annotations.Description;
+import dev.velix.imperat.annotations.Flag;
+import dev.velix.imperat.annotations.Greedy;
+import dev.velix.imperat.annotations.Inherit;
+import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Optional;
-import dev.velix.imperat.annotations.*;
-import org.jetbrains.annotations.Nullable;
+import dev.velix.imperat.annotations.Permission;
+import dev.velix.imperat.annotations.PostProcessor;
+import dev.velix.imperat.annotations.PreProcessor;
+import dev.velix.imperat.annotations.Range;
+import dev.velix.imperat.annotations.SubCommand;
+import dev.velix.imperat.annotations.Suggest;
+import dev.velix.imperat.annotations.SuggestionProvider;
+import dev.velix.imperat.annotations.Switch;
+import dev.velix.imperat.annotations.Usage;
+import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 final class AnnotationRegistry {
 

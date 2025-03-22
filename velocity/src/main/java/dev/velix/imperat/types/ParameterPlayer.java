@@ -13,10 +13,9 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
-import java.util.Collection;
+import java.util.List;
 
 public final class ParameterPlayer extends BaseParameterType<VelocitySource, Player> {
 
@@ -80,7 +79,7 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
          * @return the auto-completed suggestions of the current argument
          */
         @Override
-        public Collection<String> autoComplete(SuggestionContext<VelocitySource> context, CommandParameter<VelocitySource> parameter) {
+        public List<String> autoComplete(SuggestionContext<VelocitySource> context, CommandParameter<VelocitySource> parameter) {
             return proxyServer.getAllPlayers().stream().map(Player::getUsername).toList();
         }
     }

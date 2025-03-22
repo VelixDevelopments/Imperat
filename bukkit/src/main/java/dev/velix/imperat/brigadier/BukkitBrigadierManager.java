@@ -9,7 +9,7 @@ import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import static dev.velix.imperat.commodore.CommodoreProvider.isSupported;
 

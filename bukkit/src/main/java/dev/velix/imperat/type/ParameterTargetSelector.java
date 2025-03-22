@@ -21,7 +21,7 @@ import dev.velix.imperat.util.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.util.ArrayList;
 import java.util.List;

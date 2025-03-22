@@ -7,7 +7,12 @@ import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.EmptyCmd;
 import dev.velix.imperat.commands.annotations.KitCommand;
 import dev.velix.imperat.commands.annotations.TestCommand;
-import dev.velix.imperat.commands.annotations.examples.*;
+import dev.velix.imperat.commands.annotations.examples.AnnotatedGroupCommand;
+import dev.velix.imperat.commands.annotations.examples.BanCommand;
+import dev.velix.imperat.commands.annotations.examples.GitCommand;
+import dev.velix.imperat.commands.annotations.examples.Group;
+import dev.velix.imperat.commands.annotations.examples.MessageCmd;
+import dev.velix.imperat.commands.annotations.examples.OptionalArgCommand;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -19,7 +24,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static dev.velix.imperat.commands.TestCommands.*;
+import static dev.velix.imperat.commands.TestCommands.CHAINED_SUBCOMMANDS_CMD;
+import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
+import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
 
 public class TestRun {
 

@@ -15,12 +15,15 @@ import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * The purpose of this class is to resolve string inputs

@@ -4,7 +4,7 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 final class TagField extends PredicateField<String> {
 

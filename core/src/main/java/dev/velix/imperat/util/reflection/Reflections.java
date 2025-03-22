@@ -1,6 +1,6 @@
 package dev.velix.imperat.util.reflection;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

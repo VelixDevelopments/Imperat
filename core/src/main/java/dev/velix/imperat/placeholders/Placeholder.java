@@ -3,7 +3,7 @@ package dev.velix.imperat.placeholders;
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.Preconditions;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 public sealed interface Placeholder<S extends Source> permits PlaceholderImpl {
 

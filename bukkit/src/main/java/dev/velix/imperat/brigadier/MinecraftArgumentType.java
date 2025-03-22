@@ -2,8 +2,7 @@ package dev.velix.imperat.brigadier;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import dev.velix.imperat.util.BukkitUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;

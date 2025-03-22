@@ -7,7 +7,7 @@ import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.util.Arrays;
 

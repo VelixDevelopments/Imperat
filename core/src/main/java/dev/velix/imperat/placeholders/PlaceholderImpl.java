@@ -2,7 +2,7 @@ package dev.velix.imperat.placeholders;
 
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.util.Objects;
 import java.util.regex.Pattern;

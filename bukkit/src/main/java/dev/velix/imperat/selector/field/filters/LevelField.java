@@ -9,7 +9,7 @@ import dev.velix.imperat.selector.field.Range;
 import dev.velix.imperat.selector.field.RangedNumericField;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 final class LevelField extends PredicateField<Range<Integer>> {
 

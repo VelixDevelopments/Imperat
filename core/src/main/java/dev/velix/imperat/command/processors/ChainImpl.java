@@ -1,7 +1,7 @@
 package dev.velix.imperat.command.processors;
 
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.util.Iterator;
 import java.util.Queue;

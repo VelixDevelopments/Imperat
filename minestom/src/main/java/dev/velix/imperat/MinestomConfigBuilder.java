@@ -5,7 +5,7 @@ import dev.velix.imperat.exception.UnknownPlayerException;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 public final class MinestomConfigBuilder extends ConfigBuilder<MinestomSource, MinestomImperat> {
 

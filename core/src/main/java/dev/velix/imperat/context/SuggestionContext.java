@@ -1,7 +1,7 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.command.suggestions.CompletionArg;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 /**
  * Represents the context for auto-completion while providing suggestions

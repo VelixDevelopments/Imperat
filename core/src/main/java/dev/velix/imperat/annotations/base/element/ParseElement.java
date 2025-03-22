@@ -4,9 +4,7 @@ import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.AnnotationMap;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;

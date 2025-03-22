@@ -3,7 +3,7 @@ package dev.velix.imperat.help;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.*;
 
 /**
  * Represents a class responsible for formatting

@@ -16,8 +16,7 @@ import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.DependencySupplier;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.verification.UsageVerifier;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
 import java.util.Optional;

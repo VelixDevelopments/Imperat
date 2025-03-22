@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 @FunctionalInterface
 interface PositionShiftCondition {

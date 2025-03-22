@@ -2,7 +2,7 @@ package dev.velix.imperat.placeholders;
 
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 public interface PlaceholderResolver<S extends Source> {
 

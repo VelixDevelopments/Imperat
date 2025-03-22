@@ -4,9 +4,12 @@ import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.suggestions.CompletionArg;
-import dev.velix.imperat.context.*;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
+import org.jetbrains.annotations.*;
 
 /**
  * Represents a way for defining
