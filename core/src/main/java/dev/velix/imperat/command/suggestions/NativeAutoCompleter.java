@@ -4,7 +4,6 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
-import dev.velix.imperat.util.ImperatDebugger;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,7 +28,7 @@ final class NativeAutoCompleter<S extends Source> extends AutoCompleter<S> {
             var toComplete = context.getArgToComplete();
             if(!toComplete.isEmpty()) {
                 String input = context.getArgToComplete().value().toLowerCase(); // Lowercase input for case-insensitive comparison
-                return results.stream().filter((str)-> str.startsWith(input)).toList();
+                return results.stream().filter((str)-> str.toLowerCase().startsWith(input)).toList();
             }
             return results;
         });
