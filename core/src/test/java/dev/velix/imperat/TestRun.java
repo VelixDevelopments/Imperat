@@ -275,4 +275,11 @@ public class TestRun {
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kit", "create test"));
     }
 
+    @Test
+    public void testValuesAnnotation() {
+        var cmd = IMPERAT.getCommand("ban");
+        assert cmd != null;
+        debugCommand(cmd);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s 1d"));
+    }
 }

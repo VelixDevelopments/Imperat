@@ -9,6 +9,7 @@ import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.annotations.Values;
 import jdk.jfr.Description;
 import org.jetbrains.annotations.*;
 
@@ -27,7 +28,7 @@ public final class BanCommand {
         TestSource source,
         @Named("player") String player,
         @Switch({"silent", "s"}) boolean silent,
-        @Named("duration") @Optional @Nullable String duration,
+        @Named("duration") @Optional @Nullable @Values({"1d", "12h", "2h"}) String duration,
         @Named("reason") @Optional @Default("Breaking server laws") @Greedy String reason
     ) {
         //TODO actual ban logic

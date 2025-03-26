@@ -16,6 +16,7 @@ import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.*;
 
+@SuppressWarnings("unchecked")
 final class SmartUsageResolve<S extends Source> {
 
     private final CommandUsage<S> usage;
@@ -95,8 +96,15 @@ final class SmartUsageResolve<S extends Source> {
                 assert currentParameter.isFlag();
 
                 if (flag == null) {
-                    //NOT FREE FLAG AND ALSO NOT A PARAMETER FLAG, UNKNOWN FLAG
-                    throw new SourceException("Unknown flag '%s'", currentRaw);
+                    if(stream.peekParameter().isEmpty()) {
+                        //is last parameter
+                        //NOT FREE FLAG AND ALSO NOT A PARAMETER FLAG, UNKNOWN FLAG
+                        throw new SourceException("Unknown flag '%s'", currentRaw);
+                    }else {
+                        //resolve with null
+                        stream.skipParameter();
+                        continue;
+                    }
                 } else {
                     ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
                     context.resolveFlag(parameterFlag.resolve(context, stream));

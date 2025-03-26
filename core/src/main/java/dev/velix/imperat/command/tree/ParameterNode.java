@@ -4,6 +4,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.*;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.function.Predicate;
@@ -30,7 +31,7 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
         nextNodes.add(node);
     }
 
-    public Iterable<? extends ParameterNode<S, ?>> getChildren() {
+    public Collection<ParameterNode<S,?>> getChildren() {
         return nextNodes;
     }
 

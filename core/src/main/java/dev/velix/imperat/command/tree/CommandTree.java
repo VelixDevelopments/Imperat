@@ -15,6 +15,8 @@ import org.jetbrains.annotations.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -174,7 +176,7 @@ public final class CommandTree<S extends Source> {
     private @NotNull CommandDispatch<S> dispatchNode(
         CommandDispatch<S> commandDispatch,
         ArgumentQueue input,
-        ParameterNode<S, ?> currentNode,
+        @NotNull ParameterNode<S, ?> currentNode,
         int depth
     ) {
         if (depth >= input.size()) {
@@ -184,9 +186,15 @@ public final class CommandTree<S extends Source> {
         String rawInput = input.get(depth);
 
         ImperatDebugger.debug("Current depth=%s, node=%s", depth, currentNode.format());
-        if (!currentNode.matchesInput(rawInput)) {
-            ImperatDebugger.debug("Node '%s' doesn't match input '%s'", currentNode.format(), input.get(depth));
-            return commandDispatch;
+        while (!currentNode.matchesInput(rawInput)) {
+
+            if (currentNode.isOptional()) {
+                commandDispatch.append(currentNode);
+                currentNode = currentNode.getNextParameterChild();
+            } else {
+                ImperatDebugger.debug("Node '%s' doesn't match input '%s'", currentNode.format(), input.get(depth));
+                return commandDispatch;
+            }
         }
 
         if (!currentNode.isFlag() && Patterns.isInputFlag(rawInput)) {

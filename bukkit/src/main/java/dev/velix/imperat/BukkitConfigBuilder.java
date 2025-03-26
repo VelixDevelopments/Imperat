@@ -91,10 +91,10 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
 
     @SuppressWarnings("ConstantConditions")
     private @NotNull AdventureProvider<CommandSender> loadAdventure() {
-        if (Reflections.findClass(() -> Audience.class)) {
+        if (Reflections.findClass("net.kyori.adventure.audience.Audience")) {
             if (Audience.class.isAssignableFrom(CommandSender.class)) {
                 return new CastingAdventure<>();
-            } else if (Reflections.findClass(() -> BukkitAudiences.class)) {
+            } else if (Reflections.findClass("net.kyori.adventure.platform.bukkit.BukkitAudiences")) {
                 return new BukkitAdventure(plugin);
             }
         }

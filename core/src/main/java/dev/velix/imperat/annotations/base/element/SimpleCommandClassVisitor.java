@@ -597,7 +597,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             Set<String> values = Arrays.stream(valuesAnnotation.value())
                     .distinct()
-                    .sorted()
                     .map(config::replacePlaceholders)
                     .flatMap(replaced -> {
                         if (replaced.contains("|")) {

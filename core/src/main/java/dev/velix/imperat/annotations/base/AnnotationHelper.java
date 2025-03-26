@@ -92,7 +92,12 @@ public final class AnnotationHelper {
             String name = parameter.name();
 
             if (parameter.isFlag()) {
-                paramsInstances[i] = context.getFlagValue(name);
+                var flagValue = context.getFlagValue(name);
+                if(flagValue == null && parameter.asFlagParameter().isSwitch()) {
+                    paramsInstances[i] = false;
+                }else {
+                    paramsInstances[i] = flagValue;
+                }
             } else {
                 paramsInstances[i] = context.getArgument(name);
             }
