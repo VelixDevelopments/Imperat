@@ -13,26 +13,26 @@ import org.jetbrains.annotations.*;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-public final class ConstrainedParameterDecorator<S extends Source, T> extends BaseParameterType<S,  T> {
+public final class ConstrainedParameterTypeDecorator<S extends Source, T> extends BaseParameterType<S,  T> {
 
     private final ParameterType<S, T> original;
 
     private final boolean caseSensitive;
     private final Set<String> allowedValues;
 
-    private ConstrainedParameterDecorator(ParameterType<S, T> original, Set<String> allowedValues, boolean caseSensitive) {
+    private ConstrainedParameterTypeDecorator(ParameterType<S, T> original, Set<String> allowedValues, boolean caseSensitive) {
         super(original.wrappedType());
         this.original = original;
         this.allowedValues = allowedValues;
         this.caseSensitive = caseSensitive;
     }
 
-    public static <S extends Source, T> ConstrainedParameterDecorator<S, T> of(ParameterType<S, T> original, Set<String> allowedValues, boolean caseSensitive) {
-        return new ConstrainedParameterDecorator<>(original, allowedValues, caseSensitive);
+    public static <S extends Source, T> ConstrainedParameterTypeDecorator<S, T> of(ParameterType<S, T> original, Set<String> allowedValues, boolean caseSensitive) {
+        return new ConstrainedParameterTypeDecorator<>(original, allowedValues, caseSensitive);
     }
 
-    public static <S extends Source, T> ConstrainedParameterDecorator<S, T> of(ParameterType<S, T> original, Set<String> allowedValues) {
-        return new ConstrainedParameterDecorator<>(original, allowedValues, true);
+    public static <S extends Source, T> ConstrainedParameterTypeDecorator<S, T> of(ParameterType<S, T> original, Set<String> allowedValues) {
+        return new ConstrainedParameterTypeDecorator<>(original, allowedValues, true);
     }
 
     @Override
@@ -41,7 +41,7 @@ public final class ConstrainedParameterDecorator<S extends Source, T> extends Ba
         if(input == null)
             return original.resolve(context, commandInputStream);
 
-        if(ConstrainedParameterDecorator.contains(input, allowedValues, caseSensitive)) {
+        if(ConstrainedParameterTypeDecorator.contains(input, allowedValues, caseSensitive)) {
             return original.resolve(context, commandInputStream);
         }else {
             throw new SourceException("Input '%s' is not one of: [" + String.join(",",  allowedValues) + "]", input);

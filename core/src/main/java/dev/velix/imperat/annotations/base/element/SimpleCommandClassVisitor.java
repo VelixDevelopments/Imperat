@@ -31,7 +31,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandCoordinator;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.parameters.ConstrainedParameterDecorator;
+import dev.velix.imperat.command.parameters.ConstrainedParameterTypeDecorator;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.StrictParameterList;
 import dev.velix.imperat.command.parameters.type.ParameterType;
@@ -607,7 +607,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     })
                     .collect(Collectors.toCollection(LinkedHashSet::new));
 
-            type = ConstrainedParameterDecorator.of(type, values, valuesAnnotation.caseSensitive());
+            type = ConstrainedParameterTypeDecorator.of(type, values, valuesAnnotation.caseSensitive());
         }
 
         CommandParameter<S> param =
