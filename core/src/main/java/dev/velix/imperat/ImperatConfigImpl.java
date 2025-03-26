@@ -78,7 +78,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault(this);
         sourceResolverRegistry = SourceResolverRegistry.createDefault();
         placeholderRegistry = PlaceholderRegistry.createDefault(this);
-        contextFactory = ContextFactory.defaultFactory(this);
+        contextFactory = ContextFactory.defaultFactory();
 
         verifier = UsageVerifier.typeTolerantVerifier();
         regDefThrowableResolvers();

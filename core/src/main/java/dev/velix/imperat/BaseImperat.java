@@ -230,7 +230,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
 
         Context<S> plainContext = config.getContextFactory()
-            .createContext(source, command, rawArguments);
+            .createContext(this, source, command, rawArguments);
 
         return dispatch(plainContext);
     }

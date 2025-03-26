@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.ImperatConfig;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.suggestions.CompletionArg;
@@ -20,15 +20,12 @@ import org.jetbrains.annotations.*;
 @ApiStatus.AvailableSince("1.0.0")
 public abstract class ContextFactory<S extends Source> {
 
-    protected final ImperatConfig<S> imperat;
-
-    protected ContextFactory(ImperatConfig<S> imperat) {
-        this.imperat = imperat;
+    protected ContextFactory() {
     }
 
 
-    public static <S extends Source> ContextFactory<S> defaultFactory(ImperatConfig<S> imperat) {
-        return new DefaultContextFactory<>(imperat);
+    public static <S extends Source> ContextFactory<S> defaultFactory() {
+        return new DefaultContextFactory<>();
     }
 
 
@@ -40,6 +37,7 @@ public abstract class ContextFactory<S extends Source> {
      */
     @NotNull
     public abstract Context<S> createContext(
+        @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull ArgumentQueue queue
@@ -53,6 +51,7 @@ public abstract class ContextFactory<S extends Source> {
      * @return new context for auto completions with {@link CompletionArg}
      */
     public abstract SuggestionContext<S> createSuggestionContext(
+        @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull ArgumentQueue queue,

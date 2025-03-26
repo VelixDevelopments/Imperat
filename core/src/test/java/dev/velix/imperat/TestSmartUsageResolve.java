@@ -26,7 +26,7 @@ public class TestSmartUsageResolve {
     TestSmartUsageResolve() {
     }
 
-    private final static ContextFactory<TestSource> FACTORY = IMPERAT.config().getContextFactory();
+    private final static ContextFactory<TestSource> FACTORY = IMPERAT.config.getContextFactory();
 
     private static ResolvedContext<TestSource> inputResolve(String command, String... args) {
         System.out.println("-------------");
@@ -37,7 +37,7 @@ public class TestSmartUsageResolve {
         Command<TestSource> cmd = IMPERAT.getCommand(command);
         Assertions.assertNotNull(cmd);
 
-        Context<TestSource> context = FACTORY.createContext(SOURCE, cmd, queue);
+        Context<TestSource> context = FACTORY.createContext(IMPERAT, SOURCE, cmd, queue);
         CommandDispatch<TestSource> res = cmd.contextMatch(context);
         res.visualize();
 

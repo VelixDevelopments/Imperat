@@ -95,4 +95,5 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
     public @NotNull CommandFlag fromString(Imperat<S> imperat, String input) {
         return new CommandFlag(null, input, null, null);
     }
+
 }

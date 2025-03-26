@@ -1,5 +1,6 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import org.jetbrains.annotations.*;
@@ -13,7 +14,9 @@ import org.jetbrains.annotations.*;
 @ApiStatus.AvailableSince("1.0.0")
 public interface Context<S extends Source> {
 
-    ImperatConfig<S> imperat();
+    Imperat<S> imperat();
+
+    ImperatConfig<S> imperatConfig();
 
     /**
      * @return The {@link Command} owning this context.

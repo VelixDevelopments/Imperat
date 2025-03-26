@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.ImperatConfig;
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.suggestions.CompletionArg;
@@ -15,8 +15,8 @@ import org.jetbrains.annotations.*;
 final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
 
 
-    DefaultContextFactory(ImperatConfig<S> imperat) {
-        super(imperat);
+    DefaultContextFactory() {
+        super();
     }
 
     /**
@@ -27,6 +27,7 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
      */
     @Override
     public @NotNull Context<S> createContext(
+        @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull ArgumentQueue queue
@@ -36,6 +37,7 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
 
     @Override
     public SuggestionContext<S> createSuggestionContext(
+        @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull ArgumentQueue queue,
@@ -55,7 +57,6 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
         @NotNull CommandUsage<S> usage
     ) {
         return new ResolvedContextImpl<>(
-            imperat,
             plainContext,
             usage
         );

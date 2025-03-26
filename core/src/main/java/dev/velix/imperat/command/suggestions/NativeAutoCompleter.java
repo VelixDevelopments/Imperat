@@ -26,11 +26,12 @@ final class NativeAutoCompleter<S extends Source> extends AutoCompleter<S> {
         var tree = command.tree();
         return tree.tabComplete(imperat, context).thenApply((results)-> {
             var toComplete = context.getArgToComplete();
-            if(!toComplete.isEmpty()) {
                 String input = context.getArgToComplete().value().toLowerCase(); // Lowercase input for case-insensitive comparison
-                return results.stream().filter((str)-> str.toLowerCase().startsWith(input)).toList();
-            }
-            return results;
+                return results.stream()
+                        .distinct()
+                        .sorted(String.CASE_INSENSITIVE_ORDER)
+                        .filter((str)-> toComplete.isEmpty() || str.toLowerCase().startsWith(input))
+                        .toList();
         });
     }
 

@@ -20,6 +20,7 @@ import dev.velix.imperat.annotations.Suggest;
 import dev.velix.imperat.annotations.SuggestionProvider;
 import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.annotations.Values;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.MethodCommandExecutor;
@@ -30,6 +31,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandCoordinator;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.ConstrainedParameterDecorator;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.StrictParameterList;
 import dev.velix.imperat.command.parameters.type.ParameterType;
@@ -51,18 +53,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisitor<S> {
 
 
     private final ImperatConfig<S> config;
+    private final static String VALUES_SEPARATION_CHAR = "\\|";
 
     SimpleCommandClassVisitor(Imperat<S> imperat, AnnotationParser<S> parser, ElementSelector<MethodElement> methodSelector) {
         super(imperat, parser, methodSelector);
@@ -583,6 +590,27 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             );
         }
 
+
+        if(element.isAnnotationPresent(Values.class)) {
+            Values valuesAnnotation = element.getAnnotation(Values.class);
+            assert valuesAnnotation != null;
+
+            Set<String> values = Arrays.stream(valuesAnnotation.value())
+                    .distinct()
+                    .sorted()
+                    .map(config::replacePlaceholders)
+                    .flatMap(replaced -> {
+                        if (replaced.contains("|")) {
+                            return Arrays.stream(replaced.split(VALUES_SEPARATION_CHAR));
+                        } else {
+                            return Stream.of(replaced);
+                        }
+                    })
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            type = ConstrainedParameterDecorator.of(type, values, valuesAnnotation.caseSensitive());
+        }
+
         CommandParameter<S> param =
             AnnotationParameterDecorator.decorate(
                 CommandParameter.of(
@@ -599,6 +627,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 param, NumericRange.of(range.min(), range.max())
             );
         }
+
 
         return param;
     }

@@ -127,7 +127,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             //ImperatDebugger.debug("Last-argument='%s'", args.getLast());
 
             CompletionArg arg = new CompletionArg(args.isEmpty() ? "" : args.getLast(), args.size() - 1);
-            SuggestionContext<S> ctx = dispatcher.config().getContextFactory().createSuggestionContext(source, command, args, arg);
+            SuggestionContext<S> ctx = dispatcher.config().getContextFactory().createSuggestionContext(dispatcher, source, command, args, arg);
 
             return dispatcher.config().getParameterSuggestionResolver(parameter).asyncAutoComplete(ctx, parameter)
                 .thenCompose((results) -> {

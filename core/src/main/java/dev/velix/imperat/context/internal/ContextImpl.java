@@ -1,5 +1,6 @@
 package dev.velix.imperat.context.internal;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.ArgumentQueue;
@@ -9,23 +10,31 @@ import org.jetbrains.annotations.*;
 
 class ContextImpl<S extends Source> implements Context<S> {
 
+    protected final Imperat<S> imperat;
     protected final ImperatConfig<S> dispatcher;
 
     private final Command<S> commandUsed;
     private final S source;
     private final ArgumentQueue raw;
 
-    public ContextImpl(ImperatConfig<S> dispatcher, Command<S> commandUsed, S source, ArgumentQueue raw) {
-        this.dispatcher = dispatcher;
+    public ContextImpl(Imperat<S> imperat, Command<S> commandUsed, S source, ArgumentQueue raw) {
+        this.imperat = imperat;
+        this.dispatcher = imperat.config();
         this.commandUsed = commandUsed;
         this.source = source;
         this.raw = raw;
     }
 
     @Override
-    public ImperatConfig<S> imperat() {
+    public Imperat<S> imperat() {
+        return imperat;
+    }
+
+    @Override
+    public ImperatConfig<S> imperatConfig() {
         return dispatcher;
     }
+
 
     @Override
     public @NotNull Command<S> command() {
