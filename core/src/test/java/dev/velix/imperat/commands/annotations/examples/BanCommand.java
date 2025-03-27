@@ -8,7 +8,6 @@ import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.Range;
-import dev.velix.imperat.annotations.Suggest;
 import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.annotations.Values;

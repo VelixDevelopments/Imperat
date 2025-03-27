@@ -35,7 +35,6 @@ import dev.velix.imperat.command.parameters.ConstrainedParameterTypeDecorator;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.StrictParameterList;
 import dev.velix.imperat.command.parameters.type.ParameterType;
-import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.FlagData;

@@ -1,7 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.type.ParameterEnum;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;

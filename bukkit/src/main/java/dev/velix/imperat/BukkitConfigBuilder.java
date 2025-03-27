@@ -14,7 +14,6 @@ import dev.velix.imperat.type.ParameterTargetSelector;
 import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
