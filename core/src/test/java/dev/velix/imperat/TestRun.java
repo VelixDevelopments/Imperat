@@ -240,7 +240,7 @@ public class TestRun {
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", "-s", ""});
         var res = results.join();
-        Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h"), res.stream());
+        Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h", "[reason...]"), res.stream());
     }
 
     @Test
