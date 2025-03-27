@@ -5,6 +5,7 @@ import dev.velix.imperat.command.parameters.InputParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.jetbrains.annotations.*;
 
 public final class NumericParameterDecorator<S extends Source> extends InputParameter<S> implements NumericParameter<S> {
@@ -17,13 +18,14 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
             parameter.name(), parameter.type(), parameter.permission(),
             parameter.description(), parameter.isOptional(), parameter.isFlag(),
             parameter.isFlag(), parameter.getDefaultValueSupplier(),
-            parameter.getSuggestionResolver()
+            loadSuggestionResolver(parameter, range)
         );
         this.parameter = parameter;
         this.range = range;
     }
 
-    public static <S extends Source> NumericParameterDecorator<S> decorate(CommandParameter<S> parameter, NumericRange range) {
+
+    public static <S extends Source> NumericParameterDecorator<S> decorate(@NotNull CommandParameter<S> parameter, @NotNull NumericRange range) {
         return new NumericParameterDecorator<>(parameter, range);
     }
 
@@ -45,6 +47,24 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
     @Override
     public @Nullable NumericRange getRange() {
         return range;
+    }
+
+    private static <S extends Source> SuggestionResolver<S> loadSuggestionResolver(CommandParameter<S> parameter, NumericRange range) {
+        var def = parameter.getSuggestionResolver();
+        if(parameter.getSuggestionResolver() != null|| (range.getMin() == Double.MIN_VALUE && range.getMax() == Double.MAX_VALUE)) {
+            return def;
+        }
+
+        String suggestion;
+        if(range.getMin() != Double.MIN_VALUE && range.getMax() == Double.MAX_VALUE) {
+            suggestion = range.getMin() + "";
+        }
+        else if(range.getMin() == Double.MIN_VALUE) {
+            suggestion = range.getMax() + "";
+        }else {
+            suggestion = range.getMin() + "-" + range.getMax();
+        }
+        return SuggestionResolver.plain(suggestion);
     }
 
 }

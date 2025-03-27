@@ -113,8 +113,9 @@ final class SmartUsageResolve<S extends Source> {
                 continue;
             } else if (Patterns.isInputFlag(currentRaw) && command.getFlagFromRaw(currentRaw).isPresent()) {
                 //FOUND FREE FLAG
-                ParameterFlag<S> parameterFlag = ParameterTypes.flag();
-                context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, command.getFlagFromRaw(currentRaw).get()));
+                var flagData = command.getFlagFromRaw(currentRaw).get();
+                ParameterFlag<S> parameterFlag = ParameterTypes.flag(flagData);
+                context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, flagData));
                 stream.skipRaw();
                 continue;
             }
@@ -155,7 +156,7 @@ final class SmartUsageResolve<S extends Source> {
             var freeFlagData = command.getFlagFromRaw(currentRaw);
             if (Patterns.isInputFlag(currentRaw) && freeFlagData.isPresent()) {
                 FlagData<S> freeFlag = freeFlagData.get();
-                var value = ParameterTypes.<S>flag().resolveFreeFlag(context, stream, freeFlag);
+                var value = ParameterTypes.flag(freeFlag).resolveFreeFlag(context, stream, freeFlag);
                 context.resolveFlag(value);
             }
             stream.skipRaw();

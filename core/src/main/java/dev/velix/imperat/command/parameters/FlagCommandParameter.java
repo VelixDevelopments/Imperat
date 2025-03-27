@@ -25,7 +25,7 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
         SuggestionResolver<S> inputValueSuggestionResolver
     ) {
         super(
-            flag.name(), ParameterTypes.flag(),
+            flag.name(), ParameterTypes.flag(flag),
             permission, description,
             true, true, false,
             OptionalValueSupplier.empty(TypeWrap.of(CommandFlag.class)),

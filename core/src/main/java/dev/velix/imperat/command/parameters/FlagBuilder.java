@@ -20,7 +20,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     private SuggestionResolver<S> suggestionResolver;
 
     private FlagBuilder(String name, ParameterType<S, T> inputType) {
-        super(name, ParameterTypes.flag(), true, false);
+        super(name, ParameterTypes.flag(FlagData.create(name, List.of(), inputType)), true, false);
         this.inputType = inputType;
     }
 
@@ -67,6 +67,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
         this.free = free;
         return this;
     }
+
 
     @Override
     @SuppressWarnings("unchecked")

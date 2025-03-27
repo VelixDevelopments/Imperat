@@ -10,6 +10,7 @@ import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,7 +61,7 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
      */
     @Override
     public SuggestionResolver<S> getSuggestionResolver() {
-        return SuggestionResolver.plain(suggestions);
+        return suggestions.isEmpty() ?  null : SuggestionResolver.plain(suggestions);
     }
 
     /**

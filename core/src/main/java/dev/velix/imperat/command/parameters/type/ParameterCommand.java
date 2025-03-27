@@ -10,10 +10,14 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
 
+import java.util.List;
+
 public final class ParameterCommand<S extends Source> extends BaseParameterType<S, Command<S>> {
-    ParameterCommand() {
+    ParameterCommand(String name, List<String> aliases) {
         super(new TypeWrap<>() {
         });
+        suggestions.add(name);
+        suggestions.addAll(aliases);
     }
 
     @Override
@@ -36,5 +40,4 @@ public final class ParameterCommand<S extends Source> extends BaseParameterType<
         }
         return cmd;
     }
-
 }

@@ -7,6 +7,8 @@ import dev.velix.imperat.annotations.Greedy;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.Permission;
+import dev.velix.imperat.annotations.Range;
+import dev.velix.imperat.annotations.Suggest;
 import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.annotations.Values;
@@ -38,6 +40,11 @@ public final class BanCommand {
             source.reply("NOT SILENT= " + msg);
         else
             source.reply("SILENT= " + msg);
+    }
+
+    @Command("printnum")
+    public void printNum(TestSource source, @Named("num") @Range(min = 1.0) int num) {
+        source.reply("NUM= " + num);
     }
 
 }

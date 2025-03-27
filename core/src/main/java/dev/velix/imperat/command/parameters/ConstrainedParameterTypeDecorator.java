@@ -8,6 +8,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
 import java.lang.reflect.Type;
@@ -25,6 +26,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
         this.original = original;
         this.allowedValues = allowedValues;
         this.caseSensitive = caseSensitive;
+        allowedValues.forEach(original::withSuggestions);
     }
 
     public static <S extends Source, T> ConstrainedParameterTypeDecorator<S, T> of(ParameterType<S, T> original, Set<String> allowedValues, boolean caseSensitive) {
@@ -59,6 +61,12 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
         }
         return false;
     }
+
+    @Override
+    public SuggestionResolver<S> getSuggestionResolver() {
+        return original.getSuggestionResolver();
+    }
+
     @Override
     public boolean isRelatedToType(Type type) {
         return original.isRelatedToType(type);

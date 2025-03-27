@@ -15,8 +15,11 @@ import org.jetbrains.annotations.*;
 
 public class ParameterFlag<S extends Source> extends BaseParameterType<S, CommandFlag> {
 
-    protected ParameterFlag() {
+    protected ParameterFlag(FlagData<S> flagData) {
         super(TypeWrap.of(CommandFlag.class));
+        suggestions.add("-" + flagData.name());
+        for(var alias : flagData.aliases())
+            suggestions.add("-" + alias);
     }
 
     public CommandFlag resolveFreeFlag(

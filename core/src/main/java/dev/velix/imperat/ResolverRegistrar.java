@@ -8,6 +8,7 @@ import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.resolvers.ContextResolver;
 import dev.velix.imperat.resolvers.SourceResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
 
@@ -58,12 +59,18 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
         SuggestionResolver<S> parameterSpecificResolver = parameter.getSuggestionResolver();
         //ImperatDebugger.debug("Getting the suggestion resolver for param '%s'", parameter.format());
         if (parameterSpecificResolver == null) {
-            //ImperatDebugger.debug("Found no specific argument suggestion resolver for param '%s'", parameter.format());
-            var resolverByType = getSuggestionResolverByType(parameter.valueType());
-            //ImperatDebugger.debug("Found resolver by type for param '%s'", parameter.format() );
+            ImperatDebugger.debug("Found no specific argument suggestion resolver for param '%s'", parameter.format());
+            var resolverByType = parameter.type().getSuggestionResolver();
+
+            if(resolverByType != null)
+                ImperatDebugger.debug("Found resolver by type for param '%s'", parameter.format() );
+            else
+                ImperatDebugger.debug("Resolving suggestion in the form of the parameter's literal format !");
             return Objects.requireNonNullElseGet(resolverByType, () -> SuggestionResolver.plain(Collections.singletonList(parameter.format())));
-        } else
+        } else {
+            ImperatDebugger.debug("Found specific parameter suggestion for param '%s'", parameter.format());
             return parameterSpecificResolver;
+        }
     }
 
     /**

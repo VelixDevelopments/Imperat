@@ -119,9 +119,10 @@ public final class CommandTree<S extends Source> {
             node = child;
         }
 
-        //ImperatDebugger.debug("Node-data= '%s'", node.data.format());
+        ImperatDebugger.debug("Node-data= '%s'", node.data.format());
         CompletableFuture<List<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
         for (var child : node.getChildren()) {
+            ImperatDebugger.debug("collecting from child '%s'", child.data.format());
             future = future.thenCompose((results) -> addChildResults(imperat, context, child, results));
         }
         return future;
@@ -135,17 +136,19 @@ public final class CommandTree<S extends Source> {
         ParameterNode<S, ?> node,
         List<String> oldResults
     ) {
+
         SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
-        return resolver.asyncAutoComplete(context, node.data)
-            .thenApply((results) -> {
-                List<String> data = new ArrayList<>(results);
-                data.removeIf((entry) -> !node.matchesInput(entry));
-                return data;
-            })
-            .thenApply((res) -> {
-                oldResults.addAll(res);
-                return oldResults;
-            });
+        var currentNodeFutureResults =  resolver.asyncAutoComplete(context, node.data)
+                .thenApply((res) -> {
+                    oldResults.addAll(res);
+                    return oldResults;
+                });
+
+        var optionalChild = node.getChild(ParameterNode::isOptional);
+        if(optionalChild == null)
+            return currentNodeFutureResults;
+
+        return currentNodeFutureResults.thenCompose((results)-> addChildResults(imperat, context, optionalChild, currentNodeFutureResults.join()));
     }
 
 

@@ -35,6 +35,7 @@ import dev.velix.imperat.command.parameters.ConstrainedParameterTypeDecorator;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.StrictParameterList;
 import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.FlagData;
@@ -476,7 +477,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
 
     @SuppressWarnings("unchecked")
-    private <T> CommandParameter<S> loadParameter(
+    private <T, N extends Number> CommandParameter<S> loadParameter(
         @NotNull ParseElement<?> paramElement
     ) {
 

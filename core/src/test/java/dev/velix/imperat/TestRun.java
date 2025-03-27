@@ -234,6 +234,56 @@ public class TestRun {
     }
 
     @Test
+    public void testAutoCompletion5() {
+        var cmd = IMPERAT.getCommand("ban");
+        assert cmd != null;
+        debugCommand(cmd);
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", "-s", ""});
+        var res = results.join();
+        Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h"), res.stream());
+    }
+
+    @Test
+    public void testAutoCompletion6() {
+        var cmd = IMPERAT.getCommand("ban");
+        assert cmd != null;
+        debugCommand(cmd);
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", ""});
+        var res = results.join();
+        Assertions.assertLinesMatch(Stream.of("-silent", "-s", "1d", "12h", "2h", "[reason...]"), res.stream());
+    }
+
+    @Test
+    public void testAutoCompletion7() {
+        var cmd = IMPERAT.getCommand("ban");
+        assert cmd != null;
+        debugCommand(cmd);
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", "-s", ""});
+        var res = results.join();
+        Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h", "[reason...]"), res.stream());
+    }
+
+    @Test
+    public void testAutoCompletion8() {
+        var cmd = IMPERAT.getCommand("ban");
+        assert cmd != null;
+        debugCommand(cmd);
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", "-s", "12h", ""});
+        var res = results.join();
+        Assertions.assertLinesMatch(Stream.of("[reason...]"), res.stream());
+    }
+
+    @Test
+    public void testAutoCompletion9() {
+        var cmd = IMPERAT.getCommand("printnum");
+        assert cmd != null;
+        debugCommand(cmd);
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{""});
+        var res = results.join();
+        Assertions.assertLinesMatch(Stream.of("1.0"), res.stream());
+    }
+
+    @Test
     public void testOptionalArgCmd() {
         var cmd = IMPERAT.getCommand("opt");
         assert cmd != null;

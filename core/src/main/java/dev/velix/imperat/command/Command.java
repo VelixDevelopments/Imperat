@@ -82,7 +82,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
 
     @Override
     default @NotNull ParameterType<S, ?> type() {
-        return ParameterTypes.command();
+        return ParameterTypes.command(name(), aliases());
     }
 
     /**

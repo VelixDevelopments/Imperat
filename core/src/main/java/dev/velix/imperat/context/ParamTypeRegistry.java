@@ -1,9 +1,10 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.type.ParameterEnum;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
-import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
@@ -12,17 +13,18 @@ import org.jetbrains.annotations.*;
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public final class ParamTypeRegistry<S extends Source> extends Registry<Type, ParameterType<S, ?>> {
+@SuppressWarnings({"rawtypes", "unchecked"})
+public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Supplier<ParameterType>> {
 
 
     private ParamTypeRegistry() {
         super();
-        registerResolver(Boolean.class, ParameterTypes.bool());
-        registerResolver(String.class, ParameterTypes.string());
-        registerResolver(UUID.class, ParameterTypes.uuid());
-        registerResolver(CommandFlag.class, ParameterTypes.flag());
+        registerResolver(Boolean.class, ParameterTypes::bool);
+        registerResolver(String.class, ParameterTypes::string);
+        registerResolver(UUID.class, ParameterTypes::uuid);
 
     }
 
@@ -30,26 +32,25 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Pa
         return new ParamTypeRegistry<>();
     }
 
-    public <T> void registerResolver(Type type, ParameterType<S, T> resolver) {
+    public void registerResolver(Type type, Supplier<ParameterType> resolver) {
         if (TypeUtility.areRelatedTypes(type, Enum.class)) return;
         setData(type, resolver);
     }
 
-    @SuppressWarnings("unchecked")
-    public Optional<ParameterType<S, ?>> getResolver(Type type) {
+    public <T> Optional<ParameterType<S, T>> getResolver(Type type) {
         if (TypeUtility.isNumericType(TypeWrap.of(type)))
-            return Optional.of(ParameterTypes.numeric((Class<? extends Number>) type));
+            return Optional.of((ParameterType<S, T>) ParameterTypes.numeric((Class<? extends Number>) type));
 
-        return Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type)).orElseGet(() -> {
+        return Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type)).map(Supplier::get).orElseGet(() -> {
             if (TypeUtility.areRelatedTypes(type, Enum.class)) {
                 ParameterEnum<S> preloadedEnumType = new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
-                registerResolver(type, preloadedEnumType);
+                registerResolver(type, ()-> preloadedEnumType);
                 return preloadedEnumType;
             }
 
             for (var registeredType : getKeys()) {
                 if (TypeUtility.areRelatedTypes(type, registeredType)) {
-                    return getData(registeredType).orElse(null);
+                    return getData(registeredType).map((s)-> ((ParameterType<S, T>)s.get()) ).orElse(null);
                 }
             }
             return null;

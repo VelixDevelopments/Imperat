@@ -360,7 +360,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      */
     @Override
     public <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver) {
-        paramTypeRegistry.registerResolver(type, resolver);
+        paramTypeRegistry.registerResolver(type, ()-> resolver);
     }
 
 
