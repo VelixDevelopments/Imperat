@@ -202,6 +202,8 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
      */
     boolean isGreedy();
 
+    boolean isGreedyString();
+
     /**
      * @return checks whether this usage param is a command name
      */

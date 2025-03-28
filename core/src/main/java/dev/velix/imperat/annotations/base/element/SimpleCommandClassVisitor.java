@@ -491,7 +491,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             throw new IllegalStateException("both @Flag and @Switch at the same time !");
         }
 
-        TypeWrap<T> parameterTypeWrap = TypeWrap.of((Class<T>) parameter.getParameterizedType());
+        TypeWrap<T> parameterTypeWrap = (TypeWrap<T>) TypeWrap.of(parameter.getParameterizedType());
         var type = (ParameterType<S, T>) config.getParameterType(parameterTypeWrap.getType());
         if (type == null) {
             throw new IllegalArgumentException("Unknown type detected '" + parameterTypeWrap.getType().getTypeName() + "'");

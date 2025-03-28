@@ -5,6 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.EmptyCmd;
+import dev.velix.imperat.commands.Test2Command;
 import dev.velix.imperat.commands.annotations.KitCommand;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.examples.AnnotatedGroupCommand;
@@ -57,6 +58,7 @@ public class TestRun {
         IMPERAT.registerCommand(new MessageCmd());
         IMPERAT.registerCommand(new EmptyCmd());
         IMPERAT.registerCommand(new KitCommand());
+        IMPERAT.registerCommand(new Test2Command());
         ImperatDebugger.setEnabled(true);
     }
 
@@ -331,5 +333,35 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s 1d"));
+    }
+
+    @Test
+    public void testArrayParamExecution() {
+        var cmd = IMPERAT.getCommand("test2");
+        assert cmd != null;
+        debugCommand(cmd);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test2", "array hi bro hello man"));
+        // /test2 hi, hello man
+        // /test2 <myList>
+    }
+
+    @Test
+    public void testCollectionParamExecution() {
+        var cmd = IMPERAT.getCommand("test2");
+        assert cmd != null;
+        debugCommand(cmd);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test2", "collection hi bro hello man"));
+        // /test2 hi, hello man
+        // /test2 <myList>
+    }
+
+    @Test
+    public void testMapParamExecution() {
+        var cmd = IMPERAT.getCommand("test2");
+        assert cmd != null;
+        debugCommand(cmd);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test2", "map hi,hello hey,man"));
+        // /test2 hi, hello man
+        // /test2 <myList>
     }
 }

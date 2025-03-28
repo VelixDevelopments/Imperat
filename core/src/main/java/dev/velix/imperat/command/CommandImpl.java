@@ -209,6 +209,11 @@ final class CommandImpl<S extends Source> implements Command<S> {
         throw new UnsupportedOperationException("A command cannot be treated as a flag !");
     }
 
+    @Override
+    public boolean isGreedyString() {
+        return false;
+    }
+
     /**
      * Fetches the suggestion resolver linked to this
      * command parameter.

@@ -2,6 +2,9 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
+import dev.velix.imperat.command.parameters.type.ArrayParameterType;
+import dev.velix.imperat.command.parameters.type.CollectionParameterType;
+import dev.velix.imperat.command.parameters.type.MapParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -152,12 +155,19 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      */
     @Override
     public boolean isGreedy() {
-        if (this.type.type() != String.class && greedy) {
+        /*if ( (this.type.type() != String.class) && greedy) {
             throw new IllegalStateException(
                 String.format("Usage parameter '%s' cannot be greedy while having value-valueType '%s'", name, valueType().getTypeName())
             );
-        }
-        return greedy;
+        }*/
+        return greedy || (this.type instanceof CollectionParameterType<?,?,?>)
+                || (this.type instanceof ArrayParameterType<?,?>)
+                || (this.type instanceof MapParameterType<?,?,?,?>);
+    }
+
+    @Override
+    public boolean isGreedyString() {
+        return this.type.equalsExactly(String.class) && greedy;
     }
 
     @Override

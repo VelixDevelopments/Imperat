@@ -30,7 +30,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
 
         if (!isQuoteChar(current)) {
 
-            if (parameter != null && parameter.isGreedy()) {
+            if (parameter != null && parameter.isGreedyString()) {
                 handleGreedy(builder, inputStream);
             } else {
                 builder.append(inputStream.currentRaw().orElse(""));

@@ -65,6 +65,18 @@ public abstract class TypeWrap<T> {
         return null;
     }
 
+    public Type[] getParameterizedTypes() {
+        if(type == null) {
+            return null;
+        }
+
+        if(type instanceof ParameterizedType parameterizedType) {
+            return parameterizedType.getActualTypeArguments();
+        }else {
+            return null;
+        }
+    }
+
     public Type getType() {
         return type;
     }

@@ -249,8 +249,10 @@ public final class CommandTree<S extends Source> {
             }
         } else {
             ImperatDebugger.debug("We reached the end of the node, at node=%s", currentNode.format());
+
+
             //node is the last
-            if (isLastDepth(depth, input)) {
+            if (isLastDepth(depth, input) || currentNode.data.isGreedy()) {
                 //Last depth and last node => perfecto
                 commandDispatch.result(CommandDispatch.Result.COMPLETE);
             } else {
