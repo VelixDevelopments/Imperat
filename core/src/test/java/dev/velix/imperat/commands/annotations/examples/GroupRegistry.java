@@ -13,6 +13,10 @@ public final class GroupRegistry extends Registry<String, Group> {
     GroupRegistry() {
         Group g = new Group("member");
         setData("member", g);
+        setData("mod", new Group("mod"));
+        setData("srmod", new Group("srmod"));
+        setData("owner", new Group("owner"));
+
         setGroup("mqzen", g);
     }
 

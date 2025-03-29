@@ -59,6 +59,7 @@ public class TestRun {
         IMPERAT.registerCommand(new EmptyCmd());
         IMPERAT.registerCommand(new KitCommand());
         IMPERAT.registerCommand(new Test2Command());
+
         ImperatDebugger.setEnabled(true);
     }
 
@@ -340,7 +341,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test2");
         assert cmd != null;
         debugCommand(cmd);
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test2", "array hi bro hello man"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test2", "array member mod srmod owner"));
         // /test2 hi, hello man
         // /test2 <myList>
     }

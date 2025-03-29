@@ -42,7 +42,7 @@ import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.*;
-
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -361,6 +361,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
     @Override
     public <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver) {
         paramTypeRegistry.registerResolver(type, ()-> resolver);
+        paramTypeRegistry.registerArrayInitializer(type, (length) -> (Object[]) Array.newInstance((Class<T>) type, length));
     }
 
 
