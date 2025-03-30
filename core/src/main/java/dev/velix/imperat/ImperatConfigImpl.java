@@ -45,10 +45,12 @@ import org.jetbrains.annotations.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
 
@@ -359,9 +361,43 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      * @param resolver the resolver for this value
      */
     @Override
-    public <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver) {
+    public <T> void registerParamType(Class<T> type, @NotNull ParameterType<S, T> resolver) {
+        Preconditions.notNull(type, "type");
+        Preconditions.notNull(resolver, "resolver");
         paramTypeRegistry.registerResolver(type, ()-> resolver);
-        paramTypeRegistry.registerArrayInitializer(type, (length) -> (Object[]) Array.newInstance((Class<T>) type, length));
+        paramTypeRegistry.registerArrayInitializer(type, (length) -> (Object[]) Array.newInstance(type, length));
+    }
+
+    /**
+     * Registers a supplier function that provides new instances of a specific Collection type.
+     * This allows the framework to create appropriate collection instances during deserialization
+     * or initialization processes.
+     *
+     * @param collectionType      the Class object representing the collection type
+     * @param newInstanceSupplier a Supplier that creates new instances of the collection type
+     * @throws NullPointerException     if collectionType or newInstanceSupplier is null
+     */
+    @Override
+    public <C extends Collection<?>> void registerCollectionInitializer(Class<C> collectionType, Supplier<C> newInstanceSupplier) {
+        Preconditions.notNull(collectionType, "collectionType");
+        Preconditions.notNull(newInstanceSupplier, "newInstanceSupplier");
+        paramTypeRegistry.registerCollectionInitializer(collectionType, newInstanceSupplier);
+    }
+
+    /**
+     * Registers a supplier function that provides new instances of a specific Map type.
+     * This allows the framework to create appropriate map instances during deserialization
+     * or initialization processes.
+     *
+     * @param mapType             the Class object representing the map type
+     * @param newInstanceSupplier a Supplier that creates new instances of the map type
+     * @throws NullPointerException     if mapType or newInstanceSupplier is null
+     */
+    @Override
+    public <M extends Map<?, ?>> void registerMapInitializer(Class<M> mapType, Supplier<M> newInstanceSupplier) {
+        Preconditions.notNull(mapType, "mapType");
+        Preconditions.notNull(newInstanceSupplier, "newInstanceSupplier");
+        paramTypeRegistry.registerMapInitializer(mapType, newInstanceSupplier);
     }
 
 
@@ -550,7 +586,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void handleThrowable(
+    public void handleExecutionThrowable(
         @NotNull final Throwable throwable,
         final Context<S> context,
         final Class<?> owning,

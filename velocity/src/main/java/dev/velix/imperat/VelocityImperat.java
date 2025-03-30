@@ -59,7 +59,7 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
             InternalVelocityCommand internalCmd = new InternalVelocityCommand(this, command, manager);
             manager.register(internalCmd.getMeta(), internalCmd);
         } catch (Exception ex) {
-            config.handleThrowable(ex, null, VelocityImperat.class, "registerCommand");
+            config.handleExecutionThrowable(ex, null, VelocityImperat.class, "registerCommand");
         }
     }
 

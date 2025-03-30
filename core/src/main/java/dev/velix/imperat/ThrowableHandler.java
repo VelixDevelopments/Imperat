@@ -29,7 +29,7 @@ public sealed interface ThrowableHandler<S extends Source> permits ImperatConfig
      * @param owning     The class where the throwable originated, used for logging and debugging purposes.
      * @param methodName The name of the method where the throwable was thrown, used for logging and debugging.
      */
-    void handleThrowable(
+    void handleExecutionThrowable(
         final Throwable throwable,
         final Context<S> context,
         final Class<?> owning,

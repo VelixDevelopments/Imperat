@@ -15,6 +15,7 @@ import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -31,7 +32,6 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
 
     BukkitConfigBuilder(Plugin plugin) {
         this.plugin = plugin;
-
         config.setPermissionResolver(DEFAULT_PERMISSION_RESOLVER);
         addThrowableHandlers();
         registerSourceResolvers();
@@ -67,8 +67,8 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         config.registerParamType(Player.class, new ParameterPlayer());
         config.registerParamType(OfflinePlayer.class, new ParameterOfflinePlayer());
         config.registerParamType(TargetSelector.class, new ParameterTargetSelector());
-        var worldClass = Reflections.getClass("org.bukkit.World");
-        config.registerParamType(worldClass, new ParameterWorld(worldClass));
+        //var worldClass = Reflections.getClass("org.bukkit.World");
+        config.registerParamType(World.class, new ParameterWorld(World.class));
     }
 
     public void setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {

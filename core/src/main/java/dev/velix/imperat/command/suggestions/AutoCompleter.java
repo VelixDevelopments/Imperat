@@ -58,7 +58,7 @@ public abstract class AutoCompleter<S extends Source> {
         //ImperatDebugger.debug("auto completing !");
         return autoComplete(dispatcher, context)
             .exceptionally((ex) -> {
-                dispatcher.config().handleThrowable(ex, context, AutoCompleter.class, "autoComplete(dispatcher, sender, args)");
+                dispatcher.config().handleExecutionThrowable(ex, context, AutoCompleter.class, "autoComplete(dispatcher, sender, args)");
                 return Collections.emptyList();
             });
     }

@@ -11,7 +11,6 @@ import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -141,12 +140,9 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
     <E, C extends Collection<E>> Supplier<C> initializeNewCollection(TypeWrap<?> fullType) {
         var collectionType = fullType.getRawType();
         var data = collectionInitializer.getData(collectionType);
-        if(data.isEmpty()) {
-            return (Supplier<C>) collectionInitializer.search((ctype, supplier)-> TypeWrap.of(collectionType).isSupertypeOf(ctype))
-                    .orElseThrow(()-> new IllegalArgumentException("Unknown collection-type detected '" + collectionType.getTypeName() + "'"));
-        }else {
-            return (Supplier<C>) data.get();
-        }
+        return data.map(collectionSupplier -> (Supplier<C>) collectionSupplier)
+                .orElseGet(() -> (Supplier<C>) collectionInitializer.search((ctype, supplier) -> TypeWrap.of(collectionType).isSupertypeOf(ctype))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown collection-type detected '" + collectionType.getTypeName() + "'")));
     }
 
     Function<Integer, Object[]> initializeNewArray(TypeWrap<?> componentType) {
@@ -173,12 +169,9 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
     <K, V, M extends Map<K, V>> Supplier<M> initializeNewMap(TypeWrap<?> fullType) {
         Type mapRawType = fullType.getRawType();
         var initializer = mapInitializer.getData(mapRawType);
-        if(initializer.isEmpty()) {
-            return (Supplier<M>) mapInitializer.search((ctype, supplier)-> TypeWrap.of(mapRawType).isSupertypeOf(ctype))
-                    .orElseThrow(()-> new IllegalArgumentException("Unknown map-type detected '" + mapRawType.getTypeName() + "'"));
-        }else {
-            return (Supplier<M>) initializer.get();
-        }
+        return initializer.map(mapSupplier -> (Supplier<M>) mapSupplier)
+                .orElseGet(() -> (Supplier<M>) mapInitializer.search((ctype, supplier) -> TypeWrap.of(mapRawType).isSupertypeOf(ctype))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown map-type detected '" + mapRawType.getTypeName() + "'")));
     }
 
     private <E, C extends Collection<E>> CollectionParameterType<S, E, C> getCollectionResolver(TypeWrap<?> type) {
@@ -214,15 +207,19 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
         return new MapParameterType<>((TypeWrap<M>) type, initializeNewMap(type), keyResolver, valueResolver);
     }
 
-    public <E, C extends Collection<E>> void registerCollectionInitializer(Class<C> type, Supplier<C> initializerFunction) {
+    public <C extends Collection<?>> void registerCollectionInitializer(Class<C> type, Supplier<C> initializerFunction) {
         collectionInitializer.setData(type, (Supplier<Collection<?>>) initializerFunction);
     }
 
-    public void registerArrayInitializer(Type type, Function<Integer, Object[]> initializerFunction) {
+    public <ArrayComponent> void registerArrayInitializer(Class<ArrayComponent> type, Function<Integer, Object[]> initializerFunction) {
+        var sample = initializerFunction.apply(0);
+        if(!TypeUtility.matches(sample.getClass().getComponentType(), type)) {
+            throw new IllegalArgumentException("Array initializer type '%s' does not match '%s'".formatted(type.getName(), sample.getClass().getComponentType()));
+        }
         arrayInitializer.setData(type, initializerFunction);
     }
 
-    public <K, V, M extends Map<K, V>>  void registerMapInitializer(Type type, Supplier<M> initializerFunction) {
+    public <M extends Map<?, ?>>  void registerMapInitializer(Class<M> type, Supplier<M> initializerFunction) {
         mapInitializer.setData(type, (Supplier<Map<?, ?>>) initializerFunction);
     }
 

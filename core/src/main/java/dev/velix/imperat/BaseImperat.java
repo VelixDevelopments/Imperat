@@ -220,7 +220,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         try {
             return handleExecution(context);
         } catch (Throwable ex) {
-            config.handleThrowable(ex, context, BaseImperat.class, "dispatch");
+            config.handleExecutionThrowable(ex, context, BaseImperat.class, "dispatch");
             return CommandDispatch.Result.UNKNOWN;
         }
     }
@@ -338,7 +338,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             try {
                 preProcessor.process(this, context, usage);
             } catch (Throwable ex) {
-                config.handleThrowable(
+                config.handleExecutionThrowable(
                     ex,
                     context, preProcessor.getClass(),
                     "CommandPreProcessor#process"
@@ -355,7 +355,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             try {
                 postProcessor.process(this, context);
             } catch (Throwable ex) {
-                config.handleThrowable(
+                config.handleExecutionThrowable(
                     ex,
                     context, postProcessor.getClass(),
                     "CommandPostProcessor#process"

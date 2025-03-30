@@ -101,7 +101,7 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
     }
 
     // Parameter Type
-    public <T> ConfigBuilder<S, I> parameterType(Type type, ParameterType<S, T> resolver) {
+    public <T> ConfigBuilder<S, I> parameterType(Class<T> type, ParameterType<S, T> resolver) {
         config.registerParamType(type, resolver);
         return this;
     }

@@ -13,8 +13,11 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfig {
 
@@ -44,8 +47,31 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
      * @param resolver the resolver for this value
      * @param <T>      the valueType of value being resolved from context
      */
-    <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver);
+    <T> void registerParamType(Class<T> type, @NotNull ParameterType<S, T> resolver);
 
+    /**
+     * Registers a supplier function that provides new instances of a specific Collection type.
+     * This allows the framework to create appropriate collection instances during deserialization
+     * or initialization processes.
+     *
+     * @param <C> the type of Collection to be initialized
+     * @param collectionType the Class object representing the collection type
+     * @param newInstanceSupplier a Supplier that creates new instances of the collection type
+     * @throws NullPointerException if collectionType or newInstanceSupplier is null
+     */
+    <C extends Collection<?>> void registerCollectionInitializer(Class<C> collectionType, Supplier<C> newInstanceSupplier);
+
+    /**
+     * Registers a supplier function that provides new instances of a specific Map type.
+     * This allows the framework to create appropriate map instances during deserialization
+     * or initialization processes.
+     *
+     * @param <M> the type of Map to be initialized
+     * @param mapType the Class object representing the map type
+     * @param newInstanceSupplier a Supplier that creates new instances of the map type
+     * @throws NullPointerException if mapType or newInstanceSupplier is null
+     */
+    <M extends Map<?, ?>> void registerMapInitializer(Class<M> mapType, Supplier<M> newInstanceSupplier);
 
     /**
      * Fetches the suggestion provider/resolver for a specific valueType of
@@ -66,6 +92,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
                 ImperatDebugger.debug("Found resolver by type for param '%s'", parameter.format() );
             else
                 ImperatDebugger.debug("Resolving suggestion in the form of the parameter's literal format !");
+
             return Objects.requireNonNullElseGet(resolverByType, () -> SuggestionResolver.plain(Collections.singletonList(parameter.format())));
         } else {
             ImperatDebugger.debug("Found specific parameter suggestion for param '%s'", parameter.format());
