@@ -11,11 +11,9 @@ import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.type.ParameterOfflinePlayer;
 import dev.velix.imperat.type.ParameterPlayer;
 import dev.velix.imperat.type.ParameterTargetSelector;
-import dev.velix.imperat.type.ParameterWorld;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -67,8 +65,6 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         config.registerParamType(Player.class, new ParameterPlayer());
         config.registerParamType(OfflinePlayer.class, new ParameterOfflinePlayer());
         config.registerParamType(TargetSelector.class, new ParameterTargetSelector());
-        //var worldClass = Reflections.getClass("org.bukkit.World");
-        config.registerParamType(World.class, new ParameterWorld(World.class));
     }
 
     public void setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {
