@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.context.ArgumentQueue;
@@ -65,7 +66,7 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
 
     /**
      * Determines whether the provided input matches the expected format or criteria
-     * for a given command parameter. this is used during {@link CommandTree#contextMatch(ArgumentQueue)}
+     * for a given command parameter. this is used during {@link CommandTree#contextMatch(ArgumentQueue, ImperatConfig)}
      *
      * @param input     The input string to be matched against the parameter criteria.
      * @param parameter The command parameter that provides context for the input handling.
