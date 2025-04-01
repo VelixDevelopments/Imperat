@@ -1,6 +1,7 @@
 package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -106,7 +107,7 @@ public final class CommandTree<S extends Source> {
             var child = node.getChild((c) -> {
                 boolean hasPerm = (root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver()
                     .hasPermission(source, c.data.permission()));
-                boolean matches = c.matchesInput(raw);
+                boolean matches = this.matchesInput(imperat.config(), c, raw);
 
                 return hasPerm && matches;
             });
@@ -151,7 +152,8 @@ public final class CommandTree<S extends Source> {
 
     //context matching part
     public @NotNull CommandDispatch<S> contextMatch(
-        ArgumentQueue input
+        ArgumentQueue input,
+        ImperatConfig<S> config
     ) {
         if (input.isEmpty()) {
             return CommandDispatch.incomplete();
@@ -162,7 +164,7 @@ public final class CommandTree<S extends Source> {
         for (ParameterNode<S, ?> child : root.getChildren()) {
             CommandDispatch<S> nodeTraversing = CommandDispatch.unknown();
 
-            var traverse = dispatchNode(nodeTraversing, input, child, depth);
+            var traverse = dispatchNode(config, nodeTraversing, input, child, depth);
 
             if (traverse.result() != CommandDispatch.Result.UNKNOWN) {
                 return traverse;
@@ -174,6 +176,7 @@ public final class CommandTree<S extends Source> {
     }
 
     private @NotNull CommandDispatch<S> dispatchNode(
+        ImperatConfig<S> config,
         CommandDispatch<S> commandDispatch,
         ArgumentQueue input,
         @NotNull ParameterNode<S, ?> currentNode,
@@ -186,7 +189,7 @@ public final class CommandTree<S extends Source> {
         String rawInput = input.get(depth);
 
         ImperatDebugger.debug("Current depth=%s, node=%s", depth, currentNode.format());
-        while (!currentNode.matchesInput(rawInput)) {
+        while (!matchesInput(config, currentNode, rawInput)) {
 
             if (currentNode.isOptional()) {
                 commandDispatch.append(currentNode);
@@ -205,7 +208,7 @@ public final class CommandTree<S extends Source> {
             }
             var flag = flagData.get();
             int depthIncrease = flag.isSwitch() ? 1 : 2;
-            return dispatchNode(commandDispatch, input, currentNode, depth + depthIncrease);
+            return dispatchNode(config, commandDispatch, input, currentNode, depth + depthIncrease);
         }
 
         ImperatDebugger.debug("Appending node=%s, at depth=%s", currentNode.format(), depth);
@@ -241,7 +244,7 @@ public final class CommandTree<S extends Source> {
             } else {
                 ImperatDebugger.debug("we still in the middle of the input at depth=%s", depth);
                 for (var child : currentNode.getChildren()) {
-                    var result = dispatchNode(commandDispatch, input, child, depth + 1);
+                    var result = dispatchNode(config, commandDispatch, input, child, depth + 1);
                     if (result.result() == CommandDispatch.Result.COMPLETE) {
                         return result;
                     }
@@ -304,6 +307,7 @@ public final class CommandTree<S extends Source> {
         }
     }
 
+
     private boolean isLastDepth(int index, ArgumentQueue input) {
         return index == input.size() - 1;
     }
@@ -312,4 +316,10 @@ public final class CommandTree<S extends Source> {
         return root;
     }
 
+    private boolean matchesInput(ImperatConfig<S> config, ParameterNode<S, ?> node, String input) {
+        if(node instanceof CommandNode || config.strictCommandTree()) {
+            return node.matchesInput(input);
+        }
+        return true;
+    }
 }

@@ -25,7 +25,7 @@ import org.jetbrains.annotations.*;
 @ApiStatus.AvailableSince("1.0.0")
 public interface UsageVerifier<S extends Source> {
 
-    static <S extends Source> UsageVerifier<S> defaultVerifier() {
+    static <S extends Source> UsageVerifier<S> simpleVerifier() {
         return new SimpleVerifier<>();
     }
 
