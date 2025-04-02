@@ -5,6 +5,7 @@ import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.type.ArrayParameterType;
 import dev.velix.imperat.command.parameters.type.CollectionParameterType;
 import dev.velix.imperat.command.parameters.type.MapParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterCommand;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
@@ -172,7 +173,10 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
 
     @Override
     public Command<S> asCommand() {
-        throw new UnsupportedOperationException("Non-CommandProcessingChain Parameter cannot be converted into a command parameter");
+        if(!(this.type instanceof ParameterCommand<?> asCommandType)) {
+            throw new UnsupportedOperationException("Non-CommandProcessingChain Parameter cannot be converted into a command parameter");
+        }
+        return parentCommand.getSubCommand(asCommandType.getName());
     }
 
 

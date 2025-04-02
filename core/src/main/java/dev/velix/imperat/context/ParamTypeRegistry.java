@@ -1,5 +1,6 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.type.ArrayParameterType;
 import dev.velix.imperat.command.parameters.type.CollectionParameterType;
 import dev.velix.imperat.command.parameters.type.MapParameterType;

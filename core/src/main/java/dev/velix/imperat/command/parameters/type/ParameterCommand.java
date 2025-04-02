@@ -13,9 +13,11 @@ import org.jetbrains.annotations.*;
 import java.util.List;
 
 public final class ParameterCommand<S extends Source> extends BaseParameterType<S, Command<S>> {
+    private final String name;
     ParameterCommand(String name, List<String> aliases) {
         super(new TypeWrap<>() {
         });
+        this.name = name;
         suggestions.add(name);
         suggestions.addAll(aliases);
     }
@@ -40,4 +42,9 @@ public final class ParameterCommand<S extends Source> extends BaseParameterType<
         }
         return cmd;
     }
+
+    public String getName() {
+        return name;
+    }
+
 }

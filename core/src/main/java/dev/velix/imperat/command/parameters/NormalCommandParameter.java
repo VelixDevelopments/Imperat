@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.parameters;
 
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
