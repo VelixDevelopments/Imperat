@@ -204,7 +204,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     @Override
     public boolean similarTo(CommandParameter<?> parameter) {
         return this.name.equalsIgnoreCase(parameter.name())
-            && type.isRelatedToType(parameter.wrappedType().getType());
+            && type.equalsExactly(parameter.wrappedType().getType());
     }
 
     @Override

@@ -13,12 +13,21 @@ public final class ImperatDebugger {
 
     private static @NotNull Logger LOGGER = Logger.getLogger("IMPERAT");
     private static boolean enabled = false;
+    private static boolean testing = false;
 
     private ImperatDebugger() {
     }
 
     public static void setEnabled(boolean enabled) {
         ImperatDebugger.enabled = enabled;
+    }
+
+    public static boolean isTesting() {
+        return testing;
+    }
+
+    public static void setTesting(boolean testing) {
+        ImperatDebugger.testing = testing;
     }
 
     public static boolean isEnabled() {
@@ -31,12 +40,25 @@ public final class ImperatDebugger {
 
     public static void debug(String msg, Object... args) {
         if (!enabled) return;
-        LOGGER.log(Level.INFO, ()-> String.format(msg, args));
+        if(testing) {
+            System.out.println(String.format("INFO > " + msg, args));
+        }else {
+            LOGGER.log(Level.INFO, () -> String.format(msg, args));
+        }
+    }
+
+    public static void debugForTesting(String msg, Object... args) {
+        if (!enabled && !testing) return;
+        System.out.println(String.format("TEST-INFO > " + msg, args));
     }
 
     public static void warning(String msg, Object... args) {
         if (!enabled) return;
-        LOGGER.log(Level.WARNING, ()-> String.format(msg, args));
+        if(testing) {
+            System.out.println(String.format("WARNING > " + msg, args));
+        }else {
+            LOGGER.log(Level.WARNING, () -> String.format(msg, args));
+        }
     }
 
     public static void error(Class<?> owningClass, String method, @NotNull Throwable ex) {

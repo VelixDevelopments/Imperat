@@ -27,7 +27,7 @@ public class TestCommand {
     }
 
     @Usage
-    public void cmdUsage(TestSource source, @Named("otherText") @Suggest({"hi", "bye"}) String otherText) {
+    public void cmdUsage(TestSource source, @Named("otherText") @Suggest({"hi", "bye"}) String otherText, @Named("otherText2") String otherText2) {
         source.reply("Executing usage in test's main usage, num= " + otherText);
     }
 
@@ -57,7 +57,7 @@ public class TestCommand {
         }
 
         @Usage
-        public void sub1Main(TestSource source, @Named("otherText") String otherText, @Named("a") String a) {
+        public void sub1Main(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2, @Named("a") String a) {
             source.reply("otherText=" + otherText + ", sub1-main a=" + a);
         }
 
@@ -71,7 +71,7 @@ public class TestCommand {
             }
 
             @Usage
-            public void sub2Main(TestSource source, @Named("otherText") String otherText, @Named("a") String a, @Named("b") String b) {
+            public void sub2Main(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2, @Named("a") String a, @Named("b") String b) {
                 source.reply("sub2-main b=" + b);
             }
 
@@ -84,7 +84,7 @@ public class TestCommand {
                 }
 
                 @Usage
-                public void sub3Main(TestSource source, @Named("otherText") String otherText, @Named("a") String a, @Named("b") String b, @Named("c") String c) {
+                public void sub3Main(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2, @Named("a") String a, @Named("b") String b, @Named("c") String c) {
                     source.reply("sub3 c=" + c);
                 }
 
@@ -103,7 +103,7 @@ public class TestCommand {
         }
 
         @Usage
-        public void sub4Main(TestSource source, @Named("othertext") String otherText, @Named("a") String a) {
+        public void sub4Main(TestSource source, @Named("othertext") String otherText,@Named("otherText2") String otherText2, @Named("a") String a) {
             source.reply("sub4 a=" + a);
         }
 
@@ -116,7 +116,7 @@ public class TestCommand {
             }
 
             @Usage
-            public void sub5Main(TestSource source, @Named("othertext") String otherText, @Named("a") String a, @Named("b") String b) {
+            public void sub5Main(TestSource source, @Named("othertext") String otherText, @Named("otherText2") String otherText2, @Named("a") String a, @Named("b") String b) {
                 source.reply("sub4 a= " + a + ", sub5 b=" + b);
             }
 
@@ -128,7 +128,7 @@ public class TestCommand {
                 }
 
                 @Usage
-                public void sub6Main(TestSource source, @Named("othertext") String otherText, @Named("a") String a, @Named("b") String b, @Named("c") String c) {
+                public void sub6Main(TestSource source, @Named("othertext") String otherText, @Named("otherText2") String otherText2, @Named("a") String a, @Named("b") String b, @Named("c") String c) {
                     source.reply("sub4 a= " + a + ", sub5b= " + b + ", sub6 c=" + c);
                 }
 

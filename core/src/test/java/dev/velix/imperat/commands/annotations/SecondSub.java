@@ -16,6 +16,7 @@ public class SecondSub {
     @Usage
     public void cmdUsage(TestSource source,
                          @Named("otherText") String otherText,
+                         @Named("otherText2") String otherText2,
                          @Named("arg1") String arg1,
                          @Named("arg1") String arg2) {
         source.reply("Executing usage in first's main usage," +

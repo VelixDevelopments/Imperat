@@ -339,6 +339,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             int parentalParams = 0;
 
             if (!(method.isAnnotationPresent(SubCommand.class) && Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly())) {
+                ImperatDebugger.debug("Going in deep for method '%s'", method.getName());
                 Command<S> parent = parentCmd;
                 while (parent != null) {
                     parentalParams += parent.mainUsage().size();
@@ -409,74 +410,101 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         @Nullable Command<S> parentCmd
     ) {
 
+        ImperatDebugger.debug("Loading for method '%s'", method.getName());
         LinkedList<CommandParameter<S>> toLoad = new LinkedList<>();
 
-        //WHATEVER HAPPENS, NEVER MESS WITH THIS IMPLEMENTATION OR ELSE I WILL FUCKING DESTROY YOU
         final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
 
         if (!(method.getAnnotation(SubCommand.class) != null && Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly())) {
-            Command<S> currentParent = parentCmd;
-            while (currentParent != null) {
-                currentParent.mainUsage().getParameters()
-                    .forEach((param) -> {
-                        if (!(param.isFlag() && param.asFlagParameter().flagData().isFree())) {
-                            mainUsageParameters.addFirst(param);
-                        }
-                    });
-
-                currentParent = currentParent.parent();
+            LinkedList<Command<S>> parenteralSequence = getParenteralSequence(parentCmd);
+            for(Command<S> parent : parenteralSequence) {
+                parent.mainUsage().getParameters()
+                        .forEach((param) -> {
+                            if (!(param.isFlag() && param.asFlagParameter().flagData().isFree())) {
+                                mainUsageParameters.add(param);
+                            }
+                        });
             }
+
         }
 
+        ImperatDebugger.debugForTesting("Main usage params collected '%s'", getMainUsageParametersCollected(mainUsageParameters).toString());
+
         LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
-        LinkedList<ParameterElement> parameterElements = new LinkedList<>(method.getParameters());
+        LinkedList<ParameterElement> methodParameters = new LinkedList<>(method.getParameters());
 
         Set<FlagData<S>> freeFlags = new HashSet<>();
 
         ParameterElement senderParam = null;
-        while (!parameterElements.isEmpty()) {
+        while (!methodParameters.isEmpty()) {
 
-            ParameterElement parameterElement = parameterElements.peek();
+            ParameterElement parameterElement = methodParameters.peek();
             if (parameterElement == null) break;
             Type type = parameterElement.getElement().getParameterizedType();
 
             if ((senderParam == null && (imperat.canBeSender(type) || config.hasSourceResolver(type))) || config.hasContextResolver(type)) {
-                senderParam = parameterElements.removeFirst();
+                senderParam = methodParameters.remove();
                 continue;
             }
 
             CommandParameter<S> commandParameter = loadParameter(parameterElement);
             if (commandParameter.isFlag() && commandParameter.asFlagParameter().flagData().isFree()) {
                 freeFlags.add(commandParameter.asFlagParameter().flagData());
-                parameterElements.removeFirst();
+                methodParameters.remove();
                 continue;
             }
 
             CommandParameter<S> mainParameter = mainUsageParameters.peek();
+            if(mainParameter != null)
+                ImperatDebugger.debugForTesting("Comparing main-usage parameter '%s' with loaded parameter '%s'", mainParameter.format(), commandParameter.format());
+
+
             if (mainParameter == null) {
+                ImperatDebugger.debugForTesting("Adding command parameter '%s' that has no corresponding main parameter", commandParameter.format());
                 toLoad.add(commandParameter);
                 total.add(commandParameter);
-                parameterElements.removeFirst();
+                methodParameters.remove();
                 continue;
             }
 
             if (mainParameter.similarTo(commandParameter)) {
-                parameterElements.removeFirst();
-                mainUsageParameters.removeFirst();
+                ImperatDebugger.debugForTesting("Main parameter '%s' is exactly similar to loaded parameter '%s'", mainParameter.format(), commandParameter.format());
+                var methodParam = methodParameters.remove();
+                ImperatDebugger.debugForTesting("Removing '%s' from method params", methodParam.getName());
+                var mainUsageParam = mainUsageParameters.remove();
+                ImperatDebugger.debugForTesting("Removing '%s' from main usage params", mainUsageParam.format());
                 continue;
             }
 
             toLoad.add(commandParameter);
             total.add(commandParameter);
 
-            mainUsageParameters.removeFirst();
-            parameterElements.removeFirst();
+            mainUsageParameters.remove();
+            methodParameters.remove();
         }
         return new MethodUsageData<>(toLoad, total, freeFlags);
     }
 
+    private static <S extends Source> @NotNull StringBuilder getMainUsageParametersCollected(StrictParameterList<S> mainUsageParameters) {
+        StringBuilder builder = new StringBuilder();
+        for(var p : mainUsageParameters) {
+            builder.append(p.format()).append(" ");
+        }
+        return builder;
+    }
+
+    private static <S extends Source> @NotNull LinkedList<Command<S>> getParenteralSequence(@Nullable Command<S> parentCmd) {
+        Command<S> currentParent = parentCmd;
+        LinkedList<Command<S>> parenteralSequence = new LinkedList<>();
+        while (currentParent != null) {
+            parenteralSequence.addFirst(currentParent);
+            currentParent = currentParent.parent();
+        }
+        return parenteralSequence;
+    }
+
     @SuppressWarnings("unchecked")
-    private <T, N extends Number> CommandParameter<S> loadParameter(
+    private <T> CommandParameter<S> loadParameter(
         @NotNull ParseElement<?> paramElement
     ) {
 

@@ -284,7 +284,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             executeUsage(command, source, context, usage);
         }
         else if (searchResult.result() == CommandDispatch.Result.INCOMPLETE) {
-            if (usage != null) {
+            if(searchResult.getLastParameter().isCommand()) {
+                ImperatDebugger.debug("Executing last parameter as a sub command");
+                var defUsage = searchResult.getLastParameter().asCommand().getDefaultUsage();
+                executeUsage(command, source, context, defUsage);
+            }
+            else if (usage != null) {
                 ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
                 executeUsage(command, source, context, usage);
             } else {

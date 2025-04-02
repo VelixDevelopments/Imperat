@@ -43,24 +43,27 @@ public class TestRun {
     public static volatile int PRE_PROCESSOR_INT = 0;
 
     static {
+        ImperatDebugger.setEnabled(true);
+        ImperatDebugger.setTesting(true);
+
         IMPERAT = TestImperatConfig.builder()
             .usageVerifier(UsageVerifier.typeTolerantVerifier())
             .dependencyResolver(Group.class, () -> new Group("my-global-group"))
             .parameterType(Group.class, new ParameterGroup()).build();
 
+
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
         IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
         IMPERAT.registerCommand(new AnnotatedGroupCommand());
-        IMPERAT.registerCommand(new TestCommand());
         IMPERAT.registerCommand(new OptionalArgCommand());
         IMPERAT.registerCommand(new BanCommand());
         IMPERAT.registerCommand(new GitCommand());
         IMPERAT.registerCommand(new MessageCmd());
         IMPERAT.registerCommand(new EmptyCmd());
         IMPERAT.registerCommand(new KitCommand());
+        IMPERAT.registerCommand(new TestCommand());
         IMPERAT.registerCommand(new Test2Command());
 
-        ImperatDebugger.setEnabled(true);
     }
 
     private static CommandDispatch.Result testCmdTreeExecution(String cmdName, String input) {
@@ -156,7 +159,7 @@ public class TestRun {
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
 
-        var result = testCmdTreeExecution("test", "first-value first a1 second a3");
+        var result = testCmdTreeExecution("test", "first-value secondValue first a1 second a3");
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
     }
 
@@ -171,27 +174,29 @@ public class TestRun {
 
     @Test
     public void tempo() {
-        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "otherText1 otherText2 sub1"));
     }
     @Test
     public void testInnerClassParsing() {
+
+
         System.out.println("----------------------------");
         debugCommand(Objects.requireNonNull(IMPERAT.getCommand("test")));
         //debugCommand(Objects.requireNonNull(IMPERAT.getCommand("embedded")));
 
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", ""));
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi"));
-        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2"));
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye"));
-        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3"));
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub1 hi sub2 bye sub3 hello"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text text2 sub1 hi"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text text2 sub1 hi sub2"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text text2 sub1 hi sub2 bye"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text text2 sub1 hi sub2 bye sub3"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text text2 sub1 hi sub2 bye sub3 hello"));
 
-        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub4"));
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub4 hi"));
-        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5"));
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye"));
-        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6"));
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text sub4 hi sub5 bye sub6 hello"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text text2 sub4"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text text2 sub4 hi"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text text2 sub4 hi sub5"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text text2 sub4 hi sub5 bye"));
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("test", "text text2 sub4 hi sub5 bye sub6"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text text2 sub4 hi sub5 bye sub6 hello"));
 
     }
 
@@ -210,7 +215,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "s"});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "bye", "s"});
         var res = results.join();
         Assertions.assertEquals(List.of("sub4", "sub1"), new ArrayList<>(res));
     }
@@ -221,7 +226,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "first", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "bye", "first", ""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("x", "y", "z", "sexy"), res.stream());
     }

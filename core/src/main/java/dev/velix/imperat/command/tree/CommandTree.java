@@ -167,6 +167,7 @@ public final class CommandTree<S extends Source> {
             var traverse = dispatchNode(config, nodeTraversing, input, child, depth);
 
             if (traverse.result() != CommandDispatch.Result.UNKNOWN) {
+                ImperatDebugger.debug("Found a non-unknown traverse result !");
                 return traverse;
             }
 
@@ -195,7 +196,7 @@ public final class CommandTree<S extends Source> {
                 commandDispatch.append(currentNode);
                 currentNode = currentNode.getNextParameterChild();
             } else {
-                ImperatDebugger.debug("Node '%s' doesn't match input '%s'", currentNode.format(), input.get(depth));
+                ImperatDebugger.debug("Node '%s' doesn't match input '%s'", currentNode.format(), rawInput);
                 return commandDispatch;
             }
         }
@@ -229,7 +230,7 @@ public final class CommandTree<S extends Source> {
                 //check if the missing arguments are optional to ignore and complete this
                 //by finding the next required argument
 
-                ImperatDebugger.debug("Finding missing required argument");
+                ImperatDebugger.debug("Finding missing required argument, current node= %s", currentNode.data.name());
                 ParameterNode<S, ?> requiredParameterNode = findRequiredNodeDeeply(currentNode);
                 if (requiredParameterNode == null) {
                     ImperatDebugger.debug("No missing required args, it's complete now");
@@ -271,6 +272,7 @@ public final class CommandTree<S extends Source> {
                 } else if (Patterns.isInputFlag(nextRaw) && rootCommand.getFlagFromRaw(nextRaw).isPresent()) {
                     result = CommandDispatch.Result.COMPLETE;
                 } else if (!currentNode.isGreedyParam()) {
+                    ImperatDebugger.debug("IS NOT GREEDY !!, currentNode=%s", currentNode.format());
                     result = CommandDispatch.Result.UNKNOWN;
                 } else {
                     result = CommandDispatch.Result.COMPLETE;
