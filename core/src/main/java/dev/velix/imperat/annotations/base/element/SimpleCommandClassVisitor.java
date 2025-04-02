@@ -353,7 +353,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ImperatDebugger.debug("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
         if (inputCount == 0) {
             if (parentCmd != null) {
-                MethodUsageData<S> usageData = loadParameters(method, inputCount, parentCmd);
+                MethodUsageData<S> usageData = loadParameters(method, parentCmd);
                 loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
                 );
@@ -368,7 +368,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ClassElement methodOwner = (ClassElement) method.getParent();
         assert methodOwner != null;
 
-        MethodUsageData<S> usageData = loadParameters(method, inputCount, parentCmd);
+        MethodUsageData<S> usageData = loadParameters(method, parentCmd);
 
         var execution = MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters());
 
@@ -407,7 +407,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
     private MethodUsageData<S> loadParameters(
         @NotNull MethodElement method,
-        int calculatedInputCount,
         @Nullable Command<S> parentCmd
     ) {
 
