@@ -353,7 +353,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ImperatDebugger.debug("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
         if (inputCount == 0) {
             if (parentCmd != null) {
-                MethodUsageData<S> usageData = loadParameters(method, parentCmd);
+                MethodUsageData<S> usageData = loadParameters(method, inputCount, parentCmd);
                 loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
                 );
@@ -368,7 +368,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ClassElement methodOwner = (ClassElement) method.getParent();
         assert methodOwner != null;
 
-        MethodUsageData<S> usageData = loadParameters(method, parentCmd);
+        MethodUsageData<S> usageData = loadParameters(method, inputCount, parentCmd);
 
         var execution = MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters());
 
@@ -407,6 +407,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
     private MethodUsageData<S> loadParameters(
         @NotNull MethodElement method,
+        int calculatedInputCount,
         @Nullable Command<S> parentCmd
     ) {
 
@@ -428,21 +429,30 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         }
 
-        ImperatDebugger.debugForTesting("Main usage params collected '%s'", getMainUsageParametersCollected(mainUsageParameters).toString());
+        var inheritedParamsFormatted = getMainUsageParametersCollected(mainUsageParameters);
+        ImperatDebugger.debugForTesting("Main usage params collected '%s'", inheritedParamsFormatted.toString());
+
+
 
         LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
         LinkedList<ParameterElement> methodParameters = new LinkedList<>(method.getParameters());
+        ImperatDebugger.debugForTesting("Method parameters collected '%s'", getMethodParamsCollected(methodParameters));
 
         Set<FlagData<S>> freeFlags = new HashSet<>();
 
         ParameterElement senderParam = null;
+
+        if(methodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
+            assert method.getParent() != null;
+            throw new IllegalStateException("You have inherited parameters ('%s') that are not declared in the method '%s' in class '%s'".formatted(inheritedParamsFormatted, method.getName(), method.getParent().getName()));
+        }
+
         while (!methodParameters.isEmpty()) {
 
             ParameterElement parameterElement = methodParameters.peek();
             if (parameterElement == null) break;
             Type type = parameterElement.getElement().getParameterizedType();
-
-            if ((senderParam == null && (imperat.canBeSender(type) || config.hasSourceResolver(type))) || config.hasContextResolver(type)) {
+            if ( (senderParam == null&&(isSenderParameter(parameterElement))) || config.hasContextResolver(type)) {
                 senderParam = methodParameters.remove();
                 continue;
             }
@@ -483,6 +493,20 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             methodParameters.remove();
         }
         return new MethodUsageData<>(toLoad, total, freeFlags);
+    }
+
+    private boolean isSenderParameter(ParameterElement parameter) {
+        Type type = parameter.getElement().getParameterizedType();
+        return imperat.canBeSender(type) || config.hasSourceResolver(type);
+    }
+
+    private String getMethodParamsCollected(LinkedList<ParameterElement> methodParameters) {
+
+        StringBuilder builder = new StringBuilder();
+        for(var pe : methodParameters) {
+            builder.append(pe.getName()).append(" ");
+        }
+        return builder.toString();
     }
 
     private static <S extends Source> @NotNull StringBuilder getMainUsageParametersCollected(StrictParameterList<S> mainUsageParameters) {

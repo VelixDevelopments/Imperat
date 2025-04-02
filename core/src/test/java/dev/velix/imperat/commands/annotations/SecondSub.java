@@ -9,7 +9,11 @@ import dev.velix.imperat.annotations.Usage;
 public class SecondSub {
 
     @Usage
-    public void defaultUsage(TestSource source) {
+    public void defaultUsage(TestSource source,
+                             @Named("otherText") String otherText,
+                             @Named("otherText2") String otherText2,
+                             @Named("arg1") String arg1
+    ) {
         source.reply("Default execution of second sub-command");
     }
 

@@ -52,7 +52,7 @@ public class TestCommand {
     @SubCommand("sub1")
     public static class Sub1 {
         @Usage
-        public void defaultUsage(TestSource source) {
+        public void defaultUsage(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2) {
             source.reply("default sub1");
         }
 
@@ -66,7 +66,7 @@ public class TestCommand {
 
 
             @Usage
-            public void defaultUsage(TestSource source) {
+            public void defaultUsage(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2, @Named("a") String a) {
                 source.reply("default sub2");
             }
 
@@ -79,7 +79,7 @@ public class TestCommand {
             public static class Sub3 {
 
                 @Usage
-                public void defaultUsage(TestSource source) {
+                public void defaultUsage(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2, @Named("a") String a, @Named("b") String b) {
                     source.reply("default sub3");
                 }
 
@@ -98,7 +98,7 @@ public class TestCommand {
     public static class Sub4 {
 
         @Usage
-        public void defaultUsage(TestSource source) {
+        public void defaultUsage(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2) {
             source.reply("default sub4");
         }
 
@@ -111,7 +111,7 @@ public class TestCommand {
         public static class Sub5 {
 
             @Usage
-            public void defaultUsage(TestSource source) {
+            public void defaultUsage(TestSource source, @Named("otherText") String otherText, @Named("otherText2") String otherText2, @Named("a") String a) {
                 source.reply("default sub5");
             }
 
@@ -123,7 +123,7 @@ public class TestCommand {
             @SubCommand("sub6")
             public static class Sub6 {
                 @Usage
-                public void defaultUsage(TestSource source) {
+                public void defaultUsage(TestSource source, @Named("othertext") String otherText, @Named("otherText2") String otherText2, @Named("a") String a, @Named("b") String b) {
                     source.reply("default sub6");
                 }
 
