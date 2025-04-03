@@ -280,7 +280,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
         //executing usage
         if (searchResult.result() == CommandDispatch.Result.COMPLETE) {
-            ImperatDebugger.debug("Executing usage '%s'", usage != null ? CommandUsage.format(command, usage) : "NULL");
+
+            if(usage == null) {
+                throw new InvalidSyntaxException();
+            }
+
+            ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
             executeUsage(command, source, context, usage);
         }
         else if (searchResult.result() == CommandDispatch.Result.INCOMPLETE) {

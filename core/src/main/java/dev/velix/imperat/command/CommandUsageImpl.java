@@ -327,7 +327,17 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
     @Override
     public boolean hasParameters(List<CommandParameter<S>> parameters) {
-        return this.parameters.equals(parameters);
+
+        if(this.parameters.size() != parameters.size())return false;
+
+        for (int i = 0; i < parameters.size(); i++) {
+            CommandParameter<S> thisParam = this.parameters.get(i);
+            CommandParameter<S> otherParam = parameters.get(i);
+            if(!thisParam.similarTo(otherParam)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

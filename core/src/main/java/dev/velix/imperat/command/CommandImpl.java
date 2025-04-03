@@ -299,7 +299,18 @@ final class CommandImpl<S extends Source> implements Command<S> {
             //default
             return defaultUsage;
         }
-        return usages.get(parameters);
+
+        var mapped = usages.get(parameters);
+        if(mapped == null) {
+            for(var usage : usages()) {
+                if(usage.hasParameters(parameters)) {
+                    return usage;
+                }
+            }
+        }
+
+
+        return mapped;
     }
 
     /**
