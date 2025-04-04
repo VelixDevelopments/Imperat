@@ -48,7 +48,7 @@ public final class ImperatDebugger {
     }
 
     public static void debugForTesting(String msg, Object... args) {
-        if (!enabled && !testing) return;
+        if (!enabled || !testing) return;
         System.out.println(String.format("TEST-INFO > " + msg, args));
     }
 
