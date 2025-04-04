@@ -47,7 +47,7 @@ final class InternalVelocityCommand implements SimpleCommand {
 
     @Override
     public List<String> suggest(Invocation invocation) {
-        return imperat.autoComplete(command, imperat.wrapSender(invocation.source()), invocation.arguments()).join();
+        return imperat.autoComplete(command, imperat.wrapSender(invocation.source()), invocation.alias(), invocation.arguments()).join();
     }
 
     @Override
