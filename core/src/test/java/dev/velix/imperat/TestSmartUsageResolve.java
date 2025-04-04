@@ -37,7 +37,7 @@ public class TestSmartUsageResolve {
         Command<TestSource> cmd = IMPERAT.getCommand(command);
         Assertions.assertNotNull(cmd);
 
-        Context<TestSource> context = FACTORY.createContext(IMPERAT, SOURCE, cmd, queue);
+        Context<TestSource> context = FACTORY.createContext(IMPERAT, SOURCE, cmd, command, queue);
         CommandDispatch<TestSource> res = cmd.contextMatch(context);
         res.visualize();
 

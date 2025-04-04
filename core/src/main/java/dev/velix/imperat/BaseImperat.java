@@ -226,11 +226,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     @Override
-    public @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String[] rawInput) {
+    public @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String commandName, String[] rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
 
         Context<S> plainContext = config.getContextFactory()
-            .createContext(this, source, command, rawArguments);
+            .createContext(this, source, command, commandName, rawArguments);
 
         return dispatch(plainContext);
     }
@@ -243,7 +243,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return CommandDispatch.Result.UNKNOWN;
         }
         command.visualizeTree();
-        return dispatch(source, command, rawInput);
+        return dispatch(source, command, commandName, rawInput);
     }
 
     @Override
@@ -376,8 +376,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
      * @return the suggestions at the current position
      */
     @Override
-    public CompletableFuture<List<String>> autoComplete(Command<S> command, S source, String[] args) {
-        return command.autoCompleter().autoComplete(this, source, args);
+    public CompletableFuture<List<String>> autoComplete(Command<S> command, S source, String label, String[] args) {
+        return command.autoCompleter().autoComplete(this, source, label, args);
     }
 
     /**

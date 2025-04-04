@@ -14,21 +14,32 @@ import org.jetbrains.annotations.*;
 @ApiStatus.AvailableSince("1.0.0")
 public interface Context<S extends Source> {
 
+    /**
+     * @return imperat's instance
+     */
     Imperat<S> imperat();
 
+    /**
+     * @return the config for imperat
+     */
     ImperatConfig<S> imperatConfig();
 
     /**
      * @return The {@link Command} owning this context.
      */
-    Command<S> command();
+    @NotNull Command<S> command();
 
     /**
      * @return the {@link Source} of the command
      * @see Source
      */
+    @NotNull S source();
+
+    /**
+     * @return the root command entered by the {@link Source}
+     */
     @NotNull
-    S source();
+    String label();
 
     /**
      * @return the arguments entered by the {@link Source}

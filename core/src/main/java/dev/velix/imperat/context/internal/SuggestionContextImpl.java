@@ -15,10 +15,11 @@ final class SuggestionContextImpl<S extends Source> extends ContextImpl<S> imple
         Imperat<S> dispatcher,
         Command<S> command,
         S source,
+        String label,
         ArgumentQueue args,
         CompletionArg completionArg
     ) {
-        super(dispatcher, command, source, args);
+        super(dispatcher, command, source, label, args);
         this.completionArg = completionArg;
     }
 

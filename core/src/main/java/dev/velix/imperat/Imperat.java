@@ -59,7 +59,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      * @return the usage match result
      */
     @NotNull
-    CommandDispatch.Result dispatch(S source, Command<S> command, String... rawInput);
+    CommandDispatch.Result dispatch(S source, Command<S> command, String commandName, String... rawInput);
 
     /**
      * Dispatches and executes a command with certain raw arguments
@@ -96,10 +96,10 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      * @param args    the arguments currently written
      * @return the suggestions at the current position
      */
-    CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String[] args);
+    CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String label, String[] args);
 
-    default CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String argsOneLine) {
-        return autoComplete(command, sender, argsOneLine.split(" "));
+    default CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String label, String argsOneLine) {
+        return autoComplete(command, sender, label, argsOneLine.split(" "));
     }
 
     /**

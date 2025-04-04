@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.*;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -27,7 +26,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         super(
             command.name(),
             command.description().toString(),
-            CommandUsage.format(command, command.getDefaultUsage()),
+            CommandUsage.format(null, command.getDefaultUsage()),
             command.aliases()
         );
         this.dispatcher = dispatcher;
@@ -64,7 +63,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
 
         try {
             BukkitSource source = dispatcher.wrapSender(sender);
-            dispatcher.dispatch(source, this.command, raw);
+            dispatcher.dispatch(source, this.command, label, raw);
             return true;
         } catch (Exception ex) {
             ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);
@@ -83,7 +82,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         BukkitSource source = dispatcher.wrapSender(sender);
         try {
             //ImperatDebugger.debug("Size of completions= %s", completions.size());
-            return dispatcher.autoComplete(command, source, args).join();
+            return dispatcher.autoComplete(command, source, alias, args).join();
         } catch (Exception ex) {
             ImperatDebugger.error(InternalBukkitCommand.class, "tabComplete", ex);
             return Collections.emptyList();

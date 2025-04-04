@@ -8,6 +8,7 @@ import dev.velix.imperat.command.parameters.ParameterBuilder;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.*;
 
 import java.util.ArrayList;
@@ -26,8 +27,13 @@ import java.util.function.Predicate;
  */
 public sealed interface CommandUsage<S extends Source> extends PermissionHolder, DescriptionHolder, CooldownHolder permits CommandUsageImpl {
 
-    static <S extends Source> String format(Command<S> command, CommandUsage<S> usage) {
-        StringBuilder builder = new StringBuilder(command.name()).append(' ');
+    static <S extends Source> String format(@Nullable String label, CommandUsage<S> usage) {
+        Preconditions.notNull(usage, "usage");
+        StringBuilder builder = new StringBuilder(label == null ? "" : label);
+        if(label != null) {
+            builder.append(' ');
+        }
+
         int i = 0;
         for (CommandParameter<S> parameter : usage.getParameters()) {
             builder.append(parameter.format());
@@ -37,6 +43,11 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
             i++;
         }
         return builder.toString();
+    }
+
+    static <S extends Source> String format(@Nullable Command<S> command, CommandUsage<S> usage) {
+        String label = command == null ? null : command.name();
+        return format(label, usage);
     }
 
     static <S extends Source> Builder<S> builder() {

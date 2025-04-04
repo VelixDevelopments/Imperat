@@ -51,7 +51,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
         Context<S> context,
         CommandUsage<S> usage
     ) {
-        super(context.imperat(), context.command(), context.source(), context.arguments());
+        super(context.imperat(), context.command(), context.source(), context.label(), context.arguments());
         this.lastCommand = context.command();
         this.usage = usage;
     }
@@ -116,10 +116,10 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     @SuppressWarnings("unchecked")
     public <R> @NotNull R getResolvedSource(Type type) throws ImperatException {
-        if (!dispatcher.hasSourceResolver(type)) {
+        if (!imperatConfig.hasSourceResolver(type)) {
             throw new IllegalArgumentException("Found no SourceResolver for valueType `" + type.getTypeName() + "`");
         }
-        var sourceResolver = dispatcher.getSourceResolver(type);
+        var sourceResolver = imperatConfig.getSourceResolver(type);
         assert sourceResolver != null;
 
         return (R) sourceResolver.resolve(this.source());
@@ -135,7 +135,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getContextResolvedArgument(Class<T> type) throws ImperatException {
-        var resolver = dispatcher.getContextResolver(type);
+        var resolver = imperatConfig.getContextResolver(type);
         return resolver == null ? null : (T) resolver.resolve(this, null);
     }
 

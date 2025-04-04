@@ -30,9 +30,10 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
         @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
+        @NotNull String label,
         @NotNull ArgumentQueue queue
     ) {
-        return new ContextImpl<>(imperat, command, source, queue);
+        return new ContextImpl<>(imperat, command, source, label, queue);
     }
 
     @Override
@@ -40,10 +41,11 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
         @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
+        @NotNull String label,
         @NotNull ArgumentQueue queue,
         @NotNull CompletionArg arg
     ) {
-        return new SuggestionContextImpl<>(imperat, command, source, queue, arg);
+        return new SuggestionContextImpl<>(imperat, command, source, label, queue, arg);
     }
 
     /**

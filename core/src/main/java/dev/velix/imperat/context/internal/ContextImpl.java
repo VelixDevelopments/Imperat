@@ -11,17 +11,19 @@ import org.jetbrains.annotations.*;
 class ContextImpl<S extends Source> implements Context<S> {
 
     protected final Imperat<S> imperat;
-    protected final ImperatConfig<S> dispatcher;
+    protected final ImperatConfig<S> imperatConfig;
 
     private final Command<S> commandUsed;
     private final S source;
+    private final String label;
     private final ArgumentQueue raw;
 
-    public ContextImpl(Imperat<S> imperat, Command<S> commandUsed, S source, ArgumentQueue raw) {
+    public ContextImpl(Imperat<S> imperat, Command<S> commandUsed, S source, String label, ArgumentQueue raw) {
         this.imperat = imperat;
-        this.dispatcher = imperat.config();
+        this.imperatConfig = imperat.config();
         this.commandUsed = commandUsed;
         this.source = source;
+        this.label = label;
         this.raw = raw;
     }
 
@@ -32,7 +34,7 @@ class ContextImpl<S extends Source> implements Context<S> {
 
     @Override
     public ImperatConfig<S> imperatConfig() {
-        return dispatcher;
+        return imperatConfig;
     }
 
 
@@ -44,6 +46,14 @@ class ContextImpl<S extends Source> implements Context<S> {
     @Override
     public @NotNull S source() {
         return source;
+    }
+
+    /**
+     * @return the root command entered by the {@link Source}
+     */
+    @Override
+    public @NotNull String label() {
+        return label;
     }
 
     @Override

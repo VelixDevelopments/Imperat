@@ -205,7 +205,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"b"});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"b"});
         var res = results.join();
         Assertions.assertEquals(List.of("bye"), new ArrayList<>(res));
     }
@@ -215,7 +215,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "bye", "s"});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{"hi", "bye", "s"});
         var res = results.join();
         Assertions.assertEquals(List.of("sub4", "sub1"), new ArrayList<>(res));
     }
@@ -226,7 +226,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"hi", "bye", "first", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"hi", "bye", "first", ""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("x", "y", "z", "sexy"), res.stream());
     }
@@ -236,7 +236,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("message");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"target", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"target", ""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("this is a long greedy", "some sentence", "idk"), res.stream());
     }
@@ -246,7 +246,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("ban");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", "-s", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"mqzen", "-s", ""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h", "[reason...]"), res.stream());
     }
@@ -256,7 +256,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("ban");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{"mqzen", ""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("-silent", "-s", "1d", "12h", "2h", "[reason...]"), res.stream());
     }
@@ -266,7 +266,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("ban");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", "-s", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"mqzen", "-s", ""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h", "[reason...]"), res.stream());
     }
@@ -276,7 +276,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("ban");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{"mqzen", "-s", "12h", ""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"mqzen", "-s", "12h", ""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("[reason...]"), res.stream());
     }
@@ -286,7 +286,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("printnum");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), new String[]{""});
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{""});
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("1.0"), res.stream());
     }

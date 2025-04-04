@@ -40,6 +40,7 @@ public abstract class ContextFactory<S extends Source> {
         @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
+        @NotNull String label,
         @NotNull ArgumentQueue queue
     );
 
@@ -54,6 +55,7 @@ public abstract class ContextFactory<S extends Source> {
         @NotNull Imperat<S> imperat,
         @NotNull S source,
         @NotNull Command<S> command,
+        @NotNull String label,
         @NotNull ArgumentQueue queue,
         @NotNull CompletionArg arg
     );

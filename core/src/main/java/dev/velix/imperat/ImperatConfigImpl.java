@@ -6,7 +6,6 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.ContextResolverRegistry;
 import dev.velix.imperat.command.SourceResolverRegistry;
-import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
@@ -139,37 +138,44 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
             InvalidSyntaxException.class,
             (exception, imperat, context) -> {
                 S source = context.source();
-                if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
-                    source.error(
-                        "Unknown command, usage '<raw_args>' is unknown.".replace("<raw_args>", context.arguments().join(" "))
+                //if usage is null, find the closest usage
+
+                List<CommandUsage<S>> closestUsages = new ArrayList<>();
+                if(context instanceof ResolvedContext<S> resolvedContext) {
+                    closestUsages.add(resolvedContext.getDetectedUsage());
+                }else {
+                    var cmd = context.command();
+                    closestUsages.addAll(
+                            cmd.findUsages((usage)-> usage.size() > context.arguments().size())
                     );
+                }
+
+                source.error(
+                    "Invalid command usage '<raw_args>'".replace("<raw_args>", "/" + context.command().name() + " " + context.arguments().join(" "))
+                );
+
+                if (closestUsages.isEmpty()) {
                     return;
                 }
 
-                var usage = resolvedContext.getDetectedUsage();
-                final int last = context.arguments().size() - 1;
+                StringBuilder possibleUsages = new StringBuilder();
+                int i = 0;
+                for(var usage : closestUsages) {
 
-                final List<CommandParameter<S>> params = new ArrayList<>(usage.getParameters())
-                    .stream()
-                    .filter((param) -> !param.isOptional() && param.position() > last)
-                    .toList();
-
-                final StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < params.size(); i++) {
-                    CommandParameter<S> param = params.get(i);
-                    assert !param.isOptional();
-                    builder.append(param.format());
-                    if (i != params.size() - 1)
-                        builder.append(' ');
-
+                    possibleUsages.append("- ").append(imperat.commandPrefix()).append(CommandUsage.format(context.label(), usage));
+                    if(i != closestUsages.size()) {
+                        possibleUsages.append("\n");
+                    }
+                    i++;
                 }
-                //INCOMPLETE USAGE, AKA MISSING REQUIRED INPUTS
+
+                assert !possibleUsages.isEmpty();
                 source.error(
-                    "Missing required arguments '<required_args>'\n Full syntax: '<usage>'"
-                        .replace("<required_args>", builder.toString())
-                        .replace("<usage>", imperat.commandPrefix()
-                            + CommandUsage.format(resolvedContext.command(), usage))
+                        "Possible Command Usages: " +
+                        "\n" +
+                        possibleUsages
                 );
+
             }
         );
         this.setThrowableResolver(

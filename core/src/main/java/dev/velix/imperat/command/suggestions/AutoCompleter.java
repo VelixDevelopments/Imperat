@@ -48,13 +48,14 @@ public abstract class AutoCompleter<S extends Source> {
     public final CompletableFuture<List<String>> autoComplete(
         final Imperat<S> dispatcher,
         final S sender,
+        final String label,
         final String[] args
     ) {
         CompletionArg argToComplete = getLastArg(args);
         ArgumentQueue queue = ArgumentQueue.parseAutoCompletion(args, argToComplete.isEmpty());
 
         SuggestionContext<S> context = dispatcher.config().getContextFactory()
-            .createSuggestionContext(dispatcher, sender, command, queue, argToComplete);
+            .createSuggestionContext(dispatcher, sender, command, label, queue, argToComplete);
         //ImperatDebugger.debug("auto completing !");
         return autoComplete(dispatcher, context)
             .exceptionally((ex) -> {

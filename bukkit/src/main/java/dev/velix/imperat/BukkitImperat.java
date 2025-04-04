@@ -135,7 +135,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         //BukkitUtil.COMMAND_MAP.clearCommands();
     }
 
-    public void applyBrigadier() {
+    private void applyBrigadier() {
         brigadierManager = BukkitBrigadierManager.load(this);
     }
 
