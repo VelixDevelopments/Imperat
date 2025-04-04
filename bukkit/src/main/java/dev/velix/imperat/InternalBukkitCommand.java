@@ -26,7 +26,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         super(
             command.name(),
             command.description().toString(),
-            CommandUsage.format(null, command.getDefaultUsage()),
+            CommandUsage.format((String) null, command.getDefaultUsage()),
             command.aliases()
         );
         this.dispatcher = dispatcher;

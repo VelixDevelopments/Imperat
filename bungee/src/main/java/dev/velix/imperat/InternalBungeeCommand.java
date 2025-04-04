@@ -41,6 +41,7 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
         return bungeeCommandDispatcher.autoComplete(
             bungeeCommand,
             bungeeCommandDispatcher.wrapSender(sender),
+            bungeeCommand.name(),
             args
         ).join();
     }

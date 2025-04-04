@@ -57,7 +57,7 @@ final class SyntaxDataLoader {
             }
             arg.setSuggestionCallback((sender, context, suggestion) -> {
                 var source = imperat.wrapSender(sender);
-                for (var completion : imperat.autoComplete(imperatCommand, source, context.getInput()).join()) {
+                for (var completion : imperat.autoComplete(imperatCommand, source, context.getCommandName(), context.getInput()).join()) {
                     suggestion.addEntry(new SuggestionEntry(completion));
                 }
             });
