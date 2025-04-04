@@ -8,11 +8,13 @@ import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
 import dev.velix.imperat.selector.TargetSelector;
+import dev.velix.imperat.type.ParameterLocation;
 import dev.velix.imperat.type.ParameterOfflinePlayer;
 import dev.velix.imperat.type.ParameterPlayer;
 import dev.velix.imperat.type.ParameterTargetSelector;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -64,6 +66,7 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
     private void registerValueResolvers() {
         config.registerParamType(Player.class, new ParameterPlayer());
         config.registerParamType(OfflinePlayer.class, new ParameterOfflinePlayer());
+        config.registerParamType(Location.class, new ParameterLocation());
         config.registerParamType(TargetSelector.class, new ParameterTargetSelector());
     }
 
