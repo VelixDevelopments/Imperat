@@ -1,5 +1,6 @@
 package dev.velix.imperat.selector.field;
 
+import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.*;
 
 import java.util.Objects;
@@ -37,10 +38,17 @@ public final class Range<N extends Number> extends Number {
         if (value instanceof Range<?> other) {
             return this.equals(other);
         }
-        boolean withinMin = min == null || value.doubleValue() >= min.doubleValue();
-        boolean withinMax = max == null || value.doubleValue() <= max.doubleValue();
 
-        return withinMin && withinMax;
+        if(min == null) {
+            if(max == null) return true;
+            return value.doubleValue() <= max.doubleValue();
+        }
+        else if(max == null) {
+            return value.doubleValue() >= min.doubleValue();
+        }
+        else {
+            return value.doubleValue() >= min.doubleValue() && value.doubleValue() <= max.doubleValue();
+        }
     }
 
     /**

@@ -37,4 +37,12 @@ public final class TargetSelector implements Iterable<Entity> {
     public @NotNull Iterator<Entity> iterator() {
         return selectedEntities.iterator();
     }
+
+    public SelectionType getType() {
+        return type;
+    }
+
+    public int size() {
+        return selectedEntities.size();
+    }
 }

@@ -2,6 +2,7 @@ package dev.velix.imperat.selector.field;
 
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 
@@ -13,7 +14,8 @@ import dev.velix.imperat.util.TypeWrap;
  */
 public final class RangedNumericField<N extends Number> extends AbstractField<Range<N>> {
 
-    private final static String RANGE_CHARACTER = "..";
+    private final static String RANGE_CHARACTER = "\\.\\.";
+    private final static String RANGE_CHARACTER_WITHOUT_ESCAPE = "..";
 
     private final NumericField<N> numericField;
 
@@ -37,23 +39,28 @@ public final class RangedNumericField<N extends Number> extends AbstractField<Ra
      */
     @Override
     public Range<N> parseFieldValue(String value) throws ImperatException {
-        try {
+        ImperatDebugger.debug("Value=%s", value);
+        if(!value.contains(RANGE_CHARACTER_WITHOUT_ESCAPE)) {
             N numericValue = numericField.parseNumber(value);
             return Range.atLeast(numericValue);
-        } catch (ImperatException ex) {
-            N rangeValue = numericField.parseNumber(value.replace(RANGE_CHARACTER, ""));
-
-            if (value.startsWith(RANGE_CHARACTER)) {
+        }else  {
+            if (value.startsWith(RANGE_CHARACTER_WITHOUT_ESCAPE)) {
                 //less than or equal to value
+                N rangeValue = numericField.parseNumber(value.replace(RANGE_CHARACTER_WITHOUT_ESCAPE, ""));
                 return Range.atLeast(rangeValue);
-            } else if (value.endsWith(RANGE_CHARACTER)) {
+            } else if (value.endsWith(RANGE_CHARACTER_WITHOUT_ESCAPE)) {
+                N rangeValue = numericField.parseNumber(value.replace(RANGE_CHARACTER_WITHOUT_ESCAPE, ""));
                 return Range.atMost(rangeValue);
-            } else if (value.contains(RANGE_CHARACTER)) {
+            } else  {
                 String[] minMaxSplit = value.split(RANGE_CHARACTER);
                 if (minMaxSplit.length > 2) {
                     throw new SourceException("Invalid distance range format '%s'", value);
                 }
                 String minStr = minMaxSplit[0], maxStr = minMaxSplit[1];
+
+                ImperatDebugger.debug("Min=" + minStr);
+                ImperatDebugger.debug("Max=" + maxStr);
+
                 if (!TypeUtility.isNumber(minStr)) {
                     throw new SourceException("Invalid min-value '%s'", minStr);
                 }
@@ -65,7 +72,6 @@ public final class RangedNumericField<N extends Number> extends AbstractField<Ra
                 N min = numericField.parseFieldValue(minStr), max = numericField.parseFieldValue(maxStr);
                 return Range.of(min, max);
             }
-            throw ex;
         }
     }
 

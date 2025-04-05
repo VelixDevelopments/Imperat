@@ -150,32 +150,15 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
                     );
                 }
 
-                source.error(
-                    "Invalid command usage '<raw_args>'".replace("<raw_args>", "/" + context.command().name() + " " + context.arguments().join(" "))
-                );
-
+                source.error("Invalid command usage '/" + context.command().name() + " " + context.arguments().join(" ") + "'");
                 if (closestUsages.isEmpty()) {
                     return;
                 }
 
-                StringBuilder possibleUsages = new StringBuilder();
-                int i = 0;
+                source.error("Possible Command Usages: ");
                 for(var usage : closestUsages) {
-
-                    possibleUsages.append("- ").append(imperat.commandPrefix()).append(CommandUsage.format(context.label(), usage));
-                    if(i != closestUsages.size()) {
-                        possibleUsages.append("\n");
-                    }
-                    i++;
+                    source.error("- " + imperat.commandPrefix() + CommandUsage.format(context.label(), usage));
                 }
-
-                assert !possibleUsages.isEmpty();
-                source.error(
-                        "Possible Command Usages: " +
-                        "\n" +
-                        possibleUsages
-                );
-
             }
         );
         this.setThrowableResolver(

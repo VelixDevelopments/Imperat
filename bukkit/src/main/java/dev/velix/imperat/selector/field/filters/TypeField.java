@@ -40,7 +40,7 @@ final class TypeField extends PredicateField<EntityType> {
     @Override
     public EntityType parseFieldValue(String value) throws ImperatException {
         try {
-            return EntityType.valueOf(value);
+            return EntityType.valueOf(value.toUpperCase());
         } catch (EnumConstantNotPresentException ex) {
             throw new SourceException("Unknown type '%s'", value);
         }

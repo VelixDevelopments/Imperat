@@ -8,6 +8,7 @@ import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.selector.field.NumericField;
 import dev.velix.imperat.selector.field.Range;
 import dev.velix.imperat.selector.field.RangedNumericField;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.*;
@@ -45,6 +46,8 @@ final class DistanceField extends PredicateField<Range<Double>> {
             }
             Player commandSource = sender.asPlayer();
             double diffInDistance = commandSource.getLocation().distance(entity.getLocation());
+            ImperatDebugger.debug("Min=%s, Double value=%s", value.getMin(), diffInDistance);
+
             return value.isInRange(diffInDistance);
         });
     }
