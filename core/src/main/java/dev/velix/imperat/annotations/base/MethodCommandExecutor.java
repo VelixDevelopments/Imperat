@@ -64,11 +64,11 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
     public void execute(S source,
                         ExecutionContext<S> context) throws ImperatException {
 
-        ImperatDebugger.debug("Debugging params:-");
+        ImperatDebugger.debugForTesting("Debugging params:-");
         for (var param : fullParameters) {
-            ImperatDebugger.debug("-%s", param.format());
+            ImperatDebugger.debugForTesting("-%s", param.format());
         }
-        ImperatDebugger.debug("SIZE=%s", fullParameters.size());
+        ImperatDebugger.debugForTesting("SIZE=%s", fullParameters.size());
 
         var instances = AnnotationHelper.loadParameterInstances(
             dispatcher, fullParameters,
@@ -76,7 +76,7 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
         );
         for (int i = 0; i < instances.length; i++) {
             var instance = instances[i];
-            ImperatDebugger.debug("Object #%s = '%s', type='%s'", i, instance, instance != null ? instances[i].getClass().getName() : "N/A");
+            ImperatDebugger.debugForTesting("Object #%s = '%s', type='%s'", i, instance, instance != null ? instances[i].getClass().getName() : "N/A");
         }
 
         try {
