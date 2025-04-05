@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e7669fcf4ca8497b8b031243427e7c93)](https://app.codacy.com/gh/VelixDevelopments/Imperat?utm_source=github.com&utm_medium=referral&utm_content=VelixDevelopments/Imperat&utm_campaign=Badge_Grade)
 [![Discord](https://discord.com/api/guilds/1285395980610568192/widget.png)](https://discord.velix.dev/)
 [![Maven Central](https://img.shields.io/maven-metadata/v/https/repo1.maven.org/maven2/dev/velix/imperat-core/maven-metadata.xml.svg?label=maven%20central&colorB=brightgreen)](https://search.maven.org/artifact/dev.velix/imperat-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
