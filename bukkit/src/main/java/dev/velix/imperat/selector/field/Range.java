@@ -1,6 +1,5 @@
 package dev.velix.imperat.selector.field;
 
-import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.*;
 
 import java.util.Objects;
