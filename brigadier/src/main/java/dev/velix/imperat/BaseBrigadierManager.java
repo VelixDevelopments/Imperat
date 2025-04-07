@@ -19,6 +19,7 @@ import dev.velix.imperat.command.tree.ParameterNode;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.*;
 
@@ -62,9 +63,13 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
 
     private <T> com.mojang.brigadier.tree.CommandNode<T> convertNode(CommandNode<S> root, ParameterNode<?, ?> parent, ParameterNode<S, ?> node) {
 
+        var argType = getArgumentType(node.getData());
+
         ArgumentBuilder<T, ?> childBuilder = node instanceof CommandNode<?> ?
             LiteralArgumentBuilder.literal(node.getData().name())
-            : RequiredArgumentBuilder.argument(node.getData().name(), getArgumentType(node.getData()));
+            : RequiredArgumentBuilder.argument(node.getData().name(), argType);
+
+        ImperatDebugger.debugForTesting("parameter '%s' has type converted '%s'", node.getData().format(), argType.getClass().getName());
 
         childBuilder.requires((obj) -> {
             var permissionResolver = dispatcher.config().getPermissionResolver();

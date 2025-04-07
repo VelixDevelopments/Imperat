@@ -8,6 +8,7 @@ import dev.velix.imperat.commodore.Commodore;
 import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.*;
 
@@ -23,7 +24,7 @@ public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSou
         if (isSupported()) {
             registerArgumentResolver(String.class, DefaultArgTypeResolvers.STRING);
             registerArgumentResolver(DefaultArgTypeResolvers.NUMERIC);
-            registerArgumentResolver(DefaultArgTypeResolvers.ENTITY_SELECTOR);
+            registerArgumentResolver(Entity.class, DefaultArgTypeResolvers.ENTITY_SELECTOR);
             registerArgumentResolver(Boolean.class, DefaultArgTypeResolvers.BOOLEAN);
             registerArgumentResolver(Player.class, DefaultArgTypeResolvers.PLAYER);
             registerArgumentResolver(OfflinePlayer.class, DefaultArgTypeResolvers.PLAYER);
