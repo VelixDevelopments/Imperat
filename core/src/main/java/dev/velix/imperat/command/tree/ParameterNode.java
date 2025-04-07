@@ -3,19 +3,16 @@ package dev.velix.imperat.command.tree;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.*;
-
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.LinkedList;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public abstract class ParameterNode<S extends Source, T extends CommandParameter<S>> {
 
     protected final @NotNull T data;
 
-    private final PriorityQueue<ParameterNode<S, ?>> nextNodes = new PriorityQueue<>(
-        Comparator.comparing(ParameterNode::priority)
-    );
+    private final LinkedList<ParameterNode<S, ?>> nextNodes = new LinkedList<>();
 
     protected ParameterNode(@NotNull T data) {
         this.data = data;
@@ -28,7 +25,11 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
 
     public void addChild(ParameterNode<S, ?> node) {
         if (nextNodes.contains(node)) return;
-        nextNodes.add(node);
+        if(node.isCommand()) {
+            nextNodes.addFirst(node);
+        }else {
+            nextNodes.addLast(node);
+        }
     }
 
     public Collection<ParameterNode<S,?>> getChildren() {
@@ -84,5 +85,16 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
 
     public boolean isFlag() {
         return this.data.isFlag();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ParameterNode<?, ?> that)) return false;
+        return Objects.equals(data.name(), that.data.name()) && Objects.equals(nextNodes, that.nextNodes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data.name(), nextNodes);
     }
 }

@@ -221,7 +221,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (parseElement instanceof MethodElement method && cmd != null) {
             //@CommandProcessingChain on method
             if (!methodSelector.canBeSelected(imperat, parser, method, true)) {
-                ImperatDebugger.debug("Method '%s' has failed verification", method.getName());
+                ImperatDebugger.debugForTesting("Method '%s' has failed verification", method.getName());
                 return cmd;
             }
 
@@ -334,12 +334,14 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         @NotNull Command<S> loadedCmd,
         MethodElement method
     ) {
+        boolean isAttachedDirectly = isIsAttachedDirectlySubCmd(method);
+
         int inputCount = method.getInputCount();
         if (parentCmd != null) {
             int parentalParams = 0;
 
-            if (!(method.isAnnotationPresent(SubCommand.class) && Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly())) {
-                ImperatDebugger.debug("Going in deep for method '%s'", method.getName());
+            if (!isAttachedDirectly) {
+                ImperatDebugger.debugForTesting("Going in deep for method '%s'", method.getName() );
                 Command<S> parent = parentCmd;
                 while (parent != null) {
                     parentalParams += parent.mainUsage().size();
@@ -350,9 +352,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             inputCount = Math.abs(method.getInputCount() - parentalParams);
         }
 
-        ImperatDebugger.debug("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
+        ImperatDebugger.debugForTesting("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
         if (inputCount == 0) {
-            if (parentCmd != null) {
+            if (parentCmd != null && !isAttachedDirectly) {
+                assert method.getParent() != null;
                 MethodUsageData<S> usageData = loadParameters(method, parentCmd);
                 loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
@@ -410,12 +413,14 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         @Nullable Command<S> parentCmd
     ) {
 
-        ImperatDebugger.debug("Loading for method '%s'", method.getName());
+        ImperatDebugger.debugForTesting("Loading for method '%s'", method.getName());
         LinkedList<CommandParameter<S>> toLoad = new LinkedList<>();
 
         final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
 
-        if (!(method.getAnnotation(SubCommand.class) != null && Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly())) {
+        boolean isAttachedDirectlySubCmd = isIsAttachedDirectlySubCmd(method);
+
+        if (!isAttachedDirectlySubCmd) {
             LinkedList<Command<S>> parenteralSequence = getParenteralSequence(parentCmd);
             for(Command<S> parent : parenteralSequence) {
                 parent.mainUsage().getParameters()
@@ -431,8 +436,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         var inheritedParamsFormatted = getMainUsageParametersCollected(mainUsageParameters);
         ImperatDebugger.debugForTesting("Main usage params collected '%s'", inheritedParamsFormatted.toString());
 
-
-
         LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
         LinkedList<ParameterElement> methodParameters = new LinkedList<>(method.getParameters());
         ImperatDebugger.debugForTesting("Method parameters collected '%s'", getMethodParamsCollected(methodParameters));
@@ -441,7 +444,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         ParameterElement senderParam = null;
 
-        if(methodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
+        if(!isAttachedDirectlySubCmd && methodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
             assert method.getParent() != null;
             throw new IllegalStateException("You have inherited parameters ('%s') that are not declared in the method '%s' in class '%s'".formatted(inheritedParamsFormatted, method.getName(), method.getParent().getName()));
         }
@@ -492,6 +495,20 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             methodParameters.remove();
         }
         return new MethodUsageData<>(toLoad, total, freeFlags);
+    }
+
+    private static boolean isIsAttachedDirectlySubCmd(@NotNull MethodElement method) {
+        boolean isAttachedDirectlySubCmd = false;
+        if(method.isAnnotationPresent(SubCommand.class)) {
+            isAttachedDirectlySubCmd = Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly();
+        } else if (method.isAnnotationPresent(Usage.class)) {
+            assert method.getParent() != null;
+            var ann =  method.getParent().getAnnotation(SubCommand.class);
+            if(ann != null) {
+                isAttachedDirectlySubCmd = ann.attachDirectly();
+            }
+        }
+        return isAttachedDirectlySubCmd;
     }
 
     private boolean isSenderParameter(ParameterElement parameter) {
