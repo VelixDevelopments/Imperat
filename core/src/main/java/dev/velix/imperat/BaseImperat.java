@@ -136,7 +136,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         for (Command<S> headCommands : commands.values()) {
             if (headCommands.hasName(cmdName)) return headCommands;
         }
-
         return null;
     }
 
