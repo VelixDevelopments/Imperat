@@ -42,8 +42,8 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
     @Override
     @SuppressWarnings("deprecation")
     public @Nullable OfflinePlayer resolve(
-        ExecutionContext<BukkitSource> context,
-        @NotNull CommandInputStream<BukkitSource> commandInputStream
+            @NotNull ExecutionContext<BukkitSource> context,
+            @NotNull CommandInputStream<BukkitSource> commandInputStream
     ) throws ImperatException {
         String name = commandInputStream.currentRaw().orElse(null);
         if (name == null) return null;

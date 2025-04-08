@@ -37,7 +37,7 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
     }
 
     @Override
-    public @Nullable M resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable M resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
         M newMap = mapInitializer.get();
 
         while (commandInputStream.hasNextRaw()) {

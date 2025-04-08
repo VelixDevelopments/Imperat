@@ -25,7 +25,7 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
     }
 
     @Override
-    public @NotNull Enum<?> resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @NotNull Enum<?> resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
         Type enumType = commandInputStream.currentParameter()
             .filter(param -> TypeUtility.matches(type, Enum.class))

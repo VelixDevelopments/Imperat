@@ -17,7 +17,10 @@ public interface ParameterType<S extends Source, T> {
 
     Type type();
 
-    @Nullable T resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException;
+
+    default @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
+        return fromString(context.imperat(), inputStream.readInput());
+    }
 
     SuggestionResolver<S> getSuggestionResolver();
 

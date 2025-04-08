@@ -39,7 +39,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     }
 
     @Override
-    public @Nullable T resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
         String input = commandInputStream.currentRaw().orElse(null);
         if(input == null)
             return original.resolve(context, commandInputStream);

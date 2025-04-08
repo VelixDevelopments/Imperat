@@ -28,7 +28,7 @@ public class CollectionParameterType<S extends Source, E, C extends Collection<E
     }
 
     @Override
-    public @Nullable C resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable C resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
         C newCollection = collectionSupplier.get();
 
         while (commandInputStream.hasNextRaw()) {

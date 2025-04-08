@@ -48,7 +48,7 @@ final class HelpTemplateImpl<S extends Source> extends HelpTemplate<S> {
 
 
     @Override
-    public void display(ExecutionContext<S> context, Source source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
+    public void display(ExecutionContext<S> context, S source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
         if (displayerFunc == null)
             super.display(context, source, formatter, commandUsages);
         else

@@ -28,7 +28,7 @@ public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends
     }
 
     @Override
-    public void display(ExecutionContext<S> context, Source source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
+    public void display(ExecutionContext<S> context, S source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
 
         Integer page = context.getArgumentOr("page", 1);
         TextPage<CommandUsage<S>> textPage = paginatedText.getPage(page);
@@ -43,7 +43,7 @@ public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends
     }
 
     @Override
-    public void provide(ExecutionContext<S> context, Source source) throws ImperatException {
+    public void provide(ExecutionContext<S> context, S source) throws ImperatException {
 
         var commandUsages = context.command().usages();
         commandUsages.forEach(paginatedText::add);

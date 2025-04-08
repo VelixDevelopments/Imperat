@@ -26,7 +26,7 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
     }
 
     @Override
-    public @Nullable Location resolve(ExecutionContext<BukkitSource> context, @NotNull CommandInputStream<BukkitSource> stream) throws ImperatException {
+    public @Nullable Location resolve(@NotNull ExecutionContext<BukkitSource> context, @NotNull CommandInputStream<BukkitSource> stream) throws ImperatException {
 
 
 

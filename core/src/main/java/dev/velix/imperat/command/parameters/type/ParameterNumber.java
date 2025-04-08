@@ -33,7 +33,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     }
 
     @Override
-    public @Nullable N resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable N resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
         String input = commandInputStream.currentRaw().orElse(null);
         try {

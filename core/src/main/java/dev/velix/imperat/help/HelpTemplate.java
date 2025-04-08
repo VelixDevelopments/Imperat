@@ -34,7 +34,7 @@ public sealed abstract class HelpTemplate<S extends Source> implements HelpProvi
 
 
     @Override
-    public void provide(ExecutionContext<S> context, Source source) throws ImperatException {
+    public void provide(ExecutionContext<S> context, S source) throws ImperatException {
         Command<S> command = context.command();
 
         final int maxUsages = command.usages().size();

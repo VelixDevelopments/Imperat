@@ -31,7 +31,7 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
     }
 
     @Override
-    public @Nullable Boolean resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable Boolean resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
 
         var raw = commandInputStream.currentRaw().orElse(null);
         assert raw != null;

@@ -105,4 +105,7 @@ public interface CommandInputStream<S extends Source> {
         return builder.toString();
     }
 
+    default String readInput() {
+        return currentRaw().orElseThrow();
+    }
 }

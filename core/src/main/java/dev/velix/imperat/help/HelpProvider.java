@@ -37,12 +37,12 @@ public interface HelpProvider<S extends Source> {
      * </p>
      *
      * @param context the command's context
-     * @param source
+     * @param source the source
      * @throws ImperatException if any of the above criteria is met.
      */
-    void provide(ExecutionContext<S> context, Source source) throws ImperatException;
+    void provide(ExecutionContext<S> context, S source) throws ImperatException;
 
-    default void display(ExecutionContext<S> context, Source source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> usages) throws ImperatException {
+    default void display(ExecutionContext<S> context, S source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> usages) throws ImperatException {
         int index = 0;
         for (CommandUsage<S> usage : usages) {
             source.reply(formatter.format(context.command(), usage, index));

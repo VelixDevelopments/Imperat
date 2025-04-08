@@ -23,7 +23,7 @@ public final class ParameterCommand<S extends Source> extends BaseParameterType<
     }
 
     @Override
-    public @Nullable Command<S> resolve(ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable Command<S> resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
         return commandInputStream.currentParameter()
             .map(CommandParameter::asCommand).orElse(null);
     }
