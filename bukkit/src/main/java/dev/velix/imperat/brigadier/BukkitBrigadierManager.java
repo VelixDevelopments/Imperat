@@ -8,7 +8,6 @@ import dev.velix.imperat.commodore.Commodore;
 import dev.velix.imperat.commodore.CommodoreProvider;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.*;
 
