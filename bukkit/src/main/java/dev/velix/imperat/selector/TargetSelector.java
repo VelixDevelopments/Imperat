@@ -45,4 +45,16 @@ public final class TargetSelector implements Iterable<Entity> {
     public int size() {
         return selectedEntities.size();
     }
+
+    public boolean isEmpty() {
+        return selectedEntities.isEmpty();
+    }
+
+    public <E extends Entity> List<E> only(final Class<E> type) {
+        return selectedEntities.stream()
+            .filter(type::isInstance)
+            .map(type::cast)
+            .toList();
+    }
+
 }
