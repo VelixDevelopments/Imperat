@@ -2,7 +2,8 @@ package dev.velix.imperat.command;
 
 public final class Description {
 
-    public final static Description EMPTY = Description.of("N/A");
+    private final static String NON_APPLICABLE = "N/A";
+    public final static Description EMPTY = Description.of(NON_APPLICABLE);
     private final String value;
 
     Description(String value) {
@@ -16,5 +17,9 @@ public final class Description {
     @Override
     public String toString() {
         return value;
+    }
+
+    public boolean isEmpty() {
+        return this == EMPTY || this.value.isBlank() || this.value.equals(NON_APPLICABLE);
     }
 }
