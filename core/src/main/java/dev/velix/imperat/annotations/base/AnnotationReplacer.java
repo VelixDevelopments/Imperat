@@ -20,6 +20,7 @@ public interface AnnotationReplacer<A extends Annotation> {
     /**
      * The annotation to replace
      *
+     * @param element the loaded element holding this annotation
      * @param annotation the annotation
      * @return the annotations replaced by this annotation
      */
