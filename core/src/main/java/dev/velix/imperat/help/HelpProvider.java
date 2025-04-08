@@ -11,6 +11,7 @@ import org.jetbrains.annotations.*;
 
 import java.util.Collection;
 
+//TODO add per-command help provider
 /**
  * A class that whose only purpose is to
  * provide/send a help message to the {@link Source}
