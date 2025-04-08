@@ -10,7 +10,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.velix.imperat.ArgumentTypeResolver;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.type.ParameterWord;
+import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.util.TypeUtility;
+import dev.velix.imperat.util.TypeWrap;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Type;
@@ -40,7 +43,12 @@ class DefaultArgTypeResolvers {
     private static final ArgumentType<?> MULTI_ENTITY = entity(false, false);
 
     //TODO add entity selector
-    public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> MULTI_ENTITY;
+    public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
+
+        if(TypeUtility.matches(parameter.valueType(), TargetSelector.class) || TypeWrap.of(Entity.class).isSupertypeOf(parameter.valueType()))
+            return MULTI_ENTITY;
+        return null;
+    };
 
     private static ArgumentType<? extends Number> numeric(
         Type type,
