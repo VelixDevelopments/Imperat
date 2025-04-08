@@ -28,7 +28,7 @@ public final class CommandHelp {
                 provider.provide((ExecutionContext<S>) context, source);
             }
         } catch (Throwable ex) {
-            ((ImperatConfig<S>) dispatcher).handleExecutionThrowable(ex, (Context<S>) context, this.getClass(), "display(source, page)");
+            ((ImperatConfig<S>) dispatcher).handleExecutionThrowable(ex, (Context<S>) context, this.getClass(), "display(source)");
         }
     }
 

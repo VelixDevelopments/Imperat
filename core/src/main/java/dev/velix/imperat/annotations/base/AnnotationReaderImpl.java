@@ -54,7 +54,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         //Adding methods with their parameters
         List<Method> methods;
         try {
-            methods = MethodOrderHelper.getMethodsInSourceOrder(clazz);
+            methods = SourceOrderHelper.getMethodsInSourceOrder(clazz);
         } catch (Exception e) {
             ImperatDebugger.error(AnnotationReaderImpl.class, "readClass", e);
             throw new RuntimeException(e);
@@ -79,12 +79,20 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         }
 
         //Adding inner classes
-        for (Class<?> child : clazz.getDeclaredClasses()) {
-            root.addChild(
-                readClass(imperat, parser, root, child)
-            );
+        List<Class<?>> innerClasses;
+        try {
+            innerClasses = SourceOrderHelper.getInnerClassesInSourceOrder(clazz);
+
+        } catch (Exception e) {
+            ImperatDebugger.error(AnnotationReaderImpl.class, "readClass", e);
+            throw new RuntimeException(e);
         }
 
+        for (Class<?> child : innerClasses) {
+            root.addChild(
+                    readClass(imperat, parser, root, child)
+            );
+        }
 
         return root;
     }

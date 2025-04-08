@@ -18,16 +18,15 @@ import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -38,7 +37,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private final String name;
     private final int position;
     private final List<String> aliases = new ArrayList<>();
-    private final Map<String, Command<S>> children = new TreeMap<>();
+    private final Map<String, Command<S>> children = new LinkedHashMap<>();
     private final UsageMap<S> usages = new UsageMap<>();
     private final AutoCompleter<S> autoCompleter;
     private final @Nullable CommandTree<S> commandTree;
