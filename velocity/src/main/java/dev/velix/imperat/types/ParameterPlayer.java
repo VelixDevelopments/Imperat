@@ -51,7 +51,7 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
     }
 
     @Override
-    public @NotNull Player fromString(Imperat<VelocitySource> imperat, String input) {
+    public @NotNull Player fromString(Imperat<VelocitySource> imperat, String input) throws ImperatException {
         return proxyServer.getPlayer(input).orElseThrow();
     }
 

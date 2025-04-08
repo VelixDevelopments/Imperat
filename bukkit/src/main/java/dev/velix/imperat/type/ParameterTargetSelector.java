@@ -144,7 +144,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
     }
 
     @Override
-    public @NotNull TargetSelector fromString(Imperat<BukkitSource> imperat, String input) {
+    public @NotNull TargetSelector fromString(Imperat<BukkitSource> imperat, String input) throws ImperatException {
         return TargetSelector.empty();
     }
 

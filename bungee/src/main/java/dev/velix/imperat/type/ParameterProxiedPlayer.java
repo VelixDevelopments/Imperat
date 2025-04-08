@@ -53,7 +53,7 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
     }
 
     @Override
-    public @NotNull ProxiedPlayer fromString(Imperat<BungeeSource> imperat, String input) {
+    public @NotNull ProxiedPlayer fromString(Imperat<BungeeSource> imperat, String input) throws ImperatException {
         return ProxyServer.getInstance().getPlayer(input);
     }
 

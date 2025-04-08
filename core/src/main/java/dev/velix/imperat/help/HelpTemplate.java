@@ -42,13 +42,13 @@ public sealed abstract class HelpTemplate<S extends Source> implements HelpProvi
             throw new NoHelpException();
         }
         int page = context.getArgumentOr("page", 1);
-        displayHeaderHyphen(command, source, page);
+        displayHeaderHyphen(command, source, page, 1);
         display(context, source, formatter, command.usages());
-        displayFooterHyphen(command, source, page);
+        displayFooterHyphen(command, source, page, 1);
     }
 
-    public abstract void displayHeaderHyphen(Command<S> command, Source source, int page);
+    public abstract void displayHeaderHyphen(Command<S> command, Source source, int page, int maxPages);
 
-    public abstract void displayFooterHyphen(Command<S> command, Source source, int page);
+    public abstract void displayFooterHyphen(Command<S> command, Source source, int page, int maxPages);
 
 }

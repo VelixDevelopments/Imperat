@@ -1,9 +1,11 @@
 package dev.velix.imperat.help;
 
+import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.NoHelpException;
 import dev.velix.imperat.exception.NoHelpPageException;
 import dev.velix.imperat.util.text.PaginatedText;
 import dev.velix.imperat.util.text.TextPage;
@@ -18,7 +20,7 @@ import java.util.Collection;
 public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends HelpTemplate<S> {
 
     protected final int syntaxesPerPage;
-    PaginatedText<CommandUsage<S>> paginatedText;
+    protected PaginatedText<CommandUsage<S>> paginatedText;
 
     public PaginatedHelpTemplate(UsageFormatter formatter,
                                  int syntaxesPerPage) {
@@ -44,12 +46,22 @@ public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends
 
     @Override
     public void provide(ExecutionContext<S> context, S source) throws ImperatException {
+        Command<S> command = context.command();
 
-        var commandUsages = context.command().usages();
+        var commandUsages = command.usages();
         commandUsages.forEach(paginatedText::add);
 
         paginatedText.paginate();
-        super.provide(context, source);
+
+        final int maxUsages = commandUsages.size();
+        if (maxUsages == 0) {
+            throw new NoHelpException();
+        }
+        int page = context.getArgumentOr("page", 1);
+        displayHeaderHyphen(command, source, page, paginatedText.getMaxPages());
+        display(context, source, formatter, commandUsages);
+        displayFooterHyphen(command, source, page, paginatedText.getMaxPages());
+
         paginatedText.clear();
 
     }

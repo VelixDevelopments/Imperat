@@ -58,7 +58,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     public abstract N parse(String input) throws NumberFormatException;
 
     @Override
-    public @NotNull N fromString(Imperat<S> imperat, String input) {
+    public @Nullable N fromString(Imperat<S> imperat, String input) throws ImperatException {
         return parse(input);
     }
 

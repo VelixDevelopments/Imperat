@@ -37,12 +37,12 @@ final class HelpTemplateImpl<S extends Source> extends HelpTemplate<S> {
     }
 
     @Override
-    public void displayHeaderHyphen(Command<S> command, Source source, int page) {
+    public void displayHeaderHyphen(Command<S> command, Source source, int page, int maxPages) {
         source.reply(getHeader(command, 1, 1));
     }
 
     @Override
-    public void displayFooterHyphen(Command<S> command, Source source, int page) {
+    public void displayFooterHyphen(Command<S> command, Source source, int page, int maxPages) {
         source.reply(getFooter(command, 1, 1));
     }
 

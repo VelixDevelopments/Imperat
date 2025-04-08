@@ -60,7 +60,7 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
     }
 
     @Override
-    public @NotNull Boolean fromString(Imperat<S> imperat, String input) {
+    public @NotNull Boolean fromString(Imperat<S> imperat, String input) throws ImperatException {
         return Boolean.parseBoolean(input);
     }
 

@@ -84,7 +84,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     }
 
     @Override
-    public @NotNull T fromString(Imperat<S> imperat, String input) {
+    public @Nullable T fromString(Imperat<S> imperat, String input) throws ImperatException {
         return original.fromString(imperat, input);
     }
 

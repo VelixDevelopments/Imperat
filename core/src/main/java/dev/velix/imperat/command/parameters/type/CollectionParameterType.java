@@ -45,7 +45,7 @@ public class CollectionParameterType<S extends Source, E, C extends Collection<E
     }
 
     @Override
-    public @NotNull C fromString(Imperat<S> imperat, String input) {
+    public @NotNull C fromString(Imperat<S> imperat, String input) throws ImperatException {
         String[] split = input.split(" ");
         C newCollection = collectionSupplier.get();
         for(String raw : split) {

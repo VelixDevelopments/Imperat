@@ -41,5 +41,5 @@ public interface ParameterType<S extends Source, T> {
         return (TypeWrap<T>) TypeWrap.of(type());
     }
 
-    @NotNull T fromString(Imperat<S> imperat, String input);
+    @Nullable T fromString(Imperat<S> imperat, String input) throws ImperatException;
 }

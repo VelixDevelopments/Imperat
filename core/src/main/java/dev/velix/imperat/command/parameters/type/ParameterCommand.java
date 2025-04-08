@@ -35,7 +35,7 @@ public final class ParameterCommand<S extends Source> extends BaseParameterType<
     }
 
     @Override
-    public @NotNull Command<S> fromString(Imperat<S> imperat, String input) {
+    public @NotNull Command<S> fromString(Imperat<S> imperat, String input) throws ImperatException {
         var cmd = imperat.getCommand(input);
         if (input == null || input.isBlank() || cmd == null) {
             throw new RuntimeException(String.format("Unknown command parsed '%s'", input));

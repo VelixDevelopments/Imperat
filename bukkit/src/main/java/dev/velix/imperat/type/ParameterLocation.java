@@ -73,7 +73,7 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
     }
 
     @Override
-    public @NotNull Location fromString(Imperat<BukkitSource> imperat, String currentRaw) {
+    public @NotNull Location fromString(Imperat<BukkitSource> imperat, String currentRaw) throws ImperatException {
         String[] split = currentRaw.split(SINGLE_STRING_SEPARATOR);
         if(split.length < 4) {
             throw new IllegalArgumentException();
@@ -91,6 +91,10 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
         Double x = doubleParser.fromString(imperat, split[1]);
         Double y = doubleParser.fromString(imperat, split[2]);
         Double z = doubleParser.fromString(imperat, split[3]);
+
+        if(x == null || y == null || z == null) {
+            throw new SourceException(SEVERE, "Failed to parse location from input '%s'", currentRaw);
+        }
 
         return new Location(world, x, y, z);
     }

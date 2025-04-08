@@ -51,7 +51,7 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
     }
 
     @Override
-    public @NotNull Player fromString(Imperat<BukkitSource> imperat, String input) {
+    public @NotNull Player fromString(Imperat<BukkitSource> imperat, String input) throws ImperatException {
         return Objects.requireNonNull(Bukkit.getPlayer(input));
     }
 

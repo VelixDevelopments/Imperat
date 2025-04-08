@@ -18,7 +18,6 @@ import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -169,11 +168,16 @@ public final class AnnotationHelper {
 
         if (defaultAnnotation != null) {
             String def = defaultAnnotation.value();
+            OptionalValueSupplier<T> EMPTY = (OptionalValueSupplier<T>) OptionalValueSupplier.empty(TypeWrap.of(parameter.getType()));
             var type = imperat.config().getParameterType(TypeWrap.of(parameter.getType()).getType());
             if (type == null) {
-                return (OptionalValueSupplier<T>) OptionalValueSupplier.empty(TypeWrap.of(parameter.getType()));
+                return EMPTY;
             }
-            return (OptionalValueSupplier<T>) OptionalValueSupplier.of(type.fromString(imperat, def));
+            T defValue = (T) type.fromString(imperat, def);
+            if(defValue == null) {
+                return EMPTY;
+            }
+            return OptionalValueSupplier.of(defValue);
         } else if (provider != null) {
             Class<? extends OptionalValueSupplier<?>> supplierClass = provider.value();
             try {
@@ -186,37 +190,6 @@ public final class AnnotationHelper {
         }
         return fallback;
     }
-
-    /*public static <S extends Source> int loadMethodPriority(Method method, ImperatConfig<S> config) {
-
-        int actualParamInputs = 0;
-        for(var param : method.getParameters()) {
-            if(config.hasContextResolver(param.getType()) || config.hasSourceResolver(param.getType())) {
-                continue;
-            }
-            actualParamInputs++;
-        }
-
-        if(method.isAnnotationPresent(Usage.class) && actualParamInputs >= 1) {
-            //MAIN USAGE
-            return -100;
-        }
-        else if (method.isAnnotationPresent(Usage.class)) {
-            //if default -> -1 else -> 0;
-            return 1;
-        } else if (method.isAnnotationPresent(SubCommand.class)) {
-
-            if(method.getAnnotation(SubCommand.class).attachDirectly()) {
-                return -2;
-            }
-            else {
-                return -1;
-            }
-        }
-
-        return 0;
-    }
-*/
 
     public static boolean isHelpParameter(Parameter element) {
         return TypeUtility.areRelatedTypes(element.getType(), CommandHelp.class);

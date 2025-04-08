@@ -51,7 +51,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     }
 
     @Override
-    public @NotNull String fromString(Imperat<S> imperat, String input) {
+    public @Nullable String fromString(Imperat<S> imperat, String input) throws ImperatException {
         return input;
     }
 

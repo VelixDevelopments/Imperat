@@ -45,7 +45,7 @@ public final class ParameterUUID<S extends Source> extends BaseParameterType<S, 
     }
 
     @Override
-    public @NotNull UUID fromString(Imperat<S> imperat, String input) {
+    public @NotNull UUID fromString(Imperat<S> imperat, String input) throws ImperatException {
         return UUID.fromString(input);
     }
 }

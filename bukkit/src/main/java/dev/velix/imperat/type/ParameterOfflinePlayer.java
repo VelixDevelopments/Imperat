@@ -75,7 +75,7 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
     }
 
     @Override
-    public @NotNull OfflinePlayer fromString(Imperat<BukkitSource> imperat, String input) {
+    public @NotNull OfflinePlayer fromString(Imperat<BukkitSource> imperat, String input) throws ImperatException {
         return Bukkit.getOfflinePlayer(input);
     }
 

@@ -54,7 +54,7 @@ public final class ArrayParameterType<S extends Source, E> extends BaseParameter
     }
 
     @Override @SuppressWarnings("unchecked")
-    public E @NotNull [] fromString(Imperat<S> imperat, String input) {
+    public E @NotNull [] fromString(Imperat<S> imperat, String input) throws ImperatException {
         String[] split = input.split(" ");
         E[] initializer = (E[]) this.initializer.apply(split.length);
         for (int i = 0; i < split.length; i++) {

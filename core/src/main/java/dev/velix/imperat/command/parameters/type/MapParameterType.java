@@ -69,7 +69,7 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
     }
 
     @Override
-    public @NotNull M fromString(Imperat<S> imperat, String input) {
+    public @NotNull M fromString(Imperat<S> imperat, String input) throws ImperatException {
         String[] args = input.split(" ");
         M newMap = mapInitializer.get();
         for(String raw : args) {

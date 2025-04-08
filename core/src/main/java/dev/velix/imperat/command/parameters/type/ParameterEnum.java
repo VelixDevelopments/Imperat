@@ -56,7 +56,7 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
     }
 
     @Override
-    public @NotNull Enum<?> fromString(Imperat<S> imperat, String input) {
+    public @NotNull Enum<?> fromString(Imperat<S> imperat, String input) throws ImperatException {
         return Enum.valueOf((Class<? extends Enum>) type, input);
     }
 }
