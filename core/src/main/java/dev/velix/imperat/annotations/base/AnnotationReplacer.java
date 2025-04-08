@@ -1,6 +1,8 @@
 package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.base.element.ParameterElement;
+import dev.velix.imperat.annotations.base.element.ParseElement;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -22,6 +24,6 @@ public interface AnnotationReplacer<A extends Annotation> {
      * @return the annotations replaced by this annotation
      */
     @NotNull
-    Collection<Annotation> replace(A annotation);
+    Collection<Annotation> replace(@NotNull ParseElement<?> element, A annotation);
 
 }

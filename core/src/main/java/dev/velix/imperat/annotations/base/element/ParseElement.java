@@ -44,7 +44,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
                 //adding the replaced annotations
                 AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);
                 assert replacer != null;
-                replacer.replace((A) annotation)
+                replacer.replace(this, (A) annotation)
                     .forEach((replacedAnnotation) -> annotations.put(clazz, annotation));
             }
         }
