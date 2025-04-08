@@ -217,7 +217,7 @@ public class TestRun {
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{"hi", "bye", "s"});
         var res = results.join();
-        Assertions.assertEquals(List.of("sub1", "sub4"), new ArrayList<>(res));
+        Assertions.assertEquals(List.of("sub4", "sub1"), new ArrayList<>(res));
     }
 
 
