@@ -50,6 +50,18 @@ public final class TargetSelector implements Iterable<Entity> {
         return selectedEntities.isEmpty();
     }
 
+    public boolean containsExactly(final Entity... entities) {
+        if (entities.length != selectedEntities.size()) {
+            return false;
+        }
+        for (final Entity entity : entities) {
+            if (!selectedEntities.contains(entity)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public <E extends Entity> List<E> only(final Class<E> type) {
         return selectedEntities.stream()
             .filter(type::isInstance)
