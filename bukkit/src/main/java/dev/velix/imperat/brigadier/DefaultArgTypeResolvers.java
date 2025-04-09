@@ -15,10 +15,13 @@ import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.*;
-
 import java.lang.reflect.Type;
 
 class DefaultArgTypeResolvers {
+
+
+    private static final ArgumentType<?> SINGLE_PLAYER = entity(true, true);
+    private static final ArgumentType<?> MULTI_ENTITY = entity(false, false);
 
     public final static ArgumentTypeResolver STRING = (parameter -> {
         if (parameter.isGreedy()) return StringArgumentType.greedyString();
@@ -38,11 +41,8 @@ class DefaultArgTypeResolvers {
         return null;
     };
 
-    private static final ArgumentType<?> SINGLE_PLAYER = entity(true, true);
     public static final ArgumentTypeResolver PLAYER = parameter -> SINGLE_PLAYER;
-    private static final ArgumentType<?> MULTI_ENTITY = entity(false, false);
 
-    //TODO add entity selector
     public static final ArgumentTypeResolver ENTITY_SELECTOR = parameter -> {
 
         if(TypeUtility.matches(parameter.valueType(), TargetSelector.class) || TypeWrap.of(Entity.class).isSupertypeOf(parameter.valueType()))
