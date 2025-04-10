@@ -225,18 +225,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 return cmd;
             }
 
-            if (method.getInputCount() == 0) {
-                //default usage for that command.
-                cmd.setDefaultUsageExecution(
-                    MethodCommandExecutor.of(imperat, method, Collections.emptyList())
-                );
+            var usage = loadUsage(parentCmd, cmd, method);
 
-            } else {
-                var usage = loadUsage(parentCmd, cmd, method);
-
-                if (usage != null) {
-                    cmd.addUsage(usage);
-                }
+            if (usage != null) {
+                cmd.addUsage(usage);
             }
 
             return cmd;
@@ -360,25 +352,34 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
                 );
+
             } else {
                 loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, Collections.emptyList())
                 );
             }
+            Cooldown cooldown = method.getAnnotation(Cooldown.class);
+            Async async = method.getAnnotation(Async.class);
+
+            if(cooldown != null) {
+                String cooldownPerm = cooldown.permission();
+                loadedCmd.getDefaultUsage().setCooldown(cooldown.value(), cooldown.unit(), cooldownPerm.isEmpty() ? null : cooldownPerm);
+            }
+            if(async != null) {
+                loadedCmd.getDefaultUsage().setCoordinator(CommandCoordinator.async());
+            }
 
             return null;
         }
-        ClassElement methodOwner = (ClassElement) method.getParent();
-        assert methodOwner != null;
 
         MethodUsageData<S> usageData = loadParameters(method, parentCmd);
 
         var execution = MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters());
 
         Description description = method.getAnnotation(Description.class);
-        Permission permission = methodOwner.getAnnotation(Permission.class);
-        Cooldown cooldown = methodOwner.getAnnotation(Cooldown.class);
-        Async async = methodOwner.getAnnotation(Async.class);
+        Permission permission = method.getAnnotation(Permission.class);
+        Cooldown cooldown = method.getAnnotation(Cooldown.class);
+        Async async = method.getAnnotation(Async.class);
 
         var builder = CommandUsage.<S>builder()
             .parameters(usageData.personalParameters())
@@ -395,6 +396,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             );
 
         if (cooldown != null) {
+            ImperatDebugger.debug("Method '%s' has cooldown", method.getName());
             String cooldownPerm = cooldown.permission();
             builder.cooldown(cooldown.value(), cooldown.unit(), cooldownPerm.isEmpty() ? null : cooldownPerm);
         }

@@ -313,26 +313,34 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         final CommandUsage<S> usage
     ) throws ImperatException {
         //global pre-processing
-        preProcess(context, usage);
+        if(!preProcess(context, usage)) {
+            return;
+        }
 
         //per command pre-processing
-        command.preProcess(this, context, usage);
+        if(!command.preProcess(this, context, usage)) {
+            return;
+        }
 
         ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
         resolvedContext.resolve();
         resolvedContext.debug();
 
         //global post-processing
-        postProcess(resolvedContext);
+        if(!postProcess(resolvedContext)) {
+            return;
+        }
 
         //per command post-processing
-        command.postProcess(this, resolvedContext, usage);
+        if(!command.postProcess(this, resolvedContext, usage)) {
+            return;
+        }
 
         //executing the usage
         usage.execute(this, source, resolvedContext);
     }
 
-    private void preProcess(
+    private boolean preProcess(
         @NotNull Context<S> context,
         @NotNull CommandUsage<S> usage
     ) {
@@ -346,12 +354,13 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     context, preProcessor.getClass(),
                     "CommandPreProcessor#process"
                 );
-                break;
+                return false;
             }
         }
+        return true;
     }
 
-    private void postProcess(
+    private boolean postProcess(
         @NotNull ResolvedContext<S> context
     ) {
         for (CommandPostProcessor<S> postProcessor : config.getPostProcessors()) {
@@ -363,9 +372,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                     context, postProcessor.getClass(),
                     "CommandPostProcessor#process"
                 );
-                break;
+                return false;
             }
         }
+        return true;
     }
 
     /**

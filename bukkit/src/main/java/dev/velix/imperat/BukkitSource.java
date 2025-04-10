@@ -7,6 +7,8 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
+
 public class BukkitSource implements Source {
 
     protected final CommandSender sender;
@@ -88,4 +90,14 @@ public class BukkitSource implements Source {
         return (T) origin();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BukkitSource source)) return false;
+        return Objects.equals(sender, source.sender);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(sender);
+    }
 }

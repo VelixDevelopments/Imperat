@@ -9,7 +9,7 @@ import java.util.Optional;
 
 final class DefaultCooldownHandler<S extends Source> implements CooldownHandler<S> {
 
-    private final Map<S, Long> lastTimeExecuted = new HashMap<>();
+    private final Map<String, Long> lastTimeExecuted = new HashMap<>();
     private final CommandUsage<S> usage;
 
     DefaultCooldownHandler(CommandUsage<S> usage) {
@@ -25,7 +25,7 @@ final class DefaultCooldownHandler<S extends Source> implements CooldownHandler<
      */
     @Override
     public void registerExecutionMoment(S source) {
-        lastTimeExecuted.put(source, System.currentTimeMillis());
+        lastTimeExecuted.put(source.name(), System.currentTimeMillis());
     }
 
     /**
@@ -46,7 +46,7 @@ final class DefaultCooldownHandler<S extends Source> implements CooldownHandler<
      */
     @Override
     public void removeCooldown(S source) {
-        lastTimeExecuted.remove(source);
+        lastTimeExecuted.remove(source.name());
     }
 
     /**
@@ -58,6 +58,6 @@ final class DefaultCooldownHandler<S extends Source> implements CooldownHandler<
      */
     @Override
     public Optional<Long> getLastTimeExecuted(S source) {
-        return Optional.ofNullable(lastTimeExecuted.get(source));
+        return Optional.ofNullable(lastTimeExecuted.get(source.name()));
     }
 }

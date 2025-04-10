@@ -168,10 +168,16 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param usage   the usage detected being used
      */
     @Override
-    public void preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws ImperatException {
+    public boolean preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws ImperatException {
         if (this.preProcessor != null) {
-            preProcessor.process(api, context, usage);
+            try {
+                preProcessor.process(api, context, usage);
+            } catch (ImperatException e) {
+                api.config().handleExecutionThrowable(e, context, preProcessor.getClass(), "Command#preProcess");
+                return false;
+            }
         }
+        return true;
     }
 
     /**
@@ -192,10 +198,17 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param usage   the usage detected being used
      */
     @Override
-    public void postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException {
+    public boolean postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException {
         if (this.postProcessor != null) {
-            this.postProcessor.process(api, context);
+            try {
+                this.postProcessor.process(api, context);
+            } catch (ImperatException e) {
+                api.config().handleExecutionThrowable(e, context, postProcessor.getClass(), "Command#preProcess");
+                return false;
+            }
         }
+
+        return true;
     }
 
     /**

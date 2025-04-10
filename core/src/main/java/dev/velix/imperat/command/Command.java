@@ -148,7 +148,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param context the context
      * @param usage   the usage detected being used
      */
-    void preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
+    boolean preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
 
     /**
      * Sets a post-processor for the command
@@ -163,8 +163,9 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param api     the api
      * @param context the context
      * @param usage   the usage detected being used
+     * @return
      */
-    void postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
+    boolean postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
 
     /**
      * @return the default usage of the command
