@@ -2,9 +2,7 @@ package dev.velix.imperat.command.cooldown;
 
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.*;
-
 import java.util.Optional;
 
 /**
@@ -43,7 +41,6 @@ public interface CooldownHandler<S extends Source> {
     default boolean hasCooldown(S source) {
         UsageCooldown usageCooldown = getUsageCooldown().orElse(null);
         if (usageCooldown == null) {
-            ImperatDebugger.debug("No usage cooldown !");
             return false;
         }
 
@@ -51,13 +48,6 @@ public interface CooldownHandler<S extends Source> {
             long timePassed = System.currentTimeMillis() - lastTime;
             return timePassed <= usageCooldown.toMillis();
         }).orElse(false);
-
-        if(getLastTimeExecuted(source).isEmpty()) {
-            ImperatDebugger.debug("Empty last time executed !");
-        }else {
-            ImperatDebugger.debug("No longer empty !");
-        }
-        ImperatDebugger.debug("Cooldown query result= %s", result);
 
         if (!result)
             removeCooldown(source);

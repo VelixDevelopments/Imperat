@@ -163,7 +163,6 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param api     the api
      * @param context the context
      * @param usage   the usage detected being used
-     * @return
      */
     boolean postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
 
