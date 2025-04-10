@@ -17,20 +17,20 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     private final BukkitImperat dispatcher;
 
     @NotNull
-    private final Command<BukkitSource> command;
+    final Command<BukkitSource> imperatCommand;
 
     InternalBukkitCommand(
         final @NotNull BukkitImperat dispatcher,
-        final @NotNull Command<BukkitSource> command
+        final @NotNull Command<BukkitSource> imperatCommand
     ) {
         super(
-            command.name(),
-            command.description().toString(),
-            CommandUsage.format((String) null, command.getDefaultUsage()),
-            command.aliases()
+            imperatCommand.name(),
+            imperatCommand.description().toString(),
+            CommandUsage.format((String) null, imperatCommand.getDefaultUsage()),
+            imperatCommand.aliases()
         );
         this.dispatcher = dispatcher;
-        this.command = command;
+        this.imperatCommand = imperatCommand;
     }
 
     @Override
@@ -41,7 +41,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
     @Nullable
     @Override
     public String getPermission() {
-        return command.permission();
+        return imperatCommand.permission();
     }
 
     @NotNull
@@ -63,7 +63,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
 
         try {
             BukkitSource source = dispatcher.wrapSender(sender);
-            dispatcher.dispatch(source, this.command, label, raw);
+            dispatcher.dispatch(source, this.imperatCommand, label, raw);
             return true;
         } catch (Exception ex) {
             ImperatDebugger.error(InternalBukkitCommand.class, "execute", ex);
@@ -82,7 +82,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         BukkitSource source = dispatcher.wrapSender(sender);
         try {
             //ImperatDebugger.debug("Size of completions= %s", completions.size());
-            return dispatcher.autoComplete(command, source, alias, args).join();
+            return dispatcher.autoComplete(imperatCommand, source, alias, args).join();
         } catch (Exception ex) {
             ImperatDebugger.error(InternalBukkitCommand.class, "tabComplete", ex);
             return Collections.emptyList();

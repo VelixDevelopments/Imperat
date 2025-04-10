@@ -45,8 +45,15 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     /**
      * @return a new, empty {@link ArgumentQueue}.
      */
-    static ArgumentQueue empty(String originalLine) {
+    static ArgumentQueue of(String originalLine) {
         return new ArgumentQueueImpl(originalLine);
+    }
+
+    /**
+     * @return a new, empty {@link ArgumentQueue}.
+     */
+    static ArgumentQueue empty() {
+        return new ArgumentQueueImpl();
     }
 
     String getOriginalRaw();

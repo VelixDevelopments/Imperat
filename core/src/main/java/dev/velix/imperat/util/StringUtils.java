@@ -48,9 +48,9 @@ public final class StringUtils {
 
     public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion, boolean extraSpace) {
         if (argumentsInOneLine.isEmpty())
-            return !autoCompletion ? ArgumentQueue.empty(argumentsInOneLine) : ArgumentQueue.parse(" ");
+            return !autoCompletion ? ArgumentQueue.of(argumentsInOneLine) : ArgumentQueue.parse(" ");
 
-        ArgumentQueue toCollect = ArgumentQueue.empty(argumentsInOneLine);
+        ArgumentQueue toCollect = ArgumentQueue.of(argumentsInOneLine);
         char[] chars = argumentsInOneLine.toCharArray();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < chars.length; i++) {

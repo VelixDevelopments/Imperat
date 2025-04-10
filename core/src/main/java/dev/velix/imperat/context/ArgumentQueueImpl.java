@@ -2,6 +2,7 @@ package dev.velix.imperat.context;
 
 import org.jetbrains.annotations.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -21,10 +22,15 @@ final class ArgumentQueueImpl extends LinkedList<String> implements ArgumentQueu
     }
 
 
-    public ArgumentQueueImpl(String originalRaw, @NotNull String... rawArgs) {
+    ArgumentQueueImpl(String originalRaw, @NotNull String... rawArgs) {
         this.originalRaw = originalRaw;
         Collections.addAll(this, rawArgs);
         this.unmodifiableView = Collections.unmodifiableList(this);
+    }
+
+    ArgumentQueueImpl() {
+        this.originalRaw = "";
+        this.unmodifiableView = new ArrayList<>();
     }
 
     @Override
