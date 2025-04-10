@@ -134,7 +134,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     }
 
     @Override
-    public @NotNull CommandDispatch<S> contextMatch(Context<S> context) {
+    public @NotNull CommandDispatch<S> contextMatch(Context<S> context) throws ImperatException {
         if (commandTree != null) {
             var copy = context.arguments().copy();
             copy.removeIf(String::isBlank);
@@ -527,6 +527,9 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public void registerFlag(FlagData<S> flag) {
         freeFlags.add(flag);
+        if(commandTree != null) {
+            commandTree.getFlagReader().registerFlag(flag);
+        }
     }
 
     @Override

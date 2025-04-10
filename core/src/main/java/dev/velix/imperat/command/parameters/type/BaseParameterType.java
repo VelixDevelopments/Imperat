@@ -12,6 +12,7 @@ import org.jetbrains.annotations.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base class for defining parameter types in a command processing framework.
@@ -87,5 +88,16 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
     public @NotNull ParameterType<S, T> withSuggestions(String... suggestions) {
         this.suggestions.addAll(List.of(suggestions));
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BaseParameterType<?, ?> that)) return false;
+        return Objects.equals(type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(type);
     }
 }

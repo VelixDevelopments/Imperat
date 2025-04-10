@@ -16,6 +16,8 @@ import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.*;
 
+import java.util.List;
+
 @SuppressWarnings("unchecked")
 final class SmartUsageResolve<S extends Source> {
 
@@ -91,32 +93,35 @@ final class SmartUsageResolve<S extends Source> {
                 continue;
             }
 
-            FlagData<S> flag = usage.getFlagParameterFromRaw(currentRaw);
-            if (currentParameter.isFlag()) {
-                assert currentParameter.isFlag();
-
-                if (flag == null) {
-                    if(stream.peekParameter().isEmpty()) {
-                        //is last parameter
-                        //NOT FREE FLAG AND ALSO NOT A PARAMETER FLAG, UNKNOWN FLAG
-                        throw new SourceException("Unknown flag '%s'", currentRaw);
-                    }else {
-                        //resolve with null
-                        stream.skipParameter();
-                        continue;
-                    }
-                } else {
-                    ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
-                    context.resolveFlag(parameterFlag.resolve(context, stream));
+            List<FlagData<S>> flags = command.tree().getFlagReader().parseFlags(currentRaw);
+            //FlagData<S> flag = usage.getFlagParameterFromRaw(currentRaw);
+            if(flags.isEmpty()) {
+                if(stream.peekParameter().isEmpty()) {
+                    //is last parameter
+                    //NOT FREE FLAG AND ALSO NOT A PARAMETER FLAG, UNKNOWN FLAG
+                    throw new SourceException("Unknown flag '%s'", currentRaw);
+                }else {
+                    //resolve with null
+                    stream.skipParameter();
+                    continue;
                 }
-                stream.skip();
-                continue;
-            } else if (Patterns.isInputFlag(currentRaw) && command.getFlagFromRaw(currentRaw).isPresent()) {
-                //FOUND FREE FLAG
-                var flagData = command.getFlagFromRaw(currentRaw).get();
-                ParameterFlag<S> parameterFlag = ParameterTypes.flag(flagData);
-                context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, flagData));
-                stream.skipRaw();
+            }
+            else if(Patterns.isInputFlag(currentRaw)){
+                //we just found flags
+                for(FlagData<S> parsedFlag : flags) {
+                    if(Patterns.isInputFlag(currentRaw) && parsedFlag.isFree()) {
+                        ParameterFlag<S> parameterFlag = ParameterTypes.flag(parsedFlag);
+                        context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, parsedFlag));
+                        stream.skipRaw();
+                    }else if(currentParameter.isFlag()) {
+                        //not free
+                        ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
+                        context.resolveFlag(parameterFlag.resolve(context, stream));
+                        stream.skip();
+                    }else {
+                        throw new SourceException("Unknown flag '%s'", currentRaw);
+                    }
+                }
                 continue;
             }
 
@@ -153,12 +158,14 @@ final class SmartUsageResolve<S extends Source> {
             if (currentRaw == null) {
                 break;
             }
-            var freeFlagData = command.getFlagFromRaw(currentRaw);
-            if (Patterns.isInputFlag(currentRaw) && freeFlagData.isPresent()) {
-                FlagData<S> freeFlag = freeFlagData.get();
-                var value = ParameterTypes.flag(freeFlag).resolveFreeFlag(context, stream, freeFlag);
-                context.resolveFlag(value);
+            var freeFlagsData = command.tree().getFlagReader().parseFlags(currentRaw);
+            if (Patterns.isInputFlag(currentRaw)) {
+                for(var freeFlagData : freeFlagsData) {
+                    var value = ParameterTypes.flag(freeFlagData).resolveFreeFlag(context, stream, freeFlagData);
+                    context.resolveFlag(value);
+                }
             }
+
             stream.skipRaw();
         }
     }

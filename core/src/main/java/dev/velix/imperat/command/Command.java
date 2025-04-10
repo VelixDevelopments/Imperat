@@ -17,7 +17,6 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -123,7 +122,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param context the context of the execution
      */
     @NotNull
-    CommandDispatch<S> contextMatch(Context<S> context);
+    CommandDispatch<S> contextMatch(Context<S> context) throws ImperatException;
 
 
     /**

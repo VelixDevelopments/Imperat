@@ -4,7 +4,6 @@ import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.*;
-
 import java.util.List;
 
 /**
@@ -56,6 +55,7 @@ public interface FlagData<S extends Source> {
     <T> ParameterType<S, T> inputType();
 
     default boolean hasAlias(String alias) {
+        //Pattern pattern = Pattern.compile(alias);
         return aliases().contains(alias.toLowerCase());
     }
 

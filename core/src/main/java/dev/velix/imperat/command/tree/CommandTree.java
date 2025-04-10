@@ -6,8 +6,11 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
+import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
@@ -25,10 +28,12 @@ public final class CommandTree<S extends Source> {
 
     final Command<S> rootCommand;
     final CommandNode<S> root;
+    final CommandFlagReader<S> flagReader;
 
     CommandTree(Command<S> command) {
         this.rootCommand = command;
         this.root = new CommandNode<>(command);
+        this.flagReader = new CommandFlagReader<>(command);
         //parse(command);
     }
 
@@ -40,6 +45,10 @@ public final class CommandTree<S extends Source> {
         CommandTree<S> tree = create(command);
         tree.parseCommandUsages();
         return tree;
+    }
+
+    public CommandFlagReader<S> getFlagReader() {
+        return flagReader;
     }
 
     //parsing usages part
@@ -154,7 +163,7 @@ public final class CommandTree<S extends Source> {
     public @NotNull CommandDispatch<S> contextMatch(
         ArgumentQueue input,
         ImperatConfig<S> config
-    ) {
+    ) throws ImperatException {
         if (input.isEmpty()) {
             return CommandDispatch.incomplete();
         }
@@ -182,7 +191,7 @@ public final class CommandTree<S extends Source> {
         ArgumentQueue input,
         @NotNull ParameterNode<S, ?> currentNode,
         int depth
-    ) {
+    ) throws ImperatException {
         if (depth >= input.size()) {
             return commandDispatch;
         }
@@ -205,6 +214,26 @@ public final class CommandTree<S extends Source> {
             //FREE FLAG
             var flagData = rootCommand.getFlagFromRaw(rawInput);
             if (flagData.isEmpty()) {
+                var mixOfFreeFlags = flagReader.parseFlags(rawInput);
+                boolean differentInputTypes = mixOfFreeFlags.stream().map(FlagData::inputType).distinct().toList().size() != mixOfFreeFlags.size();
+                var isSwitches = mixOfFreeFlags.stream().map(FlagData::isSwitch).distinct().toList();
+                boolean differentNature = isSwitches.size() != mixOfFreeFlags.size();
+                if(!mixOfFreeFlags.isEmpty()) {
+                    if(differentNature) {
+                        throw new SourceException(SourceException.ErrorLevel.SEVERE, "Flags used '%s' must be of same nature (all switches or all input types)");
+                    }
+                    for (var f : mixOfFreeFlags) {
+                        if (!f.isFree()) {
+                            throw new SourceException(SourceException.ErrorLevel.SEVERE, "Used flag(s) '%s' in the wrong position", rawInput);
+                        }
+                        if (!f.isSwitch() && differentInputTypes) {
+                            throw new SourceException(SourceException.ErrorLevel.SEVERE, "Found a shorthand true flags (non-switch) that are not of same input types");
+                        }
+                    }
+
+                    int depthIncrease = isSwitches.get(0) ? 1 : 2;
+                    dispatchNode(config, commandDispatch, input, currentNode, depth + depthIncrease);
+                }
                 return commandDispatch;
             }
             var flag = flagData.get();
@@ -264,12 +293,12 @@ public final class CommandTree<S extends Source> {
                 assert nextRaw != null;
 
                 ImperatDebugger.debug("nextRaw=%s, at depth=%s, max-depth=%s", nextRaw, depth + 1, input.size() - 1);
-                ImperatDebugger.debug("isInputFlag-nextRaw='%s',  isFreeFlagRegisteredToCommand='%s'", Patterns.isInputFlag(nextRaw), rootCommand.getFlagFromRaw(nextRaw).isPresent());
+                ImperatDebugger.debug("isInputFlag-nextRaw='%s',  isFreeFlagRegisteredToCommand='%s', Found-parsedFlags='%s'", Patterns.isInputFlag(nextRaw), rootCommand.getFlagFromRaw(nextRaw).isPresent(), flagReader.parseFlags(nextRaw).isEmpty());
 
                 CommandDispatch.Result result;
                 if (currentNode.isTrueFlag() && isLastDepth(depth + 1, input)) {
                     result = CommandDispatch.Result.COMPLETE;
-                } else if (Patterns.isInputFlag(nextRaw) && rootCommand.getFlagFromRaw(nextRaw).isPresent()) {
+                } else if (Patterns.isInputFlag(nextRaw) && (rootCommand.getFlagFromRaw(nextRaw).isPresent() || !flagReader.parseFlags(nextRaw).stream().filter(FlagData::isFree).toList().isEmpty()) ) {
                     result = CommandDispatch.Result.COMPLETE;
                 } else if (!currentNode.isGreedyParam()) {
                     ImperatDebugger.debug("IS NOT GREEDY !!, currentNode=%s", currentNode.format());
