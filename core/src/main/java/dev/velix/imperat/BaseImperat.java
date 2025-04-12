@@ -196,7 +196,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
 
-    @ApiStatus.Internal
     private Command<S> search(Command<S> sub, String name) {
         if (sub.hasName(name)) {
             return sub;
