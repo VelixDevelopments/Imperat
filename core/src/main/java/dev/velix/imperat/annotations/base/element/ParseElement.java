@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Objects;
 
-@ApiStatus.Internal
 public sealed abstract class ParseElement<E extends AnnotatedElement> implements AnnotatedElement, Iterable<Annotation> permits ClassElement, MethodElement, ParameterElement {
 
     protected final AnnotationParser<?> parser;
