@@ -2,6 +2,8 @@ package dev.velix.imperat.context;
 
 import org.jetbrains.annotations.*;
 
+import java.util.UUID;
+
 /**
  * Represents the sender/source
  * of a command being executed
@@ -9,6 +11,8 @@ import org.jetbrains.annotations.*;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public interface Source {
+
+    UUID consoleID = UUID.nameUUIDFromBytes("imperat-console".getBytes());
 
     /**
      * @return name of a command source
@@ -47,6 +51,13 @@ public interface Source {
      * @return Whether the command source is from the console
      */
     boolean isConsole();
+
+    /**
+     * @return returns the UUID of the command source
+     */
+    default UUID uuid() {
+        return consoleID;
+    }
 
     @SuppressWarnings("unchecked")
     default <T> T as(Class<T> clazz) {

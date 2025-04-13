@@ -8,6 +8,8 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.entity.Player;
 
+import java.util.UUID;
+
 public final class MinestomSource implements Source {
     private final CommandSender sender;
 
@@ -73,6 +75,11 @@ public final class MinestomSource implements Source {
     @Override
     public boolean isConsole() {
         return sender instanceof ConsoleSender;
+    }
+
+    @Override
+    public UUID uuid() {
+        return this.isConsole() ? consoleID : this.asPlayer().getUuid();
     }
 
     public Player asPlayer() {

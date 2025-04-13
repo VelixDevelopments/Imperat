@@ -11,6 +11,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.*;
 
+import java.util.UUID;
+
 public class BungeeSource implements Source {
 
     private final CommandSender sender;
@@ -57,6 +59,11 @@ public class BungeeSource implements Source {
     @Override
     public boolean isConsole() {
         return ProxyServer.getInstance().getConsole().equals(sender);
+    }
+
+    @Override
+    public UUID uuid() {
+        return this.isConsole() ? consoleID : this.asPlayer().getUniqueId();
     }
 
     public @NotNull ProxiedPlayer asPlayer() {

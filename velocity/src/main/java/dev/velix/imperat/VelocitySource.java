@@ -6,6 +6,8 @@ import com.velocitypowered.api.proxy.Player;
 import dev.velix.imperat.context.Source;
 import net.kyori.adventure.text.ComponentLike;
 
+import java.util.UUID;
+
 public class VelocitySource implements Source {
 
     private final CommandSource origin;
@@ -46,6 +48,11 @@ public class VelocitySource implements Source {
     @Override
     public boolean isConsole() {
         return origin instanceof ConsoleCommandSource;
+    }
+
+    @Override
+    public UUID uuid() {
+        return this.isConsole() ? consoleID : this.asPlayer().getUniqueId();
     }
 
     public ConsoleCommandSource asConsole() {

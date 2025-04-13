@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class BukkitSource implements Source {
 
@@ -82,6 +83,11 @@ public class BukkitSource implements Source {
     @Override
     public boolean isConsole() {
         return !(sender instanceof Player);
+    }
+
+    @Override
+    public UUID uuid() {
+        return this.isConsole() ? consoleID : this.asPlayer().getUniqueId();
     }
 
     @Override
