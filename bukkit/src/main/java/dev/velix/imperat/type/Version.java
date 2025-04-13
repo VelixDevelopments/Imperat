@@ -1,10 +1,10 @@
-package dev.velix.imperat.util;
+package dev.velix.imperat.type;
 
 
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
 
-public final class Version {
+final class Version {
 
     public static final String VERSION_EXACT = Bukkit.getBukkitVersion().split("-")[0];
     public static final boolean IS_FOLIA = Reflections.findClass("io.papermc.paper.threadedregions.RegionizedServer");
