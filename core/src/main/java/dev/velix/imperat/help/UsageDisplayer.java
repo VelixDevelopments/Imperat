@@ -9,6 +9,6 @@ import java.util.Collection;
 @FunctionalInterface
 public interface UsageDisplayer<S extends Source> {
 
-    void accept(ExecutionContext<S> ctx, Source source, Collection<? extends CommandUsage<S>> commandUsages);
+    void accept(ExecutionContext<S> ctx, S source, Collection<? extends CommandUsage<S>> commandUsages);
 
 }
