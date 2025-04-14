@@ -34,7 +34,9 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     @Override
     public <T> void parseCommandClass(T instance) {
         //loading dependency
+
         AnnotationReader<S> reader = AnnotationReader.read(imperat, methodSelector, this, instance);
+
         reader.accept(visitor);
     }
 

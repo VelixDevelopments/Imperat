@@ -50,7 +50,7 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         @Nullable ClassElement parent,
         @NotNull Class<?> clazz
     ) {
-        ClassElement root = new ClassElement(parser, parent, clazz);
+        ClassElement root = new ClassElement(parser, parent, clazz, rootCommandClass.proxyInstance());
         //Adding methods with their parameters
         List<Method> methods;
         try {

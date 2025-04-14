@@ -31,6 +31,17 @@ public final class ClassElement extends ParseElement<Class<?>> {
         this.injectDependencies();
     }
 
+    public <S extends Source> ClassElement(
+            @NotNull AnnotationParser<S> parser,
+            @Nullable ClassElement parent,
+            @NotNull Class<?> element,
+            @NotNull Object instance
+    ) {
+        super(parser, parent, element);
+        this.instance = instance;
+        this.injectDependencies();
+    }
+
     private void injectDependencies() {
         Exception exception = null;
         for (Field field : element.getDeclaredFields()) {

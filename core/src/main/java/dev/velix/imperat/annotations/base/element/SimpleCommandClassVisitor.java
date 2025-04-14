@@ -220,7 +220,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ParseElement<?> parseElement,
         @NotNull Annotation annotation
     ) {
-        if(parseElement.getParent() != null && isAbnormalClass(parseElement)) {
+        if(isAbnormalClass(parseElement)) {
             //sub abnormal class
             //ignore
             return null;
