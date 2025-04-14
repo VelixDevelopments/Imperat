@@ -50,6 +50,7 @@ import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -89,7 +90,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             throw new IllegalStateException("Root command class cannot be a @SubCommand");
         }
 
+
         if (commandAnnotation != null) {
+
+            if(clazz.isRootClass() && isAbnormalClass(clazz)) {
+                throw new IllegalArgumentException("Abnormal root class '%s'".formatted(clazz.getName()));
+            }
 
             Command<S> cmd = loadCommand(null, clazz, commandAnnotation);
 
@@ -209,11 +215,17 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         return null;
     }
 
-    private Command<S> loadCommand(
+    private @Nullable Command<S> loadCommand(
         @Nullable Command<S> parentCmd,
         ParseElement<?> parseElement,
         @NotNull Annotation annotation
     ) {
+        if(parseElement.getParent() != null && isAbnormalClass(parseElement)) {
+            //sub abnormal class
+            //ignore
+            return null;
+        }
+
         final Command<S> cmd = loadCmdInstance(annotation, parseElement);
         if (parentCmd != null && cmd != null) {
             cmd.parent(parentCmd);
@@ -713,6 +725,14 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Set<FlagData<S>> freeFlags
     ) {
 
+    }
+
+    public boolean isAbnormalClass(ParseElement<?> parseElement) {
+        if(parseElement instanceof ClassElement classElement) {
+            var element = classElement.getElement();
+            return element.isInterface() || element.isEnum() || Modifier.isAbstract(element.getModifiers());
+        }
+        return false;
     }
 
 }
