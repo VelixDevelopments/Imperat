@@ -9,7 +9,7 @@ allprojects {
     compileJava.options.encoding = "UTF-8"
 
     group = "dev.velix"
-    version = "1.8.4"
+    version = "1.8.5"
 
     ext {
         def kyoriVersion = "4.17.0"
