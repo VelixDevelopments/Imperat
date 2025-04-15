@@ -7,6 +7,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,14 +24,18 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         final CommandParameter<S> parameter = inputStream.currentParameter().orElse(null);
         //if (parameter == null) return builder.toString();
 
+        if(parameter != null)
+            ImperatDebugger.debug("RESOLVER INTERNAL: INPUT='%s', PARAM='%s'", input, parameter.format());
+
         final Character current = inputStream.currentLetter().orElse(null);
         if (current == null)
-            return builder.toString();
+            return input;
 
         if (!isQuoteChar(current)) {
 
             if (parameter != null && parameter.isGreedyString()) {
-                handleGreedy(builder, inputStream);
+                System.out.println("GREEDY !");
+                handleGreedy(builder, inputStream, input);
             } else {
                 builder.append(inputStream.currentRaw().orElse(""));
             }
@@ -46,17 +51,26 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
             builder.append(next);
         } while (inputStream.hasNextRaw() && inputStream.peekLetter().map((ch) -> !isQuoteChar(ch)).orElse(false));
 
-        return builder.toString();
+        return builder.isEmpty() ? input : builder.toString();
     }
 
 
-    private void handleGreedy(StringBuilder builder, CommandInputStream<S> inputStream) {
-        var raw = inputStream.currentRaw().orElse(null);
-        if (raw == null) return;
+    private void handleGreedy(StringBuilder builder, CommandInputStream<S> inputStream, String input) {
 
+        String raw = inputStream.currentRaw().orElse(null);
+        //if raw is null OR not equal to the input provided(very rare) ->
+        // we are in a case of resolving default value for an optional parameter with no real input from the source.
+        if(raw == null || !raw.equals(input)) {
+            builder.append(input);
+            return;
+        }
+        //the letter internal cursor is related to the LAST valid raw , that's why, GG
         while (inputStream.hasNextLetter()) {
             inputStream.currentLetter()
-                .ifPresent((builder::append));
+                .ifPresent((l)-> {
+                    System.out.println("Appending = '" + l + "'");
+                    builder.append(l);
+                });
             inputStream.skipLetter();
         }
     }

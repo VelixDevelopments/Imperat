@@ -21,7 +21,7 @@ public final class ParameterElement extends ParseElement<Parameter> {
     ) {
         super(parser, method, element);
         this.owningClass = owningClass;
-        this.name = AnnotationHelper.getParamName(parser.getImperat().config(), element);
+        this.name = AnnotationHelper.getParamName(parser.getImperat().config(), this);
         this.type = element.getParameterizedType();
     }
 

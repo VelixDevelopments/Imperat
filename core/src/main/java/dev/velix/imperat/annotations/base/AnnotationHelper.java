@@ -17,6 +17,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -117,7 +118,7 @@ public final class AnnotationHelper {
 
     public static <S extends Source> @NotNull String getParamName(
         ImperatConfig<S> imperat,
-        Parameter parameter,
+        ParameterElement parameter,
         @Nullable Named named,
         @Nullable Flag flag,
         @Nullable Switch switchAnnotation
@@ -136,7 +137,7 @@ public final class AnnotationHelper {
         return imperat.replacePlaceholders(name);
     }
 
-    public static <S extends Source> @NotNull String getParamName(ImperatConfig<S> imperat, Parameter parameter) {
+    public static <S extends Source> @NotNull String getParamName(ImperatConfig<S> imperat, ParameterElement parameter) {
         return getParamName(
             imperat,
             parameter,
@@ -146,7 +147,7 @@ public final class AnnotationHelper {
     }
 
     public static @NotNull OptionalValueSupplier getOptionalValueSupplier(
-        Parameter parameter,
+        ParameterElement parameter,
         Class<? extends OptionalValueSupplier> supplierClass
     ) throws NoSuchMethodException, InstantiationException,
         IllegalAccessException, InvocationTargetException {
@@ -163,20 +164,15 @@ public final class AnnotationHelper {
 
     public static <S extends Source> @NotNull OptionalValueSupplier deduceOptionalValueSupplier(
         Imperat<S> imperat,
-        Parameter parameter,
+        ParameterElement parameter,
         Default defaultAnnotation,
         DefaultProvider provider,
         OptionalValueSupplier fallback
     ) throws ImperatException {
 
         if (defaultAnnotation != null) {
+            ImperatDebugger.debug("Went in @Default checker, found def value '%s'", defaultAnnotation.value());
             String def = defaultAnnotation.value();
-            OptionalValueSupplier EMPTY =  OptionalValueSupplier.empty();
-            var type = imperat.config().getParameterType(TypeWrap.of(parameter.getType()).getType());
-            if (type == null) {
-                return EMPTY;
-            }
-
             return OptionalValueSupplier.of(def);
         } else if (provider != null) {
             Class<? extends OptionalValueSupplier> supplierClass = provider.value();

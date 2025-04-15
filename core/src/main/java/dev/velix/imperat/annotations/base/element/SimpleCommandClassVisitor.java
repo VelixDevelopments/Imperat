@@ -49,10 +49,8 @@ import dev.velix.imperat.util.reflection.Reflections;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -560,11 +558,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
     @SuppressWarnings("unchecked")
     private <T> CommandParameter<S> loadParameter(
-        @NotNull ParseElement<?> paramElement
+        @NotNull ParameterElement parameter
     ) {
 
-        ParameterElement element = (ParameterElement) paramElement;
-        Parameter parameter = element.getElement();
+        //Parameter parameter = element.getElement();
 
         Named named = parameter.getAnnotation(Named.class);
         Flag flag = parameter.getAnnotation(Flag.class);
@@ -574,7 +571,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             throw new IllegalStateException("both @Flag and @Switch at the same time !");
         }
 
-        TypeWrap<T> parameterTypeWrap = (TypeWrap<T>) TypeWrap.of(parameter.getParameterizedType());
+        TypeWrap<T> parameterTypeWrap = (TypeWrap<T>) TypeWrap.of(parameter.getElement().getParameterizedType());
         var type = (ParameterType<S, T>) config.getParameterType(parameterTypeWrap.getType());
         if (type == null) {
             throw new IllegalArgumentException("Unknown type detected '" + parameterTypeWrap.getType().getTypeName() + "'");
@@ -582,15 +579,15 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         String name = AnnotationHelper.getParamName(config, parameter, named, flag, switchAnnotation);
         boolean optional = flag != null || switchAnnotation != null
-            || element.isAnnotationPresent(Optional.class)
-            || element.isAnnotationPresent(Default.class)
-            || element.isAnnotationPresent(DefaultProvider.class);
+            || parameter.isAnnotationPresent(Optional.class)
+            || parameter.isAnnotationPresent(Default.class)
+            || parameter.isAnnotationPresent(DefaultProvider.class);
 
         //reading suggestion annotation
         //element.debug();
 
-        Suggest suggestAnnotation = element.getAnnotation(Suggest.class);
-        SuggestionProvider suggestionProvider = element.getAnnotation(SuggestionProvider.class);
+        Suggest suggestAnnotation = parameter.getAnnotation(Suggest.class);
+        SuggestionProvider suggestionProvider = parameter.getAnnotation(SuggestionProvider.class);
 
         SuggestionResolver<S> suggestionResolver = null;
 
@@ -613,12 +610,12 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         boolean greedy = parameter.getAnnotation(Greedy.class) != null;
 
         if (greedy && parameter.getType() != String.class) {
-            throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy valueType '" + parameter.getType().getName() + "'");
+            throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy valueType '" + parameter.getType().getTypeName() + "'");
         }
 
         dev.velix.imperat.command.Description desc = dev.velix.imperat.command.Description.EMPTY;
-        if (element.isAnnotationPresent(Description.class)) {
-            var descAnn = element.getAnnotation(Description.class);
+        if (parameter.isAnnotationPresent(Description.class)) {
+            var descAnn = parameter.getAnnotation(Description.class);
             assert descAnn != null;
             desc = dev.velix.imperat.command.Description.of(
                 config.replacePlaceholders(descAnn.value())
@@ -626,8 +623,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
 
         String permission = null;
-        if (element.isAnnotationPresent(Permission.class)) {
-            var permAnn = element.getAnnotation(Permission.class);
+        if (parameter.isAnnotationPresent(Permission.class)) {
+            var permAnn = parameter.getAnnotation(Permission.class);
             assert permAnn != null;
             permission = config.replacePlaceholders(permAnn.value());
         }
@@ -658,7 +655,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     .description(desc)
                     .permission(permission)
                     .build(),
-                element
+                parameter
             );
         } else if (switchAnnotation != null) {
             String[] switchAliases = switchAnnotation.value();
@@ -669,13 +666,13 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     .description(desc)
                     .permission(permission)
                     .build(),
-                element
+                parameter
             );
         }
 
 
-        if(element.isAnnotationPresent(Values.class)) {
-            Values valuesAnnotation = element.getAnnotation(Values.class);
+        if(parameter.isAnnotationPresent(Values.class)) {
+            Values valuesAnnotation = parameter.getAnnotation(Values.class);
             assert valuesAnnotation != null;
 
             Set<String> values = Arrays.stream(valuesAnnotation.value())
@@ -693,17 +690,18 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             type = ConstrainedParameterTypeDecorator.of(type, values, valuesAnnotation.caseSensitive());
         }
 
+        ImperatDebugger.debug("Optional value is empty='%s'", optionalValueSupplier.isEmpty());
         CommandParameter<S> param =
             AnnotationParameterDecorator.decorate(
                 CommandParameter.of(
                     name, type, permission, desc,
                     optional, greedy, optionalValueSupplier, suggestionResolver
-                ), element
+                ), parameter
             );
 
         if (TypeUtility.isNumericType(TypeWrap.of(param.valueType()))
-            && element.isAnnotationPresent(Range.class)) {
-            Range range = element.getAnnotation(Range.class);
+            && parameter.isAnnotationPresent(Range.class)) {
+            Range range = parameter.getAnnotation(Range.class);
             assert range != null;
             param = NumericParameterDecorator.decorate(
                 param, NumericRange.of(range.min(), range.max())
