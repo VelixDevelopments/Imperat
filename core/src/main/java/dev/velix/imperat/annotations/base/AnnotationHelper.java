@@ -7,8 +7,10 @@ import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Flag;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Switch;
+import dev.velix.imperat.annotations.base.element.ClassElement;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
+import dev.velix.imperat.annotations.base.element.ParseElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -20,6 +22,7 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
@@ -193,5 +196,16 @@ public final class AnnotationHelper {
 
     public static boolean isHelpParameter(Parameter element) {
         return TypeUtility.areRelatedTypes(element.getType(), CommandHelp.class);
+    }
+
+
+    public static boolean isAbnormalClass(ParseElement<?> parseElement) {
+        if(parseElement instanceof ClassElement classElement) {
+            return isAbnormalClass(classElement.getElement());
+        }
+        return false;
+    }
+    public static boolean isAbnormalClass(Class<?> element) {
+        return element.isInterface() || element.isEnum() || Modifier.isAbstract(element.getModifiers());
     }
 }

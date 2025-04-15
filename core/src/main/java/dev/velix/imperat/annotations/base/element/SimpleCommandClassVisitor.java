@@ -93,7 +93,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         if (commandAnnotation != null) {
 
-            if(clazz.isRootClass() && isAbnormalClass(clazz)) {
+            if(clazz.isRootClass() && AnnotationHelper.isAbnormalClass(clazz)) {
                 throw new IllegalArgumentException("Abnormal root class '%s'".formatted(clazz.getName()));
             }
 
@@ -220,7 +220,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ParseElement<?> parseElement,
         @NotNull Annotation annotation
     ) {
-        if(isAbnormalClass(parseElement)) {
+        if(AnnotationHelper.isAbnormalClass(parseElement)) {
             //sub abnormal class
             //ignore
             return null;
@@ -726,13 +726,4 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     ) {
 
     }
-
-    public boolean isAbnormalClass(ParseElement<?> parseElement) {
-        if(parseElement instanceof ClassElement classElement) {
-            var element = classElement.getElement();
-            return element.isInterface() || element.isEnum() || Modifier.isAbstract(element.getModifiers());
-        }
-        return false;
-    }
-
 }

@@ -32,6 +32,9 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         AnnotationParser<S> parser,
         Object instance
     ) {
+        if(AnnotationHelper.isAbnormalClass(instance.getClass())) {
+            throw new IllegalArgumentException("Failed to parse the abnormal class '%s'".formatted(instance.getClass().getTypeName()));
+        }
         this.imperat = imperat;
         this.parser = parser;
         this.rootCommandClass = new RootCommandClass<>(instance.getClass(), instance);
@@ -40,11 +43,11 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         this.classElement = read(imperat);
     }
 
-    private ClassElement read(Imperat<S> imperat) {
+    private @NotNull ClassElement read(Imperat<S> imperat) {
         return readClass(imperat, parser, null, rootCommandClass.proxyClass());
     }
 
-    private ClassElement readClass(
+    private @NotNull ClassElement readClass(
         Imperat<S> imperat,
         AnnotationParser<S> parser,
         @Nullable ClassElement parent,
@@ -92,6 +95,10 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         }
 
         for (Class<?> child : innerClasses) {
+            if(AnnotationHelper.isAbnormalClass(child)) {
+                ImperatDebugger.debug("Ignoring abnormal sub class '%s'", child.getTypeName());
+                continue;
+            }
             root.addChild(
                     readClass(imperat, parser, root, child)
             );
