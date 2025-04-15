@@ -52,7 +52,7 @@ public class VelocitySource implements Source {
 
     @Override
     public UUID uuid() {
-        return this.isConsole() ? consoleID : this.asPlayer().getUniqueId();
+        return this.isConsole() ? CONSOLE_UUID : this.asPlayer().getUniqueId();
     }
 
     public ConsoleCommandSource asConsole() {

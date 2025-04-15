@@ -12,7 +12,7 @@ import java.util.UUID;
 @ApiStatus.AvailableSince("1.0.0")
 public interface Source {
 
-    UUID consoleID = UUID.nameUUIDFromBytes("imperat-console".getBytes());
+    UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("imperat-console".getBytes());
 
     /**
      * @return name of a command source
@@ -56,7 +56,7 @@ public interface Source {
      * @return returns the UUID of the command source
      */
     default UUID uuid() {
-        return consoleID;
+        return CONSOLE_UUID;
     }
 
     @SuppressWarnings("unchecked")

@@ -79,7 +79,7 @@ public final class MinestomSource implements Source {
 
     @Override
     public UUID uuid() {
-        return this.isConsole() ? consoleID : this.asPlayer().getUuid();
+        return this.isConsole() ? CONSOLE_UUID : this.asPlayer().getUuid();
     }
 
     public Player asPlayer() {
