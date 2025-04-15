@@ -7,7 +7,6 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,9 +23,6 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         final CommandParameter<S> parameter = inputStream.currentParameter().orElse(null);
         //if (parameter == null) return builder.toString();
 
-        if(parameter != null)
-            ImperatDebugger.debug("RESOLVER INTERNAL: INPUT='%s', PARAM='%s'", input, parameter.format());
-
         final Character current = inputStream.currentLetter().orElse(null);
         if (current == null)
             return input;
@@ -34,7 +30,6 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         if (!isQuoteChar(current)) {
 
             if (parameter != null && parameter.isGreedyString()) {
-                System.out.println("GREEDY !");
                 handleGreedy(builder, inputStream, input);
             } else {
                 builder.append(inputStream.currentRaw().orElse(""));
@@ -67,10 +62,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         //the letter internal cursor is related to the LAST valid raw , that's why, GG
         while (inputStream.hasNextLetter()) {
             inputStream.currentLetter()
-                .ifPresent((l)-> {
-                    System.out.println("Appending = '" + l + "'");
-                    builder.append(l);
-                });
+                .ifPresent(builder::append);
             inputStream.skipLetter();
         }
     }
