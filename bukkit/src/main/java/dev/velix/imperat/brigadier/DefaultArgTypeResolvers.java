@@ -14,7 +14,8 @@ import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Type;
 
 class DefaultArgTypeResolvers {

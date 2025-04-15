@@ -17,7 +17,11 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

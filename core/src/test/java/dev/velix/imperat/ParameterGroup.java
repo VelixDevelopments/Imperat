@@ -10,7 +10,8 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     private final GroupSuggestionResolver suggestionResolver = new GroupSuggestionResolver();

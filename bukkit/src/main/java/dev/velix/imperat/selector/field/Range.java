@@ -1,6 +1,6 @@
 package dev.velix.imperat.selector.field;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 

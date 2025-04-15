@@ -6,7 +6,7 @@ import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.StringUtils;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 

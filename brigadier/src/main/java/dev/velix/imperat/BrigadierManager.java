@@ -6,7 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A class that manages parsing {@link Command}

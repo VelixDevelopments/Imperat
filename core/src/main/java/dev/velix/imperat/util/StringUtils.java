@@ -1,7 +1,8 @@
 package dev.velix.imperat.util;
 
 import dev.velix.imperat.context.ArgumentQueue;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

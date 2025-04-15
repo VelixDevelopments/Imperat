@@ -3,7 +3,8 @@ package dev.velix.imperat.command.parameters;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
@@ -26,12 +27,11 @@ public interface FlagParameter<S extends Source> extends CommandParameter<S> {
     }
 
     /**
-     * @param <T> the valueType of flag input value
      * @return the {@link SuggestionResolver} for input value of this flag
      * null if the flag is switch, check using {@link FlagParameter#isSwitch()}
      */
     @Nullable
-    <T> SuggestionResolver<S> inputSuggestionResolver();
+    SuggestionResolver<S> inputSuggestionResolver();
 
     /**
      * @return checks whether this parameter is a flag

@@ -9,7 +9,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.help.GenericCommandHelpTopic;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.help.HelpTopicFactory;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

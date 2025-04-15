@@ -6,7 +6,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 class ContextImpl<S extends Source> implements Context<S> {
 

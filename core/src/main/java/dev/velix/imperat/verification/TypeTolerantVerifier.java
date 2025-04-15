@@ -4,7 +4,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.TypeUtility;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Type;
 

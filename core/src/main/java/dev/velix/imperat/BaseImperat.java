@@ -21,7 +21,8 @@ import dev.velix.imperat.exception.PermissionDeniedException;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

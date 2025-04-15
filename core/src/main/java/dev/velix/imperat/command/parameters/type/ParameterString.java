@@ -1,5 +1,7 @@
 package dev.velix.imperat.command.parameters.type;
 
+import static dev.velix.imperat.util.StringUtils.isQuoteChar;
+
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
@@ -7,9 +9,8 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
-
-import static dev.velix.imperat.util.StringUtils.isQuoteChar;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class ParameterString<S extends Source> extends BaseParameterType<S, String> {
 

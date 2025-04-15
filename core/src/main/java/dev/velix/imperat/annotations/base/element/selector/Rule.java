@@ -3,7 +3,8 @@ package dev.velix.imperat.annotations.base.element.selector;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.element.MethodElement;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 

@@ -1,5 +1,7 @@
 package dev.velix.imperat;
 
+import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
+
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -21,12 +23,10 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 
 @SuppressWarnings("unchecked")
 public abstract non-sealed class BaseBrigadierManager<S extends Source> implements BrigadierManager<S> {

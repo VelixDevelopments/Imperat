@@ -5,7 +5,9 @@ import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.AnnotationMap;
 import dev.velix.imperat.util.ImperatDebugger;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;

@@ -2,7 +2,8 @@ package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.base.element.ParseElement;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;

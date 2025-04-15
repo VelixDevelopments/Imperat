@@ -1,7 +1,8 @@
 package dev.velix.imperat.resolvers;
 
 import dev.velix.imperat.BungeeSource;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class BungeePermissionResolver implements PermissionResolver<BungeeSource> {
 

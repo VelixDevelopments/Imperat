@@ -2,7 +2,8 @@ package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.Internal
 public final class ArgumentNode<S extends Source> extends ParameterNode<S, CommandParameter<S>> {

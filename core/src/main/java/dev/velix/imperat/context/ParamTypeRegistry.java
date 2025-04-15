@@ -1,6 +1,5 @@
 package dev.velix.imperat.context;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.type.ArrayParameterType;
 import dev.velix.imperat.command.parameters.type.CollectionParameterType;
 import dev.velix.imperat.command.parameters.type.MapParameterType;
@@ -10,7 +9,7 @@ import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Type;
 import java.util.ArrayDeque;

@@ -2,7 +2,8 @@ package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.ImperatDebugger;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public final class CommandTreeVisualizer<S extends Source> {

@@ -5,7 +5,7 @@ import dev.velix.imperat.annotations.base.AnnotationReader;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Contract;
 
 import java.lang.annotation.Annotation;
 

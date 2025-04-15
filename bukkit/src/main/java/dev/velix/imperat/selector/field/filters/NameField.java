@@ -4,7 +4,7 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 final class NameField extends PredicateField<String> {
     /**

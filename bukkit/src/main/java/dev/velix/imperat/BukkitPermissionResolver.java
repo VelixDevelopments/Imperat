@@ -1,7 +1,8 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.resolvers.PermissionResolver;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class BukkitPermissionResolver implements PermissionResolver<BukkitSource> {
 

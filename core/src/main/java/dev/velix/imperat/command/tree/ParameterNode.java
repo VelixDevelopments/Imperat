@@ -2,7 +2,9 @@ package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Objects;

@@ -1,7 +1,8 @@
 package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.util.Preconditions;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;

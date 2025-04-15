@@ -10,7 +10,8 @@ import dev.velix.imperat.resolvers.SourceResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.Collection;

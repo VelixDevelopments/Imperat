@@ -1,6 +1,6 @@
 package dev.velix.imperat.command.suggestions;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Represents an argument that's being completed

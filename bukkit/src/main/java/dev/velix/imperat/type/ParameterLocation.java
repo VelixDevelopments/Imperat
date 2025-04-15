@@ -1,5 +1,7 @@
 package dev.velix.imperat.type;
 
+import static dev.velix.imperat.exception.SourceException.ErrorLevel.SEVERE;
+
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
@@ -13,8 +15,8 @@ import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.jetbrains.annotations.*;
-import static dev.velix.imperat.exception.SourceException.ErrorLevel.SEVERE;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unchecked")
 public class ParameterLocation extends BaseParameterType<BukkitSource, Location> {

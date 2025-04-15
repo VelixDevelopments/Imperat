@@ -1,6 +1,6 @@
 package dev.velix.imperat.annotations;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

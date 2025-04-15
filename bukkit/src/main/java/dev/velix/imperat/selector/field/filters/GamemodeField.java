@@ -8,7 +8,7 @@ import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.GameMode;
 import org.bukkit.entity.HumanEntity;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 

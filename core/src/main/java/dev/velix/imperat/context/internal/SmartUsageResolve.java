@@ -14,7 +14,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Patterns;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unchecked")
 final class SmartUsageResolve<S extends Source> {

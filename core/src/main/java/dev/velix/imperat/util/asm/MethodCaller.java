@@ -23,7 +23,8 @@
  */
 package dev.velix.imperat.util.asm;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A high-level wrapper, responsible for invoking methods reflectively.

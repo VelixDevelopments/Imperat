@@ -12,6 +12,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

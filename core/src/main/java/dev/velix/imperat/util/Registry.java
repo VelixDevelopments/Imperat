@@ -1,6 +1,6 @@
 package dev.velix.imperat.util;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;

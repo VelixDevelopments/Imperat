@@ -12,7 +12,8 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.TypeUtility;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

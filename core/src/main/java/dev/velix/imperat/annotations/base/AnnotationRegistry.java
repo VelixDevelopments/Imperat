@@ -21,7 +21,7 @@ import dev.velix.imperat.annotations.SuggestionProvider;
 import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.annotations.Values;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;

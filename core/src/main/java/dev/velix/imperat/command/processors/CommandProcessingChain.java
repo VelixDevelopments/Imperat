@@ -1,12 +1,13 @@
 package dev.velix.imperat.command.processors;
 
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-public interface CommandProcessingChain<S extends Source, P extends CommandProcessor> extends Iterable<P> {
+public interface CommandProcessingChain<S extends Source, P extends CommandProcessor<S>> extends Iterable<P> {
 
     @NotNull
     Queue<P> getProcessors();
@@ -15,12 +16,12 @@ public interface CommandProcessingChain<S extends Source, P extends CommandProce
 
     void add(P preProcessor);
 
-    final class Builder<S extends Source, P extends CommandProcessor> {
+    final class Builder<S extends Source, P extends CommandProcessor<S>> {
         private final PriorityQueue<P> processors;
 
         public Builder() {
             // Create a priority queue that sorts by the priority of the processors
-            this.processors = new PriorityQueue<>((p1, p2) -> Integer.compare(p1.priority(), p2.priority()));
+            this.processors = new PriorityQueue<>(Comparator.comparingInt(CommandProcessor::priority));
         }
 
         public Builder<S, P> then(P processor) {

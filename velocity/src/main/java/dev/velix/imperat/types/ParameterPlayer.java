@@ -13,7 +13,8 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 

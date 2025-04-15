@@ -1,6 +1,6 @@
 package dev.velix.imperat.util.text;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;

@@ -1,6 +1,6 @@
 package dev.velix.imperat.util;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;

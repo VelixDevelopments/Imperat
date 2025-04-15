@@ -1,6 +1,9 @@
 package dev.velix.imperat;
 
 
+import static dev.velix.imperat.TestRun.IMPERAT;
+import static dev.velix.imperat.TestRun.SOURCE;
+
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.tree.CommandDispatch;
@@ -17,9 +20,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import static dev.velix.imperat.TestRun.IMPERAT;
-import static dev.velix.imperat.TestRun.SOURCE;
 
 public class TestSmartUsageResolve {
 

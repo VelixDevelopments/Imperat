@@ -1,6 +1,9 @@
 package dev.velix.imperat.util.asm;
 
-import org.jetbrains.annotations.*;
+import static java.util.Collections.addAll;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -8,8 +11,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Collections.addAll;
 
 /**
  * A {@link MethodCallerFactory} that uses the method handles API to generate

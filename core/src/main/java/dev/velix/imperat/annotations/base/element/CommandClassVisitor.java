@@ -6,7 +6,7 @@ import dev.velix.imperat.annotations.base.element.selector.ElementSelector;
 import dev.velix.imperat.annotations.base.element.selector.MethodRules;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 

@@ -5,7 +5,7 @@ import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.SubCommand;
 import dev.velix.imperat.annotations.Usage;
-import java.util.LinkedList;
+
 import java.util.List;
 import java.util.Map;
 

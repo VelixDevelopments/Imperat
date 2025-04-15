@@ -6,7 +6,7 @@ import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 final class SuggestionContextImpl<S extends Source> extends ContextImpl<S> implements SuggestionContext<S> {
     private final CompletionArg completionArg;

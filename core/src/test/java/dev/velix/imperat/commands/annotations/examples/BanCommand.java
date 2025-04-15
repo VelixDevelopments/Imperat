@@ -12,7 +12,7 @@ import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.annotations.Values;
 import jdk.jfr.Description;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 @Command("ban")
 @Permission("command.ban")

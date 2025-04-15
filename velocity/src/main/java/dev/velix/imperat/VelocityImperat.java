@@ -9,7 +9,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.types.ParameterPlayer;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 
 public final class VelocityImperat extends BaseImperat<VelocitySource> {

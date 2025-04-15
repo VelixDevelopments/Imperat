@@ -1,7 +1,8 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents dynamic function returning a hyphen string

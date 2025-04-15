@@ -1,6 +1,6 @@
 package dev.velix.imperat.command;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents an entity that can hold a permission.

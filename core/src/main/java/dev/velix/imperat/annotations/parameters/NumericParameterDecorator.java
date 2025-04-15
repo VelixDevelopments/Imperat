@@ -6,7 +6,8 @@ import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class NumericParameterDecorator<S extends Source> extends InputParameter<S> implements NumericParameter<S> {
 

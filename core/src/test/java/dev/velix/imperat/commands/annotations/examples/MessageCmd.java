@@ -6,7 +6,7 @@ import dev.velix.imperat.annotations.Greedy;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Suggest;
 import dev.velix.imperat.annotations.Usage;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 @Command({"message"})
 public class MessageCmd {

@@ -9,7 +9,7 @@ import dev.velix.imperat.exception.NoHelpException;
 import dev.velix.imperat.exception.NoHelpPageException;
 import dev.velix.imperat.util.text.PaginatedText;
 import dev.velix.imperat.util.text.TextPage;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 

@@ -2,7 +2,7 @@ package dev.velix.imperat.command.parameters.type;
 
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 

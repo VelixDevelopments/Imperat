@@ -5,7 +5,7 @@ import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Usage;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 @Command("opt")
 public class OptionalArgCommand {

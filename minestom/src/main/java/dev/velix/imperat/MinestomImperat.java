@@ -4,7 +4,7 @@ import dev.velix.imperat.command.Command;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.command.CommandSender;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 

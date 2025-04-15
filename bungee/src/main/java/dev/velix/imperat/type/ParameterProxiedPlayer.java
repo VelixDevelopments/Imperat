@@ -13,7 +13,8 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 

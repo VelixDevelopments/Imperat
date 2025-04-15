@@ -1,6 +1,7 @@
 package dev.velix.imperat.command.cooldown;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;

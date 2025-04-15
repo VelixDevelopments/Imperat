@@ -1,7 +1,7 @@
 package dev.velix.imperat.annotations.base.element.selector;
 
 import dev.velix.imperat.annotations.base.element.ParseElement;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -7,7 +7,8 @@ import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -115,7 +116,7 @@ public final class SuggestionResolverRegistry<S extends Source> {
 
         }
 
-        private List<String> autoCompleteFlagNames(FlagData data) {
+        private List<String> autoCompleteFlagNames(FlagData<S> data) {
             List<String> results = new ArrayList<>();
             results.add("-" + data.name());
             for (var alias : data.aliases()) {

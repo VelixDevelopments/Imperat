@@ -5,7 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 

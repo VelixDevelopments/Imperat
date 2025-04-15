@@ -7,7 +7,7 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

@@ -5,7 +5,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NoHelpException;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Represents a template for holding information that the help-writer will use

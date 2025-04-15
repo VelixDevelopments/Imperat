@@ -2,7 +2,7 @@ package dev.velix.imperat.util;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.logging.Level;
