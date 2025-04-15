@@ -1,6 +1,7 @@
 package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.base.element.ClassElement;
 import dev.velix.imperat.annotations.base.element.CommandClassVisitor;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.RootCommandClass;
@@ -27,6 +28,8 @@ public interface AnnotationReader<S extends Source> {
     }
 
     RootCommandClass<S> getRootClass();
+
+    ClassElement getParsedClass();
 
     void accept(CommandClassVisitor<S> visitor);
 

@@ -1,11 +1,14 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.annotations.base.AnnotationFactory;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.EmptyCmd;
+import dev.velix.imperat.commands.MyCustomAnnotation;
 import dev.velix.imperat.commands.Test2Command;
+import dev.velix.imperat.commands.TestCustomAnnotationCmd;
 import dev.velix.imperat.commands.annotations.KitCommand;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.examples.AnnotatedGroupCommand;
@@ -51,7 +54,11 @@ public class TestRun {
             .dependencyResolver(Group.class, () -> new Group("my-global-group"))
             .parameterType(Group.class, new ParameterGroup()).build();
 
-
+        IMPERAT.registerAnnotationReplacer(MyCustomAnnotation.class,(element, ann)-> {
+            dev.velix.imperat.annotations.Command cmdAnn = AnnotationFactory.create(dev.velix.imperat.annotations.Command.class, "value",
+                    new String[]{ann.name()});
+            return List.of(cmdAnn);
+        });
         IMPERAT.registerCommand(MULTIPLE_OPTIONAL_CMD);
         IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
         IMPERAT.registerCommand(new AnnotatedGroupCommand());
@@ -63,6 +70,7 @@ public class TestRun {
         IMPERAT.registerCommand(new KitCommand());
         IMPERAT.registerCommand(new TestCommand());
         IMPERAT.registerCommand(new Test2Command());
+
 
     }
 
@@ -371,4 +379,12 @@ public class TestRun {
         // /test2 <myList>
     }
 
+    @Test
+    public void testAR() {
+        IMPERAT.registerCommand(new TestCustomAnnotationCmd());
+        var cmd = IMPERAT.getCommand("testreplacer");
+        assert cmd != null;
+        debugCommand(cmd);
+        Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("testreplacer", ""));
+    }
 }

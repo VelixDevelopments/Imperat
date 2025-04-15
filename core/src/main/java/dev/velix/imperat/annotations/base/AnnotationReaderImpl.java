@@ -50,7 +50,10 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
         @Nullable ClassElement parent,
         @NotNull Class<?> clazz
     ) {
-        ClassElement root = new ClassElement(parser, parent, clazz, rootCommandClass.proxyInstance());
+
+        ClassElement root = parent == null ?
+                new ClassElement(parser, null, clazz, rootCommandClass.proxyInstance()) : new ClassElement(parser, parent, clazz);
+
         //Adding methods with their parameters
         List<Method> methods;
         try {
@@ -101,6 +104,11 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     @Override
     public RootCommandClass<S> getRootClass() {
         return rootCommandClass;
+    }
+
+    @Override
+    public ClassElement getParsedClass() {
+        return classElement;
     }
 
     @Override

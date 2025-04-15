@@ -4,11 +4,12 @@ import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.AnnotationMap;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -38,13 +39,17 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
                 annotations.put(clazz, annotation);
             } else if (registry.hasAnnotationReplacerFor(clazz)) {
                 //we add the custom annotation anyway
+                ImperatDebugger.debug("Found replacer for '@%s' on element '%s'",clazz.getSimpleName(), this.getName());
                 annotations.put(clazz, annotation);
 
                 //adding the replaced annotations
                 AnnotationReplacer<A> replacer = registry.getAnnotationReplacer(clazz);
                 assert replacer != null;
-                replacer.replace(this, (A) annotation)
-                    .forEach((replacedAnnotation) -> annotations.put(clazz, annotation));
+
+                Collection<Annotation> replacementAnnotations = replacer.replace(this, (A) annotation);
+                for(Annotation replacement : replacementAnnotations) {
+                    annotations.put(replacement.annotationType(), replacement);
+                }
             }
         }
     }
@@ -79,7 +84,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
      * @since 1.5
      */
     @Override
-    public Annotation[] getAnnotations() {
+    public Annotation @NotNull [] getAnnotations() {
         return annotations.values().toArray(new Annotation[0]);
     }
 
@@ -97,7 +102,7 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
      * @since 1.5
      */
     @Override
-    public Annotation[] getDeclaredAnnotations() {
+    public Annotation @NotNull [] getDeclaredAnnotations() {
         return annotations.values().toArray(new Annotation[0]);
     }
 
