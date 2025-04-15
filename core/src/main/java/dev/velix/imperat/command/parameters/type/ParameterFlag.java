@@ -39,7 +39,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
             ParameterType<S, ?> inputType = freeFlag.inputType();
             rawInput = commandInputStream.popRaw().orElse(null);
             if (rawInput != null) {
-                input = inputType.resolve(context, commandInputStream, );
+                input = inputType.resolve(context, commandInputStream, commandInputStream.readInput());
             }
         } else {
             input = true;
@@ -72,7 +72,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
             ParameterType<S, ?> inputType = flagParameter.flagData().inputType();
             rawInput = commandInputStream.popRaw().orElse(null);
             if (rawInput != null) {
-                objInput = inputType.resolve(context, commandInputStream, );
+                objInput = inputType.resolve(context, commandInputStream, commandInputStream.readInput());
             }
         } else {
             objInput = true;

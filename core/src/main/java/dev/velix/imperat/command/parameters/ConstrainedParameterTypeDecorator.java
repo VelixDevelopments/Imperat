@@ -43,7 +43,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     public @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
 
         if(ConstrainedParameterTypeDecorator.contains(input, allowedValues, caseSensitive)) {
-            return original.resolve(context, commandInputStream, );
+            return original.resolve(context, commandInputStream, commandInputStream.readInput());
         }else {
             throw new SourceException("Input '%s' is not one of: [" + String.join(",",  allowedValues) + "]", input);
         }
