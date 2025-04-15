@@ -45,7 +45,7 @@ public final class ArrayParameterType<S extends Source, E> extends BaseParameter
             if(raw == null)
                 break;
 
-            array[i] = componentType.resolve(context, stream, commandInputStream.readInput());
+            array[i] = componentType.resolve(context, stream, stream.readInput());
 
             stream.skipRaw();
             i++;
