@@ -39,7 +39,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
             ParameterType<S, ?> inputType = freeFlag.inputType();
             rawInput = commandInputStream.popRaw().orElse(null);
             if (rawInput != null) {
-                input = inputType.resolve(context, commandInputStream);
+                input = inputType.resolve(context, commandInputStream, );
             }
         } else {
             input = true;
@@ -48,7 +48,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
     }
 
     @Override
-    public @Nullable CommandFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable CommandFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
         var currentParameter = commandInputStream.currentParameter()
             .orElse(null);
         if (currentParameter == null)
@@ -66,16 +66,16 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
         }
 
         String rawInput = null;
-        Object input = null;
+        Object objInput = null;
 
         if (!flagParameter.isSwitch()) {
             ParameterType<S, ?> inputType = flagParameter.flagData().inputType();
             rawInput = commandInputStream.popRaw().orElse(null);
             if (rawInput != null) {
-                input = inputType.resolve(context, commandInputStream);
+                objInput = inputType.resolve(context, commandInputStream, );
             }
         } else {
-            input = true;
+            objInput = true;
         }
         return new CommandFlag(flagParameter.flagData(), rawFlag, rawInput, input);
     }
@@ -96,7 +96,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
     }
 
     @Override
-    public @Nullable CommandFlag fromString(Imperat<S> imperat, String input) throws ImperatException {
+    public @NotNull CommandFlag fromString(Imperat<S> imperat, String input) throws ImperatException {
         return null;
     }
 

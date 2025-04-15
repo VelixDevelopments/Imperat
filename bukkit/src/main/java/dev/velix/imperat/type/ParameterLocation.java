@@ -28,7 +28,7 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
     }
 
     @Override
-    public @Nullable Location resolve(@NotNull ExecutionContext<BukkitSource> context, @NotNull CommandInputStream<BukkitSource> stream) throws ImperatException {
+    public @Nullable Location resolve(@NotNull ExecutionContext<BukkitSource> context, @NotNull CommandInputStream<BukkitSource> stream, String input) throws ImperatException {
 
 
 
@@ -58,15 +58,15 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
             if(doubleParser == null) {
                 throw new SourceException(SEVERE, "Failed to find a parser for type '%s'", Double.class.getTypeName());
             }
-            Double x = doubleParser.resolve(context, stream);
+            Double x = doubleParser.resolve(context, stream, );
             if(x == null ) throw new SourceException(SEVERE, "X coordinate is invalid");
             stream.skipRaw();
 
-            Double y = doubleParser.resolve(context, stream);
+            Double y = doubleParser.resolve(context, stream, );
             if(y == null ) throw new SourceException(SEVERE, "Y coordinate is invalid");
             stream.skipRaw();
 
-            Double z = doubleParser.resolve(context, stream);
+            Double z = doubleParser.resolve(context, stream, );
             if(z == null) throw new SourceException(SEVERE, "Z coordinate is invalid");
 
             return new Location(world, x, y, z);

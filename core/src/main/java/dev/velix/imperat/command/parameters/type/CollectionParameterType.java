@@ -29,7 +29,7 @@ public class CollectionParameterType<S extends Source, E, C extends Collection<E
     }
 
     @Override
-    public @Nullable C resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable C resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
         C newCollection = collectionSupplier.get();
 
         while (commandInputStream.hasNextRaw()) {
@@ -37,7 +37,7 @@ public class CollectionParameterType<S extends Source, E, C extends Collection<E
             String raw = commandInputStream.currentRaw().orElse(null);
             if(raw == null) break;
             //if(context.imperatConfig().getPar)
-            E element = componentResolver.resolve(context, commandInputStream);
+            E element = componentResolver.resolve(context, commandInputStream, );
             newCollection.add(element);
 
             commandInputStream.skipRaw();

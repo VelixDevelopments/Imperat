@@ -32,8 +32,8 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
     @Override
     public @Nullable Player resolve(
             @NotNull ExecutionContext<VelocitySource> context,
-            @NotNull CommandInputStream<VelocitySource> commandInputStream
-    ) throws ImperatException {
+            @NotNull CommandInputStream<VelocitySource> commandInputStream,
+            String input) throws ImperatException {
         String currentRaw = commandInputStream.currentRaw().orElse(null);
         if (currentRaw == null) return null;
 

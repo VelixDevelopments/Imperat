@@ -10,7 +10,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class ParameterString<S extends Source> extends BaseParameterType<S, String> {
 
@@ -20,7 +19,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     }
 
     @Override
-    public @NotNull String resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
+    public @NotNull String resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, String input) throws ImperatException {
         StringBuilder builder = new StringBuilder();
         final CommandParameter<S> parameter = inputStream.currentParameter().orElse(null);
         //if (parameter == null) return builder.toString();
@@ -52,7 +51,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     }
 
     @Override
-    public @Nullable String fromString(Imperat<S> imperat, String input) throws ImperatException {
+    public @NotNull String fromString(Imperat<S> imperat, String input) throws ImperatException {
         return input;
     }
 

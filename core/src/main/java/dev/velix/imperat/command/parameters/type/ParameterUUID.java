@@ -21,8 +21,8 @@ public final class ParameterUUID<S extends Source> extends BaseParameterType<S, 
     @Override
     public @Nullable UUID resolve(
             @NotNull ExecutionContext<S> context,
-            @NotNull CommandInputStream<S> commandInputStream
-    ) throws ImperatException {
+            @NotNull CommandInputStream<S> commandInputStream,
+            String input) throws ImperatException {
         String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null) {
             return null;

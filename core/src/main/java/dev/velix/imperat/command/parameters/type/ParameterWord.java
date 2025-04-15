@@ -24,7 +24,7 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
     }
 
     @Override
-    public @Nullable String resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
+    public @Nullable String resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
         var nextRaw = commandInputStream.currentRaw();
         if (restrictions.isEmpty()) {
             return nextRaw.orElse(null);

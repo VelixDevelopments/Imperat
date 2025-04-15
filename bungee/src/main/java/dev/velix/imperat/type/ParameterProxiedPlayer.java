@@ -29,8 +29,8 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
     @Override
     public @Nullable ProxiedPlayer resolve(
             @NotNull ExecutionContext<BungeeSource> context,
-            @NotNull CommandInputStream<BungeeSource> commandInputStream
-    ) throws ImperatException {
+            @NotNull CommandInputStream<BungeeSource> commandInputStream,
+            String input) throws ImperatException {
         String currentRaw = commandInputStream.currentRaw().orElse(null);
         if (currentRaw == null) return null;
 

@@ -107,7 +107,7 @@ final class SmartUsageResolve<S extends Source> {
                     }
                 } else {
                     ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
-                    context.resolveFlag(parameterFlag.resolve(context, stream));
+                    context.resolveFlag(parameterFlag.resolve(context, stream, stream.readInput()));
                 }
                 stream.skip();
                 continue;
@@ -121,7 +121,7 @@ final class SmartUsageResolve<S extends Source> {
             }
 
             //ImperatDebugger.debug("FLAG DETECTED=`%s`, current-raw=`%s`, current-param=`%s`", (flag == null ? null : flag.name()), currentRaw, currentParameter.name());
-            var value = currentParameter.type().resolve(context, stream);
+            var value = currentParameter.type().resolve(context, stream, stream.readInput());
             //ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`", currentRaw, currentParameter.name());
             if (value instanceof CommandFlag commandFlag) {
                 context.resolveFlag(commandFlag);

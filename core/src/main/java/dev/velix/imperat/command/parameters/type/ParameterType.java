@@ -19,7 +19,7 @@ public interface ParameterType<S extends Source, T> {
     Type type();
 
 
-    default @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream) throws ImperatException {
+    default @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, String input) throws ImperatException {
         return fromString(context.imperat(), inputStream.readInput());
     }
 
@@ -42,5 +42,7 @@ public interface ParameterType<S extends Source, T> {
         return (TypeWrap<T>) TypeWrap.of(type());
     }
 
-    @Nullable T fromString(Imperat<S> imperat, String input) throws ImperatException;
+    default @NotNull T fromString(Imperat<S> imperat, String input) throws ImperatException{
+
+    }
 }

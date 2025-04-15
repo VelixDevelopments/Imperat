@@ -28,7 +28,7 @@ public final class ArrayParameterType<S extends Source, E> extends BaseParameter
     }
 
     @Override @SuppressWarnings("unchecked")
-    public E @Nullable [] resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> stream) throws ImperatException {
+    public E @Nullable [] resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> stream, String input) throws ImperatException {
 
         String currentRaw = stream.currentRaw().orElse(null);
         if(currentRaw == null)
@@ -45,7 +45,7 @@ public final class ArrayParameterType<S extends Source, E> extends BaseParameter
             if(raw == null)
                 break;
 
-            array[i] = componentType.resolve(context, stream);
+            array[i] = componentType.resolve(context, stream, );
 
             stream.skipRaw();
             i++;

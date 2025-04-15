@@ -34,9 +34,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     }
 
     @Override
-    public @Nullable N resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
-
-        String input = commandInputStream.currentRaw().orElse(null);
+    public @Nullable N resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
         try {
             return parse(input);
         } catch (NumberFormatException ex) {
@@ -59,7 +57,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     public abstract N parse(String input) throws NumberFormatException;
 
     @Override
-    public @Nullable N fromString(Imperat<S> imperat, String input) throws ImperatException {
+    public @NotNull N fromString(Imperat<S> imperat, String input) throws ImperatException {
         return parse(input);
     }
 

@@ -108,7 +108,7 @@ public sealed interface ImperatConfig<S extends Source> extends
      * Fetches the {@link ContextResolver} suitable for the {@link CommandParameter}
      *
      * @param commandParameter the parameter of a command's usage
-     * @param <T>              the valueType of value that will be resolved by {@link ParameterType#resolve(ExecutionContext, CommandInputStream)}
+     * @param <T>              the valueType of value that will be resolved by {@link ParameterType#resolve(ExecutionContext, CommandInputStream, String)}
      * @return the context resolver for this parameter's value valueType
      */
     default <T> ContextResolver<S, T> getContextResolver(CommandParameter<S> commandParameter) {

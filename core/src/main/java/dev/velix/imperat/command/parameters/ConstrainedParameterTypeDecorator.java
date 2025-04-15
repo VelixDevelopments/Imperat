@@ -40,13 +40,10 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     }
 
     @Override
-    public @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream) throws ImperatException {
-        String input = commandInputStream.currentRaw().orElse(null);
-        if(input == null)
-            return original.resolve(context, commandInputStream);
+    public @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
 
         if(ConstrainedParameterTypeDecorator.contains(input, allowedValues, caseSensitive)) {
-            return original.resolve(context, commandInputStream);
+            return original.resolve(context, commandInputStream, );
         }else {
             throw new SourceException("Input '%s' is not one of: [" + String.join(",",  allowedValues) + "]", input);
         }
@@ -85,7 +82,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     }
 
     @Override
-    public @Nullable T fromString(Imperat<S> imperat, String input) throws ImperatException {
+    public @NotNull T fromString(Imperat<S> imperat, String input) throws ImperatException {
         return original.fromString(imperat, input);
     }
 
