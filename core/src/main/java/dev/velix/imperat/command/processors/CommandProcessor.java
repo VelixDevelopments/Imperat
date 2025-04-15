@@ -1,6 +1,8 @@
 package dev.velix.imperat.command.processors;
 
-public interface CommandProcessor {
+import dev.velix.imperat.context.Source;
+
+public interface CommandProcessor<S extends Source> {
 
     /**
      * Returns the priority of the command processor.

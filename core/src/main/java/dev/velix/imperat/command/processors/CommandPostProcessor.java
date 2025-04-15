@@ -12,7 +12,7 @@ import dev.velix.imperat.exception.ImperatException;
  *
  * @param <S> the command sender valueType
  */
-public interface CommandPostProcessor<S extends Source> extends CommandProcessor {
+public interface CommandPostProcessor<S extends Source> extends CommandProcessor<S> {
 
     /**
      * Processes context AFTER the resolving operation.
