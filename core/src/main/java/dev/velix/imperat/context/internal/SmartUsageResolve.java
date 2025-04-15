@@ -263,11 +263,10 @@ final class SmartUsageResolve<S extends Source> {
     private @Nullable <T> T getDefaultValue(ExecutionContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
         OptionalValueSupplier optionalSupplier = parameter.getDefaultValueSupplier();
         if(optionalSupplier.isEmpty()) {
-            System.out.println("NULL OPTIONAL DEF VALUE FOR " + parameter.format());
             return null;
         }
         String value = optionalSupplier.supply(context.source());
-        ImperatDebugger.debug("DEF VALUE='%s', for param='%s'", value, parameter.format());
+        //ImperatDebugger.debug("DEF VALUE='%s', for param='%s'", value, parameter.format());
         return (T) parameter.type().resolve(context, stream, value);
     }
 
