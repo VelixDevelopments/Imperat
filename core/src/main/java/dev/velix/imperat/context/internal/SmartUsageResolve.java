@@ -4,15 +4,16 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
+import dev.velix.imperat.command.parameters.OptionalValueSupplier;
 import dev.velix.imperat.command.parameters.type.ParameterFlag;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
-import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +55,7 @@ final class SmartUsageResolve<S extends Source> {
             context.resolveFlag(flag, null, null, value);
         } else {
             context.resolveArgument(command, null, stream.cursor()
-                .parameter, optionalEmptyParameter, getDefaultValue(context, optionalEmptyParameter));
+                .parameter, optionalEmptyParameter, getDefaultValue(context, stream, optionalEmptyParameter));
         }
     }
 
@@ -121,8 +122,9 @@ final class SmartUsageResolve<S extends Source> {
             }
 
             //ImperatDebugger.debug("FLAG DETECTED=`%s`, current-raw=`%s`, current-param=`%s`", (flag == null ? null : flag.name()), currentRaw, currentParameter.name());
+            ImperatDebugger.debug("type for param '%s' is '%s'", currentParameter.format(), currentParameter.type().getClass().getTypeName());
             var value = currentParameter.type().resolve(context, stream, stream.readInput());
-            //ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`", currentRaw, currentParameter.name());
+            ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`, resolved-value='%s'", currentRaw, currentParameter.name(), value);
             if (value instanceof CommandFlag commandFlag) {
                 context.resolveFlag(commandFlag);
                 stream.skip();
@@ -211,7 +213,7 @@ final class SmartUsageResolve<S extends Source> {
                         currentRaw,
                         currentParameterPosition,
                         currentParameter,
-                        getDefaultValue(context, currentParameter)
+                        getDefaultValue(context, stream, currentParameter)
                     );
 
                     context.resolveArgument(
@@ -239,7 +241,7 @@ final class SmartUsageResolve<S extends Source> {
                     currentRaw,
                     currentParameterPosition,
                     currentParameter,
-                    getDefaultValue(context, currentParameter)
+                    getDefaultValue(context, stream, currentParameter)
                 );
 
                 //shifting the parameters && raw again, so it can start after the new shift
@@ -258,9 +260,13 @@ final class SmartUsageResolve<S extends Source> {
         stream.skip();
     }
 
-    private @Nullable <T> T getDefaultValue(Context<S> context, CommandParameter<S> parameter) {
-        OptionalValueSupplier<T> optionalSupplier = parameter.getDefaultValueSupplier();
-        return optionalSupplier.supply(context.source());
+    private @Nullable <T> T getDefaultValue(ExecutionContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
+        OptionalValueSupplier optionalSupplier = parameter.getDefaultValueSupplier();
+        if(optionalSupplier.isEmpty()) {
+            return null;
+        }
+        String value = optionalSupplier.supply(context.source());
+        return (T) parameter.type().resolve(context, stream, value);
     }
 
     public Command<S> getCommand() {

@@ -39,9 +39,4 @@ public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
         return suggestionResolver;
     }
 
-    @Override
-    public @NotNull Group fromString(Imperat<TestSource> imperat, String input) throws ImperatException {
-        return GroupRegistry.getInstance().getData(input)
-            .orElseThrow();
-    }
 }

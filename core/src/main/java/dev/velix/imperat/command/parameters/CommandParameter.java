@@ -9,7 +9,6 @@ import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
@@ -32,7 +31,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
         Description description,
         boolean optional,
         boolean greedy,
-        @NotNull OptionalValueSupplier<T> valueSupplier,
+        @NotNull OptionalValueSupplier valueSupplier,
         @Nullable SuggestionResolver<S> suggestionResolver
     ) {
         Preconditions.notNull(name, "name");
@@ -179,7 +178,7 @@ public interface CommandParameter<S extends Source> extends PermissionHolder, De
      * in case of the parameter being optional
      */
     @NotNull
-    <T> OptionalValueSupplier<T> getDefaultValueSupplier();
+    OptionalValueSupplier getDefaultValueSupplier();
 
     /**
      * @return whether this is an optional argument

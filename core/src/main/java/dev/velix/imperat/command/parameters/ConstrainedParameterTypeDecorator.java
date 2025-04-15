@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.ExecutionContext;
@@ -40,8 +39,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     }
 
     @Override
-    public @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
-
+    public @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, @NotNull String input) throws ImperatException {
         if(ConstrainedParameterTypeDecorator.contains(input, allowedValues, caseSensitive)) {
             return original.resolve(context, commandInputStream, commandInputStream.readInput());
         }else {
@@ -79,11 +77,6 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     @Override
     public TypeWrap<T> wrappedType() {
         return original.wrappedType();
-    }
-
-    @Override
-    public @NotNull T fromString(Imperat<S> imperat, String input) throws ImperatException {
-        return original.fromString(imperat, input);
     }
 
 }

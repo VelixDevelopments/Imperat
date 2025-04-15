@@ -3,7 +3,6 @@ package dev.velix.imperat.type;
 import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
@@ -75,10 +74,6 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
         return input.length() <= 16;
     }
 
-    @Override
-    public @NotNull OfflinePlayer fromString(Imperat<BukkitSource> imperat, String input) throws ImperatException {
-        return Bukkit.getOfflinePlayer(input);
-    }
 
     @Override
     public SuggestionResolver<BukkitSource> getSuggestionResolver() {

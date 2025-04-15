@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -55,8 +54,4 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
         }
     }
 
-    @Override
-    public @NotNull Enum<?> fromString(Imperat<S> imperat, String input) throws ImperatException {
-        return Enum.valueOf((Class<? extends Enum>) type, input);
-    }
 }

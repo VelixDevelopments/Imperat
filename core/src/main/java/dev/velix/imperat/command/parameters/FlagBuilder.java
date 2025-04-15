@@ -6,7 +6,6 @@ import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     private final ParameterType<S, T> inputType;
     private final List<String> aliases = new ArrayList<>();
     private boolean free;
-    private OptionalValueSupplier<T> defaultValueSupplier = null;
+    private OptionalValueSupplier defaultValueSupplier = null;
     private SuggestionResolver<S> suggestionResolver;
 
     private FlagBuilder(String name, ParameterType<S, T> inputType) {
@@ -47,7 +46,7 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
         return this;
     }
 
-    public FlagBuilder<S, T> flagDefaultInputValue(OptionalValueSupplier<T> valueSupplier) {
+    public FlagBuilder<S, T> flagDefaultInputValue(OptionalValueSupplier valueSupplier) {
         if (inputType == null) {
             throw new IllegalArgumentException("Flag of valueType switches, cannot have a default value supplier !");
         }
@@ -70,11 +69,10 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
 
 
     @Override
-    @SuppressWarnings("unchecked")
     public FlagParameter<S> build() {
         FlagData<S> flag = FlagData.create(name, aliases, inputType, free);
         if (inputType == null) {
-            defaultValueSupplier = (OptionalValueSupplier<T>) OptionalValueSupplier.of(false);
+            defaultValueSupplier = OptionalValueSupplier.of("false");
         }
         return new FlagCommandParameter<>(flag, permission, description, defaultValueSupplier, suggestionResolver);
     }

@@ -2,7 +2,6 @@ package dev.velix.imperat.command.parameters.type;
 
 import static dev.velix.imperat.util.StringUtils.isQuoteChar;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -48,11 +47,6 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         } while (inputStream.hasNextRaw() && inputStream.peekLetter().map((ch) -> !isQuoteChar(ch)).orElse(false));
 
         return builder.toString();
-    }
-
-    @Override
-    public @NotNull String fromString(Imperat<S> imperat, String input) throws ImperatException {
-        return input;
     }
 
 

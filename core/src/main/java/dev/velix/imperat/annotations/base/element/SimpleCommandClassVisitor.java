@@ -33,6 +33,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.ConstrainedParameterTypeDecorator;
 import dev.velix.imperat.command.parameters.NumericRange;
+import dev.velix.imperat.command.parameters.OptionalValueSupplier;
 import dev.velix.imperat.command.parameters.StrictParameterList;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
@@ -41,7 +42,6 @@ import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
@@ -632,7 +632,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             permission = config.replacePlaceholders(permAnn.value());
         }
 
-        OptionalValueSupplier<T> optionalValueSupplier = OptionalValueSupplier.empty(parameterTypeWrap);
+        OptionalValueSupplier optionalValueSupplier = OptionalValueSupplier.empty();
         if (optional) {
             Default defaultAnnotation = parameter.getAnnotation(Default.class);
             DefaultProvider provider = parameter.getAnnotation(DefaultProvider.class);

@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -9,7 +8,6 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.InvalidUUIDException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -19,19 +17,15 @@ public final class ParameterUUID<S extends Source> extends BaseParameterType<S, 
     }
 
     @Override
-    public @Nullable UUID resolve(
+    public @NotNull UUID resolve(
             @NotNull ExecutionContext<S> context,
             @NotNull CommandInputStream<S> commandInputStream,
             String input) throws ImperatException {
-        String raw = commandInputStream.currentRaw().orElse(null);
-        if (raw == null) {
-            return null;
-        }
 
         try {
-            return UUID.fromString(raw);
+            return UUID.fromString(input);
         } catch (Exception ex) {
-            throw new InvalidUUIDException(raw);
+            throw new InvalidUUIDException(input);
         }
     }
 
@@ -43,10 +37,5 @@ public final class ParameterUUID<S extends Source> extends BaseParameterType<S, 
         } catch (Exception ex) {
             return false;
         }
-    }
-
-    @Override
-    public @NotNull UUID fromString(Imperat<S> imperat, String input) throws ImperatException {
-        return UUID.fromString(input);
     }
 }

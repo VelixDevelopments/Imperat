@@ -4,7 +4,6 @@ import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +17,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
 
     protected String permission = null;
     protected Description description = Description.EMPTY;
-    private @NotNull OptionalValueSupplier<T> valueSupplier;
+    private @NotNull OptionalValueSupplier valueSupplier;
     private SuggestionResolver<S> suggestionResolver = null;
 
     ParameterBuilder(String name, ParameterType<S, T> type, boolean optional, boolean greedy) {
@@ -26,7 +25,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
         this.type = type;
         this.optional = optional;
         this.greedy = greedy;
-        this.valueSupplier = OptionalValueSupplier.empty(type.wrappedType());
+        this.valueSupplier = OptionalValueSupplier.empty();
     }
 
     ParameterBuilder(String name, ParameterType<S, T> type, boolean optional) {
@@ -49,13 +48,13 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
         return description(Description.of(descValue));
     }
 
-    public ParameterBuilder<S, T> defaultValue(@NotNull OptionalValueSupplier<T> defaultValueSupplier) {
+    public ParameterBuilder<S, T> defaultValue(@NotNull OptionalValueSupplier defaultValueSupplier) {
         this.valueSupplier = defaultValueSupplier;
         return this;
     }
 
     public ParameterBuilder<S, T> defaultValue(@Nullable T value) {
-        return defaultValue(value == null ? OptionalValueSupplier.empty(this.type.wrappedType()) : OptionalValueSupplier.of(value));
+        return defaultValue(value == null ? OptionalValueSupplier.empty() : OptionalValueSupplier.of(String.valueOf(value)));
     }
 
     public ParameterBuilder<S, T> suggest(SuggestionResolver<S> suggestionResolver) {

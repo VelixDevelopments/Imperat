@@ -1,7 +1,6 @@
 package dev.velix.imperat.type;
 
 import dev.velix.imperat.BungeeSource;
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
@@ -51,11 +50,6 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
     @Override
     public boolean matchesInput(String input, CommandParameter<BungeeSource> parameter) {
         return ProxyServer.getInstance().getPlayer(input) != null;
-    }
-
-    @Override
-    public @NotNull ProxiedPlayer fromString(Imperat<BungeeSource> imperat, String input) throws ImperatException {
-        return ProxyServer.getInstance().getPlayer(input);
     }
 
     /**

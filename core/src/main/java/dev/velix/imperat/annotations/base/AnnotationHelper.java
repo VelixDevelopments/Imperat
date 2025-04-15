@@ -12,11 +12,11 @@ import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.annotations.base.element.ParseElement;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.OptionalValueSupplier;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -145,46 +145,41 @@ public final class AnnotationHelper {
             parameter.getAnnotation(Switch.class));
     }
 
-    @SuppressWarnings({"unchecked"})
-    public static <T> @NotNull OptionalValueSupplier<T> getOptionalValueSupplier(
+    public static @NotNull OptionalValueSupplier getOptionalValueSupplier(
         Parameter parameter,
-        Class<? extends OptionalValueSupplier<?>> supplierClass
+        Class<? extends OptionalValueSupplier> supplierClass
     ) throws NoSuchMethodException, InstantiationException,
         IllegalAccessException, InvocationTargetException {
 
         var emptyConstructor = supplierClass.getDeclaredConstructor();
         emptyConstructor.setAccessible(true);
-        OptionalValueSupplier<T> valueSupplier = (OptionalValueSupplier<T>) emptyConstructor.newInstance();
-        if (!TypeUtility.matches(valueSupplier.reflectionType(), parameter.getType())) {
-            throw new IllegalArgumentException("Optional supplier of value-valueType '" + valueSupplier.reflectionType().getTypeName() + "' doesn't match the optional value valueType '" + parameter.getType().getName() + "'");
-        }
 
-        return valueSupplier;
+        /*if (!TypeUtility.matches(valueSupplier.reflectionType(), parameter.getType())) {
+            throw new IllegalArgumentException("Optional supplier of value-valueType '" + valueSupplier.reflectionType().getTypeName() + "' doesn't match the optional value valueType '" + parameter.getType().getName() + "'");
+        }*/
+
+        return emptyConstructor.newInstance();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <S extends Source, T> @NotNull OptionalValueSupplier<T> deduceOptionalValueSupplier(
+    public static <S extends Source> @NotNull OptionalValueSupplier deduceOptionalValueSupplier(
         Imperat<S> imperat,
         Parameter parameter,
         Default defaultAnnotation,
         DefaultProvider provider,
-        OptionalValueSupplier<T> fallback
+        OptionalValueSupplier fallback
     ) throws ImperatException {
 
         if (defaultAnnotation != null) {
             String def = defaultAnnotation.value();
-            OptionalValueSupplier<T> EMPTY = (OptionalValueSupplier<T>) OptionalValueSupplier.empty(TypeWrap.of(parameter.getType()));
+            OptionalValueSupplier EMPTY =  OptionalValueSupplier.empty();
             var type = imperat.config().getParameterType(TypeWrap.of(parameter.getType()).getType());
             if (type == null) {
                 return EMPTY;
             }
-            T defValue = (T) type.fromString(imperat, def);
-            if(defValue == null) {
-                return EMPTY;
-            }
-            return OptionalValueSupplier.of(defValue);
+
+            return OptionalValueSupplier.of(def);
         } else if (provider != null) {
-            Class<? extends OptionalValueSupplier<?>> supplierClass = provider.value();
+            Class<? extends OptionalValueSupplier> supplierClass = provider.value();
             try {
                 return getOptionalValueSupplier(parameter, supplierClass);
             } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |

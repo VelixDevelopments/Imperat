@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
@@ -59,8 +58,8 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
             String keyRaw = split[0];
             String valueRaw = split[1];
 
-            K key = keyResolver.fromString(context.imperat(), keyRaw);
-            V value = valueResolver.fromString(context.imperat(), valueRaw);
+            K key = keyResolver.resolve(context, commandInputStream, keyRaw);
+            V value = valueResolver.resolve(context, commandInputStream, valueRaw);
 
             newMap.put(key, value);
 
@@ -69,23 +68,4 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
         return newMap;
     }
 
-    @Override
-    public @NotNull M fromString(Imperat<S> imperat, String input) throws ImperatException {
-        String[] args = input.split(" ");
-        M newMap = mapInitializer.get();
-        for(String raw : args) {
-            String[] split = raw.split(ENTRY_SEPARATOR);
-            if(split.length != 2) {
-                continue;
-            }
-
-            String keyRaw = split[0];
-            String valueRaw = split[1];
-
-            K key = keyResolver.fromString(imperat, keyRaw);
-            V value = valueResolver.fromString(imperat, valueRaw);
-            newMap.put(key, value);
-        }
-        return newMap;
-    }
 }

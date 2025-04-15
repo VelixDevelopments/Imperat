@@ -3,9 +3,9 @@ package dev.velix.imperat.type;
 import static dev.velix.imperat.exception.SourceException.ErrorLevel.SEVERE;
 
 import dev.velix.imperat.BukkitSource;
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
@@ -23,8 +23,10 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
 
     private final static String SINGLE_STRING_SEPARATOR = ";";
 
+    private final ParameterType<BukkitSource, Double> doubleParser;
     public ParameterLocation() {
         super(TypeWrap.of(Location.class));
+        doubleParser = ParameterTypes.numeric(Double.class);
     }
 
     @Override
@@ -34,7 +36,7 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
 
         try {
             String currentRaw = stream.currentRaw().orElseThrow();
-            return fromString(context.imperat(), currentRaw);
+            return locFromStr(context, stream, currentRaw);
         }catch (Exception ex) {
 
             World world;
@@ -74,8 +76,7 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
 
     }
 
-    @Override
-    public @NotNull Location fromString(Imperat<BukkitSource> imperat, String currentRaw) throws ImperatException {
+    private @NotNull Location locFromStr(ExecutionContext<BukkitSource> context, CommandInputStream<BukkitSource> stream, String currentRaw) throws ImperatException {
         String[] split = currentRaw.split(SINGLE_STRING_SEPARATOR);
         if(split.length < 4) {
             throw new IllegalArgumentException();
@@ -85,14 +86,10 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
         if(world == null) {
             throw new IllegalArgumentException();
         }
-        ParameterType<BukkitSource, Double> doubleParser = (ParameterType<BukkitSource, Double>) imperat.config().getParameterType(Double.class);
-        if(doubleParser == null) {
-            throw new IllegalArgumentException();
-        }
 
-        Double x = doubleParser.fromString(imperat, split[1]);
-        Double y = doubleParser.fromString(imperat, split[2]);
-        Double z = doubleParser.fromString(imperat, split[3]);
+        Double x = doubleParser.resolve(context, stream, split[1]);
+        Double y = doubleParser.resolve(context, stream, split[2]);
+        Double z = doubleParser.resolve(context, stream, split[3]);
 
         if(x == null || y == null || z == null) {
             throw new SourceException(SEVERE, "Failed to parse location from input '%s'", currentRaw);

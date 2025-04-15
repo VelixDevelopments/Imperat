@@ -3,6 +3,7 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.FlagRegistrar;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.OptionalValueSupplier;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
@@ -14,7 +15,6 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -105,9 +105,8 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * in case of the parameter being optional
      */
     @Override
-    @SuppressWarnings("unchecked")
-    default <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
-        return (OptionalValueSupplier<T>) OptionalValueSupplier.of(name());
+    default @NotNull OptionalValueSupplier getDefaultValueSupplier() {
+        return OptionalValueSupplier.of(name());
     }
 
     /**

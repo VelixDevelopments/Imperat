@@ -9,7 +9,6 @@ import dev.velix.imperat.command.parameters.type.ParameterCommand;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +23,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     protected final String name;
     protected final ParameterType<S, ?> type;
     protected final boolean optional, flag, greedy;
-    protected final OptionalValueSupplier<?> optionalValueSupplier;
+    protected final OptionalValueSupplier optionalValueSupplier;
     protected final SuggestionResolver<S> suggestionResolver;
     protected String permission;
     protected Description description;
@@ -37,7 +36,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
         @Nullable String permission,
         Description description,
         boolean optional, boolean flag, boolean greedy,
-        @NotNull OptionalValueSupplier<?> optionalValueSupplier,
+        @NotNull OptionalValueSupplier optionalValueSupplier,
         @Nullable SuggestionResolver<S> suggestionResolver
     ) {
         this.name = name;
@@ -120,9 +119,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      * in case of the parameter being optional
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
-        return (OptionalValueSupplier<T>) optionalValueSupplier;
+    public @NotNull OptionalValueSupplier getDefaultValueSupplier() {
+        return optionalValueSupplier;
     }
 
     /**

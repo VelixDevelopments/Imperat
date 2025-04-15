@@ -4,10 +4,7 @@ import dev.velix.imperat.command.Description;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.supplier.OptionalValueSupplier;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,21 +13,21 @@ import org.jetbrains.annotations.Nullable;
 public final class FlagCommandParameter<S extends Source> extends InputParameter<S> implements FlagParameter<S> {
 
     private final FlagData<S> flag;
-    private final OptionalValueSupplier<?> inputValueSupplier;
+    private final OptionalValueSupplier inputValueSupplier;
     private final SuggestionResolver<S> inputValueSuggestionResolver;
 
     FlagCommandParameter(
         FlagData<S> flag,
         String permission,
         Description description,
-        OptionalValueSupplier<?> inputValueSupplier,
+        OptionalValueSupplier inputValueSupplier,
         SuggestionResolver<S> inputValueSuggestionResolver
     ) {
         super(
             flag.name(), ParameterTypes.flag(flag),
             permission, description,
             true, true, false,
-            OptionalValueSupplier.empty(TypeWrap.of(CommandFlag.class)),
+            OptionalValueSupplier.empty(),
             inputValueSuggestionResolver
         );
         this.flag = flag;
@@ -55,10 +52,8 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
      * @return the default value if it's input is not present
      * in case of the parameter being optional
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> @NotNull OptionalValueSupplier<T> getDefaultValueSupplier() {
-        return (OptionalValueSupplier<T>) inputValueSupplier;
+    public @NotNull OptionalValueSupplier getDefaultValueSupplier() {
+        return inputValueSupplier;
     }
 
     @Override

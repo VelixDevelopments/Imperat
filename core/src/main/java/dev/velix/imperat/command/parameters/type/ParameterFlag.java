@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.context.ExecutionContext;
@@ -48,7 +47,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
     }
 
     @Override
-    public @Nullable CommandFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
+    public @Nullable CommandFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String rawFlag) throws ImperatException {
         var currentParameter = commandInputStream.currentParameter()
             .orElse(null);
         if (currentParameter == null)
@@ -60,11 +59,6 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
 
         FlagParameter<S> flagParameter = currentParameter.asFlagParameter();
 
-        String rawFlag = commandInputStream.currentRaw().orElse(null);
-        if (rawFlag == null) {
-            throw new IllegalArgumentException();
-        }
-
         String rawInput = null;
         Object objInput = null;
 
@@ -72,12 +66,12 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
             ParameterType<S, ?> inputType = flagParameter.flagData().inputType();
             rawInput = commandInputStream.popRaw().orElse(null);
             if (rawInput != null) {
-                objInput = inputType.resolve(context, commandInputStream, commandInputStream.readInput());
+                objInput = inputType.resolve(context, commandInputStream, rawInput);
             }
         } else {
             objInput = true;
         }
-        return new CommandFlag(flagParameter.flagData(), rawFlag, rawInput, input);
+        return new CommandFlag(flagParameter.flagData(), rawFlag, rawInput, objInput);
     }
 
     @Override
@@ -93,11 +87,6 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
         String flagInput = input.substring(subStringIndex);
         return parameter.asFlagParameter().flagData()
             .acceptsInput(flagInput);
-    }
-
-    @Override
-    public @NotNull CommandFlag fromString(Imperat<S> imperat, String input) throws ImperatException {
-        return null;
     }
 
 }

@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
@@ -54,14 +53,4 @@ public final class ArrayParameterType<S extends Source, E> extends BaseParameter
         return array;
     }
 
-    @Override @SuppressWarnings("unchecked")
-    public E @NotNull [] fromString(Imperat<S> imperat, String input) throws ImperatException {
-        String[] split = input.split(" ");
-        E[] initializer = (E[]) this.initializer.apply(split.length);
-        for (int i = 0; i < split.length; i++) {
-            String raw = split[i];
-            initializer[i] = componentType.fromString(imperat, raw);
-        }
-        return initializer;
-    }
 }

@@ -1,6 +1,5 @@
 package dev.velix.imperat.command.parameters.type;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
@@ -19,9 +18,7 @@ public interface ParameterType<S extends Source, T> {
     Type type();
 
 
-    default @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, String input) throws ImperatException {
-        return fromString(context.imperat(), inputStream.readInput());
-    }
+    @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, String input) throws ImperatException;
 
     SuggestionResolver<S> getSuggestionResolver();
 
@@ -40,9 +37,5 @@ public interface ParameterType<S extends Source, T> {
     @SuppressWarnings("unchecked")
     default TypeWrap<T> wrappedType() {
         return (TypeWrap<T>) TypeWrap.of(type());
-    }
-
-    default @NotNull T fromString(Imperat<S> imperat, String input) throws ImperatException{
-
     }
 }
