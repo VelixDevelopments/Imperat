@@ -467,7 +467,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             ParameterElement parameterElement = methodParameters.peek();
             if (parameterElement == null) break;
             Type type = parameterElement.getElement().getParameterizedType();
-            if ( (senderParam == null&&(isSenderParameter(parameterElement))) || config.hasContextResolver(type)) {
+            if ( (senderParam == null && (isSenderParameter(parameterElement))) || config.hasContextResolver(type)) {
                 senderParam = methodParameters.remove();
                 continue;
             }

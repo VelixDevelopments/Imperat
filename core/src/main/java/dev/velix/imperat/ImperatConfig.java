@@ -34,6 +34,7 @@ public sealed interface ImperatConfig<S extends Source> extends
 
     void setCommandPrefix(String cmdPrefix);
 
+
     /**
      * Fetches {@link ParameterType} for a certain value
      *
@@ -42,6 +43,10 @@ public sealed interface ImperatConfig<S extends Source> extends
      */
     @Nullable
     ParameterType<S, ?> getParameterType(Type resolvingValueType);
+
+    default boolean hasParameterType(Type type) {
+        return getParameterType(type) != null;
+    }
 
     /**
      * Checks whether the command tree operates in strict mode.
