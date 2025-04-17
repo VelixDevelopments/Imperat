@@ -1,20 +1,19 @@
 package dev.velix.imperat.command.tree;
 
-import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public final class CommandDispatch<S extends Source> implements Iterable<CommandParameter<S>> {
+public final class CommandDispatch<S extends Source> implements Iterable<ParameterNode<S, ?>> {
 
-    private final List<CommandParameter<S>> parameters = new ArrayList<>();
+    private final List<ParameterNode<S, ?>> nodes = new ArrayList<>();
+
+    private CommandUsage<S> directUsage;
 
     private Result result;
 
@@ -37,48 +36,46 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
     public void append(ParameterNode<S, ?> node) {
         if (node == null) return;
         //if (parameters.contains(node.data)) return;
-        parameters.add(node.data);
+        nodes.add(node);
     }
 
-    public void append(CommandParameter<S> parameter) {
-        if (parameter == null) return;
-        parameters.add(parameter);
-    }
-
-    public CommandParameter<S> getLastParameter() {
-        return parameters.get(parameters.size() - 1);
+    public @Nullable ParameterNode<S, ?> getLastNode() {
+        int lastIndex = nodes.size()-1;
+        if(lastIndex < 0) {
+            return null;
+        }
+        return nodes.get(nodes.size() - 1);
     }
 
     @Override
-    public @NotNull Iterator<CommandParameter<S>> iterator() {
-        return parameters.iterator();
+    public @NotNull Iterator<ParameterNode<S, ?>> iterator() {
+        return nodes.iterator();
     }
 
-    public Result result() {
+
+    public void setDirectUsage(CommandUsage<S> directUsage) {
+        this.directUsage = directUsage;
+    }
+
+    public Result getResult() {
         return result;
     }
 
-    public void result(Result result) {
+    public void setResult(Result result) {
         this.result = result;
     }
 
-    public @Nullable CommandUsage<S> toUsage(Command<S> command) {
-        return command.getUsage(parameters);
-    }
-
-    public @NotNull CommandDispatch<S> copy() {
-        CommandDispatch<S> commandDispatch = CommandDispatch.of(result);
-        parameters.forEach(commandDispatch::append);
-        return commandDispatch;
+    public @Nullable CommandUsage<S> toUsage() {
+        return directUsage;
     }
 
     public void visualize() {
         ImperatDebugger.debug("Result => " + result.name());
         StringBuilder builder = new StringBuilder();
-        int size = parameters.size();
+        int size = nodes.size();
 
         int i = 0;
-        for (var node : parameters) {
+        for (var node : nodes) {
             builder.append(node.format());
             if (i != size - 1) {
                 builder.append(" -> ");
@@ -89,7 +86,7 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
     }
 
     /**
-     * Defines a result from dispatching the command execution.
+     * Defines a setResult from dispatching the command execution.
      */
     public enum Result {
 
@@ -106,7 +103,7 @@ public final class CommandDispatch<S extends Source> implements Iterable<Command
         INCOMPLETE,
 
         /**
-         * Defines an unknown execution/command, it's the default result
+         * Defines an unknown execution/command, it's the default setResult
          */
         UNKNOWN
 

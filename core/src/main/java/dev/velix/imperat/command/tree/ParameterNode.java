@@ -1,5 +1,6 @@
 package dev.velix.imperat.command.tree;
 
+import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
@@ -14,10 +15,25 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
 
     protected final @NotNull T data;
 
+    protected @Nullable CommandUsage<S> executableUsage;
+
     private final LinkedList<ParameterNode<S, ?>> nextNodes = new LinkedList<>();
 
-    protected ParameterNode(@NotNull T data) {
+    protected ParameterNode(@NotNull T data, @Nullable CommandUsage<S> executableUsage) {
         this.data = data;
+        this. executableUsage = executableUsage;
+    }
+
+    public @Nullable CommandUsage<S> getExecutableUsage() {
+        return executableUsage;
+    }
+
+    public void setExecutableUsage(@Nullable CommandUsage<S> executableUsage) {
+        this.executableUsage = executableUsage;
+    }
+
+    public boolean isExecutable() {
+        return this.executableUsage != null;
     }
 
     @NotNull

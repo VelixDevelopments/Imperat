@@ -1,11 +1,10 @@
 package dev.velix.imperat.context.internal;
 
-import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
-
+import java.util.List;
 import java.util.Optional;
 
 public interface CommandInputStream<S extends Source> {
@@ -38,7 +37,7 @@ public interface CommandInputStream<S extends Source> {
 
     @NotNull ArgumentQueue getRawQueue();
 
-    @NotNull CommandUsage<S> getUsage();
+    @NotNull List<CommandParameter<S>> getParametersList();
 
     boolean skip();
 
@@ -72,7 +71,7 @@ public interface CommandInputStream<S extends Source> {
     }
 
     default int parametersLength() {
-        return getUsage().size();
+        return getParametersList().size();
     }
 
     default boolean skipTill(char target) {
@@ -107,5 +106,12 @@ public interface CommandInputStream<S extends Source> {
 
     default String readInput() {
         return currentRaw().orElseThrow();
+    }
+    static <S extends Source> CommandInputStream<S> ofSingleString(@NotNull CommandParameter<S> parameter, @NotNull String str) {
+        return new CommandInputStreamImpl<>(ArgumentQueue.of(str), List.of(parameter));
+    }
+
+    static <S extends Source> CommandInputStream<S> subStream(@NotNull CommandInputStream<S> stream, @NotNull String input) {
+        return ofSingleString(stream.currentParameter().orElseThrow(), input);
     }
 }

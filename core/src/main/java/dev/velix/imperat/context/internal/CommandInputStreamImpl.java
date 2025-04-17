@@ -6,6 +6,7 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 
 final class CommandInputStreamImpl<S extends Source> implements CommandInputStream<S> {
@@ -18,12 +19,17 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     private final Cursor<S> cursor;
 
     private final ArgumentQueue queue;
-    private final CommandUsage<S> usage;
+    private final List<CommandParameter<S>> parametersList;
 
-    CommandInputStreamImpl(ArgumentQueue queue, CommandUsage<S> usage) {
+    CommandInputStreamImpl(ArgumentQueue queue, CommandUsage<S> parametersList) {
+        this(queue, parametersList.getParameters());
+
+    }
+
+    CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters) {
         this.queue = queue;
         this.inputLine = queue.getOriginalRaw();
-        this.usage = usage;
+        this.parametersList = parameters;
         this.cursor = new Cursor<>(this, 0, 0);
     }
 
@@ -34,13 +40,19 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
 
     @Override
     public @NotNull Optional<CommandParameter<S>> currentParameter() {
-        return Optional.ofNullable(usage.getParameter(cursor.parameter));
+        if(cursor.parameter >= parametersList.size()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(parametersList.get(cursor.parameter));
     }
 
     @Override
     public Optional<CommandParameter<S>> peekParameter() {
+        if(cursor.parameter+1 >= parametersList.size())
+            return Optional.empty();
+
         return Optional.ofNullable(
-            usage.getParameter(cursor.parameter + 1)
+            parametersList.get(cursor.parameter + 1)
         );
     }
 
@@ -107,7 +119,7 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
 
     @Override
     public boolean hasNextParameter() {
-        return cursor.parameter < usage.size();
+        return cursor.parameter < parametersList.size();
     }
 
     @Override
@@ -116,8 +128,8 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     @Override
-    public @NotNull CommandUsage<S> getUsage() {
-        return usage;
+    public @NotNull List<CommandParameter<S>> getParametersList() {
+        return parametersList;
     }
 
     @Override

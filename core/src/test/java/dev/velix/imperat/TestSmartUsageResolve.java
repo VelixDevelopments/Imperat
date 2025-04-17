@@ -41,13 +41,13 @@ public class TestSmartUsageResolve {
         CommandDispatch<TestSource> res = cmd.contextMatch(context);
         res.visualize();
 
-        CommandUsage<TestSource> usage = res.toUsage(cmd);
+        CommandUsage<TestSource> usage = res.toUsage();
 
         if (usage == null) {
             System.out.println("USAGE IS NULL");
-            var param = res.getLastParameter();
-            if (param.isCommand()) {
-                usage = param.asCommand().getDefaultUsage();
+            var param = res.getLastNode();
+            if (param != null && param.isCommand()) {
+                usage = param.getData().asCommand().getDefaultUsage();
             }
         }
         Assertions.assertNotNull(usage);

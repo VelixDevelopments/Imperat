@@ -45,7 +45,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      * Dispatches and executes a command using {@link Context} only
      *
      * @param context the context
-     * @return the usage match result
+     * @return the usage match setResult
      */
     @NotNull
     CommandDispatch.Result dispatch(Context<S> context);
@@ -57,7 +57,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      * @param source   the sender/executor of this command
      * @param command  the command object to execute
      * @param rawInput the command's args input
-     * @return the usage match result
+     * @return the usage match setResult
      */
     @NotNull
     CommandDispatch.Result dispatch(S source, Command<S> command, String commandName, String... rawInput);
@@ -68,7 +68,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      * @param sender      the sender/executor of this command
      * @param commandName the name of the command to execute
      * @param rawInput    the command's args input
-     * @return the usage match result
+     * @return the usage match setResult
      */
     CommandDispatch.Result dispatch(S sender, String commandName, String[] rawInput);
 
@@ -78,7 +78,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      * @param sender         the sender/executor of this command
      * @param commandName    the name of the command to execute
      * @param rawArgsOneLine the command's args input on ONE LINE
-     * @return the usage match result
+     * @return the usage match setResult
      */
     CommandDispatch.Result dispatch(S sender, String commandName, String rawArgsOneLine);
 
@@ -87,7 +87,7 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
      *
      * @param sender      the source/sender of the command
      * @param commandLine the command line to dispatch
-     * @return the usage match result
+     * @return the usage match setResult
      */
     CommandDispatch.Result dispatch(S sender, String commandLine);
 

@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 @ApiStatus.Internal
 final class CommandImpl<S extends Source> implements Command<S> {
 
-
     private final String name;
     private final int position;
     private final List<String> aliases = new ArrayList<>();

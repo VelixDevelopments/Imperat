@@ -15,7 +15,17 @@ public final class ImperatDebugger {
     private static boolean enabled = false;
     private static boolean testing = false;
 
+    private static boolean usingTestCases = false;
+
     private ImperatDebugger() {
+    }
+
+    public static boolean isUsingTestCases() {
+        return usingTestCases;
+    }
+
+    public static void setUsingTestCases(boolean usingTestCases) {
+        ImperatDebugger.usingTestCases = usingTestCases;
     }
 
     public static void setEnabled(boolean enabled) {
@@ -40,7 +50,7 @@ public final class ImperatDebugger {
 
     public static void debug(String msg, Object... args) {
         if (!enabled) return;
-        if(testing) {
+        if(testing || usingTestCases) {
             System.out.println(String.format("INFO > " + msg, args));
         }else {
             LOGGER.log(Level.INFO, () -> String.format(msg, args));

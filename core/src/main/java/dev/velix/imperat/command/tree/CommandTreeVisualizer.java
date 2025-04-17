@@ -20,7 +20,7 @@ public final class CommandTreeVisualizer<S extends Source> {
 
 
     public void visualize() {
-        if (tree == null) return;
+        if (tree == null || !ImperatDebugger.isEnabled()) return;
         StringBuilder builder = new StringBuilder();
         visualizeNode(tree.root, builder, 0);
         ImperatDebugger.debug(builder.toString());

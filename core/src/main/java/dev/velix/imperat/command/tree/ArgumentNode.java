@@ -1,15 +1,17 @@
 package dev.velix.imperat.command.tree;
 
+import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public final class ArgumentNode<S extends Source> extends ParameterNode<S, CommandParameter<S>> {
 
-    ArgumentNode(@NotNull CommandParameter<S> data) {
-        super(data);
+    ArgumentNode(@NotNull CommandParameter<S> data, @Nullable CommandUsage<S> usage) {
+        super(data, usage);
     }
 
     @Override

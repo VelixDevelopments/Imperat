@@ -29,9 +29,13 @@ public final class CommandTree<S extends Source> {
 
     CommandTree(Command<S> command) {
         this.rootCommand = command;
-        this.root = new CommandNode<>(command);
+        this.root = new CommandNode<>(command, command.getDefaultUsage());
         //parse(command);
     }
+    public CommandNode<S> getRoot() {
+        return root;
+    }
+
 
     public static <S extends Source> CommandTree<S> create(Command<S> command) {
         return new CommandTree<>(command);
@@ -51,149 +55,147 @@ public final class CommandTree<S extends Source> {
     }
 
     public void parseUsage(CommandUsage<S> usage) {
-
         for (var flag : usage.getUsedFreeFlags()) {
             rootCommand.registerFlag(flag);
         }
 
         List<CommandParameter<S>> parameters = usage.getParameters();
         if (parameters == null || parameters.isEmpty()) {
+            // For usages with no parameters, set the root as terminal with this usage
+            root.setExecutableUsage(usage);
             return;
         }
-        addParametersToTree(root, parameters, 0);
+
+        // We'll pass an empty list to track the path of nodes we've created
+        List<ParameterNode<S, ?>> path = new ArrayList<>();
+        path.add(root);
+
+        // Add parameters to the tree, handling optional parameters
+        addParametersToTree(root, usage, parameters, 0, path);
     }
 
     private void addParametersToTree(
-        ParameterNode<S, ?> currentNode,
-        List<CommandParameter<S>> parameters,
-        int index
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> parameters,
+            int index,
+            List<ParameterNode<S, ?>> path
     ) {
+        // If we've processed all parameters, mark the current node as terminal
         if (index >= parameters.size()) {
+            currentNode.setExecutableUsage(usage);
+            return;
+        }
+
+        if(currentNode.isGreedyParam()) {
+            if(!currentNode.isLast()) {
+                throw new IllegalStateException("A greedy node '%s' is not the last argument !".formatted(currentNode.format()));
+            }
+            currentNode.setExecutableUsage(usage);
             return;
         }
 
         CommandParameter<S> param = parameters.get(index);
+
+        // Create/get the child node for this parameter
         ParameterNode<S, ?> childNode = getChildNode(currentNode, param);
-        // Recursively add the remaining parameters to the child node
-        addParametersToTree(childNode, parameters, index + 1);
+
+        // Update our path
+        List<ParameterNode<S, ?>> updatedPath = new ArrayList<>(path);
+        updatedPath.add(childNode);
+
+        // Continue with this parameter
+        addParametersToTree(childNode, usage, parameters, index + 1, updatedPath);
+
+        // If parameter is optional, also create a path WITHOUT this parameter
+        if (param.isOptional()) {
+            // Skip this optional parameter and process the next one with the current node
+            addParametersToTree(currentNode, usage, parameters, index + 1, path);
+        }
     }
 
     private ParameterNode<S, ?> getChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
+        // Try to find an existing child node that matches this parameter
         for (ParameterNode<S, ?> child : parent.getChildren()) {
             if (child.data.name().equalsIgnoreCase(param.name())
-                && TypeUtility.matches(child.data.valueType(), param.valueType())) {
+                    && TypeUtility.matches(child.data.valueType(), param.valueType())) {
                 return child;
             }
         }
+
+        // Create a new node - both constructors now accept a usage parameter (initially null)
         ParameterNode<S, ?> newNode;
         if (param.isCommand())
-            newNode = new CommandNode<>(param.asCommand());
+            newNode = new CommandNode<>(param.asCommand(), null);
         else
-            newNode = new ArgumentNode<>(param);
+            newNode = new ArgumentNode<>(param, null);
 
         parent.addChild(newNode);
         return newNode;
     }
 
-    public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
-        final int depthToReach = context.getArgToComplete().index();
-
-        var source = context.source();
-        ParameterNode<S, ?> node = root;
-        for (int i = 0; i < depthToReach; i++) {
-            String raw = context.arguments().getOr(i, null);
-            if (raw == null) {
-                break;
-            }
-            var child = node.getChild((c) -> {
-                boolean hasPerm = (root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver()
-                    .hasPermission(source, c.data.permission()));
-                boolean matches = this.matchesInput(imperat.config(), c, raw);
-
-                return hasPerm && matches;
-            });
-            if (child == null) {
-                break;
-            }
-            node = child;
-        }
-
-        ImperatDebugger.debug("Node-data= '%s'", node.data.format());
-        CompletableFuture<List<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
-        for (var child : node.getChildren()) {
-            ImperatDebugger.debug("collecting from child '%s'", child.data.format());
-            future = future.thenCompose((results) -> addChildResults(imperat, context, child, results));
-        }
-        return future;
-    }
 
 
-
-    private CompletableFuture<List<String>> addChildResults(
-        Imperat<S> imperat,
-        SuggestionContext<S> context,
-        ParameterNode<S, ?> node,
-        List<String> oldResults
-    ) {
-
-        SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
-        var currentNodeFutureResults =  resolver.asyncAutoComplete(context, node.data)
-                .thenApply((res) -> {
-                    oldResults.addAll(res);
-                    return oldResults;
-                });
-
-        var optionalChild = node.getChild(ParameterNode::isOptional);
-        if(optionalChild == null)
-            return currentNodeFutureResults;
-
-        return currentNodeFutureResults.thenCompose((results)-> addChildResults(imperat, context, optionalChild, currentNodeFutureResults.join()));
-    }
-
-
-    //context matching part
+    // Update the context matching to leverage terminal usages
     public @NotNull CommandDispatch<S> contextMatch(
-        ArgumentQueue input,
-        ImperatConfig<S> config
+            ArgumentQueue input,
+            ImperatConfig<S> config
     ) {
+        CommandDispatch<S> dispatch = CommandDispatch.unknown();
+        dispatch.append(root);
+
         if (input.isEmpty()) {
-            return CommandDispatch.incomplete();
+            dispatch.setResult(CommandDispatch.Result.INCOMPLETE);
+            dispatch.setDirectUsage(root.getExecutableUsage());
+            return dispatch;
         }
 
         int depth = 0;
 
         for (ParameterNode<S, ?> child : root.getChildren()) {
-            CommandDispatch<S> nodeTraversing = CommandDispatch.unknown();
+            var traverse = dispatchNode(config, dispatch, input, child, depth);
 
-            var traverse = dispatchNode(config, nodeTraversing, input, child, depth);
-
-            if (traverse.result() != CommandDispatch.Result.UNKNOWN) {
+            if (traverse.getResult() != CommandDispatch.Result.UNKNOWN) {
                 ImperatDebugger.debug("Found a non-unknown traverse result !");
                 return traverse;
             }
-
         }
 
-        return CommandDispatch.unknown();
+        return dispatch;
     }
 
     private @NotNull CommandDispatch<S> dispatchNode(
-        ImperatConfig<S> config,
-        CommandDispatch<S> commandDispatch,
-        ArgumentQueue input,
-        @NotNull ParameterNode<S, ?> currentNode,
-        int depth
+            ImperatConfig<S> config,
+            CommandDispatch<S> commandDispatch,
+            ArgumentQueue input,
+            @NotNull ParameterNode<S, ?> currentNode,
+            int depth
     ) {
         if (depth >= input.size()) {
+            // We've matched all input tokens
+            if (currentNode.isExecutable()) {
+                // This is a valid terminal node with a stored usage
+                commandDispatch.append(currentNode);
+                commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
+                commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
+                return commandDispatch;
+            }
             return commandDispatch;
         }
 
         String rawInput = input.get(depth);
 
+        if(currentNode.isGreedyParam()) {
+            commandDispatch.append(currentNode);
+            commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
+            commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
+            return commandDispatch;
+        }
+
         ImperatDebugger.debug("Current depth=%s, node=%s", depth, currentNode.format());
         while (!matchesInput(config, currentNode, rawInput)) {
-
             if (currentNode.isOptional()) {
+                ImperatDebugger.debug("Current Node '%s' doesn't match raw input '%s', while being optional", currentNode.format(), rawInput);
                 commandDispatch.append(currentNode);
                 currentNode = currentNode.getNextParameterChild();
             } else {
@@ -215,73 +217,55 @@ public final class CommandTree<S extends Source> {
 
         ImperatDebugger.debug("Appending node=%s, at depth=%s", currentNode.format(), depth);
         commandDispatch.append(currentNode);
-
-        if (!currentNode.isLast()) {
-            if (isLastDepth(depth, input)) {
-                ImperatDebugger.debug("Reached the end of the input at depth=%s", depth);
-                //check for incomplete executions
-                if (currentNode.isCommand()) {
-                    ImperatDebugger.debug("The last node at last depth is command=%s", currentNode.format());
-                    addOptionalChildren(commandDispatch, currentNode);
-                    commandDispatch.result(CommandDispatch.Result.INCOMPLETE);
-                    return commandDispatch;
-                }
-
-                //means that there's missing arguments that need to be input
-                //check if the missing arguments are optional to ignore and complete this
-                //by finding the next required argument
-
-                ImperatDebugger.debug("Finding missing required argument, current node= %s", currentNode.data.name());
-                ParameterNode<S, ?> requiredParameterNode = findRequiredNodeDeeply(currentNode);
-                if (requiredParameterNode == null) {
-                    ImperatDebugger.debug("No missing required args, it's complete now");
-                    //we ignore it and assume the result is complete
-                    commandDispatch.result(CommandDispatch.Result.COMPLETE);
-                    //but don't forget to add optionals if there are
-                    addOptionalChildren(commandDispatch, currentNode);
-                } else {
-                    ImperatDebugger.debug("There are missing required args !!, the usage is UNKNOWN");
-                    commandDispatch.result(requiredParameterNode.isCommand() ? CommandDispatch.Result.COMPLETE : CommandDispatch.Result.UNKNOWN);
-                }
-            } else {
-                ImperatDebugger.debug("we still in the middle of the input at depth=%s", depth);
-                for (var child : currentNode.getChildren()) {
-                    var result = dispatchNode(config, commandDispatch, input, child, depth + 1);
-                    if (result.result() == CommandDispatch.Result.COMPLETE) {
-                        return result;
-                    }
-                }
-            }
-        } else {
-            ImperatDebugger.debug("We reached the end of the node, at node=%s", currentNode.format());
-
-
-            //node is the last
-            if (isLastDepth(depth, input) || currentNode.data.isGreedy()) {
-                //Last depth and last node => perfecto
-                commandDispatch.result(CommandDispatch.Result.COMPLETE);
-            } else {
-                String nextRaw = input.getOr(depth + 1, null);
-                assert nextRaw != null;
-
-                ImperatDebugger.debug("nextRaw=%s, at depth=%s, max-depth=%s", nextRaw, depth + 1, input.size() - 1);
-                ImperatDebugger.debug("isInputFlag-nextRaw='%s',  isFreeFlagRegisteredToCommand='%s'", Patterns.isInputFlag(nextRaw), rootCommand.getFlagFromRaw(nextRaw).isPresent());
-
-                CommandDispatch.Result result;
-                if (currentNode.isTrueFlag() && isLastDepth(depth + 1, input)) {
-                    result = CommandDispatch.Result.COMPLETE;
-                } else if (Patterns.isInputFlag(nextRaw) && rootCommand.getFlagFromRaw(nextRaw).isPresent()) {
-                    result = CommandDispatch.Result.COMPLETE;
-                } else if (!currentNode.isGreedyParam()) {
-                    ImperatDebugger.debug("IS NOT GREEDY !!, currentNode=%s", currentNode.format());
-                    result = CommandDispatch.Result.UNKNOWN;
-                } else {
-                    result = CommandDispatch.Result.COMPLETE;
-                }
-                commandDispatch.result(result);
-            }
-
+        if(currentNode.isTrueFlag()) {
+            depth++;
+            ImperatDebugger.debug("Incrementing depth for true flag '%s', depth is now '%s'", currentNode.format(), depth);
         }
+
+        if (isLastDepth(depth, input)) {
+            // We've processed all input, check if this is a valid terminal node
+            ImperatDebugger.debug("Reached last depth at depth '%s' of raw '%s'", depth, rawInput);
+
+            if (currentNode.isExecutable()) {
+                ImperatDebugger.debug("Node '%s' is executable, finished traversing !", currentNode.format());
+                commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
+                commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
+                return commandDispatch;
+            }
+
+            if (currentNode.isCommand()) {
+                ImperatDebugger.debug("The last node at last depth is command=%s", currentNode.format());
+                addOptionalChildren(commandDispatch, currentNode);
+                commandDispatch.setResult(CommandDispatch.Result.INCOMPLETE);
+                return commandDispatch;
+            }
+
+            // Check for required parameters
+            ParameterNode<S, ?> requiredParameterNode = findRequiredNodeDeeply(currentNode);
+            if (requiredParameterNode == null) {
+                ImperatDebugger.debug("No missing required args, it's complete now");
+                commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
+                addOptionalChildren(commandDispatch, currentNode);
+            } else {
+                ImperatDebugger.debug("There are missing required args !!, the usage is UNKNOWN");
+                commandDispatch.setResult(requiredParameterNode.isCommand() ? CommandDispatch.Result.COMPLETE : CommandDispatch.Result.UNKNOWN);
+            }
+            return commandDispatch;
+        }
+
+        /*if(currentNode.isTrueFlag()) {
+            //a true flag
+            depth++;
+        }*/
+
+        // Not at the last depth, continue traversing children
+        for (var child : currentNode.getChildren()) {
+            var result = dispatchNode(config, commandDispatch, input, child, depth + 1);
+            if (result.getResult() == CommandDispatch.Result.COMPLETE) {
+                return result;
+            }
+        }
+
         return commandDispatch;
     }
 
@@ -315,14 +299,67 @@ public final class CommandTree<S extends Source> {
         return index == input.size() - 1;
     }
 
-    public CommandNode<S> getRoot() {
-        return root;
-    }
 
     private boolean matchesInput(ImperatConfig<S> config, ParameterNode<S, ?> node, String input) {
         if(node instanceof CommandNode || config.strictCommandTree()) {
             return node.matchesInput(input);
         }
         return true;
+    }
+
+
+    public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
+        final int depthToReach = context.getArgToComplete().index();
+
+        var source = context.source();
+        ParameterNode<S, ?> node = root;
+        for (int i = 0; i < depthToReach; i++) {
+            String raw = context.arguments().getOr(i, null);
+            if (raw == null) {
+                break;
+            }
+            var child = node.getChild((c) -> {
+                boolean hasPerm = (root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver()
+                        .hasPermission(source, c.data.permission()));
+                boolean matches = this.matchesInput(imperat.config(), c, raw);
+
+                return hasPerm && matches;
+            });
+            if (child == null) {
+                break;
+            }
+            node = child;
+        }
+
+        ImperatDebugger.debug("Node-data= '%s'", node.data.format());
+        CompletableFuture<List<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
+        for (var child : node.getChildren()) {
+            ImperatDebugger.debug("collecting from child '%s'", child.data.format());
+            future = future.thenCompose((results) -> addChildResults(imperat, context, child, results));
+        }
+        return future;
+    }
+
+
+
+    private CompletableFuture<List<String>> addChildResults(
+            Imperat<S> imperat,
+            SuggestionContext<S> context,
+            ParameterNode<S, ?> node,
+            List<String> oldResults
+    ) {
+
+        SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
+        var currentNodeFutureResults =  resolver.asyncAutoComplete(context, node.data)
+                .thenApply((res) -> {
+                    oldResults.addAll(res);
+                    return oldResults;
+                });
+
+        var optionalChild = node.getChild(ParameterNode::isOptional);
+        if(optionalChild == null)
+            return currentNodeFutureResults;
+
+        return currentNodeFutureResults.thenCompose((results)-> addChildResults(imperat, context, optionalChild, currentNodeFutureResults.join()));
     }
 }
