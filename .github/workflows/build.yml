@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+
     steps:
       - name: ✅ Checkout Project
         uses: actions/checkout@v4
@@ -28,4 +29,11 @@ jobs:
       - name: 🧪 Gradle Test
         run: |
           chmod +x ./gradlew
-          ./gradlew build  test
+          ./gradlew test --info
+
+      - name: 📦 Archive test reports (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: build/reports/tests/test
