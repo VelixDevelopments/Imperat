@@ -35,6 +35,13 @@ jobs:
         if: failure()
         run: |
           echo "## ❌ Failed Tests Summary" >> $GITHUB_STEP_SUMMARY
+          # Check if any test result XML files exist
+          if ! find . -path "*/build/test-results/test/*.xml" | grep -q .; then
+            echo "No test results found. Build likely failed before tests ran." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          # Process XML files if they exist
           find . -type f -path "*/build/test-results/test/*.xml" | while read file; do
             module=$(echo "$file" | cut -d/ -f2)
             fails=$(grep -c "<failure" "$file")
