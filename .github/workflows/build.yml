@@ -31,7 +31,33 @@ jobs:
           chmod +x ./gradlew
           ./gradlew test --info
 
-      - name: 📦 Archive test reports (on failure)
+      - name: 📝 Summarize Failed Tests
+        if: failure()
+        run: |
+          echo "## ❌ Failed Tests Summary" >> $GITHUB_STEP_SUMMARY
+          find . -type f -path "*/build/test-results/test/*.xml" | while read file; do
+            module=$(echo "$file" | cut -d/ -f2)
+            fails=$(grep -c "<failure" "$file")
+            if [ "$fails" -gt 0 ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**$module:**" >> $GITHUB_STEP_SUMMARY
+              grep -A 1 "<testcase" "$file" | grep -B 1 "<failure" | grep -E "<testcase|<failure" | while read line; do
+                if [[ "$line" == *"<testcase"* ]]; then
+                  classname=$(echo "$line" | sed -n 's/.*classname="\([^"]*\)".*/\1/p')
+                  name=$(echo "$line" | sed -n 's/.*name="\([^"]*\)".*/\1/p')
+                  echo "- ${classname##*.}.${name}" >> $GITHUB_STEP_SUMMARY
+                elif [[ "$line" == *"<failure"* ]]; then
+                  message=$(echo "$line" | sed -n 's/.*<failure[^>]*message="\([^"]*\)".*/\1/p')
+                  if [ -z "$message" ]; then
+                    message="(no message)"
+                  fi
+                  echo "  → $message" >> $GITHUB_STEP_SUMMARY
+                fi
+              done
+            fi
+          done
+
+      - name: 📦 Archive all test reports (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
