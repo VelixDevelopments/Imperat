@@ -13,8 +13,9 @@ import java.util.Map;
 public class Test2Command {
 
     @Usage
+    @SubCommand("help")
     public void def(TestSource source) {
-        source.reply("Enter an input");
+        source.reply("Send help input");
         // /test2
     }
 
