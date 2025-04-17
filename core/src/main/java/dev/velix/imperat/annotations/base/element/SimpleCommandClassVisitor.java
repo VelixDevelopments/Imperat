@@ -284,7 +284,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                             loadCommand(null, innerClass, innerCmdAnn)
                         );
                         return null;
-                    } else if (innerClass.isAnnotationPresent(SubCommand.class)) {
+                    }
+                    if (innerClass.isAnnotationPresent(SubCommand.class)) {
                         if (cmd == null) {
                             throw new IllegalStateException("Inner class '" + innerClass.getElement().getSimpleName() + "' Cannot be  treated as subcommand, it doesn't have a parent ");
                         }
