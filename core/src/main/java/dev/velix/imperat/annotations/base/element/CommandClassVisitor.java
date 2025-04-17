@@ -44,7 +44,7 @@ public abstract class CommandClassVisitor<S extends Source> {
             parser,
             ElementSelector.<MethodElement>create()
                 .addRule(MethodRules.HAS_KNOWN_SENDER)
-                .addRule(MethodRules.HAS_LEAST_ONLY_ONE_MAIN_ANNOTATION)
+                //.addRule(MethodRules.HAS_LEAST_ONLY_ONE_MAIN_ANNOTATION)
         );
     }
 }
