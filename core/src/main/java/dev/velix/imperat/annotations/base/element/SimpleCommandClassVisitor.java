@@ -265,7 +265,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                             cmd.addUsage(usage);
                         }
 
-                    } else if (method.isAnnotationPresent(SubCommand.class)) {
+                    }
+                    if (method.isAnnotationPresent(SubCommand.class)) {
                         var subAnn = method.getAnnotation(SubCommand.class);
                         assert subAnn != null;
 
