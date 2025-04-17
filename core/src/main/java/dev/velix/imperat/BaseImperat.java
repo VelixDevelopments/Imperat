@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
@@ -275,10 +276,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         CommandDispatch<S> searchResult = command.contextMatch(context);
         searchResult.visualize();
 
-        CommandUsage<S> usage = searchResult.toUsage(command);
+        CommandUsage<S> usage = searchResult.toUsage();
 
         //executing usage
-        if (searchResult.result() == CommandDispatch.Result.COMPLETE) {
+        if (searchResult.getResult() == CommandDispatch.Result.COMPLETE) {
 
             if(usage == null) {
                 throw new InvalidSyntaxException();
@@ -287,10 +288,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
             executeUsage(command, source, context, usage);
         }
-        else if (searchResult.result() == CommandDispatch.Result.INCOMPLETE) {
-            if(searchResult.getLastParameter().isCommand()) {
+        else if (searchResult.getResult() == CommandDispatch.Result.INCOMPLETE) {
+            if(Objects.requireNonNull(searchResult.getLastNode()).isCommand()) {
                 ImperatDebugger.debug("Executing last parameter as a sub command");
-                var defUsage = searchResult.getLastParameter().asCommand().getDefaultUsage();
+                var defUsage = searchResult.getLastNode().getData().asCommand().getDefaultUsage();
                 executeUsage(command, source, context, defUsage);
             }
             else if (usage != null) {
@@ -303,7 +304,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         } else {
             throw new InvalidSyntaxException();
         }
-        return searchResult.result();
+        return searchResult.getResult();
     }
 
     private void executeUsage(

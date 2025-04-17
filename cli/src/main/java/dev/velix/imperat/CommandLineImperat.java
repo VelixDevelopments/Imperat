@@ -52,7 +52,7 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
      * Dispatches the command-line from the input stream provided
      *
      * @param outputStream the output stream/command-source origin
-     * @return the usage match result
+     * @return the usage match setResult
      */
     public CommandDispatch.Result dispatch(OutputStream outputStream) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
@@ -68,7 +68,7 @@ public final class CommandLineImperat extends BaseImperat<ConsoleSource> {
      * Dispatches the command-line from the input stream provided
      * while using {@link System#out} as an {@link OutputStream}
      *
-     * @return the usage match result
+     * @return the usage match setResult
      */
     public CommandDispatch.Result dispatch() {
         return dispatch(System.out);

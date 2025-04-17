@@ -244,6 +244,11 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
         return getParameters().size();
     }
 
+
+    default String formatted() {
+        return format((String) null, this);
+    }
+
     class Builder<S extends Source> {
 
         private final List<CommandParameter<S>> parameters = new ArrayList<>();

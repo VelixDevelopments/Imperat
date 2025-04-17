@@ -47,7 +47,8 @@ public class TestRun {
 
     static {
         ImperatDebugger.setEnabled(true);
-        ImperatDebugger.setTesting(true);
+        ImperatDebugger.setUsingTestCases(true);
+        //ImperatDebugger.setTesting(true);
 
         IMPERAT = TestImperatConfig.builder()
             .usageVerifier(UsageVerifier.typeTolerantVerifier())
@@ -143,10 +144,10 @@ public class TestRun {
     public void testPreProcessor() {
         USAGE_EXECUTED = false;
         GROUP_CMD.setPreProcessor(new CustomPreProcessor());
-        var result = testCmdTreeExecution("group", "member");
+        var setResult = testCmdTreeExecution("group", "member");
         
         Assertions.assertEquals(PRE_PROCESSOR_INT, 1);
-        Assertions.assertEquals(Result.COMPLETE, result);
+        Assertions.assertEquals(Result.COMPLETE, setResult);
         Assertions.assertTrue(USAGE_EXECUTED);
     }
     
@@ -155,9 +156,9 @@ public class TestRun {
         USAGE_EXECUTED = false;
         GROUP_CMD.setPostProcessor(new CustomPostProcessor());
         
-        var result = testCmdTreeExecution("group", "member");
+        var setResult = testCmdTreeExecution("group", "member");
         Assertions.assertEquals(POST_PROCESSOR_INT, 1);
-        Assertions.assertEquals(Result.COMPLETE, result);
+        Assertions.assertEquals(Result.COMPLETE, setResult);
         Assertions.assertTrue(USAGE_EXECUTED);
     }*/
 
@@ -380,11 +381,21 @@ public class TestRun {
     }
 
     @Test
-    public void testAR() {
+    public void testAnnotationReplacer() {
         IMPERAT.registerCommand(new TestCustomAnnotationCmd());
         var cmd = IMPERAT.getCommand("testreplacer");
         assert cmd != null;
         debugCommand(cmd);
         Assertions.assertEquals(CommandDispatch.Result.INCOMPLETE, testCmdTreeExecution("testreplacer", ""));
+    }
+
+    @Test
+    public void testOT() {
+        var cmd = IMPERAT.getCommand("ot");
+        Assertions.assertNotNull(cmd);
+        debugCommand(cmd);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ot","myr1 myr2"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ot","myr1 myo1 myr2"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ot","myr1 myo1 myr2 myo2"));
     }
 }

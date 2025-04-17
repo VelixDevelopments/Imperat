@@ -5,6 +5,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,8 +59,14 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
             String keyRaw = split[0];
             String valueRaw = split[1];
 
-            K key = keyResolver.resolve(context, commandInputStream, keyRaw);
-            V value = valueResolver.resolve(context, commandInputStream, valueRaw);
+            CommandInputStream<S> keySubStream = CommandInputStream.subStream(commandInputStream, keyRaw);
+            CommandInputStream<S> valueSubStream = CommandInputStream.subStream(commandInputStream, keyRaw);
+
+            K key = keyResolver.resolve(context, keySubStream, keyRaw);
+            V value = valueResolver.resolve(context, valueSubStream, valueRaw);
+
+            ImperatDebugger.debug("MAP-TYPE => Adding key '%s' to value '%s'", keyRaw, valueRaw);
+            ImperatDebugger.debug("MAP-TYPE => KEY-VALUE:'%s', VALUE-VALUE='%s'", key, value);
 
             newMap.put(key, value);
 

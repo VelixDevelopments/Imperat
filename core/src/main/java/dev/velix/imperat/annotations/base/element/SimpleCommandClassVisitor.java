@@ -690,7 +690,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             type = ConstrainedParameterTypeDecorator.of(type, values, valuesAnnotation.caseSensitive());
         }
 
-        ImperatDebugger.debug("Optional value is empty='%s'", optionalValueSupplier.isEmpty());
+        //ImperatDebugger.debug("Optional value is empty='%s'", optionalValueSupplier.isEmpty());
         CommandParameter<S> param =
             AnnotationParameterDecorator.decorate(
                 CommandParameter.of(

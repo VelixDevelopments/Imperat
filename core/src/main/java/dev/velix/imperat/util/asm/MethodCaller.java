@@ -36,7 +36,7 @@ public interface MethodCaller {
      *
      * @param instance  Instance to call from. Can be null
      * @param arguments Invoking arguments
-     * @return The return result
+     * @return The return setResult
      */
     Object call(@Nullable Object instance, Object... arguments);
 
@@ -61,7 +61,7 @@ public interface MethodCaller {
          * Calls the method of this caller
          *
          * @param arguments Invoking arguments
-         * @return The return result
+         * @return The return setResult
          */
         Object call(@NotNull Object... arguments);
     }
