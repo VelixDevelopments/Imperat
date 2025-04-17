@@ -265,7 +265,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                             cmd.addUsage(usage);
                         }
 
-                    } else if (method.isAnnotationPresent(SubCommand.class)) {
+                    }
+                    if (method.isAnnotationPresent(SubCommand.class)) {
                         var subAnn = method.getAnnotation(SubCommand.class);
                         assert subAnn != null;
 
@@ -284,8 +285,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                             loadCommand(null, innerClass, innerCmdAnn)
                         );
                         return null;
-                    }
-                    if (innerClass.isAnnotationPresent(SubCommand.class)) {
+                    } else if (innerClass.isAnnotationPresent(SubCommand.class)) {
                         if (cmd == null) {
                             throw new IllegalStateException("Inner class '" + innerClass.getElement().getSimpleName() + "' Cannot be  treated as subcommand, it doesn't have a parent ");
                         }
