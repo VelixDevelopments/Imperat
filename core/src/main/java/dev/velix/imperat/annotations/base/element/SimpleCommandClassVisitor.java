@@ -258,23 +258,29 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         return cmd;
                     }
 
-                    if (method.isAnnotationPresent(Usage.class)) {
+                    if(method.isAnnotationPresent(SubCommand.class)) {
+                        var subAnn = method.getAnnotation(SubCommand.class);
+                        assert subAnn != null;
 
+                        String subName = subAnn.value()[0];
+                        Command<S> subCommand = cmd.getSubCommand(subName);
+                        if(subCommand != null) {
+                            subCommand.addUsage(loadUsage(cmd, subCommand, method));
+                        }
+                        else {
+                            subCommand = loadCommand(cmd, method, subAnn);
+                            cmd.addSubCommand(subCommand, subAnn.attachDirectly());
+                        }
+
+                    }
+
+                    if(method.isAnnotationPresent(Usage.class)) {
                         var usage = loadUsage(parentCmd, cmd, method);
                         if (usage != null) {
                             cmd.addUsage(usage);
                         }
-
                     }
-                    if (method.isAnnotationPresent(SubCommand.class)) {
-                        var subAnn = method.getAnnotation(SubCommand.class);
-                        assert subAnn != null;
 
-                        var subCmd = loadCommand(cmd, method, subAnn);
-                        assert subCmd != null;
-
-                        cmd.addSubCommand(subCmd, subAnn.attachDirectly());
-                    }
                 } else if (element instanceof ClassElement innerClass) {
 
                     if (innerClass.isAnnotationPresent(dev.velix.imperat.annotations.Command.class)) {
