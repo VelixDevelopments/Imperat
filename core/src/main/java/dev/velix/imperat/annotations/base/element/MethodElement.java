@@ -1,14 +1,14 @@
 package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
+import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,16 +27,24 @@ public final class MethodElement extends ParseElement<Method> {
     ) {
         super(registry, owningElement, element);
         var params = element.getParameters();
-        for(int i = 1; i< params.length; i++) {
-            Parameter parameter = params[i];
-            if (AnnotationHelper.isHelpParameter(parameter)) {
-                help = true;
-            } else if (!imperat.config().hasContextResolver(parameter.getType())) {
-                inputCount++;
+        for (int i = 0; i < params.length; i++) {
+            var parameter = params[i];
+            //TODO debug this !
+            ParameterElement parameterElement = new ParameterElement(registry, owningElement, this, parameter);
+            ImperatDebugger.debug("Adding param '%s' to method '%s'", parameterElement.getName(), this.getName());
+            parameters.add(parameterElement);
+            if (i > 0 ) {
+
+                if(!parameterElement.isAnnotationPresent(ContextResolved.class)) {
+                    inputCount++;
+                }
+
+                if(!help && AnnotationHelper.isHelpParameter(parameterElement)) {
+                    help = true;
+                }
+
             }
         }
-        for(Parameter parameter : params)
-            parameters.add(new ParameterElement(registry, owningElement, this, parameter));
 
     }
 
@@ -75,4 +83,9 @@ public final class MethodElement extends ParseElement<Method> {
         return help;
     }
 
+    @Override
+    public @NotNull ParseElement<?> getParent() {
+        assert super.getParent() != null;
+        return super.getParent();
+    }
 }

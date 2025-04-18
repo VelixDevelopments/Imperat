@@ -105,7 +105,12 @@ public final class CommandDispatch<S extends Source> implements Iterable<Paramet
         /**
          * Defines an unknown execution/command, it's the default setResult
          */
-        UNKNOWN
+        UNKNOWN,
+
+        /**
+         * Defines an execution that ended up with throwing an exception that had no handler
+         */
+        FAILURE;
 
     }
 }

@@ -2,6 +2,7 @@ package dev.velix.imperat.commands.annotations.examples;
 
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.SubCommand;
@@ -27,7 +28,7 @@ public final class AnnotatedGroupCommand {
     }
 
     @SubCommand(value = "help", attachDirectly = true)
-    public void help(TestSource source, CommandHelp help) {
+    public void help(TestSource source, @ContextResolved CommandHelp help) {
         help.display(source);
     }
 

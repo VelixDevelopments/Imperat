@@ -14,7 +14,6 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.AmbiguousUsageAdditionException;
-import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.InvalidCommandUsageException;
 import dev.velix.imperat.exception.InvalidSyntaxException;
 import dev.velix.imperat.exception.PermissionDeniedException;
@@ -221,7 +220,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return handleExecution(context);
         } catch (Throwable ex) {
             config.handleExecutionThrowable(ex, context, BaseImperat.class, "dispatch");
-            return CommandDispatch.Result.UNKNOWN;
+            return CommandDispatch.Result.FAILURE;
         }
     }
 
@@ -259,7 +258,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         return dispatch(sender, lineArgs[0], argumentsOnly);
     }
 
-    private CommandDispatch.Result handleExecution(Context<S> context) throws ImperatException {
+    private CommandDispatch.Result handleExecution(Context<S> context) throws Throwable {
         Command<S> command = context.command();
         S source = context.source();
 
@@ -312,7 +311,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         final S source,
         final Context<S> context,
         final CommandUsage<S> usage
-    ) throws ImperatException {
+    ) throws Throwable {
         //global pre-processing
         if(!preProcess(context, usage)) {
             return;

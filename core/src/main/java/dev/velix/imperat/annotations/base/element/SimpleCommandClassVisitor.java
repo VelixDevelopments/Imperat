@@ -3,13 +3,13 @@ package dev.velix.imperat.annotations.base.element;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.Async;
+import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.Cooldown;
 import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Description;
 import dev.velix.imperat.annotations.Flag;
 import dev.velix.imperat.annotations.Greedy;
-import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.PostProcessor;
@@ -344,10 +344,14 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         @NotNull Command<S> loadedCmd,
         MethodElement method
     ) {
-        boolean isAttachedDirectly = isIsAttachedDirectlySubCmd(method);
+        boolean isAttachedDirectly = isIsAttachedDirectlySubCmd(parentCmd, method);
 
         int inputCount = method.getInputCount();
+        ImperatDebugger.debugForTesting("The method-usage '%s' in class '%s', has '%s' default input count", method.getName(),
+                method.getParent().getName(), inputCount);
         if (parentCmd != null) {
+            ImperatDebugger.debug("Found subcommand method usage '%s' in class '%s' with parent '%s'", method.getName(),
+                    method.getParent().getName(), parentCmd.name());
             int parentalParams = 0;
 
             if (!isAttachedDirectly) {
@@ -360,12 +364,13 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
 
             inputCount = Math.abs(method.getInputCount() - parentalParams);
+        }else {
+            ImperatDebugger.debug("Parent is null for cmd '%s'", loadedCmd.name());
         }
 
         ImperatDebugger.debugForTesting("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
         if (inputCount == 0) {
             if (parentCmd != null && !isAttachedDirectly) {
-                assert method.getParent() != null;
                 MethodUsageData<S> usageData = loadParameters(method, parentCmd);
                 loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
@@ -438,7 +443,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
 
-        boolean isAttachedDirectlySubCmd = isIsAttachedDirectlySubCmd(method);
+        boolean isAttachedDirectlySubCmd = isIsAttachedDirectlySubCmd(parentCmd, method);
 
         if (!isAttachedDirectlySubCmd) {
             LinkedList<Command<S>> parenteralSequence = getParenteralSequence(parentCmd);
@@ -465,7 +470,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         ParameterElement senderParam = null;
 
         if(!isAttachedDirectlySubCmd && methodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
-            assert method.getParent() != null;
             throw new IllegalStateException("You have inherited parameters ('%s') that are not declared in the method '%s' in class '%s'".formatted(inheritedParamsFormatted, method.getName(), method.getParent().getName()));
         }
 
@@ -473,13 +477,18 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             ParameterElement parameterElement = methodParameters.peek();
             if (parameterElement == null) break;
-            Type type = parameterElement.getElement().getParameterizedType();
-            if ( (senderParam == null && (isSenderParameter(parameterElement))) || config.hasContextResolver(type)) {
+            //Type type = parameterElement.getElement().getParameterizedType();
+            if ( senderParam == null && isSenderParameter(parameterElement) ) {
                 senderParam = methodParameters.remove();
                 continue;
             }
 
             CommandParameter<S> commandParameter = loadParameter(parameterElement);
+            if(commandParameter == null) {
+                methodParameters.remove();
+                continue;
+            }
+
             if (commandParameter.isFlag() && commandParameter.asFlagParameter().flagData().isFree()) {
                 freeFlags.add(commandParameter.asFlagParameter().flagData());
                 methodParameters.remove();
@@ -487,9 +496,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
 
             CommandParameter<S> mainParameter = mainUsageParameters.peek();
-            if(mainParameter != null)
-                ImperatDebugger.debugForTesting("Comparing main-usage parameter '%s' with loaded parameter '%s'", mainParameter.format(), commandParameter.format());
-
+            if(mainParameter != null) {
+                ImperatDebugger.debugForTesting("Comparing main-usage parameter '%s' with loaded parameter '%s'", mainParameter.format(),
+                        commandParameter.format());
+            }
 
             if (mainParameter == null) {
                 ImperatDebugger.debugForTesting("Adding command parameter '%s' that has no corresponding main parameter", commandParameter.format());
@@ -517,15 +527,19 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         return new MethodUsageData<>(toLoad, total, freeFlags);
     }
 
-    private static boolean isIsAttachedDirectlySubCmd(@NotNull MethodElement method) {
+    private static <S extends Source> boolean isIsAttachedDirectlySubCmd(@Nullable Command<S> parentCmd, @NotNull MethodElement method) {
         boolean isAttachedDirectlySubCmd = false;
         if(method.isAnnotationPresent(SubCommand.class)) {
             isAttachedDirectlySubCmd = Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly();
         } else if (method.isAnnotationPresent(Usage.class)) {
-            assert method.getParent() != null;
             var ann =  method.getParent().getAnnotation(SubCommand.class);
             if(ann != null) {
                 isAttachedDirectlySubCmd = ann.attachDirectly();
+            }
+        }else {
+            if(parentCmd != null) {
+                method.getParent();
+                isAttachedDirectlySubCmd = parentCmd.mainUsage().isDefault();
             }
         }
         return isAttachedDirectlySubCmd;
@@ -564,13 +578,19 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     }
 
     @SuppressWarnings("unchecked")
-    private <T> CommandParameter<S> loadParameter(
+    private <T> @Nullable CommandParameter<S> loadParameter(
         @NotNull ParameterElement parameter
     ) {
 
         //Parameter parameter = element.getElement();
 
-        Named named = parameter.getAnnotation(Named.class);
+        if(parameter.isAnnotationPresent(ContextResolved.class) ) {
+            ImperatDebugger.debug("Found param '%s' for context resolving !", parameter.getType().getTypeName());
+            return null;
+        }else {
+            ImperatDebugger.debug("Loading parameter '%s'", parameter.getType().getTypeName());
+        }
+
         Flag flag = parameter.getAnnotation(Flag.class);
         Switch switchAnnotation = parameter.getAnnotation(Switch.class);
 
@@ -580,11 +600,11 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         TypeWrap<T> parameterTypeWrap = (TypeWrap<T>) TypeWrap.of(parameter.getElement().getParameterizedType());
         var type = (ParameterType<S, T>) config.getParameterType(parameterTypeWrap.getType());
-        if (type == null) {
+        if (type == null && !parameter.isAnnotationPresent(ContextResolved.class)) {
             throw new IllegalArgumentException("Unknown type detected '" + parameterTypeWrap.getType().getTypeName() + "'");
         }
 
-        String name = AnnotationHelper.getParamName(config, parameter, named, flag, switchAnnotation);
+        String name = parameter.getName();
         boolean optional = flag != null || switchAnnotation != null
             || parameter.isAnnotationPresent(Optional.class)
             || parameter.isAnnotationPresent(Default.class)

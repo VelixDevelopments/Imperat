@@ -318,7 +318,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      * @param context the context of the command
      */
     @Override
-    public void execute(Imperat<S> imperat, S source, ExecutionContext<S> context) {
+    public void execute(Imperat<S> imperat, S source, ExecutionContext<S> context) throws Throwable {
         commandCoordinator.coordinate(imperat, source, context, this.execution);
     }
 

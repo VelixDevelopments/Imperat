@@ -227,7 +227,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
      * @param source  the command source/sender
      * @param context the context of the command
      */
-    void execute(Imperat<S> imperat, S source, ExecutionContext<S> context);
+    void execute(Imperat<S> imperat, S source, ExecutionContext<S> context) throws Throwable;
 
     /**
      * @return Whether this usage is a help-subcommand usage

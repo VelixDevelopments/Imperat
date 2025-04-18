@@ -15,6 +15,9 @@ import dev.velix.imperat.commands.Test2Command;
 import dev.velix.imperat.commands.TestCustomAnnotationCmd;
 import dev.velix.imperat.commands.annotations.KitCommand;
 import dev.velix.imperat.commands.annotations.TestCommand;
+import dev.velix.imperat.commands.annotations.contextresolver.ContextResolvingCmd;
+import dev.velix.imperat.commands.annotations.contextresolver.PlayerData;
+import dev.velix.imperat.commands.annotations.contextresolver.PlayerDataContextResolver;
 import dev.velix.imperat.commands.annotations.examples.AnnotatedGroupCommand;
 import dev.velix.imperat.commands.annotations.examples.BanCommand;
 import dev.velix.imperat.commands.annotations.examples.GitCommand;
@@ -53,7 +56,9 @@ public class TestRun {
         IMPERAT = TestImperatConfig.builder()
             .usageVerifier(UsageVerifier.typeTolerantVerifier())
             .dependencyResolver(Group.class, () -> new Group("my-global-group"))
-            .parameterType(Group.class, new ParameterGroup()).build();
+            .parameterType(Group.class, new ParameterGroup())
+                .contextResolver(PlayerData.class, new PlayerDataContextResolver())
+                .build();
 
         IMPERAT.registerAnnotationReplacer(MyCustomAnnotation.class,(element, ann)-> {
             dev.velix.imperat.annotations.Command cmdAnn = AnnotationFactory.create(dev.velix.imperat.annotations.Command.class, "value",
@@ -71,8 +76,6 @@ public class TestRun {
         IMPERAT.registerCommand(new KitCommand());
         IMPERAT.registerCommand(new TestCommand());
         IMPERAT.registerCommand(new Test2Command());
-
-
     }
 
     private static CommandDispatch.Result testCmdTreeExecution(String cmdName, String input) {
@@ -397,5 +400,20 @@ public class TestRun {
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ot","myr1 myr2"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ot","myr1 myo1 myr2"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ot","myr1 myo1 myr2 myo2"));
+    }
+
+    @Test
+    public void contextResolve() {
+        ImperatDebugger.setTesting(true);
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new ContextResolvingCmd());
+        });
+        var cmd = IMPERAT.getCommand("ctx");
+        Assertions.assertNotNull(cmd);
+        Assertions.assertDoesNotThrow(()-> {
+            testCmdTreeExecution("ctx", "");
+        });
+
+        Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("ctx", "sub"));
     }
 }

@@ -2,6 +2,7 @@ package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
+import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Flag;
@@ -64,16 +65,33 @@ public final class AnnotationHelper {
             paramsInstances[0] = context.getResolvedSource(firstParam.getType());
         }
 
+        //TODO fix bug for it
         for (int i = 1, p = 0; i < method.size(); i++, p++) {
             ParameterElement actualParameter = method.getParameterAt(i);
             assert actualParameter != null;
 
-            var contextResolver = dispatcher.config().getMethodParamContextResolver(actualParameter);
+            if(actualParameter.isAnnotationPresent(ContextResolved.class)) {
+                ImperatDebugger.debug("param an actual context param, '%s'", actualParameter.getName());
+                var contextResolver = dispatcher.config().getMethodParamContextResolver(actualParameter);
 
-            if (contextResolver != null) {
-                paramsInstances[i] = contextResolver.resolve(context, actualParameter);
-                p--;
-                continue;
+                if (contextResolver != null) {
+                    ImperatDebugger.debug(">> Found Context resolver for parameter '%s' of type '%s'", actualParameter.getName(),
+                            actualParameter.getType().getTypeName());
+                    paramsInstances[i] = contextResolver.resolve(context, actualParameter);
+                    p--;
+                    continue;
+                }else {
+                    ImperatDebugger.debug(">> No Context resolver found for parameter '%s' of type '%s'", actualParameter.getName(),
+                            actualParameter.getType().getTypeName());
+
+                    throw new IllegalStateException(
+                            "In class '%s', In method '%s', The parameter '%s' is set to be context resolved while not having a context resolver for its type '%s'"
+                                    .formatted(method.getParent().getName(), method.getName(), actualParameter.getName(),
+                                            actualParameter.getType().getTypeName())
+                    );
+                }
+            }else {
+                ImperatDebugger.debug("Not a context param '%s', of type '%s'", actualParameter.getName(), actualParameter.getType());
             }
 
             CommandParameter<S> parameter = getUsageParam(fullParameters, p);
@@ -130,7 +148,7 @@ public final class AnnotationHelper {
         else if (switchAnnotation != null)
             name = switchAnnotation.value()[0];
         else
-            name = parameter.getName();
+            name = parameter.getElement().getName();
 
         return imperat.replacePlaceholders(name);
     }
@@ -152,10 +170,6 @@ public final class AnnotationHelper {
 
         var emptyConstructor = supplierClass.getDeclaredConstructor();
         emptyConstructor.setAccessible(true);
-
-        /*if (!TypeUtility.matches(valueSupplier.reflectionType(), parameter.getType())) {
-            throw new IllegalArgumentException("Optional supplier of value-valueType '" + valueSupplier.reflectionType().getTypeName() + "' doesn't match the optional value valueType '" + parameter.getType().getName() + "'");
-        }*/
 
         return emptyConstructor.newInstance();
     }
@@ -185,7 +199,7 @@ public final class AnnotationHelper {
         return fallback;
     }
 
-    public static boolean isHelpParameter(Parameter element) {
+    public static boolean isHelpParameter(ParameterElement element) {
         return TypeUtility.areRelatedTypes(element.getType(), CommandHelp.class);
     }
 

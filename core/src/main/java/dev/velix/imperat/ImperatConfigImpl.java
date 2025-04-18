@@ -42,7 +42,6 @@ import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;

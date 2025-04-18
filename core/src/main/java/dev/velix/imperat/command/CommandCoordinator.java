@@ -14,11 +14,7 @@ public interface CommandCoordinator<S extends Source> {
 
     static <S extends Source> CommandCoordinator<S> sync() {
         return (api, source, context, execution) -> {
-            try {
-                execution.execute(source, context);
-            } catch (Exception ex) {
-                api.config().handleExecutionThrowable(ex, context, CommandCoordinator.class, "sync-lambda");
-            }
+            execution.execute(source, context);
         };
     }
 
@@ -28,13 +24,7 @@ public interface CommandCoordinator<S extends Source> {
             if (executorService == null) {
                 executorService = ForkJoinPool.commonPool();
             }
-            CompletableFuture.runAsync(() -> {
-                try {
-                    execution.execute(source, context);
-                } catch (Exception e) {
-                    api.config().handleExecutionThrowable(e, context, CommandCoordinator.class, "async-lambda");
-                }
-            }, executorService);
+            CompletableFuture.runAsync((UnsafeRunnable) () -> execution.execute(source, context), executorService);
         });
     }
 
@@ -47,6 +37,20 @@ public interface CommandCoordinator<S extends Source> {
         @NotNull S source,
         @NotNull ExecutionContext<S> context,
         @NotNull CommandExecution<S> execution
-    );
+    ) throws Throwable;
 
+    @FunctionalInterface
+    interface UnsafeRunnable extends Runnable {
+
+        void runUnsafe() throws Throwable;
+
+        @Override
+        default void run() {
+            try {
+                runUnsafe();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

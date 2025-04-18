@@ -2,6 +2,7 @@ package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.annotations.Async;
 import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.Cooldown;
 import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.DefaultProvider;
@@ -42,7 +43,7 @@ final class AnnotationRegistry {
             Command.class, Inherit.class, Usage.class, SubCommand.class,
             Cooldown.class, Description.class, Permission.class,
             Suggest.class, SuggestionProvider.class, Default.class, DefaultProvider.class, Values.class,
-            Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, Range.class, Async.class,
+            Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, ContextResolved.class, Range.class, Async.class,
             PostProcessor.class, PreProcessor.class
         );
     }
