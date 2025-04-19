@@ -3,7 +3,6 @@ package dev.velix.imperat.annotations.base.element;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.Async;
-import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.Cooldown;
 import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.DefaultProvider;
@@ -591,7 +590,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         //Parameter parameter = element.getElement();
 
-        if(parameter.isAnnotationPresent(ContextResolved.class) ) {
+        if(parameter.isContextResolved()) {
             ImperatDebugger.debug("Found param '%s' for context resolving !", parameter.getType().getTypeName());
             return null;
         }else {
@@ -607,7 +606,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         TypeWrap<T> parameterTypeWrap = (TypeWrap<T>) TypeWrap.of(parameter.getElement().getParameterizedType());
         var type = (ParameterType<S, T>) config.getParameterType(parameterTypeWrap.getType());
-        if (type == null && !parameter.isAnnotationPresent(ContextResolved.class)) {
+        if (type == null && !parameter.isContextResolved()) {
             throw new IllegalArgumentException("Unknown type detected '" + parameterTypeWrap.getType().getTypeName() + "'");
         }
 
