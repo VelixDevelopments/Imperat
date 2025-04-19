@@ -3,7 +3,6 @@ package dev.velix.imperat.commands.annotations;
 import dev.velix.imperat.TestRun;
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.Command;
-import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.Dependency;
 import dev.velix.imperat.annotations.Inherit;
 import dev.velix.imperat.annotations.Named;
@@ -38,7 +37,7 @@ public class TestCommand {
     }
 
     @SubCommand(value = "help", attachDirectly = true)
-    public void help(TestSource source, @ContextResolved CommandHelp help) {
+    public void help(TestSource source, CommandHelp help) {
         help.display(source);
         source.reply("executed /test help");
         TestRun.USAGE_EXECUTED = true;

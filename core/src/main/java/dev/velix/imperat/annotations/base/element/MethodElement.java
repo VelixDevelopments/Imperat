@@ -1,7 +1,6 @@
 package dev.velix.imperat.annotations.base.element;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
@@ -37,7 +36,7 @@ public final class MethodElement extends ParseElement<Method> {
             parameters.add(parameterElement);
             if (i > 0 ) {
 
-                if(!parameterElement.isAnnotationPresent(ContextResolved.class)) {
+                if(!parameterElement.isContextResolved()) {
                     inputCount++;
                     if(parameterElement.isOptional()) {
                         optionalCount++;
