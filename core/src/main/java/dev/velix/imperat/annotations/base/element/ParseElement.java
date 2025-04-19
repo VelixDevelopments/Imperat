@@ -51,8 +51,6 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
                 for(Annotation replacement : replacementAnnotations) {
                     annotations.put(replacement.annotationType(), replacement);
                 }
-            } else {
-                annotations.put(clazz, annotation);
             }
         }
     }
