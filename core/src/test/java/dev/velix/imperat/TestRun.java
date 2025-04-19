@@ -128,7 +128,7 @@ public class TestRun {
     public void testIncompleteSubCommand() {
         //syntax -> /group <group> setperm <permission> [value]
         var result = testCmdTreeExecution("group", "member setperm");
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
+        Assertions.assertEquals(CommandDispatch.Result.FAILURE, result);
     }
 
     @Test
