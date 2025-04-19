@@ -37,9 +37,8 @@ public sealed abstract class ParseElement<E extends AnnotatedElement> implements
     private <A extends Annotation, S extends Source> void load(@NotNull AnnotationParser<S> registry) {
         for (Annotation annotation : element.getDeclaredAnnotations()) {
             Class<A> clazz = (Class<A>) annotation.annotationType();
-            if (registry.isKnownAnnotation(clazz)) {
-                annotations.put(clazz, annotation);
-            } else if (registry.hasAnnotationReplacerFor(clazz)) {
+            annotations.put(clazz, annotation);
+            if (!registry.isKnownAnnotation(clazz) && registry.hasAnnotationReplacerFor(clazz)) {
                 //we add the custom annotation anyway
                 ImperatDebugger.debug("Found replacer for '@%s' on element '%s'",clazz.getSimpleName(), this.getName());
                 annotations.put(clazz, annotation);
