@@ -177,9 +177,6 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      */
     @Override
     public void resolve() throws ImperatException {
-        if (arguments().isEmpty())
-            return;
-
         SmartUsageResolve<S> sur = SmartUsageResolve.create(command(), this, usage);
         sur.resolve();
         this.lastCommand = sur.getCommand();
@@ -239,6 +236,11 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
 
     @Override
     public void debug() {
+        if(allResolvedArgs.size() == 0) {
+            ImperatDebugger.debug("No arguments were resolved!");
+            return;
+        }
+
         for (var arg : allResolvedArgs.getAll()) {
             ImperatDebugger.debug("Argument '%s' at index #%s with input='%s' with value='%s'",
                 arg.parameter().format(), arg.index(), arg.raw(), arg.value());

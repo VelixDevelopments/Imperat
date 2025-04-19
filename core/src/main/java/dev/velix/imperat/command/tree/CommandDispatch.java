@@ -29,10 +29,6 @@ public final class CommandDispatch<S extends Source> implements Iterable<Paramet
         return of(Result.UNKNOWN);
     }
 
-    static <S extends Source> CommandDispatch<S> incomplete() {
-        return of(Result.INCOMPLETE);
-    }
-
     public void append(ParameterNode<S, ?> node) {
         if (node == null) return;
         //if (parameters.contains(node.data)) return;
@@ -95,12 +91,6 @@ public final class CommandDispatch<S extends Source> implements Iterable<Paramet
          * {@link CommandUsage} cannot be null unless the {@link CommandTree} has issues
          */
         COMPLETE,
-
-        /**
-         * Defines an incomplete execution, due to incomplete usage arguments.
-         * May occur with command default execution(with no args). e.g: `/cmd`
-         */
-        INCOMPLETE,
 
         /**
          * Defines an unknown execution/command, it's the default setResult

@@ -18,7 +18,7 @@ class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
     @Override
     public boolean verify(CommandUsage<S> usage) {
         if (usage.getParameters().isEmpty()) {
-            return false;
+            return true;
         }
 
         int greedyCount = 0;
@@ -31,15 +31,11 @@ class SimpleVerifier<S extends Source> implements UsageVerifier<S> {
             return false;
         }
 
-        CommandParameter<S> firstParameter = usage.getParameters().get(0);
-        boolean firstArgIsRequired = firstParameter != null
-            && !firstParameter.isOptional();
-
         CommandParameter<S> greedyParam = usage.getParameter(CommandParameter::isGreedy);
         if (greedyParam == null)
-            return firstArgIsRequired;
+            return true;
 
-        return greedyParam.position() == usage.getMaxLength() - 1 && firstArgIsRequired;
+        return greedyParam.position() == usage.getMaxLength() - 1;
     }
 
     @Override

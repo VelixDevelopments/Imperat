@@ -60,10 +60,9 @@ public final class CommandTree<S extends Source> {
         }
 
         List<CommandParameter<S>> parameters = usage.getParameters();
-        if (parameters == null || parameters.isEmpty()) {
+        if (usage.isDefault()) {
             // For usages with no parameters, set the root as terminal with this usage
             root.setExecutableUsage(usage);
-            return;
         }
 
         // We'll pass an empty list to track the path of nodes we've created
@@ -145,7 +144,7 @@ public final class CommandTree<S extends Source> {
         dispatch.append(root);
 
         if (input.isEmpty()) {
-            dispatch.setResult(CommandDispatch.Result.INCOMPLETE);
+            dispatch.setResult(CommandDispatch.Result.COMPLETE);
             dispatch.setDirectUsage(root.getExecutableUsage());
             return dispatch;
         }
@@ -236,7 +235,7 @@ public final class CommandTree<S extends Source> {
             if (currentNode.isCommand()) {
                 ImperatDebugger.debug("The last node at last depth is command=%s", currentNode.format());
                 addOptionalChildren(commandDispatch, currentNode);
-                commandDispatch.setResult(CommandDispatch.Result.INCOMPLETE);
+                commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
                 return commandDispatch;
             }
 

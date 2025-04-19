@@ -54,6 +54,7 @@ final class SmartUsageResolve<S extends Source> {
 
             context.resolveFlag(flag, null, null, value);
         } else {
+            ImperatDebugger.debug("Resolving empty optional param '%s'", optionalEmptyParameter.format());
             context.resolveArgument(command, null, stream.cursor()
                 .parameter, optionalEmptyParameter, getDefaultValue(context, stream, optionalEmptyParameter));
         }
@@ -62,26 +63,36 @@ final class SmartUsageResolve<S extends Source> {
     public void resolve() throws ImperatException {
 
         final int lengthWithoutFlags = usage.getParametersWithoutFlags().size();
+        ImperatDebugger.debug("Resolving input stream of usage '%s'", CommandUsage.format(this.command.name(), usage));
         while (stream.hasNextParameter()) {
 
             CommandParameter<S> currentParameter = stream.currentParameter().orElse(null);
-            if (currentParameter == null) break;
+            if (currentParameter == null) {
+                ImperatDebugger.debug("Something weird, there are no params !");
+                break;
+            }
 
             String currentRaw = stream.currentRaw().orElse(null);
             if (currentRaw == null) {
+                ImperatDebugger.debug("Input is too short or empty, checking for remaining optional parameters...");
                 if (currentParameter.isOptional()) {
+                    ImperatDebugger.debug("Found optional parameter '%s'", currentParameter.format());
                     handleEmptyOptional(currentParameter);
                 }
-                while (stream.hasNextParameter()) {
+                do {
                     var param = stream.popParameter()
-                        .filter(CommandParameter::isOptional)
-                        .orElse(null);
+                            .filter(CommandParameter::isOptional)
+                            .orElse(null);
                     if (param == null) break;
+                    ImperatDebugger.debug("Handling other optional parameter '%s'", param.format());
                     handleEmptyOptional(
-                        param
+                            param
                     );
-                }
+                }while (stream.hasNextParameter());
+
                 break;
+            }else {
+                ImperatDebugger.debug("Current raw is '%s', current param is '%s'", currentRaw, currentParameter.format());
             }
 
             if (currentParameter.isCommand()) {

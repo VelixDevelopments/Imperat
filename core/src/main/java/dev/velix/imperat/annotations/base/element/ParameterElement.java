@@ -1,5 +1,9 @@
 package dev.velix.imperat.annotations.base.element;
 
+import dev.velix.imperat.annotations.Default;
+import dev.velix.imperat.annotations.DefaultProvider;
+import dev.velix.imperat.annotations.Flag;
+import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
@@ -42,4 +46,11 @@ public final class ParameterElement extends ParseElement<Parameter> {
         return owningClass;
     }
 
+    public boolean isOptional() {
+        return isAnnotationPresent(dev.velix.imperat.annotations.Optional.class)
+                || isAnnotationPresent(Default.class)
+                || isAnnotationPresent(DefaultProvider.class)
+                || isAnnotationPresent(Flag.class)
+                || isAnnotationPresent(Switch.class);
+    }
 }

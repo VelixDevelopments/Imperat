@@ -22,14 +22,12 @@ import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
@@ -266,11 +264,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             throw new PermissionDeniedException();
         }
 
-        if (context.arguments().isEmpty()) {
+        /*if (context.arguments().isEmpty()) {
             CommandUsage<S> defaultUsage = command.getDefaultUsage();
             executeUsage(command, source, context, defaultUsage);
             return CommandDispatch.Result.INCOMPLETE;
-        }
+        }*/
 
         CommandDispatch<S> searchResult = command.contextMatch(context);
         searchResult.visualize();
@@ -287,7 +285,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
             executeUsage(command, source, context, usage);
         }
-        else if (searchResult.getResult() == CommandDispatch.Result.INCOMPLETE) {
+        /*else if (searchResult.getResult() == CommandDispatch.Result.INCOMPLETE) {
             if(Objects.requireNonNull(searchResult.getLastNode()).isCommand()) {
                 ImperatDebugger.debug("Executing last parameter as a sub command");
                 var defUsage = searchResult.getLastNode().getData().asCommand().getDefaultUsage();
@@ -300,7 +298,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                 //usage is null and last param is not command
                 throw new InvalidSyntaxException();
             }
-        } else {
+
+        }
+        */
+        else {
             throw new InvalidSyntaxException();
         }
         return searchResult.getResult();
@@ -322,6 +323,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return;
         }
 
+        ImperatDebugger.debug("Resolving usage '%s'", CommandUsage.format(command, usage));
         ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
         resolvedContext.resolve();
         resolvedContext.debug();
@@ -337,6 +339,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
 
         //executing the usage
+        ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
         usage.execute(this, source, resolvedContext);
     }
 

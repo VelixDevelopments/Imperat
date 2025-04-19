@@ -10,7 +10,6 @@ import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Description;
 import dev.velix.imperat.annotations.Flag;
 import dev.velix.imperat.annotations.Greedy;
-import dev.velix.imperat.annotations.Optional;
 import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.PostProcessor;
 import dev.velix.imperat.annotations.PreProcessor;
@@ -54,7 +53,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -344,41 +342,50 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         @NotNull Command<S> loadedCmd,
         MethodElement method
     ) {
-        boolean isAttachedDirectly = isIsAttachedDirectlySubCmd(parentCmd, method);
+        /*boolean isAttachedDirectlySubCommandMethod = isIsAttachedDirectlySubCmdMethod(parentCmd, method);
 
         int inputCount = method.getInputCount();
+
         ImperatDebugger.debugForTesting("The method-usage '%s' in class '%s', has '%s' default input count", method.getName(),
                 method.getParent().getName(), inputCount);
+
         if (parentCmd != null) {
             ImperatDebugger.debug("Found subcommand method usage '%s' in class '%s' with parent '%s'", method.getName(),
                     method.getParent().getName(), parentCmd.name());
             int parentalParams = 0;
 
-            if (!isAttachedDirectly) {
+            if (!isAttachedDirectlySubCommandMethod) {
                 ImperatDebugger.debugForTesting("Going in deep for method '%s'", method.getName() );
                 Command<S> parent = parentCmd;
                 while (parent != null) {
-                    parentalParams += parent.mainUsage().size();
+                    parentalParams += parent.getMainUsage().size();
                     parent = parent.parent();
                 }
             }
 
             inputCount = Math.abs(method.getInputCount() - parentalParams);
-        }else {
-            ImperatDebugger.debug("Parent is null for cmd '%s'", loadedCmd.name());
-        }
+        }else if(method.isAllOptionalInput()){
+            //The command class owning the method doesnt have a parent(root),
+            // and the method params are all optional.
+            // Handling it as a default usage
+            ImperatDebugger.debug("Parent is null for cmd '%s', resetting input count", loadedCmd.name());
+            inputCount = 0;
+        }*/
 
-        ImperatDebugger.debugForTesting("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
-        if (inputCount == 0) {
-            if (parentCmd != null && !isAttachedDirectly) {
-                MethodUsageData<S> usageData = loadParameters(method, parentCmd);
+        //ImperatDebugger.debugForTesting("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
+        /*if (inputCount == 0) {
+            MethodUsageData<S> usageData = loadParameters(method, parentCmd);
+            loadedCmd.addUsage();
+            if (parentCmd != null && !isAttachedDirectlySubCommandMethod) {
                 loadedCmd.setDefaultUsageExecution(
                     MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
                 );
 
             } else {
+
+                List<CommandParameter<S>> params = method.isAllOptionalInput() ? usageData.personalParameters() : Collections.emptyList();
                 loadedCmd.setDefaultUsageExecution(
-                    MethodCommandExecutor.of(imperat, method, Collections.emptyList())
+                    MethodCommandExecutor.of(imperat, method, params)
                 );
             }
             Cooldown cooldown = method.getAnnotation(Cooldown.class);
@@ -393,7 +400,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
 
             return null;
-        }
+        }*/
 
         MethodUsageData<S> usageData = loadParameters(method, parentCmd);
 
@@ -439,16 +446,16 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
     ) {
 
         ImperatDebugger.debugForTesting("Loading for method '%s'", method.getName());
-        LinkedList<CommandParameter<S>> toLoad = new LinkedList<>();
+        LinkedList<CommandParameter<S>> personalMethodInputParameters = new LinkedList<>();
 
         final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
 
-        boolean isAttachedDirectlySubCmd = isIsAttachedDirectlySubCmd(parentCmd, method);
+        boolean isAttachedDirectlySubCmd = isIsAttachedDirectlySubCmdMethod(parentCmd, method);
 
         if (!isAttachedDirectlySubCmd) {
             LinkedList<Command<S>> parenteralSequence = getParenteralSequence(parentCmd);
             for(Command<S> parent : parenteralSequence) {
-                parent.mainUsage().getParameters()
+                parent.getMainUsage().getParameters()
                         .forEach((param) -> {
                             if (!(param.isFlag() && param.asFlagParameter().flagData().isFree())) {
                                 mainUsageParameters.add(param);
@@ -461,37 +468,37 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         var inheritedParamsFormatted = getMainUsageParametersCollected(mainUsageParameters);
         ImperatDebugger.debugForTesting("Main usage params collected '%s'", inheritedParamsFormatted.toString());
 
-        LinkedList<CommandParameter<S>> total = new LinkedList<>(mainUsageParameters);
-        LinkedList<ParameterElement> methodParameters = new LinkedList<>(method.getParameters());
-        ImperatDebugger.debugForTesting("Method parameters collected '%s'", getMethodParamsCollected(methodParameters));
+        LinkedList<CommandParameter<S>> totalMethodParameters = new LinkedList<>(mainUsageParameters);
+        LinkedList<ParameterElement> originalMethodParameters = new LinkedList<>(method.getParameters());
+        ImperatDebugger.debugForTesting("Method parameters collected '%s'", getMethodParamsCollected(originalMethodParameters));
 
         Set<FlagData<S>> freeFlags = new HashSet<>();
 
         ParameterElement senderParam = null;
 
-        if(!isAttachedDirectlySubCmd && methodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
+        if(!isAttachedDirectlySubCmd && originalMethodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
             throw new IllegalStateException("You have inherited parameters ('%s') that are not declared in the method '%s' in class '%s'".formatted(inheritedParamsFormatted, method.getName(), method.getParent().getName()));
         }
 
-        while (!methodParameters.isEmpty()) {
+        while (!originalMethodParameters.isEmpty()) {
 
-            ParameterElement parameterElement = methodParameters.peek();
+            ParameterElement parameterElement = originalMethodParameters.peek();
             if (parameterElement == null) break;
             //Type type = parameterElement.getElement().getParameterizedType();
             if ( senderParam == null && isSenderParameter(parameterElement) ) {
-                senderParam = methodParameters.remove();
+                senderParam = originalMethodParameters.remove();
                 continue;
             }
 
             CommandParameter<S> commandParameter = loadParameter(parameterElement);
             if(commandParameter == null) {
-                methodParameters.remove();
+                originalMethodParameters.remove();
                 continue;
             }
 
             if (commandParameter.isFlag() && commandParameter.asFlagParameter().flagData().isFree()) {
                 freeFlags.add(commandParameter.asFlagParameter().flagData());
-                methodParameters.remove();
+                originalMethodParameters.remove();
                 continue;
             }
 
@@ -503,43 +510,43 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             if (mainParameter == null) {
                 ImperatDebugger.debugForTesting("Adding command parameter '%s' that has no corresponding main parameter", commandParameter.format());
-                toLoad.add(commandParameter);
-                total.add(commandParameter);
-                methodParameters.remove();
+                personalMethodInputParameters.add(commandParameter);
+                totalMethodParameters.add(commandParameter);
+                originalMethodParameters.remove();
                 continue;
             }
 
             if (mainParameter.similarTo(commandParameter)) {
                 ImperatDebugger.debugForTesting("Main parameter '%s' is exactly similar to loaded parameter '%s'", mainParameter.format(), commandParameter.format());
-                var methodParam = methodParameters.remove();
+                var methodParam = originalMethodParameters.remove();
                 ImperatDebugger.debugForTesting("Removing '%s' from method params", methodParam.getName());
                 var mainUsageParam = mainUsageParameters.remove();
                 ImperatDebugger.debugForTesting("Removing '%s' from main usage params", mainUsageParam.format());
                 continue;
             }
 
-            toLoad.add(commandParameter);
-            total.add(commandParameter);
+            personalMethodInputParameters.add(commandParameter);
+            totalMethodParameters.add(commandParameter);
 
             mainUsageParameters.remove();
-            methodParameters.remove();
+            originalMethodParameters.remove();
         }
-        return new MethodUsageData<>(toLoad, total, freeFlags);
+        return new MethodUsageData<>(personalMethodInputParameters, totalMethodParameters, freeFlags);
     }
 
-    private static <S extends Source> boolean isIsAttachedDirectlySubCmd(@Nullable Command<S> parentCmd, @NotNull MethodElement method) {
+    private static <S extends Source> boolean isIsAttachedDirectlySubCmdMethod(@Nullable Command<S> parentCmd, @NotNull MethodElement method) {
         boolean isAttachedDirectlySubCmd = false;
+
         if(method.isAnnotationPresent(SubCommand.class)) {
             isAttachedDirectlySubCmd = Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly();
-        } else if (method.isAnnotationPresent(Usage.class)) {
+        }
+        else if (method.isAnnotationPresent(Usage.class)) {
             var ann =  method.getParent().getAnnotation(SubCommand.class);
             if(ann != null) {
                 isAttachedDirectlySubCmd = ann.attachDirectly();
             }
-        }else {
-            if(parentCmd != null) {
-                method.getParent();
-                isAttachedDirectlySubCmd = parentCmd.mainUsage().isDefault();
+            else if(parentCmd != null) {
+                isAttachedDirectlySubCmd = parentCmd.getMainUsage().getParameters().isEmpty();
             }
         }
         return isAttachedDirectlySubCmd;
@@ -605,10 +612,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
 
         String name = parameter.getName();
-        boolean optional = flag != null || switchAnnotation != null
-            || parameter.isAnnotationPresent(Optional.class)
-            || parameter.isAnnotationPresent(Default.class)
-            || parameter.isAnnotationPresent(DefaultProvider.class);
+        boolean optional = parameter.isOptional();
 
         //reading suggestion annotation
         //element.debug();

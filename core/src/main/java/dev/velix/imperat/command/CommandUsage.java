@@ -204,7 +204,7 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     void setCooldownHandler(CooldownHandler<S> cooldownHandler);
 
     default boolean isDefault() {
-        return getParameters().isEmpty();
+        return getParameters().isEmpty() || getParameters().stream().noneMatch(CommandParameter::isRequired);
     }
 
     /**

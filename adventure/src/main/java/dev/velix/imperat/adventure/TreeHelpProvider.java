@@ -544,7 +544,7 @@ public class TreeHelpProvider<S extends Source> implements HelpProvider<S> {
 
         // Add the root command's usage if enabled
         if (config.isShowUsage()) {
-            String mainUsage = CommandUsage.format((String)null, command.mainUsage());
+            String mainUsage = CommandUsage.format((String)null, command.getMainUsage());
             if (!mainUsage.isEmpty()) {
                 Component usageComponent = Component.text(config.getUsagePrefix() + mainUsage, config.getUsageColor());
                 for (TextDecoration decoration : config.getUsageDecorations()) {
@@ -570,7 +570,7 @@ public class TreeHelpProvider<S extends Source> implements HelpProvider<S> {
         List<Command<S>> subCommands = new ArrayList<>(command.getSubCommands());
         if (subCommands.isEmpty()) {
             // No need to show usage again if we already showed it in the header and it's not empty
-            String mainUsage = CommandUsage.format((String)null, command.mainUsage());
+            String mainUsage = CommandUsage.format((String)null, command.getMainUsage());
             if (mainUsage.isEmpty() || !config.isShowUsage()) {
                 responseHandler.reply(source, Component.text(config.getNoCommandsMessage(), config.getHeaderColor()));
             }
@@ -615,7 +615,7 @@ public class TreeHelpProvider<S extends Source> implements HelpProvider<S> {
         List<Command<S>> children = new ArrayList<>(command.getSubCommands());
 
         if (config.isShowUsage()) {
-            usageComponent = formatUsage(command.mainUsage());
+            usageComponent = formatUsage(command.getMainUsage());
         }
 
         // Add description if enabled

@@ -65,7 +65,6 @@ public final class AnnotationHelper {
             paramsInstances[0] = context.getResolvedSource(firstParam.getType());
         }
 
-        //TODO fix bug for it
         for (int i = 1, p = 0; i < method.size(); i++, p++) {
             ParameterElement actualParameter = method.getParameterAt(i);
             assert actualParameter != null;

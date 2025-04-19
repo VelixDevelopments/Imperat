@@ -296,12 +296,12 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public void addUsage(CommandUsage<S> usage) {
         if (usage.isDefault()) {
-            return;
+            this.defaultUsage = usage;
         }
 
         usages.put(usage.getParameters(), usage);
 
-        if (mainUsage == null && usage.getMaxLength() >= 1 && !usage.hasParamType(Command.class)) {
+        if (mainUsage == null && !usage.isDefault() && usage.getMaxLength() >= 1 && !usage.hasParamType(Command.class)) {
             mainUsage = usage;
         }
 
@@ -345,10 +345,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
     /**
      * @return the usage that doesn't include any subcommands, only
-     * parameters
+     * required parameters
      */
     @Override
-    public @NotNull CommandUsage<S> mainUsage() {
+    public @NotNull CommandUsage<S> getMainUsage() {
         return Optional.ofNullable(mainUsage)
             .orElse(defaultUsage);
     }
@@ -396,15 +396,15 @@ final class CommandImpl<S extends Source> implements Command<S> {
         command.parent(this);
         registerSubCommand(command);
 
-        final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : mainUsage();
-        CommandUsage<S> combo = prime.mergeWithCommand(command, command.mainUsage());
+        final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
+        CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
         //adding the merged command usage
 
         //ImperatDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
         this.addUsage(combo);
 
         for (CommandUsage<S> subUsage : command.usages()) {
-            if (subUsage.equals(command.mainUsage())) continue;
+            if (subUsage.equals(command.getMainUsage())) continue;
             combo = prime.mergeWithCommand(command, subUsage);
             //adding the merged command usage
 
@@ -446,7 +446,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         if (attachDirectly) {
             position = position() + 1;
         } else {
-            CommandUsage<S> main = mainUsage();
+            CommandUsage<S> main = getMainUsage();
             position = this.position() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
         }
 

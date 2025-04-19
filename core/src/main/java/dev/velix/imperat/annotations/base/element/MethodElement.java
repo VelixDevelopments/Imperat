@@ -17,6 +17,8 @@ public final class MethodElement extends ParseElement<Method> {
 
     private final List<ParameterElement> parameters = new ArrayList<>();
     private int inputCount = 0;
+    private int optionalCount = 0;
+
     private boolean help = false;
 
     public <S extends Source> MethodElement(
@@ -37,6 +39,9 @@ public final class MethodElement extends ParseElement<Method> {
 
                 if(!parameterElement.isAnnotationPresent(ContextResolved.class)) {
                     inputCount++;
+                    if(parameterElement.isOptional()) {
+                        optionalCount++;
+                    }
                 }
 
                 if(!help && AnnotationHelper.isHelpParameter(parameterElement)) {
@@ -77,6 +82,10 @@ public final class MethodElement extends ParseElement<Method> {
 
     public int getInputCount() {
         return inputCount;
+    }
+
+    public boolean isAllOptionalInput() {
+        return inputCount == optionalCount;
     }
 
     public boolean isHelp() {

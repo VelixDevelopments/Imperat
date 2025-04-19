@@ -218,10 +218,10 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
 
     /**
      * @return the usage that doesn't include any subcommands, only
-     * parameters
+     * required parameters
      */
     @NotNull
-    CommandUsage<S> mainUsage();
+    CommandUsage<S> getMainUsage();
 
     /**
      * @return Returns {@link AutoCompleter}
