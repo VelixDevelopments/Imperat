@@ -73,6 +73,24 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     CommandTree<S> tree();
 
     /**
+     * Debugs or visualizes all tree nodes
+     * from {@link CommandTree}.
+     * If the command is not a root command,
+     * nothing will be visualized.
+     */
+    void visualizeTree();
+
+    /**
+     * Traverses the {@link CommandTree} linked to
+     * this command object, searching for the most suitable usage that
+     * best suites the context input by the user
+     *
+     * @param context the context of the execution
+     */
+    @NotNull
+    CommandDispatch<S> contextMatch(Context<S> context);
+
+    /**
      * Sets the aliases of a command
      *
      * @param aliases the aliases for te command to set
@@ -117,24 +135,6 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
         return this.name().equalsIgnoreCase(name) || this.aliases().contains(name.toLowerCase());
     }
 
-    /**
-     * Traverses the {@link CommandTree} linked to
-     * this command object, searching for the most suitable usage that
-     * best suites the context input by the user
-     *
-     * @param context the context of the execution
-     */
-    @NotNull
-    CommandDispatch<S> contextMatch(Context<S> context);
-
-
-    /**
-     * Debugs or visualizes all tree nodes
-     * from {@link CommandTree}.
-     * If the command is not a root command,
-     * nothing will be visualized.
-     */
-    void visualizeTree();
 
     /**
      * Sets a pre-processor for the command
