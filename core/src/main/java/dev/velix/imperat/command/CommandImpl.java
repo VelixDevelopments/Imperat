@@ -260,7 +260,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @return the {@link SuggestionResolver} for a resolving suggestion
      */
     @Override
-    public @Nullable SuggestionResolver<S> getSuggestionResolver() {
+    public @NotNull SuggestionResolver<S> getSuggestionResolver() {
         return suggestionResolver;
     }
 
