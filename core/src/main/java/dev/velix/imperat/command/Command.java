@@ -61,6 +61,24 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     @UnmodifiableView
     List<String> aliases();
 
+    /**
+     * Sets the aliases of a command
+     *
+     * @param aliases the aliases for te command to set
+     */
+    void addAliases(List<String> aliases);
+
+    /**
+     * Adds aliases for the command using an array of alias strings.
+     * <p>
+     * This method internally converts the array to a list and calls
+     * the {@code addAliases(List<String> aliases)} method to set the aliases.
+     * </p>
+     * @param aliases the array of alias strings to be added
+     */
+    default void addAliases(String... aliases) {
+        addAliases(List.of(aliases));
+    }
 
     /**
      * @param name the name used
@@ -93,25 +111,6 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      */
     @NotNull
     CommandDispatch<S> contextMatch(Context<S> context);
-
-    /**
-     * Sets the aliases of a command
-     *
-     * @param aliases the aliases for te command to set
-     */
-    void addAliases(List<String> aliases);
-
-    /**
-     * Adds aliases for the command using an array of alias strings.
-     * <p>
-     * This method internally converts the array to a list and calls
-     * the {@code addAliases(List<String> aliases)} method to set the aliases.
-     * </p>
-     * @param aliases the array of alias strings to be added
-     */
-    default void addAliases(String... aliases) {
-        addAliases(List.of(aliases));
-    }
 
 
     /**
@@ -192,6 +191,14 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      */
     @NotNull
     CommandUsage<S> getDefaultUsage();
+
+
+    /**
+     * Sets the default command usage representation.
+     *
+     * @param usage the default command usage instance to be set, which must not be null
+     */
+    void setDefaultUsage(@NotNull CommandUsage<S> usage);
 
     /**
      * @param execution sets what happens when there are no parameters
