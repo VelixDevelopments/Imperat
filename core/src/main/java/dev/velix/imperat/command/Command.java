@@ -56,16 +56,20 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     String name();
 
     /**
-     * @return The description of a command
-     */
-    @NotNull
-    Description description();
-
-    /**
      * @return The aliases for this commands
      */
     @UnmodifiableView
     List<String> aliases();
+
+
+    /**
+     * @param name the name used
+     * @return Whether this command has this name/alias
+     */
+    default boolean hasName(String name) {
+        return this.name().equalsIgnoreCase(name) || this.aliases().contains(name.toLowerCase());
+    }
+
 
     /**
      * @return The tree for the command
@@ -97,10 +101,32 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      */
     void addAliases(List<String> aliases);
 
+    /**
+     * Adds aliases for the command using an array of alias strings.
+     * <p>
+     * This method internally converts the array to a list and calls
+     * the {@code addAliases(List<String> aliases)} method to set the aliases.
+     * </p>
+     * @param aliases the array of alias strings to be added
+     */
     default void addAliases(String... aliases) {
         addAliases(List.of(aliases));
     }
 
+
+    /**
+     * @return The description of a command
+     */
+    @NotNull
+    Description description();
+
+    /**
+     * Retrieves the parameter type associated with the current command,
+     * including its name and any aliases.
+     *
+     * @return a ParameterType instance representing the command's parameter type,
+     *         encapsulating its name and aliases
+     */
     @Override
     default @NotNull ParameterType<S, ?> type() {
         return ParameterTypes.command(name(), aliases());
@@ -125,14 +151,6 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     @Override
     default @NotNull OptionalValueSupplier getDefaultValueSupplier() {
         return OptionalValueSupplier.of(name());
-    }
-
-    /**
-     * @param name the name used
-     * @return Whether this command has this name/alias
-     */
-    default boolean hasName(String name) {
-        return this.name().equalsIgnoreCase(name) || this.aliases().contains(name.toLowerCase());
     }
 
 
@@ -248,7 +266,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param attachDirectly whether the sub command's usage will be attached to
      *                       the main/default usage of the command directly or not
      *                       <p>
-     *                       if you have the command's default usage '/group' for example
+     *                       if you have the command's default usage '/group' for example,
      *                       and then you add the usage with attachDirectly being true, the usage
      *                       added will be in the form of "/command your subcommand param1 param2"
      *                       However, if you set attachDirectly to false, this will merge all the command's usages
