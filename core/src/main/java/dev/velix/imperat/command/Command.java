@@ -15,6 +15,7 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -152,6 +153,33 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
         return OptionalValueSupplier.of(name());
     }
 
+
+    /**
+     * Retrieves the HelpProvider instance associated with the current context.
+     *
+     * @return the HelpProvider instance of type S
+     */
+    @Nullable HelpProvider<S> getHelpProvider();
+
+
+    /**
+     * Sets the help provider for the current context. The provided help provider can be used
+     * to supply contextual help or assistance in various scenarios.
+     *
+     * @param helpProvider the help provider instance to set. Can be null to indicate
+     *                     that no help provider is to be used.
+     */
+    void setHelpProvider(@Nullable HelpProvider<S> helpProvider);
+
+
+    /**
+     * Determines whether a help provider is available.
+     *
+     * @return true if a help provider is present, false otherwise
+     */
+    default boolean hasHelpProvider() {
+        return getHelpProvider() != null;
+    }
 
     /**
      * Sets a pre-processor for the command
@@ -464,6 +492,11 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
 
         public Builder<S> usage(CommandUsage.Builder<S> usage) {
             cmd.addUsage(usage);
+            return this;
+        }
+
+        public Builder<S> helpProvider(HelpProvider<S> helpProvider) {
+            cmd.setHelpProvider(helpProvider);
             return this;
         }
 

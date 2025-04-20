@@ -9,6 +9,7 @@ import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Description;
 import dev.velix.imperat.annotations.Flag;
 import dev.velix.imperat.annotations.Greedy;
+import dev.velix.imperat.annotations.Help;
 import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.PostProcessor;
 import dev.velix.imperat.annotations.PreProcessor;
@@ -39,6 +40,7 @@ import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
@@ -145,6 +147,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         Permission permission = element.getAnnotation(Permission.class);
         Description description = element.getAnnotation(Description.class);
 
+        //help provider for this command
+        Help help = element.getAnnotation(Help.class);
+
         if (cmdAnnotation instanceof dev.velix.imperat.annotations.Command cmdAnn) {
             final String[] values = config.replacePlaceholders(cmdAnn.value());
             final List<String> aliases = List.of(values).subList(1, values.length);
@@ -171,6 +176,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             if (postProcessor != null) {
                 builder.postProcessor(loadPostProcessorInstance(postProcessor.value()));
+            }
+
+            if(help != null) {
+                builder.helpProvider(loadHelpProviderInstance(help.value()));
             }
 
             return builder.build();
@@ -206,6 +215,10 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                 builder.postProcessor(loadPostProcessorInstance(postProcessor.value()));
             }
 
+            if(help != null) {
+                builder.helpProvider(loadHelpProviderInstance(help.value()));
+            }
+
             return builder.build();
         }
         return null;
@@ -226,6 +239,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (parentCmd != null && cmd != null) {
             cmd.parent(parentCmd);
         }
+
         if (parseElement instanceof MethodElement method && cmd != null) {
             //@CommandProcessingChain on method
             if (!methodSelector.canBeSelected(imperat, parser, method, true)) {
@@ -335,72 +349,25 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private HelpProvider<S> loadHelpProviderInstance(Class<? extends HelpProvider<?>> clazz) {
+        var constructor = Reflections.getConstructor(clazz);
+        if (constructor == null)
+            throw new UnsupportedOperationException("Couldn't find constructor in class `" + clazz.getSimpleName() + "`");
+
+        try {
+            return (HelpProvider<S>) constructor.newInstance();
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private CommandUsage<S> loadUsage(
         @Nullable Command<S> parentCmd,
         @NotNull Command<S> loadedCmd,
         MethodElement method
     ) {
-        /*boolean isAttachedDirectlySubCommandMethod = isIsAttachedDirectlySubCmdMethod(parentCmd, method);
-
-        int inputCount = method.getInputCount();
-
-        ImperatDebugger.debugForTesting("The method-usage '%s' in class '%s', has '%s' default input count", method.getName(),
-                method.getParent().getName(), inputCount);
-
-        if (parentCmd != null) {
-            ImperatDebugger.debug("Found subcommand method usage '%s' in class '%s' with parent '%s'", method.getName(),
-                    method.getParent().getName(), parentCmd.name());
-            int parentalParams = 0;
-
-            if (!isAttachedDirectlySubCommandMethod) {
-                ImperatDebugger.debugForTesting("Going in deep for method '%s'", method.getName() );
-                Command<S> parent = parentCmd;
-                while (parent != null) {
-                    parentalParams += parent.getMainUsage().size();
-                    parent = parent.parent();
-                }
-            }
-
-            inputCount = Math.abs(method.getInputCount() - parentalParams);
-        }else if(method.isAllOptionalInput()){
-            //The command class owning the method doesnt have a parent(root),
-            // and the method params are all optional.
-            // Handling it as a default usage
-            ImperatDebugger.debug("Parent is null for cmd '%s', resetting input count", loadedCmd.name());
-            inputCount = 0;
-        }*/
-
-        //ImperatDebugger.debugForTesting("The method-usage '%s', has '%s' calculated input count", method.getName(), inputCount);
-        /*if (inputCount == 0) {
-            MethodUsageData<S> usageData = loadParameters(method, parentCmd);
-            loadedCmd.addUsage();
-            if (parentCmd != null && !isAttachedDirectlySubCommandMethod) {
-                loadedCmd.setDefaultUsageExecution(
-                    MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters())
-                );
-
-            } else {
-
-                List<CommandParameter<S>> params = method.isAllOptionalInput() ? usageData.personalParameters() : Collections.emptyList();
-                loadedCmd.setDefaultUsageExecution(
-                    MethodCommandExecutor.of(imperat, method, params)
-                );
-            }
-            Cooldown cooldown = method.getAnnotation(Cooldown.class);
-            Async async = method.getAnnotation(Async.class);
-
-            if(cooldown != null) {
-                String cooldownPerm = cooldown.permission();
-                loadedCmd.getDefaultUsage().setCooldown(cooldown.value(), cooldown.unit(), cooldownPerm.isEmpty() ? null : cooldownPerm);
-            }
-            if(async != null) {
-                loadedCmd.getDefaultUsage().setCoordinator(CommandCoordinator.async());
-            }
-
-            return null;
-        }*/
-
         MethodUsageData<S> usageData = loadParameters(method, parentCmd);
 
         var execution = MethodCommandExecutor.of(imperat, method, usageData.inheritedTotalParameters());
@@ -591,10 +558,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         //Parameter parameter = element.getElement();
 
         if(parameter.isContextResolved()) {
-            ImperatDebugger.debug("Found param '%s' for context resolving !", parameter.getType().getTypeName());
             return null;
-        }else {
-            ImperatDebugger.debug("Loading parameter '%s'", parameter.getType().getTypeName());
         }
 
         Flag flag = parameter.getAnnotation(Flag.class);
@@ -606,7 +570,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         TypeWrap<T> parameterTypeWrap = (TypeWrap<T>) TypeWrap.of(parameter.getElement().getParameterizedType());
         var type = (ParameterType<S, T>) config.getParameterType(parameterTypeWrap.getType());
-        if (type == null && !parameter.isContextResolved()) {
+        if (type == null) {
             throw new IllegalArgumentException("Unknown type detected '" + parameterTypeWrap.getType().getTypeName() + "'");
         }
 

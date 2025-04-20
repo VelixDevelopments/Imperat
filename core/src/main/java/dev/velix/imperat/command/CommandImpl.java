@@ -14,6 +14,7 @@ import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
@@ -52,10 +53,11 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private CommandUsage<S> defaultUsage;
     private @Nullable CommandPreProcessor<S> preProcessor;
     private @Nullable CommandPostProcessor<S> postProcessor;
-    private Command<S> parent;
+    private @Nullable HelpProvider<S> helpProvider;
+    private @Nullable Command<S> parent;
 
-    private final SuggestionResolver<S> suggestionResolver;
-    private final Set<FlagData<S>> freeFlags = new HashSet<>();
+    private final @NotNull SuggestionResolver<S> suggestionResolver;
+    private final @NotNull Set<FlagData<S>> freeFlags = new HashSet<>();
 
     CommandImpl(String name) {
         this(null, name);
@@ -134,6 +136,28 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public void position(int position) {
         throw new UnsupportedOperationException("You can't modify the position of a command");
+    }
+
+    /**
+     * Retrieves the HelpProvider instance associated with the current context.
+     *
+     * @return the HelpProvider instance of type S
+     */
+    @Override
+    public @Nullable HelpProvider<S> getHelpProvider() {
+        return helpProvider;
+    }
+
+    /**
+     * Sets the help provider for the current context. The provided help provider can be used
+     * to supply contextual help or assistance in various scenarios.
+     *
+     * @param helpProvider the help provider instance to set. Can be null to indicate
+     *                     that no help provider is to be used.
+     */
+    @Override
+    public void setHelpProvider(@Nullable HelpProvider<S> helpProvider) {
+        this.helpProvider = helpProvider;
     }
 
     @Override
@@ -276,6 +300,16 @@ final class CommandImpl<S extends Source> implements Command<S> {
     @Override
     public @NotNull CommandUsage<S> getDefaultUsage() {
         return defaultUsage;
+    }
+
+    /**
+     * Sets the default command usage representation.
+     *
+     * @param usage the default command usage instance to be set, which must not be null
+     */
+    @Override
+    public void setDefaultUsage(@NotNull CommandUsage<S> usage) {
+        this.defaultUsage = Objects.requireNonNull(usage, "Default usage cannot be null");
     }
 
     /**

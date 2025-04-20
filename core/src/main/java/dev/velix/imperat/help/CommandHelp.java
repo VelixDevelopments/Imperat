@@ -25,7 +25,9 @@ public final class CommandHelp {
 
     public <S extends Source> void display(S source) {
         try {
-            HelpProvider<S> provider = (HelpProvider<S>) dispatcher.getHelpProvider();
+
+            HelpProvider<S> provider = (HelpProvider<S>)
+                    (context.command().hasHelpProvider() ?  context.command().getHelpProvider() : dispatcher.getHelpProvider());
             if (provider != null) {
                 provider.provide((ExecutionContext<S>) context, source);
             }
