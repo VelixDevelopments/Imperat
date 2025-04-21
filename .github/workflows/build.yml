@@ -40,7 +40,7 @@ jobs:
           SNAPSHOT_BUILD: true
         run: |
           chmod +x ./gradlew
-          ./gradlew publishAllPublicationsToMavenCentralRepository --info
+          ./gradlew publishAndReleaseToMavenCentral --info
 
       - name: 🧪 Gradle Test (No Publish)
         if: ${{ steps.publish_snapshot.outcome != 'success' && steps.publish_snapshot.outcome != 'failure' }}
