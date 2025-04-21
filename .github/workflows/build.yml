@@ -27,7 +27,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: 🧪 Gradle Test
+        env:
+          SNAPSHOT_BUILD: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
+          echo "### Build Type: $([[ \"$SNAPSHOT_BUILD\" == \"true\" ]] && echo \"📦 Snapshot\" || echo \"🧪 Regular\")" >> $GITHUB_STEP_SUMMARY
           chmod +x ./gradlew
           ./gradlew test --info
 
