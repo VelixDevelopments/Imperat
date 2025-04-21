@@ -4,7 +4,6 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Method;
@@ -32,7 +31,7 @@ public final class MethodElement extends ParseElement<Method> {
             var parameter = params[i];
             //TODO debug this !
             ParameterElement parameterElement = new ParameterElement(registry, owningElement, this, parameter);
-            ImperatDebugger.debug("Adding param '%s' to method '%s'", parameterElement.getName(), this.getName());
+            //ImperatDebugger.debug("Adding param '%s' to method '%s'", parameterElement.getName(), this.getName());
             parameters.add(parameterElement);
             if (i > 0 ) {
 

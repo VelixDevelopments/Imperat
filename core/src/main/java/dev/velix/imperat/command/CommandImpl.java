@@ -425,7 +425,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.parent = parent;
     }
 
-    private void registerSubCommand(Command<S> command) {
+    @Override
+    public void registerSubCommand(Command<S> command) {
         children.put(command.name(), command);
     }
 

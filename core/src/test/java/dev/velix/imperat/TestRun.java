@@ -12,6 +12,7 @@ import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.EmptyCmd;
 import dev.velix.imperat.commands.MyCustomAnnotation;
 import dev.velix.imperat.commands.Test2Command;
+import dev.velix.imperat.commands.Test3Command;
 import dev.velix.imperat.commands.TestCustomAnnotationCmd;
 import dev.velix.imperat.commands.annotations.FirstOptionalArgumentCmd;
 import dev.velix.imperat.commands.annotations.KitCommand;
@@ -438,6 +439,38 @@ public class TestRun {
 
         Assertions.assertDoesNotThrow(()-> {
             Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("foa", "1 sub 2"));
+        });
+    }
+
+    @Test
+    public void testEmptyAttachmentSubToDefaultWithOneOptionalArg() {
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new Test3Command());
+        });
+
+        var cmd = IMPERAT.getCommand("test3");
+        Assertions.assertNotNull(cmd);
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test3", ""));
+        });
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test3", "hello-world"));
+        });
+
+
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("test3", "hello-world sub"));
+        });
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("test3", "hello-world sub HI_BRO"));
+        });
+
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test3", "sub"));
+        });
+
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test3", "sub HI_BRO"));
         });
     }
 }

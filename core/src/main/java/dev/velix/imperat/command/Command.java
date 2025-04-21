@@ -444,6 +444,9 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
                         List<CommandParameter<S>> params,
                         CommandExecution<S> helpExecution);
 
+    @ApiStatus.Internal
+    void registerSubCommand(Command<S> subCommand);
+
 
     class Builder<S extends Source> {
 

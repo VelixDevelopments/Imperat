@@ -182,7 +182,7 @@ public final class AnnotationHelper {
     ) throws ImperatException {
 
         if (defaultAnnotation != null) {
-            ImperatDebugger.debug("Went in @Default checker, found def value '%s'", defaultAnnotation.value());
+            //ImperatDebugger.debug("Went in @Default checker, found def value '%s'", defaultAnnotation.value());
             String def = defaultAnnotation.value();
             return OptionalValueSupplier.of(def);
         } else if (provider != null) {

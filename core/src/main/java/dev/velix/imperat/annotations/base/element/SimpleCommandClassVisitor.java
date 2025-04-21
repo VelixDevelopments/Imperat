@@ -274,17 +274,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                     if(method.isAnnotationPresent(SubCommand.class)) {
                         var subAnn = method.getAnnotation(SubCommand.class);
                         assert subAnn != null;
-
-                        String subName = subAnn.value()[0];
-                        Command<S> subCommand = cmd.getSubCommand(subName);
-                        if(subCommand != null) {
-                            subCommand.addUsage(loadUsage(cmd, subCommand, method));
-                        }
-                        else {
-                            subCommand = loadCommand(cmd, method, subAnn);
-                            cmd.addSubCommand(subCommand, extractAttachmentMode(commandClass, subAnn));
-                        }
-
+                        cmd.addSubCommand(loadCommand(cmd, method, subAnn),  extractAttachmentMode(commandClass, subAnn));
                     }
 
                     if(method.isAnnotationPresent(Usage.class)) {

@@ -29,12 +29,13 @@ public final class AnnotatedGroupCommand {
 
     @SubCommand(value = "help", attachment = AttachmentMode.DEFAULT)
     public void help(TestSource source, CommandHelp help) {
+        // /group help
         help.display(source);
     }
 
     @SubCommand("setperm")
     @Permission("command.group.setperm")
-    public void setPermission(TestSource source,
+    public void setGroupPermission(TestSource source,
                               @Named("group") Group group,
                               @Named("permission") String permission) {
         // /group <group> setperm <permission>
