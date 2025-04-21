@@ -26,11 +26,26 @@ jobs:
       - name: 📐 Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: 🧪 Gradle Test
-        env:
-          SNAPSHOT_BUILD: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      - name: 🔍 Should create a snapshot?
         run: |
+          SNAPSHOT=$(./gradlew -q printReleaseSnapshots | grep releaseSnapshots | cut -d'=' -f2)
+          echo "RELEASE_SNAPSHOTS=$SNAPSHOT" >> $GITHUB_ENV
           echo "### Build Type: $([[ \"$SNAPSHOT_BUILD\" == \"true\" ]] && echo \"📦 Snapshot\" || echo \"🧪 Regular\")" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🚀 Gradle Snapshot
+        id: publish_snapshot
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && env.RELEASE_SNAPSHOTS == 'true' }}
+        env:
+          SNAPSHOT_BUILD: true
+        run: |
+          chmod +x ./gradlew
+          ./gradlew publishAllPublicationsToMavenCentralRepository --info
+
+      - name: 🧪 Gradle Test (No Publish)
+        if: ${{ steps.publish_snapshot.outcome != 'success' && steps.publish_snapshot.outcome != 'failure' }}
+        env:
+          SNAPSHOT_BUILD: false
+        run: |
           chmod +x ./gradlew
           ./gradlew test --info
 
