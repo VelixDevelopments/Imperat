@@ -2,7 +2,6 @@ package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
-import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Flag;
@@ -69,7 +68,7 @@ public final class AnnotationHelper {
             ParameterElement actualParameter = method.getParameterAt(i);
             assert actualParameter != null;
 
-            if(actualParameter.isAnnotationPresent(ContextResolved.class)) {
+            if(actualParameter.isContextResolved()) {
                 ImperatDebugger.debug("param an actual context param, '%s'", actualParameter.getName());
                 var contextResolver = dispatcher.config().getMethodParamContextResolver(actualParameter);
 
