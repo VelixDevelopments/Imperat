@@ -9,6 +9,7 @@ import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.SubCommand;
 import dev.velix.imperat.annotations.Suggest;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.command.AttachmentMode;
 import dev.velix.imperat.commands.annotations.examples.Group;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.util.ImperatDebugger;
@@ -36,7 +37,7 @@ public class TestCommand {
         source.reply("Other-text= " + text);
     }
 
-    @SubCommand(value = "help", attachDirectly = true)
+    @SubCommand(value = "help", attachment = AttachmentMode.DEFAULT)
     public void help(TestSource source, CommandHelp help) {
         help.display(source);
         source.reply("executed /test help");

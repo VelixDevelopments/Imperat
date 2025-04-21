@@ -6,6 +6,7 @@ import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.SubCommand;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.command.AttachmentMode;
 import dev.velix.imperat.help.CommandHelp;
 
 @Command("group")
@@ -26,7 +27,7 @@ public final class AnnotatedGroupCommand {
         source.reply("entered group name= " + group.name());
     }
 
-    @SubCommand(value = "help", attachDirectly = true)
+    @SubCommand(value = "help", attachment = AttachmentMode.DEFAULT)
     public void help(TestSource source, CommandHelp help) {
         help.display(source);
     }

@@ -314,13 +314,13 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     default void addSubCommandUsage(String subCommand,
                                     List<String> aliases,
                                     CommandUsage.Builder<S> usage) {
-        addSubCommandUsage(subCommand, aliases, usage, AttachmentMode.DEFAULT);
+        addSubCommandUsage(subCommand, aliases, usage, AttachmentMode.MAIN);
     }
 
     default void addSubCommandUsage(String subCommand,
                                     CommandUsage.Builder<S> usage,
-                                    boolean attachDirectly) {
-        addSubCommandUsage(subCommand, Collections.emptyList(), usage, AttachmentMode.DEFAULT);
+                                    AttachmentMode attachmentMode) {
+        addSubCommandUsage(subCommand, Collections.emptyList(), usage, attachmentMode);
     }
 
     /**
@@ -331,7 +331,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param usage      the usage
      */
     default void addSubCommandUsage(String subCommand, CommandUsage.Builder<S> usage) {
-        addSubCommandUsage(subCommand, usage, false);
+        addSubCommandUsage(subCommand, usage,  AttachmentMode.MAIN);
     }
 
     /**

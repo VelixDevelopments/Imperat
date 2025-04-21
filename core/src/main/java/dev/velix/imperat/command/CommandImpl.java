@@ -569,7 +569,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             CommandUsage.<S>builder()
                 .parameters(params)
                 .execute(helpExecution),
-            true
+            AttachmentMode.MAIN
         );
     }
 

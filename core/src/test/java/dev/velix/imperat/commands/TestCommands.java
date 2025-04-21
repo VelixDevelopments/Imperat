@@ -2,6 +2,7 @@ package dev.velix.imperat.commands;
 
 import dev.velix.imperat.TestRun;
 import dev.velix.imperat.TestSource;
+import dev.velix.imperat.command.AttachmentMode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -71,7 +72,7 @@ public final class TestCommands {
                         TestRun.USAGE_EXECUTED = true;
                     })
 
-            ).build(), true
+            ).build(), AttachmentMode.MAIN
         )
         .build();
 
