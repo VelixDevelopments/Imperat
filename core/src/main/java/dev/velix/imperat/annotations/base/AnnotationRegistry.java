@@ -8,7 +8,9 @@ import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Description;
 import dev.velix.imperat.annotations.Flag;
+import dev.velix.imperat.annotations.GlobalAttachmentMode;
 import dev.velix.imperat.annotations.Greedy;
+import dev.velix.imperat.annotations.Help;
 import dev.velix.imperat.annotations.Inherit;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Optional;
@@ -44,7 +46,7 @@ final class AnnotationRegistry {
             Cooldown.class, Description.class, Permission.class,
             Suggest.class, SuggestionProvider.class, Default.class, DefaultProvider.class, Values.class,
             Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, ContextResolved.class, Range.class, Async.class,
-            PostProcessor.class, PreProcessor.class
+            PostProcessor.class, PreProcessor.class, Help.class, GlobalAttachmentMode.class
         );
     }
 
