@@ -1,0 +1,38 @@
+package dev.velix.imperat.command;
+
+/**
+ * Defines the modes of attachment for a subcommand within a {@link Command}.
+ * This enum determines how a subcommand integrates with the usages of a command,
+ * based on the specified attachment mode.
+ */
+public enum AttachmentMode {
+
+    /**
+     * Attaches the subcommand to an empty usage of the {@link Command}
+     */
+    EMPTY(false),
+
+    /**
+     * Attaches the subcommand to the default usage of a {@link Command},
+     * which may be empty or contain optional arguments/parameters.
+     */
+    DEFAULT(true),
+
+    /**
+     * Attaches the sub command to the main {@link CommandUsage} of a {@link Command}
+     * A main usage is a usage that contains required arguments/parameters.
+     */
+    MAIN(true),
+    ;
+
+    private final boolean requiresParameterInheritance;
+
+    AttachmentMode(boolean requiresParameterInheritance) {
+        this.requiresParameterInheritance = requiresParameterInheritance;
+    }
+
+
+    public boolean requiresParameterInheritance() {
+        return requiresParameterInheritance;
+    }
+}

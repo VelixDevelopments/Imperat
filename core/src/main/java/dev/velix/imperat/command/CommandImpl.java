@@ -55,7 +55,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private @Nullable CommandPostProcessor<S> postProcessor;
     private @Nullable HelpProvider<S> helpProvider;
     private @Nullable Command<S> parent;
-
+    private final CommandUsage<S> emptyUsage;
     private final @NotNull SuggestionResolver<S> suggestionResolver;
     private final @NotNull Set<FlagData<S>> freeFlags = new HashSet<>();
 
@@ -78,6 +78,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.commandTree = parent != null ? null : CommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
         this.suggestionResolver = SuggestionResolver.forCommand(this);
+        this.emptyUsage = CommandUsage.<S>builder().build(this);
     }
 
     /**
@@ -236,6 +237,16 @@ final class CommandImpl<S extends Source> implements Command<S> {
         }
 
         return true;
+    }
+
+    /**
+     * Retrieves a usage with no args for this command
+     *
+     * @return A usage with empty parameters.
+     */
+    @Override 
+    public @NotNull CommandUsage<S> getEmptyUsage() {
+        return emptyUsage;
     }
 
     /**
@@ -422,15 +433,22 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * Injects a created-subcommand directly into the parent's command usages.
      *
      * @param command        the subcommand to inject
-     * @param attachDirectly whether the sub command's usage will be attached to
-     *                       the main/default usage of the command directly or not
+     * @param attachmentMode see {@link AttachmentMode}
      */
     @Override
-    public void addSubCommand(Command<S> command, boolean attachDirectly) {
+    public void addSubCommand(Command<S> command, AttachmentMode attachmentMode) {
         command.parent(this);
         registerSubCommand(command);
 
-        final CommandUsage<S> prime = attachDirectly ? getDefaultUsage() : getMainUsage();
+
+
+        final CommandUsage<S> prime;
+        switch (attachmentMode) {
+            case EMPTY -> prime = getEmptyUsage();
+            case MAIN -> prime = getMainUsage();
+            case DEFAULT -> prime = getDefaultUsage();
+            default -> throw new IllegalArgumentException("Unknown attachment mode: " + attachmentMode);
+        }
         CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
         //adding the merged command usage
 
@@ -449,38 +467,19 @@ final class CommandImpl<S extends Source> implements Command<S> {
         }
 
     }
-
-    /**
-     * Creates and adds a new sub-command (if it doesn't exist) then add
-     * the {@link CommandUsage} to the sub-command
-     *
-     * @param subCommand     the sub-command's unique name
-     * @param aliases        of the subcommand
-     * @param usage          the usage
-     * @param attachDirectly whether the sub command's usage will be attached to
-     *                       the main/default usage of the command directly or not
-     *                       <p>
-     *                       if you have the command's default usage '/group' for example
-     *                       and then you add the usage with attachDirectly being true, the usage
-     *                       added will be in the form of "/command your subcommand param1 param2"
-     *                       However, if you set attachDirectly to false, this will merge all the command's usages
-     *                       automatically with the subcommand's usage, so if your command has a usage of '/command param1'
-     *                       then the final usage will be : "/command param1 your subcommand param2, param3"
-     *
-     *                       </p>
-     */
+    
     @Override
     public void addSubCommandUsage(
         String subCommand,
         List<String> aliases,
         CommandUsage.Builder<S> usage,
-        boolean attachDirectly
+        AttachmentMode attachmentMode
     ) {
         int position;
-        if (attachDirectly) {
+        if (attachmentMode == AttachmentMode.EMPTY) {
             position = position() + 1;
         } else {
-            CommandUsage<S> main = getMainUsage();
+            CommandUsage<S> main = attachmentMode == AttachmentMode.MAIN ? getMainUsage() : getDefaultUsage();
             position = this.position() + (main.getMinLength() == 0 ? 1 : main.getMinLength());
         }
 
@@ -490,7 +489,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
                 .aliases(aliases)
                 .usage(usage)
                 .build();
-        addSubCommand(subCmd, attachDirectly);
+        addSubCommand(subCmd, attachmentMode);
     }
 
     /**

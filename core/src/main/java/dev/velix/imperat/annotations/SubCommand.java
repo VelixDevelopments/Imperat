@@ -1,5 +1,7 @@
 package dev.velix.imperat.annotations;
 
+import dev.velix.imperat.command.AttachmentMode;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -13,5 +15,5 @@ public @interface SubCommand {
 
     boolean skipSuggestionsChecks() default false;
 
-    boolean attachDirectly() default false;
+    AttachmentMode attachment() default AttachmentMode.DEFAULT;
 }

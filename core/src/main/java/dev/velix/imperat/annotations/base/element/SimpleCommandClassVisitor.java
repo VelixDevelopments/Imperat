@@ -280,7 +280,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         }
                         else {
                             subCommand = loadCommand(cmd, method, subAnn);
-                            cmd.addSubCommand(subCommand, subAnn.attachDirectly());
+                            cmd.addSubCommand(subCommand, subAnn.attachment());
                         }
 
                     }
@@ -309,7 +309,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         SubCommand subCommandAnn = innerClass.getAnnotation(SubCommand.class);
                         assert subCommandAnn != null;
                         cmd.addSubCommand(
-                            loadCommand(cmd, innerClass, subCommandAnn), subCommandAnn.attachDirectly()
+                            loadCommand(cmd, innerClass, subCommandAnn), subCommandAnn.attachment()
                         );
                     }
 
@@ -416,9 +416,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
 
-        boolean isAttachedDirectlySubCmd = isIsAttachedDirectlySubCmdMethod(parentCmd, method);
+        boolean doesRequireParameterInheritance = doesRequireParameterInheritance(parentCmd, method);
 
-        if (!isAttachedDirectlySubCmd) {
+        if (doesRequireParameterInheritance(parentCmd, method)) {
             LinkedList<Command<S>> parenteralSequence = getParenteralSequence(parentCmd);
             for(Command<S> parent : parenteralSequence) {
                 parent.getMainUsage().getParameters()
@@ -442,7 +442,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
         ParameterElement senderParam = null;
 
-        if(!isAttachedDirectlySubCmd && originalMethodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
+        if(doesRequireParameterInheritance && originalMethodParameters.size()-1 == 0 && !mainUsageParameters.isEmpty() && parentCmd != null) {
             throw new IllegalStateException("You have inherited parameters ('%s') that are not declared in the method '%s' in class '%s'".formatted(inheritedParamsFormatted, method.getName(), method.getParent().getName()));
         }
 
@@ -500,22 +500,22 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         return new MethodUsageData<>(personalMethodInputParameters, totalMethodParameters, freeFlags);
     }
 
-    private static <S extends Source> boolean isIsAttachedDirectlySubCmdMethod(@Nullable Command<S> parentCmd, @NotNull MethodElement method) {
-        boolean isAttachedDirectlySubCmd = false;
+    private static <S extends Source> boolean doesRequireParameterInheritance(@Nullable Command<S> parentCmd, @NotNull MethodElement method) {
+        boolean requiresParameterInheritance = false;
 
         if(method.isAnnotationPresent(SubCommand.class)) {
-            isAttachedDirectlySubCmd = Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachDirectly();
+            requiresParameterInheritance = Objects.requireNonNull(method.getAnnotation(SubCommand.class)).attachment().requiresParameterInheritance();
         }
         else if (method.isAnnotationPresent(Usage.class)) {
             var ann =  method.getParent().getAnnotation(SubCommand.class);
             if(ann != null) {
-                isAttachedDirectlySubCmd = ann.attachDirectly();
+                requiresParameterInheritance = ann.attachment().requiresParameterInheritance();
             }
             else if(parentCmd != null) {
-                isAttachedDirectlySubCmd = parentCmd.getMainUsage().getParameters().isEmpty();
+                requiresParameterInheritance = parentCmd.getMainUsage().getParameters().isEmpty();
             }
         }
-        return isAttachedDirectlySubCmd;
+        return requiresParameterInheritance;
     }
 
     private boolean isSenderParameter(ParameterElement parameter) {

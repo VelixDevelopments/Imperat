@@ -214,6 +214,13 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     boolean postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
 
     /**
+     * Retrieves a usage with no args for this command
+     * @return A usage with empty parameters.
+     */
+    @NotNull
+    CommandUsage<S> getEmptyUsage();
+
+    /**
      * @return the default usage of the command
      * without any args
      */
@@ -286,10 +293,9 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * Injects a created-subcommand directly into the parent's command usages.
      *
      * @param command        the subcommand to inject
-     * @param attachDirectly whether the sub command's usage will be attached to
-     *                       the main/default usage of the command directly or not
+     * @param attachmentMode see {@link AttachmentMode}
      */
-    void addSubCommand(Command<S> command, boolean attachDirectly);
+    void addSubCommand(Command<S> command, AttachmentMode attachmentMode);
 
     /**
      * Creates and adds a new sub-command (if it doesn't exist) then add
@@ -298,32 +304,23 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param subCommand     the sub-command's unique name
      * @param aliases        of the subcommand
      * @param usage          the usage
-     * @param attachDirectly whether the sub command's usage will be attached to
-     *                       the main/default usage of the command directly or not
-     *                       <p>
-     *                       if you have the command's default usage '/group' for example,
-     *                       and then you add the usage with attachDirectly being true, the usage
-     *                       added will be in the form of "/command your subcommand param1 param2"
-     *                       However, if you set attachDirectly to false, this will merge all the command's usages
-     *                       automatically with the subcommand's usage, so if your command has a usage of '/command param1'
-     *                       then the final usage will be : "/command param1 your subcommand param2, param3"
-     *                       </p>
+     * @param attachmentMode see {@link AttachmentMode}
      */
     void addSubCommandUsage(String subCommand,
                             List<String> aliases,
                             CommandUsage.Builder<S> usage,
-                            boolean attachDirectly);
+                            AttachmentMode attachmentMode);
 
     default void addSubCommandUsage(String subCommand,
                                     List<String> aliases,
                                     CommandUsage.Builder<S> usage) {
-        addSubCommandUsage(subCommand, aliases, usage, false);
+        addSubCommandUsage(subCommand, aliases, usage, AttachmentMode.DEFAULT);
     }
 
     default void addSubCommandUsage(String subCommand,
                                     CommandUsage.Builder<S> usage,
                                     boolean attachDirectly) {
-        addSubCommandUsage(subCommand, Collections.emptyList(), usage, attachDirectly);
+        addSubCommandUsage(subCommand, Collections.emptyList(), usage, AttachmentMode.DEFAULT);
     }
 
     /**
@@ -500,26 +497,26 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
             return this;
         }
 
-        public Builder<S> subCommand(Command<S> subCommand, boolean attachDirectly) {
-            cmd.addSubCommand(subCommand, attachDirectly);
+        public Builder<S> subCommand(Command<S> subCommand, AttachmentMode attachmentMode) {
+            cmd.addSubCommand(subCommand, attachmentMode);
             return this;
         }
 
         public Builder<S> subCommand(Command<S> subCommand) {
-            return subCommand(subCommand, false);
+            return subCommand(subCommand, AttachmentMode.DEFAULT);
         }
 
-        public Builder<S> subCommand(String name, CommandUsage.Builder<S> mainUsage, boolean attachDirectly) {
+        public Builder<S> subCommand(String name, CommandUsage.Builder<S> mainUsage, AttachmentMode attachmentMode) {
             return subCommand(
                 Command.<S>create(name)
                     .usage(mainUsage)
                     .build(),
-                attachDirectly
+                attachmentMode
             );
         }
 
         public Builder<S> subCommand(String name, CommandUsage.Builder<S> mainUsage) {
-            return subCommand(name, mainUsage, false);
+            return subCommand(name, mainUsage, AttachmentMode.DEFAULT);
         }
 
         public Builder<S> preProcessor(CommandPreProcessor<S> preProcessor) {
