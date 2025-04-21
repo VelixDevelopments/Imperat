@@ -218,6 +218,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @return A usage with empty parameters.
      */
     @NotNull
+    @ApiStatus.AvailableSince("1.9.0")
     CommandUsage<S> getEmptyUsage();
 
     /**
@@ -225,6 +226,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * without any args
      */
     @NotNull
+    @ApiStatus.AvailableSince("1.9.0")
     CommandUsage<S> getDefaultUsage();
 
 
@@ -233,6 +235,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      *
      * @param usage the default command usage instance to be set, which must not be null
      */
+    @ApiStatus.AvailableSince("1.9.0")
     void setDefaultUsage(@NotNull CommandUsage<S> usage);
 
     /**
@@ -445,6 +448,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
                         CommandExecution<S> helpExecution);
 
     @ApiStatus.Internal
+    @ApiStatus.AvailableSince("1.9.0")
     void registerSubCommand(Command<S> subCommand);
 
 
@@ -495,6 +499,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
             return this;
         }
 
+        @ApiStatus.AvailableSince("1.9.0")
         public Builder<S> helpProvider(HelpProvider<S> helpProvider) {
             cmd.setHelpProvider(helpProvider);
             return this;

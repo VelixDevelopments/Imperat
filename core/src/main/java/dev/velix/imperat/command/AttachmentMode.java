@@ -1,10 +1,13 @@
 package dev.velix.imperat.command;
 
+import org.jetbrains.annotations.ApiStatus;
+
 /**
  * Defines the modes of attachment for a subcommand within a {@link Command}.
  * This enum determines how a subcommand integrates with the usages of a command,
  * based on the specified attachment mode.
  */
+@ApiStatus.AvailableSince("1.9.0")
 public enum AttachmentMode {
 
 

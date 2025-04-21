@@ -1,6 +1,7 @@
 package dev.velix.imperat.annotations;
 
 import dev.velix.imperat.help.HelpProvider;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
+@ApiStatus.AvailableSince("1.9.0")
 public @interface Help {
 
     /**
