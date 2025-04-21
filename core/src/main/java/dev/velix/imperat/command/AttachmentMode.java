@@ -7,6 +7,7 @@ package dev.velix.imperat.command;
  */
 public enum AttachmentMode {
 
+
     /**
      * Attaches the subcommand to an empty usage of the {@link Command}
      */
@@ -23,6 +24,12 @@ public enum AttachmentMode {
      * A main usage is a usage that contains required arguments/parameters.
      */
     MAIN(true),
+
+    /**
+     * Behaves exactly like {@link AttachmentMode#MAIN},
+     * It's used internally to know when to prefer the global attachment mode over the per subcommand one.
+     */
+    UNSET(true),
     ;
 
     private final boolean requiresParameterInheritance;

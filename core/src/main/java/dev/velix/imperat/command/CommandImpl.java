@@ -440,12 +440,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
         command.parent(this);
         registerSubCommand(command);
 
-
-
         final CommandUsage<S> prime;
         switch (attachmentMode) {
             case EMPTY -> prime = getEmptyUsage();
-            case MAIN -> prime = getMainUsage();
+            case MAIN, UNSET -> prime = getMainUsage();
             case DEFAULT -> prime = getDefaultUsage();
             default -> throw new IllegalArgumentException("Unknown attachment mode: " + attachmentMode);
         }

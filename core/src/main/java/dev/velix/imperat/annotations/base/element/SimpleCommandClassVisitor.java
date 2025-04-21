@@ -8,6 +8,7 @@ import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.DefaultProvider;
 import dev.velix.imperat.annotations.Description;
 import dev.velix.imperat.annotations.Flag;
+import dev.velix.imperat.annotations.GlobalAttachmentMode;
 import dev.velix.imperat.annotations.Greedy;
 import dev.velix.imperat.annotations.Help;
 import dev.velix.imperat.annotations.Permission;
@@ -26,6 +27,7 @@ import dev.velix.imperat.annotations.base.MethodCommandExecutor;
 import dev.velix.imperat.annotations.base.element.selector.ElementSelector;
 import dev.velix.imperat.annotations.parameters.AnnotationParameterDecorator;
 import dev.velix.imperat.annotations.parameters.NumericParameterDecorator;
+import dev.velix.imperat.command.AttachmentMode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandCoordinator;
 import dev.velix.imperat.command.CommandUsage;
@@ -94,7 +96,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             if(clazz.isRootClass() && AnnotationHelper.isAbnormalClass(clazz)) {
                 throw new IllegalArgumentException("Abnormal root class '%s'".formatted(clazz.getName()));
             }
-
+            
             Command<S> cmd = loadCommand(null, clazz, commandAnnotation);
 
             //if cmd=null → loading @CommandProcessingChain methods only from this class
@@ -241,7 +243,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
 
         if (parseElement instanceof MethodElement method && cmd != null) {
-            //@CommandProcessingChain on method
+            //Loading @Command/@SubCommand on methods
             if (!methodSelector.canBeSelected(imperat, parser, method, true)) {
                 ImperatDebugger.debugForTesting("Method '%s' has failed verification", method.getName());
                 return cmd;
@@ -255,7 +257,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
 
             return cmd;
         } else if (parseElement instanceof ClassElement commandClass) {
-
+            //Loading @Command/@SubCommand on classes
 
             //load command class
             for (ParseElement<?> element : commandClass.getChildren()) {
@@ -280,7 +282,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         }
                         else {
                             subCommand = loadCommand(cmd, method, subAnn);
-                            cmd.addSubCommand(subCommand, subAnn.attachment());
+                            cmd.addSubCommand(subCommand, extractAttachmentMode(commandClass, subAnn));
                         }
 
                     }
@@ -308,8 +310,9 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
                         }
                         SubCommand subCommandAnn = innerClass.getAnnotation(SubCommand.class);
                         assert subCommandAnn != null;
+
                         cmd.addSubCommand(
-                            loadCommand(cmd, innerClass, subCommandAnn), subCommandAnn.attachment()
+                            loadCommand(cmd, innerClass, subCommandAnn), extractAttachmentMode(commandClass, subCommandAnn)
                         );
                     }
 
@@ -321,6 +324,15 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
 
         return cmd;
+    }
+
+    private static AttachmentMode extractAttachmentMode(ClassElement commandClass, SubCommand subCommandAnn) {
+        AttachmentMode attachmentMode = subCommandAnn.attachment();
+        GlobalAttachmentMode globalAttachmentMode = commandClass.getAnnotation(GlobalAttachmentMode.class);
+        if(globalAttachmentMode != null && attachmentMode == AttachmentMode.UNSET) {
+            attachmentMode = globalAttachmentMode.value();
+        }
+        return attachmentMode;
     }
 
     @SuppressWarnings("unchecked")
