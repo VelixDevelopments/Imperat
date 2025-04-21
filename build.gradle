@@ -5,8 +5,14 @@ plugins {
     id "com.vanniktech.maven.publish" version "0.31.0"
 }
 
-def releaseSnapshots = false
-def isSnapshot = System.getProperty("SNAPSHOT_BUILD") == "true"
+def releaseSnapshots = true
+def isSnapshot = System.getenv("SNAPSHOT_BUILD") == "true"
+
+tasks.register('printReleaseSnapshots') {
+    doLast {
+        println "releaseSnapshots=${releaseSnapshots}"
+    }
+}
 
 allprojects {
     compileJava.options.encoding = "UTF-8"
