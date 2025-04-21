@@ -94,7 +94,9 @@ subprojects {
                 && (!isSnapshot || (isSnapshot && releaseSnapshots))
         ) {
             publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-            signAllPublications()
+            if (!isSnapshot) {
+                signAllPublications()
+            }
         }
 
         compileJava.options.encoding = "UTF-8"
