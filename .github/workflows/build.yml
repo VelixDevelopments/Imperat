@@ -28,6 +28,7 @@ jobs:
 
       - name: 🔍 Should create a snapshot?
         run: |
+          chmod +x ./gradlew
           SNAPSHOT=$(./gradlew -q printReleaseSnapshots | grep releaseSnapshots | cut -d'=' -f2)
           echo "RELEASE_SNAPSHOTS=$SNAPSHOT" >> $GITHUB_ENV
           echo "### Build Type: $([[ \"$SNAPSHOT_BUILD\" == \"true\" ]] && echo \"📦 Snapshot\" || echo \"🧪 Regular\")" >> $GITHUB_STEP_SUMMARY
