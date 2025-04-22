@@ -5,6 +5,7 @@ plugins {
     id "com.vanniktech.maven.publish" version "0.31.0"
 }
 
+def baseVersion = "1.9.1"
 def releaseSnapshots = true
 def isSnapshot = System.getenv("SNAPSHOT_BUILD") == "true"
 
@@ -14,11 +15,17 @@ tasks.register('printReleaseSnapshots') {
     }
 }
 
+tasks.register('printVersion') {
+    doLast {
+        println "baseVersion=${baseVersion}"
+    }
+}
+
 allprojects {
     compileJava.options.encoding = "UTF-8"
 
     group = "dev.velix"
-    version = "1.9.1"
+    version = baseVersion
 
     if (isSnapshot && releaseSnapshots) {
         version = version + "-SNAPSHOT"

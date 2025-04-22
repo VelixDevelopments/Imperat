@@ -26,11 +26,21 @@ jobs:
       - name: 📐 Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: 🔍 Should create a snapshot?
+      - name: 🔍 Figure repository info
         run: |
           chmod +x ./gradlew
+          
+          TAG=$(curl -s https://api.github.com/repos/VelixDevelopments/Imperat/tags | jq -r '.[0].name')
+          CLEANED_TAG=${TAG#v} # remove leading "v" if any
+          echo "LATEST_RELEASE=$CLEANED_TAG" >> $GITHUB_ENV
+          
+          CURRENT_VERSION=$(./gradlew -q printVersion | grep baseVersion | cut -d'=' -f2)
+          echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+          
           SNAPSHOT=$(./gradlew -q printReleaseSnapshots | grep releaseSnapshots | cut -d'=' -f2)
           echo "RELEASE_SNAPSHOTS=$SNAPSHOT" >> $GITHUB_ENV
+          
+          echo "### Build Version: 👌 $VERSION" >> $GITHUB_STEP_SUMMARY
           echo "### Build Type: $([[ \"RELEASE_SNAPSHOTS\" == \"true\" ]] && echo \"📦 Snapshot\" || echo \"🧪 Regular\")" >> $GITHUB_STEP_SUMMARY
 
       - name: 🚀 Gradle Snapshot
@@ -95,3 +105,24 @@ jobs:
         with:
           name: test-reports
           path: '**/build/reports/tests/test'
+
+      - name: ℹ️ Update Endpoint
+        if: ${{ steps.publish_snapshot.outcome == 'success' }}
+        run: |
+          rm -rf *
+          git config --global user.name "VelixDevelopments System"
+          git config --global user.email "github@velix.dev"
+          git clone https://github.com/VelixDevelopments/endpoint.git
+          cd endpoint
+          mkdir -p imperat && cd imperat
+          echo "{
+            \"release\": \"$LATEST_RELEASE\",
+            \"snapshot\": \"${VERSION}-SNAPSHOT\"
+          }" > info.json
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update imperat version"
+            git push https://x-access-token:${{ secrets.VELIX_SYSTEM_TOKEN }}@github.com/VelixDevelopments/endpoint.git
+          fi
