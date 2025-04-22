@@ -29,19 +29,33 @@ jobs:
       - name: 🔍 Figure repository info
         run: |
           chmod +x ./gradlew
-          
+
+          # Fetch latest release tag
           TAG=$(curl -s https://api.github.com/repos/VelixDevelopments/Imperat/tags | jq -r '.[0].name')
-          CLEANED_TAG=${TAG#v} # remove leading "v" if any
+          CLEANED_TAG=${TAG#v}
           echo "LATEST_RELEASE=$CLEANED_TAG" >> $GITHUB_ENV
-          
+
+          # Get current version from Gradle
           CURRENT_VERSION=$(./gradlew -q printVersion | grep baseVersion | cut -d'=' -f2)
           echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
-          
+
+          # Determine if this is a snapshot release
           SNAPSHOT=$(./gradlew -q printReleaseSnapshots | grep releaseSnapshots | cut -d'=' -f2)
           echo "RELEASE_SNAPSHOTS=$SNAPSHOT" >> $GITHUB_ENV
-          
-          echo "### Build Version: 👌 $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "### Build Type: $([[ \"RELEASE_SNAPSHOTS\" == \"true\" ]] && echo \"📦 Snapshot\" || echo \"🧪 Regular\")" >> $GITHUB_STEP_SUMMARY
+
+          # Log info to console
+          echo "🔹 Latest GitHub Release Tag: $CLEANED_TAG"
+          echo "🔹 Gradle Version: $CURRENT_VERSION"
+          echo "🔹 Is Snapshot Release: $SNAPSHOT"
+
+          # Add everything to GitHub summary
+          {
+            echo "### 🧾 Repository Info"
+            echo "- 🔖 Latest Release Tag: \`$CLEANED_TAG\`"
+            echo "- 🏷️  Current Version: \`$CURRENT_VERSION\`"
+            echo "- 🧪 Is Snapshot Release: \`$SNAPSHOT\`"
+            echo "### Build Type: $([[ \"$SNAPSHOT\" == \"true\" ]] && echo \"📦 Snapshot\" || echo \"🧪 Regular\")"
+          } >> $GITHUB_STEP_SUMMARY
 
       - name: 🚀 Gradle Snapshot
         id: publish_snapshot
