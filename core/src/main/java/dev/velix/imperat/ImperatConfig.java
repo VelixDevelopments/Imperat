@@ -22,6 +22,20 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
+/**
+ * The {@code ImperatConfig} interface defines the core configuration and interaction points
+ * for a command processing system. It provides methods for registering handlers,
+ * resolving dependencies, and managing the execution context. This interface enables
+ * integration of custom resolvers, context factories, permission management, and
+ * placeholder handling.
+ * <p>
+ * Implementations of this interface are responsible for providing these required
+ * functionalities and may enforce strict validation and processing rules based on
+ * the specified configurations.
+ * </p>
+ *
+ * @param <S> The type of the source object used by the configuration, which implements the {@link Source} interface.
+ */
 public sealed interface ImperatConfig<S extends Source> extends
     ProcessorRegistrar<S>, ResolverRegistrar<S>,
     CommandHelpHandler<S>, ThrowableHandler<S>
