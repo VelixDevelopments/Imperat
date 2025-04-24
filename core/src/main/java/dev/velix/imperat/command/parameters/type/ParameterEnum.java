@@ -31,12 +31,10 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
             .map(CommandParameter::valueType)
             .orElse(type);
 
-        var raw = commandInputStream.currentRaw();
         try {
-            assert raw.isPresent();
-            return Enum.valueOf((Class<? extends Enum>) enumType, raw.get());
+            return Enum.valueOf((Class<? extends Enum>) enumType, input);
         } catch (IllegalArgumentException | EnumConstantNotPresentException ex) {
-            throw new SourceException("Invalid " + enumType.getTypeName() + " '" + raw + "'");
+            throw new SourceException("Invalid " + enumType.getTypeName() + " '" + input + "'");
         }
     }
 

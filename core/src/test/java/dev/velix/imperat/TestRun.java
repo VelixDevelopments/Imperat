@@ -473,4 +473,22 @@ public class TestRun {
             Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test3", "sub HI_BRO"));
         });
     }
+
+    @Test
+    public void testCustomEnum() {
+
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new Test4Cmd());
+        });
+
+        var cmd = IMPERAT.getCommand("test4");
+        Assertions.assertNotNull(cmd);
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test4", "VALUE_1"));
+        });
+
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("test4", "HELLO"));
+        });
+    }
 }
