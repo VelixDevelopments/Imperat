@@ -56,10 +56,11 @@ public class TestRun {
         //ImperatDebugger.setTesting(true);
 
         IMPERAT = TestImperatConfig.builder()
-            .usageVerifier(UsageVerifier.typeTolerantVerifier())
-            .dependencyResolver(Group.class, () -> new Group("my-global-group"))
-            .parameterType(Group.class, new ParameterGroup())
+                .usageVerifier(UsageVerifier.typeTolerantVerifier())
+                .dependencyResolver(Group.class, () -> new Group("my-global-group"))
+                .parameterType(Group.class, new ParameterGroup())
                 .contextResolver(PlayerData.class, new PlayerDataContextResolver())
+                .parameterType(CustomEnum.class, new CustomEnumParameterType())
                 .build();
 
         IMPERAT.registerAnnotationReplacer(MyCustomAnnotation.class,(element, ann)-> {
@@ -485,6 +486,8 @@ public class TestRun {
         Assertions.assertNotNull(cmd);
         Assertions.assertDoesNotThrow(()-> {
             Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test4", "VALUE_1"));
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test4", "VALUE_2"));
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test4", "VALUE_3"));
         });
 
         Assertions.assertDoesNotThrow(()-> {
