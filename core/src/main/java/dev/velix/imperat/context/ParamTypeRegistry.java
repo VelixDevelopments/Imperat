@@ -6,6 +6,7 @@ import dev.velix.imperat.command.parameters.type.MapParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterEnum;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
@@ -133,7 +134,6 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
     }
 
     public void registerResolver(Type type, Supplier<ParameterType> resolver) {
-        if (TypeUtility.areRelatedTypes(type, Enum.class)) return;
         setData(type, resolver);
     }
 
@@ -224,27 +224,27 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
     }
 
     public <T> Optional<ParameterType<S, T>> getResolver(Type type) {
-        var wrap = TypeWrap.of(type);
-        if(wrap.isArray()) {
-            //array type
-            return Optional.of((ParameterType<S, T>) getArrayResolver(wrap));
-        }else if(wrap.isSubtypeOf(Collection.class)) {
-            //collection type
-            return Optional.of((ParameterType<S, T>) this.getCollectionResolver(wrap));
-        }
-        else if(wrap.isSubtypeOf(Map.class)) {
-            //map type
-            return Optional.of((ParameterType<S, T>) this.getMapResolver(wrap));
-        }
-
-
-        if (TypeUtility.isNumericType(wrap))
-            return Optional.of((ParameterType<S, T>) ParameterTypes.numeric((Class<? extends Number>) type));
 
         return Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type)).map(Supplier::get).orElseGet(() -> {
+
+            var wrap = TypeWrap.of(type);
+            if(wrap.isArray()) {
+                //array type
+                return getArrayResolver(wrap);
+            }else if(wrap.isSubtypeOf(Collection.class)) {
+                //collection type
+                return this.getCollectionResolver(wrap);
+            }
+            else if(wrap.isSubtypeOf(Map.class)) {
+                //map type
+                return this.getMapResolver(wrap);
+            }
+
+            if (TypeUtility.isNumericType(wrap))
+                return ParameterTypes.numeric((Class<? extends Number>) type);
+
             if (TypeUtility.areRelatedTypes(type, Enum.class)) {
-                registerResolver(type, ()-> new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type)));
-                return  new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
+                return new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
             }
 
             for (var registeredType : getKeys()) {
