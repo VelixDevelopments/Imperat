@@ -147,6 +147,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
                     closestUsages.add(resolvedContext.getDetectedUsage());
                 }else {
                     var cmd = context.command();
+                    //TODO improve the accuracy of the criteria
                     closestUsages.addAll(
                             cmd.findUsages((usage)-> usage.size() > context.arguments().size())
                     );
@@ -342,8 +343,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      * @param resolver the resolver for this value
      */
     @Override
-    public <T> void registerContextResolver(Type type,
-                                            @NotNull ContextResolver<S, T> resolver) {
+    public <T> void registerContextResolver(Type type, @NotNull ContextResolver<S, T> resolver) {
         contextResolverRegistry.registerResolver(type, resolver);
     }
 
