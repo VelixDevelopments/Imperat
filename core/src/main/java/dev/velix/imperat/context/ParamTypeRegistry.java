@@ -6,7 +6,6 @@ import dev.velix.imperat.command.parameters.type.MapParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterEnum;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Registry;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
