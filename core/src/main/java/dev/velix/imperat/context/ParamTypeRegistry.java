@@ -243,9 +243,8 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
 
         return Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type)).map(Supplier::get).orElseGet(() -> {
             if (TypeUtility.areRelatedTypes(type, Enum.class)) {
-                ParameterEnum<S> preloadedEnumType = new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
-                registerResolver(type, ()-> preloadedEnumType);
-                return preloadedEnumType;
+                registerResolver(type, ()-> new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type)));
+                return  new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
             }
 
             for (var registeredType : getKeys()) {
