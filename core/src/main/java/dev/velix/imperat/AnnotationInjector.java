@@ -9,6 +9,14 @@ import org.jetbrains.annotations.Contract;
 
 import java.lang.annotation.Annotation;
 
+/**
+ * This interface provides mechanisms for injecting and managing annotations within
+ * a command parsing and execution framework. It is designed to allow the registration
+ * and replacement of annotations and provides the capability to set a custom
+ * {@link AnnotationParser}.
+ *
+ * @param <S> the type of the command source (e.g., console, player, etc.)
+ */
 public interface AnnotationInjector<S extends Source> {
 
 

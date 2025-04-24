@@ -20,6 +20,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+/**
+ * The ResolverRegistrar interface provides mechanisms for registering and retrieving various
+ * types of resolvers, factories, and initializers that are contextually linked to specific
+ * source types and value types. It is a sealed interface, which limits its implementation
+ * to specific permitted types.
+ *
+ * @param <S> the type of source that this registrar handles
+ */
 public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfig {
 
 

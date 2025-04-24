@@ -5,6 +5,12 @@ import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.context.Source;
 
+/**
+ * Represents a registrar that allows the configuration and management of pre-processing
+ * and post-processing chains of command processors for a given source type.
+ *
+ * @param <S> the type of the source associated with command processing
+ */
 public sealed interface ProcessorRegistrar<S extends Source> permits ImperatConfig {
 
     /**

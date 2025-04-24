@@ -4,6 +4,13 @@ import dev.velix.imperat.context.Source;
 
 import java.lang.reflect.Type;
 
+/**
+ * A sealed interface representing the abstraction for wrapping
+ * and handling sources or senders of commands, and validating
+ * the compatibility of a type as a sender.
+ *
+ * @param <S> the type that extends the {@link Source}, representing the command sender
+ */
 public sealed interface SourceWrapper<S extends Source> permits Imperat {
     /**
      * Wraps the sender into a built-in command-sender valueType

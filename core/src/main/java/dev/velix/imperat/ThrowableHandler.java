@@ -5,6 +5,14 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ThrowableResolver;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The {@code ThrowableHandler} interface defines a mechanism for managing and resolving
+ * throwable instances within a given context. It provides methods to retrieve specific
+ * resolvers for throwable types and handle execution throwables with detailed context
+ * information.
+ *
+ * @param <S> The valueType extending {@link Source} that acts as the source of a command.
+ */
 public sealed interface ThrowableHandler<S extends Source> permits ImperatConfig {
 
     /**
