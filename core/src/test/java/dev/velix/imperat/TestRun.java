@@ -3,7 +3,6 @@ package dev.velix.imperat;
 import static dev.velix.imperat.commands.TestCommands.CHAINED_SUBCOMMANDS_CMD;
 import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
 import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
-
 import dev.velix.imperat.annotations.base.AnnotationFactory;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
