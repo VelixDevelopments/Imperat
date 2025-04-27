@@ -80,10 +80,16 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
                         throw new AmbiguousUsageAdditionException(command, usage, other);
                 }
             }
-            commands.put(command.name().toLowerCase(), command);
+            this.registerCmd(command);
         } catch (RuntimeException ex) {
             ImperatDebugger.error(BaseImperat.class, "registerCommand(CommandProcessingChain command)", ex);
             shutdownPlatform();
+        }
+    }
+    private void registerCmd(@NotNull Command<S> command) {
+        this.commands.put(command.name().trim().toLowerCase(), command);
+        for(var aliases : command.aliases()) {
+            this.commands.put(aliases.trim().toLowerCase(), command);
         }
     }
 
@@ -111,7 +117,12 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public void unregisterCommand(String name) {
         Preconditions.notNull(name, "commandToRemove");
-        commands.remove(name.toLowerCase());
+        Command<S> removed = commands.remove(name.trim().toLowerCase());
+        if(removed != null) {
+            for(var aliases : removed.aliases()) {
+                commands.remove(aliases.trim().toLowerCase());
+            }
+        }
     }
 
     /**

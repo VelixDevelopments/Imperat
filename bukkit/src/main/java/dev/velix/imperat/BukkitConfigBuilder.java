@@ -19,6 +19,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, BukkitImperat> {
@@ -28,7 +29,7 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
     private final Plugin plugin;
     private AdventureProvider<CommandSender> adventureProvider;
 
-    private boolean supportBrigadier = false;
+    private boolean supportBrigadier = false, injectCustomHelp = false, parasiteMode = false;
 
     BukkitConfigBuilder(Plugin plugin) {
         this.plugin = plugin;
@@ -79,12 +80,26 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         return this;
     }
 
+    public BukkitConfigBuilder injectCustomHelp(boolean injectCustomHelp) {
+        this.injectCustomHelp = injectCustomHelp;
+        return this;
+    }
+
+    @ApiStatus.Experimental
+    public BukkitConfigBuilder parasiteMode(boolean parasiteMode) {
+        this.parasiteMode = parasiteMode;
+        return this;
+    }
+
     @Override
     public @NotNull BukkitImperat build() {
         if (this.adventureProvider == null) {
             this.adventureProvider = this.loadAdventure();
         }
-        return new BukkitImperat(plugin, adventureProvider, supportBrigadier, this.config);
+        return new BukkitImperat(
+                plugin, adventureProvider, supportBrigadier,
+                injectCustomHelp, parasiteMode, this.config
+        );
     }
 
     @SuppressWarnings("ConstantConditions")

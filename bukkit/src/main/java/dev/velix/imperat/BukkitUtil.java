@@ -1,17 +1,17 @@
-package dev.velix.imperat.util;
+package dev.velix.imperat;
 
-import dev.velix.imperat.BukkitImperat;
+import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.reflection.FieldAccessor;
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -19,6 +19,8 @@ import java.util.regex.Pattern;
 
 public final class BukkitUtil {
 
+    public static final Pattern SPLIT_LINE = Pattern.compile(" ", Pattern.LITERAL);
+    public final static FieldAccessor<SimpleCommandMap> COMMAND_MAP_ACCESSOR = Reflections.getField(Bukkit.getServer().getClass(), SimpleCommandMap.class);
     public static CommandMap COMMAND_MAP;
     public static @Nullable Field KNOWN_COMMANDS;
 
@@ -34,12 +36,20 @@ public final class BukkitUtil {
     private BukkitUtil() {
     }
 
-    private static void loadBukkitFieldMappings() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        final Class<?> craftServer = Bukkit.getServer().getClass();
-        final FieldAccessor<SimpleCommandMap> accessor = Reflections.getField(craftServer, SimpleCommandMap.class);
-        COMMAND_MAP = accessor.get(Bukkit.getServer());
+    private static void loadBukkitFieldMappings() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException  {
+        COMMAND_MAP = COMMAND_MAP_ACCESSOR.get(Bukkit.getServer());
+        updateCommandActualMap();
+    }
+
+    public static void writeCommandMapInstance(SimpleCommandMap commandMap) throws NoSuchFieldException {
+        COMMAND_MAP_ACCESSOR.set(Bukkit.getServer(), commandMap);
+        COMMAND_MAP = commandMap;
+        updateCommandActualMap();
+    }
+
+    private static void updateCommandActualMap() throws NoSuchFieldException {
         if (COMMAND_MAP != null) {
-            KNOWN_COMMANDS = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            KNOWN_COMMANDS = COMMAND_MAP.getClass().getDeclaredField("knownCommands");
             KNOWN_COMMANDS.setAccessible(true);
         }
     }
@@ -103,15 +113,28 @@ public final class BukkitUtil {
 
     }
 
-    @SuppressWarnings("unchecked")
-    public static Class<? extends Entity> getSelectedEntity(@NotNull Type selectorType) {
-        return (Class<? extends Entity>) TypeUtility.getInsideGeneric(selectorType, Entity.class);
-    }
-
     public static <T> Set<T> mergedSet(Set<T> set1, Set<T> set2, Supplier<Set<T>> supplier) {
         Set<T> merged = supplier.get();
         merged.addAll(set1);
         merged.addAll(set2);
         return merged;
+    }
+
+    @ApiStatus.Experimental
+    public static Command<BukkitSource> convertBukkitCmdToImperatCmd(org.bukkit.command.Command bukkitCmd) {
+        return Command.<BukkitSource>create(bukkitCmd.getName())
+                .aliases(bukkitCmd.getAliases())
+                .description(bukkitCmd.getDescription())
+                .permission(bukkitCmd.getPermission())
+                //TODO add forced syntax format
+                .usage(CommandUsage.<BukkitSource>builder()
+                        .parameters(CommandParameter.requiredGreedy("args"))
+                        .execute((source, context)-> {
+                            String argsOneLine = context.getArgument("args");
+                            String[] args = SPLIT_LINE.split(argsOneLine);
+                            bukkitCmd.execute(source.origin(), context.label(), args);
+                        })
+                )
+                .build();
     }
 }

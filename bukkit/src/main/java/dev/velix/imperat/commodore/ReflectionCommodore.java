@@ -30,7 +30,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import dev.velix.imperat.util.BukkitUtil;
+import dev.velix.imperat.BukkitUtil;
 import dev.velix.imperat.util.ImperatDebugger;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

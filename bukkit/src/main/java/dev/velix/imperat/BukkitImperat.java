@@ -4,14 +4,12 @@ import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.type.Version;
-import dev.velix.imperat.util.BukkitUtil;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -20,25 +18,32 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> adventureProvider;
     private BukkitBrigadierManager brigadierManager;
-    private Map<String, org.bukkit.command.Command> bukkitCommands = new HashMap<>();
+
+    private final Map<String, org.bukkit.command.Command> bukkitCommands;
 
     public static BukkitConfigBuilder builder(Plugin plugin) {
         return new BukkitConfigBuilder(plugin);
     }
 
     @SuppressWarnings("unchecked")
-    BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, boolean supportBrigadier, ImperatConfig<BukkitSource> config) {
+    BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider,
+            boolean supportBrigadier, boolean injectCustomHelp,
+            boolean parasiteMode, ImperatConfig<BukkitSource> config) {
         super(config);
         this.plugin = plugin;
         this.adventureProvider = adventureProvider;
 
         ImperatDebugger.setLogger(plugin.getLogger());
         try {
-            if (BukkitUtil.KNOWN_COMMANDS != null) {
-                this.bukkitCommands = (Map<String, org.bukkit.command.Command>)
-                    BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
+            if(parasiteMode) {
+                BukkitUtil.writeCommandMapInstance(new ImperatCommandMap(this, plugin.getServer()));
             }
-        } catch (IllegalAccessException e) {
+            if(BukkitUtil.KNOWN_COMMANDS != null) {
+                bukkitCommands = (Map<String, org.bukkit.command.Command>) BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
+            }else {
+                throw new RuntimeException("Failed to get known commands field. Please report this to the developer.");
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
 
@@ -47,7 +52,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         }
 
         //registering automatic help topic:
-        Bukkit.getHelpMap().registerHelpTopicFactory(InternalBukkitCommand.class, new ImperatBukkitHelpTopic.Factory(this));
+        if(injectCustomHelp) {
+            Bukkit.getHelpMap().registerHelpTopicFactory(InternalBukkitCommand.class, new ImperatBukkitHelpTopic.Factory(this));
+        }
     }
 
     /**
