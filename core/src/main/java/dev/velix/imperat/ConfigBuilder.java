@@ -19,6 +19,7 @@ import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
+import java.util.function.Consumer;
 
 /**
  * A generic abstract builder class for configuring instances of ImperatConfig and creating
@@ -218,6 +219,19 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
     }
 
     /**
+     * Applies a consumer function to the current configuration, allowing modifications
+     * to be performed directly on the {@code ImperatConfig} instance.
+     *
+     * @param configConsumer a {@link Consumer} that takes the {@code ImperatConfig<S>} to apply changes.
+     *                       The provided consumer may modify the configuration as needed.
+     * @return the current {@code ConfigBuilder<S, I>} instance for fluent method chaining.
+     */
+    public ConfigBuilder<S, I> applyOnConfig(@NotNull Consumer<ImperatConfig<S>> configConsumer) {
+        configConsumer.accept(config);
+        return this;
+    }
+
+    /**
      * Registers a named suggestion resolver for providing autocomplete suggestions
      * for command arguments or parameters.
      *
@@ -228,6 +242,19 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
     // Named Suggestion Resolver
     public ConfigBuilder<S, I> namedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver) {
         config.registerNamedSuggestionResolver(name, suggestionResolver);
+        return this;
+    }
+
+    /**
+     * Sets the default suggestion resolver for providing autocomplete suggestions
+     * for command arguments or parameters in the configuration.
+     *
+     * @param suggestionResolver the {@link SuggestionResolver} implementation to be
+     *                           used as the default resolver for suggestions
+     * @return the current {@link ConfigBuilder} instance for method chaining
+     */
+    public ConfigBuilder<S, I> defaultSuggestionResolver(@NotNull SuggestionResolver<S> suggestionResolver) {
+        config.setDefaultSuggestionResolver(suggestionResolver);
         return this;
     }
 
