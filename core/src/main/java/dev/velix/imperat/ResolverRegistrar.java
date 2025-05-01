@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
