@@ -4,12 +4,14 @@ import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.type.Version;
+import dev.velix.imperat.util.BukkitUtil;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -18,8 +20,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     private final Plugin plugin;
     private final AdventureProvider<CommandSender> adventureProvider;
     private BukkitBrigadierManager brigadierManager;
-
-    private final Map<String, org.bukkit.command.Command> bukkitCommands;
+    private Map<String, org.bukkit.command.Command> bukkitCommands = new HashMap<>();
 
     public static BukkitConfigBuilder builder(Plugin plugin) {
         return new BukkitConfigBuilder(plugin);
@@ -27,23 +28,21 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
 
     @SuppressWarnings("unchecked")
     BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider,
-            boolean supportBrigadier, boolean injectCustomHelp,
-            boolean parasiteMode, ImperatConfig<BukkitSource> config) {
+            boolean supportBrigadier,
+            boolean injectCustomHelp,
+            ImperatConfig<BukkitSource> config
+    ) {
         super(config);
         this.plugin = plugin;
         this.adventureProvider = adventureProvider;
 
         ImperatDebugger.setLogger(plugin.getLogger());
         try {
-            if(parasiteMode) {
-                BukkitUtil.writeCommandMapInstance(new ImperatCommandMap(this, plugin.getServer()));
+            if (BukkitUtil.KNOWN_COMMANDS != null) {
+                this.bukkitCommands = (Map<String, org.bukkit.command.Command>)
+                    BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
             }
-            if(BukkitUtil.KNOWN_COMMANDS != null) {
-                bukkitCommands = (Map<String, org.bukkit.command.Command>) BukkitUtil.KNOWN_COMMANDS.get(BukkitUtil.COMMAND_MAP);
-            }else {
-                throw new RuntimeException("Failed to get known commands field. Please report this to the developer.");
-            }
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
 

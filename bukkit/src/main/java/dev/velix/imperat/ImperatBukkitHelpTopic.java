@@ -33,14 +33,11 @@ final class ImperatBukkitHelpTopic extends GenericCommandHelpTopic {
         CommandHelp commandHelp = new CommandHelp(imperat.config, resolvedContext);
         commandHelp.display(source);
 
-        this.fullText = String.join("\n",messages);
+        this.fullText = String.join("\n", messages);
     }
 
     @Override
     public @NotNull String getFullText(@NotNull CommandSender sender) {
-
-
-
         return super.getFullText(sender);
     }
 
