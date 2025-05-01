@@ -9,6 +9,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.EmptyCmd;
+import dev.velix.imperat.commands.KingdomChatCommand;
 import dev.velix.imperat.commands.MyCustomAnnotation;
 import dev.velix.imperat.commands.Test2Command;
 import dev.velix.imperat.commands.Test3Command;
@@ -492,5 +493,20 @@ public class TestRun {
         Assertions.assertDoesNotThrow(()-> {
             Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("test4", "HELLO"));
         });
+    }
+    @Test
+    public void testKingdomChatWeirdCmd() {
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new KingdomChatCommand());
+        });
+
+        var cmd = IMPERAT.getCommand("kingdomchat");
+        Assertions.assertNotNull(cmd);
+        debugCommand(cmd);
+
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kingdomchat", ""));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kingdomchat", "hello world"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kingdomchat", "hello world hi"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kingdomchat", "hello world hi bro"));
     }
 }

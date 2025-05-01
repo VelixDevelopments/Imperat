@@ -27,7 +27,11 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     }
 
     @SuppressWarnings("unchecked")
-    BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider, boolean supportBrigadier, ImperatConfig<BukkitSource> config) {
+    BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider,
+            boolean supportBrigadier,
+            boolean injectCustomHelp,
+            ImperatConfig<BukkitSource> config
+    ) {
         super(config);
         this.plugin = plugin;
         this.adventureProvider = adventureProvider;
@@ -47,7 +51,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         }
 
         //registering automatic help topic:
-        Bukkit.getHelpMap().registerHelpTopicFactory(InternalBukkitCommand.class, new ImperatBukkitHelpTopic.Factory(this));
+        if(injectCustomHelp) {
+            Bukkit.getHelpMap().registerHelpTopicFactory(InternalBukkitCommand.class, new ImperatBukkitHelpTopic.Factory(this));
+        }
     }
 
     /**
