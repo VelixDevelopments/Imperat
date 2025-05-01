@@ -46,6 +46,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
+
+    private @NotNull SuggestionResolver<S> defaultSuggestionResolver =
+            (context, input) ->
+            Collections.singletonList(input.format());
 
     private @NotNull PermissionResolver<S> permissionResolver = (source, permission) -> true;
     private @NotNull ContextFactory<S> contextFactory;
@@ -391,6 +396,28 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         Preconditions.notNull(mapType, "mapType");
         Preconditions.notNull(newInstanceSupplier, "newInstanceSupplier");
         paramTypeRegistry.registerMapInitializer(mapType, newInstanceSupplier);
+    }
+
+    /**
+     * Retrieves the default suggestion resolver associated with this registrar.
+     *
+     * @return the {@link SuggestionResolver} instance used as the default resolver
+     */
+    @Override
+    public @NotNull SuggestionResolver<S> getDefaultSuggestionResolver() {
+        return defaultSuggestionResolver;
+    }
+
+    /**
+     * Sets the default suggestion resolver to be used when no specific
+     * suggestion resolver is provided. The default suggestion resolver
+     * handles the auto-completion of arguments/parameters for commands.
+     *
+     * @param defaultSuggestionResolver the {@link SuggestionResolver} to be set as default
+     */
+    @Override
+    public void setDefaultSuggestionResolver(@NotNull SuggestionResolver<S> defaultSuggestionResolver) {
+        this.defaultSuggestionResolver = defaultSuggestionResolver;
     }
 
 

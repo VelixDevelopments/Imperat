@@ -83,6 +83,22 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
     <M extends Map<?, ?>> void registerMapInitializer(Class<M> mapType, Supplier<M> newInstanceSupplier);
 
     /**
+     * Retrieves the default suggestion resolver associated with this registrar.
+     *
+     * @return the {@link SuggestionResolver} instance used as the default resolver
+     */
+    SuggestionResolver<S> getDefaultSuggestionResolver();
+
+    /**
+     * Sets the default suggestion resolver to be used when no specific
+     * suggestion resolver is provided. The default suggestion resolver
+     * handles the auto-completion of arguments/parameters for commands.
+     *
+     * @param defaultSuggestionResolver the {@link SuggestionResolver} to be set as default
+     */
+    void setDefaultSuggestionResolver(SuggestionResolver<S> defaultSuggestionResolver);
+
+    /**
      * Fetches the suggestion provider/resolver for a specific valueType of
      * argument or parameter.
      *
@@ -102,7 +118,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
             else
                 ImperatDebugger.debug("Resolving suggestion in the form of the parameter's literal format !");
 
-            return Objects.requireNonNullElseGet(resolverByType, () -> SuggestionResolver.plain(Collections.singletonList(parameter.format())));
+            return Objects.requireNonNullElseGet(resolverByType, this::getDefaultSuggestionResolver);
         } else {
             ImperatDebugger.debug("Found specific parameter suggestion for param '%s'", parameter.format());
             return parameterSpecificResolver;
