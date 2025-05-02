@@ -10,6 +10,7 @@ import dev.velix.imperat.util.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +28,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     }
 
     @SuppressWarnings("unchecked")
-    BukkitImperat(Plugin plugin, AdventureProvider<CommandSender> adventureProvider,
+    BukkitImperat(
+            Plugin plugin,
+            AdventureProvider<CommandSender> adventureProvider,
             boolean supportBrigadier,
             boolean injectCustomHelp,
             ImperatConfig<BukkitSource> config
@@ -90,10 +93,17 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     public void registerCommand(Command<BukkitSource> command) {
         super.registerCommand(command);
 
+        //let's make a safety check for the plugin.yml
+        if (plugin instanceof JavaPlugin javaPlugin) {
+            var existingPluginYamlCmd = javaPlugin.getCommand(command.name().toLowerCase());
+            if(existingPluginYamlCmd != null) {
+                throw new IllegalArgumentException("Command with name '" + command.name() + "' already exists in plugin.yml!");
+            }
+        }
+
         var internalCmd = new InternalBukkitCommand(this, command);
 
         BukkitUtil.COMMAND_MAP.register(this.plugin.getName(), internalCmd);
-
 
         if (brigadierManager != null) {
             brigadierManager.registerBukkitCommand(internalCmd, command, config.getPermissionResolver());
