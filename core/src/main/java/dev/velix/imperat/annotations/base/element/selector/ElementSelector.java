@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * Selects a {@link ParseElement} based on specific list of {@link Rule}
+ * Selects a {@link ParseElement} based on a specific list of {@link Rule}
  *
  * @param <E> the valueType of {@link ParseElement} to select
  */
@@ -37,11 +37,11 @@ public sealed interface ElementSelector<E extends ParseElement<?>> permits Simpl
         getRules().remove(rule);
     }
 
-    default boolean canBeSelected(Imperat<?> imperat, AnnotationParser<?> registry, E element, boolean fail) {
+    default boolean canBeSelected(Imperat<?> imperat, AnnotationParser<?> parse, E element, boolean fail) {
         for (var rule : getRules()) {
-            if (!rule.test(imperat, registry, element)) {
+            if (!rule.test(imperat, parse, element)) {
                 if (fail) {
-                    rule.onFailure(registry, element);
+                    rule.onFailure(parse, element);
                 }
                 return false;
             }

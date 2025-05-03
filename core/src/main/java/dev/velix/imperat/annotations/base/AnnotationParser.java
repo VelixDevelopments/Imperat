@@ -93,4 +93,6 @@ public abstract class AnnotationParser<S extends Source> {
         return imperat;
     }
 
+    abstract AnnotationRegistry getAnnotationRegistry();
+
 }
