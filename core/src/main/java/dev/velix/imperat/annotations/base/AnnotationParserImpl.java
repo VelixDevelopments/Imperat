@@ -15,7 +15,7 @@ import java.lang.annotation.Annotation;
 @ApiStatus.Internal
 final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
 
-    private final AnnotationRegistry annotationRegistry;
+    final AnnotationRegistry annotationRegistry;
     private final ElementSelector<MethodElement> methodSelector;
     private final CommandClassVisitor<S> visitor;
 
@@ -25,7 +25,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
 
         this.methodSelector = ElementSelector.create();
         methodSelector.addRule(
-            MethodRules.IS_PUBLIC.and(MethodRules.RETURNS_VOID)
+            MethodRules.IS_PUBLIC.and(MethodRules.RETURNS_VOID).and(MethodRules.HAS_A_MAIN_ANNOTATION)
         );
 
         this.visitor = CommandClassVisitor.newSimpleVisitor(dispatcher, this);
@@ -82,7 +82,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
      * for it in the internal registry for replacers
      *
      * @param type the valueType of annotation entered
-     * @return Whether the there's an annotation replacer for the valueType entered.
+     * @return Whether there's an annotation replacer for the valueType entered.
      */
     @Override
     public boolean hasAnnotationReplacerFor(Class<? extends Annotation> type) {
@@ -98,6 +98,10 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
     @Override
     public <A extends Annotation> @Nullable AnnotationReplacer<A> getAnnotationReplacer(Class<A> type) {
         return annotationRegistry.getAnnotationReplacer(type);
+    }
+
+    @Override AnnotationRegistry getAnnotationRegistry() {
+        return annotationRegistry;
     }
 
 }

@@ -44,34 +44,19 @@ public interface MethodRules {
         })
         .build();
 
-    Rule<MethodElement> HAS_LEAST_ONLY_ONE_MAIN_ANNOTATION = Rule.buildForMethod()
+    Rule<MethodElement> HAS_A_MAIN_ANNOTATION = Rule.buildForMethod()
         .condition((imperat, registry, element) -> {
             long count = Arrays.stream(element.getDeclaredAnnotations())
                 .filter(annotation -> registry.isEntryPointAnnotation(annotation.annotationType())).count();
-            return count == 1;
+            return count > 0;
         })
         .failure((registry, element) -> {
-            StringBuilder builder = new StringBuilder();
-
-            Annotation[] declaredAnnotations = element.getDeclaredAnnotations();
-            for (int i = 0, declaredAnnotationsLength = declaredAnnotations.length; i < declaredAnnotationsLength; i++) {
-                Annotation annotation = declaredAnnotations[i];
-                if (registry.isEntryPointAnnotation(annotation.annotationType())) {
-                    builder.append("@").append(annotation.annotationType().getSimpleName());
-                }
-
-                if (i != declaredAnnotationsLength - 1) {
-                    builder.append(", ");
-                }
-            }
-
-            throw methodError(element, "has more than one main annotations such as: `" + builder + "`");
+            throw methodError(element, "doesn't have any main annotations!");
         })
         .build();
 
     private static IllegalStateException methodError(MethodElement element, String msg) {
         ClassElement parent = (ClassElement) element.getParent();
-        assert parent != null;
 
         return new IllegalStateException(
             String.format("Method '%s' In class '%s' " + msg,

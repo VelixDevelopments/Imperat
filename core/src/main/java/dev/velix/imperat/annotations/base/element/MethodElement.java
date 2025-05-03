@@ -21,16 +21,16 @@ public final class MethodElement extends ParseElement<Method> {
 
     public <S extends Source> MethodElement(
         @NotNull Imperat<S> imperat,
-        @NotNull AnnotationParser<S> registry,
+        @NotNull AnnotationParser<S> parser,
         @Nullable ClassElement owningElement,
         @NotNull Method element
     ) {
-        super(registry, owningElement, element);
+        super(parser, owningElement, element);
         var params = element.getParameters();
         for (int i = 0; i < params.length; i++) {
             var parameter = params[i];
             //TODO debug this !
-            ParameterElement parameterElement = new ParameterElement(registry, owningElement, this, parameter);
+            ParameterElement parameterElement = new ParameterElement(parser, owningElement, this, parameter);
             //ImperatDebugger.debug("Adding param '%s' to method '%s'", parameterElement.getName(), this.getName());
             parameters.add(parameterElement);
             if (i > 0 ) {
