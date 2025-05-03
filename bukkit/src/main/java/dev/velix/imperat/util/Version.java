@@ -1,4 +1,4 @@
-package dev.velix.imperat.type;
+package dev.velix.imperat.util;
 
 
 import dev.velix.imperat.util.reflection.Reflections;
