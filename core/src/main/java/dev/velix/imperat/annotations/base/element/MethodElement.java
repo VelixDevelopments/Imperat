@@ -1,6 +1,5 @@
 package dev.velix.imperat.annotations.base.element;
 
-import dev.velix.imperat.Imperat;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
@@ -20,7 +19,6 @@ public final class MethodElement extends ParseElement<Method> {
     private boolean help = false;
 
     public <S extends Source> MethodElement(
-        @NotNull Imperat<S> imperat,
         @NotNull AnnotationParser<S> parser,
         @Nullable ClassElement owningElement,
         @NotNull Method element
