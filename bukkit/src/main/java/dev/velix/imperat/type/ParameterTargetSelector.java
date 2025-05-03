@@ -17,6 +17,7 @@ import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.selector.field.filters.PredicateField;
 import dev.velix.imperat.selector.field.operators.OperatorField;
 import dev.velix.imperat.util.TypeWrap;
+import dev.velix.imperat.util.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
