@@ -13,8 +13,6 @@ import dev.velix.imperat.util.TypeWrap;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource, ProxiedPlayer> {
@@ -26,23 +24,21 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
     }
 
     @Override
-    public @Nullable ProxiedPlayer resolve(
+    public @NotNull ProxiedPlayer resolve(
             @NotNull ExecutionContext<BungeeSource> context,
             @NotNull CommandInputStream<BungeeSource> commandInputStream,
             String input) throws ImperatException {
-        String currentRaw = commandInputStream.currentRaw().orElse(null);
-        if (currentRaw == null) return null;
 
-        if (currentRaw.equalsIgnoreCase("me")) {
+        if (input.equalsIgnoreCase("me")) {
             if (context.source().isConsole()) {
-                throw new UnknownPlayerException(currentRaw);
+                throw new UnknownPlayerException(input);
             }
             return context.source().asPlayer();
         }
 
-        ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(currentRaw);
+        ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(input);
         if (proxiedPlayer == null) {
-            throw new UnknownPlayerException(currentRaw);
+            throw new UnknownPlayerException(input);
         }
         return proxiedPlayer;
     }

@@ -13,8 +13,6 @@ import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 public final class ParameterPlayer extends BaseParameterType<VelocitySource, Player> {
@@ -29,20 +27,18 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
     }
 
     @Override
-    public @Nullable Player resolve(
+    public @NotNull Player resolve(
             @NotNull ExecutionContext<VelocitySource> context,
             @NotNull CommandInputStream<VelocitySource> commandInputStream,
             String input) throws ImperatException {
-        String currentRaw = commandInputStream.currentRaw().orElse(null);
-        if (currentRaw == null) return null;
 
-        if (currentRaw.equalsIgnoreCase("me")) {
+        if (input.equalsIgnoreCase("me")) {
             if (context.source().isConsole()) {
-                throw new UnknownPlayerException(currentRaw);
+                throw new UnknownPlayerException(input);
             }
             return context.source().asPlayer();
         }
-        return proxyServer.getPlayer(currentRaw.toLowerCase()).orElseThrow(() -> new UnknownPlayerException(currentRaw));
+        return proxyServer.getPlayer(input.toLowerCase()).orElseThrow(() -> new UnknownPlayerException(input));
     }
 
     @Override
