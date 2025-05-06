@@ -25,7 +25,7 @@ final class AnnotationParserImpl<S extends Source> extends AnnotationParser<S> {
 
         this.methodSelector = ElementSelector.create();
         methodSelector.addRule(
-            MethodRules.IS_PUBLIC.and(MethodRules.RETURNS_VOID).and(MethodRules.HAS_A_MAIN_ANNOTATION)
+            MethodRules.IS_PUBLIC/*.and(MethodRules.RETURNS_VOID)*/.and(MethodRules.HAS_A_MAIN_ANNOTATION)
         );
 
         this.visitor = CommandClassVisitor.newSimpleVisitor(dispatcher, this);

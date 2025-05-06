@@ -5,6 +5,7 @@ import dev.velix.imperat.annotations.base.element.ClassElement;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.command.CommandExecution;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.returns.ReturnResolver;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
@@ -80,7 +81,17 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
         }
 
         try {
-            boundMethodCaller.call(instances);
+            Object returned = boundMethodCaller.call(instances);
+            if (method.getReturnType() == void.class) {
+                return;
+            }
+
+            ReturnResolver<S, Object> returnResolver = context.imperatConfig().getReturnResolver(method.getReturnType());
+            if (returnResolver == null) {
+                return;
+            }
+
+            returnResolver.handle(context, returned);
         } catch (Exception ex) {
             ImperatDebugger.error(methodOwner.getElement(), method.getElement().getName(), ex);
         }

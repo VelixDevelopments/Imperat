@@ -1,16 +1,13 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.annotations.base.element.ParameterElement;
-import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.ContextResolverFactory;
-import dev.velix.imperat.command.ContextResolverRegistry;
-import dev.velix.imperat.command.SourceResolverRegistry;
+import dev.velix.imperat.command.*;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.command.processors.impl.DefaultProcessors;
+import dev.velix.imperat.command.returns.ReturnResolver;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ParamTypeRegistry;
@@ -72,6 +69,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
     private final SuggestionResolverRegistry<S> suggestionResolverRegistry;
     private final PlaceholderRegistry<S> placeholderRegistry;
     private final SourceResolverRegistry<S> sourceResolverRegistry;
+    private final ReturnResolverRegistry<S> returnResolverRegistry;
 
     private final Map<Class<? extends Throwable>, ThrowableResolver<?, S>> handlers = new HashMap<>();
 
@@ -87,6 +85,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         paramTypeRegistry = ParamTypeRegistry.createDefault();
         suggestionResolverRegistry = SuggestionResolverRegistry.createDefault(this);
         sourceResolverRegistry = SourceResolverRegistry.createDefault();
+        returnResolverRegistry = ReturnResolverRegistry.createDefault();
         placeholderRegistry = PlaceholderRegistry.createDefault(this);
         contextFactory = ContextFactory.defaultFactory();
 
@@ -556,6 +555,16 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
     @Override
     public <R> void registerSourceResolver(Type type, SourceResolver<S, R> sourceResolver) {
         sourceResolverRegistry.setData(type, sourceResolver);
+    }
+
+    @Override
+    public @Nullable <T> ReturnResolver<S, T> getReturnResolver(Type type) {
+        return returnResolverRegistry.getReturnResolver(type);
+    }
+
+    @Override
+    public <T> void registerReturnResolver(Type type, ReturnResolver<S, T> returnResolver) {
+        returnResolverRegistry.setData(type, returnResolver);
     }
 
     /**
