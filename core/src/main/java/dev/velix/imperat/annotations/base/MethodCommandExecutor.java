@@ -91,7 +91,7 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
                 return;
             }
 
-            returnResolver.handle(context, returned);
+            returnResolver.handle(context, method, returned);
         } catch (Exception ex) {
             ImperatDebugger.error(methodOwner.getElement(), method.getElement().getName(), ex);
         }
