@@ -16,13 +16,6 @@ public interface MethodRules {
         })
         .build();
 
-    Rule<MethodElement> RETURNS_VOID = Rule.buildForMethod()
-        .condition((imperat, registry, method) -> method.getReturnType() == void.class)
-        .failure((registry, method) -> {
-            throw methodError(method, "should return void");
-        })
-        .build();
-
     Rule<MethodElement> HAS_KNOWN_SENDER = Rule.buildForMethod()
         .condition((imperat, registry, method) -> {
             ParameterElement parameterElement = method.getParameterAt(0);
