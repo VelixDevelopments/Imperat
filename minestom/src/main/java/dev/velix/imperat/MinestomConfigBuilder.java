@@ -7,7 +7,7 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public final class MinestomConfigBuilder extends ConfigBuilder<MinestomSource, MinestomImperat> {
+public final class MinestomConfigBuilder extends ConfigBuilder<MinestomSource, MinestomImperat, MinestomConfigBuilder> {
 
     private final ServerProcess serverProcess;
 

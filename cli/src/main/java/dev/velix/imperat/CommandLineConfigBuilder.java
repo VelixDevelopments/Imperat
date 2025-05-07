@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.InputStream;
 import java.io.PrintStream;
 
-public final class CommandLineConfigBuilder extends ConfigBuilder<ConsoleSource, CommandLineImperat> {
+public final class CommandLineConfigBuilder extends ConfigBuilder<ConsoleSource, CommandLineImperat, CommandLineConfigBuilder> {
 
     private final InputStream inputStream;
 

@@ -9,7 +9,7 @@ import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.types.ParameterPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public final class VelocityConfigBuilder extends ConfigBuilder<VelocitySource, VelocityImperat> {
+public final class VelocityConfigBuilder extends ConfigBuilder<VelocitySource, VelocityImperat, VelocityConfigBuilder> {
 
     private final PluginContainer plugin;
     private final ProxyServer proxyServer;
