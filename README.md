@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/VelixDevelopments/Imperat/blob/master/logo.png" /></p><br>
+<p><img src="https://github.com/VelixDevelopments/Imperat/blob/master/logo.png"  alt=""/></p><br>
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/fad48fc9b696419ba81f5a8571e5c29c)](https://app.codacy.com/gh/VelixDevelopments/Imperat/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Maven Central](https://img.shields.io/maven-metadata/v/https/repo1.maven.org/maven2/dev/velix/imperat-core/maven-metadata.xml.svg?label=maven%20central&colorB=brightgreen)](https://search.maven.org/artifact/dev.velix/imperat-core)
