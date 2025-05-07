@@ -3,6 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.command.returns.ReturnResolver;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.resolvers.ContextResolver;
@@ -180,6 +181,32 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
      * @param <R>            the new source valueType parameter
      */
     <R> void registerSourceResolver(Type type, SourceResolver<S, R> sourceResolver);
+
+    /**
+     * Fetches the {@link ReturnResolver} from an internal registry.
+     *
+     * @param type the target type
+     * @return the {@link ReturnResolver} for specific type
+     */
+    <T> @Nullable ReturnResolver<S, T> getReturnResolver(Type type);
+
+    /**
+     * Registers the {@link ReturnResolver} into an internal registry
+     *
+     * @param type           the target type
+     * @param returnResolver the return resolver to register
+     */
+    default <T> void registerReturnResolver(TypeWrap<T> type, ReturnResolver<S, T> returnResolver) {
+        registerReturnResolver(type.getType(), returnResolver);
+    }
+
+    /**
+     * Registers the {@link ReturnResolver} into an internal registry
+     *
+     * @param type           the target type
+     * @param returnResolver the return resolver to register
+     */
+    <T> void registerReturnResolver(Type type, ReturnResolver<S, T> returnResolver);
 
     /**
      * Registers a placeholder
