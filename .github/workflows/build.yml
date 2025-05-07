@@ -26,6 +26,18 @@ jobs:
       - name: 📐 Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      # Cache Gradle dependencies and wrapper (skip for pull requests)
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: 🔍 Figure repository info
         run: |
           chmod +x ./gradlew
