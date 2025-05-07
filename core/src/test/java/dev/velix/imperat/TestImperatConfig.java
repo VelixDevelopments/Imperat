@@ -2,7 +2,7 @@ package dev.velix.imperat;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class TestImperatConfig extends ConfigBuilder<TestSource, TestImperat> {
+public final class TestImperatConfig extends ConfigBuilder<TestSource, TestImperat, TestImperatConfig> {
 
     private TestImperatConfig() {
 

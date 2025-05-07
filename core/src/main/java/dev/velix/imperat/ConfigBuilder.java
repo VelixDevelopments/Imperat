@@ -29,14 +29,14 @@ import java.util.function.Consumer;
  * @param <S> the source type representing the entity or origin of the command (e.g., a user or a system)
  * @param <I> the implementation type that extends Imperat
  */
-public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
+@SuppressWarnings("unchecked")
+public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>, B extends ConfigBuilder<S, I, B>> {
 
     protected final ImperatConfig<S> config;
 
     ConfigBuilder() {
         config = new ImperatConfigImpl<>();
     }
-
 
     /**
      * Sets the command prefix for the command processing chain.
@@ -45,9 +45,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the updated instance of the ConfigBuilder to allow for method chaining
      */
     // CommandProcessingChain Prefix
-    public ConfigBuilder<S, I> commandPrefix(String cmdPrefix) {
+    public B commandPrefix(String cmdPrefix) {
         config.setCommandPrefix(cmdPrefix);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -58,9 +58,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current {@link ConfigBuilder} instance for method chaining and further configuration
      */
     // Permission Resolver
-    public ConfigBuilder<S, I> permissionResolver(PermissionResolver<S> permissionResolver) {
+    public B permissionResolver(PermissionResolver<S> permissionResolver) {
         config.setPermissionResolver(permissionResolver);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -70,9 +70,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current instance of {@code ConfigBuilder} for method chaining
      */
     // Context Factory
-    public ConfigBuilder<S, I> contextFactory(ContextFactory<S> contextFactory) {
+    public B contextFactory(ContextFactory<S> contextFactory) {
         config.setContextFactory(contextFactory);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -82,9 +82,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current {@link ConfigBuilder} instance for fluent chaining
      */
     // Usage Verifier
-    public ConfigBuilder<S, I> usageVerifier(UsageVerifier<S> usageVerifier) {
+    public B usageVerifier(UsageVerifier<S> usageVerifier) {
         config.setUsageVerifier(usageVerifier);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -95,9 +95,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current instance of {@code ConfigBuilder} for method chaining
      */
     // Dependency Resolver
-    public ConfigBuilder<S, I> dependencyResolver(Type type, DependencySupplier resolver) {
+    public B dependencyResolver(Type type, DependencySupplier resolver) {
         config.registerDependencyResolver(type, resolver);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -114,10 +114,10 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      *         chaining for further configuration.
      */
     // Throwable Resolver
-    public <T extends Throwable> ConfigBuilder<S, I> throwableResolver(
+    public <T extends Throwable> B throwableResolver(
         Class<T> exception, ThrowableResolver<T, S> handler) {
         config.setThrowableResolver(exception, handler);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -128,9 +128,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current {@link ConfigBuilder} instance for method chaining
      */
     // CommandProcessingChain Pre-Processor
-    public ConfigBuilder<S, I> preProcessor(CommandPreProcessor<S> preProcessor) {
+    public B preProcessor(CommandPreProcessor<S> preProcessor) {
         config.getPreProcessors().add(preProcessor);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -142,9 +142,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current {@link ConfigBuilder} instance for chaining additional configurations
      */
     // CommandProcessingChain Post-Processor
-    public ConfigBuilder<S, I> postProcessor(CommandPostProcessor<S> postProcessor) {
+    public B postProcessor(CommandPostProcessor<S> postProcessor) {
         config.getPostProcessors().add(postProcessor);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -156,9 +156,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      *              multiple {@code CommandPreProcessor} handlers
      * @return the current {@code ConfigBuilder} instance for method chaining
      */
-    public ConfigBuilder<S, I> preProcessingChain(CommandProcessingChain<S, CommandPreProcessor<S>> chain) {
+    public B preProcessingChain(CommandProcessingChain<S, CommandPreProcessor<S>> chain) {
         this.config.setPreProcessorsChain(chain);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -167,9 +167,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @param chain the {@link CommandProcessingChain} of {@link CommandPostProcessor} instances to be set as the post-processing chain
      * @return the {@link ConfigBuilder} instance for method chaining
      */
-    public ConfigBuilder<S, I> postProcessingChain(CommandProcessingChain<S, CommandPostProcessor<S>> chain) {
+    public B postProcessingChain(CommandProcessingChain<S, CommandPostProcessor<S>> chain) {
         this.config.setPostProcessorsChain(chain);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -183,9 +183,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return this ConfigBuilder instance for method chaining
      */
     // Context Resolver Factory
-    public <T> ConfigBuilder<S, I> contextResolverFactory(Type type, ContextResolverFactory<S, T> factory) {
+    public <T> B contextResolverFactory(Type type, ContextResolverFactory<S, T> factory) {
         config.registerContextResolverFactory(type, factory);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -199,9 +199,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the updated instance of {@code ConfigBuilder}, enabling fluent configuration
      */
     // Context Resolver
-    public <T> ConfigBuilder<S, I> contextResolver(Type type, ContextResolver<S, T> resolver) {
+    public <T> B contextResolver(Type type, ContextResolver<S, T> resolver) {
         config.registerContextResolver(type, resolver);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -213,9 +213,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return The current instance of {@code ConfigBuilder}, allowing method chaining.
      */
     // Parameter Type
-    public <T> ConfigBuilder<S, I> parameterType(Class<T> type, ParameterType<S, T> resolver) {
+    public <T> B parameterType(Class<T> type, ParameterType<S, T> resolver) {
         config.registerParamType(type, resolver);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -224,11 +224,11 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      *
      * @param configConsumer a {@link Consumer} that takes the {@code ImperatConfig<S>} to apply changes.
      *                       The provided consumer may modify the configuration as needed.
-     * @return the current {@code ConfigBuilder<S, I>} instance for fluent method chaining.
+     * @return the current {@code B} instance for fluent method chaining.
      */
-    public ConfigBuilder<S, I> applyOnConfig(@NotNull Consumer<ImperatConfig<S>> configConsumer) {
+    public B applyOnConfig(@NotNull Consumer<ImperatConfig<S>> configConsumer) {
         configConsumer.accept(config);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -240,9 +240,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current instance of {@code ConfigBuilder} for method chaining
      */
     // Named Suggestion Resolver
-    public ConfigBuilder<S, I> namedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver) {
+    public B namedSuggestionResolver(String name, SuggestionResolver<S> suggestionResolver) {
         config.registerNamedSuggestionResolver(name, suggestionResolver);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -253,9 +253,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      *                           used as the default resolver for suggestions
      * @return the current {@link ConfigBuilder} instance for method chaining
      */
-    public ConfigBuilder<S, I> defaultSuggestionResolver(@NotNull SuggestionResolver<S> suggestionResolver) {
+    public B defaultSuggestionResolver(@NotNull SuggestionResolver<S> suggestionResolver) {
         config.setDefaultSuggestionResolver(suggestionResolver);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -267,9 +267,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current {@link ConfigBuilder} instance for method chaining
      */
     // Source Resolver
-    public <R> ConfigBuilder<S, I> sourceResolver(Type type, SourceResolver<S, R> sourceResolver) {
+    public <R> B sourceResolver(Type type, SourceResolver<S, R> sourceResolver) {
         config.registerSourceResolver(type, sourceResolver);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -280,9 +280,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current {@link ConfigBuilder} instance for chaining further configuration.
      */
     // Placeholder
-    public ConfigBuilder<S, I> placeholder(Placeholder<S> placeholder) {
+    public B placeholder(Placeholder<S> placeholder) {
         config.registerPlaceholder(placeholder);
-        return this;
+        return (B) this;
     }
 
     /**
@@ -292,9 +292,9 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>> {
      * @return the current instance of {@code ConfigBuilder}, for method chaining
      */
     // Help Provider
-    public ConfigBuilder<S, I> helpProvider(HelpProvider<S> helpProvider) {
+    public B helpProvider(HelpProvider<S> helpProvider) {
         config.setHelpProvider(helpProvider);
-        return this;
+        return (B) this;
     }
 
     /**
