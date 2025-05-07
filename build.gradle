@@ -32,7 +32,7 @@ allprojects {
     }
 
     ext {
-        def kyoriVersion = "4.17.0"
+        def kyoriVersion = "4.20.0"
         def kyoriPlatformVersion = "4.3.4"
 
         kyori = { String module ->
