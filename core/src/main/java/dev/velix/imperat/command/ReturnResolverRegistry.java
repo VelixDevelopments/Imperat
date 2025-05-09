@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-@ApiStatus.AvailableSince("1.0.0")
+@ApiStatus.AvailableSince("1.9.1")
 public final class ReturnResolverRegistry<S extends Source> extends Registry<Type, ReturnResolver<S, ?>> {
 
     public static <S extends Source> ReturnResolverRegistry<S> createDefault() {
