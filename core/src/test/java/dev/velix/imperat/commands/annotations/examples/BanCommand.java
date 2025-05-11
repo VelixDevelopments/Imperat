@@ -2,6 +2,7 @@ package dev.velix.imperat.commands.annotations.examples;
 
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.Description;
 import dev.velix.imperat.annotations.Greedy;
 import dev.velix.imperat.annotations.Named;
@@ -29,7 +30,7 @@ public final class BanCommand {
             @Switch({"silent", "s"}) boolean silent,
             @Switch("ip") boolean ip,
             @Named("duration") @Optional @Nullable String duration,
-            @Named("reason") @Optional @Greedy String reason
+            @Named("reason") @Default("Breaking server laws") @Optional @Greedy String reason
     ) {
         //TODO actual ban logic
         String durationFormat = duration == null ? "FOREVER" : "for " + duration;
