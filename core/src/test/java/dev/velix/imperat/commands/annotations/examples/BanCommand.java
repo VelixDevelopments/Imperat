@@ -2,7 +2,7 @@ package dev.velix.imperat.commands.annotations.examples;
 
 import dev.velix.imperat.TestSource;
 import dev.velix.imperat.annotations.Command;
-import dev.velix.imperat.annotations.Default;
+import dev.velix.imperat.annotations.Description;
 import dev.velix.imperat.annotations.Greedy;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Optional;
@@ -10,9 +10,6 @@ import dev.velix.imperat.annotations.Permission;
 import dev.velix.imperat.annotations.Range;
 import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
-import dev.velix.imperat.annotations.Values;
-import jdk.jfr.Description;
-import jdk.jfr.Name;
 import org.jetbrains.annotations.Nullable;
 
 @Command("ban")
