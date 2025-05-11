@@ -15,9 +15,9 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @author Mqzen
@@ -30,12 +30,11 @@ public final class CommandTree<S extends Source> {
     CommandTree(Command<S> command) {
         this.rootCommand = command;
         this.root = new CommandNode<>(command, command.getDefaultUsage());
-        //parse(command);
     }
+
     public CommandNode<S> getRoot() {
         return root;
     }
-
 
     public static <S extends Source> CommandTree<S> create(Command<S> command) {
         return new CommandTree<>(command);
@@ -47,7 +46,7 @@ public final class CommandTree<S extends Source> {
         return tree;
     }
 
-    //parsing usages part
+    // Parsing usages part
     public void parseCommandUsages() {
         for (CommandUsage<S> usage : root.data.usages()) {
             parseUsage(usage);
@@ -65,7 +64,7 @@ public final class CommandTree<S extends Source> {
             root.setExecutableUsage(usage);
         }
 
-        // We'll pass an empty list to track the path of nodes we've created
+        // Pass an empty list to track the path of nodes we've created
         List<ParameterNode<S, ?>> path = new ArrayList<>();
         path.add(root);
 
@@ -86,14 +85,41 @@ public final class CommandTree<S extends Source> {
             return;
         }
 
-        if(currentNode.isGreedyParam()) {
-            if(!currentNode.isLast()) {
-                throw new IllegalStateException("A greedy node '%s' is not the last argument !".formatted(currentNode.format()));
+        if (currentNode.isGreedyParam()) {
+            if (!currentNode.isLast()) {
+                throw new IllegalStateException("A greedy node '%s' is not the last argument!".formatted(currentNode.format()));
             }
             currentNode.setExecutableUsage(usage);
             return;
         }
 
+        // Find consecutive sequence of optional flags
+        List<Integer> flagSequenceIndices = new ArrayList<>();
+        if (parameters.get(index).isFlag() && parameters.get(index).isOptional()) {
+            flagSequenceIndices.add(index);
+
+            // Check for additional consecutive optional flags
+            for (int i = index + 1; i < parameters.size(); i++) {
+                if (parameters.get(i).isFlag() && parameters.get(i).isOptional()) {
+                    flagSequenceIndices.add(i);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        // If we have multiple consecutive optional flags, handle them specially
+        if (flagSequenceIndices.size() > 1) {
+            // Handle all permutations of these flags
+            handleFlagPermutations(currentNode, usage, parameters, flagSequenceIndices, path);
+
+            // Continue with the next non-flag parameter for the case where all flags are skipped
+            int nextIndex = flagSequenceIndices.get(0);
+            addParametersToTree(currentNode, usage, parameters, nextIndex + 1, path);
+            return;
+        }
+
+        // Regular parameter handling (non-consecutive flags)
         CommandParameter<S> param = parameters.get(index);
 
         // Create/get the child node for this parameter
@@ -113,6 +139,76 @@ public final class CommandTree<S extends Source> {
         }
     }
 
+    /**
+     * Handles permutations of multiple consecutive optional flags.
+     * Creates a branch in the command tree for each possible ordering of flags.
+     */
+    private void handleFlagPermutations(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<Integer> flagIndices,
+            List<ParameterNode<S, ?>> path
+    ) {
+        // Extract the flag parameters
+        List<CommandParameter<S>> flagParams = flagIndices.stream()
+                .map(allParameters::get)
+                .collect(Collectors.toList());
+
+        // Generate all permutations of these flag parameters
+        List<List<CommandParameter<S>>> permutations = generatePermutations(flagParams);
+
+        // For each permutation, create a branch in the tree
+        for (List<CommandParameter<S>> permutation : permutations) {
+            ParameterNode<S, ?> nodePointer = currentNode;
+            List<ParameterNode<S, ?>> updatedPath = new ArrayList<>(path);
+
+            // Add each flag in this permutation order
+            for (CommandParameter<S> flagParam : permutation) {
+                ParameterNode<S, ?> flagNode = getChildNode(nodePointer, flagParam);
+                updatedPath.add(flagNode);
+                nodePointer = flagNode;
+            }
+
+            // Continue with the remaining parameters after the flags
+            int nextIndex = flagIndices.get(flagIndices.size() - 1) + 1;
+            if (nextIndex < allParameters.size()) {
+                addParametersToTree(nodePointer, usage, allParameters, nextIndex, updatedPath);
+            } else {
+                // If there are no more parameters, mark this node as executable
+                nodePointer.setExecutableUsage(usage);
+            }
+        }
+    }
+
+    /**
+     * Generates all possible permutations of the given list of parameters
+     */
+    private <T> List<List<T>> generatePermutations(List<T> items) {
+        if (items.isEmpty()) {
+            List<List<T>> result = new ArrayList<>();
+            result.add(new ArrayList<>());
+            return result;
+        }
+
+        List<List<T>> result = new ArrayList<>();
+        for (T item : items) {
+            List<T> remaining = new ArrayList<>(items);
+            remaining.remove(item);
+
+            List<List<T>> permutationsWithoutItem = generatePermutations(remaining);
+
+            for (List<T> perm : permutationsWithoutItem) {
+                List<T> newPerm = new ArrayList<>();
+                newPerm.add(item);
+                newPerm.addAll(perm);
+                result.add(newPerm);
+            }
+        }
+
+        return result;
+    }
+
     private ParameterNode<S, ?> getChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
         // Try to find an existing child node that matches this parameter
         for (ParameterNode<S, ?> child : parent.getChildren()) {
@@ -122,7 +218,7 @@ public final class CommandTree<S extends Source> {
             }
         }
 
-        // Create a new node - both constructors now accept a usage parameter (initially null)
+        // Create a new node
         ParameterNode<S, ?> newNode;
         if (param.isCommand())
             newNode = new CommandNode<>(param.asCommand(), null);
@@ -132,8 +228,6 @@ public final class CommandTree<S extends Source> {
         parent.addChild(newNode);
         return newNode;
     }
-
-
 
     // Update the context matching to leverage terminal usages
     public @NotNull CommandDispatch<S> contextMatch(
@@ -155,7 +249,7 @@ public final class CommandTree<S extends Source> {
             var traverse = dispatchNode(config, dispatch, input, child, depth);
 
             if (traverse.getResult() != CommandDispatch.Result.UNKNOWN) {
-                ImperatDebugger.debug("Found a non-unknown traverse result !");
+                ImperatDebugger.debug("Found a non-unknown traverse result!");
                 return traverse;
             }
         }
@@ -184,7 +278,7 @@ public final class CommandTree<S extends Source> {
 
         String rawInput = input.get(depth);
 
-        if(currentNode.isGreedyParam()) {
+        if (currentNode.isGreedyParam()) {
             commandDispatch.append(currentNode);
             commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
             commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
@@ -204,7 +298,7 @@ public final class CommandTree<S extends Source> {
         }
 
         if (!currentNode.isFlag() && Patterns.isInputFlag(rawInput)) {
-            //FREE FLAG
+            // FREE FLAG
             var flagData = rootCommand.getFlagFromRaw(rawInput);
             if (flagData.isEmpty()) {
                 return commandDispatch;
@@ -216,7 +310,7 @@ public final class CommandTree<S extends Source> {
 
         ImperatDebugger.debug("Appending node=%s, at depth=%s", currentNode.format(), depth);
         commandDispatch.append(currentNode);
-        if(currentNode.isTrueFlag()) {
+        if (currentNode.isTrueFlag()) {
             depth++;
             ImperatDebugger.debug("Incrementing depth for true flag '%s', depth is now '%s'", currentNode.format(), depth);
         }
@@ -226,7 +320,7 @@ public final class CommandTree<S extends Source> {
             ImperatDebugger.debug("Reached last depth at depth '%s' of raw '%s'", depth, rawInput);
 
             if (currentNode.isExecutable()) {
-                ImperatDebugger.debug("Node '%s' is executable, finished traversing !", currentNode.format());
+                ImperatDebugger.debug("Node '%s' is executable, finished traversing!", currentNode.format());
                 commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
                 commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
                 return commandDispatch;
@@ -246,16 +340,11 @@ public final class CommandTree<S extends Source> {
                 commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
                 addOptionalChildren(commandDispatch, currentNode);
             } else {
-                ImperatDebugger.debug("There are missing required args !!, the usage is UNKNOWN");
+                ImperatDebugger.debug("There are missing required args!!, the usage is UNKNOWN");
                 commandDispatch.setResult(requiredParameterNode.isCommand() ? CommandDispatch.Result.COMPLETE : CommandDispatch.Result.UNKNOWN);
             }
             return commandDispatch;
         }
-
-        /*if(currentNode.isTrueFlag()) {
-            //a true flag
-            depth++;
-        }*/
 
         // Not at the last depth, continue traversing children
         for (var child : currentNode.getChildren()) {
@@ -290,22 +379,21 @@ public final class CommandTree<S extends Source> {
 
         if (!childOptional.isLast()) {
             addOptionalChildren(dispatch, childOptional);
+        }else {
+            dispatch.setDirectUsage(childOptional.getExecutableUsage());
         }
     }
-
 
     private boolean isLastDepth(int index, ArgumentQueue input) {
         return index == input.size() - 1;
     }
 
-
     private boolean matchesInput(ImperatConfig<S> config, ParameterNode<S, ?> node, String input) {
-        if(node instanceof CommandNode || config.strictCommandTree()) {
+        if (node instanceof CommandNode || config.strictCommandTree() || node.isFlag()) {
             return node.matchesInput(input);
         }
         return true;
     }
-
 
     public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
@@ -339,26 +427,23 @@ public final class CommandTree<S extends Source> {
         return future;
     }
 
-
-
     private CompletableFuture<List<String>> addChildResults(
             Imperat<S> imperat,
             SuggestionContext<S> context,
             ParameterNode<S, ?> node,
             List<String> oldResults
     ) {
-
         SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
-        var currentNodeFutureResults =  resolver.asyncAutoComplete(context, node.data)
+        var currentNodeFutureResults = resolver.asyncAutoComplete(context, node.data)
                 .thenApply((res) -> {
                     oldResults.addAll(res);
                     return oldResults;
                 });
 
         var optionalChild = node.getChild(ParameterNode::isOptional);
-        if(optionalChild == null)
+        if (optionalChild == null)
             return currentNodeFutureResults;
 
-        return currentNodeFutureResults.thenCompose((results)-> addChildResults(imperat, context, optionalChild, currentNodeFutureResults.join()));
+        return currentNodeFutureResults.thenCompose((results) -> addChildResults(imperat, context, optionalChild, currentNodeFutureResults.join()));
     }
 }

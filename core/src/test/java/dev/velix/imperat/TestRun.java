@@ -473,7 +473,12 @@ public class TestRun {
         debugCommand(cmd);
 
         System.out.println("Executing '/ban mqzen -s'");
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s 1d"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s"));
+
+        System.out.println("----------------");
+
+        System.out.println("Executing '/ban mqzen -s -ip'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s -ip"));
 
         System.out.println("----------------");
 
@@ -484,6 +489,8 @@ public class TestRun {
 
         System.out.println("Executing '/ban mqzen -ip -s'");
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -ip -s"));
+
+
     }
 }
 
