@@ -72,7 +72,7 @@ public class TestRun {
         IMPERAT.registerCommand(CHAINED_SUBCOMMANDS_CMD);
         IMPERAT.registerCommand(new AnnotatedGroupCommand());
         IMPERAT.registerCommand(new OptionalArgCommand());
-        IMPERAT.registerCommand(new BanCommand());
+        //;
         IMPERAT.registerCommand(new GitCommand());
         IMPERAT.registerCommand(new MessageCmd());
         IMPERAT.registerCommand(new EmptyCmd());
@@ -509,4 +509,30 @@ public class TestRun {
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kingdomchat", "hello world hi"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("kingdomchat", "hello world hi bro"));
     }
+
+    @Test
+    public void testTwoConsecutiveMiddleOptionalSwitches() {
+        System.out.println("-----------------------------");
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new BanCommand());
+        });
+
+        var cmd = IMPERAT.getCommand("ban");
+        Assertions.assertNotNull(cmd);
+        debugCommand(cmd);
+
+        System.out.println("Executing '/ban mqzen -s'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s 1d"));
+
+        System.out.println("----------------");
+
+        System.out.println("Executing '/ban mqzen -ip'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -ip"));
+
+        System.out.println("----------------");
+
+        System.out.println("Executing '/ban mqzen -ip -s'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -ip -s"));
+    }
 }
+
