@@ -173,11 +173,15 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
 
             if (preProcessor != null) {
-                builder.preProcessor(loadPreProcessorInstance(preProcessor.value()));
+                for(var processor : preProcessor.value()) {
+                    builder.preProcessor(loadPreProcessorInstance(processor));
+                }
             }
 
             if (postProcessor != null) {
-                builder.postProcessor(loadPostProcessorInstance(postProcessor.value()));
+                for(var processor : postProcessor.value()) {
+                    builder.postProcessor(loadPostProcessorInstance(processor));
+                }
             }
 
             if(help != null) {
@@ -210,11 +214,16 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             }
 
             if (preProcessor != null) {
-                builder.preProcessor(loadPreProcessorInstance(preProcessor.value()));
+
+                for(var processor : preProcessor.value()) {
+                    builder.preProcessor(loadPreProcessorInstance(processor));
+                }
             }
 
             if (postProcessor != null) {
-                builder.postProcessor(loadPostProcessorInstance(postProcessor.value()));
+                for(var processor : postProcessor.value()) {
+                    builder.postProcessor(loadPostProcessorInstance(processor));
+                }
             }
 
             if(help != null) {

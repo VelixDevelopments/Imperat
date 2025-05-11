@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface PostProcessor {
 
-    Class<? extends CommandPostProcessor<?>> value();
+    Class<? extends CommandPostProcessor<?>>[] value();
 
 }

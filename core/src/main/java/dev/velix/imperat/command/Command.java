@@ -186,7 +186,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      *
      * @param preProcessor the pre-processor for the command
      */
-    void setPreProcessor(@NotNull CommandPreProcessor<S> preProcessor);
+    void addPreProcessor(@NotNull CommandPreProcessor<S> preProcessor);
 
     /**
      * Executes the pre-processing instructions in {@link CommandPreProcessor}
@@ -202,7 +202,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      *
      * @param postProcessor the post-processor for the command
      */
-    void setPostProcessor(@NotNull CommandPostProcessor<S> postProcessor);
+    void addPostProcessor(@NotNull CommandPostProcessor<S> postProcessor);
 
     /**
      * Executes the post-processing instructions in {@link CommandPostProcessor}
@@ -528,12 +528,12 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
         }
 
         public Builder<S> preProcessor(CommandPreProcessor<S> preProcessor) {
-            cmd.setPreProcessor(preProcessor);
+            cmd.addPreProcessor(preProcessor);
             return this;
         }
 
         public Builder<S> postProcessor(CommandPostProcessor<S> postProcessor) {
-            cmd.setPostProcessor(postProcessor);
+            cmd.addPostProcessor(postProcessor);
             return this;
         }
 

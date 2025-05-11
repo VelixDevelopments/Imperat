@@ -5,6 +5,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
+import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.command.tree.CommandTree;
@@ -51,8 +52,15 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private boolean suppressACPermissionChecks = false;
     private CommandUsage<S> mainUsage = null;
     private CommandUsage<S> defaultUsage;
-    private @Nullable CommandPreProcessor<S> preProcessor;
-    private @Nullable CommandPostProcessor<S> postProcessor;
+
+    private final @NotNull CommandProcessingChain<S, CommandPreProcessor<S>> preProcessors =
+            CommandProcessingChain.<S>preProcessors()
+            .build();
+
+    private final @NotNull CommandProcessingChain<S, CommandPostProcessor<S>> postProcessors =
+            CommandProcessingChain.<S>postProcessors()
+            .build();
+
     private @Nullable HelpProvider<S> helpProvider;
     private @Nullable Command<S> parent;
     private final CommandUsage<S> emptyUsage;
@@ -184,8 +192,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param preProcessor the pre-processor for the command
      */
     @Override
-    public void setPreProcessor(@NotNull CommandPreProcessor<S> preProcessor) {
-        this.preProcessor = preProcessor;
+    public void addPreProcessor(@NotNull CommandPreProcessor<S> preProcessor) {
+        this.preProcessors.add(preProcessor);
     }
 
     /**
@@ -197,14 +205,15 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     public boolean preProcess(@NotNull Imperat<S> api, @NotNull Context<S> context, @NotNull CommandUsage<S> usage) {
-        if (this.preProcessor != null) {
+        for(var processor : preProcessors) {
             try {
-                preProcessor.process(api, context, usage);
+                processor.process(api, context, usage);
             } catch (ImperatException e) {
-                api.config().handleExecutionThrowable(e, context, preProcessor.getClass(), "Command#preProcess");
+                api.config().handleExecutionThrowable(e, context, processor.getClass(), "Command#preProcess");
                 return false;
             }
         }
+
         return true;
     }
 
@@ -214,8 +223,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param postProcessor the post-processor for the command
      */
     @Override
-    public void setPostProcessor(@NotNull CommandPostProcessor<S> postProcessor) {
-        this.postProcessor = postProcessor;
+    public void addPostProcessor(@NotNull CommandPostProcessor<S> postProcessor) {
+        this.postProcessors.add(postProcessor);
     }
 
     /**
@@ -227,15 +236,15 @@ final class CommandImpl<S extends Source> implements Command<S> {
      */
     @Override
     public boolean postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) {
-        if (this.postProcessor != null) {
+        for(var processor : postProcessors) {
             try {
-                this.postProcessor.process(api, context);
+                processor.process(api, context);
             } catch (ImperatException e) {
-                api.config().handleExecutionThrowable(e, context, postProcessor.getClass(), "Command#preProcess");
+                api.config().handleExecutionThrowable(e, context, processor.getClass(), "Command#postProcess");
                 return false;
             }
-        }
 
+        }
         return true;
     }
 
