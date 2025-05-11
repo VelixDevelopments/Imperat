@@ -1,5 +1,4 @@
-package dev.velix.imperat.util;
-
+package dev.velix.imperat;
 
 import dev.velix.imperat.util.reflection.Reflections;
 import org.bukkit.Bukkit;
