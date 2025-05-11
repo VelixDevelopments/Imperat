@@ -63,6 +63,16 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     @Override
+    public Optional<CommandParameter<S>> prevParameter() {
+        if(cursor.parameter <= 0)
+            return Optional.empty();
+
+        return Optional.ofNullable(
+                parametersList.get(cursor.parameter - 1)
+        );
+    }
+
+    @Override
     public @NotNull Optional<String> currentRaw() {
         if (cursor.raw >= queue.size())
             return Optional.empty();
@@ -108,6 +118,15 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     @Override
+    public Optional<String> prevRaw() {
+        int prev = cursor.raw - 1;
+
+        return Optional.ofNullable(
+                queue.getOr(prev, null)
+        );
+    }
+
+    @Override
     public boolean hasNextLetter() {
         return letterPos < inputLine.length();
     }
@@ -118,8 +137,18 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     @Override
+    public boolean hasPreviousRaw() {
+        return cursor.raw > 0;
+    }
+
+    @Override
     public boolean hasNextParameter() {
         return cursor.parameter < parametersList.size();
+    }
+
+    @Override
+    public boolean hasPreviousParameter() {
+        return cursor.parameter > 0;
     }
 
     @Override
