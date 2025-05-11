@@ -83,7 +83,7 @@ public class TestSmartUsageResolve {
         test(
             "ban mqzen",
             ResolvedArgsData.empty()
-                .arg("player", "mqzen")
+                .arg("target", "mqzen")
                 .flag("silent", false)
                 .flag("ip", false)
                 .arg("duration", null)
@@ -94,17 +94,17 @@ public class TestSmartUsageResolve {
         test(
             "ban mqzen -s",
             ResolvedArgsData.empty()
-                .arg("player", "mqzen")
+                .arg("target", "mqzen")
                 .flag("silent", true)
-                .arg("duration", null)
                 .flag("ip", false)
+                .arg("duration", null)
                 .arg("reason", "Breaking server laws")
 
         );
         test(
             "ban mqzen -s 1d",
             ResolvedArgsData.empty()
-                    .arg("player", "mqzen")
+                    .arg("target", "mqzen")
                     .flag("silent", true)
                     .flag("ip", false)
                     .arg("duration", "1d")
@@ -114,7 +114,7 @@ public class TestSmartUsageResolve {
         test(
             "ban mqzen -s 1d A disgrace to community",
             ResolvedArgsData.empty()
-                .arg("player", "mqzen")
+                .arg("target", "mqzen")
                 .flag("silent", true)
                 .flag("ip", false)
                 .arg("duration", "1d")
@@ -155,9 +155,20 @@ public class TestSmartUsageResolve {
                 args.put(resolved.parameter().name(), resolved.value());
             }
 
-            for (var flag : context.getResolvedFlags()) {
-                String name = flag.flag().name();
-                resolvedFlags.setData(flag.flag().name(), context.getFlagValue(name));
+            for (var param : context.getDetectedUsage().getParameters()) {
+                if(!param.isFlag()) {
+                    continue;
+                }
+                var flagParam = param.asFlagParameter();
+
+                String name = param.asFlagParameter().flagData().name();
+
+                Object resolvedValue = context.getFlagValue(name);
+                if(resolvedValue == null && flagParam.isSwitch()) {
+                    resolvedValue = false;
+                }
+
+                resolvedFlags.setData(name, resolvedValue);
             }
         }
 
@@ -181,14 +192,22 @@ public class TestSmartUsageResolve {
         }
 
         public boolean matches(ResolvedArgsData other) {
+            System.out.println("----------------");
+            System.out.println("Comparing THIS ARGS:");
             System.out.println(this.args);
+
+
+            System.out.println("Comparing OTHER ARGS:");
             System.out.println(other.args);
+
+            System.out.println("Comparing THIS FLAGS:");
             System.out.println(this.resolvedFlags.getMap());
+
+            System.out.println("Comparing OTHER FLAGS:");
             System.out.println(other.resolvedFlags.getMap());
 
 
             if (args.size() != other.args.size() || resolvedFlags.size() != other.resolvedFlags.size()) {
-
                 return false;
             }
 
@@ -203,10 +222,12 @@ public class TestSmartUsageResolve {
             for (String flagKey : resolvedFlags.getKeys()) {
                 Object flagValue = resolvedFlags.getData(flagKey).orElse(null);
                 if (!other.resolvedFlags.getMap().containsKey(flagKey)) {
+                    System.out.println("Flag mismatch: " + flagKey + "=" + flagValue + " != " + flagKey + "=null");
                     return false;
                 }
                 if (!Objects.equals(flagValue, other.resolvedFlags.getData(flagKey)
                     .orElse(null))) {
+                    System.out.println("Flag mismatch: " + flagKey + "=" + flagValue + " != " + flagKey + "=" + other.resolvedFlags.getData(flagKey).orElse(null));
                     return false;
                 }
             }
