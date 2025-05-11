@@ -52,6 +52,8 @@ final class SmartUsageResolve<S extends Source> {
                     .supply(context.source());
             }
 
+            ImperatDebugger.debug("Resolving empty optional FLAG parameter '%s', with value='%s'", optionalEmptyParameter.format(), value);
+
             context.resolveFlag(flag, null, null, value);
         } else {
             ImperatDebugger.debug("Resolving empty optional param '%s'", optionalEmptyParameter.format());
@@ -105,23 +107,7 @@ final class SmartUsageResolve<S extends Source> {
 
             FlagData<S> flag = usage.getFlagParameterFromRaw(currentRaw);
             if (currentParameter.isFlag()) {
-                assert currentParameter.isFlag();
-
-                if (flag == null) {
-                    if(stream.peekParameter().isEmpty()) {
-                        //is last parameter
-                        //NOT FREE FLAG AND ALSO NOT A PARAMETER FLAG, UNKNOWN FLAG
-                        throw new SourceException("Unknown flag '%s'", currentRaw);
-                    }else {
-                        //resolve with null
-                        stream.skipParameter();
-                        continue;
-                    }
-                } else {
-                    ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
-                    context.resolveFlag(parameterFlag.resolve(context, stream, stream.readInput()));
-                }
-                stream.skip();
+                handleParameterFlag(currentParameter, currentRaw, flag);
                 continue;
             } else if (Patterns.isInputFlag(currentRaw) && command.getFlagFromRaw(currentRaw).isPresent()) {
                 //FOUND FREE FLAG
@@ -136,6 +122,7 @@ final class SmartUsageResolve<S extends Source> {
             ImperatDebugger.debug("type for param '%s' is '%s'", currentParameter.format(), currentParameter.type().getClass().getTypeName());
             var value = currentParameter.type().resolve(context, stream, stream.readInput());
             ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`, resolved-value='%s'", currentRaw, currentParameter.name(), value);
+
             if (value instanceof CommandFlag commandFlag) {
                 context.resolveFlag(commandFlag);
                 stream.skip();
@@ -176,6 +163,53 @@ final class SmartUsageResolve<S extends Source> {
         }
     }
 
+    private void handleParameterFlag(CommandParameter<S> currentParameter, String currentRaw, FlagData<S> flag) throws ImperatException {
+        ImperatDebugger.debug("Found parameter flag '%s' from raw input '%s'", currentParameter.format(), currentRaw);
+        ImperatDebugger.debug("It's FlagData='%s'", (flag == null ? "NULL" : flag.name()));
+        
+        if (flag == null) {
+            handleUnknownFlag(currentRaw);
+            return;
+        }
+        
+        ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
+        CommandParameter<S> flagParam = findMatchingFlagParameter(currentParameter, currentRaw, parameterFlag);
+        
+        if (flagParam == null) {
+            throw new SourceException("Unknown flag '%s'", currentRaw);
+        }
+        
+        ImperatDebugger.debug("Found flag parameter '%s' for flag input '%s'", flagParam.format(), currentRaw);
+        ImperatDebugger.debug("Resolving parameter flag '%s' from raw input '%s'", flagParam.format(), currentRaw);
+        context.resolveFlag(parameterFlag.resolve(context, stream, stream.readInput()));
+        stream.skip();
+    }
+
+    private void handleUnknownFlag(String currentRaw) throws SourceException {
+        if (stream.peekParameter().isEmpty()) {
+            // Last parameter - unknown flag
+            throw new SourceException("Unknown flag '%s'", currentRaw);
+        } else {
+            // Skip parameter for unknown flag
+            ImperatDebugger.debug("Skipping param for flag raw '%s'", currentRaw);
+            stream.skipParameter();
+        }
+    }
+
+    private CommandParameter<S> findMatchingFlagParameter(
+            CommandParameter<S> currentParameter,
+            String currentRaw,
+            ParameterFlag<S> parameterFlag
+    ) {
+        CommandParameter<S> flagParam = currentParameter;
+        while (flagParam != null && !parameterFlag.matchesInput(currentRaw, flagParam)) {
+            if (!flagParam.isFlag()) {
+                break;
+            }
+            flagParam = stream.popParameter().orElse(null);
+        }
+        return flagParam;
+    }
 
     private void resolveRequired(
         String currentRaw,

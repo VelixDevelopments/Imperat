@@ -12,6 +12,7 @@ import dev.velix.imperat.annotations.Switch;
 import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.annotations.Values;
 import jdk.jfr.Description;
+import jdk.jfr.Name;
 import org.jetbrains.annotations.Nullable;
 
 @Command("ban")
@@ -25,16 +26,21 @@ public final class BanCommand {
     }
 
     @Usage
-    public void banPlayer(
-        TestSource source,
-        @Named("player") String player,
-        @Switch({"silent", "s"}) boolean silent,
-        @Named("duration") @Optional @Nullable @Values({"1d", "12h", "2h"}) String duration,
-        @Named("reason") @Optional @Default("Breaking server laws") @Greedy String reason
+    public void ban(
+            TestSource source,
+            @Named("target") String player,
+            @Switch({"silent", "s"}) boolean silent,
+            @Switch("ip") boolean ip,
+            @Named("duration") @Optional @Nullable String duration,
+            @Named("reason") @Optional @Greedy String reason
     ) {
         //TODO actual ban logic
         String durationFormat = duration == null ? "FOREVER" : "for " + duration;
         String msg = "Banning " + player + " " + durationFormat + " due to '" + reason + "'";
+        System.out.println("IP= " + ip);
+        System.out.println("SILENT= " + silent);
+
+
         if (!silent)
             source.reply("NOT SILENT= " + msg);
         else
