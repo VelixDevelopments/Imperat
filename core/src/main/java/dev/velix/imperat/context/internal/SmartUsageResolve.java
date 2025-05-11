@@ -109,11 +109,34 @@ final class SmartUsageResolve<S extends Source> {
             if (currentParameter.isFlag()) {
                 handleParameterFlag(currentParameter, currentRaw, flag);
                 continue;
-            } else if (Patterns.isInputFlag(currentRaw) && command.getFlagFromRaw(currentRaw).isPresent()) {
-                //FOUND FREE FLAG
-                var flagData = command.getFlagFromRaw(currentRaw).get();
-                ParameterFlag<S> parameterFlag = ParameterTypes.flag(flagData);
-                context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, flagData));
+            } else if (Patterns.isInputFlag(currentRaw)) {
+
+                if(command.getFlagFromRaw(currentRaw).isPresent()) {
+
+                    //FOUND FREE FLAG
+                    var flagData = command.getFlagFromRaw(currentRaw).get();
+                    ImperatDebugger.debug("Found free flag '%s' from raw input '%s'", flagData.name(), currentRaw);
+
+                    ParameterFlag<S> parameterFlag = ParameterTypes.flag(flagData);
+                    context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, flagData));
+
+                }else {
+
+                    /*
+                     *  if the current param IS NOT A FLAG, & the current input matches a flag's criteria
+                     *  if the input also isn't from the free flags register that is linked to the command's instance, THEN
+                     *  this can be a case of two consecutive optional flags next to each other , example usage:
+                     *  '/ban <target> [-silent] [-ip] [duration] [reason]'
+                     *  If user enters '/ban mqzen -s -ip' this should work flawlessly, while '/ban mqzen -ip -s' DOESN'T resolve the silent flag,
+                     *  because of the algorithm that retains the parameters order while resolving their values.
+                     *  I think this can be fixed in the command tree instead of doing it here by making the tree shuffle the possibilities of
+                     *  flag-command-nodes.
+                     */
+
+                    //TODO fix this in the command tree
+                }
+
+                //we skip the raw input cursor only
                 stream.skipRaw();
                 continue;
             }
@@ -163,7 +186,7 @@ final class SmartUsageResolve<S extends Source> {
         }
     }
 
-    private void handleParameterFlag(CommandParameter<S> currentParameter, String currentRaw, FlagData<S> flag) throws ImperatException {
+    private void handleParameterFlag(CommandParameter<S> currentParameter, String currentRaw, @Nullable FlagData<S> flag) throws ImperatException {
         ImperatDebugger.debug("Found parameter flag '%s' from raw input '%s'", currentParameter.format(), currentRaw);
         ImperatDebugger.debug("It's FlagData='%s'", (flag == null ? "NULL" : flag.name()));
         
@@ -202,12 +225,14 @@ final class SmartUsageResolve<S extends Source> {
             ParameterFlag<S> parameterFlag
     ) {
         CommandParameter<S> flagParam = currentParameter;
+
         while (flagParam != null && !parameterFlag.matchesInput(currentRaw, flagParam)) {
             if (!flagParam.isFlag()) {
                 break;
             }
             flagParam = stream.popParameter().orElse(null);
         }
+
         return flagParam;
     }
 
