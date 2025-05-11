@@ -1,6 +1,7 @@
 package dev.velix.imperat.type;
 
 import dev.velix.imperat.BukkitSource;
+import dev.velix.imperat.Version;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
@@ -16,7 +17,6 @@ import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.selector.field.filters.PredicateField;
 import dev.velix.imperat.selector.field.operators.OperatorField;
 import dev.velix.imperat.util.TypeWrap;
-import dev.velix.imperat.util.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
