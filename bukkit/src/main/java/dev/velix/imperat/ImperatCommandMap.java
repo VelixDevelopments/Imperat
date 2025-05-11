@@ -2,7 +2,7 @@ package dev.velix.imperat;
 
 import com.destroystokyo.paper.event.server.ServerExceptionEvent;
 import com.destroystokyo.paper.exception.ServerTabCompleteException;
-import dev.velix.imperat.type.Version;
+import dev.velix.imperat.util.Version;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.Command;

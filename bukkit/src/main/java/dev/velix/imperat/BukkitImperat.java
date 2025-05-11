@@ -4,7 +4,6 @@ import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.brigadier.BukkitBrigadierManager;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.util.Version;
-import dev.velix.imperat.util.BukkitUtil;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.StringUtils;
 import org.bukkit.Bukkit;
@@ -57,6 +56,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         if(injectCustomHelp) {
             Bukkit.getHelpMap().registerHelpTopicFactory(InternalBukkitCommand.class, new ImperatBukkitHelpTopic.Factory(this));
         }
+
     }
 
     /**
