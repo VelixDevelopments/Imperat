@@ -14,8 +14,8 @@ public interface CommandInputStream<S extends Source> {
     @NotNull Optional<CommandParameter<S>> currentParameter();
 
     Optional<CommandParameter<S>> peekParameter();
-
     Optional<CommandParameter<S>> popParameter();
+    Optional<CommandParameter<S>> prevParameter();
 
     @NotNull Optional<Character> currentLetter();
 
@@ -26,14 +26,17 @@ public interface CommandInputStream<S extends Source> {
     @NotNull Optional<String> currentRaw();
 
     Optional<String> peekRaw();
-
     Optional<String> popRaw();
+    Optional<String> prevRaw();
+
 
     boolean hasNextLetter();
 
     boolean hasNextRaw();
+    boolean hasPreviousRaw();
 
     boolean hasNextParameter();
+    boolean hasPreviousParameter();
 
     @NotNull ArgumentQueue getRawQueue();
 
@@ -107,6 +110,7 @@ public interface CommandInputStream<S extends Source> {
     default String readInput() {
         return currentRaw().orElseThrow();
     }
+
     static <S extends Source> CommandInputStream<S> ofSingleString(@NotNull CommandParameter<S> parameter, @NotNull String str) {
         return new CommandInputStreamImpl<>(ArgumentQueue.of(str), List.of(parameter));
     }

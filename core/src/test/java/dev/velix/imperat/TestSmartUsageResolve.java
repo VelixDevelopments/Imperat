@@ -85,6 +85,7 @@ public class TestSmartUsageResolve {
             ResolvedArgsData.empty()
                 .arg("player", "mqzen")
                 .flag("silent", false)
+                .flag("ip", false)
                 .arg("duration", null)
                 .arg("reason", "Breaking server laws")
         );
@@ -96,16 +97,18 @@ public class TestSmartUsageResolve {
                 .arg("player", "mqzen")
                 .flag("silent", true)
                 .arg("duration", null)
+                .flag("ip", false)
                 .arg("reason", "Breaking server laws")
 
         );
         test(
             "ban mqzen -s 1d",
             ResolvedArgsData.empty()
-                .arg("player", "mqzen")
-                .flag("silent", true)
-                .arg("duration", "1d")
-                .arg("reason", "Breaking server laws")
+                    .arg("player", "mqzen")
+                    .flag("silent", true)
+                    .flag("ip", false)
+                    .arg("duration", "1d")
+                    .arg("reason", "Breaking server laws")
 
         );
         test(
@@ -113,6 +116,7 @@ public class TestSmartUsageResolve {
             ResolvedArgsData.empty()
                 .arg("player", "mqzen")
                 .flag("silent", true)
+                .flag("ip", false)
                 .arg("duration", "1d")
                 .arg("reason", "A disgrace to community")
 

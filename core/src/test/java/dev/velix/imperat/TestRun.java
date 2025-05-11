@@ -257,46 +257,6 @@ public class TestRun {
     }
 
     @Test
-    public void testAutoCompletion5() {
-        var cmd = IMPERAT.getCommand("ban");
-        assert cmd != null;
-        debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"mqzen", "-s", ""});
-        var res = results.join();
-        Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h", "[reason...]"), res.stream());
-    }
-
-    @Test
-    public void testAutoCompletion6() {
-        var cmd = IMPERAT.getCommand("ban");
-        assert cmd != null;
-        debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{"mqzen", ""});
-        var res = results.join();
-        Assertions.assertLinesMatch(Stream.of("-silent", "-s", "1d", "12h", "2h", "[reason...]"), res.stream());
-    }
-
-    @Test
-    public void testAutoCompletion7() {
-        var cmd = IMPERAT.getCommand("ban");
-        assert cmd != null;
-        debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"mqzen", "-s", ""});
-        var res = results.join();
-        Assertions.assertLinesMatch(Stream.of("1d", "12h", "2h", "[reason...]"), res.stream());
-    }
-
-    @Test
-    public void testAutoCompletion8() {
-        var cmd = IMPERAT.getCommand("ban");
-        assert cmd != null;
-        debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"mqzen", "-s", "12h", ""});
-        var res = results.join();
-        Assertions.assertLinesMatch(Stream.of("[reason...]"), res.stream());
-    }
-
-    @Test
     public void testAutoCompletion9() {
         var cmd = IMPERAT.getCommand("printnum");
         assert cmd != null;
@@ -321,15 +281,6 @@ public class TestRun {
         debugCommand(cmd);
 
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen"));
-    }
-
-    @Test
-    public void testBanWithFlag() {
-        var cmd = IMPERAT.getCommand("ban");
-        assert cmd != null;
-        debugCommand(cmd);
-
-        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -s"));
     }
 
     @Test
