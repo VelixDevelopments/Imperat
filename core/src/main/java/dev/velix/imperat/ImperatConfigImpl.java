@@ -184,8 +184,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         this.setThrowableResolver(
             NoHelpPageException.class,
             (exception, imperat, context) -> {
-                if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null
-                    || resolvedContext.getDetectedUsage().isHelp()) {
+                if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
                     throw new IllegalCallerException("Called NoHelpPageCaption in wrong the wrong sequence/part of the code");
                 }
 
