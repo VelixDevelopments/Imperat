@@ -136,7 +136,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      */
     @Override
     public boolean isFlag() {
-        return flag;
+        return flag || this instanceof FlagParameter<?>;
     }
 
     /**

@@ -5,7 +5,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.internal.Argument;
-import dev.velix.imperat.context.internal.CommandFlag;
+import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.ApiStatus;
@@ -98,11 +98,11 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
         @Nullable Object flagInputValue
     ) {
         resolveFlag(
-            new CommandFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue)
+            new ExtractedInputFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue)
         );
     }
 
-    void resolveFlag(CommandFlag flag);
+    void resolveFlag(ExtractedInputFlag flag);
 
     /**
      * Fetches the last used resolved command

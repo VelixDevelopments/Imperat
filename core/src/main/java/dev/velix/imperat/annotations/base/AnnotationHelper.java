@@ -173,7 +173,6 @@ public final class AnnotationHelper {
     }
 
     public static <S extends Source> @NotNull OptionalValueSupplier deduceOptionalValueSupplier(
-        Imperat<S> imperat,
         ParameterElement parameter,
         Default defaultAnnotation,
         DefaultProvider provider,

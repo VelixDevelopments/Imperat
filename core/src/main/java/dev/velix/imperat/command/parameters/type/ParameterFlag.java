@@ -5,7 +5,7 @@ import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.CommandFlag;
+import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
@@ -14,16 +14,16 @@ import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ParameterFlag<S extends Source> extends BaseParameterType<S, CommandFlag> {
+public class ParameterFlag<S extends Source> extends BaseParameterType<S, ExtractedInputFlag> {
 
     protected ParameterFlag(FlagData<S> flagData) {
-        super(TypeWrap.of(CommandFlag.class));
+        super(TypeWrap.of(ExtractedInputFlag.class));
         suggestions.add("-" + flagData.name());
         for(var alias : flagData.aliases())
             suggestions.add("-" + alias);
     }
 
-    public CommandFlag resolveFreeFlag(
+    public ExtractedInputFlag resolveFreeFlag(
         ExecutionContext<S> context,
         @NotNull CommandInputStream<S> commandInputStream,
         FlagData<S> freeFlag
@@ -44,11 +44,11 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
         } else {
             input = true;
         }
-        return new CommandFlag(freeFlag, rawFlag, rawInput, input);
+        return new ExtractedInputFlag(freeFlag, rawFlag, rawInput, input);
     }
 
     @Override
-    public @Nullable CommandFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String rawFlag) throws ImperatException {
+    public @Nullable ExtractedInputFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String rawFlag) throws ImperatException {
         var currentParameter = commandInputStream.currentParameter()
             .orElse(null);
         if (currentParameter == null)
@@ -68,17 +68,26 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
             rawInput = commandInputStream.popRaw().orElse(null);
             if (rawInput != null) {
                 objInput = inputType.resolve(context, commandInputStream, rawInput);
+                if(objInput == null && !flagParameter.getDefaultValueSupplier().isEmpty()) {
+                    objInput = inputType.resolve(context, commandInputStream, flagParameter.getDefaultValueSupplier().supply(context.source(),
+                            flagParameter));
+                }
             }else {
                 throw new SourceException(SourceException.ErrorLevel.SEVERE, "Please enter the value for flag '%s'", rawFlag);
             }
         } else {
             objInput = true;
         }
-        return new CommandFlag(flagParameter.flagData(), rawFlag, rawInput, objInput);
+        return new ExtractedInputFlag(flagParameter.flagData(), rawFlag, rawInput, objInput);
     }
 
     @Override
     public boolean matchesInput(String input, CommandParameter<S> parameter) {
+        if(!parameter.isFlag()) {
+            throw new IllegalArgumentException(String.format("Parameter '%s' isn't a flag while having parameter type of '%s'", parameter.format(),
+             "ParameterFlag"));
+        }
+
         int subStringIndex;
         if (Patterns.SINGLE_FLAG.matcher(input).matches())
             subStringIndex = 1;
@@ -88,6 +97,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
             subStringIndex = 0;
 
         String flagInput = input.substring(subStringIndex);
+
         return parameter.asFlagParameter().flagData()
             .acceptsInput(flagInput);
     }

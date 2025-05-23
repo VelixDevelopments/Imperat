@@ -40,7 +40,7 @@ import java.util.Optional;
 final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> implements ResolvedContext<S> {
 
     private final CommandUsage<S> usage;
-    private final Registry<String, CommandFlag> flagRegistry = new Registry<>();
+    private final Registry<String, ExtractedInputFlag> flagRegistry = new Registry<>();
     //per command/subcommand because the class 'CommandProcessingChain' can be also treated as a sub command
     private final Registry<Command<S>, Registry<String, Argument<S>>> resolvedArgumentsPerCommand = new Registry<>(LinkedHashMap::new);
     //all resolved arguments EXCEPT for subcommands and flags.
@@ -145,13 +145,13 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      * @return the resolved flag arguments
      */
     @Override
-    public Collection<? extends CommandFlag> getResolvedFlags() {
+    public Collection<? extends ExtractedInputFlag> getResolvedFlags() {
         return flagRegistry.getAll();
     }
 
 
     @Override
-    public Optional<CommandFlag> getFlag(String flagName) {
+    public Optional<ExtractedInputFlag> getFlag(String flagName) {
         return flagRegistry.getData(flagName);
     }
 
@@ -167,7 +167,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getFlagValue(String flagName) {
         return (T) getFlag(flagName)
-            .map(CommandFlag::value)
+            .map(ExtractedInputFlag::value)
             .orElse(null);
     }
 
@@ -211,7 +211,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     }
 
     @Override
-    public void resolveFlag(CommandFlag flag) {
+    public void resolveFlag(ExtractedInputFlag flag) {
         flagRegistry.setData(flag.flag().name(), flag);
     }
 

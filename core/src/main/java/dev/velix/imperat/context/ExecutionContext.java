@@ -2,7 +2,7 @@ package dev.velix.imperat.context;
 
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.context.internal.Argument;
-import dev.velix.imperat.context.internal.CommandFlag;
+import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @param flagName the name of the flag to check if it's used or not
      * @return The flag whether it has been used or not in this command context
      */
-    Optional<CommandFlag> getFlag(String flagName);
+    Optional<ExtractedInputFlag> getFlag(String flagName);
 
     /**
      * Fetches the flag input value
@@ -80,5 +80,5 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
     /**
      * @return the resolved flag arguments
      */
-    Collection<? extends CommandFlag> getResolvedFlags();
+    Collection<? extends ExtractedInputFlag> getResolvedFlags();
 }

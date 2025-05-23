@@ -52,7 +52,12 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
      * @return the default value if it's input is not present
      * in case of the parameter being optional
      */
+    @Override
     public @NotNull OptionalValueSupplier getDefaultValueSupplier() {
+        return inputValueSupplier;
+    }
+
+    public OptionalValueSupplier getDefaultInputValueSupplier() {
         return inputValueSupplier;
     }
 

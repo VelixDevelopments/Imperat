@@ -75,4 +75,12 @@ public final class AnnotationParameterDecorator<S extends Source> extends InputP
         return parameter.asFlagParameter();
     }
 
+    /**
+     * @return checks whether this parameter is a flag
+     */
+    @Override
+    public boolean isFlag() {
+        return parameter.isFlag();
+    }
+
 }

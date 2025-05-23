@@ -11,8 +11,6 @@ import java.util.Optional;
 
 final class CommandInputStreamImpl<S extends Source> implements CommandInputStream<S> {
 
-    private final static char WHITE_SPACE = ' ';
-
     private final String inputLine;
     private final Cursor<S> cursor;
     private final ArgumentQueue queue;
@@ -31,7 +29,6 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
         this.parametersList = parameters;
         this.cursor = new Cursor<>(this, 0, 0);
         this.rawStartPositions = calculateRawStartPositions();
-        System.out.println("INPUT LINE= '" + inputLine + "'");
     }
 
     /**

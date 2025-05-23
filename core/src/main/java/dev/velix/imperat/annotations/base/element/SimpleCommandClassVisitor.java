@@ -639,7 +639,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             Default defaultAnnotation = parameter.getAnnotation(Default.class);
             DefaultProvider provider = parameter.getAnnotation(DefaultProvider.class);
             try {
-                optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(imperat, parameter, defaultAnnotation, provider, optionalValueSupplier);
+                optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(parameter, defaultAnnotation, provider, optionalValueSupplier);
+                ImperatDebugger.debug("Optional value for param '%s' is present = (%s)", parameter.getName(), !optionalValueSupplier.isEmpty());
             } catch (ImperatException e) {
                 ImperatDebugger.error(AnnotationHelper.class, "deduceOptionalValueSupplier", e);
             }

@@ -108,7 +108,7 @@ final class SmartUsageResolve<S extends Source> {
 
             FlagData<S> flag = usage.getFlagParameterFromRaw(currentRaw);
             if (currentParameter.isFlag()) {
-                handleParameterFlag(currentParameter, currentRaw, flag);
+                handleParameterFlag(stream, currentParameter, currentRaw, flag);
                 continue;
             } else if (Patterns.isInputFlag(currentRaw)) {
 
@@ -148,8 +148,8 @@ final class SmartUsageResolve<S extends Source> {
             var value = currentParameter.type().resolve(context, stream, stream.readInput());
             ImperatDebugger.debug("AfterResolve >> current-raw=`%s`, current-param=`%s`, resolved-value='%s'", currentRaw, currentParameter.name(), value);
 
-            if (value instanceof CommandFlag commandFlag) {
-                context.resolveFlag(commandFlag);
+            if (value instanceof ExtractedInputFlag extractedInputFlag) {
+                context.resolveFlag(extractedInputFlag);
                 stream.skip();
             } else if (currentParameter.isOptional()) {
                 ImperatDebugger.debug("Resolving optional %s, with current raw '%s'", currentParameter.name(), currentRaw);
@@ -192,26 +192,55 @@ final class SmartUsageResolve<S extends Source> {
         }
     }
 
-    private void handleParameterFlag(CommandParameter<S> currentParameter, String currentRaw, @Nullable FlagData<S> flag) throws ImperatException {
+    private void handleParameterFlag(CommandInputStream<S> stream, CommandParameter<S> currentParameter, String currentRaw,
+            @Nullable FlagData<S> flag) throws ImperatException {
         ImperatDebugger.debug("Found parameter flag '%s' from raw input '%s'", currentParameter.format(), currentRaw);
         ImperatDebugger.debug("It's FlagData='%s'", (flag == null ? "NULL" : flag.name()));
-        
+
         if (flag == null) {
-            handleUnknownFlag(currentRaw);
+            var nextParam = stream.peekParameter().orElse(null);
+
+            if(nextParam == null || nextParam.isOptional()) {
+                handleUnknownFlag(currentRaw);
+                return;
+            }else {
+                //required
+                FlagParameter<S> flagParameter = currentParameter.asFlagParameter();
+                flag = currentParameter.asFlagParameter().flagData();
+
+                if(!flagParameter.isSwitch()) {
+
+                    //true flag default value handling
+
+                    String defValue = flagParameter.getDefaultValueSupplier().supply(context.source(), flagParameter);
+                    Object flagValueResolved = flagParameter.getDefaultValueSupplier().isEmpty() ? null :
+                            flag.inputType().resolve(
+                                context,
+                                defValue == null ? stream : CommandInputStream.subStream(stream, defValue),
+                                defValue
+                            );
+                    ImperatDebugger.debug("Resolving flag '%s' default input value='%s'", flag.name(), defValue);
+                    context.resolveFlag(new ExtractedInputFlag(flag,null, defValue, flagValueResolved));
+
+                }
+
+            }
+            //no raw input , skipping a flag's parameter
+            stream.skipParameter();
             return;
         }
-        
-        ParameterFlag<S> parameterFlag = (ParameterFlag<S>) currentParameter.asFlagParameter().type();
-        CommandParameter<S> flagParam = findMatchingFlagParameter(currentParameter, currentRaw, parameterFlag);
-        
+
+        // flag != null
+        ParameterFlag<S> parameterFlagType = (ParameterFlag<S>) currentParameter.type();
+        CommandParameter<S> flagParam = findMatchingFlagParameter(currentParameter, currentRaw, parameterFlagType);
+
         if (flagParam == null) {
             throw new SourceException("Unknown flag '%s'", currentRaw);
         }
-        
-        ImperatDebugger.debug("Found flag parameter '%s' for flag input '%s'", flagParam.format(), currentRaw);
-        ImperatDebugger.debug("Resolving parameter flag '%s' from raw input '%s'", flagParam.format(), currentRaw);
-        context.resolveFlag(parameterFlag.resolve(context, stream, stream.readInput()));
+
+        context.resolveFlag(parameterFlagType.resolve(context, stream, stream.readInput()));
         stream.skip();
+
     }
 
     private void handleUnknownFlag(String currentRaw) throws SourceException {
@@ -225,19 +254,24 @@ final class SmartUsageResolve<S extends Source> {
         }
     }
 
-    private CommandParameter<S> findMatchingFlagParameter(
+    private @Nullable CommandParameter<S> findMatchingFlagParameter(
             CommandParameter<S> currentParameter,
             String currentRaw,
             ParameterFlag<S> parameterFlag
     ) {
         CommandParameter<S> flagParam = currentParameter;
 
-        while (flagParam != null && !parameterFlag.matchesInput(currentRaw, flagParam)) {
+
+        do {
+            if(parameterFlag.matchesInput(currentRaw, flagParam)) {
+                return flagParam;
+            }
+
             if (!flagParam.isFlag()) {
-                break;
+                continue;
             }
             flagParam = stream.popParameter().orElse(null);
-        }
+        } while (flagParam != null);
 
         return flagParam;
     }
@@ -339,10 +373,11 @@ final class SmartUsageResolve<S extends Source> {
     private @Nullable <T> T getDefaultValue(ExecutionContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
         OptionalValueSupplier optionalSupplier = parameter.getDefaultValueSupplier();
         if(optionalSupplier.isEmpty()) {
+            ImperatDebugger.debug("no def value for param='%s'", parameter.format());
             return null;
         }
         String value = optionalSupplier.supply(context.source(), parameter);
-        //ImperatDebugger.debug("DEF VALUE='%s', for param='%s'", value, parameter.format());
+        ImperatDebugger.debug("DEF VALUE='%s', for param='%s'", value, parameter.format());
         return (T) parameter.type().resolve(context, stream, value);
     }
 

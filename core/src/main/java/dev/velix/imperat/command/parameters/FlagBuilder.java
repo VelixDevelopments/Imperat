@@ -4,13 +4,13 @@ import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.internal.CommandFlag;
+import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, CommandFlag> {
+public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, ExtractedInputFlag> {
 
     private final ParameterType<S, T> inputType;
     private final List<String> aliases = new ArrayList<>();
