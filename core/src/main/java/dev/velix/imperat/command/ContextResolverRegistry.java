@@ -3,7 +3,6 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;

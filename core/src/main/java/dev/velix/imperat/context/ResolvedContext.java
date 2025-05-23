@@ -1,17 +1,11 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.internal.Argument;
-import dev.velix.imperat.context.internal.ExtractedInputFlag;
-import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Collection;
 import java.util.List;
 
