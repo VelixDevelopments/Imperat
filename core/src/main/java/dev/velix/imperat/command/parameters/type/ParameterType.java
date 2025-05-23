@@ -9,6 +9,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,6 +65,7 @@ public interface ParameterType<S extends Source, T> {
      *
      * @return an {@link OptionalValueSupplier} providing the default value, or empty if none.
      */
+    @ApiStatus.AvailableSince("1.9.1")
     default OptionalValueSupplier supplyDefaultValue() {
         return OptionalValueSupplier.empty();
     }

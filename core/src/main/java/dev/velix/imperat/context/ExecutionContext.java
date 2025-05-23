@@ -1,7 +1,13 @@
 package dev.velix.imperat.context;
 
 import dev.velix.imperat.ImperatConfig;
+import dev.velix.imperat.annotations.ContextResolved;
+import dev.velix.imperat.command.Command;
+import dev.velix.imperat.command.CommandUsage;
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.internal.Argument;
+import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.ApiStatus;
@@ -17,6 +23,7 @@ import java.util.Optional;
  * during the execution of a command
  */
 @ApiStatus.AvailableSince("1.0.0")
+@ContextResolved
 public interface ExecutionContext<S extends Source> extends Context<S> {
 
     /**
@@ -81,4 +88,58 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      * @return the resolved flag arguments
      */
     Collection<? extends ExtractedInputFlag> getResolvedFlags();
+
+    /**
+     * Resolves the raw input and
+     * the parameters into arguments {@link Argument}
+     *
+     * @param command   the command owning the argument
+     * @param raw       the raw input
+     * @param index     the position of this argument
+     * @param parameter the parameter of the argument
+     * @param value     the resolved value of the argument
+     * @param <T>       the valueType of resolved value of the argument
+     */
+    <T> void resolveArgument(
+            Command<S> command,
+            @Nullable String raw,
+            int index,
+            CommandParameter<S> parameter,
+            @Nullable T value
+    ) throws ImperatException;
+
+    /**
+     * Resolves flag the in the context
+     *
+     * @param flagDetected   the optional flag-parameter detected
+     * @param flagRaw        the flag itself raw input
+     * @param flagInputRaw   the flag's value if present
+     * @param flagInputValue the flag's input value resolved by {@link ParameterType#resolve(ExecutionContext, CommandInputStream, String)}
+     */
+    default void resolveFlag(
+            FlagData<S> flagDetected,
+            String flagRaw,
+            @Nullable String flagInputRaw,
+            @Nullable Object flagInputValue
+    ) {
+        resolveFlag(
+                new ExtractedInputFlag(flagDetected, flagRaw, flagInputRaw, flagInputValue)
+        );
+    }
+
+    void resolveFlag(ExtractedInputFlag flag);
+
+    /**
+     * Fetches the last used resolved command
+     * of a resolved context!
+     *
+     * @return the last used command/subcommand
+     */
+    Command<S> getLastUsedCommand();
+
+    /**
+     * @return The used usage to use it to resolve commands
+     */
+    CommandUsage<S> getDetectedUsage();
+
 }

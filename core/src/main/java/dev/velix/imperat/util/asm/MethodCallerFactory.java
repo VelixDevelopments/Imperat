@@ -34,7 +34,7 @@ public interface MethodCallerFactory {
 
     /**
      * Returns a {@link MethodCallerFactory} that uses the new
-     * method handles API to create method callers.
+     * method handling API to create method callers.
      *
      * @return The default method caller factory.
      */

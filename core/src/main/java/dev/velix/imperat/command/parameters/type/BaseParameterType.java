@@ -25,8 +25,8 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
 
     /**
      * Encapsulates type information for the parameter being handled.
-     * This instance is used to obtain and manage type-related information
-     * and operations specific to the parameter type .
+     * This instance is used to collect and manage type-related information
+     * and operations specific to the parameter type.
      */
     protected final Type type;
     /**

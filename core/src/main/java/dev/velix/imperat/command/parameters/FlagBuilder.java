@@ -6,6 +6,7 @@ import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +19,10 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     private OptionalValueSupplier defaultValueSupplier;
     private SuggestionResolver<S> suggestionResolver;
 
-    private FlagBuilder(String name, ParameterType<S, T> inputType) {
+    private FlagBuilder(String name, @Nullable ParameterType<S, T> inputType) {
         super(name, ParameterTypes.flag(FlagData.create(name, List.of(), inputType)), true, false);
         this.inputType = inputType;
-        this.defaultValueSupplier = inputType.supplyDefaultValue();
+        this.defaultValueSupplier = inputType == null ? OptionalValueSupplier.of("false") : inputType.supplyDefaultValue();
     }
 
     //for switches

@@ -1,5 +1,6 @@
 package dev.velix.imperat.context;
 
+import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.util.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,7 @@ import java.util.List;
  * for handling the arguments entered by the {@link Source}
  */
 @ApiStatus.AvailableSince("1.0.0")
+@ContextResolved
 public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
 
     static ArgumentQueue parse(String[] rawArguments) {
