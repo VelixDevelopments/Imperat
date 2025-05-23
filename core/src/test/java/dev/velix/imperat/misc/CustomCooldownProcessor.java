@@ -1,5 +1,6 @@
-package dev.velix.imperat;
+package dev.velix.imperat.misc;
 
+import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.processors.CommandPreProcessor;

@@ -32,7 +32,8 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
             if (parameter != null && parameter.isGreedyString()) {
                 handleGreedy(builder, inputStream, input);
             } else {
-                builder.append(inputStream.currentRaw().orElse(input));
+                String toAppend = inputStream.currentRaw().orElse(input);
+                builder.append(toAppend);
             }
             return builder.toString();
         }
@@ -46,20 +47,20 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
             builder.append(next);
         } while (inputStream.hasNextRaw() && inputStream.peekLetter().map((ch) -> !isQuoteChar(ch)).orElse(false));
 
-        return builder.isEmpty() ? input : builder.toString();
+        return builder.toString();
     }
 
 
     private void handleGreedy(StringBuilder builder, CommandInputStream<S> inputStream, String input) {
 
         String raw = inputStream.currentRaw().orElse(null);
+
         //if raw is null OR not equal to the input provided(very rare) ->
         // we are in a case of resolving default value for an optional parameter with no real input from the source.
         if(raw == null || !raw.equals(input)) {
             builder.append(input);
             return;
         }
-        //the letter internal cursor is related to the LAST valid raw , that's why, GG
         while (inputStream.hasNextLetter()) {
             inputStream.currentLetter()
                 .ifPresent(builder::append);

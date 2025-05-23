@@ -8,6 +8,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandFlag;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -60,13 +61,15 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Comman
         FlagParameter<S> flagParameter = currentParameter.asFlagParameter();
 
         String rawInput = null;
-        Object objInput = null;
+        Object objInput;
 
         if (!flagParameter.isSwitch()) {
             ParameterType<S, ?> inputType = flagParameter.flagData().inputType();
             rawInput = commandInputStream.popRaw().orElse(null);
             if (rawInput != null) {
                 objInput = inputType.resolve(context, commandInputStream, rawInput);
+            }else {
+                throw new SourceException(SourceException.ErrorLevel.SEVERE, "Please enter the value for flag '%s'", rawFlag);
             }
         } else {
             objInput = true;

@@ -8,6 +8,7 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.annotations.examples.BanCommand;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;

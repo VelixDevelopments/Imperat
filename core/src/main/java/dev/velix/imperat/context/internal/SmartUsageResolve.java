@@ -49,7 +49,7 @@ final class SmartUsageResolve<S extends Source> {
                 value = false;
             else {
                 value = flagParameter.getDefaultValueSupplier()
-                    .supply(context.source());
+                    .supply(context.source(), flagParameter);
             }
 
             ImperatDebugger.debug("Resolving empty optional FLAG parameter '%s', with value='%s'", optionalEmptyParameter.format(), value);
@@ -65,6 +65,7 @@ final class SmartUsageResolve<S extends Source> {
     public void resolve() throws ImperatException {
 
         final int lengthWithoutFlags = usage.getParametersWithoutFlags().size();
+        ImperatDebugger.debug("Resolving input '%s'",  stream.getRawQueue().toString());
         ImperatDebugger.debug("Resolving input stream of usage '%s'", CommandUsage.format(this.command.name(), usage));
         while (stream.hasNextParameter()) {
 
@@ -111,6 +112,7 @@ final class SmartUsageResolve<S extends Source> {
                 continue;
             } else if (Patterns.isInputFlag(currentRaw)) {
 
+                ImperatDebugger.debug("Flag pattern of raw '%s'", currentRaw);
                 if(command.getFlagFromRaw(currentRaw).isPresent()) {
 
                     //FOUND FREE FLAG
@@ -150,7 +152,7 @@ final class SmartUsageResolve<S extends Source> {
                 context.resolveFlag(commandFlag);
                 stream.skip();
             } else if (currentParameter.isOptional()) {
-                //ImperatDebugger.debug("Resolving optional %s", currentParameter.name());
+                ImperatDebugger.debug("Resolving optional %s, with current raw '%s'", currentParameter.name(), currentRaw);
                 resolveOptional(
                     currentRaw,
                     currentParameter,
@@ -159,6 +161,7 @@ final class SmartUsageResolve<S extends Source> {
                 );
             } else {
                 //required
+                ImperatDebugger.debug("Resolving required %s, with current raw '%s'", currentParameter.name(), currentRaw);
                 resolveRequired(currentRaw, currentParameter, value);
             }
 
@@ -176,12 +179,15 @@ final class SmartUsageResolve<S extends Source> {
             if (currentRaw == null) {
                 break;
             }
+
             var freeFlagData = command.getFlagFromRaw(currentRaw);
             if (Patterns.isInputFlag(currentRaw) && freeFlagData.isPresent()) {
                 FlagData<S> freeFlag = freeFlagData.get();
                 var value = ParameterTypes.flag(freeFlag).resolveFreeFlag(context, stream, freeFlag);
                 context.resolveFlag(value);
+
             }
+            ImperatDebugger.debug("CURRENT-RAW-AFTER-LOOP=%s",currentRaw);
             stream.skipRaw();
         }
     }
@@ -335,7 +341,7 @@ final class SmartUsageResolve<S extends Source> {
         if(optionalSupplier.isEmpty()) {
             return null;
         }
-        String value = optionalSupplier.supply(context.source());
+        String value = optionalSupplier.supply(context.source(), parameter);
         //ImperatDebugger.debug("DEF VALUE='%s', for param='%s'", value, parameter.format());
         return (T) parameter.type().resolve(context, stream, value);
     }

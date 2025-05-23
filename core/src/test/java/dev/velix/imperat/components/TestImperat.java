@@ -1,5 +1,7 @@
-package dev.velix.imperat;
+package dev.velix.imperat.components;
 
+import dev.velix.imperat.BaseImperat;
+import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 
 import java.io.PrintStream;

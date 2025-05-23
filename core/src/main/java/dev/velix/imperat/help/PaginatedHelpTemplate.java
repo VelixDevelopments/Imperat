@@ -20,49 +20,60 @@ import java.util.Collection;
 public non-sealed abstract class PaginatedHelpTemplate<S extends Source> extends HelpTemplate<S> {
 
     protected final int syntaxesPerPage;
-    protected PaginatedText<CommandUsage<S>> paginatedText;
 
-    public PaginatedHelpTemplate(UsageFormatter formatter,
-                                 int syntaxesPerPage) {
+    public PaginatedHelpTemplate(
+            UsageFormatter formatter,
+            int syntaxesPerPage
+    ) {
         super(formatter);
         this.syntaxesPerPage = syntaxesPerPage;
-        paginatedText = new PaginatedText<>(syntaxesPerPage);
     }
 
     @Override
-    public void display(ExecutionContext<S> context, S source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
-
-        Integer page = context.getArgumentOr("page", 1);
-        TextPage<CommandUsage<S>> textPage = paginatedText.getPage(page);
-        if (textPage == null) {
-            throw new NoHelpPageException();
-        }
-        int index = 0;
-        for (var usage : textPage.asList()) {
-            source.reply(formatter.format(context.command(), usage, index));
-            index++;
-        }
+    public final void display(ExecutionContext<S> context, S source, UsageFormatter formatter, Collection<? extends CommandUsage<S>> commandUsages) throws ImperatException {
+        //empty
+        throw new UnsupportedOperationException("Display method isn't supported in PaginatedHelpTemplate");
     }
 
     @Override
     public void provide(ExecutionContext<S> context, S source) throws ImperatException {
+
         Command<S> command = context.command();
-
-        var commandUsages = command.usages();
-        commandUsages.forEach(paginatedText::add);
-
-        paginatedText.paginate();
+        var commandUsages = command.usages().stream().filter((usage)-> {
+            if(usage.isDefault()) return false;
+            if(usage.getParameters().isEmpty()) return false;
+            var lastParam = usage.getParameters().get(usage.size()-1);
+            if(lastParam.isCommand()) {
+                Command<S> subCommand = lastParam.asCommand();
+                //main usage is NOT default -> it has params, while this current usage which has the sub command param has no args, meaning
+                // let's show the main usage only
+                return subCommand.getMainUsage().isDefault();
+            }
+            return true;
+        }).toList();
 
         final int maxUsages = commandUsages.size();
         if (maxUsages == 0) {
             throw new NoHelpException();
         }
+
+        PaginatedText<CommandUsage<S>> paginatedText = new PaginatedText<>(syntaxesPerPage);
+
+        commandUsages.forEach(paginatedText::add);
+        paginatedText.paginate();
+
         int page = context.getArgumentOr("page", 1);
+        TextPage<CommandUsage<S>> textPage = paginatedText.getPage(page);
+        if (textPage == null) {
+            throw new NoHelpPageException();
+        }
+
         displayHeaderHyphen(command, source, page, paginatedText.getMaxPages());
-        display(context, source, formatter, commandUsages);
+        int index = 0;
+        for (var usage : textPage.asList()) {
+            source.reply(formatter.format(context.command(), usage, index));
+            index++;
+        }
         displayFooterHyphen(command, source, page, paginatedText.getMaxPages());
-
-        paginatedText.clear();
-
     }
 }

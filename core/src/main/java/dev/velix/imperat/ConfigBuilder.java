@@ -34,7 +34,7 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>, B ex
 
     protected final ImperatConfig<S> config;
 
-    ConfigBuilder() {
+    protected ConfigBuilder() {
         config = new ImperatConfigImpl<>();
     }
 

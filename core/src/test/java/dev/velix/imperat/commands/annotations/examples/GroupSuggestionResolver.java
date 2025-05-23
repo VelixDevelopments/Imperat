@@ -1,6 +1,6 @@
 package dev.velix.imperat.commands.annotations.examples;
 
-import dev.velix.imperat.TestSource;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.SuggestionResolver;

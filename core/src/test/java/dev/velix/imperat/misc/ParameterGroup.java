@@ -1,5 +1,6 @@
-package dev.velix.imperat;
+package dev.velix.imperat.misc;
 
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.commands.annotations.examples.Group;
 import dev.velix.imperat.commands.annotations.examples.GroupRegistry;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     private final GroupSuggestionResolver suggestionResolver = new GroupSuggestionResolver();
 
-    ParameterGroup() {
+    public ParameterGroup() {
         super(TypeWrap.of(Group.class));
         //static plain suggestions
     }

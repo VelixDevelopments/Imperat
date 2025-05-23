@@ -3,16 +3,23 @@ package dev.velix.imperat;
 import static dev.velix.imperat.commands.TestCommands.CHAINED_SUBCOMMANDS_CMD;
 import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
 import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
+
+import dev.velix.imperat.advanced.DurationParameterType;
+import dev.velix.imperat.advanced.GuildMOTDCommand;
 import dev.velix.imperat.annotations.base.AnnotationFactory;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
+import dev.velix.imperat.misc.CustomEnum;
+import dev.velix.imperat.misc.CustomEnumParameterType;
 import dev.velix.imperat.commands.EmptyCmd;
 import dev.velix.imperat.commands.KingdomChatCommand;
 import dev.velix.imperat.commands.MyCustomAnnotation;
+import dev.velix.imperat.misc.ParameterGroup;
 import dev.velix.imperat.commands.Test2Command;
 import dev.velix.imperat.commands.Test3Command;
+import dev.velix.imperat.misc.Test4Cmd;
 import dev.velix.imperat.commands.TestCustomAnnotationCmd;
 import dev.velix.imperat.commands.annotations.FirstOptionalArgumentCmd;
 import dev.velix.imperat.commands.annotations.KitCommand;
@@ -26,12 +33,16 @@ import dev.velix.imperat.commands.annotations.examples.GitCommand;
 import dev.velix.imperat.commands.annotations.examples.Group;
 import dev.velix.imperat.commands.annotations.examples.MessageCmd;
 import dev.velix.imperat.commands.annotations.examples.OptionalArgCommand;
+import dev.velix.imperat.components.TestImperat;
+import dev.velix.imperat.components.TestImperatConfig;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +54,7 @@ public class TestRun {
         USAGE_EXECUTED = false;
     }
 
-    final static TestImperat IMPERAT;
+    public final static TestImperat IMPERAT;
     final static TestSource SOURCE = new TestSource(System.out);
 
     public static volatile boolean USAGE_EXECUTED = false;
@@ -61,6 +72,7 @@ public class TestRun {
                 .parameterType(Group.class, new ParameterGroup())
                 .contextResolver(PlayerData.class, new PlayerDataContextResolver())
                 .parameterType(CustomEnum.class, new CustomEnumParameterType())
+                .parameterType(Duration.class, new DurationParameterType())
                 .build();
 
         IMPERAT.registerAnnotationReplacer(MyCustomAnnotation.class,(element, ann)-> {
@@ -92,6 +104,26 @@ public class TestRun {
         System.out.println("CommandProcessingChain '" + command.name() + "' has usages: ");
         for (CommandUsage<TestSource> usage : command.usages()) {
             System.out.println("- " + CommandUsage.format(command, usage));
+        }
+
+    }
+
+
+    public static void testCommand(String name, Object cmdClassInstance, String... usages) {
+
+        System.out.println("-----------------------------");
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(cmdClassInstance);
+        });
+
+        var cmd = IMPERAT.getCommand(name);
+        Assertions.assertNotNull(cmd);
+        debugCommand(cmd);
+
+        for(String usage : usages) {
+            System.out.println("Executing '/" + name + " " + usage + "'");
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution(name, usage));
+            System.out.println("----------------");
         }
 
     }
@@ -491,6 +523,15 @@ public class TestRun {
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban", "mqzen -ip -s"));
 
 
+    }
+
+    @Test
+    public void motdCommand() {
+        //String usage1 = "\"Hello world, im mazen\" 1h";
+        String usage2 = "-time 1h Hello world, im mazen";
+        String usage3 = "Hello world, im mazen";
+
+        testCommand("motd",new GuildMOTDCommand(),usage2, usage3);
     }
 }
 

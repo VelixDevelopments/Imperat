@@ -236,7 +236,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     @Override
     public @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String commandName, String[] rawInput) {
         ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
-
         Context<S> plainContext = config.getContextFactory()
             .createContext(this, source, command, commandName, rawArguments);
 

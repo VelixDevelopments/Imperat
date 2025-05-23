@@ -1,6 +1,6 @@
 package dev.velix.imperat.commands.annotations.examples;
 
-import dev.velix.imperat.TestSource;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Flag;
 import dev.velix.imperat.annotations.SubCommand;

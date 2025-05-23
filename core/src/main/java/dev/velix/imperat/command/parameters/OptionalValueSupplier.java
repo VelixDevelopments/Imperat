@@ -9,7 +9,7 @@ public interface OptionalValueSupplier {
 
     OptionalValueSupplier EMPTY = new OptionalValueSupplier() {
         @Override
-        public @Nullable <S extends Source> String supply(S source) {
+        public @Nullable <S extends Source> String supply(S source, CommandParameter<S> parameter) {
             return null;
         }
     };
@@ -18,7 +18,7 @@ public interface OptionalValueSupplier {
         Preconditions.notNull(value, "default cannot be null, use `OptionalValueSupplier#empty` instead");
         return new OptionalValueSupplier() {
             @Override
-            public <S extends Source> @NotNull String supply(S source) {
+            public <S extends Source> @NotNull String supply(S source, CommandParameter<S> parameter) {
                 return value;
             }
         };
@@ -37,9 +37,10 @@ public interface OptionalValueSupplier {
      * usage parameters {@link CommandParameter}
      *
      * @param source the context
+     * @param parameter the parameter
      * @return the resolved default value
      */
     @Nullable
-    <S extends Source> String supply(S source);
+    <S extends Source> String supply(S source, CommandParameter<S> parameter);
 
 }

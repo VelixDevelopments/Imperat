@@ -1,4 +1,4 @@
-package dev.velix.imperat;
+package dev.velix.imperat.components;
 
 import static dev.velix.imperat.TestRun.IMPERAT;
 

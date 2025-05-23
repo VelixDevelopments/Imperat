@@ -59,7 +59,7 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
     }
 
     /**
-     * Resolves source into a new valueType of source
+     * Resolves a source into a new valueType of a source
      * using {@link ImperatConfig#getSourceResolver(Type)}
      *
      * @param <R> the valueType of the resolved source

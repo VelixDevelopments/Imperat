@@ -1,7 +1,7 @@
 package dev.velix.imperat.commands.annotations;
 
 import dev.velix.imperat.TestRun;
-import dev.velix.imperat.TestSource;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Dependency;
 import dev.velix.imperat.annotations.Inherit;

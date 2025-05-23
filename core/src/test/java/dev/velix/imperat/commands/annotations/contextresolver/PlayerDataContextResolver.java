@@ -1,6 +1,6 @@
 package dev.velix.imperat.commands.annotations.contextresolver;
 
-import dev.velix.imperat.TestSource;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.exception.ImperatException;

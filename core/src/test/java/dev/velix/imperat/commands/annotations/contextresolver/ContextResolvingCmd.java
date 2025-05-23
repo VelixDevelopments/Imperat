@@ -1,7 +1,7 @@
 package dev.velix.imperat.commands.annotations.contextresolver;
 
 
-import dev.velix.imperat.TestSource;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.SubCommand;

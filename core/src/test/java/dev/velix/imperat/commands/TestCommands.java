@@ -1,7 +1,7 @@
 package dev.velix.imperat.commands;
 
 import dev.velix.imperat.TestRun;
-import dev.velix.imperat.TestSource;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.command.AttachmentMode;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;

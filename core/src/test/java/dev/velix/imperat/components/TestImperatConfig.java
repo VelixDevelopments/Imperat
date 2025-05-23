@@ -1,11 +1,12 @@
-package dev.velix.imperat;
+package dev.velix.imperat.components;
 
+import dev.velix.imperat.ConfigBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public final class TestImperatConfig extends ConfigBuilder<TestSource, TestImperat, TestImperatConfig> {
 
-    private TestImperatConfig() {
-
+    public TestImperatConfig() {
+        super();
     }
 
     @Override

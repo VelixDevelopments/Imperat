@@ -1,5 +1,6 @@
-package dev.velix.imperat;
+package dev.velix.imperat.misc;
 
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;

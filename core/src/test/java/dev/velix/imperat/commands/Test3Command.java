@@ -1,6 +1,6 @@
 package dev.velix.imperat.commands;
 
-import dev.velix.imperat.TestSource;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Default;
 import dev.velix.imperat.annotations.Named;

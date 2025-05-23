@@ -1,4 +1,4 @@
-package dev.velix.imperat;
+package dev.velix.imperat.components;
 
 import dev.velix.imperat.context.Source;
 

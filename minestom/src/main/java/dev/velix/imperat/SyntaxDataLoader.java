@@ -51,7 +51,7 @@ final class SyntaxDataLoader {
                 arg.setDefaultValue(
                     commandSender -> {
                         var supplier = parameter.getDefaultValueSupplier();
-                        return (T) supplier.supply(imperat.wrapSender(commandSender));
+                        return (T) supplier.supply(imperat.wrapSender(commandSender), parameter);
                     });
 
             }

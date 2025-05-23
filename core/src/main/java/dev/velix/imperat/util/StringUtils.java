@@ -54,6 +54,7 @@ public final class StringUtils {
         ArgumentQueue toCollect = ArgumentQueue.of(argumentsInOneLine);
         char[] chars = argumentsInOneLine.toCharArray();
         StringBuilder builder = new StringBuilder();
+
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
 
@@ -71,14 +72,18 @@ public final class StringUtils {
             }
 
             if (Character.isWhitespace(c)) {
-                toCollect.add(builder.toString());
-                builder = new StringBuilder();
+                // Only add if builder is not empty
+                if (!builder.isEmpty()) {
+                    toCollect.add(builder.toString());
+                    builder = new StringBuilder();
+                }
                 continue;
             }
 
             builder.append(c);
-
         }
+
+        // Only add if builder is not empty
         if (!builder.isEmpty()) {
             toCollect.add(builder.toString());
         }

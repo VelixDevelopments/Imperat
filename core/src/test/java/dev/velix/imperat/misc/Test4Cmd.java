@@ -1,5 +1,6 @@
-package dev.velix.imperat;
+package dev.velix.imperat.misc;
 
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Usage;
