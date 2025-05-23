@@ -49,7 +49,7 @@ public final class BukkitUtil {
 
     private static void updateCommandActualMap() throws NoSuchFieldException {
         if (COMMAND_MAP != null) {
-            KNOWN_COMMANDS = COMMAND_MAP.getClass().getDeclaredField("knownCommands");
+            KNOWN_COMMANDS = SimpleCommandMap.class.getDeclaredField("knownCommands");
             KNOWN_COMMANDS.setAccessible(true);
         }
     }
