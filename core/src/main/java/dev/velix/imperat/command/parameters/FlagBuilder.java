@@ -15,12 +15,13 @@ public final class FlagBuilder<S extends Source, T> extends ParameterBuilder<S, 
     private final ParameterType<S, T> inputType;
     private final List<String> aliases = new ArrayList<>();
     private boolean free;
-    private OptionalValueSupplier defaultValueSupplier = null;
+    private OptionalValueSupplier defaultValueSupplier;
     private SuggestionResolver<S> suggestionResolver;
 
     private FlagBuilder(String name, ParameterType<S, T> inputType) {
         super(name, ParameterTypes.flag(FlagData.create(name, List.of(), inputType)), true, false);
         this.inputType = inputType;
+        this.defaultValueSupplier = inputType.supplyDefaultValue();
     }
 
     //for switches

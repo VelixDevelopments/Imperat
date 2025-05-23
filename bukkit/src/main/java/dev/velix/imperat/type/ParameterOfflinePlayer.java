@@ -46,12 +46,6 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
     }
 
     @Override
-    public boolean matchesInput(String input, CommandParameter<BukkitSource> parameter) {
-        return input.length() <= 16;
-    }
-
-
-    @Override
     public SuggestionResolver<BukkitSource> getSuggestionResolver() {
         return playerSuggestionResolver;
     }

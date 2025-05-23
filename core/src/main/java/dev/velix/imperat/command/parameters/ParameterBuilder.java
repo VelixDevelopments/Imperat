@@ -25,7 +25,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
         this.type = type;
         this.optional = optional;
         this.greedy = greedy;
-        this.valueSupplier = OptionalValueSupplier.empty();
+        this.valueSupplier = type.supplyDefaultValue();
     }
 
     ParameterBuilder(String name, ParameterType<S, T> type, boolean optional) {

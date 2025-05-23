@@ -161,7 +161,6 @@ public final class AnnotationHelper {
     }
 
     public static @NotNull OptionalValueSupplier getOptionalValueSupplier(
-        ParameterElement parameter,
         Class<? extends OptionalValueSupplier> supplierClass
     ) throws NoSuchMethodException, InstantiationException,
         IllegalAccessException, InvocationTargetException {
@@ -186,7 +185,7 @@ public final class AnnotationHelper {
         } else if (provider != null) {
             Class<? extends OptionalValueSupplier> supplierClass = provider.value();
             try {
-                return getOptionalValueSupplier(parameter, supplierClass);
+                return getOptionalValueSupplier(supplierClass);
             } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
                      IllegalAccessException e) {
                 throw new IllegalAccessError("Optional value suppler class '" +
