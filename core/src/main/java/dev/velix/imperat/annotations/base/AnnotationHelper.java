@@ -172,7 +172,7 @@ public final class AnnotationHelper {
         return emptyConstructor.newInstance();
     }
 
-    public static <S extends Source> @NotNull OptionalValueSupplier deduceOptionalValueSupplier(
+    public static @NotNull OptionalValueSupplier deduceOptionalValueSupplier(
         ParameterElement parameter,
         Default defaultAnnotation,
         DefaultProvider provider,
