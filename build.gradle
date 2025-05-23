@@ -5,7 +5,7 @@ plugins {
     id "com.vanniktech.maven.publish" version "0.31.0"
 }
 
-def baseVersion = "1.9.1"
+def baseVersion = "1.9.2"
 def releaseSnapshots = true
 def isSnapshot = System.getenv("SNAPSHOT_BUILD") == "true"
 
