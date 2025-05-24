@@ -9,7 +9,6 @@ import dev.velix.imperat.command.returns.ReturnResolver;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.asm.DefaultMethodCallerFactory;
 import dev.velix.imperat.util.asm.MethodCaller;
 import org.jetbrains.annotations.ApiStatus;
@@ -20,7 +19,6 @@ import java.util.List;
 public class MethodCommandExecutor<S extends Source> implements CommandExecution<S> {
 
     private final Imperat<S> dispatcher;
-    private final ClassElement methodOwner;
     private final MethodElement method;
     private final MethodCaller.BoundMethodCaller boundMethodCaller;
     private final List<CommandParameter<S>> fullParameters;
@@ -35,8 +33,7 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
             this.dispatcher = dispatcher;
             this.method = method;
 
-            methodOwner = (ClassElement) method.getParent();
-            assert methodOwner != null;
+            ClassElement methodOwner = (ClassElement) method.getParent();
             boundMethodCaller = DefaultMethodCallerFactory.INSTANCE.createFor(method.getElement()).bindTo(methodOwner.getObjectInstance());
 
             this.fullParameters = fullParameters;
@@ -62,39 +59,24 @@ public class MethodCommandExecutor<S extends Source> implements CommandExecution
      * @param context the context of the command
      */
     @Override
-    public void execute(S source,
-                        ExecutionContext<S> context) throws ImperatException {
-
-        ImperatDebugger.debugForTesting("Debugging params:-");
-        for (var param : fullParameters) {
-            ImperatDebugger.debugForTesting("-%s", param.format());
-        }
-        ImperatDebugger.debugForTesting("SIZE=%s", fullParameters.size());
+    public void execute(S source, ExecutionContext<S> context) throws ImperatException {
 
         var instances = AnnotationHelper.loadParameterInstances(
             dispatcher, fullParameters,
             source, context, method
         );
-        for (int i = 0; i < instances.length; i++) {
-            var instance = instances[i];
-            ImperatDebugger.debugForTesting("Object #%s = '%s', type='%s'", i, instance, instance != null ? instances[i].getClass().getName() : "N/A");
+
+        Object returned = boundMethodCaller.call(instances);
+        if (method.getReturnType() == void.class) {
+            return;
         }
 
-        try {
-            Object returned = boundMethodCaller.call(instances);
-            if (method.getReturnType() == void.class) {
-                return;
-            }
-
-            ReturnResolver<S, Object> returnResolver = context.imperatConfig().getReturnResolver(method.getReturnType());
-            if (returnResolver == null) {
-                return;
-            }
-
-            returnResolver.handle(context, method, returned);
-        } catch (Exception ex) {
-            ImperatDebugger.error(methodOwner.getElement(), method.getElement().getName(), ex);
+        ReturnResolver<S, Object> returnResolver = context.imperatConfig().getReturnResolver(method.getReturnType());
+        if (returnResolver == null) {
+            return;
         }
+
+        returnResolver.handle(context, method, returned);
 
     }
 

@@ -36,7 +36,6 @@ final class MethodHandlesCallerFactory implements MethodCallerFactory {
                     try {
                         return handle.invokeWithArguments(args);
                     } catch (final Throwable e) {
-                        e.printStackTrace();
                         throw new RuntimeException(e);
                     }
                 }
