@@ -74,6 +74,10 @@ public final class VelocityImperat extends BaseImperat<VelocitySource> {
         return proxyServer;
     }
 
+    public PluginContainer getPlugin() {
+        return plugin;
+    }
+
     @Override
     public void shutdownPlatform() {
         plugin.getExecutorService().shutdown();
