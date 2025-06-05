@@ -213,7 +213,7 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>, B ex
      * @return The current instance of {@code ConfigBuilder}, allowing method chaining.
      */
     // Parameter Type
-    public <T> B parameterType(Class<T> type, ParameterType<S, T> resolver) {
+    public <T> B parameterType(Type type, ParameterType<S, T> resolver) {
         config.registerParamType(type, resolver);
         return (B) this;
     }

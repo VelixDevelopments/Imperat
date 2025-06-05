@@ -56,7 +56,7 @@ public sealed interface ResolverRegistrar<S extends Source> permits ImperatConfi
      * @param resolver the resolver for this value
      * @param <T>      the valueType of value being resolved from context
      */
-    <T> void registerParamType(Class<T> type, @NotNull ParameterType<S, T> resolver);
+    <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver);
 
     /**
      * Registers a supplier function that provides new instances of a specific Collection type.

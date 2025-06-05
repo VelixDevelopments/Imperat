@@ -36,6 +36,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.Registry;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -357,11 +358,14 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
      * @param resolver the resolver for this value
      */
     @Override
-    public <T> void registerParamType(Class<T> type, @NotNull ParameterType<S, T> resolver) {
+    @SuppressWarnings("unchecked")
+    public <T> void registerParamType(Type type, @NotNull ParameterType<S, T> resolver) {
         Preconditions.notNull(type, "type");
         Preconditions.notNull(resolver, "resolver");
         paramTypeRegistry.registerResolver(type, ()-> resolver);
-        paramTypeRegistry.registerArrayInitializer(type, (length) -> (Object[]) Array.newInstance(type, length));
+
+        Class<T> rawType = (Class<T>) TypeWrap.of(type).getRawType();
+        paramTypeRegistry.registerArrayInitializer(rawType, (length) -> (Object[]) Array.newInstance(rawType, length));
     }
 
     /**
