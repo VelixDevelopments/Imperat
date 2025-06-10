@@ -6,14 +6,20 @@ import java.util.function.IntUnaryOperator;
 
 public final class Cursor<S extends Source> {
 
-    CommandInputStream<S> stream;
+    int maxParamLength, maxRawLength;
     int parameter, raw;
 
-    Cursor(CommandInputStream<S> stream, int parameter, int raw) {
-        this.stream = stream;
+    Cursor(int maxParamLength, int maxRawLength, int parameter, int raw) {
+        this.maxParamLength = maxParamLength;
+        this.maxRawLength = maxRawLength;
         this.parameter = parameter;
         this.raw = raw;
     }
+
+    Cursor(int maxParamLength, int maxRawLength) {
+        this(maxParamLength, maxRawLength, 0, 0);
+    }
+
 
     void shift(ShiftTarget shift, IntUnaryOperator operator) {
         switch (shift) {
@@ -46,15 +52,15 @@ public final class Cursor<S extends Source> {
     }
 
     boolean isLast(ShiftTarget shiftTarget) {
-        return isLast(shiftTarget, stream.parametersLength(), stream.rawsLength());
+        return isLast(shiftTarget, maxParamLength, maxRawLength);
     }
 
     int maxRaws() {
-        return stream.rawsLength();
+        return maxRawLength;
     }
 
     int maxParameters() {
-        return stream.parametersLength();
+        return maxParamLength;
     }
 
     @Override
@@ -74,4 +80,7 @@ public final class Cursor<S extends Source> {
         return result;
     }
 
+    public Cursor<S> copy() {
+        return new Cursor<>(maxParamLength, maxRawLength, parameter, raw);
+    }
 }

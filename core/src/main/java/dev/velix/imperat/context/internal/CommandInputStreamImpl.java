@@ -24,17 +24,21 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters) {
+        this(queue, parameters, new Cursor<>(parameters.size(), queue.size()), calculateRawStartPositions(queue, queue.getOriginalRaw()));
+    }
+
+    CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters, Cursor<S> cursor, int[] rawStartPositions) {
         this.queue = queue;
         this.inputLine = queue.getOriginalRaw();
         this.parametersList = parameters;
-        this.cursor = new Cursor<>(this, 0, 0);
-        this.rawStartPositions = calculateRawStartPositions();
+        this.cursor = cursor;
+        this.rawStartPositions = rawStartPositions;
     }
 
     /**
      * Calculate the starting position of each raw argument in the input line
      */
-    private int[] calculateRawStartPositions() {
+    private static int[] calculateRawStartPositions(ArgumentQueue queue, String inputLine) {
         int[] positions = new int[queue.size()];
         int currentPos = 0;
 
@@ -52,7 +56,7 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
                 // For quoted strings, the raw argument doesn't include quotes
                 positions[i] = currentPos + 1; // Position after opening quote
                 // Skip to after the closing quote
-                currentPos = findClosingQuote(currentPos) + 1;
+                currentPos = findClosingQuote(currentPos, inputLine) + 1;
             } else {
                 // For unquoted arguments
                 positions[i] = currentPos;
@@ -63,11 +67,11 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
         return positions;
     }
 
-    private boolean isQuoteChar(char c) {
+    private static boolean isQuoteChar(char c) {
         return c == '"' || c == '\'';
     }
 
-    private int findClosingQuote(int openQuotePos) {
+    private static int findClosingQuote(int openQuotePos, String inputLine) {
         char quoteChar = inputLine.charAt(openQuotePos);
         for (int i = openQuotePos + 1; i < inputLine.length(); i++) {
             if (inputLine.charAt(i) == quoteChar) {
@@ -233,5 +237,13 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     @Override
     public boolean skipLetter() {
         return popLetter().isPresent();
+    }
+
+    /**
+     * @return A copy of {@link CommandInputStream}
+     */
+    @Override
+    public CommandInputStream<S> copy() {
+        return new CommandInputStreamImpl<>(this.queue.copy(), List.copyOf(parametersList), cursor.copy(), rawStartPositions);
     }
 }

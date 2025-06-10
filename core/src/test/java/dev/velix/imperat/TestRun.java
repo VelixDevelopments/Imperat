@@ -11,6 +11,8 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.tree.CommandDispatch;
+import dev.velix.imperat.commands.ParameterDuration;
+import dev.velix.imperat.commands.RankCommand;
 import dev.velix.imperat.misc.CustomEnum;
 import dev.velix.imperat.misc.CustomEnumParameterType;
 import dev.velix.imperat.commands.EmptyCmd;
@@ -73,6 +75,7 @@ public class TestRun {
                 .contextResolver(PlayerData.class, new PlayerDataContextResolver())
                 .parameterType(CustomEnum.class, new CustomEnumParameterType())
                 .parameterType(Duration.class, new DurationParameterType())
+                .parameterType(dev.velix.imperat.commands.Duration.class, new ParameterDuration<>())
                 .build();
 
         IMPERAT.registerAnnotationReplacer(MyCustomAnnotation.class,(element, ann)-> {
@@ -532,6 +535,38 @@ public class TestRun {
         String usage3 = "Hello world, im mazen";
 
         testCommand("motd",new GuildMOTDCommand(),usage2, usage3);
+    }
+
+    @Test
+    public void addPermRankCmd() {
+        System.out.println("-----------------------------");
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new RankCommand());
+        });
+
+        var cmd = IMPERAT.getCommand("rank");
+        Assertions.assertNotNull(cmd);
+        debugCommand(cmd);
+
+        System.out.println("Executing '/rank addperm mod server.fly'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("rank", "addperm mod server.fly"));
+
+        System.out.println("----------------");
+
+        System.out.println("Executing '/rank addperm mod server.fly -duration 1d -force'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("rank", "addperm mod server.fly -duration 1d -force"));
+
+        System.out.println("----------------");
+
+        System.out.println("Executing '/rank addperm mod server.fly -duration 1d'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("rank", "addperm mod server.fly -duration 1d"));
+
+        System.out.println("----------------");
+
+        System.out.println("Executing '/rank addperm mod server.fly -force'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("rank", "addperm mod server.fly -force"));
+
+
     }
 }
 

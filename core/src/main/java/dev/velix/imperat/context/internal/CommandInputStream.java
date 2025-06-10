@@ -265,6 +265,11 @@ public interface CommandInputStream<S extends Source> {
     }
 
     /**
+     * @return A copy of {@link CommandInputStream}
+     */
+    CommandInputStream<S> copy();
+
+    /**
      * Reads the current raw input.
      *
      * @return The current raw input.
