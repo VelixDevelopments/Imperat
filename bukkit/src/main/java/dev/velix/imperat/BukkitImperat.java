@@ -96,7 +96,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         super.registerCommand(command);
 
         //let's make a safety check for the plugin.yml
-        if (paperPlugin && plugin instanceof JavaPlugin javaPlugin) {
+        if (!paperPlugin && plugin instanceof JavaPlugin javaPlugin) {
             var existingPluginYamlCmd = javaPlugin.getCommand(command.name().toLowerCase());
             if (existingPluginYamlCmd != null) {
                 throw new IllegalArgumentException("Command with name '" + command.name() + "' already exists in plugin.yml!");
