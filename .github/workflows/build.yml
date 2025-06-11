@@ -24,7 +24,7 @@ jobs:
           java-version: 17
 
       - name: 📐 Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       # Cache Gradle dependencies and wrapper (skip for pull requests)
       - name: Cache Gradle dependencies
