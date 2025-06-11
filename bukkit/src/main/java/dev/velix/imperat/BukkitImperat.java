@@ -10,6 +10,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
+import java.util.jar.JarFile;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,6 +19,7 @@ import java.util.Map;
 public final class BukkitImperat extends BaseImperat<BukkitSource> {
 
     private final Plugin plugin;
+    private final boolean paperPlugin;
     private final AdventureProvider<CommandSender> adventureProvider;
     private BukkitBrigadierManager brigadierManager;
     private Map<String, org.bukkit.command.Command> bukkitCommands = new HashMap<>();
@@ -35,6 +38,7 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     ) {
         super(config);
         this.plugin = plugin;
+        this.paperPlugin = isPaperPlugin(plugin);
         this.adventureProvider = adventureProvider;
 
         ImperatDebugger.setLogger(plugin.getLogger());
@@ -52,10 +56,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         }
 
         //registering automatic help topic:
-        if(injectCustomHelp) {
+        if (injectCustomHelp) {
             Bukkit.getHelpMap().registerHelpTopicFactory(InternalBukkitCommand.class, new ImperatBukkitHelpTopic.Factory(this));
         }
-
     }
 
     /**
@@ -93,9 +96,9 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         super.registerCommand(command);
 
         //let's make a safety check for the plugin.yml
-        if (plugin instanceof JavaPlugin javaPlugin) {
+        if (paperPlugin && plugin instanceof JavaPlugin javaPlugin) {
             var existingPluginYamlCmd = javaPlugin.getCommand(command.name().toLowerCase());
-            if(existingPluginYamlCmd != null) {
+            if (existingPluginYamlCmd != null) {
                 throw new IllegalArgumentException("Command with name '" + command.name() + "' already exists in plugin.yml!");
             }
         }
@@ -155,8 +158,20 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
     }
 
     private void applyBrigadier() {
-        if(Version.isOrOver(13)) {
+        if (Version.isOrOver(13)) {
             brigadierManager = BukkitBrigadierManager.load(this);
+        }
+    }
+
+    private boolean isPaperPlugin(Plugin plugin) {
+        if (!Version.IS_PAPER || Version.isOrBelow(13)) {
+            return false;
+        }
+        try (JarFile jar = new JarFile(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().getPath())) {
+            return jar.getEntry("paper-plugin.yml") != null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
