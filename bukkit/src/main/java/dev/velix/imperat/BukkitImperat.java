@@ -10,7 +10,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.jar.JarFile;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -167,9 +170,14 @@ public final class BukkitImperat extends BaseImperat<BukkitSource> {
         if (!Version.IS_PAPER || Version.isOrBelow(13)) {
             return false;
         }
-        try (JarFile jar = new JarFile(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().getPath())) {
-            return jar.getEntry("paper-plugin.yml") != null;
-        } catch (IOException e) {
+
+        try {
+            URI uri = plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
+
+            try (JarFile jar = new JarFile(new File(uri))) {
+                return jar.getEntry("paper-plugin.yml") != null;
+            }
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             return false;
         }
