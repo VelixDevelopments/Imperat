@@ -1,8 +1,6 @@
 package dev.velix.imperat.exception.parse;
 
-import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.ParseException;
-
 import java.util.Set;
 
 public class ValueOutOfConstraintException extends ParseException {

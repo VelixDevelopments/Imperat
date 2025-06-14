@@ -60,17 +60,17 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
 
             String inputX = stream.readInput();
             Double x = doubleParser.resolve(context, stream, inputX);
-            if(x == null ) throw new InvalidLocationFormatException(input, InvalidLocationFormatException.Reason.INVALID_X_COORD, inputX, null, null);
+            if(x == null ) throw new InvalidLocationFormatException(input, InvalidLocationFormatException.Reason.INVALID_X_COORDINATE, inputX, null, null);
             stream.skipRaw();
 
             String inputY = stream.readInput();
             Double y = doubleParser.resolve(context, stream, inputY);
-            if(y == null ) throw new InvalidLocationFormatException(input, InvalidLocationFormatException.Reason.INVALID_Y_COORD, null, inputY, null);
+            if(y == null ) throw new InvalidLocationFormatException(input, InvalidLocationFormatException.Reason.INVALID_Y_COORDINATE, null, inputY, null);
             stream.skipRaw();
 
             String inputZ = stream.readInput();
             Double z = doubleParser.resolve(context, stream, inputZ);
-            if(z == null) throw new InvalidLocationFormatException(input, InvalidLocationFormatException.Reason.INVALID_Z_COORD, null, null, inputZ);
+            if(z == null) throw new InvalidLocationFormatException(input, InvalidLocationFormatException.Reason.INVALID_Z_COORDINATE, null, null, inputZ);
 
             return new Location(world, x, y, z);
         }

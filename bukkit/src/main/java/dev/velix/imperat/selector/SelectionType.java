@@ -5,7 +5,6 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.OnlyPlayerAllowedException;
-import dev.velix.imperat.exception.SourceException;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

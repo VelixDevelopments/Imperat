@@ -37,11 +37,11 @@ public class InvalidLocationFormatException extends ParseException {
 
     public enum Reason {
 
-        INVALID_X_COORD,
+        INVALID_X_COORDINATE,
 
-        INVALID_Y_COORD,
+        INVALID_Y_COORDINATE,
 
-        INVALID_Z_COORD,
+        INVALID_Z_COORDINATE,
 
         NO_WORLDS_AVAILABLE,
 

@@ -69,9 +69,9 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
 
             InvalidLocationFormatException.Reason reason = exception.getReason();
             String msg = switch (reason) {
-                case INVALID_X_COORD -> "Invalid X coordinate '" + exception.getInputX() + "'";
-                case INVALID_Y_COORD -> "Invalid Y coordinate '" + exception.getInputY() + "'";
-                case INVALID_Z_COORD -> "Invalid Z coordinate '" + exception.getInputZ() + "'";
+                case INVALID_X_COORDINATE -> "Invalid X coordinate '" + exception.getInputX() + "'";
+                case INVALID_Y_COORDINATE -> "Invalid Y coordinate '" + exception.getInputY() + "'";
+                case INVALID_Z_COORDINATE -> "Invalid Z coordinate '" + exception.getInputZ() + "'";
                 case NO_WORLDS_AVAILABLE -> "Failed to fetch the world of the given location";
                 case WRONG_FORMAT -> "Wrong location format!";
             };
