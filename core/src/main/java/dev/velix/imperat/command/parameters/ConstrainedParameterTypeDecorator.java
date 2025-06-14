@@ -6,7 +6,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.parse.ValueOutOfConstraintException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
         if(ConstrainedParameterTypeDecorator.contains(input, allowedValues, caseSensitive)) {
             return original.resolve(context, commandInputStream, commandInputStream.readInput());
         }else {
-            throw new SourceException("Input '%s' is not one of: [" + String.join(",",  allowedValues) + "]", input);
+            throw new ValueOutOfConstraintException(input, allowedValues);
         }
     }
 

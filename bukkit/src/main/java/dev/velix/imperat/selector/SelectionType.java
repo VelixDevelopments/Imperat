@@ -4,6 +4,7 @@ import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.SourceException;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -42,7 +43,7 @@ public interface SelectionType {
             @NotNull CommandInputStream<BukkitSource> commandInputStream
         ) throws ImperatException {
             if (context.source().isConsole()) {
-                throw new SourceException("Only players can do this !");
+                throw new OnlyPlayerAllowedException();
             }
             return List.of((E) context.source().asPlayer());
         }
@@ -61,7 +62,7 @@ public interface SelectionType {
             @NotNull CommandInputStream<BukkitSource> commandInputStream
         ) throws ImperatException {
             if (context.source().isConsole()) {
-                throw new SourceException("Only players can do this !");
+                throw new OnlyPlayerAllowedException();
             }
 
             Player sender = context.source().asPlayer();
@@ -131,7 +132,7 @@ public interface SelectionType {
             @NotNull CommandInputStream<BukkitSource> commandInputStream
         ) throws ImperatException {
             if (context.source().isConsole()) {
-                throw new SourceException("Only players can do this !");
+                throw new OnlyPlayerAllowedException();
             }
             Player player = context.source().asPlayer();
             World world = player.getWorld();

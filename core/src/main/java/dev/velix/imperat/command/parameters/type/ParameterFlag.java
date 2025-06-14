@@ -8,7 +8,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.MissingFlagInputException;
 import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +73,8 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Extrac
                             flagParameter));
                 }
             }else {
-                throw new SourceException(SourceException.ErrorLevel.SEVERE, "Please enter the value for flag '%s'", rawFlag);
+                //"Please enter the value for flag '%s'"
+                throw new MissingFlagInputException(flagParameter, rawFlag);
             }
         } else {
             objInput = true;

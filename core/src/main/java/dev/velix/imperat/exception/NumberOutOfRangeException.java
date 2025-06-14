@@ -3,28 +3,34 @@ package dev.velix.imperat.exception;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 
-public class NumberOutOfRangeException extends SourceException {
+public class NumberOutOfRangeException extends ParseException {
+
+    private final NumericParameter<?> parameter;
+    private final Number value;
+    private final NumericRange range;
 
     public NumberOutOfRangeException(
-        final NumericParameter<?> parameter,
-        final Number value,
-        final NumericRange range
+            final String originalInput,
+            final NumericParameter<?> parameter,
+            final Number value,
+            final NumericRange range
     ) {
-        super("Value '" + value + "' entered for parameter '" + parameter.format() + "' must be " + formatRange(range));
+        super(originalInput);
+        this.parameter = parameter;
+        this.value = value;
+        this.range = range;
     }
 
-    private static String formatRange(final NumericRange range) {
-        final StringBuilder builder = new StringBuilder();
-        if (range.getMin() != Double.MIN_VALUE && range.getMax() != Double.MAX_VALUE)
-            builder.append("within ").append(range.getMin()).append('-').append(range.getMax());
-        else if (range.getMin() != Double.MIN_VALUE)
-            builder.append("at least '").append(range.getMin()).append("'");
-        else if (range.getMax() != Double.MAX_VALUE)
-            builder.append("at most '").append(range.getMax()).append("'");
-        else
-            builder.append("(Open range)");
+    public Number getValue() {
+        return value;
+    }
 
-        return builder.toString();
+    public NumericRange getRange() {
+        return range;
+    }
+
+    public NumericParameter<?> getParameter() {
+        return parameter;
     }
 
 }

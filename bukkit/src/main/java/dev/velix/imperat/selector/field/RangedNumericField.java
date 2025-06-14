@@ -58,9 +58,6 @@ public final class RangedNumericField<N extends Number> extends AbstractField<Ra
                 }
                 String minStr = minMaxSplit[0], maxStr = minMaxSplit[1];
 
-                ImperatDebugger.debug("Min=" + minStr);
-                ImperatDebugger.debug("Max=" + maxStr);
-
                 if (!TypeUtility.isNumber(minStr)) {
                     throw new SourceException("Invalid min-value '%s'", minStr);
                 }

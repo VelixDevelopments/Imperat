@@ -1,6 +1,6 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.command.CommandSender;
@@ -22,7 +22,7 @@ public final class MinestomConfigBuilder extends ConfigBuilder<MinestomSource, M
 
         config.registerSourceResolver(Player.class, source -> {
             if (source.isConsole()) {
-                throw new SourceException("Only players are allowed to do this!");
+                throw new OnlyPlayerAllowedException();
             }
             return source.asPlayer();
         });

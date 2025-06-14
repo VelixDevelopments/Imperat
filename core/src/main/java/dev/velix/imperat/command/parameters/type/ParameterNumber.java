@@ -6,6 +6,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.parse.InvalidNumberFormatException;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
         try {
             return parse(input);
         } catch (NumberFormatException ex) {
-            throw new SourceException("Invalid " + display() + " format input '%s'", input);
+            throw new InvalidNumberFormatException(input,ex, display(), this.wrappedType());
         }
     }
 

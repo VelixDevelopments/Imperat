@@ -8,7 +8,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.selector.UnknownEntitySelectionTypeException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.selector.EntityCondition;
 import dev.velix.imperat.selector.SelectionParameterInput;
@@ -81,7 +81,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
         //update current
 
         if (type == SelectionType.UNKNOWN) {
-            throw new SourceException("Unknown selection type '%s'", commandInputStream.currentLetter().orElseThrow());
+            throw new UnknownEntitySelectionTypeException(commandInputStream.currentLetter().orElseThrow() + "");
         }
 
         List<SelectionParameterInput<?>> inputParameters = new ArrayList<>();

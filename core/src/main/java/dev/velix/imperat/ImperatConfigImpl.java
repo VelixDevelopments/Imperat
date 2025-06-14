@@ -2,6 +2,7 @@ package dev.velix.imperat;
 
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.*;
+import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
@@ -15,15 +16,28 @@ import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.exception.CooldownException;
+import dev.velix.imperat.exception.InvalidSelectorFieldCriteriaFormat;
 import dev.velix.imperat.exception.InvalidSourceException;
 import dev.velix.imperat.exception.InvalidSyntaxException;
 import dev.velix.imperat.exception.InvalidUUIDException;
+import dev.velix.imperat.exception.MissingFlagInputException;
 import dev.velix.imperat.exception.NoHelpException;
 import dev.velix.imperat.exception.NoHelpPageException;
+import dev.velix.imperat.exception.NumberOutOfRangeException;
+import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.PermissionDeniedException;
 import dev.velix.imperat.exception.SelfHandledException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.ThrowableResolver;
+import dev.velix.imperat.exception.UnknownFlagException;
+import dev.velix.imperat.exception.UnknownSelectorFieldException;
+import dev.velix.imperat.exception.parse.InvalidBooleanException;
+import dev.velix.imperat.exception.parse.InvalidEnumException;
+import dev.velix.imperat.exception.parse.InvalidNumberFormatException;
+import dev.velix.imperat.exception.parse.UnknownSubCommandException;
+import dev.velix.imperat.exception.parse.ValueOutOfConstraintException;
+import dev.velix.imperat.exception.parse.InvalidMapEntryFormatException;
+import dev.velix.imperat.exception.parse.WordOutOfRestrictionsException;
 import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderRegistry;
@@ -108,6 +122,69 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
             throw new UnsupportedOperationException("Couldn't find any source resolver for valueType `"
                 + exception.getTargetType().getTypeName() + "'");
         });
+
+        this.setThrowableResolver(UnknownFlagException.class,(ex, imperat, context)-> {
+            context.source().error("Unknown flag '" + ex.getInput() + "'");
+        });
+
+        this.setThrowableResolver(MissingFlagInputException.class,(ex, imperat, context)-> {
+            context.source().error("Please enter the value for flag '" + ex.getInput() + "'");
+        });
+
+        this.setThrowableResolver(OnlyPlayerAllowedException.class, (ex, imperat, context)-> {
+            context.source().error("Only players can do this!");
+        });
+
+        this.setThrowableResolver(ValueOutOfConstraintException.class, (ex, imperat, context)-> {
+            context.source().error("Input '" + ex.getInput() + "' is not one of: [" + String.join(",",  ex.getAllowedValues()) + "]");
+        });
+
+        this.setThrowableResolver(WordOutOfRestrictionsException.class, (ex, imperat, context)-> {
+            context.source().error("Word '" + ex.getInput() + "' is not within the given restrictions=" + String.join(",",ex.getRestrictions()));
+        });
+
+        this.setThrowableResolver(UnknownSubCommandException.class, (exception, imperat, context) -> {
+            context.source().error("Unknown sub-command '" + exception.getInput() + "'");
+        });
+
+        this.setThrowableResolver(InvalidMapEntryFormatException.class, (exception, imperat, context) -> {
+            InvalidMapEntryFormatException.Reason reason = exception.getReason();
+            String extraMsg = "";
+            if(reason == InvalidMapEntryFormatException.Reason.MISSING_SEPARATOR) {
+                extraMsg = "entry doesn't contain '" + exception.getRequiredSeparator() + "'";
+            }else if(reason == InvalidMapEntryFormatException.Reason.NOT_TWO_ELEMENTS) {
+                extraMsg = "entry is not made of 2 elements";
+            }
+            context.source().error("Invalid map entry '" + exception.getInput() + "'" + (!extraMsg.isEmpty() ? ", " + extraMsg : ""));
+        });
+
+        this.setThrowableResolver(InvalidBooleanException.class, (exception, imperat, context) -> {
+            context.source().error("Invalid boolean '" + exception.getInput() + "'");
+        });
+
+        this.setThrowableResolver(InvalidEnumException.class, (exception, imperat, context) -> {
+            context.source().error("Invalid " + exception.getEnumType().getTypeName() + " '" + exception.getInput() + "'");
+        });
+
+        this.setThrowableResolver(InvalidNumberFormatException.class, (exception, imperat, context) -> {
+            context.source().error("Invalid " + exception.getNumberTypeDisplay() + " format '" + exception.getInput() + "'");
+        });
+
+        this.setThrowableResolver(NumberOutOfRangeException.class, ((exception, imperat, context) -> {
+            NumericRange range = exception.getRange();
+            final StringBuilder builder = new StringBuilder();
+            if (range.getMin() != Double.MIN_VALUE && range.getMax() != Double.MAX_VALUE)
+                builder.append("within ").append(range.getMin()).append('-').append(range.getMax());
+            else if (range.getMin() != Double.MIN_VALUE)
+                builder.append("at least '").append(range.getMin()).append("'");
+            else if (range.getMax() != Double.MAX_VALUE)
+                builder.append("at most '").append(range.getMax()).append("'");
+            else
+                builder.append("(Open range)");
+
+            String rangeFormatted = builder.toString();
+            context.source().error("Value '" + exception.getValue() + "' entered for parameter '" + exception.getParameter().format() + "' must be " + rangeFormatted);
+        }));
 
         this.setThrowableResolver(
             SourceException.class,

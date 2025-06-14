@@ -4,7 +4,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.types.ParameterPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public final class VelocityConfigBuilder extends ConfigBuilder<VelocitySource, V
 
         config.registerSourceResolver(Player.class, (source) -> {
             if (source.isConsole()) {
-                throw new SourceException("Only players are allowed to do this!");
+                throw new OnlyPlayerAllowedException();
             }
             return source.asPlayer();
         });

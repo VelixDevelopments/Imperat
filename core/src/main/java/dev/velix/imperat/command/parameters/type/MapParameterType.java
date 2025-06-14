@@ -4,8 +4,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SourceException;
-import dev.velix.imperat.util.ImperatDebugger;
+import dev.velix.imperat.exception.parse.InvalidMapEntryFormatException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,15 +44,16 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
 
             String raw = commandInputStream.currentRaw().orElse(null);
             if(raw == null) break;
-            //if(context.imperatConfig().getPar)
 
             if(!raw.contains(ENTRY_SEPARATOR)) {
-                throw new SourceException("Invalid map entry '%s', entry doesn't contain '%s'", raw, ENTRY_SEPARATOR);
+                throw new InvalidMapEntryFormatException(raw, ENTRY_SEPARATOR, InvalidMapEntryFormatException.Reason.MISSING_SEPARATOR);
+                //throw new SourceException("Invalid map entry '%s', entry doesn't contain '%s'", raw, ENTRY_SEPARATOR);
             }
 
             String[] split = raw.split(ENTRY_SEPARATOR);
             if(split.length != 2) {
-                throw new SourceException("Invalid map entry '%s', entry is not made of 2 elements", raw);
+                throw new InvalidMapEntryFormatException(raw,ENTRY_SEPARATOR, InvalidMapEntryFormatException.Reason.NOT_TWO_ELEMENTS);
+                //throw new SourceException("Invalid map entry '%s', entry is not made of 2 elements", raw);
             }
 
             String keyRaw = split[0];
@@ -64,9 +64,6 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
 
             K key = keyResolver.resolve(context, keySubStream, keyRaw);
             V value = valueResolver.resolve(context, valueSubStream, valueRaw);
-
-            ImperatDebugger.debug("MAP-TYPE => Adding key '%s' to value '%s'", keyRaw, valueRaw);
-            ImperatDebugger.debug("MAP-TYPE => KEY-VALUE:'%s', VALUE-VALUE='%s'", key, value);
 
             newMap.put(key, value);
 

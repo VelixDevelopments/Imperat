@@ -12,7 +12,8 @@ import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.UnknownFlagException;
+import dev.velix.imperat.exception.parse.UnknownSubCommandException;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.Nullable;
@@ -104,7 +105,7 @@ final class SmartUsageResolve<S extends Source> {
             if (currentParameter.isCommand()) {
                 Command<S> parameterSubCmd = (Command<S>) currentParameter;
                 if (parameterSubCmd.hasName(currentRaw)) this.command = parameterSubCmd;
-                else throw new SourceException("Unknown sub-command '" + currentRaw + "'");
+                else throw new UnknownSubCommandException(currentRaw);
                 stream.skip();
                 continue;
             }
@@ -223,7 +224,7 @@ final class SmartUsageResolve<S extends Source> {
         CommandParameter<S> lookedUpFlagParameter = findMatchingFlagParameter(currentParameter, currentRaw, parameterFlagType);
 
         if (lookedUpFlagParameter == null) {
-            throw new SourceException("Unknown flag '%s'", currentRaw);
+            throw new UnknownFlagException(currentRaw);
         }
 
         if (!lookedUpFlagParameter.asFlagParameter().name().equals(currentParameter.name())) {
@@ -258,16 +259,12 @@ final class SmartUsageResolve<S extends Source> {
                 );
         ImperatDebugger.debug("Resolving flag '%s' default input value='%s'", flagDataFromRaw.name(), defValue);
         context.resolveFlag(new ExtractedInputFlag(flagDataFromRaw,null, defValue, flagValueResolved));
-
-//        if(enteredFlagParameter.isFlag()) {
-//            stream.skipRaw();
-//        }
     }
 
-    private void handleUnknownFlag(String currentRaw) throws SourceException {
+    private void handleUnknownFlag(String currentRaw) throws ImperatException {
         if (stream.peekParameter().isEmpty()) {
             // Last parameter - unknown flag
-            throw new SourceException("Unknown flag '%s'", currentRaw);
+            throw new UnknownFlagException(currentRaw);
         } else {
             // Skip parameter for unknown flag
             ImperatDebugger.debug("Skipping param for flag raw '%s'", currentRaw);

@@ -3,6 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BungeeAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
+import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
@@ -45,7 +46,7 @@ public final class BungeeConfigBuilder extends ConfigBuilder<BungeeSource, Bunge
         config.registerSourceResolver(CommandSender.class, BungeeSource::origin);
         config.registerSourceResolver(ProxiedPlayer.class, (source) -> {
             if (source.isConsole()) {
-                throw new SourceException("Only players are allowed to do this!");
+                throw new OnlyPlayerAllowedException();
             }
             return source.asPlayer();
         });

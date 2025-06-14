@@ -6,6 +6,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.parse.WordOutOfRestrictionsException;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -24,12 +25,13 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
 
     @Override
     public @Nullable String resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
-        var nextRaw = commandInputStream.currentRaw();
         if (restrictions.isEmpty()) {
-            return nextRaw.orElse(null);
+            return input;
         }
-        return nextRaw.filter(restrictions::contains)
-            .orElseThrow(() -> new SourceException("Word '%s' is not within the given restrictions=%s", nextRaw, restrictions.toString()));
+        if(!restrictions.contains(input)) {
+            throw new WordOutOfRestrictionsException(input, restrictions);
+        }
+        return input;
     }
 
     @Override

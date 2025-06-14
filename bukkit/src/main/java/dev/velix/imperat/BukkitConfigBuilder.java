@@ -3,10 +3,14 @@ package dev.velix.imperat;
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.CastingAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.InvalidLocationFormatException;
+import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.UnknownOfflinePlayerException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.exception.UnknownWorldException;
+import dev.velix.imperat.exception.selector.InvalidSelectorFieldCriteriaFormat;
+import dev.velix.imperat.exception.selector.UnknownEntitySelectionTypeException;
+import dev.velix.imperat.exception.selector.UnknownSelectorFieldException;
 import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.type.ParameterLocation;
 import dev.velix.imperat.type.ParameterOfflinePlayer;
@@ -42,13 +46,39 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         config.registerSourceResolver(CommandSender.class, BukkitSource::origin);
         config.registerSourceResolver(Player.class, (source) -> {
             if (source.isConsole()) {
-                throw new SourceException("Only players are allowed to do this !");
+                throw new OnlyPlayerAllowedException();
             }
             return source.asPlayer();
         });
     }
 
     private void addThrowableHandlers() {
+        config.setThrowableResolver(InvalidSelectorFieldCriteriaFormat.class, (ex, imperat, context)-> {
+            context.source().error("Invalid field-criteria format '" + ex.getFieldCriteriaInput() + "'");
+        });
+
+        config.setThrowableResolver(UnknownSelectorFieldException.class, (ex, imperat, context)-> {
+            context.source().error("Unknown selection field '" + ex.getFieldEntered() + "'");
+        });
+
+        config.setThrowableResolver(UnknownEntitySelectionTypeException.class, ((exception, imperat, context) -> {
+            context.source().error("Unknown selection type '" + exception.getInput() + "'");
+        }));
+
+        config.setThrowableResolver(InvalidLocationFormatException.class, (exception, imperat, context) -> {
+
+            InvalidLocationFormatException.Reason reason = exception.getReason();
+            String msg = switch (reason) {
+                case INVALID_X_COORD -> "Invalid X coordinate '" + exception.getInputX() + "'";
+                case INVALID_Y_COORD -> "Invalid Y coordinate '" + exception.getInputY() + "'";
+                case INVALID_Z_COORD -> "Invalid Z coordinate '" + exception.getInputZ() + "'";
+                case NO_WORLDS_AVAILABLE -> "Failed to fetch the world of the given location";
+                case WRONG_FORMAT -> "Wrong location format!";
+            };
+
+            context.source().reply("&4Failed to parse location '" + exception.getInput() + "' due to: &c" + msg);
+        });
+
         config.setThrowableResolver(
             UnknownPlayerException.class, (exception, imperat, context) ->
                 context.source().error("A player with the name '" + exception.getName() + "' doesn't seem to be online")
@@ -61,6 +91,7 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
             UnknownWorldException.class, (exception, imperat, context) ->
                 context.source().error("A world with the name '" + exception.getName() + "' doesn't seem to exist")
         );
+
     }
 
     private void registerValueResolvers() {

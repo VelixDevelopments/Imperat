@@ -6,6 +6,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.parse.InvalidEnumException;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +35,7 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
         try {
             return Enum.valueOf((Class<? extends Enum>) enumType, input);
         } catch (IllegalArgumentException | EnumConstantNotPresentException ex) {
-            throw new SourceException("Invalid " + enumType.getTypeName() + " '" + input + "'");
+            throw new InvalidEnumException(input, (Class<? extends Enum>) enumType);
         }
     }
 

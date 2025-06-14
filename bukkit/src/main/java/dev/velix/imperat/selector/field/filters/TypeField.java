@@ -42,7 +42,7 @@ final class TypeField extends PredicateField<EntityType> {
         try {
             return EntityType.valueOf(value.toUpperCase());
         } catch (EnumConstantNotPresentException ex) {
-            throw new SourceException("Unknown type '%s'", value);
+            throw new SourceException("Unknown entity-type '%s'", value);
         }
     }
 }

@@ -6,6 +6,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.parse.InvalidBooleanException;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +44,7 @@ public final class ParameterBoolean<S extends Source> extends BaseParameterType<
         if (allowVariants) {
             return VARIANTS.get(raw.toLowerCase());
         } else {
-            throw new SourceException("Invalid boolean '%s'", raw);
+            throw new InvalidBooleanException(raw);
         }
     }
 

@@ -3,7 +3,8 @@ package dev.velix.imperat.selector;
 import dev.velix.imperat.BukkitSource;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.exception.SourceException;
+import dev.velix.imperat.exception.selector.InvalidSelectorFieldCriteriaFormat;
+import dev.velix.imperat.exception.selector.UnknownSelectorFieldException;
 import dev.velix.imperat.selector.field.SelectionField;
 import dev.velix.imperat.selector.field.provider.FieldProvider;
 
@@ -36,12 +37,12 @@ public final class SelectionParameterInput<V> {
     public static SelectionParameterInput<?> parse(String str, CommandInputStream<BukkitSource> commandInputStream) throws ImperatException {
         String[] split = str.split(String.valueOf(SelectionField.VALUE_EQUALS));
         if (split.length != 2) {
-            throw new SourceException("Invalid field-criteria format '%s'", str);
+            throw new InvalidSelectorFieldCriteriaFormat(str, commandInputStream.readInput());
         }
         String field = split[0], value = split[1];
         SelectionField<?> selectionField = FieldProvider.INSTANCE.provideField(field, commandInputStream);
         if (selectionField == null) {
-            throw new SourceException("Unknown field '%s'", field);
+            throw new UnknownSelectorFieldException(field, commandInputStream.currentRaw().orElseThrow());
         }
 
         return new SelectionParameterInput<>(selectionField, value);
