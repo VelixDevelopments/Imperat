@@ -4,7 +4,6 @@ import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BungeeAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
 import dev.velix.imperat.exception.OnlyPlayerAllowedException;
-import dev.velix.imperat.exception.SourceException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.type.ParameterProxiedPlayer;
