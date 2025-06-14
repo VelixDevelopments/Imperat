@@ -4,6 +4,8 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -46,8 +48,9 @@ public interface CooldownHandler<S extends Source> {
         }
 
         boolean result = getLastTimeExecuted(source).map((lastTime) -> {
-            long timePassed = System.currentTimeMillis() - lastTime;
-            return timePassed <= usageCooldown.toMillis();
+            Duration elapsed = Duration.between(lastTime, Instant.now());
+            Duration remaining = usageCooldown.toDuration().minus(elapsed);
+            return !remaining.isZero() && !remaining.isNegative();
         }).orElse(false);
 
         if (!result)
@@ -71,7 +74,7 @@ public interface CooldownHandler<S extends Source> {
      * @param source the command sender
      * @return the last time the sender executed {@link CommandUsage}
      */
-    Optional<Long> getLastTimeExecuted(S source);
+    Optional<Instant> getLastTimeExecuted(S source);
 
     static <S extends Source> CooldownHandler<S> createDefault(CommandUsage<S> usage) {
         return new DefaultCooldownHandler<>(usage);

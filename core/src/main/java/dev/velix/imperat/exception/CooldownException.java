@@ -1,20 +1,35 @@
 package dev.velix.imperat.exception;
 
+import java.time.Duration;
+import java.time.Instant;
+
 public final class CooldownException extends ImperatException {
 
-    private final long defaultCooldown, cooldown;
+    private final Duration cooldownDuration, remainingDuration;
+    private final Instant lastTimeExecuted;
 
-    public CooldownException(final long cooldown, final long defaultCooldown) {
-        this.defaultCooldown = defaultCooldown;
-        this.cooldown = cooldown;
+    public CooldownException(final Duration cooldownDuration, Instant lastTimeExecuted) {
+        this.cooldownDuration = cooldownDuration;
+        this.lastTimeExecuted = lastTimeExecuted;
+
+        Duration elapsed = Duration.between(lastTimeExecuted, Instant.now());
+        var remaining = cooldownDuration.minus(elapsed);
+        this.remainingDuration = remaining.isNegative()
+                ? Duration.ZERO
+                : remaining;
     }
 
-    public long getCooldown() {
-        return cooldown;
+
+    public Duration getCooldownDuration() {
+        return cooldownDuration;
     }
 
-    public long getDefaultCooldown() {
-        return defaultCooldown;
+    public Instant getLastTimeExecuted() {
+        return lastTimeExecuted;
+    }
+
+    public Duration getRemainingDuration() {
+        return remainingDuration;
     }
 
 }

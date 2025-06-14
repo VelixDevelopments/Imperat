@@ -61,7 +61,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
@@ -204,11 +203,8 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         this.setThrowableResolver(
             CooldownException.class,
             (exception, imperat, context) -> {
-                final long lastTimeExecuted = exception.getCooldown();
-                final long timePassed = System.currentTimeMillis() - lastTimeExecuted;
-                final long remaining = exception.getDefaultCooldown() - timePassed;
                 context.source().error(
-                    "Please wait %d second(s) to execute this command again!".formatted(TimeUnit.MILLISECONDS.toSeconds(remaining))
+                    "Please wait %d second(s) to execute this command again!".formatted(exception.getRemainingDuration().toSeconds())
                 );
             }
         );

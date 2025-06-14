@@ -36,9 +36,11 @@ public final class UsageCooldownProcessor<S extends Source> implements CommandPr
             if(cooldown.permission() == null
                     || cooldown.permission().isEmpty()
                     || !imperat.config().getPermissionResolver().hasPermission(source, cooldown.permission())) {
+
+
                 throw new CooldownException(
-                        cooldown.toMillis(),
-                        handler.getLastTimeExecuted(source).orElse(0L)
+                        cooldown.toDuration(),
+                        handler.getLastTimeExecuted(source).orElseThrow()
                 );
             }
         }

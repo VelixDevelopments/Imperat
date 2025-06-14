@@ -3,6 +3,7 @@ package dev.velix.imperat.misc;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
+import dev.velix.imperat.command.cooldown.UsageCooldown;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
@@ -23,11 +24,14 @@ public final class CustomCooldownProcessor<S extends Source> implements CommandP
         CooldownHandler<S> cooldownHandler = usage.getCooldownHandler();
         S source = context.source();
 
+        UsageCooldown usageCooldown = cooldownHandler.getUsageCooldown().orElse(null);
+        if(usageCooldown == null)return;
+
         if (cooldownHandler.hasCooldown(source) && !imperat.config().getPermissionResolver().hasPermission(source, "yourpermission")) {
             //if there's a cooldown and the source doesn't have a specific permission, let's send him the cooldown message through the exception below
             throw new CooldownException(
-                cooldownHandler.getUsageCooldown().orElseThrow().toMillis(),
-                cooldownHandler.getLastTimeExecuted(source).orElse(0L)
+                usageCooldown.toDuration(),
+                cooldownHandler.getLastTimeExecuted(source).orElseThrow()
             );
         }
 
