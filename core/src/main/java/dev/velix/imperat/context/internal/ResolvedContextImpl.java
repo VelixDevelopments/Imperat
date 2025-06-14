@@ -198,7 +198,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
             && !numericParameter.matchesRange((Number) value)) {
 
             NumericRange range = numericParameter.getRange();
-            throw new NumberOutOfRangeException(numericParameter, (Number) value, range);
+            throw new NumberOutOfRangeException(raw, numericParameter, (Number) value, range);
         }
         final Argument<S> argument = new Argument<>(raw, parameter, index, value);
         resolvedArgumentsPerCommand.update(command, (existingResolvedArgs) -> {
