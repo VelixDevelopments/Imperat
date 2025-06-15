@@ -20,16 +20,10 @@ import java.util.List;
 
 public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, OfflinePlayer> {
 
-    protected final boolean ifCachedOnly;
 
     private final PlayerSuggestionResolver playerSuggestionResolver = new PlayerSuggestionResolver();
-    public ParameterOfflinePlayer(boolean ifCachedOnly) {
-        super(TypeWrap.of(OfflinePlayer.class));
-        this.ifCachedOnly = ifCachedOnly;
-    }
-
     public ParameterOfflinePlayer() {
-        this(false);
+        super(TypeWrap.of(OfflinePlayer.class));
     }
 
     @Override
