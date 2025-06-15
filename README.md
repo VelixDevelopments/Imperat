@@ -6,28 +6,49 @@
 [![Build](https://github.com/VelixDevelopments/Imperat/actions/workflows/build.yml/badge.svg)](https://github.com/VelixDevelopments/Imperat/actions/workflows/build.yml)
 [![Discord](https://discord.com/api/guilds/1285395980610568192/widget.png)](https://discord.velix.dev/)
 
-# Imperat
+# Imperat: A High-Performance, Platform-Agnostic Command Dispatching Framework
 
-**Imperat** is a high-performance, general-purpose command dispatching framework built in Java.
-Designed to be platform-agnostic, Imperat is capable of handling massive numbers of commands efficiently.
-Whether you're building microservices, game engines, or any other system that requires command dispatching,
-Imperat provides a flexible and powerful foundation, that can handle complex command graphs including middle optional
-arguments,
-with a smart algorithm called `SmartUsageResolve`.
+Imperat is a powerful and versatile command dispatching framework built in Java, designed for optimal performance and broad compatibility. 
+It provides a robust solution for managing and executing commands across various platforms, making it ideal for applications ranging from microservices to game engines.
 
-## Features
+## Key Features:
 
-- **Generic Command Dispatching:** Dispatch commands across multiple platforms and systems seamlessly.
-- **High Performance:** Engineered to manage large volumes of commands with minimal overhead.
-- **Platform-Agnostic:** Works across different platforms, making it suitable for a wide variety of projects.
+*   **Generic Command Dispatching:** Seamlessly dispatch commands across diverse platforms and systems.
+*   **High Performance:** Engineered to handle massive volumes of commands with minimal overhead, ensuring efficient execution.
+*   **Platform-Agnostic:** Imperat is designed to work across different environments, offering flexible integration with platforms such as Bukkit, Minestom, Velocity, Bungeecord, and CLI (Command Line Interface).
+*   **Smart Usage Resolution (`SmartUsageResolve`):** This intelligent algorithm enables Imperat to handle complex command graphs, including middle optional arguments, providing a sophisticated approach to command parsing and execution.
 
-## Installation
+*   **Comprehensive API:** Imperat offers a rich set of APIs for various functionalities, including:
+    *   **Dispatcher API:** For managing command dispatching.
+    *   **Command API (Classic & Annotations):** Flexible options for defining commands.
+    *   **Error Handlers:** Robust error handling for command executions.
+    *   **Parameter Type & Context/Suggestion Resolvers:** Advanced features for command argument parsing and auto-completion.
+    *   **Processors:** For custom command processing logic.
+    *   **CommandHelpProvider API:** Provides automation for help messages ***(+/- pagination)***
+    *   **Source Resolvers:** For applying custom command sources.
 
-Imperat is available on Maven Central.<br>
-You can install it using either Maven or Gradle.<br>
-Replace `PLATFORM` with your desired platform and `VERSION` with the latest version available.
+## Installation:
 
-### Using Gradle
+Imperat is available on Maven Central. You can easily integrate it into your project using Maven or Gradle.
+
+### Maven
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>dev.velix</groupId>
+    <artifactId>imperat-core</artifactId>
+    <version>VERSION</version>
+  </dependency>
+  <dependency>
+    <groupId>dev.velix</groupId>
+    <artifactId>imperat-PLATFORM</artifactId>
+    <version>VERSION</version>
+  </dependency>
+</dependencies>
+```
+
+### Gradle
 
 ```gradle
 dependencies {
@@ -36,51 +57,89 @@ dependencies {
 }
 ```
 
-### Using Maven
+Replace `PLATFORM` with your desired platform (e.g., `bukkit`, `minestom`, `velocity`, `bungeecord`, `cli`) , <br>
+and `VERSION` with the latest version available.
 
-```xml
+## Example: Teleporting Players with Style
 
-<dependencies>
-  <dependency>
-    <groupId>dev.velix</groupId>
-    <artifactId>imperat-core</artifactId>
-    <version>VERSION</version>
-  </dependency>
+Let's imagine a Minecraft server where administrators want a powerful yet intuitive teleportation command. <br>
+Imperat makes this easy with its flexible command definition and parameter resolution capabilities.
 
-  <dependency>
-    <groupId>dev.velix</groupId>
-    <artifactId>imperat-PLATFORM</artifactId>
-    <version>VERSION</version>
-  </dependency>
-</dependencies>
+```java
+import dev.velix.imperat.annotations.Command;
+import dev.velix.imperat.annotations.Named;
+import dev.velix.imperat.annotations.Optional;
+import dev.velix.imperat.annotations.Usage;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+// Assuming Imperat is initialized and registered
+@Command({"teleport", "tp"})
+public class TeleportCommand {
+
+    @Usage
+    public void teleportPlayerToPlayer(
+            Player sender,
+            @Named("target") Player target,
+            @Optional @Named("destination") Player destinationPlayer
+    ) {
+        if (destinationPlayer != null) {
+            // Teleport target to destination player
+            target.teleport(destinationPlayer.getLocation());
+            sender.sendMessage(target.getName() + " has been teleported to " + destinationPlayer.getName() + ".");
+        } else {
+            // Teleport sender to target player
+            sender.teleport(target.getLocation());
+            sender.sendMessage("You have been teleported to " + target.getName() + ".");
+        }
+    }
+
+    @Usage
+    public void teleportPlayerToCoordinates(
+            Player sender,
+            @Named("target") Player target,
+            @Named("x") Double x,
+            @Named("y") Double y,
+            @Named("z") Double z
+    ) {
+        // Teleport target to coordinates
+        target.teleport(new Location(target.getWorld(), x, y, z));
+        sender.sendMessage(target.getName() + " has been teleported to X:" + x + ", Y:" + y + ", Z:" + z + ".");
+    }
+
+    @Usage
+    public void teleportSelfToCoordinates(
+            Player sender,
+            @Named("x") Double x,
+            @Named("y") Double y,
+            @Named("z") Double z
+    ) {
+        // Teleport sender to coordinates
+        sender.teleport(new Location(sender.getWorld(), x, y, z));
+        sender.sendMessage("You have been teleported to X:" + x + ", Y:" + y + ", Z:" + z + ".");
+    }
+}
 
 ```
 
-## Supported platforms
+This example demonstrates Imperat's ability to:
 
-Imperat supports the following platforms:
+*   **Define root commands with `@Command`:** Easily set the command name and aliases (e.g., `/teleport` or `/tp`).
+*   **Handle multiple command usages with `@Usage`:** The `teleport` command can be used in various ways (e.g., `/tp <player>`, `/tp <player> <player>`, `/tp <player> <x> <y> <z>`, `/tp <x> <y> <z>`).
+*   **Utilize platform-specific sources:** The `Player` is automatically injected, allowing interaction with the bukkit player.
+*   **Support optional arguments using `@Optional` or `@Default`:** Clearly define required/optional command arguments with custom names using `@Named`
+*   **Leverage automatic parameter resolution:** Imperat automatically resolves `Player` and `Double` types, simplifying command logic.
 
-- Bukkit
-- Minestom
-- Velocity
-- Bungeecord
-- CLI (Command Line Interface)
+This flexibility allows developers to create powerful and user-friendly commands with clean, readable code, thanks to Imperat's intelligent command dispatching and parameter handling.
 
-## Documentation
+## Documentation & Community:
 
-For detailed usage instructions, architecture overview, and API documentation,<br>
-visit the official [Imperat Documentation](https://docs.velix.dev/Imperat/).
+For detailed usage instructions, architecture overviews, and API documentation, visit the official docs website.
 
-## Join the Community
+**Documentation:** https://docs.velix.dev/
 
-If you have any questions, ideas,
-or want to connect with other developers using Imperat, join our community on [Discord](https://discord.velix.dev/).
+Join our community on [Discord](https://discord.gg/velix) to connect with other developers, ask questions, and share ideas.
 
-## License
+## License:
 
-Imperat is released under the MIT License. See `LICENSE` for more information.
-
-## Credits
-
-- Mqzn and iiAhmedYT (the original authors of Imperat) <br>
-  Some features/ideas were inspired from [Lamp](https://github.com/Revxrsal/Lamp).
+Imperat is released under the MIT License. See the `LICENSE` file in the repository for more information.evxrsal/Lamp).
