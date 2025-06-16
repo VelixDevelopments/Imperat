@@ -56,11 +56,6 @@ public final class FlagCommandParameter<S extends Source> extends InputParameter
     public @NotNull OptionalValueSupplier getDefaultValueSupplier() {
         return inputValueSupplier;
     }
-
-    public OptionalValueSupplier getDefaultInputValueSupplier() {
-        return inputValueSupplier;
-    }
-
     @Override
     public @Nullable SuggestionResolver<S> inputSuggestionResolver() {
         if (isSwitch())

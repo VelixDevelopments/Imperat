@@ -120,7 +120,7 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
      */
     @Override
     public @NotNull OptionalValueSupplier getDefaultValueSupplier() {
-        return optionalValueSupplier;
+        return optionalValueSupplier.isEmpty() ? type.supplyDefaultValue() : optionalValueSupplier;
     }
 
     /**
