@@ -138,8 +138,8 @@ For detailed usage instructions, architecture overviews, and API documentation, 
 
 **Documentation:** https://docs.velix.dev/
 
-Join our community on [Discord](https://discord.gg/velix) to connect with other developers, ask questions, and share ideas.
+Join our community on [Discord]([https://discord.gg/velix](https://discord.gg/McN4GMWApE) to connect with other developers, ask questions, and share ideas.
 
 ## License:
 
-Imperat is released under the MIT License. See the `LICENSE` file in the repository for more information.evxrsal/Lamp).
+Imperat is released under the MIT License. See the `LICENSE` file in the repository for more information.
