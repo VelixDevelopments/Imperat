@@ -20,26 +20,41 @@ public abstract class TypeCapturer {
                 throw new IndexOutOfBoundsException("No type argument at index " + index);
             }
             return args[index];
-        } 
+        }
 
         throw new IllegalStateException("Superclass is not parameterized: " + genericSuperclass);
     }
 
     /**
-     * Attempts to cast the type argument to a Class object.
+     * Extracts a generic type argument from a specific superclass in this class's hierarchy.
+     *
+     * @param targetSuperclass The exact class whose generic argument should be extracted.
+     * @param index The index of the type argument (e.g. 0 for the first).
+     * @return The resolved {@link Type}.
      */
-    @SuppressWarnings("unchecked")
-    protected <T> Class<T> extractTypeClass(int index) {
-        Type type = extractType(index);
+    protected Type extractType(Class<?> targetSuperclass, int index) {
+        Class<?> currentClass = getClass();
 
-        if (type instanceof Class<?> cls) {
-            return (Class<T>) cls;
+        while (currentClass != null && currentClass != Object.class) {
+            Type genericSuperclass = currentClass.getGenericSuperclass();
+
+            if (genericSuperclass instanceof ParameterizedType parameterized) {
+                Class<?> raw = (Class<?>) parameterized.getRawType();
+                if (raw.equals(targetSuperclass)) {
+                    Type[] args = parameterized.getActualTypeArguments();
+                    if (index < 0 || index >= args.length) {
+                        throw new IndexOutOfBoundsException("No type argument at index " + index);
+                    }
+                    return args[index];
+                }
+                currentClass = raw;
+            } else if (genericSuperclass instanceof Class<?> raw) {
+                currentClass = raw;
+            } else {
+                break;
+            }
         }
 
-        if (type instanceof ParameterizedType pt && pt.getRawType() instanceof Class<?> raw) {
-            return (Class<T>) raw;
-        }
-
-        throw new IllegalStateException("Type at index " + index + " is not a Class: " + type);
+        throw new IllegalStateException("Superclass " + targetSuperclass.getName() + " not found in hierarchy of " + getClass().getName());
     }
 }
