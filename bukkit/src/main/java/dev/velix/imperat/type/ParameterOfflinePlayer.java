@@ -9,7 +9,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +22,7 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
 
     private final PlayerSuggestionResolver playerSuggestionResolver = new PlayerSuggestionResolver();
     public ParameterOfflinePlayer() {
-        super(TypeWrap.of(OfflinePlayer.class));
+        super();
     }
 
     @Override

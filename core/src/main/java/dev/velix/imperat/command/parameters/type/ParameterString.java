@@ -7,14 +7,13 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
 public final class ParameterString<S extends Source> extends BaseParameterType<S, String> {
 
 
     ParameterString() {
-        super(TypeWrap.of(String.class));
+        super();
     }
 
     @Override

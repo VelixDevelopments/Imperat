@@ -7,7 +7,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.parse.WordOutOfRestrictionsException;
 import dev.velix.imperat.util.Preconditions;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +18,7 @@ public final class ParameterWord<S extends Source> extends BaseParameterType<S, 
     private final List<String> restrictions = new ArrayList<>();
 
     ParameterWord() {
-        super(TypeWrap.of(String.class));
+        super();
     }
 
     @Override

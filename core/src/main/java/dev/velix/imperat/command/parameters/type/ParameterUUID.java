@@ -6,14 +6,13 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.InvalidUUIDException;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public final class ParameterUUID<S extends Source> extends BaseParameterType<S, UUID> {
     public ParameterUUID() {
-        super(TypeWrap.of(UUID.class));
+        super();
     }
 
     @Override

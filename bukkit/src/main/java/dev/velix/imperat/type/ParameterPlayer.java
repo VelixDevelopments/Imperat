@@ -10,7 +10,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +22,7 @@ public class ParameterPlayer extends BaseParameterType<BukkitSource, Player> {
     private final OptionalValueSupplier DEFAULT_VALUE_SUPPLIER = OptionalValueSupplier.of("~");
 
     public ParameterPlayer() {
-        super(TypeWrap.of(Player.class));
+        super();
     }
 
     @Override

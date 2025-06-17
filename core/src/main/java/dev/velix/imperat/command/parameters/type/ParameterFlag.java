@@ -10,14 +10,13 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.MissingFlagInputException;
 import dev.velix.imperat.util.Patterns;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ParameterFlag<S extends Source> extends BaseParameterType<S, ExtractedInputFlag> {
 
     protected ParameterFlag(FlagData<S> flagData) {
-        super(TypeWrap.of(ExtractedInputFlag.class));
+        super();
         suggestions.add("-" + flagData.name());
         for(var alias : flagData.aliases())
             suggestions.add("-" + alias);

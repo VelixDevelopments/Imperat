@@ -23,7 +23,7 @@ public final class ConstrainedParameterTypeDecorator<S extends Source, T> extend
     private final Set<String> allowedValues;
 
     private ConstrainedParameterTypeDecorator(ParameterType<S, T> original, Set<String> allowedValues, boolean caseSensitive) {
-        super(original.wrappedType());
+        super();
         this.original = original;
         this.allowedValues = allowedValues;
         this.caseSensitive = caseSensitive;

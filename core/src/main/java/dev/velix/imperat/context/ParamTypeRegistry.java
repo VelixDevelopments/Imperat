@@ -180,7 +180,7 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
         }
         TypeWrap<E> componentType = (TypeWrap<E>) TypeWrap.of(parameterizedTypes[0]);
         ParameterType<S, E> componentResolver = (ParameterType<S, E>) getResolver(componentType.getType()).orElseThrow(()-> new IllegalArgumentException("Unknown component-type detected '" + componentType.getType().getTypeName() + "'"));
-        return new CollectionParameterType<>((TypeWrap<C>) type, initializeNewCollection(type), componentResolver);
+        return new CollectionParameterType<>(initializeNewCollection(type), componentResolver);
     }
 
     private <E> ParameterType<S, E[]> getArrayResolver(TypeWrap<?> type) {
@@ -189,7 +189,7 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
             throw new IllegalArgumentException("NULL COMPONENT TYPE");
         }
         ParameterType<S, E> componentResolver = (ParameterType<S, E>) getResolver(componentType.getType()).orElseThrow(()-> new IllegalArgumentException("Unknown component-type detected '" + componentType.getType().getTypeName() + "'"));
-        return new ArrayParameterType<>((TypeWrap<E[]>) type, initializeNewArray(componentType), componentResolver);
+        return new ArrayParameterType<>(initializeNewArray(componentType), componentResolver);
     }
 
     private <K, V, M extends Map<K, V>> MapParameterType<S, K, V, M> getMapResolver(TypeWrap<?> type) {
@@ -203,7 +203,7 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
         ParameterType<S, K> keyResolver = (ParameterType<S, K>) getResolver(keyType.getType()).orElseThrow(()-> new IllegalArgumentException("Unknown component-type detected '" + keyType.getType().getTypeName() + "'"));
         ParameterType<S, V> valueResolver = (ParameterType<S, V>) getResolver(valueType.getType()).orElseThrow(()-> new IllegalArgumentException("Unknown component-type detected '" + valueType.getType().getTypeName() + "'"));
 
-        return new MapParameterType<>((TypeWrap<M>) type, initializeNewMap(type), keyResolver, valueResolver);
+        return new MapParameterType<>(initializeNewMap(type), keyResolver, valueResolver);
     }
 
     public <C extends Collection<?>> void registerCollectionInitializer(Class<C> type, Supplier<C> initializerFunction) {

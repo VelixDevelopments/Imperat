@@ -11,7 +11,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
     private final PlayerSuggestionResolver playerSuggestionResolver;
 
     public ParameterPlayer(ProxyServer server) {
-        super(TypeWrap.of(Player.class));
+        super();
         this.proxyServer = server;
         this.playerSuggestionResolver = new PlayerSuggestionResolver(server);
     }

@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 public final class ParameterEnum<S extends Source> extends BaseParameterType<S, Enum<?>> {
 
     public ParameterEnum(TypeWrap<Enum<?>> typeWrap) {
-        super(typeWrap);
+        super(typeWrap.getType());
         Class<? extends Enum<?>> type = (Class<? extends Enum<?>>) typeWrap.getType();
         for (var constantEnum : type.getEnumConstants()) {
             suggestions.add(constantEnum.name());

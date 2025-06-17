@@ -4,7 +4,6 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,13 +14,8 @@ public final class ArrayParameterType<S extends Source, E> extends BaseParameter
     private final Function<Integer, Object[]> initializer;
     private final ParameterType<S, E> componentType;
 
-    /**
-     * Constructs a new BaseParameterType with the given TypeWrap.
-     *
-     * @param type The wrapping object that holds information about the type of the parameter.
-     */
-    public ArrayParameterType(TypeWrap<E[]> type, Function<Integer, Object[]> initializer, ParameterType<S, E> componentType) {
-        super(type);
+    public ArrayParameterType(Function<Integer, Object[]> initializer, ParameterType<S, E> componentType) {
+        super();
         this.initializer = initializer;
         this.componentType = componentType;
     }

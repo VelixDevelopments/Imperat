@@ -6,7 +6,6 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,8 +14,7 @@ import java.util.List;
 public final class ParameterCommand<S extends Source> extends BaseParameterType<S, Command<S>> {
     private final String name;
     ParameterCommand(String name, List<String> aliases) {
-        super(new TypeWrap<>() {
-        });
+        super();
         this.name = name;
         suggestions.add(name);
         suggestions.addAll(aliases);

@@ -9,7 +9,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.TypeWrap;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +19,7 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
     private final ProxiedPlayerSuggestionResolver PROXIED_PLAYER_SUGGESTION_RESOLVER = new ProxiedPlayerSuggestionResolver();
 
     public ParameterProxiedPlayer() {
-        super(TypeWrap.of(ProxiedPlayer.class));
+        super();
     }
 
     @Override

@@ -5,7 +5,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.parse.InvalidMapEntryFormatException;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,18 +18,13 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
     private final ParameterType<S, K> keyResolver;
     private final ParameterType<S, V> valueResolver;
 
-    /**
-     * Constructs a new BaseParameterType with the given TypeWrap.
-     *
-     * @param type The wrapping object that holds information about the type of the parameter.
-     */
+
     public MapParameterType(
-            TypeWrap<M> type,
             Supplier<M> mapInitializer,
             ParameterType<S, K> keyResolver,
             ParameterType<S, V> valueResolver
     ) {
-        super(type);
+        super();
         this.mapInitializer = mapInitializer;
         this.keyResolver = keyResolver;
         this.valueResolver = valueResolver;

@@ -10,7 +10,6 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.InvalidLocationFormatException;
 import dev.velix.imperat.exception.UnknownWorldException;
 import dev.velix.imperat.util.TypeUtility;
-import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -26,7 +25,7 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
 
     private final ParameterType<BukkitSource, Double> doubleParser;
     public ParameterLocation() {
-        super(TypeWrap.of(Location.class));
+        super();
         doubleParser = ParameterTypes.numeric(Double.class);
     }
 

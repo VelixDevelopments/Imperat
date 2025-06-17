@@ -7,14 +7,13 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.parse.InvalidNumberFormatException;
 import dev.velix.imperat.util.TypeUtility;
-import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class ParameterNumber<S extends Source, N extends Number> extends BaseParameterType<S, N> {
 
-    protected ParameterNumber(TypeWrap<N> typeWrap) {
-        super(typeWrap);
+    protected ParameterNumber() {
+        super();
     }
 
     @SuppressWarnings("unchecked")
@@ -58,7 +57,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     static class ParameterInt<S extends Source> extends ParameterNumber<S, Integer> {
 
         protected ParameterInt() {
-            super(TypeWrap.of(Integer.class));
+            super();
         }
 
         @Override
@@ -75,7 +74,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     static class ParameterFloat<S extends Source> extends ParameterNumber<S, Float> {
 
         protected ParameterFloat() {
-            super(TypeWrap.of(Float.class));
+            super();
         }
 
         @Override
@@ -92,7 +91,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     static class ParameterLong<S extends Source> extends ParameterNumber<S, Long> {
 
         protected ParameterLong() {
-            super(TypeWrap.of(Long.class));
+            super();
         }
 
         @Override
@@ -109,7 +108,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     static class ParameterDouble<S extends Source> extends ParameterNumber<S, Double> {
 
         protected ParameterDouble() {
-            super(TypeWrap.of(Double.class));
+            super();
         }
 
         @Override

@@ -16,12 +16,10 @@ import dev.velix.imperat.selector.SelectionType;
 import dev.velix.imperat.selector.TargetSelector;
 import dev.velix.imperat.selector.field.filters.PredicateField;
 import dev.velix.imperat.selector.field.operators.OperatorField;
-import dev.velix.imperat.util.TypeWrap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +31,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
     private final SuggestionResolver<BukkitSource> suggestionResolver;
 
     public ParameterTargetSelector() {
-        super(TypeWrap.of(TargetSelector.class));
+        super();
         SelectionType.TYPES.stream()
             .filter(type -> type != SelectionType.UNKNOWN)
             .map(SelectionType::id)
