@@ -9,6 +9,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeCapturer;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public abstract class BaseParameterType<S extends Source, T>
      * Constructs a new BaseParameterType with an automated {@link TypeWrap}
      */
     public BaseParameterType() {
-        this.type = this.extractTypeArgument(1);
+        this.type = this.extractType();
     }
 
     /**
@@ -95,5 +96,16 @@ public abstract class BaseParameterType<S extends Source, T>
     public @NotNull ParameterType<S, T> withSuggestions(String... suggestions) {
         this.suggestions.addAll(List.of(suggestions));
         return this;
+    }
+
+    private Type extractType() {
+        final Type superclass = getClass().getGenericSuperclass();
+        if (superclass instanceof ParameterizedType parameterizedType) {
+            return parameterizedType.getActualTypeArguments()[1];
+        } else if (superclass instanceof Class) {
+            return Object.class;
+        } else {
+            throw new IllegalArgumentException("TypeWrap must be created with a parameterized valueType.");
+        }
     }
 }
