@@ -30,7 +30,7 @@ public abstract class TypeCapturer {
      */
     @SuppressWarnings("unchecked")
     protected <T> Class<T> extractTypeClass(int index) {
-        Type type = extractTypeArgument(index);
+        Type type = extractType(index);
 
         if (type instanceof Class<?> cls) {
             return (Class<T>) cls;
