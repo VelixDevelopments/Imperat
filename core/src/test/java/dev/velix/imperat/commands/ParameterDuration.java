@@ -19,7 +19,7 @@ public class ParameterDuration<S extends Source> extends BaseParameterType<S, Du
     );
 
     public ParameterDuration() {
-        super(TypeWrap.of(Duration.class));
+        super();
     }
 
     @Override
