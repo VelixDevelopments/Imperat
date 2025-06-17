@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 public class CustomEnumParameterType extends BaseParameterType<TestSource, CustomEnum> {
 
     public CustomEnumParameterType() {
-        super(CustomEnum.class);
+        super();
     }
 
     @Override public @Nullable CustomEnum resolve(
