@@ -18,7 +18,7 @@ public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     private final GroupSuggestionResolver suggestionResolver = new GroupSuggestionResolver();
 
     public ParameterGroup() {
-        super(TypeWrap.of(Group.class));
+        super();
         //static plain suggestions
     }
 
