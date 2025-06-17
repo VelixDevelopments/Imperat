@@ -6,7 +6,7 @@ import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.TypeWrap;
+import dev.velix.imperat.util.TypeCapturer;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
@@ -21,7 +21,8 @@ import java.util.List;
  * @param <S> The type of the source from which the command originates.
  * @param <T> The type of the parameter being handled.
  */
-public abstract class BaseParameterType<S extends Source, T> implements ParameterType<S, T> {
+public abstract class BaseParameterType<S extends Source, T> 
+    extends TypeCapturer implements ParameterType<S, T> {
 
     /**
      * Encapsulates type information for the parameter being handled.
@@ -48,7 +49,7 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
      * Constructs a new BaseParameterType with an automated {@link TypeWrap}
      */
     public BaseParameterType() {
-        this.type = new TypeWrap<T>() {}.getType();
+        this.type = this.extractTypeArgument(1);
     }
 
     /**
