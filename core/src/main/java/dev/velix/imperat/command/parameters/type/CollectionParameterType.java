@@ -29,7 +29,7 @@ public class CollectionParameterType<S extends Source, E, C extends Collection<E
 
             String raw = commandInputStream.currentRaw().orElse(null);
             if(raw == null) break;
-            //if(context.imperatConfig().getPar)
+
             E element = componentResolver.resolve(context, CommandInputStream.subStream(commandInputStream, raw), raw);
             newCollection.add(element);
 
