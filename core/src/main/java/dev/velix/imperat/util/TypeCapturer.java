@@ -11,7 +11,7 @@ public abstract class TypeCapturer {
      * @param index The index of the type argument (e.g. 0 for the first, 1 for the second).
      * @return The resolved {@link Type}.
      */
-    protected Type extractTypeArgument(int index) {
+    protected Type extractType(int index) {
         Type genericSuperclass = getClass().getGenericSuperclass();
 
         if (genericSuperclass instanceof ParameterizedType parameterized) {
