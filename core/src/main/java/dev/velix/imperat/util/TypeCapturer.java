@@ -66,22 +66,24 @@ public abstract class TypeCapturer {
     }
 
     /**
-     * Debug helper to print details about a Type using ImperatDebugger.warning.
+     * Debug helper to print details about a Type using ImperatDebugger.warning,
+     * including the original class name from which the type is extracted.
      */
     protected void debugType(Type type) {
+        String className = getClass().getName();
         if (type instanceof Class<?>) {
-            ImperatDebugger.warning("Type is Class: " + ((Class<?>) type).getName());
+            ImperatDebugger.warning(className + " - Type is Class: " + ((Class<?>) type).getName());
         } else if (type instanceof ParameterizedType) {
-            ImperatDebugger.warning("Type is ParameterizedType: " + type);
+            ImperatDebugger.warning(className + " - Type is ParameterizedType: " + type);
         } else if (type instanceof GenericArrayType) {
-            ImperatDebugger.warning("Type is GenericArrayType: " + type);
+            ImperatDebugger.warning(className + " - Type is GenericArrayType: " + type);
         } else if (type instanceof TypeVariable<?>) {
             TypeVariable<?> tv = (TypeVariable<?>) type;
-            ImperatDebugger.warning("Type is TypeVariable: " + tv.getName() + ", bounds: " + java.util.Arrays.toString(tv.getBounds()));
+            ImperatDebugger.warning(className + " - Type is TypeVariable: " + tv.getName() + ", bounds: " + java.util.Arrays.toString(tv.getBounds()));
         } else if (type instanceof WildcardType) {
-            ImperatDebugger.warning("Type is WildcardType: " + type);
+            ImperatDebugger.warning(className + " - Type is WildcardType: " + type);
         } else {
-            ImperatDebugger.warning("Type is unknown: " + type);
+            ImperatDebugger.warning(className + " - Type is unknown: " + type);
         }
     }
 }
