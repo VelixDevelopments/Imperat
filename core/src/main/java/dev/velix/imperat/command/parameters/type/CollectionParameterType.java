@@ -16,7 +16,7 @@ public class CollectionParameterType<S extends Source, E, C extends Collection<E
     private final ParameterType<S, E> componentResolver;
 
     public CollectionParameterType(Supplier<C> collectionSupplier, ParameterType<S, E> componentResolver) {
-        super(this.extractType(3));
+        super(2);
         this.collectionSupplier = collectionSupplier;
         this.componentResolver = componentResolver;
     }
