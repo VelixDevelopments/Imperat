@@ -17,7 +17,7 @@ import java.time.Duration;
 public final class DurationParameterType extends BaseParameterType<TestSource, Duration> {
 
     public DurationParameterType() {
-        super(Duration.class);
+        super();
     }
 
     @Override
