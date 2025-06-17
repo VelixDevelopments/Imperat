@@ -50,7 +50,7 @@ public abstract class BaseParameterType<S extends Source, T>
      * Constructs a new BaseParameterType with an automated {@link TypeWrap}
      */
     public BaseParameterType() {
-        this.type = this.extractType();
+        this.type = this.extractType(1);
     }
 
     /**
@@ -98,14 +98,4 @@ public abstract class BaseParameterType<S extends Source, T>
         return this;
     }
 
-    private Type extractType() {
-        final Type superclass = getClass().getGenericSuperclass();
-        if (superclass instanceof ParameterizedType parameterizedType) {
-            return parameterizedType.getActualTypeArguments()[1];
-        } else if (superclass instanceof Class) {
-            return Object.class;
-        } else {
-            throw new IllegalArgumentException("TypeWrap must be created with a parameterized valueType.");
-        }
-    }
 }
