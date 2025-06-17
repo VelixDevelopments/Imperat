@@ -4,6 +4,7 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,8 +16,8 @@ public class CollectionParameterType<S extends Source, E, C extends Collection<E
     private final Supplier<C> collectionSupplier;
     private final ParameterType<S, E> componentResolver;
 
-    public CollectionParameterType(Supplier<C> collectionSupplier, ParameterType<S, E> componentResolver) {
-        super(2);
+    public CollectionParameterType(TypeWrap<C> type, Supplier<C> collectionSupplier, ParameterType<S, E> componentResolver) {
+        super(type.getType());
         this.collectionSupplier = collectionSupplier;
         this.componentResolver = componentResolver;
     }
