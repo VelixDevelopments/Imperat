@@ -38,19 +38,26 @@ public abstract class BaseParameterType<S extends Source, T>
     protected final List<String> suggestions = new ArrayList<>();
 
     /**
+     * Constructs a new BaseParameterType with an automated {@link TypeWrap}
+     */
+    public BaseParameterType() {
+        this.type = this.extractType(1);
+    }
+
+    /**
+     * Constructs a new BaseParameterType with an automated {@link TypeWrap}
+     */
+    public BaseParameterType(int index) {
+        this.type = this.extractType(index);
+    }
+
+    /**
      * Constructs a new BaseParameterType with the given TypeWrap.
      *
      * @param type The wrapping object that holds information about the type of the parameter.
      */
     public BaseParameterType(final Type type) {
         this.type = type;
-    }
-
-    /**
-     * Constructs a new BaseParameterType with an automated {@link TypeWrap}
-     */
-    public BaseParameterType() {
-        this.type = this.extractType(1);
     }
 
     /**
