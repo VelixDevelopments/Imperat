@@ -9,7 +9,6 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeCapturer;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +41,6 @@ public abstract class BaseParameterType<S extends Source, T>
      */
     public BaseParameterType() {
         this.type = this.extractType(1);
-    }
-
-    /**
-     * Constructs a new BaseParameterType with an automated {@link TypeWrap}
-     */
-    public BaseParameterType(int index) {
-        this.type = this.extractType(index);
     }
 
     /**
