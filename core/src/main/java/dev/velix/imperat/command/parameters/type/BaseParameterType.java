@@ -45,12 +45,10 @@ public abstract class BaseParameterType<S extends Source, T> implements Paramete
     }
 
     /**
-     * Constructs a new BaseParameterType with the given TypeWrap.
-     *
-     * @param type The wrapping object that holds information about the type of the parameter.
+     * Constructs a new BaseParameterType with an automated typewrap
      */
-    public BaseParameterType(TypeWrap<T> type) {
-        this.type = type.getType();
+    public BaseParameterType() {
+        this.type = new TypeWrap<T>() {}.getType();
     }
 
     /**

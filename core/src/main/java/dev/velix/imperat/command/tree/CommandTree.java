@@ -93,7 +93,7 @@ public final class CommandTree<S extends Source> {
             return;
         }
 
-        // Find consecutive sequence of optional flags
+        // Find a consecutive sequence of optional flags
         List<Integer> flagSequenceIndices = new ArrayList<>();
         if (parameters.get(index).isFlag() && parameters.get(index).isOptional()) {
             flagSequenceIndices.add(index);
