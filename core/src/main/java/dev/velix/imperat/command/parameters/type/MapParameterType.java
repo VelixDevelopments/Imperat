@@ -24,7 +24,7 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
             ParameterType<S, K> keyResolver,
             ParameterType<S, V> valueResolver
     ) {
-        super(this.extractType(4));
+        super(3);
         this.mapInitializer = mapInitializer;
         this.keyResolver = keyResolver;
         this.valueResolver = valueResolver;
