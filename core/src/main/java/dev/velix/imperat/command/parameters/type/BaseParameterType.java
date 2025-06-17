@@ -99,7 +99,6 @@ public abstract class BaseParameterType<S extends Source, T>
     }
 
     @Override
-    @SupressWarnings("all")
     protected Type extractType(int index) {
         Type genericSuperclass = ((BaseParameterType)this).getClass().getGenericSuperclass();
 
