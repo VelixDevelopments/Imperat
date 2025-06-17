@@ -98,19 +98,4 @@ public abstract class BaseParameterType<S extends Source, T>
         return this;
     }
 
-    @Override
-    protected Type extractType(int index) {
-        Type genericSuperclass = ((BaseParameterType)this).getClass().getGenericSuperclass();
-
-        if (genericSuperclass instanceof ParameterizedType parameterized) {
-            Type[] args = parameterized.getActualTypeArguments();
-            if (index < 0 || index >= args.length) {
-                throw new IndexOutOfBoundsException("No type argument at index " + index);
-            }
-            return args[index];
-        } 
-
-        throw new IllegalStateException("Superclass is not parameterized: " + genericSuperclass);
-    }
-
 }
