@@ -22,7 +22,7 @@ public final class ArrayParameterType<S extends Source, E> extends BaseParameter
     }
 
     @Override @SuppressWarnings("unchecked")
-    public E @Nullable [] resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> stream, String input) throws ImperatException {
+    public E @Nullable [] resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> stream, @NotNull String input) throws ImperatException {
 
         String currentRaw = stream.currentRaw().orElse(null);
         if(currentRaw == null)

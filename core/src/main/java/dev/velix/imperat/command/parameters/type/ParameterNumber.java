@@ -32,7 +32,7 @@ public abstract class ParameterNumber<S extends Source, N extends Number> extend
     }
 
     @Override
-    public @Nullable N resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String input) throws ImperatException {
+    public @Nullable N resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, @NotNull String input) throws ImperatException {
         try {
             return parse(input);
         } catch (NumberFormatException ex) {

@@ -47,7 +47,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Extrac
     }
 
     @Override
-    public @Nullable ExtractedInputFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, String rawFlag) throws ImperatException {
+    public @Nullable ExtractedInputFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, @NotNull String rawFlag) throws ImperatException {
         var currentParameter = commandInputStream.currentParameter()
             .orElse(null);
         if (currentParameter == null)

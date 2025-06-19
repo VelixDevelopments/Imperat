@@ -29,7 +29,7 @@ public class ParameterOfflinePlayer extends BaseParameterType<BukkitSource, Offl
     public @Nullable OfflinePlayer resolve(
             @NotNull ExecutionContext<BukkitSource> context,
             @NotNull CommandInputStream<BukkitSource> commandInputStream,
-            String input) throws ImperatException {
+            @NotNull String input) throws ImperatException {
 
         if (input.length() > 16) {
             throw new UnknownPlayerException(input);

@@ -26,7 +26,7 @@ public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource
     public @NotNull ProxiedPlayer resolve(
             @NotNull ExecutionContext<BungeeSource> context,
             @NotNull CommandInputStream<BungeeSource> commandInputStream,
-            String input) throws ImperatException {
+            @NotNull String input) throws ImperatException {
 
         if (input.equalsIgnoreCase("me")) {
             if (context.source().isConsole()) {

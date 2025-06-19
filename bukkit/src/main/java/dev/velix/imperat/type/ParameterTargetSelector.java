@@ -43,7 +43,7 @@ public final class ParameterTargetSelector extends BaseParameterType<BukkitSourc
     public @NotNull TargetSelector resolve(
             @NotNull ExecutionContext<BukkitSource> context,
             @NotNull CommandInputStream<BukkitSource> commandInputStream,
-            String input) throws ImperatException {
+            @NotNull String input) throws ImperatException {
 
         String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null)

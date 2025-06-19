@@ -29,7 +29,7 @@ public final class ParameterPlayer extends BaseParameterType<VelocitySource, Pla
     public @NotNull Player resolve(
             @NotNull ExecutionContext<VelocitySource> context,
             @NotNull CommandInputStream<VelocitySource> commandInputStream,
-            String input) throws ImperatException {
+            @NotNull String input) throws ImperatException {
 
         if (input.equalsIgnoreCase("me")) {
             if (context.source().isConsole()) {

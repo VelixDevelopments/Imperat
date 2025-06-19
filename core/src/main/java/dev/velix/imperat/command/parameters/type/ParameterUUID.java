@@ -19,7 +19,7 @@ public final class ParameterUUID<S extends Source> extends BaseParameterType<S, 
     public @NotNull UUID resolve(
             @NotNull ExecutionContext<S> context,
             @NotNull CommandInputStream<S> commandInputStream,
-            String input) throws ImperatException {
+            @NotNull String input) throws ImperatException {
 
         try {
             return UUID.fromString(input);

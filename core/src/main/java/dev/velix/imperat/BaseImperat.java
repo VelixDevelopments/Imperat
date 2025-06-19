@@ -322,35 +322,51 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         final S source,
         final Context<S> context,
         final CommandUsage<S> usage
-    ) throws Throwable {
+    ) {
         //global pre-processing
-        if(!preProcess(context, usage)) {
-            return;
-        }
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                if (!preProcess(context, usage)) {
+                    return null;
+                }
 
-        //per command pre-processing
-        if(!command.preProcess(this, context, usage)) {
-            return;
-        }
+                //per command pre-processing
+                if (!command.preProcess(this, context, usage)) {
+                    return null;
+                }
 
-        ImperatDebugger.debug("Resolving usage '%s'", CommandUsage.format(command, usage));
-        ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
-        resolvedContext.resolve();
-        resolvedContext.debug();
+                ImperatDebugger.debug("Resolving usage '%s'", CommandUsage.format(command, usage));
+                ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
+                resolvedContext.resolve();
+                resolvedContext.debug();
 
-        //global post-processing
-        if(!postProcess(resolvedContext)) {
-            return;
-        }
+                //global post-processing
+                if (!postProcess(resolvedContext)) {
+                    return null;
+                }
 
-        //per command post-processing
-        if(!command.postProcess(this, resolvedContext, usage)) {
-            return;
-        }
+                //per command post-processing
+                if (!command.postProcess(this, resolvedContext, usage)) {
+                    return null;
+                }
+                return resolvedContext;
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
 
-        //executing the usage
-        ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
-        usage.execute(this, source, resolvedContext);
+        })
+        .thenAccept((resolvedContext) -> {
+            if (resolvedContext == null) {
+                return;
+            }
+            //executing the usage
+            ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
+            try {
+                usage.execute(this, source, resolvedContext);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private boolean preProcess(

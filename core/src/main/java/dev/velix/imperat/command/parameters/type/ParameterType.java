@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a type handler for command parameters, providing methods for
@@ -41,8 +42,21 @@ public interface ParameterType<S extends Source, T> {
      * @return the resolved value, or {@code null} if resolution fails.
      * @throws ImperatException if resolution fails due to an error.
      */
-    @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, String input) throws ImperatException;
+    @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, @NotNull String input) throws ImperatException;
 
+    default CompletableFuture<T> resolveAsync(
+            @NotNull ExecutionContext<S> context,
+            @NotNull CommandInputStream<S> inputStream,
+            @NotNull String input) {
+        return CompletableFuture.supplyAsync(()-> {
+            try {
+                return resolve(context, inputStream, input);
+            } catch (ImperatException e) {
+                context.imperatConfig().handleExecutionThrowable(e, context, ParameterType.this.getClass(), "resolveAsync");
+                return null;
+            }
+        });
+    }
     /**
      * Gets the suggestion resolver for this parameter type.
      *

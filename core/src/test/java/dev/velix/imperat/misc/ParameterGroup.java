@@ -25,7 +25,7 @@ public final class ParameterGroup extends BaseParameterType<TestSource, Group> {
     public @Nullable Group resolve(
             @NotNull ExecutionContext<TestSource> context,
             @NotNull CommandInputStream<TestSource> commandInputStream,
-            String input) throws ImperatException {
+            @NotNull String input) throws ImperatException {
         String raw = commandInputStream.currentRaw().orElse(null);
         if (raw == null) {
             return null;

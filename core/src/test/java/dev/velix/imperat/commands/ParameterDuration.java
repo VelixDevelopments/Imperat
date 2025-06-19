@@ -25,7 +25,7 @@ public class ParameterDuration<S extends Source> extends BaseParameterType<S, Du
     public @Nullable Duration resolve(
             @NotNull ExecutionContext<S> context,
             @NotNull CommandInputStream<S> cis,
-            String input
+            @NotNull String input
     ) throws ImperatException {
         final long ms = Utilities.convertDurationToMs(input);
         if (ms == 0) {

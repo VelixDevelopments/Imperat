@@ -30,7 +30,7 @@ public class ParameterLocation extends BaseParameterType<BukkitSource, Location>
     }
 
     @Override
-    public @Nullable Location resolve(@NotNull ExecutionContext<BukkitSource> context, @NotNull CommandInputStream<BukkitSource> stream, String input) throws ImperatException {
+    public @Nullable Location resolve(@NotNull ExecutionContext<BukkitSource> context, @NotNull CommandInputStream<BukkitSource> stream, @NotNull String input) throws ImperatException {
         try {
             String currentRaw = stream.currentRaw().orElseThrow();
             return locFromStr(context, stream, currentRaw);

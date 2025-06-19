@@ -17,7 +17,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
     }
 
     @Override
-    public @NotNull String resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, String input) throws ImperatException {
+    public @NotNull String resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, @NotNull String input) throws ImperatException {
         StringBuilder builder = new StringBuilder();
         final CommandParameter<S> parameter = inputStream.currentParameter().orElse(null);
         //if (parameter == null) return builder.toString();
