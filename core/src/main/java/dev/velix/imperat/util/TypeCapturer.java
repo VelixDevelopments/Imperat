@@ -1,7 +1,10 @@
 package dev.velix.imperat.util;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 public abstract class TypeCapturer {
 
@@ -19,27 +22,68 @@ public abstract class TypeCapturer {
             if (index < 0 || index >= args.length) {
                 throw new IndexOutOfBoundsException("No type argument at index " + index);
             }
-            return args[index];
-        } 
+            Type extracted = args[index];
+            debugType(extracted);
+            return extracted;
+        }
 
         throw new IllegalStateException("Superclass is not parameterized: " + genericSuperclass);
     }
 
     /**
-     * Attempts to cast the type argument to a Class object.
+     * Extracts a generic type argument from a specific superclass in this class's hierarchy.
+     *
+     * @param targetSuperclass The exact class whose generic argument should be extracted.
+     * @param index The index of the type argument (e.g. 0 for the first).
+     * @return The resolved {@link Type}.
      */
-    @SuppressWarnings("unchecked")
-    protected <T> Class<T> extractTypeClass(int index) {
-        Type type = extractType(index);
+    protected Type extractType(Class<?> targetSuperclass, int index) {
+        Class<?> currentClass = getClass();
 
-        if (type instanceof Class<?> cls) {
-            return (Class<T>) cls;
+        while (currentClass != null && currentClass != Object.class) {
+            Type genericSuperclass = currentClass.getGenericSuperclass();
+
+            if (genericSuperclass instanceof ParameterizedType parameterized) {
+                Class<?> raw = (Class<?>) parameterized.getRawType();
+                if (raw.equals(targetSuperclass)) {
+                    Type[] args = parameterized.getActualTypeArguments();
+                    if (index < 0 || index >= args.length) {
+                        throw new IndexOutOfBoundsException("No type argument at index " + index);
+                    }
+                    Type extracted = args[index];
+                    debugType(extracted);
+                    return extracted;
+                }
+                currentClass = raw;
+            } else if (genericSuperclass instanceof Class<?> raw) {
+                currentClass = raw;
+            } else {
+                break;
+            }
         }
 
-        if (type instanceof ParameterizedType pt && pt.getRawType() instanceof Class<?> raw) {
-            return (Class<T>) raw;
-        }
+        throw new IllegalStateException("Superclass " + targetSuperclass.getName() + " not found in hierarchy of " + getClass().getName());
+    }
 
-        throw new IllegalStateException("Type at index " + index + " is not a Class: " + type);
+    /**
+     * Debug helper to print details about a Type using ImperatDebugger.warning,
+     * including the original class name from which the type is extracted.
+     */
+    protected void debugType(Type type) {
+        String className = getClass().getName();
+        if (type instanceof Class<?>) {
+            ImperatDebugger.warning(className + " - Type is Class: " + ((Class<?>) type).getName());
+        } else if (type instanceof ParameterizedType) {
+            ImperatDebugger.warning(className + " - Type is ParameterizedType: " + type);
+        } else if (type instanceof GenericArrayType) {
+            ImperatDebugger.warning(className + " - Type is GenericArrayType: " + type);
+        } else if (type instanceof TypeVariable<?>) {
+            TypeVariable<?> tv = (TypeVariable<?>) type;
+            ImperatDebugger.warning(className + " - Type is TypeVariable: " + tv.getName() + ", bounds: " + java.util.Arrays.toString(tv.getBounds()));
+        } else if (type instanceof WildcardType) {
+            ImperatDebugger.warning(className + " - Type is WildcardType: " + type);
+        } else {
+            ImperatDebugger.warning(className + " - Type is unknown: " + type);
+        }
     }
 }
