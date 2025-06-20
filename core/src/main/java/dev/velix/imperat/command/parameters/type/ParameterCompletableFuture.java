@@ -28,10 +28,11 @@ public final class ParameterCompletableFuture<S extends Source, T> extends BaseP
                     new IllegalStateException("No type parameter for type '" + type.getTypeName() + "'")
             );
         }
-
+        CommandInputStream<S> copyStream = inputStream.copy();
+        //CommandInputStream<S> singleStream = CommandInputStream.ofSingleString(inputStream.currentParameter().orElseThrow(), input);
         return CompletableFuture.supplyAsync(()-> {
             try {
-                return typeResolver.resolve(context,inputStream, input);
+                return typeResolver.resolve(context, copyStream, input);
             } catch (ImperatException e) {
                 context.imperatConfig()
                         .handleExecutionThrowable(e,context, ParameterCompletableFuture.class, "resolve");
