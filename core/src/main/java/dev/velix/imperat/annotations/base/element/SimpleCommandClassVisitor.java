@@ -613,8 +613,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         }
 
         boolean greedy = parameter.getAnnotation(Greedy.class) != null;
-
-        if (greedy && parameter.getType() != String.class) {
+        boolean allowsGreedy = parameter.getType() == String.class || (TypeUtility.isAcceptableGreedyWrapper(parameter.getType()) && TypeUtility.hasGenericType(parameter.getType(), String.class));
+        if (greedy && !allowsGreedy) {
             throw new IllegalArgumentException("Argument '" + parameter.getName() + "' is greedy while having a non-greedy valueType '" + parameter.getType().getTypeName() + "'");
         }
 

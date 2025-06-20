@@ -41,6 +41,8 @@ import dev.velix.imperat.commands.annotations.examples.OptionalArgCommand;
 import dev.velix.imperat.components.TestImperat;
 import dev.velix.imperat.components.TestImperatConfig;
 import dev.velix.imperat.components.TestSource;
+import dev.velix.imperat.paramtypes.TestCompletableFutureParam;
+import dev.velix.imperat.paramtypes.TestJavaOptionalParam;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -569,8 +571,6 @@ public class TestRun {
 
         System.out.println("Executing '/rank addperm mod server.fly -force'");
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("rank", "addperm mod server.fly -force"));
-
-
     }
 
 
@@ -588,7 +588,26 @@ public class TestRun {
 
         Assertions.assertEquals("java.lang.String[]", stringArrType.type().getTypeName());
         Assertions.assertEquals("java.util.concurrent.CompletableFuture<java.lang.String>", completableFutureType.type().getTypeName());
+    }
 
+    @Test
+    public void testSpecialParamTypes() {
+
+        //register cf cmd
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new TestCompletableFutureParam());
+            IMPERAT.registerCommand(new TestJavaOptionalParam());
+        });
+
+
+        var testCF = IMPERAT.getCommand("testcf");
+        Assertions.assertNotNull(testCF);
+
+        var testOpt = IMPERAT.getCommand("testoptional");
+        Assertions.assertNotNull(testOpt);
+
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("testcf", "Thor is the best hero"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("testoptional", "Hulk is always angry"));
     }
 }
 

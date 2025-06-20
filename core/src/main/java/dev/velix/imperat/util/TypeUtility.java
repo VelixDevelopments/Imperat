@@ -9,10 +9,17 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class TypeUtility {
+
+    static Set<Class<?>> ACCEPTED_GENERIC_WRAPPERS = Set.of(
+            CompletableFuture.class,
+            Optional.class
+    );
 
     static Set<Type> NUMERIC_PRIMITIVES = Set.of(
         short.class, byte.class, int.class,
@@ -190,5 +197,24 @@ public final class TypeUtility {
 
     public static boolean isNumber(String str) {
         return isDouble(str);
+    }
+
+    public static boolean isAcceptableGreedyWrapper(Type type) {
+        return ACCEPTED_GENERIC_WRAPPERS.contains(TypeWrap.of(type).getRawType());
+    }
+
+    public static boolean hasGenericType(@NotNull Type type, @NotNull Type genericToFind) {
+        TypeWrap<?> typeWrap = TypeWrap.of(type);
+        Type[] typeParams = typeWrap.getParameterizedTypes();
+        if(typeParams == null) {
+            return false;
+        }
+
+        for(Type genericTypeParam : typeParams) {
+            if(genericTypeParam.equals(genericToFind)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

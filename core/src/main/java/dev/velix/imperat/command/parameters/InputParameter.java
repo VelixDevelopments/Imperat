@@ -9,6 +9,7 @@ import dev.velix.imperat.command.parameters.type.ParameterCommand;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,6 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
     protected String permission;
     protected Description description;
     protected int index;
-
 
     protected InputParameter(
         String name,
@@ -168,7 +168,8 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
 
     @Override
     public boolean isGreedyString() {
-        return this.type.equalsExactly(String.class) && greedy;
+        boolean isGreedyWrapper = ( TypeUtility.isAcceptableGreedyWrapper(this.type.type()) && TypeUtility.hasGenericType(type.type(), String.class));
+        return ( this.type.equalsExactly(String.class) || isGreedyWrapper) && greedy;
     }
 
     @Override
