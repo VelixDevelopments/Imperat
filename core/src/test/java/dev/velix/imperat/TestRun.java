@@ -574,7 +574,7 @@ public class TestRun {
     }
 
 
-    @Test
+    @Test @SuppressWarnings("unchecked")
     public void testArrayExtractedType() {
 
         ParameterType<TestSource, String> stringResolver = (ParameterType<TestSource, String>) IMPERAT.config.getParameterType(String.class);
