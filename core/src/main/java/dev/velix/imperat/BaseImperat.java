@@ -14,12 +14,14 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.AmbiguousUsageAdditionException;
+import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.InvalidCommandUsageException;
 import dev.velix.imperat.exception.InvalidSyntaxException;
 import dev.velix.imperat.exception.PermissionDeniedException;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
+import javafx.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
@@ -322,51 +324,37 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         final S source,
         final Context<S> context,
         final CommandUsage<S> usage
-    ) {
+    ) throws Throwable {
         //global pre-processing
-        CompletableFuture.supplyAsync(() -> {
-            try {
-                if (!preProcess(context, usage)) {
-                    return null;
-                }
 
-                //per command pre-processing
-                if (!command.preProcess(this, context, usage)) {
-                    return null;
-                }
 
-                ImperatDebugger.debug("Resolving usage '%s'", CommandUsage.format(command, usage));
-                ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
-                resolvedContext.resolve();
-                resolvedContext.debug();
+        if (!preProcess(context, usage)) {
+            return;
+        }
 
-                //global post-processing
-                if (!postProcess(resolvedContext)) {
-                    return null;
-                }
+        //per command pre-processing
+        if (!command.preProcess(this, context, usage)) {
+            return;
+        }
 
-                //per command post-processing
-                if (!command.postProcess(this, resolvedContext, usage)) {
-                    return null;
-                }
-                return resolvedContext;
-            } catch (Exception exception) {
-                throw new RuntimeException(exception);
-            }
+        ImperatDebugger.debug("Resolving usage '%s'", CommandUsage.format(command, usage));
+        ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
+        resolvedContext.resolve();
+        resolvedContext.debug();
 
-        })
-        .thenAccept((resolvedContext) -> {
-            if (resolvedContext == null) {
-                return;
-            }
-            //executing the usage
-            ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
-            try {
-                usage.execute(this, source, resolvedContext);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        });
+        //global post-processing
+        if (!postProcess(resolvedContext)) {
+            return;
+        }
+
+        //per command post-processing
+        if (!command.postProcess(this, resolvedContext, usage)) {
+            return;
+        }
+
+        //executing the usage
+        ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
+        usage.execute(this, source, resolvedContext);
     }
 
     private boolean preProcess(

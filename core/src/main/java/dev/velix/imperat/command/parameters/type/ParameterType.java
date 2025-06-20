@@ -44,19 +44,6 @@ public interface ParameterType<S extends Source, T> {
      */
     @Nullable T resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> inputStream, @NotNull String input) throws ImperatException;
 
-    default CompletableFuture<T> resolveAsync(
-            @NotNull ExecutionContext<S> context,
-            @NotNull CommandInputStream<S> inputStream,
-            @NotNull String input) {
-        return CompletableFuture.supplyAsync(()-> {
-            try {
-                return resolve(context, inputStream, input);
-            } catch (ImperatException e) {
-                context.imperatConfig().handleExecutionThrowable(e, context, ParameterType.this.getClass(), "resolveAsync");
-                return null;
-            }
-        });
-    }
     /**
      * Gets the suggestion resolver for this parameter type.
      *
