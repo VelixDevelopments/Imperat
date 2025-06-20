@@ -5,6 +5,7 @@ import dev.velix.imperat.command.parameters.type.ParameterCollection;
 import dev.velix.imperat.command.parameters.type.ParameterCompletableFuture;
 import dev.velix.imperat.command.parameters.type.ParameterMap;
 import dev.velix.imperat.command.parameters.type.ParameterEnum;
+import dev.velix.imperat.command.parameters.type.ParameterOptional;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.util.Registry;
@@ -219,6 +220,19 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
         return ParameterTypes.future((TypeWrap<CompletableFuture<T>>) type, futureTypeResolver);
     }
 
+    private <T> ParameterOptional<S, T> getOptionalResolver(TypeWrap<?> type) {
+        var parameterizedTypes = type.getParameterizedTypes();
+        if(parameterizedTypes == null || parameterizedTypes.length == 0) {
+            throw new IllegalArgumentException("Raw types are not allowed as parameters !");
+        }
+        TypeWrap<T> optionalType = (TypeWrap<T>) TypeWrap.of(parameterizedTypes[0]);
+        ParameterType<S, T> optionalTypeResolver =
+                (ParameterType<S, T>) getResolver(optionalType.getType()).orElseThrow(()-> new IllegalArgumentException("Unknown "
+                + "component-type detected '" + optionalType.getType().getTypeName() + "'"));
+
+        return ParameterTypes.optional((TypeWrap<Optional<T>>) type, optionalTypeResolver);
+    }
+
     public <C extends Collection<?>> void registerCollectionInitializer(Class<C> type, Supplier<C> initializerFunction) {
         collectionInitializer.setData(type, (Supplier<Collection<?>>) initializerFunction);
     }
@@ -236,7 +250,10 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
     }
 
     public <T> Optional<ParameterType<S, T>> getResolver(Type type) {
-        return Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type)).map(Supplier::get).orElseGet(() -> {
+        return
+                Optional.ofNullable(getData(TypeUtility.primitiveToBoxed(type))
+                .map(Supplier::get)
+        .orElseGet(() -> {
 
             var wrap = TypeWrap.of(type);
             if(wrap.isArray()) {
@@ -256,10 +273,14 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
                 return this.getFutureResolver(wrap);
             }
 
-            if (TypeUtility.isNumericType(wrap))
+            else if(wrap.getRawType().equals(Optional.class)) {
+                return this.getOptionalResolver(wrap);
+            }
+
+            else if (TypeUtility.isNumericType(wrap))
                 return ParameterTypes.numeric((Class<? extends Number>) type);
 
-            if (TypeUtility.areRelatedTypes(type, Enum.class)) {
+            else if (TypeUtility.areRelatedTypes(type, Enum.class)) {
                 return new ParameterEnum<>((TypeWrap<Enum<?>>) TypeWrap.of(type));
             }
 

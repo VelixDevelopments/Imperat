@@ -8,12 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class ParameterTypes {
-
 
     private ParameterTypes() {
     }
@@ -78,5 +78,12 @@ public final class ParameterTypes {
             ParameterType<S, T> resolverType
     ) {
         return new ParameterCompletableFuture<>(typeWrap, resolverType);
+    }
+
+    public static <S extends Source, T> ParameterOptional<S, T> optional(
+            TypeWrap<Optional<T>> typeWrap,
+            ParameterType<S, T> resolverType
+    )  {
+        return new ParameterOptional<>(typeWrap, resolverType);
     }
 }
