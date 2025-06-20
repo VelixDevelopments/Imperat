@@ -138,7 +138,7 @@ For detailed usage instructions, architecture overviews, and API documentation, 
 
 **Documentation:** https://docs.velix.dev/
 
-Join our community on [Discord]([https://discord.gg/velix](https://discord.gg/McN4GMWApE) to connect with other developers, ask questions, and share ideas.
+Join our community on [Discord](https://discord.gg/McN4GMWApE) to connect with other developers, ask questions, and share ideas.
 
 ## License:
 
