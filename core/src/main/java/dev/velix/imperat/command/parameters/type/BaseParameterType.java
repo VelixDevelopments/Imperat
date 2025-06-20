@@ -47,7 +47,16 @@ public abstract class BaseParameterType<S extends Source, T>
     /**
      * Constructs a new BaseParameterType with the given TypeWrap.
      *
-     * @param type The wrapping object that holds information about the type of the parameter.
+     * @param type The type of the parameter.
+     */
+    public BaseParameterType(final Class<T> type) {
+        this.type = type;
+    }
+
+    /**
+     * Constructs a new BaseParameterType with the given TypeWrap.
+     *
+     * @param type The type of the parameter.
      */
     public BaseParameterType(final Type type) {
         this.type = type;
