@@ -2,9 +2,14 @@ package dev.velix.imperat.command.parameters.type;
 
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class ParameterTypes {
 
@@ -39,5 +44,37 @@ public final class ParameterTypes {
 
     public static <S extends Source> ParameterUUID<S> uuid() {
         return new ParameterUUID<>();
+    }
+
+    public static <S extends Source, E> ParameterArray<S, E> array(
+            TypeWrap<E[]> type,
+            Function<Integer, Object[]> initializer,
+            ParameterType<S, E> componentType
+    ) {
+        return new ParameterArray<>(type, initializer, componentType);
+    }
+
+    public static <S extends Source, E, C extends Collection<E>> ParameterCollection<S, E, C> collection(
+            TypeWrap<C> type,
+            Supplier<C> collectionSupplier,
+            ParameterType<S, E> componentResolver
+    ) {
+        return new ParameterCollection<>(type, collectionSupplier, componentResolver);
+    }
+
+    public static <S extends Source, K, V, M extends Map<K, V>> ParameterMap<S, K, V, M> map(
+            TypeWrap<M> type,
+            Supplier<M> mapInitializer,
+            ParameterType<S, K> keyResolver,
+            ParameterType<S, V> valueResolver
+    ) {
+        return new ParameterMap<>(type, mapInitializer, keyResolver, valueResolver);
+    }
+
+
+    public static <S extends Source, T> ParameterCompletableFuture<S, T> future(
+            ParameterType<S, T> resolverType
+    ) {
+        return new ParameterCompletableFuture<>(resolverType);
     }
 }

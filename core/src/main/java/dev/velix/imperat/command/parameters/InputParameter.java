@@ -2,9 +2,9 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
-import dev.velix.imperat.command.parameters.type.ArrayParameterType;
-import dev.velix.imperat.command.parameters.type.CollectionParameterType;
-import dev.velix.imperat.command.parameters.type.MapParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterArray;
+import dev.velix.imperat.command.parameters.type.ParameterCollection;
+import dev.velix.imperat.command.parameters.type.ParameterMap;
 import dev.velix.imperat.command.parameters.type.ParameterCommand;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.context.Source;
@@ -161,9 +161,9 @@ public abstract class InputParameter<S extends Source> implements CommandParamet
                 String.format("Usage parameter '%s' cannot be greedy while having value-valueType '%s'", name, valueType().getTypeName())
             );
         }*/
-        return greedy || (this.type instanceof CollectionParameterType<?,?,?>)
-                || (this.type instanceof ArrayParameterType<?,?>)
-                || (this.type instanceof MapParameterType<?,?,?,?>);
+        return greedy || (this.type instanceof ParameterCollection<?,?,?>)
+                || (this.type instanceof ParameterArray<?,?>)
+                || (this.type instanceof ParameterMap<?,?,?,?>);
     }
 
     @Override

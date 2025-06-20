@@ -10,12 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public final class ArrayParameterType<S extends Source, E> extends BaseParameterType<S, E[]> {
+public final class ParameterArray<S extends Source, E> extends BaseParameterType<S, E[]> {
 
     private final Function<Integer, Object[]> initializer;
     private final ParameterType<S, E> componentType;
 
-    public ArrayParameterType(TypeWrap<E[]> type, Function<Integer, Object[]> initializer, ParameterType<S, E> componentType) {
+    public ParameterArray(TypeWrap<E[]> type, Function<Integer, Object[]> initializer, ParameterType<S, E> componentType) {
         super(type.getType());
         this.initializer = initializer;
         this.componentType = componentType;

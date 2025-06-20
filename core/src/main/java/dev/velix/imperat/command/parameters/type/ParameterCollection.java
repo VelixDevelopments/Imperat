@@ -11,12 +11,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class CollectionParameterType<S extends Source, E, C extends Collection<E>> extends BaseParameterType<S, C> {
+public class ParameterCollection<S extends Source, E, C extends Collection<E>> extends BaseParameterType<S, C> {
 
     private final Supplier<C> collectionSupplier;
     private final ParameterType<S, E> componentResolver;
 
-    public CollectionParameterType(TypeWrap<C> type, Supplier<C> collectionSupplier, ParameterType<S, E> componentResolver) {
+    public ParameterCollection(TypeWrap<C> type, Supplier<C> collectionSupplier, ParameterType<S, E> componentResolver) {
         super(type.getType());
         this.collectionSupplier = collectionSupplier;
         this.componentResolver = componentResolver;

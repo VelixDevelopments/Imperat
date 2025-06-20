@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> extends BaseParameterType<S, M> {
+public class ParameterMap<S extends Source, K, V, M extends Map<K, V>> extends BaseParameterType<S, M> {
     private final static String ENTRY_SEPARATOR = ",";
 
     private final Supplier<M> mapInitializer;
@@ -20,7 +20,7 @@ public class MapParameterType<S extends Source, K, V, M extends Map<K, V>> exten
     private final ParameterType<S, V> valueResolver;
 
 
-    public MapParameterType(
+    public ParameterMap(
             TypeWrap<M> type,
             Supplier<M> mapInitializer,
             ParameterType<S, K> keyResolver,
