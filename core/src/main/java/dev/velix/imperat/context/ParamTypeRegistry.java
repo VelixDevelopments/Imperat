@@ -216,7 +216,7 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
         ParameterType<S, T> futureTypeResolver = (ParameterType<S, T>) getResolver(futureTypeInput.getType()).orElseThrow(()-> new IllegalArgumentException("Unknown "
                 + "component-type detected '" + futureTypeInput.getType().getTypeName() + "'"));
 
-        return ParameterTypes.future(futureTypeResolver);
+        return ParameterTypes.future((TypeWrap<CompletableFuture<T>>) type, futureTypeResolver);
     }
 
     public <C extends Collection<?>> void registerCollectionInitializer(Class<C> type, Supplier<C> initializerFunction) {

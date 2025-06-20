@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -73,8 +74,9 @@ public final class ParameterTypes {
 
 
     public static <S extends Source, T> ParameterCompletableFuture<S, T> future(
+            TypeWrap<CompletableFuture<T>> typeWrap,
             ParameterType<S, T> resolverType
     ) {
-        return new ParameterCompletableFuture<>(resolverType);
+        return new ParameterCompletableFuture<>(typeWrap, resolverType);
     }
 }

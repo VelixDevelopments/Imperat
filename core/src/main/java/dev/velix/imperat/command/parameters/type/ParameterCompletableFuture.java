@@ -12,8 +12,8 @@ import java.util.concurrent.CompletableFuture;
 public final class ParameterCompletableFuture<S extends Source, T> extends BaseParameterType<S, CompletableFuture<T>> {
 
     private final ParameterType<S, T> typeResolver;
-    public ParameterCompletableFuture(ParameterType<S, T> typeResolver) {
-        super(new TypeWrap<CompletableFuture<T>>() {}.getType());
+    public ParameterCompletableFuture(TypeWrap<CompletableFuture<T>> typeWrap, ParameterType<S, T> typeResolver) {
+        super(typeWrap.getType());
         this.typeResolver = typeResolver;
     }
 

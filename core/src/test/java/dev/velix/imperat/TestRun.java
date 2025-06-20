@@ -10,6 +10,9 @@ import dev.velix.imperat.annotations.base.AnnotationFactory;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.type.BaseParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.ParameterDuration;
 import dev.velix.imperat.commands.RankCommand;
@@ -48,6 +51,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class TestRun {
@@ -566,6 +570,24 @@ public class TestRun {
         System.out.println("Executing '/rank addperm mod server.fly -force'");
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("rank", "addperm mod server.fly -force"));
 
+
+    }
+
+
+    @Test
+    public void testArrayExtractedType() {
+
+        ParameterType<TestSource, String> stringResolver = (ParameterType<TestSource, String>) IMPERAT.config.getParameterType(String.class);
+        BaseParameterType<TestSource, String[]> stringArrType = ParameterTypes.array(new TypeWrap<>() {
+        }, String[]::new, stringResolver);
+
+
+        BaseParameterType<TestSource, CompletableFuture<String>> completableFutureType = ParameterTypes.future(
+                new TypeWrap<>() {
+                }, stringResolver);
+
+        Assertions.assertEquals("java.lang.String[]", stringArrType.type().getTypeName());
+        Assertions.assertEquals("java.util.concurrent.CompletableFuture<java.lang.String>", completableFutureType.type().getTypeName());
 
     }
 }

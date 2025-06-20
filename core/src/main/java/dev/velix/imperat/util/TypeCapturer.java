@@ -2,6 +2,7 @@ package dev.velix.imperat.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 public abstract class TypeCapturer {
 
@@ -12,17 +13,25 @@ public abstract class TypeCapturer {
      * @return The resolved {@link Type}.
      */
     protected Type extractType(int index) {
-        Type genericSuperclass = getClass().getGenericSuperclass();
-
-        if (genericSuperclass instanceof ParameterizedType parameterized) {
+        Type genericSuperClass = this.getClass().getGenericSuperclass();
+        if (genericSuperClass instanceof ParameterizedType parameterized) {
             Type[] args = parameterized.getActualTypeArguments();
             if (index < 0 || index >= args.length) {
                 throw new IndexOutOfBoundsException("No type argument at index " + index);
             }
-            return args[index];
-        } 
 
-        throw new IllegalStateException("Superclass is not parameterized: " + genericSuperclass);
+            Type targetType = args[index];
+
+            // Handle TypeVariable (like E[])
+            if (targetType instanceof TypeVariable) {
+                throw new IllegalStateException("Cannot resolve generic type variable: " + targetType +
+                        ". Consider passing the concrete type explicitly to the constructor.");
+            }
+
+            return targetType;
+        }
+
+        throw new IllegalStateException("Superclass is not parameterized: " + genericSuperClass);
     }
 
     /**
