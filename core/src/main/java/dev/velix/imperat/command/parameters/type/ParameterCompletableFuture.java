@@ -1,9 +1,12 @@
 package dev.velix.imperat.command.parameters.type;
 
+import dev.velix.imperat.command.parameters.CommandParameter;
+import dev.velix.imperat.command.parameters.OptionalValueSupplier;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
+import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,5 +42,20 @@ public final class ParameterCompletableFuture<S extends Source, T> extends BaseP
                 return null;
             }
         });
+    }
+
+    @Override
+    public SuggestionResolver<S> getSuggestionResolver() {
+        return typeResolver.getSuggestionResolver();
+    }
+
+    @Override
+    public boolean matchesInput(String input, CommandParameter<S> parameter) {
+        return typeResolver.matchesInput(input, parameter);
+    }
+
+    @Override
+    public OptionalValueSupplier supplyDefaultValue() {
+        return typeResolver.supplyDefaultValue();
     }
 }
