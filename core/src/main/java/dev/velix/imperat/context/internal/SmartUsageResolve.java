@@ -110,8 +110,13 @@ final class SmartUsageResolve<S extends Source> {
                 continue;
             }
 
-            FlagData<S> flag = usage.getFlagParameterFromRaw(currentRaw);
             if (currentParameter.isFlag()) {
+                FlagData<S> flag;
+                if (!Patterns.isInputFlag(currentRaw)) {
+                    flag = null;
+                }else {
+                    flag = usage.getFlagParameterFromRaw(currentRaw);
+                }
                 handleParameterFlag(stream, currentParameter.asFlagParameter(), currentRaw, flag);
                 continue;
             } else if (Patterns.isInputFlag(currentRaw)) {

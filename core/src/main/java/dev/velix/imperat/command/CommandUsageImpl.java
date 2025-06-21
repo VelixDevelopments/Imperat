@@ -6,14 +6,15 @@ import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
+import dev.velix.imperat.command.flags.FlagExtractor;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,6 +37,8 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     private CommandCoordinator<S> commandCoordinator;
 
     private final Set<FlagData<S>> freeflags = new HashSet<>();
+    private final FlagExtractor<S> flagExtractor;
+
     CommandUsageImpl(@NotNull CommandExecution<S> execution) {
         this(execution, false);
     }
@@ -45,6 +48,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         this.cooldownHandler = CooldownHandler.createDefault(this);
         this.commandCoordinator = CommandCoordinator.sync();
         this.help = help;
+        this.flagExtractor = FlagExtractor.createNative(this);
     }
 
     /**
@@ -79,6 +83,11 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
         this.description = description;
     }
 
+    @Override
+    public @NotNull FlagExtractor<S> getFlagExtractor() {
+        return flagExtractor;
+    }
+
     /**
      * Checks whether the raw input is a flag
      * registered by this usage
@@ -99,19 +108,24 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
      */
     @Override
     public @Nullable FlagData<S> getFlagParameterFromRaw(String rawInput) {
-        boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
-        boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
 
-        if (!isSingle && !isDouble) {
-            return null;
+        String raw = rawInput;
+        if (Patterns.isInputFlag(rawInput)) {
+            boolean isSingle = SINGLE_FLAG.matcher(rawInput).matches();
+            boolean isDouble = DOUBLE_FLAG.matcher(rawInput).matches();
+            int offset = 0;
+            if(isSingle) {
+                offset = 1;
+            }else if(isDouble) {
+                offset = 2;
+            }
+            raw = rawInput.substring(offset);
         }
-
-        String inputFlagAlias = rawInput.substring(isSingle ? 1 : 2);
 
         for (var param : parameters) {
             if (!param.isFlag()) continue;
             FlagData<S> flag = param.asFlagParameter().flagData();
-            if (flag.acceptsInput(inputFlagAlias)) {
+            if (flag.acceptsInput(raw)) {
                 return flag;
             }
         }
@@ -119,13 +133,9 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     }
 
     @Override
-    public void addFlag(CommandParameter<S> flagParam) {
-        freeflags.add(flagParam.asFlagParameter().flagData());
-    }
-
-    @Override
     public void addFlag(FlagData<S> flagData) {
         freeflags.add(flagData);
+        flagExtractor.insertFlag(flagData);
     }
 
     @Override
@@ -158,7 +168,10 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
                 continue;
             }
             parameters.add(param);
-            if (param.isFlag()) continue;
+            if (param.isFlag()) {
+                flagExtractor.insertFlag(param.asFlagParameter().flagData());
+                continue;
+            }
             parametersWithoutFlags.add(param);
         }
     }

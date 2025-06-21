@@ -3,11 +3,13 @@ package dev.velix.imperat.command;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
+import dev.velix.imperat.command.flags.FlagExtractor;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.ParameterBuilder;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.exception.UnknownFlagException;
 import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,32 +30,43 @@ import java.util.function.Predicate;
  */
 public sealed interface CommandUsage<S extends Source> extends PermissionHolder, DescriptionHolder, CooldownHolder permits CommandUsageImpl {
 
-    static <S extends Source> String format(@Nullable String label, CommandUsage<S> usage) {
-        Preconditions.notNull(usage, "usage");
-        StringBuilder builder = new StringBuilder(label == null ? "" : label);
-        if(label != null) {
-            builder.append(' ');
-        }
-
-        int i = 0;
-        for (CommandParameter<S> parameter : usage.getParameters()) {
-            builder.append(parameter.format());
-            if (i != usage.getParameters().size() - 1) {
-                builder.append(' ');
-            }
-            i++;
-        }
-        return builder.toString();
-    }
-
-    static <S extends Source> String format(@Nullable Command<S> command, CommandUsage<S> usage) {
-        String label = command == null ? null : command.name();
-        return format(label, usage);
-    }
-
-    static <S extends Source> Builder<S> builder() {
-        return new Builder<>();
-    }
+    /**
+     * Retrieves the flag extractor instance for parsing command flags from input strings.
+     *
+     * <p>The returned {@link FlagExtractor} is capable of parsing flag aliases from compact
+     * string representations (e.g., "-abc", "alphaby") and resolving them to their
+     * corresponding {@link FlagData} objects based on the command's usage configuration.
+     *
+     * <p>The extractor uses a greedy longest-match algorithm to handle overlapping aliases
+     * efficiently. For example, if both "a" and "alpha" are valid aliases for the same flag,
+     * the input "alpha" will match the longer alias rather than just "a".
+     *
+     * <p><strong>Usage Examples:</strong>
+     * <pre>{@code
+     * // Given flags: alpha["a", "alfa"], beta["b"], gamma["g", "gam"]
+     * FlagExtractor<MySource> extractor = command.getFlagExtractor();
+     *
+     * Set<FlagData<MySource>> flags1 = extractor.extract("ab");     // alpha, beta
+     * Set<FlagData<MySource>> flags2 = extractor.extract("alphag"); // alpha, gamma
+     * Set<FlagData<MySource>> flags3 = extractor.extract("abx");    // throws UnknownFlagException
+     * }</pre>
+     *
+     * <p><strong>Error Handling:</strong>
+     * The extractor will throw an {@link UnknownFlagException} if the input contains
+     * any characters that cannot be matched to known flag aliases.
+     *
+     * <p><strong>Thread Safety:</strong>
+     * The returned extractor instance is thread-safe for concurrent read operations
+     * but should not be used across different command contexts.
+     *
+     * @return a non-null flag extractor configured for this command's flag definitions
+     * @throws IllegalStateException if the command usage has not been properly initialized
+     *                               or if no flag definitions are available
+     * @see FlagExtractor#extract(String)
+     * @see FlagData
+     * @since 1.9.6
+     */
+    @NotNull FlagExtractor<S> getFlagExtractor();
 
     /**
      * Checks whether the raw input is a flag
@@ -73,10 +86,20 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
     @Nullable
     FlagData<S> getFlagParameterFromRaw(String rawInput);
 
-    void addFlag(CommandParameter<S> flagParam);
+    default void addFlag(CommandParameter<S> flagParam) {
+        addFlag(flagParam.asFlagParameter().flagData());
+    }
 
+    /**
+     * Adds a free flag to the usage
+     * @param flagData adds a free flag to the usage
+     */
     void addFlag(FlagData<S> flagData);
 
+    /**
+     * The allowed free flags in this usage.
+     * @return the allowed free flags that can be used.
+     */
     Set<FlagData<S>> getUsedFreeFlags();
 
     /**
@@ -244,9 +267,35 @@ public sealed interface CommandUsage<S extends Source> extends PermissionHolder,
         return getParameters().size();
     }
 
-
     default String formatted() {
         return format((String) null, this);
+    }
+
+    static <S extends Source> String format(@Nullable String label, CommandUsage<S> usage) {
+        Preconditions.notNull(usage, "usage");
+        StringBuilder builder = new StringBuilder(label == null ? "" : label);
+        if(label != null) {
+            builder.append(' ');
+        }
+
+        int i = 0;
+        for (CommandParameter<S> parameter : usage.getParameters()) {
+            builder.append(parameter.format());
+            if (i != usage.getParameters().size() - 1) {
+                builder.append(' ');
+            }
+            i++;
+        }
+        return builder.toString();
+    }
+
+    static <S extends Source> String format(@Nullable Command<S> command, CommandUsage<S> usage) {
+        String label = command == null ? null : command.name();
+        return format(label, usage);
+    }
+
+    static <S extends Source> Builder<S> builder() {
+        return new Builder<>();
     }
 
     class Builder<S extends Source> {
