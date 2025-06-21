@@ -166,7 +166,7 @@ final class SmartUsageResolve<S extends Source> {
                 if(nextParam == null) {
                     handleUnknownFlag(currentRaw);
                     return;
-                }else {
+                }else if(!context.hasResolvedFlag(currentParameter)) {
                     //required
                     resolveFlagDefaultValue(stream, currentParameter.asFlagParameter());
                 }
