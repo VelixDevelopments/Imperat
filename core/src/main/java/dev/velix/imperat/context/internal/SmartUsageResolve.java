@@ -113,7 +113,9 @@ final class SmartUsageResolve<S extends Source> {
             }
 
             if (Patterns.isInputFlag(currentRaw)) {
+                ImperatDebugger.debug("Resolving input flag");
                 if(context.hasResolvedFlag(currentParameter)) {
+                    ImperatDebugger.debug("Flag-Parameter has been already resolved before!");
                     currentParameter = stream.popParameter().orElse(null);
                     if(currentParameter == null) continue;
                 }
@@ -138,24 +140,30 @@ final class SmartUsageResolve<S extends Source> {
                 //we are sure they all are of same-type
                 for(FlagData<S> extractedFlagData : extracted) {
                     if(context.hasResolvedFlag(extractedFlagData)) {
+                        ImperatDebugger.debug("Already resolved flag '%s', skipping...", extractedFlagData.name());
                         continue;
                     }
 
                     if(currentParameter.isFlag() && !currentParameter.asFlagParameter().flagData().equals(extractedFlagData)) {
+                        ImperatDebugger.debug("Current flag parameter '%s' does not match the entered flag '%s' in the same position !",
+                                currentParameter.asFlagParameter().flagData().name(), extractedFlagData.name());
+                        ImperatDebugger.debug("Resolving parameter %s's default value", currentParameter.format());
                         resolveFlagDefaultValue(stream, currentParameter.asFlagParameter());
                         //no raw input , skipping a flag's parameter
                         break;
                     }
 
+                    ImperatDebugger.debug("Resolving flag '%s'", extractedFlagData.name());
                     context.resolveFlag(ParameterTypes.flag(extractedFlagData).resolve(context, stream, currentRaw));
                 }
 
                 stream.skip();
                 continue;
             }else if(currentParameter.isFlag()) {
+                ImperatDebugger.debug("Current parameter is a flag while the raw '%s' doesn't match a flag input !", currentRaw);
                 var nextParam = stream.peekParameter().orElse(null);
 
-                if(nextParam == null || nextParam.isOptional()) {
+                if(nextParam == null) {
                     handleUnknownFlag(currentRaw);
                     return;
                 }else {
