@@ -6,6 +6,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
@@ -232,6 +233,12 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     public CommandUsage<S> getDetectedUsage() {
         return usage;
+    }
+
+    @Override
+    public boolean hasResolvedFlag(FlagData<S> flagData) {
+        return flagRegistry.getData(flagData.name())
+                .isPresent();
     }
 
     @Override

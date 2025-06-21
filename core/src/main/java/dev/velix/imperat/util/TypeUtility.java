@@ -1,5 +1,8 @@
 package dev.velix.imperat.util;
 
+import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.context.FlagData;
+import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
@@ -216,5 +219,17 @@ public final class TypeUtility {
             }
         }
         return false;
+    }
+
+    public static <S extends Source> boolean areTrueFlagsOfSameInputTpe(Set<FlagData<S>> flagDataSet) {
+        ParameterType<S, ?> inputType = null;
+        for(FlagData<S> flagData : flagDataSet) {
+            if(inputType != null && !flagData.inputType().equalsExactly(inputType.type())) {
+               return false;
+            }
+            inputType = flagData.inputType();
+        }
+
+        return true;
     }
 }

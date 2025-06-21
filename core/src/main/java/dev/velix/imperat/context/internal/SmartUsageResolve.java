@@ -5,7 +5,6 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.OptionalValueSupplier;
-import dev.velix.imperat.command.parameters.type.ParameterFlag;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
@@ -16,7 +15,10 @@ import dev.velix.imperat.exception.UnknownFlagException;
 import dev.velix.imperat.exception.parse.UnknownSubCommandException;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
+import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
 
 @SuppressWarnings("unchecked")
 final class SmartUsageResolve<S extends Source> {
@@ -110,45 +112,58 @@ final class SmartUsageResolve<S extends Source> {
                 continue;
             }
 
-            if (currentParameter.isFlag()) {
-                FlagData<S> flag;
-                if (!Patterns.isInputFlag(currentRaw)) {
-                    flag = null;
-                }else {
-                    flag = usage.getFlagParameterFromRaw(currentRaw);
+            if (Patterns.isInputFlag(currentRaw)) {
+                if(context.hasResolvedFlag(currentParameter)) {
+                    currentParameter = stream.popParameter().orElse(null);
+                    if(currentParameter == null) continue;
                 }
-                handleParameterFlag(stream, currentParameter.asFlagParameter(), currentRaw, flag);
+
+                Set<FlagData<S>> extracted = usage.getFlagExtractor().extract(Patterns.withoutFlagSign(currentRaw));
+                long numberOfSwitches = extracted.stream().filter(FlagData::isSwitch)
+                        .count();
+
+                long numberOfTrueFlags = extracted.size()-numberOfSwitches;
+
+                if(extracted.size() != numberOfSwitches && extracted.size() != numberOfTrueFlags) {
+                    //we don't support flag shorthands for a mixture of true and switch flags.
+                    throw new RuntimeException("Unsupported use of a mixutre of switches and true flags !");
+                }
+
+                if(extracted.size() == numberOfTrueFlags && !TypeUtility.areTrueFlagsOfSameInputTpe(extracted)) {
+                    //all are true flags
+                    //check if they share same type
+                    throw new IllegalStateException("You cannot use compressed true flags with, while they are not of same input type");
+                }
+
+                //we are sure they all are of same-type
+                for(FlagData<S> extractedFlagData : extracted) {
+                    if(context.hasResolvedFlag(extractedFlagData)) {
+                        continue;
+                    }
+
+                    if(currentParameter.isFlag() && !currentParameter.asFlagParameter().flagData().equals(extractedFlagData)) {
+                        resolveFlagDefaultValue(stream, currentParameter.asFlagParameter());
+                        //no raw input , skipping a flag's parameter
+                        break;
+                    }
+
+                    context.resolveFlag(ParameterTypes.flag(extractedFlagData).resolve(context, stream, currentRaw));
+                }
+
+                stream.skip();
                 continue;
-            } else if (Patterns.isInputFlag(currentRaw)) {
+            }else if(currentParameter.isFlag()) {
+                var nextParam = stream.peekParameter().orElse(null);
 
-                ImperatDebugger.debug("Flag pattern of raw '%s'", currentRaw);
-                if(command.getFlagFromRaw(currentRaw).isPresent()) {
-
-                    //FOUND FREE FLAG
-                    var flagData = command.getFlagFromRaw(currentRaw).get();
-                    ImperatDebugger.debug("Found free flag '%s' from raw input '%s'", flagData.name(), currentRaw);
-
-                    ParameterFlag<S> parameterFlag = ParameterTypes.flag(flagData);
-                    context.resolveFlag(parameterFlag.resolveFreeFlag(context, stream, flagData));
-
+                if(nextParam == null || nextParam.isOptional()) {
+                    handleUnknownFlag(currentRaw);
+                    return;
                 }else {
-
-                    /*
-                     *  if the current param IS NOT A FLAG, & the current input matches a flag's criteria
-                     *  if the input also isn't from the free flags register that is linked to the command's instance, THEN
-                     *  this can be a case of two consecutive optional flags next to each other , example usage:
-                     *  '/ban <target> [-silent] [-ip] [duration] [reason]'
-                     *  If user enters '/ban mqzen -s -ip' this should work flawlessly, while '/ban mqzen -ip -s' DOESN'T resolve the silent flag,
-                     *  because of the algorithm that retains the parameters order while resolving their values.
-                     *  I think this can be fixed in the command tree instead of doing it here by making the tree shuffle the possibilities of
-                     *  flag-command-nodes.
-                     */
-
-                    //TODO fix this in the command tree
+                    //required
+                    resolveFlagDefaultValue(stream, currentParameter.asFlagParameter());
                 }
-
-                //we skip the raw input cursor only
-                stream.skipRaw();
+                //no raw input , skipping a flag's parameter
+                stream.skipParameter();
                 continue;
             }
 
@@ -200,51 +215,6 @@ final class SmartUsageResolve<S extends Source> {
         }
     }
 
-    private void handleParameterFlag(
-            CommandInputStream<S> stream,
-            FlagParameter<S> currentParameter,
-            String currentRaw,
-            @Nullable FlagData<S> flagDataFromRaw
-    ) throws ImperatException {
-        ImperatDebugger.debug("Found parameter flag '%s' from raw input '%s'", currentParameter.format(), currentRaw);
-        ImperatDebugger.debug("It's FlagData='%s'", (flagDataFromRaw == null ? "NULL" : flagDataFromRaw.name()));
-
-        if (flagDataFromRaw == null) {
-            var nextParam = stream.peekParameter().orElse(null);
-
-            if(nextParam == null || nextParam.isOptional()) {
-                handleUnknownFlag(currentRaw);
-                return;
-            }else {
-                //required
-                resolveFlagDefaultValue(stream, currentParameter);
-            }
-            //no raw input , skipping a flag's parameter
-            stream.skipParameter();
-            return;
-        }
-
-        // flag != null
-        ParameterFlag<S> parameterFlagType = (ParameterFlag<S>) currentParameter.type();
-        CommandParameter<S> lookedUpFlagParameter = findMatchingFlagParameter(currentParameter, currentRaw, parameterFlagType);
-
-        if (lookedUpFlagParameter == null) {
-            throw new UnknownFlagException(currentRaw);
-        }
-
-        if (!lookedUpFlagParameter.asFlagParameter().name().equals(currentParameter.name())) {
-            //a flag in between got skipped, we should resolve its defaults
-            //currentParameter is the skipped one
-            resolveFlagDefaultValue(stream, currentParameter.asFlagParameter());
-
-            stream.skipParameter();
-        }else {
-            context.resolveFlag(parameterFlagType.resolve(context, stream, stream.readInput()));
-            stream.skip();
-        }
-
-    }
-
     private void resolveFlagDefaultValue(CommandInputStream<S> stream, FlagParameter<S> flagParameter) throws ImperatException {
         FlagData<S> flagDataFromRaw = flagParameter.asFlagParameter().flagData();
 
@@ -280,28 +250,6 @@ final class SmartUsageResolve<S extends Source> {
         }
     }
 
-    private @Nullable CommandParameter<S> findMatchingFlagParameter(
-            CommandParameter<S> currentParameter,
-            String currentRaw,
-            ParameterFlag<S> parameterFlag
-    ) {
-        CommandInputStream<S> stream = this.stream.copy();
-        CommandParameter<S> flagParam = currentParameter;
-
-        do {
-            if(parameterFlag.matchesInput(currentRaw, flagParam)) {
-                return flagParam;
-            }
-
-            if (!flagParam.isFlag()) {
-                continue;
-            }
-            flagParam = stream.popParameter().orElse(null);
-        } while (flagParam != null);
-
-        return null;
-    }
-
     private void resolveRequired(
         String currentRaw,
         CommandParameter<S> currentParameter,
@@ -324,13 +272,10 @@ final class SmartUsageResolve<S extends Source> {
         int lengthWithoutFlags,
         Object resolveResult
     ) throws ImperatException {
-        // /cmd <r1> [o1] <r2> [o2]
-        // /cmd hi bye
         int currentParameterPosition = stream.currentParameterPosition();
 
         if (stream.rawsLength() < lengthWithoutFlags) {
             int diff = lengthWithoutFlags - stream.rawsLength();
-
 
             if (!stream.cursor().isLast(ShiftTarget.PARAMETER_ONLY)) {
                 //[o1]

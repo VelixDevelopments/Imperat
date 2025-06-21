@@ -142,4 +142,13 @@ public interface ExecutionContext<S extends Source> extends Context<S> {
      */
     CommandUsage<S> getDetectedUsage();
 
+    default boolean hasResolvedFlag(CommandParameter<S> currentParameter) {
+        if(!currentParameter.isFlag()) {
+            return false;
+        }
+        return hasResolvedFlag(currentParameter.asFlagParameter().flagData());
+    }
+
+    boolean hasResolvedFlag(FlagData<S> flagData);
+
 }

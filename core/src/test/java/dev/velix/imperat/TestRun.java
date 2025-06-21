@@ -540,7 +540,8 @@ public class TestRun {
         String usage2 = "-time 1h Hello world, im mazen";
         String usage3 = "Hello world, im mazen";
 
-        testCommand("motd",new GuildMOTDCommand(),usage2, usage3);
+        testCommand("motd",new GuildMOTDCommand(), usage2);
+        testCommand("motd",new GuildMOTDCommand(), usage3);
     }
 
     @Test

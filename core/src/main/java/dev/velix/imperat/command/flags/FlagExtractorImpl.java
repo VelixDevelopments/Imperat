@@ -27,6 +27,7 @@ final class FlagExtractorImpl<S extends Source> implements FlagExtractor<S>{
 
     @Override
     public void insertFlag(FlagData<S> flagData) {
+        flagTrie.insert(flagData.name(), flagData);
         for(String alias : flagData.aliases()) {
             flagTrie.insert(alias, flagData);
         }
