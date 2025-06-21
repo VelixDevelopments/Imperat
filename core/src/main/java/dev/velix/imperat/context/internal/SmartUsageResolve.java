@@ -256,14 +256,17 @@ final class SmartUsageResolve<S extends Source> {
 
         //true flag default value handling
         String defValue = flagParameter.getDefaultValueSupplier().supply(context.source(), flagParameter);
-        Object flagValueResolved = flagParameter.getDefaultValueSupplier().isEmpty() ? null :
-                flagDataFromRaw.inputType().resolve(
-                    context,
-                    defValue == null ? stream : CommandInputStream.subStream(stream, defValue),
-                    defValue
-                );
-        ImperatDebugger.debug("Resolving flag '%s' default input value='%s'", flagDataFromRaw.name(), defValue);
-        context.resolveFlag(new ExtractedInputFlag(flagDataFromRaw,null, defValue, flagValueResolved));
+        if(defValue != null) {
+            Object flagValueResolved = flagParameter.getDefaultValueSupplier().isEmpty() ? null :
+                    flagDataFromRaw.inputType().resolve(
+                            context,
+                            CommandInputStream.subStream(stream, defValue),
+                            defValue
+                    );
+            ImperatDebugger.debug("Resolving flag '%s' default input value='%s'", flagDataFromRaw.name(), defValue);
+            context.resolveFlag(new ExtractedInputFlag(flagDataFromRaw,null, defValue, flagValueResolved));
+        }
+
     }
 
     private void handleUnknownFlag(String currentRaw) throws ImperatException {
@@ -400,8 +403,13 @@ final class SmartUsageResolve<S extends Source> {
             return null;
         }
         String value = optionalSupplier.supply(context.source(), parameter);
-        ImperatDebugger.debug("DEF VALUE='%s', for param='%s'", value, parameter.format());
-        return (T) parameter.type().resolve(context, stream, value);
+
+        if(value != null) {
+            ImperatDebugger.debug("DEF VALUE='%s', for param='%s'", value, parameter.format());
+            return (T) parameter.type().resolve(context, stream, value);
+        }
+
+        return null;
     }
 
     public Command<S> getCommand() {
