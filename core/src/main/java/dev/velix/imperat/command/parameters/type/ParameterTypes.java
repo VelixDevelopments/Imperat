@@ -52,7 +52,7 @@ public final class ParameterTypes {
             Function<Integer, Object[]> initializer,
             ParameterType<S, E> componentType
     ) {
-        return new ParameterArray<>(type, initializer, componentType);
+        return new ParameterArray<>(type, initializer, componentType) {};
     }
 
     public static <S extends Source, E, C extends Collection<E>> ParameterCollection<S, E, C> collection(
