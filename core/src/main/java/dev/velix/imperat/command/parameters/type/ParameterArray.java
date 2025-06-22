@@ -16,7 +16,7 @@ public final class ParameterArray<S extends Source, E> extends BaseParameterType
     private final ParameterType<S, E> componentType;
 
     public ParameterArray(TypeWrap<E[]> type, Function<Integer, Object[]> initializer, ParameterType<S, E> componentType) {
-        super(type.getType());
+        super();
         this.initializer = initializer;
         this.componentType = componentType;
     }
