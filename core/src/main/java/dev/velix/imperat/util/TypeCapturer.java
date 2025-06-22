@@ -1,132 +1,182 @@
 package dev.velix.imperat.util;
 
 import java.lang.reflect.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class TypeCapturer {
 
     /**
-     * Extracts a generic type argument from this class's direct superclass.
+     * Extract generic parameter type from this class's direct superclass.
      *
-     * @param index The index of the type argument (e.g. 0 for the first).
-     * @return The resolved {@link Type}.
+     * @param index index of the generic parameter
+     * @return resolved Type
      */
     protected Type extractType(int index) {
-        Type genericSuperClass = this.getClass().getGenericSuperclass();
+        Type genericSuperClass = getClass().getGenericSuperclass();
 
         if (genericSuperClass instanceof ParameterizedType parameterized) {
             Type[] args = parameterized.getActualTypeArguments();
-            if (index < 0 || index >= args.length) {
+            if (index < 0 || index >= args.length)
                 throw new IndexOutOfBoundsException("No type argument at index " + index);
-            }
 
-            Type extracted = args[index];
-            return resolveVariableType(extracted, this.getClass());
+            return resolveType(args[index]);
         }
 
         throw new IllegalStateException("Superclass is not parameterized: " + genericSuperClass);
     }
 
     /**
-     * Extracts a generic type argument from a specific superclass in the hierarchy.
+     * Extract generic parameter type from a specific superclass/interface in the hierarchy.
      *
-     * @param targetSuperclass The exact superclass whose type argument to extract.
-     * @param index The index of the type parameter.
-     * @return The resolved {@link Type}, possibly a Class, ParameterizedType, or array.
+     * @param targetSuperclass superclass to extract from
+     * @param index           index of generic parameter
+     * @return resolved Type
      */
     protected Type extractType(Class<?> targetSuperclass, int index) {
-        Class<?> currentClass = getClass();
+        Class<?> current = getClass();
 
-        while (currentClass != null && currentClass != Object.class) {
-            Type genericSuperclass = currentClass.getGenericSuperclass();
+        while (current != null && current != Object.class) {
+            Type genericSuper = current.getGenericSuperclass();
 
-            if (genericSuperclass instanceof ParameterizedType parameterized) {
-                Class<?> rawType = (Class<?>) parameterized.getRawType();
+            if (genericSuper instanceof ParameterizedType parameterized) {
+                Class<?> raw = (Class<?>) parameterized.getRawType();
 
-                if (rawType.equals(targetSuperclass)) {
-                    Type[] actualArgs = parameterized.getActualTypeArguments();
-
-                    if (index < 0 || index >= actualArgs.length) {
+                if (raw.equals(targetSuperclass)) {
+                    Type[] args = parameterized.getActualTypeArguments();
+                    if (index < 0 || index >= args.length)
                         throw new IndexOutOfBoundsException("No type argument at index " + index);
-                    }
 
-                    Type extracted = actualArgs[index];
-                    return resolveVariableType(extracted, getClass());
+                    return resolveType(args[index]);
                 }
 
-                currentClass = rawType;
-
-            } else if (genericSuperclass instanceof Class<?> raw) {
-                currentClass = raw;
-
+                current = raw;
+            } else if (genericSuper instanceof Class<?> raw) {
+                current = raw;
             } else {
                 break;
             }
         }
 
-        throw new IllegalStateException("Superclass " + targetSuperclass.getName() +
-            " not found in hierarchy of " + getClass().getName());
+        throw new IllegalStateException(
+                "Superclass " + targetSuperclass.getName() + " not found in hierarchy of " + getClass().getName());
     }
 
     /**
-     * Resolves a {@link Type} (including {@link TypeVariable}, {@link GenericArrayType}, {@link ParameterizedType})
-     * to a concrete {@link Type} using the type hierarchy of the given context class.
+     * Resolves a type by recursively substituting TypeVariables from the class hierarchy starting at getClass().
      */
-    private Type resolveVariableType(Type type, Class<?> contextClass) {
+    private Type resolveType(Type type) {
         if (type instanceof Class<?>) {
-            return type; // Already resolved
+            return type;
         }
 
         if (type instanceof ParameterizedType pt) {
-            Type[] resolvedArgs = new Type[pt.getActualTypeArguments().length];
-            for (int i = 0; i < resolvedArgs.length; i++) {
-                resolvedArgs[i] = resolveVariableType(pt.getActualTypeArguments()[i], contextClass);
+            Type[] args = pt.getActualTypeArguments();
+            Type[] resolvedArgs = new Type[args.length];
+            for (int i = 0; i < args.length; i++) {
+                resolvedArgs[i] = resolveType(args[i]);
             }
             return new ResolvedParameterizedType((Class<?>) pt.getRawType(), resolvedArgs, pt.getOwnerType());
         }
 
         if (type instanceof GenericArrayType gat) {
-            Type component = resolveVariableType(gat.getGenericComponentType(), contextClass);
-            if (component instanceof Class<?> cls) {
-                return Array.newInstance(cls, 0).getClass(); // Convert to array class like String[].class
+            Type comp = resolveType(gat.getGenericComponentType());
+            if (comp instanceof Class<?> cls) {
+                return Array.newInstance(cls, 0).getClass();
             }
-            return new ResolvedGenericArrayType(component);
+            return new ResolvedGenericArrayType(comp);
         }
 
-        if (type instanceof TypeVariable<?> variable) {
-            Class<?> currentClass = contextClass;
-
-            while (currentClass != null && currentClass != Object.class) {
-                Type genericSuperclass = currentClass.getGenericSuperclass();
-
-                if (genericSuperclass instanceof ParameterizedType parameterized) {
-                    Class<?> raw = (Class<?>) parameterized.getRawType();
-                    TypeVariable<?>[] vars = raw.getTypeParameters();
-                    Type[] args = parameterized.getActualTypeArguments();
-
-                    for (int i = 0; i < vars.length; i++) {
-                        if (vars[i].getName().equals(variable.getName())) {
-                            return resolveVariableType(args[i], raw);
-                        }
-                    }
-
-                    currentClass = raw;
-                } else if (genericSuperclass instanceof Class<?> raw) {
-                    currentClass = raw;
-                } else {
-                    break;
-                }
-            }
-
-            return variable; // Still unresolved
+        if (type instanceof TypeVariable<?> tv) {
+            return resolveTypeVariable(tv, getClass(), new HashMap<>());
         }
 
-        return type; // Fallback
+        return type;
     }
 
     /**
-     * Implementation of ParameterizedType with fully resolved arguments.
+     * Resolves a TypeVariable to a concrete Type by building a substitution map walking up the class hierarchy.
+     * @param variable TypeVariable to resolve
+     * @param contextClass class to start resolution from (always getClass())
+     * @param typeVarAssigns map of TypeVariable -> Type substitutions so far
+     * @return resolved Type or original TypeVariable if unresolved
      */
+    private Type resolveTypeVariable(TypeVariable<?> variable, Class<?> contextClass, Map<TypeVariable<?>, Type> typeVarAssigns) {
+        if (typeVarAssigns.containsKey(variable)) {
+            // Already resolved in map, avoid recursion loop
+            Type resolved = typeVarAssigns.get(variable);
+            if (!resolved.equals(variable)) {
+                return resolveType(resolved);
+            }
+            return resolved;
+        }
+
+        Class<?> current = contextClass;
+
+        while (current != null && current != Object.class) {
+            Type genericSuper = current.getGenericSuperclass();
+
+            if (genericSuper instanceof ParameterizedType parameterized) {
+                Class<?> raw = (Class<?>) parameterized.getRawType();
+
+                TypeVariable<?>[] vars = raw.getTypeParameters();
+                Type[] args = parameterized.getActualTypeArguments();
+
+                for (int i = 0; i < vars.length; i++) {
+                    Type resolvedArg = args[i];
+                    // Substitute any mapped vars recursively
+                    resolvedArg = substituteTypeVariables(resolvedArg, typeVarAssigns);
+
+                    typeVarAssigns.put(vars[i], resolvedArg);
+                }
+
+                if (raw.equals(variable.getGenericDeclaration())) {
+                    // Found declaring class, return resolved or original
+                    Type resolved = typeVarAssigns.get(variable);
+                    return resolved != null ? resolveType(resolved) : variable;
+                }
+
+                current = raw;
+            } else if (genericSuper instanceof Class<?> raw) {
+                current = raw;
+            } else {
+                break;
+            }
+        }
+
+        return variable; // could not resolve
+    }
+
+    private Type substituteTypeVariables(Type type, Map<TypeVariable<?>, Type> typeVarAssigns) {
+        if (type instanceof TypeVariable<?> tv) {
+            Type mapped = typeVarAssigns.get(tv);
+            if (mapped != null && !mapped.equals(tv)) {
+                return substituteTypeVariables(mapped, typeVarAssigns);
+            }
+            return tv;
+        }
+
+        if (type instanceof ParameterizedType pt) {
+            Type[] args = pt.getActualTypeArguments();
+            Type[] resolved = new Type[args.length];
+            for (int i = 0; i < args.length; i++) {
+                resolved[i] = substituteTypeVariables(args[i], typeVarAssigns);
+            }
+            return new ResolvedParameterizedType((Class<?>) pt.getRawType(), resolved, pt.getOwnerType());
+        }
+
+        if (type instanceof GenericArrayType gat) {
+            Type comp = substituteTypeVariables(gat.getGenericComponentType(), typeVarAssigns);
+            if (comp instanceof Class<?> cls) {
+                return Array.newInstance(cls, 0).getClass();
+            }
+            return new ResolvedGenericArrayType(comp);
+        }
+
+        return type;
+    }
+
     private static class ResolvedParameterizedType implements ParameterizedType {
         private final Class<?> raw;
         private final Type[] args;
@@ -168,9 +218,6 @@ public abstract class TypeCapturer {
         }
     }
 
-    /**
-     * Implementation of GenericArrayType with fully resolved component type.
-     */
     private static class ResolvedGenericArrayType implements GenericArrayType {
         private final Type component;
 
