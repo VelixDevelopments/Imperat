@@ -3,7 +3,6 @@ package dev.velix.imperat.util;
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public abstract class TypeCapturer {
 
@@ -67,10 +66,7 @@ public abstract class TypeCapturer {
      * Resolves a type by recursively substituting TypeVariables from the class hierarchy starting at getClass().
      */
     private Type resolveType(Type type) {
-        ImperatDebugger.warning("Resolving type: " + type);
-
         if (type instanceof Class<?>) {
-            ImperatDebugger.warning("Resolved as Class: " + type);
             return type;
         }
 
@@ -80,30 +76,21 @@ public abstract class TypeCapturer {
             for (int i = 0; i < args.length; i++) {
                 resolvedArgs[i] = resolveType(args[i]);
             }
-            ResolvedParameterizedType r = new ResolvedParameterizedType((Class<?>) pt.getRawType(), resolvedArgs, pt.getOwnerType());
-            ImperatDebugger.warning("Resolved ParameterizedType: " + r);
-            return r;
+            return new ResolvedParameterizedType((Class<?>) pt.getRawType(), resolvedArgs, pt.getOwnerType());
         }
 
         if (type instanceof GenericArrayType gat) {
             Type comp = resolveType(gat.getGenericComponentType());
             if (comp instanceof Class<?> cls) {
-                Type arrClass = Array.newInstance(cls, 0).getClass();
-                ImperatDebugger.warning("Resolved GenericArrayType to Class: " + arrClass);
-                return arrClass;
+                return Array.newInstance(cls, 0).getClass();
             }
-            ResolvedGenericArrayType r = new ResolvedGenericArrayType(comp);
-            ImperatDebugger.warning("Resolved GenericArrayType to ResolvedGenericArrayType: " + r);
-            return r;
+            return new ResolvedGenericArrayType(comp);
         }
 
         if (type instanceof TypeVariable<?> tv) {
-            Type resolved = resolveTypeVariable(tv, getClass(), new HashMap<>());
-            ImperatDebugger.warning("Resolved TypeVariable " + tv + " to " + resolved);
-            return resolved;
+            return resolveTypeVariable(tv, getClass(), new HashMap<>());
         }
 
-        ImperatDebugger.warning("Fallback return type: " + type);
         return type;
     }
 
@@ -115,8 +102,6 @@ public abstract class TypeCapturer {
      * @return resolved Type or original TypeVariable if unresolved
      */
     private Type resolveTypeVariable(TypeVariable<?> target, Class<?> startClass, Map<TypeVariable<?>, Type> typeMap) {
-        ImperatDebugger.warning("Resolving TypeVariable: " + target.getName() + " from " + startClass.getName());
-
         Class<?> current = startClass;
 
         while (current != null && current != Object.class) {
@@ -138,18 +123,14 @@ public abstract class TypeCapturer {
                 } else {
                     typeMap.put(declaredVars[i], actual);
                 }
-
-                ImperatDebugger.warning("Mapped: " + declaredVars[i].getName() + " -> " + typeMap.get(declaredVars[i]));
             }
 
             current = raw;
         }
 
-        // Resolve the target using the map
         Type resolved = typeMap.get(target);
 
         if (resolved instanceof TypeVariable<?> nested) {
-            // Recurse in case it's mapped to another variable
             return resolveTypeVariable(nested, startClass, typeMap);
         }
 
