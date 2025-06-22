@@ -67,7 +67,10 @@ public abstract class TypeCapturer {
      * Resolves a type by recursively substituting TypeVariables from the class hierarchy starting at getClass().
      */
     private Type resolveType(Type type) {
+        ImperatDebugger.warning("Resolving type: " + type);
+
         if (type instanceof Class<?>) {
+            ImperatDebugger.warning("Resolved as Class: " + type);
             return type;
         }
 
@@ -77,21 +80,30 @@ public abstract class TypeCapturer {
             for (int i = 0; i < args.length; i++) {
                 resolvedArgs[i] = resolveType(args[i]);
             }
-            return new ResolvedParameterizedType((Class<?>) pt.getRawType(), resolvedArgs, pt.getOwnerType());
+            ResolvedParameterizedType r = new ResolvedParameterizedType((Class<?>) pt.getRawType(), resolvedArgs, pt.getOwnerType());
+            ImperatDebugger.warning("Resolved ParameterizedType: " + r);
+            return r;
         }
 
         if (type instanceof GenericArrayType gat) {
             Type comp = resolveType(gat.getGenericComponentType());
             if (comp instanceof Class<?> cls) {
-                return Array.newInstance(cls, 0).getClass();
+                Type arrClass = Array.newInstance(cls, 0).getClass();
+                ImperatDebugger.warning("Resolved GenericArrayType to Class: " + arrClass);
+                return arrClass;
             }
-            return new ResolvedGenericArrayType(comp);
+            ResolvedGenericArrayType r = new ResolvedGenericArrayType(comp);
+            ImperatDebugger.warning("Resolved GenericArrayType to ResolvedGenericArrayType: " + r);
+            return r;
         }
 
         if (type instanceof TypeVariable<?> tv) {
-            return resolveTypeVariable(tv, getClass(), new HashMap<>());
+            Type resolved = resolveTypeVariable(tv, getClass(), new HashMap<>());
+            ImperatDebugger.warning("Resolved TypeVariable " + tv + " to " + resolved);
+            return resolved;
         }
 
+        ImperatDebugger.warning("Fallback return type: " + type);
         return type;
     }
 
