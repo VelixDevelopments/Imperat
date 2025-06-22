@@ -187,11 +187,11 @@ public final class ParamTypeRegistry<S extends Source> extends Registry<Type, Su
 
     private <E> ParameterType<S, E[]> getArrayResolver(TypeWrap<?> type) {
         var componentType = type.getComponentType();
-        if(componentType == null) {
+        if (componentType == null) {
             throw new IllegalArgumentException("NULL COMPONENT TYPE");
         }
         ParameterType<S, E> componentResolver = (ParameterType<S, E>) getResolver(componentType.getType()).orElseThrow(()-> new IllegalArgumentException("Unknown component-type detected '" + componentType.getType().getTypeName() + "'"));
-        return new ParameterArray<>((TypeWrap<E[]>) type, initializeNewArray(componentType), componentResolver);
+        return new ParameterArray<>((TypeWrap<E[]>) type, initializeNewArray(componentType), componentResolver) {};
     }
 
     private <K, V, M extends Map<K, V>> ParameterMap<S, K, V, M> getMapResolver(TypeWrap<?> type) {
