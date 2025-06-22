@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public final class ParameterArray<S extends Source, E> extends BaseParameterType<S, E[]> {
+public abstract class ParameterArray<S extends Source, E> extends BaseParameterType<S, E[]> {
 
     private final Function<Integer, Object[]> initializer;
     private final ParameterType<S, E> componentType;
