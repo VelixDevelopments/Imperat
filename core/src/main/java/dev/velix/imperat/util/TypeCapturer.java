@@ -114,50 +114,46 @@ public abstract class TypeCapturer {
      * @param typeVarAssigns map of TypeVariable -> Type substitutions so far
      * @return resolved Type or original TypeVariable if unresolved
      */
-    private Type resolveTypeVariable(TypeVariable<?> variable, Class<?> contextClass, Map<TypeVariable<?>, Type> typeVarAssigns) {
-        if (typeVarAssigns.containsKey(variable)) {
-            // Already resolved in map, avoid recursion loop
-            Type resolved = typeVarAssigns.get(variable);
-            if (!resolved.equals(variable)) {
-                return resolveType(resolved);
-            }
-            return resolved;
-        }
+    private Type resolveTypeVariable(TypeVariable<?> target, Class<?> startClass, Map<TypeVariable<?>, Type> typeMap) {
+        ImperatDebugger.warning("Resolving TypeVariable: " + target.getName() + " from " + startClass.getName());
 
-        Class<?> current = contextClass;
+        Class<?> current = startClass;
 
         while (current != null && current != Object.class) {
-            Type genericSuper = current.getGenericSuperclass();
-
-            if (genericSuper instanceof ParameterizedType parameterized) {
-                Class<?> raw = (Class<?>) parameterized.getRawType();
-
-                TypeVariable<?>[] vars = raw.getTypeParameters();
-                Type[] args = parameterized.getActualTypeArguments();
-
-                for (int i = 0; i < vars.length; i++) {
-                    Type resolvedArg = args[i];
-                    // Substitute any mapped vars recursively
-                    resolvedArg = substituteTypeVariables(resolvedArg, typeVarAssigns);
-
-                    typeVarAssigns.put(vars[i], resolvedArg);
-                }
-
-                if (raw.equals(variable.getGenericDeclaration())) {
-                    // Found declaring class, return resolved or original
-                    Type resolved = typeVarAssigns.get(variable);
-                    return resolved != null ? resolveType(resolved) : variable;
-                }
-
-                current = raw;
-            } else if (genericSuper instanceof Class<?> raw) {
-                current = raw;
-            } else {
-                break;
+            Type superclass = current.getGenericSuperclass();
+            if (!(superclass instanceof ParameterizedType parameterized)) {
+                current = current.getSuperclass();
+                continue;
             }
+
+            Class<?> raw = (Class<?>) parameterized.getRawType();
+            Type[] actualArgs = parameterized.getActualTypeArguments();
+            TypeVariable<?>[] declaredVars = raw.getTypeParameters();
+
+            for (int i = 0; i < declaredVars.length; i++) {
+                Type actual = actualArgs[i];
+
+                if (actual instanceof TypeVariable<?> tv && typeMap.containsKey(tv)) {
+                    typeMap.put(declaredVars[i], typeMap.get(tv));
+                } else {
+                    typeMap.put(declaredVars[i], actual);
+                }
+
+                ImperatDebugger.warning("Mapped: " + declaredVars[i].getName() + " -> " + typeMap.get(declaredVars[i]));
+            }
+
+            current = raw;
         }
 
-        return variable; // could not resolve
+        // Resolve the target using the map
+        Type resolved = typeMap.get(target);
+
+        if (resolved instanceof TypeVariable<?> nested) {
+            // Recurse in case it's mapped to another variable
+            return resolveTypeVariable(nested, startClass, typeMap);
+        }
+
+        return resolved != null ? resolved : target;
     }
 
     private Type substituteTypeVariables(Type type, Map<TypeVariable<?>, Type> typeVarAssigns) {
