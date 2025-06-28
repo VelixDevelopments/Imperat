@@ -14,7 +14,7 @@ import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -419,31 +419,91 @@ public final class CommandTree<S extends Source> {
         }
 
         ImperatDebugger.debug("Node-data= '%s'", node.data.format());
-        CompletableFuture<List<String>> future = CompletableFuture.completedFuture(new ArrayList<>());
+
+        // Get all valid children at once
+        List<ParameterNode<S, ?>> validChildren = new ArrayList<>();
         for (var child : node.getChildren()) {
-            ImperatDebugger.debug("collecting from child '%s'", child.data.format());
-            future = future.thenCompose((results) -> addChildResults(imperat, context, child, results));
+            if (root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver().hasPermission(source, child.data.permission())) {
+                ImperatDebugger.debug("Adding child '%s' to valid children", child.data.format());
+                validChildren.add(child);
+            }
         }
-        return future;
+
+        if (validChildren.isEmpty()) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+
+        // Process the first valid child and determine if we should include more
+        return processValidChildren(imperat, context, validChildren);
     }
 
-    private CompletableFuture<List<String>> addChildResults(
+    private CompletableFuture<List<String>> processValidChildren(
             Imperat<S> imperat,
             SuggestionContext<S> context,
-            ParameterNode<S, ?> node,
-            List<String> oldResults
+            List<ParameterNode<S, ?>> validChildren
     ) {
-        SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(node.data);
-        var currentNodeFutureResults = resolver.asyncAutoComplete(context, node.data)
-                .thenApply((res) -> {
-                    oldResults.addAll(res);
-                    return oldResults;
+        // Pre-filter children to avoid unnecessary async calls
+        List<ParameterNode<S, ?>> childrenToProcess = filterChildrenToProcess(validChildren);
+
+        if (childrenToProcess.isEmpty()) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+
+        if (childrenToProcess.size() == 1) {
+            // Single child optimization - no need for combining
+            ParameterNode<S, ?> child = childrenToProcess.get(0);
+            ImperatDebugger.debug("collecting from single child '%s'", child.data.format());
+            SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(child.data);
+            return resolver.asyncAutoComplete(context, child.data);
+        }
+
+        // Multiple children - use parallel processing with stream
+        List<CompletableFuture<List<String>>> futures = childrenToProcess.stream()
+                .map(child -> {
+                    ImperatDebugger.debug("collecting from child '%s'", child.data.format());
+                    SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(child.data);
+                    return resolver.asyncAutoComplete(context, child.data);
+                })
+                .toList();
+
+        // Use efficient combining with pre-sized list
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> {
+                    // Pre-calculate capacity to avoid list resizing
+                    int totalCapacity = futures.stream()
+                            .mapToInt(f -> f.join().size())
+                            .sum();
+
+                    List<String> result = new ArrayList<>(totalCapacity);
+                    futures.forEach(future -> result.addAll(future.join()));
+                    return result;
                 });
+    }
 
-        var optionalChild = node.getChild(ParameterNode::isOptional);
-        if (optionalChild == null)
-            return currentNodeFutureResults;
+    // Efficient pre-filtering to minimize async operations
+    private List<ParameterNode<S, ?>> filterChildrenToProcess(List<ParameterNode<S, ?>> validChildren) {
+        if (validChildren.size() <= 1) {
+            return validChildren;
+        }
 
-        return currentNodeFutureResults.thenCompose((results) -> addChildResults(imperat, context, optionalChild, currentNodeFutureResults.join()));
+        List<ParameterNode<S, ?>> result = new ArrayList<>();
+        Set<Type> processedOptionalTypes = new HashSet<>();
+
+        for (ParameterNode<S, ?> child : validChildren) {
+            if (!child.isOptional()) {
+                // Always include non-optional (like subcommands)
+                result.add(child);
+            } else {
+                // For optional parameters, check type uniqueness
+                Type childType = child.getData().valueType();
+                if (processedOptionalTypes.add(childType)) {
+                    // First time seeing this type for optional params
+                    result.add(child);
+                }
+                // Skip subsequent optional params of same type
+            }
+        }
+
+        return result;
     }
 }

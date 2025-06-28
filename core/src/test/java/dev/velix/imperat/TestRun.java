@@ -6,6 +6,7 @@ import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
 
 import dev.velix.imperat.advanced.DurationParameterType;
 import dev.velix.imperat.advanced.GuildMOTDCommand;
+import dev.velix.imperat.annotations.Suggest;
 import dev.velix.imperat.annotations.base.AnnotationFactory;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
@@ -16,6 +17,8 @@ import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.ParameterDuration;
 import dev.velix.imperat.commands.RankCommand;
+import dev.velix.imperat.commands.TestAC;
+import dev.velix.imperat.commands.TestAC2;
 import dev.velix.imperat.misc.CustomEnum;
 import dev.velix.imperat.misc.CustomEnumParameterType;
 import dev.velix.imperat.commands.EmptyCmd;
@@ -608,6 +611,43 @@ public class TestRun {
 
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("testcf", "Thor is the best hero"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("testoptional", "Hulk is always angry"));
+    }
+
+    @Test
+    public void testCumulativeSuggestions() {
+        //tests if it respects the order of the nodes during suggestion resolving.
+
+        IMPERAT.registerCommand(new TestAC());
+
+        var cmd = IMPERAT.getCommand("testac");
+        assert cmd != null;
+        debugCommand(cmd);
+
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac", new String[]{""}).join();
+        Assertions.assertLinesMatch(Stream.of("any_text"), results.stream());
+
+        var results2 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac", new String[]{"my_text", ""}).join();
+        Assertions.assertLinesMatch(Stream.of("2", "5", "10"), results2.stream());
+    }
+
+    @Test
+    public void testCumulativeSuggestions2() {
+        //tests if it respects the order of the nodes during suggestion resolving.
+
+        IMPERAT.registerCommand(new TestAC2());
+
+        var cmd = IMPERAT.getCommand("testac2");
+        assert cmd != null;
+        debugCommand(cmd);
+
+        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{""}).join();
+        Assertions.assertLinesMatch(Stream.of("any_text"), results.stream());
+
+        var results2 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{"my_text", ""}).join();
+        Assertions.assertLinesMatch(Stream.of("2", "5", "10"), results2.stream());
+
+        var results3 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{"my_text", "5", ""}).join();
+        Assertions.assertLinesMatch(Stream.of("3", "6", "9"), results3.stream());
     }
 }
 
