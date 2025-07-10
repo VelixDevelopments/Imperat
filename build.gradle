@@ -1,11 +1,9 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     id "java-library"
-    id "com.vanniktech.maven.publish" version "0.31.0"
+    id "com.vanniktech.maven.publish" version "0.33.0"
 }
 
-def baseVersion = "1.9.6"
+def baseVersion = "1.9.7"
 def releaseSnapshots = true
 def isSnapshot = System.getenv("SNAPSHOT_BUILD") == "true"
 
@@ -100,7 +98,7 @@ subprojects {
                 !gradle.startParameter.taskNames.any { (it == "publishToMavenLocal") }
                 && (!isSnapshot || (isSnapshot && releaseSnapshots))
         ) {
-            publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+            publishToMavenCentral()
             signAllPublications()
         }
 
