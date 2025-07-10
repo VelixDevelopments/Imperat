@@ -19,6 +19,7 @@ import dev.velix.imperat.commands.ParameterDuration;
 import dev.velix.imperat.commands.RankCommand;
 import dev.velix.imperat.commands.TestAC;
 import dev.velix.imperat.commands.TestAC2;
+import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.misc.CustomEnum;
 import dev.velix.imperat.misc.CustomEnumParameterType;
 import dev.velix.imperat.commands.EmptyCmd;
@@ -35,12 +36,6 @@ import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.contextresolver.ContextResolvingCmd;
 import dev.velix.imperat.commands.annotations.contextresolver.PlayerData;
 import dev.velix.imperat.commands.annotations.contextresolver.PlayerDataContextResolver;
-import dev.velix.imperat.commands.annotations.examples.AnnotatedGroupCommand;
-import dev.velix.imperat.commands.annotations.examples.BanCommand;
-import dev.velix.imperat.commands.annotations.examples.GitCommand;
-import dev.velix.imperat.commands.annotations.examples.Group;
-import dev.velix.imperat.commands.annotations.examples.MessageCmd;
-import dev.velix.imperat.commands.annotations.examples.OptionalArgCommand;
 import dev.velix.imperat.components.TestImperat;
 import dev.velix.imperat.components.TestImperatConfig;
 import dev.velix.imperat.components.TestSource;
@@ -649,6 +644,19 @@ public class TestRun {
 
         var results3 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{"my_text", "5", ""}).join();
         Assertions.assertLinesMatch(Stream.of("3", "6", "9"), results3.stream());
+    }
+    
+    
+    @Test
+    public void testMiddleFlag() {
+        
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new Ban2Command());
+        });
+        
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban2", "mqzen -t 7d Cheating"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban2", "mqzen -t 7d Cheating is not good !"));
+        
     }
 }
 

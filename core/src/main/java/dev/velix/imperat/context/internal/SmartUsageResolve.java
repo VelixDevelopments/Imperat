@@ -282,37 +282,45 @@ final class SmartUsageResolve<S extends Source> {
     ) throws ImperatException {
         int currentParameterPosition = stream.currentParameterPosition();
 
-        if (stream.rawsLength() < lengthWithoutFlags) {
+        if (lengthWithoutFlags > stream.rawsLength() ) {
             int diff = lengthWithoutFlags - stream.rawsLength();
 
-            if (!stream.cursor().isLast(ShiftTarget.PARAMETER_ONLY)) {
+            boolean isLastParameter = stream.cursor().isLast(ShiftTarget.PARAMETER_ONLY);
+            if (!isLastParameter) {
                 //[o1]
 
                 if (diff > 1) {
 
                     CommandParameter<S> nextParam = stream.peekParameter().filter(CommandParameter::isRequired).orElse(null);
-                    if (nextParam == null) {
-                        //optional next parameter
+                    if (nextParam != null) {
+                        //required NEXT parameter
+                        context.resolveArgument(
+                                command,
+                                currentRaw,
+                                currentParameterPosition,
+                                currentParameter,
+                                getDefaultValue(context, stream, currentParameter)
+                        );
+                        
+                        context.resolveArgument(
+                                command, currentRaw,
+                                currentParameterPosition + 1,
+                                nextParam, resolveResult
+                        );
+                        
                         stream.skipParameter();
-                        return;
+                    }else {
+                        // optional next parameter, let's resolve this current parameter normally
+                        context.resolveArgument(
+                                command, currentRaw,
+                                currentParameterPosition,
+                                currentParameter,
+                                resolveResult
+                        );
                     }
-                    //required NEXT parameter
-                    context.resolveArgument(
-                        command,
-                        currentRaw,
-                        currentParameterPosition,
-                        currentParameter,
-                        getDefaultValue(context, stream, currentParameter)
-                    );
 
-                    context.resolveArgument(
-                        command, currentRaw,
-                        currentParameterPosition + 1,
-                        nextParam, resolveResult
-                    );
-
-                    stream.skipParameter();
                 } else {
+                    //diff == 1
                     context.resolveArgument(
                         command,
                         currentRaw,
