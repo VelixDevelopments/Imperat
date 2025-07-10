@@ -317,6 +317,7 @@ final class SmartUsageResolve<S extends Source> {
                                 currentParameter,
                                 resolveResult
                         );
+                        stream.skip();
                     }
 
                 } else {
