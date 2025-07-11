@@ -70,7 +70,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
 
     private @NotNull SuggestionResolver<S> defaultSuggestionResolver =
             (context, input) ->
-            Collections.singletonList(input.format());
+            Collections.emptyList();
 
     private @NotNull PermissionResolver<S> permissionResolver = (source, permission) -> true;
     private @NotNull ContextFactory<S> contextFactory;
