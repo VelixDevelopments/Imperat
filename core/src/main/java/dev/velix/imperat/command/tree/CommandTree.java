@@ -445,7 +445,6 @@ public final class CommandTree<S extends Source> {
             if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepth(node, child) ) {
                 
                 ImperatDebugger.debug("Checking if child '%s @depth=%s' is already skipped", child.data.format(), child.getDepth());
-                System.out.println("IN LOOP- SKIPPED= " + skippedSimilarChildren.toString());
                 
                 if(skippedSimilarChildren.contains(child.data.format())) {
                     ImperatDebugger.debug("Skipping optional child '%s @depth=%s' - already skipped similar node", child.data.format(), child.getDepth());
@@ -462,16 +461,12 @@ public final class CommandTree<S extends Source> {
             
         }
         //DONE
-        System.out.println("AFTER-LOOP SKIPPED= " + skippedSimilarChildren.toString());
 
         if (validChildren.isEmpty()) {
-            System.out.println("EMPTY CHILDREN ------------------");
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
         
-        System.out.println("VALID CHILDREN= " + validChildren.stream().map(ParameterNode::format).collect(Collectors.joining(", ")));
         // Process the first valid child and determine if we should include more
-        System.out.println("-------------------------------------------");
         return processValidChildren(imperat, context, validChildren);
     }
     
