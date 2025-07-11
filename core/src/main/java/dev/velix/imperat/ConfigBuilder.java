@@ -110,6 +110,11 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>, B ex
         config.setOptionalParameterSuggestionOverlap(overlap);
         return (B) this;
     }
+    
+    public B setDefaultSuggestionResolver(SuggestionResolver<S> resolver) {
+        config.setDefaultSuggestionResolver(resolver);
+        return (B) this;
+    }
 
     /**
      * Registers a throwable resolver for a specific exception type.
