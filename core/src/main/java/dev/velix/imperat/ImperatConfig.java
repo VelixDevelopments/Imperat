@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -19,6 +20,7 @@ import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
@@ -61,7 +63,62 @@ public sealed interface ImperatConfig<S extends Source> extends
     default boolean hasParameterType(Type type) {
         return getParameterType(type) != null;
     }
-
+    
+    <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer);
+    
+    <A extends Annotation> void applyAnnotationReplacers(Imperat<S> imperat);
+    /**
+     * Determines whether multiple optional parameters can be suggested simultaneously
+     * during tab completion at the same command depth level.
+     *
+     * <p>When enabled ({@code true}), all available optional parameters will be included
+     * in tab completion suggestions, allowing users to see all possible optional arguments
+     * they can provide at the current position.
+     *
+     * <p>When disabled ({@code false}), only the first optional parameter (typically based
+     * on priority or registration order) will be suggested, preventing overwhelming users
+     * with too many optional choices and reducing ambiguity in command completion.
+     *
+     * <p>This setting does not affect:
+     * <ul>
+     *   <li>Required parameters - they are always suggested</li>
+     *   <li>Command structure - the actual command tree remains unchanged</li>
+     *   <li>Parameter validation - all parameters remain functionally available</li>
+     * </ul>
+     *
+     * @return {@code true} if multiple optional parameters can overlap in suggestions,
+     *         {@code false} if only one optional parameter should be suggested at a time
+     * @see #setOptionalParameterSuggestionOverlap(boolean)
+     */
+    boolean isOptionalParameterSuggestionOverlappingEnabled();
+    
+    /**
+     * Sets whether multiple optional parameters can be suggested simultaneously
+     * during tab completion at the same command depth level.
+     *
+     * <p>This is a configuration setting that affects the behavior of tab completion
+     * suggestions without modifying the underlying command structure. The command
+     * tree and parameter validation remain unchanged regardless of this setting.
+     *
+     * <p><strong>Examples:</strong>
+     * <pre>{@code
+     * // Command structure: /command [count] [extra]
+     * //                              \[extra]
+     *
+     * // When enabled (true):
+     * /command <TAB> → shows: [count], [extra]
+     *
+     * // When disabled (false):
+     * /command <TAB> → shows: [count] (first optional only)
+     * }</pre>
+     *
+     * @param enabled {@code true} to allow multiple optional parameter suggestions,
+     *                {@code false} to limit to one optional parameter suggestion
+     * @see #isOptionalParameterSuggestionOverlappingEnabled()
+     */
+    void setOptionalParameterSuggestionOverlap(boolean enabled);
+    
+    
     /**
      * Checks whether the command tree operates in strict mode.
      * <p>
@@ -238,6 +295,6 @@ public sealed interface ImperatConfig<S extends Source> extends
         final Class<T> exception,
         final ThrowableResolver<T, S> handler
     );
-
+    
 
 }

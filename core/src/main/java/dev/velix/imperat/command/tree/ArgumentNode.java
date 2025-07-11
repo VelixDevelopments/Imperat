@@ -10,8 +10,8 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 public final class ArgumentNode<S extends Source> extends ParameterNode<S, CommandParameter<S>> {
 
-    ArgumentNode(@NotNull CommandParameter<S> data, @Nullable CommandUsage<S> usage) {
-        super(data, usage);
+    ArgumentNode(@NotNull CommandParameter<S> data, int depth, @Nullable CommandUsage<S> usage) {
+        super(data, depth, usage);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
@@ -17,7 +18,7 @@ import dev.velix.imperat.resolvers.SourceResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.NotNull;
-
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
@@ -97,6 +98,16 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>, B ex
     // Dependency Resolver
     public B dependencyResolver(Type type, DependencySupplier resolver) {
         config.registerDependencyResolver(type, resolver);
+        return (B) this;
+    }
+    
+    public <A extends Annotation> B annotationReplacer(Class<A> annotationType, AnnotationReplacer<A> replacer) {
+        config.registerAnnotationReplacer(annotationType, replacer);
+        return (B) this;
+    }
+    
+    public B overlapOptionalParameterSuggestions(boolean overlap) {
+        config.setOptionalParameterSuggestionOverlap(overlap);
         return (B) this;
     }
 

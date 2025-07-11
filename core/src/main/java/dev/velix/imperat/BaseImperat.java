@@ -39,6 +39,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     protected BaseImperat(@NotNull ImperatConfig<S> config) {
         this.config = config;
         annotationParser = AnnotationParser.defaultParser(this);
+        config.applyAnnotationReplacers(this);
     }
 
     /**

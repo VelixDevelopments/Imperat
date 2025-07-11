@@ -1,5 +1,6 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.annotations.base.AnnotationReplacer;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
 import dev.velix.imperat.command.*;
 import dev.velix.imperat.command.parameters.NumericRange;
@@ -52,6 +53,8 @@ import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -89,9 +92,12 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
     private @NotNull CommandProcessingChain<S, CommandPostProcessor<S>> globalPostProcessors;
 
     private boolean strictCommandTree = false;
-
+    private boolean overlapOptionalParameterSuggestions = false;
+    
     private String commandPrefix = "/";
 
+    private final Map<Class<?>, AnnotationReplacer<?>> annotationReplacerMap = new HashMap<>();
+    
     ImperatConfigImpl() {
         contextResolverRegistry = ContextResolverRegistry.createDefault(this);
         paramTypeRegistry = ParamTypeRegistry.createDefault();
@@ -504,7 +510,79 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
     public @Nullable ParameterType<S, ?> getParameterType(Type resolvingValueType) {
         return paramTypeRegistry.getResolver(resolvingValueType).orElse(null);
     }
-
+    
+    @Override
+    public <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer) {
+        annotationReplacerMap.put(type, replacer);
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public <A extends Annotation> void applyAnnotationReplacers(Imperat<S> imperat) {
+        this.annotationReplacerMap.forEach((type, replacer)-> {
+            Class<A> annType = (Class<A>)type;
+            AnnotationReplacer<A> annReplacer = (AnnotationReplacer<A>)replacer;
+            imperat.registerAnnotationReplacer(annType, annReplacer);
+        });
+    }
+    
+    /**
+     * Determines whether multiple optional parameters can be suggested simultaneously
+     * during tab completion at the same command depth level.
+     *
+     * <p>When enabled ({@code true}), all available optional parameters will be included
+     * in tab completion suggestions, allowing users to see all possible optional arguments
+     * they can provide at the current position.
+     *
+     * <p>When disabled ({@code false}), only the first optional parameter (typically based
+     * on priority or registration order) will be suggested, preventing overwhelming users
+     * with too many optional choices and reducing ambiguity in command completion.
+     *
+     * <p>This setting does not affect:
+     * <ul>
+     *   <li>Required parameters - they are always suggested</li>
+     *   <li>Command structure - the actual command tree remains unchanged</li>
+     *   <li>Parameter validation - all parameters remain functionally available</li>
+     * </ul>
+     *
+     * @return {@code true} if multiple optional parameters can overlap in suggestions,
+     * {@code false} if only one optional parameter should be suggested at a time
+     * @see #setOptionalParameterSuggestionOverlap(boolean)
+     */
+    @Override
+    public boolean isOptionalParameterSuggestionOverlappingEnabled() {
+        return overlapOptionalParameterSuggestions;
+    }
+    
+    /**
+     * Sets whether multiple optional parameters can be suggested simultaneously
+     * during tab completion at the same command depth level.
+     *
+     * <p>This is a configuration setting that affects the behavior of tab completion
+     * suggestions without modifying the underlying command structure. The command
+     * tree and parameter validation remain unchanged regardless of this setting.
+     *
+     * <p><strong>Examples:</strong>
+     * <pre>{@code
+     * // Command structure: /command [count] [extra]
+     * //                              \[extra]
+     *
+     * // When enabled (true):
+     * /command <TAB> → shows: [count], [extra]
+     *
+     * // When disabled (false):
+     * /command <TAB> → shows: [count] (first optional only)
+     * }</pre>
+     *
+     * @param enabled {@code true} to allow multiple optional parameter suggestions,
+     *                {@code false} to limit to one optional parameter suggestion
+     * @see #isOptionalParameterSuggestionOverlappingEnabled()
+     */
+    @Override
+    public void setOptionalParameterSuggestionOverlap(boolean enabled) {
+        this.overlapOptionalParameterSuggestions = enabled;
+    }
+    
     /**
      * Checks whether the command tree operates in strict mode.
      * <p>
@@ -720,7 +798,9 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
     public <T extends Throwable> void setThrowableResolver(Class<T> exception, ThrowableResolver<T, S> handler) {
         this.handlers.put(exception, handler);
     }
-
+    
+   
+    
     @Override
     @SuppressWarnings("unchecked")
     public void handleExecutionThrowable(

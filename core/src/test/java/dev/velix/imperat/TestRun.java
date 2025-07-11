@@ -6,7 +6,6 @@ import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
 
 import dev.velix.imperat.advanced.DurationParameterType;
 import dev.velix.imperat.advanced.GuildMOTDCommand;
-import dev.velix.imperat.annotations.Suggest;
 import dev.velix.imperat.annotations.base.AnnotationFactory;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
@@ -635,15 +634,27 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("testac2");
         assert cmd != null;
         debugCommand(cmd);
-
+        
+        System.out.println("TEST 1 :-");
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{""}).join();
         Assertions.assertLinesMatch(Stream.of("any_text"), results.stream());
-
+        
+        
+        System.out.println("TEST 2 :-");
         var results2 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{"my_text", ""}).join();
         Assertions.assertLinesMatch(Stream.of("2", "5", "10"), results2.stream());
 
+        System.out.println("TEST 3 :-");
         var results3 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{"my_text", "5", ""}).join();
-        Assertions.assertLinesMatch(Stream.of("3", "6", "9"), results3.stream());
+        Assertions.assertLinesMatch(Stream.of("3.1", "6.2", "9.5"), results3.stream());
+        
+        
+        System.out.println("TEST 4 :-");
+        IMPERAT.config().setOptionalParameterSuggestionOverlap(true);
+        var results4 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac2", new String[]{"my_text", ""}).join();
+        Assertions.assertLinesMatch(Stream.of("2", "5", "10", "3.1", "6.2", "9.5"), results4.stream());
+        IMPERAT.config().setOptionalParameterSuggestionOverlap(false);
+        
     }
     
     

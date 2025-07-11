@@ -29,7 +29,7 @@ public final class CommandTree<S extends Source> {
 
     CommandTree(Command<S> command) {
         this.rootCommand = command;
-        this.root = new CommandNode<>(command, command.getDefaultUsage());
+        this.root = new CommandNode<>(command, 0, command.getDefaultUsage());
     }
 
     public CommandNode<S> getRoot() {
@@ -221,9 +221,9 @@ public final class CommandTree<S extends Source> {
         // Create a new node
         ParameterNode<S, ?> newNode;
         if (param.isCommand())
-            newNode = new CommandNode<>(param.asCommand(), null);
+            newNode = new CommandNode<>(param.asCommand(), parent.getDepth()+1, null);
         else
-            newNode = new ArgumentNode<>(param, null);
+            newNode = new ArgumentNode<>(param, parent.getDepth()+1, null);
 
         parent.addChild(newNode);
         return newNode;
@@ -421,21 +421,61 @@ public final class CommandTree<S extends Source> {
         ImperatDebugger.debug("Node-data= '%s'", node.data.format());
 
         // Get all valid children at once
+        //HERE
         List<ParameterNode<S, ?>> validChildren = new ArrayList<>();
-        for (var child : node.getChildren()) {
-            if (root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver().hasPermission(source, child.data.permission())) {
-                ImperatDebugger.debug("Adding child '%s' to valid children", child.data.format());
+        List<String> skippedSimilarChildren = new ArrayList<>();
+        final boolean overlapOptionalArgs = imperat.config().isOptionalParameterSuggestionOverlappingEnabled();
+        
+        var children = node.getChildren()
+                .stream()
+                .filter((child)-> root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver().hasPermission(source, child.data.permission()))
+                .collect(Collectors.toSet());
+        
+        
+        for (var child : children) {
+            
+            if(child.isRequired()) {
+                ImperatDebugger.debug("Adding required child '%s' to valid children", child.data.format());
                 validChildren.add(child);
+                continue;
             }
+            
+            // For optional nodes: add if overlapOptionalArgs is true OR no similar node exists at different depth
+            ImperatDebugger.debug("Child '%s @depth=%s' is optional, checking for similar nodes", child.data.format(), child.getDepth());
+            if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepth(node, child) ) {
+                
+                ImperatDebugger.debug("Checking if child '%s @depth=%s' is already skipped", child.data.format(), child.getDepth());
+                System.out.println("IN LOOP- SKIPPED= " + skippedSimilarChildren.toString());
+                
+                if(skippedSimilarChildren.contains(child.data.format())) {
+                    ImperatDebugger.debug("Skipping optional child '%s @depth=%s' - already skipped similar node", child.data.format(), child.getDepth());
+                    continue;
+                }
+                ImperatDebugger.debug("Adding optional child '%s @depth=%s' to valid children", child.data.format(), child.getDepth());
+                validChildren.add(child);
+            } else {
+                ImperatDebugger.debug("Skipping optional child '%s @depth=%s' - similar node exists at different depth",  child.data.format(), child.getDepth());
+                ImperatDebugger.debug("Adding to skippedSimilarChildren: '%s'", child.data.format());
+                skippedSimilarChildren.add(child.data.format());
+            }
+            
+            
         }
+        //DONE
+        System.out.println("AFTER-LOOP SKIPPED= " + skippedSimilarChildren.toString());
 
         if (validChildren.isEmpty()) {
+            System.out.println("EMPTY CHILDREN ------------------");
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
-
+        
+        System.out.println("VALID CHILDREN= " + validChildren.stream().map(ParameterNode::format).collect(Collectors.joining(", ")));
         // Process the first valid child and determine if we should include more
+        System.out.println("-------------------------------------------");
         return processValidChildren(imperat, context, validChildren);
     }
+    
+
 
     private CompletableFuture<List<String>> processValidChildren(
             Imperat<S> imperat,
@@ -479,7 +519,7 @@ public final class CommandTree<S extends Source> {
                     return result;
                 });
     }
-
+    
     // Efficient pre-filtering to minimize async operations
     private List<ParameterNode<S, ?>> filterChildrenToProcess(List<ParameterNode<S, ?>> validChildren) {
         if (validChildren.size() <= 1) {
@@ -494,6 +534,8 @@ public final class CommandTree<S extends Source> {
                 // Always include non-optional (like subcommands)
                 result.add(child);
             } else {
+                
+                //child is optional
                 // For optional parameters, check type uniqueness
                 Type childType = child.getData().valueType();
                 if (processedOptionalTypes.add(childType)) {
@@ -505,5 +547,28 @@ public final class CommandTree<S extends Source> {
         }
 
         return result;
+    }
+    
+    private boolean hasSimilarNodeWithDifferentDepth(
+            ParameterNode<S, ?> currentNode,
+            ParameterNode<S, ?> childNode
+    ) {
+        
+        for(var child : currentNode.getChildren()) {
+            
+            ImperatDebugger.debug("Checking child '%s @depth=%s' against node '%s @depth=%s'", child.data.format(), child.getDepth(),  childNode.data.format(), childNode.getDepth());
+            
+            if( child.data.name().equalsIgnoreCase(childNode.data.name())
+                    && child.getDepth() != childNode.getDepth()
+            ) {
+                ImperatDebugger.debug("Found similar node '%s @depth=%s' at different depth=%s", child.data.format(), child.getDepth(), childNode.getDepth());
+                return true;
+            }
+            
+            if (hasSimilarNodeWithDifferentDepth(child, childNode)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

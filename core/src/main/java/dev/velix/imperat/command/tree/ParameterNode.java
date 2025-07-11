@@ -3,12 +3,11 @@ package dev.velix.imperat.command.tree;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 
 public abstract class ParameterNode<S extends Source, T extends CommandParameter<S>> {
@@ -19,11 +18,18 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
 
     private final LinkedList<ParameterNode<S, ?>> nextNodes = new LinkedList<>();
 
-    protected ParameterNode(@NotNull T data, @Nullable CommandUsage<S> executableUsage) {
+    private final int depth;
+    
+    protected ParameterNode(@NotNull T data, int depth, @Nullable CommandUsage<S> executableUsage) {
         this.data = data;
+        this.depth = depth;
         this. executableUsage = executableUsage;
     }
-
+    
+    public int getDepth() {
+        return depth;
+    }
+    
     public @Nullable CommandUsage<S> getExecutableUsage() {
         return executableUsage;
     }
@@ -108,11 +114,12 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ParameterNode<?, ?> that)) return false;
-        return Objects.equals(data.name(), that.data.name()) && Objects.equals(nextNodes, that.nextNodes);
+        return Objects.equals(data.name(), that.data.name()) && this.depth == that.depth && Objects.equals(nextNodes, that.nextNodes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(data.name(), nextNodes);
+        return Objects.hash(data.name(), this.depth,  nextNodes);
     }
+    
 }
