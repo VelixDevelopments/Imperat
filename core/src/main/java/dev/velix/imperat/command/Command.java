@@ -237,11 +237,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      */
     @ApiStatus.AvailableSince("1.9.0")
     void setDefaultUsage(@NotNull CommandUsage<S> usage);
-
-    /**
-     * @param execution sets what happens when there are no parameters
-     */
-    void setDefaultUsageExecution(CommandExecution<S> execution);
+    
 
     /**
      * Adds a usage to the command
@@ -490,8 +486,8 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
         }
 
         public Builder<S> defaultExecution(CommandExecution<S> defaultExec) {
-            cmd.setDefaultUsageExecution(defaultExec);
-            return this;
+            return usage(CommandUsage.<S>builder()
+                    .execute(defaultExec));
         }
 
         public Builder<S> usage(CommandUsage.Builder<S> usage) {

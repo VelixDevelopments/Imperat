@@ -669,5 +669,24 @@ public class TestRun {
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("ban2", "mqzen -t 7d Cheating is not good !"));
         
     }
+    
+    @Test
+    public void testPlainCmd() {
+        
+        var cmd = Command.create("plain")
+                .defaultExecution(
+                        (source, ctx)-> {
+                            System.out.println("RUNNING DEFAULT !!");
+                        }
+                )
+                .build();
+        
+        
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(cmd);
+        });
+        
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("plain", ""));
+    }
 }
 

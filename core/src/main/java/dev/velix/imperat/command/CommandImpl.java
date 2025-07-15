@@ -80,13 +80,14 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.parent = parent;
         this.position = position;
         this.name = name.toLowerCase();
-        setDefaultUsageExecution((source, context) -> {
-        });
+        this.emptyUsage = CommandUsage.<S>builder().build(this);
+        this.defaultUsage = CommandUsage.<S>builder().build(this);
+        
         this.autoCompleter = AutoCompleter.createNative(this);
         this.commandTree = parent != null ? null : CommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
         this.suggestionResolver = SuggestionResolver.forCommand(this);
-        this.emptyUsage = CommandUsage.<S>builder().build(this);
+
     }
 
     /**
@@ -331,16 +332,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public void setDefaultUsage(@NotNull CommandUsage<S> usage) {
         this.defaultUsage = Objects.requireNonNull(usage, "Default usage cannot be null");
     }
-
-    /**
-     * @param execution sets what happens when there are no parameters
-     */
-    @Override
-    public void setDefaultUsageExecution(CommandExecution<S> execution) {
-        this.defaultUsage = CommandUsage.<S>builder()
-            .execute(execution)
-            .build(this);
-    }
+    
 
     /**
      * Adds a usage to the command
