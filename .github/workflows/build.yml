@@ -59,11 +59,17 @@ jobs:
           echo "LATEST_RELEASE=$CLEANED_TAG" >> $GITHUB_ENV
 
           # Get current version from Gradle
-          CURRENT_VERSION=$(./gradlew -q printVersion | grep baseVersion | cut -d'=' -f2)
+          if ! CURRENT_VERSION=$(./gradlew -q printVersion | grep baseVersion | cut -d'=' -f2); then
+            echo "❌ Failed to get current version from Gradle"
+            exit 1
+          fi
           echo "VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
           # Determine if this is a snapshot release
-          SNAPSHOT=$(./gradlew -q printReleaseSnapshots | grep releaseSnapshots | cut -d'=' -f2)
+          if ! SNAPSHOT=$(./gradlew -q printReleaseSnapshots | grep releaseSnapshots | cut -d'=' -f2); then
+            echo "❌ Failed to determine snapshot status from Gradle"
+            exit 1
+          fi
           echo "RELEASE_SNAPSHOTS=$SNAPSHOT" >> $GITHUB_ENV
 
           # Log info to console
