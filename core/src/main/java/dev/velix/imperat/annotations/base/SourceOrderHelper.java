@@ -9,12 +9,7 @@ import org.objectweb.asm.Type;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 public class SourceOrderHelper {
 
@@ -52,9 +47,10 @@ public class SourceOrderHelper {
             return orderedMethods;
         }
     }
-
+    
     /**
-     * Gets inner static classes in their original source code declaration order
+     * Gets inner classes (both static and non-static) in their original source code declaration order
+     * Debug version with detailed logging
      */
     public static List<Class<?>> getInnerClassesInSourceOrder(Class<?> outerClass) throws Exception {
         String className = outerClass.getName().replace('.', '/') + ".class";
@@ -62,33 +58,46 @@ public class SourceOrderHelper {
             if (stream == null) {
                 throw new IOException("Class resource not found: " + className);
             }
-
+            
             // First pass: Get inner class order from ASM
             ClassReader reader = new ClassReader(stream);
             InnerClassOrderVisitor visitor = new InnerClassOrderVisitor(outerClass.getName());
             reader.accept(visitor, ClassReader.SKIP_DEBUG);
-
+            
+            // Debug: Print what ASM visitor found
+            List<String> innerClassNames = visitor.getInnerClassNames();
+            
             // Create map of inner class names to Class objects
             Map<String, Class<?>> classMap = new HashMap<>();
-            for (Class<?> innerClass : outerClass.getDeclaredClasses()) {
-                if (java.lang.reflect.Modifier.isStatic(innerClass.getModifiers())) {
-                    classMap.put(innerClass.getName(), innerClass);
+            
+            // Use getDeclaredClasses() to get all inner classes (static and non-static)
+            // and combine with getNestMembers() to ensure we don't miss any
+            
+            // getDeclaredClasses() returns all classes declared within this class
+            Set<Class<?>> allInnerClasses = new HashSet<>(Arrays.asList(outerClass.getDeclaredClasses()));
+            
+            // getNestMembers() includes nested classes that might be missed by getDeclaredClasses()
+            for (Class<?> nestMember : outerClass.getDeclaredClasses()) {
+                if (!nestMember.equals(outerClass)) { // Exclude the outer class itself
+                    allInnerClasses.add(nestMember);
                 }
             }
-
+            
+            // Map all inner classes by name
+            for (Class<?> innerClass : allInnerClasses) {
+                classMap.put(innerClass.getName(), innerClass);
+            }
+            
             // Build ordered list based on ASM visitation order
             List<Class<?>> orderedClasses = new ArrayList<>();
-            List<String> innerClassNames = visitor.getInnerClassNames();
-
-            // The issue might be in the order that ASM returns inner classes
-            // Let's use the same order as they were visited, which matches source code order
+            
+            // Debug: Check mapping
             for (String innerClassName : innerClassNames) {
                 Class<?> innerClass = classMap.get(innerClassName);
                 if (innerClass != null) {
                     orderedClasses.add(innerClass);
                 }
             }
-
             return orderedClasses;
         }
     }
@@ -108,7 +117,7 @@ public class SourceOrderHelper {
                 result.add(currentClass);
             }
 
-            // Add all static inner classes to the queue for further processing
+            // Add all inner classes to the queue for further processing
             List<Class<?>> innerClasses = getInnerClassesInSourceOrder(currentClass);
             queue.addAll(innerClasses);
         }
@@ -148,7 +157,7 @@ public class SourceOrderHelper {
         @Override
         public void visitInnerClass(String name, String outerName, String innerName, int access) {
             // Check if it's a static inner class
-            if ((access & Opcodes.ACC_STATIC) != 0) {
+            //if ((access & Opcodes.ACC_STATIC) != 0) {
                 // Convert binary name to fully qualified name
                 String fullClassName = name.replace('/', '.');
 
@@ -159,7 +168,7 @@ public class SourceOrderHelper {
                     // This fixes the reverse order issue
                     innerClassNames.add(0, fullClassName);
                 }
-            }
+            //}
             super.visitInnerClass(name, outerName, innerName, access);
         }
 

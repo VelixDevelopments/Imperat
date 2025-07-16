@@ -57,7 +57,8 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
     ) {
 
         ClassElement root = parent == null ?
-                new ClassElement(parser, null, clazz, rootCommandClass.proxyInstance()) : new ClassElement(parser, parent, clazz);
+                new ClassElement(parser, null, clazz, rootCommandClass.proxyInstance())
+                : new ClassElement(parser, parent, clazz);
 
         //Adding methods with their parameters
         List<Method> methods;

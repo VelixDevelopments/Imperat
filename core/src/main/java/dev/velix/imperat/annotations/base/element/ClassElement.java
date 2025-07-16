@@ -24,11 +24,11 @@ public final class ClassElement extends ParseElement<Class<?>> {
 
     public <S extends Source> ClassElement(
         @NotNull AnnotationParser<S> parser,
-        @Nullable ClassElement parent,
+        @NotNull ClassElement parent,
         @NotNull Class<?> element
     ) {
         super(parser, parent, element);
-        this.instance = newInstance();
+        this.instance = newInstance(parent);
         this.injectDependencies();
     }
 
@@ -68,25 +68,70 @@ public final class ClassElement extends ParseElement<Class<?>> {
             throw new RuntimeException(exception);
         }
     }
-
-    private Object newInstance(Object... constructorArgs) {
-        Class<?>[] types = new Class[constructorArgs.length];
-        for (int i = 0; i < types.length; i++) {
-            types[i] = constructorArgs[i].getClass();
-        }
-
+    
+    private Object newInstance(ClassElement parent, Object... constructorArgs) {
+        boolean isStaticClass = this.isStaticClass();
+        boolean external = !this.element.isMemberClass();
+        
         try {
-            Constructor<?> cons = Reflections.getConstructor(element, types);
-            if (cons == null) {
-                throw new IllegalCallerException("Class " + element.getSimpleName() + " doesn't have a constructor matching the arguments");
+            Constructor<?> cons;
+            Object[] finalArgs;
+            
+            if (isStaticClass || external) {
+                // Static inner class - doesn't need outer instance
+                Class<?>[] types = new Class[constructorArgs.length];
+                for (int i = 0; i < types.length; i++) {
+                    types[i] = constructorArgs[i].getClass();
+                }
+                
+                cons = Reflections.getConstructor(element, types);
+                finalArgs = constructorArgs;
+                
+            } else {
+                // Non-static inner class - needs outer instance as first parameter
+                if (parent == null) {
+                    throw new IllegalArgumentException("Non-static inner class " + element.getSimpleName() +
+                            " requires a parent instance, but parent is null");
+                }
+                
+                Object parentInstance = parent.getObjectInstance();
+                if (parentInstance == null) {
+                    throw new IllegalArgumentException("Parent instance is null for non-static inner class " +
+                            element.getSimpleName());
+                }
+                
+                // For non-static inner classes, first parameter is always the outer class instance
+                Class<?>[] types = new Class[constructorArgs.length + 1];
+                types[0] = parent.getElement(); // Outer class type
+                
+                for (int i = 0; i < constructorArgs.length; i++) {
+                    types[i + 1] = constructorArgs[i].getClass();
+                }
+                
+                cons = Reflections.getConstructor(element, types);
+                
+                // Build final arguments array with parent instance first
+                finalArgs = new Object[constructorArgs.length + 1];
+                finalArgs[0] = parentInstance;
+                System.arraycopy(constructorArgs, 0, finalArgs, 1, constructorArgs.length);
             }
-            return cons.newInstance(constructorArgs);
+            
+            if (cons == null) {
+                throw new IllegalCallerException("Class " + element.getSimpleName() +
+                        " doesn't have a constructor matching the arguments");
+            }
+            
+            return cons.newInstance(finalArgs);
+            
         } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to create instance of " + element.getSimpleName(), e);
         }
-
     }
-
+    
+    public boolean isStaticClass() {
+        return Modifier.isStatic(this.element.getModifiers());
+    }
+    
     public Object getObjectInstance() {
         return instance;
     }

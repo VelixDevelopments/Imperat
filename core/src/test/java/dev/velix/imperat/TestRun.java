@@ -7,6 +7,7 @@ import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
 import dev.velix.imperat.advanced.DurationParameterType;
 import dev.velix.imperat.advanced.GuildMOTDCommand;
 import dev.velix.imperat.annotations.base.AnnotationFactory;
+import dev.velix.imperat.annotations.base.SourceOrderHelper;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
@@ -66,6 +67,8 @@ public class TestRun {
     public static volatile int POST_PROCESSOR_INT = 0;
     public static volatile int PRE_PROCESSOR_INT = 0;
 
+    
+    private final static SomeInstance SOME_INSTANCE = new SomeInstance("Hello-world");
     static {
         ImperatDebugger.setEnabled(true);
         ImperatDebugger.setUsingTestCases(true);
@@ -74,6 +77,7 @@ public class TestRun {
         IMPERAT = TestImperatConfig.builder()
                 .usageVerifier(UsageVerifier.typeTolerantVerifier())
                 .dependencyResolver(Group.class, () -> new Group("my-global-group"))
+                .dependencyResolver(SomeInstance.class, ()-> SOME_INSTANCE)
                 .parameterType(Group.class, new ParameterGroup())
                 .contextResolver(PlayerData.class, new PlayerDataContextResolver())
                 .parameterType(CustomEnum.class, new CustomEnumParameterType())
@@ -687,6 +691,45 @@ public class TestRun {
         });
         
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("plain", ""));
+    }
+    
+    @Test
+    public void testInnerNonStaticClassesReflection() throws Exception {
+        
+        System.out.println("Checking inner classes: ");
+        
+        System.out.println("---------------> Debugging SomeClass:");
+        for(var e : SourceOrderHelper.getInnerClassesInSourceOrder(SomeClass.class)) {
+            System.out.println("INNER= " + e.getTypeName());
+        }
+        
+        
+        System.out.println("----------------> Debugging SomeClass.InnerOne:");
+        for(var e : SourceOrderHelper.getInnerClassesInSourceOrder(SomeClass.InnerOne.class)) {
+            System.out.println("INNER= " + e.getTypeName());
+        }
+        
+        System.out.println("----------------> Debugging SomeClass.InnerTwo:");
+        for(var e : SourceOrderHelper.getInnerClassesInSourceOrder(SomeClass.InnerTwo.class)) {
+            System.out.println("INNER= " + e.getTypeName());
+        }
+    }
+    
+    @Test
+    public void testNonStaticMemberClasses() {
+    
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new SomeClass());
+        });
+        
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("root", "i1"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("root", "i1 i1.1"));
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("root", "i1 i1.1 i1.1.1"));
+    }
+    
+    @Test
+    public void testArgumentsInheritanceBySubCmdMethod() {
+        //TODO test later on...
     }
 }
 
