@@ -469,8 +469,6 @@ public final class CommandTree<S extends Source> {
         // Process the first valid child and determine if we should include more
         return processValidChildren(imperat, context, validChildren);
     }
-    
-
 
     private CompletableFuture<List<String>> processValidChildren(
             Imperat<S> imperat,
