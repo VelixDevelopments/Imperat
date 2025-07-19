@@ -11,6 +11,7 @@ import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.command.processors.impl.DefaultProcessors;
 import dev.velix.imperat.command.returns.ReturnResolver;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
+import dev.velix.imperat.command.tree.ClosestUsageSearch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ParamTypeRegistry;
 import dev.velix.imperat.context.ResolvedContext;
@@ -57,11 +58,9 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -223,29 +222,12 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
             (exception, imperat, context) -> {
                 S source = context.source();
                 //if usage is null, find the closest usage
-
-                List<CommandUsage<S>> closestUsages = new ArrayList<>();
-                if(context instanceof ResolvedContext<S> resolvedContext) {
-                    closestUsages.add(resolvedContext.getDetectedUsage());
-                }else {
-                    var cmd = context.command();
-                    //TODO improve the accuracy of the criteria
-                    closestUsages.addAll(
-                            cmd.findUsages((usage)-> usage.size() > context.arguments().size())
-                    );
-                }
-
+                ClosestUsageSearch<S> closestUsageSearch = context.command().tree().getClosestUsages(context);
                 source.error("Invalid command usage '/" + context.command().name() + " " + context.arguments().join(" ") + "'");
-                if (closestUsages.isEmpty()) {
-                    return;
-                }
-
-                source.error("Possible Command Usages: ");
-                for(var usage : closestUsages) {
-                    source.error("- " + imperat.commandPrefix() + CommandUsage.format(context.label(), usage));
-                }
+                source.error("Closest Command Usage: " + (imperat.commandPrefix() + CommandUsage.format(context.label(), closestUsageSearch.getClosest())) );
             }
         );
+        
         this.setThrowableResolver(
             NoHelpException.class,
             (exception, imperat, context) -> {
