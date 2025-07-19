@@ -5,9 +5,7 @@ import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.SuggestionContext;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
@@ -29,7 +27,7 @@ public final class CommandTree<S extends Source> {
 
     CommandTree(Command<S> command) {
         this.rootCommand = command;
-        this.root = new CommandNode<>(command, 0, command.getDefaultUsage());
+        this.root = new CommandNode<>(command, -1, command.getDefaultUsage());
     }
 
     public CommandNode<S> getRoot() {
@@ -564,4 +562,111 @@ public final class CommandTree<S extends Source> {
         }
         return false;
     }
+    
+    public ClosestUsageSearch<S> getClosestUsages(Context<S> context) {
+        ArgumentQueue queue = context.arguments();
+        
+        var startingNode = root.getChild((child)-> {
+            var raw = queue.getOr(0, null);
+            if(raw == null) {
+                return true;
+            }
+            return child.matchesInput(raw);
+        });
+        
+        Set<CommandUsage<S>> closestUsages;
+        
+        if(startingNode == null) {
+            closestUsages = Set.of(rootCommand.getDefaultUsage());
+        }
+        else {
+            ParameterNode<S, ?> closestNode = getClosestNode(startingNode, context);
+            if (closestNode == null) {
+                closestUsages = Set.of(rootCommand.getDefaultUsage());
+            }else {
+                closestUsages = getClosestUsagesRecursively(new LinkedHashSet<>(), closestNode, context);
+            }
+        }
+        
+        return new ClosestUsageSearch<>(closestUsages);
+    }
+    
+    private @Nullable ParameterNode<S, ?> getClosestNode(ParameterNode<S, ?> startingNode, Context<S> context) {
+        
+        ArgumentQueue rawArguments = ArgumentQueue.empty();
+        rawArguments.addAll(context.arguments());
+        
+        Queue<ParameterNode<S, ?>> queue = new LinkedList<>();
+        queue.add(startingNode);
+        
+        String inputEntered = null;
+        while (!queue.isEmpty()) {
+            
+            ParameterNode<S, ?> currentNode = queue.poll();
+            
+            if(!rawArguments.isEmpty()) {
+                inputEntered = rawArguments.poll();
+            }
+            
+            if(rawArguments.isEmpty() && inputEntered != null && currentNode.matchesInput(inputEntered) && currentNode.isExecutable()) {
+                return currentNode;
+            }
+            
+            queue.addAll(
+                    currentNode.getChildren().stream()
+                            .filter((child)-> context.imperatConfig().getPermissionResolver().hasPermission(context.source(), child.data.permission()) )
+                            .collect(Collectors.toSet())
+            );
+        }
+        
+        return null;
+    }
+    
+    private Set<CommandUsage<S>> getClosestUsagesRecursively(
+            Set<CommandUsage<S>> currentUsages,
+            ParameterNode<S, ?> node,
+            Context<S> context
+    ) {
+        //PAST: ALLAH ALMOST3AN , A7NA HNTFSH5 HNA
+        //PRESENT: ETFSH5NA , BS 5ALA9NA
+        
+        if(node.isExecutable()) {
+            var usage = node.getExecutableUsage();
+            if(context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(),usage )) {
+                currentUsages.add(usage);
+            }
+        }
+     
+        if(!node.isLast()) {
+            
+            for(var child : node.getChildren()) {
+                String correspondingInput = context.arguments().getOr(child.getDepth(), null);
+                if(correspondingInput == null ) {
+                    
+                    if(child.isRequired()) {
+                        currentUsages.addAll(
+                                getClosestUsagesRecursively(currentUsages, child, context)
+                                        .stream()
+                                        .filter((usage)-> context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(), usage))
+                                        .collect(Collectors.toSet())
+                        );
+                    }
+                    
+                }else {
+                    if( child.matchesInput(correspondingInput)  ) {
+                        currentUsages.addAll(
+                                getClosestUsagesRecursively(currentUsages, child, context)
+                                        .stream()
+                                        .filter((usage)-> context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(), usage))
+                                        .collect(Collectors.toSet())
+                        );
+                    }
+                }
+                
+            }
+        }
+      
+        return currentUsages;
+    }
+    
 }

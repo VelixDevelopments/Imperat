@@ -3,7 +3,6 @@ package dev.velix.imperat;
 import static dev.velix.imperat.commands.TestCommands.CHAINED_SUBCOMMANDS_CMD;
 import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
 import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
-
 import dev.velix.imperat.advanced.DurationParameterType;
 import dev.velix.imperat.advanced.GuildMOTDCommand;
 import dev.velix.imperat.annotations.base.AnnotationFactory;
@@ -20,6 +19,8 @@ import dev.velix.imperat.commands.RankCommand;
 import dev.velix.imperat.commands.TestAC;
 import dev.velix.imperat.commands.TestAC2;
 import dev.velix.imperat.commands.annotations.examples.*;
+import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.Context;
 import dev.velix.imperat.misc.CustomEnum;
 import dev.velix.imperat.misc.CustomEnumParameterType;
 import dev.velix.imperat.commands.EmptyCmd;
@@ -46,11 +47,11 @@ import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -725,6 +726,30 @@ public class TestRun {
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("root", "i1"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("root", "i1 i1.1"));
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("root", "i1 i1.1 i1.1.1"));
+    }
+    
+    @Test
+    public void testClosestUsage() {
+        var cmd = IMPERAT.getCommand("test");
+        Assertions.assertNotNull(cmd);
+        
+        cmd.visualizeTree();
+        
+        ArgumentQueue queue = ArgumentQueue.parse(new String[]{"hello"});
+        Context<TestSource> context = IMPERAT.config.getContextFactory().createContext(IMPERAT, new TestSource(System.out), cmd, "test", queue);
+        
+        var closestSearch = cmd.tree().getClosestUsages(context);
+        
+        Set<CommandUsage<TestSource>> usages = closestSearch.getClosestUsages();
+        CommandUsage<TestSource> closest = closestSearch.getClosest();
+        
+        System.out.println("Closest usage:- ");
+        System.out.println("  - " + closest.formatted());
+        
+        System.out.println("Possible usages:-");
+        for(var u : usages) {
+            System.out.println("  - /" + CommandUsage.format(cmd, u) );
+        }
     }
     
     @Test
