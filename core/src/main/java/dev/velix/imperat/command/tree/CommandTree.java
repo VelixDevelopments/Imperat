@@ -569,14 +569,18 @@ public final class CommandTree<S extends Source> {
         var startingNode = root.getChild((child)-> {
             var raw = queue.getOr(0, null);
             if(raw == null) {
+                System.out.println("RAW IS NULL");
                 return true;
             }
+            System.out.println("CHILD OF STARTING NODE = " + child.format());
             return child.matchesInput(raw);
         });
+        System.out.println("STARTING NODE = " + (startingNode == null ? "N/A" : startingNode.format()));
         
         Set<CommandUsage<S>> closestUsages;
         
         if(startingNode == null) {
+            ImperatDebugger.debug("Failed to find a starting node from the BFS step.");
             closestUsages = Set.of(rootCommand.getDefaultUsage());
         }
         else {

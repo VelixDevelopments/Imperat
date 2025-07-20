@@ -428,7 +428,8 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         final StrictParameterList<S> mainUsageParameters = new StrictParameterList<>();
 
         boolean doesRequireParameterInheritance = doesRequireParameterInheritance(parentCmd, method);
-
+        ImperatDebugger.debug("Method '%s' Requires inheritance= " + doesRequireParameterInheritance, method.getName());
+        
         if (doesRequireParameterInheritance(parentCmd, method)) {
             LinkedList<Command<S>> parenteralSequence = getParenteralSequence(parentCmd);
             for(Command<S> parent : parenteralSequence) {

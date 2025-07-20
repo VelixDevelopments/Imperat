@@ -42,6 +42,7 @@ import dev.velix.imperat.components.TestImperatConfig;
 import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.paramtypes.TestCompletableFutureParam;
 import dev.velix.imperat.paramtypes.TestJavaOptionalParam;
+import dev.velix.imperat.special.PartyCommand;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
@@ -730,12 +731,16 @@ public class TestRun {
     
     @Test
     public void testClosestUsage() {
-        var cmd = IMPERAT.getCommand("test");
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new PartyCommand());
+        });
+        
+        var cmd = IMPERAT.getCommand("party");
         Assertions.assertNotNull(cmd);
         
         cmd.visualizeTree();
         
-        ArgumentQueue queue = ArgumentQueue.parse(new String[]{"hello"});
+        ArgumentQueue queue = ArgumentQueue.parse(new String[]{"invite"});
         Context<TestSource> context = IMPERAT.config.getContextFactory().createContext(IMPERAT, new TestSource(System.out), cmd, "test", queue);
         
         var closestSearch = cmd.tree().getClosestUsages(context);
