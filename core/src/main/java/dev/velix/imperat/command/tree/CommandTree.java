@@ -627,9 +627,6 @@ public final class CommandTree<S extends Source> {
             ParameterNode<S, ?> node,
             Context<S> context
     ) {
-        //PAST: ALLAH ALMOST3AN , A7NA HNTFSH5 HNA
-        //PRESENT: ETFSH5NA , BS 5ALA9NA
-        
         if(node.isExecutable()) {
             var usage = node.getExecutableUsage();
             if(context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(),usage )) {
