@@ -586,6 +586,7 @@ public final class CommandTree<S extends Source> {
         else {
             ParameterNode<S, ?> closestNode = getClosestNode(startingNode, context);
             if (closestNode == null) {
+                System.out.println("CLOSEST NODE = FROM STARTING NODE = NULL !");
                 closestUsages = Set.of(rootCommand.getDefaultUsage());
             }else {
                 closestUsages = getClosestUsagesRecursively(new LinkedHashSet<>(), closestNode, context);
@@ -613,8 +614,11 @@ public final class CommandTree<S extends Source> {
             }
             
             if(rawArguments.isEmpty() && inputEntered != null && currentNode.matchesInput(inputEntered) && currentNode.isExecutable()) {
+                System.out.println("Found matching currentnode=" + currentNode.format());
                 return currentNode;
             }
+            
+            System.out.println("Checking node= '" + currentNode.format() + "'");
             
             queue.addAll(
                     currentNode.getChildren().stream()

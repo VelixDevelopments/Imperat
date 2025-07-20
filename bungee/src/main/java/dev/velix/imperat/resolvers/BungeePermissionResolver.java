@@ -11,6 +11,10 @@ public class BungeePermissionResolver implements PermissionResolver<BungeeSource
         @NotNull BungeeSource source,
         @Nullable String permission
     ) {
+        if(source.isConsole() || permission == null) {
+            return true;
+        }
+        
         return source.origin().hasPermission(permission);
     }
 }
