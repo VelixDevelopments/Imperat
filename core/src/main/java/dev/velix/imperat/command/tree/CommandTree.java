@@ -584,13 +584,7 @@ public final class CommandTree<S extends Source> {
             closestUsages = Set.of(rootCommand.getDefaultUsage());
         }
         else {
-            ParameterNode<S, ?> closestNode = getClosestNode(startingNode, context);
-            if (closestNode == null) {
-                System.out.println("CLOSEST NODE = FROM STARTING NODE = NULL !");
-                closestUsages = Set.of(rootCommand.getDefaultUsage());
-            }else {
-                closestUsages = getClosestUsagesRecursively(new LinkedHashSet<>(), closestNode, context);
-            }
+            closestUsages = getClosestUsagesRecursively(new LinkedHashSet<>(), startingNode, context);
         }
         
         return new ClosestUsageSearch<>(closestUsages);
@@ -613,17 +607,21 @@ public final class CommandTree<S extends Source> {
                 inputEntered = rawArguments.poll();
             }
             
+            System.out.println("CURRENT NODE= " + currentNode.format());
+            System.out.println("Raw args is empty: " + rawArguments.isEmpty() );
+            System.out.println("INPUT ENTERED= " + inputEntered);
+            System.out.println("CURRENT NODE MATCHES INPUT = " + currentNode.matchesInput(inputEntered));
+            System.out.println("IS EXECUTABLE= " + currentNode.isExecutable());
+            
             if(rawArguments.isEmpty() && inputEntered != null && currentNode.matchesInput(inputEntered) && currentNode.isExecutable()) {
                 System.out.println("Found matching currentnode=" + currentNode.format());
                 return currentNode;
             }
             
-            System.out.println("Checking node= '" + currentNode.format() + "'");
+            System.out.println("NOT ACCEPTED AS TERMINAL NODE= " + currentNode.format());
             
             queue.addAll(
-                    currentNode.getChildren().stream()
-                            .filter((child)-> context.imperatConfig().getPermissionResolver().hasPermission(context.source(), child.data.permission()) )
-                            .collect(Collectors.toSet())
+                    currentNode.getChildren()
             );
         }
         
@@ -636,10 +634,13 @@ public final class CommandTree<S extends Source> {
             Context<S> context
     ) {
         if(node.isExecutable()) {
+            System.out.println("EXECUTABLE-NODE= " + node.format());
             var usage = node.getExecutableUsage();
             if(context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(),usage )) {
                 currentUsages.add(usage);
             }
+        }else {
+            System.out.println("NON-EXECUTABLE-NODE= " + node.format());
         }
      
         if(!node.isLast()) {
