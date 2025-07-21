@@ -569,13 +569,10 @@ public final class CommandTree<S extends Source> {
         var startingNode = root.getChild((child)-> {
             var raw = queue.getOr(0, null);
             if(raw == null) {
-                System.out.println("RAW IS NULL");
                 return true;
             }
-            System.out.println("CHILD OF STARTING NODE = " + child.format());
             return child.matchesInput(raw);
         });
-        System.out.println("STARTING NODE = " + (startingNode == null ? "N/A" : startingNode.format()));
         
         Set<CommandUsage<S>> closestUsages;
         
@@ -590,57 +587,16 @@ public final class CommandTree<S extends Source> {
         return new ClosestUsageSearch<>(closestUsages);
     }
     
-    private @Nullable ParameterNode<S, ?> getClosestNode(ParameterNode<S, ?> startingNode, Context<S> context) {
-        
-        ArgumentQueue rawArguments = ArgumentQueue.empty();
-        rawArguments.addAll(context.arguments());
-        
-        Queue<ParameterNode<S, ?>> queue = new LinkedList<>();
-        queue.add(startingNode);
-        
-        String inputEntered = null;
-        while (!queue.isEmpty()) {
-            
-            ParameterNode<S, ?> currentNode = queue.poll();
-            
-            if(!rawArguments.isEmpty()) {
-                inputEntered = rawArguments.poll();
-            }
-            
-            System.out.println("CURRENT NODE= " + currentNode.format());
-            System.out.println("Raw args is empty: " + rawArguments.isEmpty() );
-            System.out.println("INPUT ENTERED= " + inputEntered);
-            System.out.println("CURRENT NODE MATCHES INPUT = " + currentNode.matchesInput(inputEntered));
-            System.out.println("IS EXECUTABLE= " + currentNode.isExecutable());
-            
-            if(rawArguments.isEmpty() && inputEntered != null && currentNode.matchesInput(inputEntered) && currentNode.isExecutable()) {
-                System.out.println("Found matching currentnode=" + currentNode.format());
-                return currentNode;
-            }
-            
-            System.out.println("NOT ACCEPTED AS TERMINAL NODE= " + currentNode.format());
-            
-            queue.addAll(
-                    currentNode.getChildren()
-            );
-        }
-        
-        return null;
-    }
-    
     private Set<CommandUsage<S>> getClosestUsagesRecursively(
             Set<CommandUsage<S>> currentUsages,
             ParameterNode<S, ?> node,
             Context<S> context
     ) {
         if(node.isExecutable()) {
-            System.out.println("EXECUTABLE-NODE= " + node.format());
             var usage = node.getExecutableUsage();
             if(context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(),usage )) {
                 currentUsages.add(usage);
             }
-        }else {
-            System.out.println("NON-EXECUTABLE-NODE= " + node.format());
         }
      
         if(!node.isLast()) {
