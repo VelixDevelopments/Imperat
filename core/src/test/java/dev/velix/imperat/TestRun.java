@@ -21,6 +21,7 @@ import dev.velix.imperat.commands.TestAC2;
 import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
+import dev.velix.imperat.exception.UnknownFlagException;
 import dev.velix.imperat.misc.CustomEnum;
 import dev.velix.imperat.misc.CustomEnumParameterType;
 import dev.velix.imperat.commands.EmptyCmd;
@@ -764,9 +765,7 @@ public class TestRun {
             IMPERAT.registerCommand(new SetRankCmd());
         });
         
-        Assertions.assertDoesNotThrow(()-> {
-            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
-        });
+        Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
     }
     
     @Test

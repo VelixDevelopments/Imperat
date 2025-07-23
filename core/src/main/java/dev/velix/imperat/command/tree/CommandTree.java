@@ -320,10 +320,16 @@ public final class CommandTree<S extends Source> {
         while (!matchesInputOptimized(workingNode, rawInput, strictMode)) {
             if (workingNode.isOptional()) {
                 commandDispatch.append(workingNode);
-                workingNode = workingNode.getNextParameterChild();
-                if (workingNode == null) {
+                
+                var nextWorkingNode = workingNode.getNextParameterChild();
+                if (nextWorkingNode == null) {
+                    if(workingNode.isExecutable()) {
+                        commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
+                        commandDispatch.setDirectUsage(workingNode.executableUsage);
+                    }
                     return commandDispatch;
                 }
+                workingNode = nextWorkingNode;
             } else {
                 return commandDispatch;
             }
