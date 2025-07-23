@@ -6,12 +6,14 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * Highly optimized CommandTree implementation focused on maximum performance
@@ -470,99 +472,72 @@ public final class CommandTree<S extends Source> {
         return true;
     }
     
-    // Tab completion optimization - reduced allocations and improved performance
+    // Tab completion optimization - same logic flow as version 1 with version 2's optimizations
     public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
         final var arguments = context.arguments();
         final var source = context.source();
         final var permissionResolver = imperat.config().getPermissionResolver();
         final boolean ignorePerms = root.data.isIgnoringACPerms();
+        final var config = imperat.config();
         
         ParameterNode<S, ?> node = root;
         for (int i = 0; i < depthToReach; i++) {
             final String raw = arguments.getOr(i, null);
-            if (raw == null) break;
-            
-            node = findMatchingChild(node, raw, source, permissionResolver, ignorePerms, imperat.config());
-            if (node == null) break;
-        }
-        
-        return processTabCompletionOptimized(imperat, context, node, source, permissionResolver, ignorePerms);
-    }
-    
-    /**
-     * Optimized child finding with early termination
-     */
-    private ParameterNode<S, ?> findMatchingChild(
-            ParameterNode<S, ?> parent,
-            String raw,
-            S source,
-            Object permissionResolver,
-            boolean ignorePerms,
-            ImperatConfig<S> config
-    ) {
-        final var children = parent.getChildren();
-        for (var child : children) {
-            if ((ignorePerms || hasPermission(permissionResolver, source, child.data.permission()))
-                    && matchesInputOptimized(child, raw, config.strictCommandTree())) {
-                return child;
+            if (raw == null) {
+                break;
             }
-        }
-        return null;
-    }
-    
-    /**
-     * Type-safe permission checking
-     */
-    @SuppressWarnings("unchecked")
-    private boolean hasPermission(Object resolver, S source, String permission) {
-        if (resolver instanceof dev.velix.imperat.resolvers.PermissionResolver) {
-            return ((dev.velix.imperat.resolvers.PermissionResolver<S>) resolver).hasPermission(source, permission);
-        }
-        return true; // Fallback
-    }
-    
-    /**
-     * Heavily optimized tab completion processing
-     */
-    private CompletableFuture<List<String>> processTabCompletionOptimized(
-            Imperat<S> imperat,
-            SuggestionContext<S> context,
-            ParameterNode<S, ?> node,
-            S source,
-            Object permissionResolver,
-            boolean ignorePerms
-    ) {
-        if (node == null) {
-            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
+            var child = node.getChild((c) -> {
+                boolean hasPerm = (ignorePerms || permissionResolver.hasPermission(source, c.data.permission()));
+                boolean matches = matchesInputOptimized(c, raw, config.strictCommandTree());
+                return hasPerm && matches;
+            });
+            if (child == null) {
+                break;
+            }
+            node = child;
         }
         
-        final boolean overlapOptionalArgs = imperat.config().isOptionalParameterSuggestionOverlappingEnabled();
-        final var validChildren = new ArrayList<ParameterNode<S, ?>>(8);
-        final var skippedNames = new HashSet<String>(8);
+        // Get all valid children at once - EXACT SAME LOGIC AS VERSION 1
+        //HERE
+        final var validChildren = new ArrayList<ParameterNode<S, ?>>(8); // Pre-sized for performance
+        final var skippedSimilarChildren = new ArrayList<String>(4); // Pre-sized for performance
+        final boolean overlapOptionalArgs = config.isOptionalParameterSuggestionOverlappingEnabled();
         
-        final var children = node.getChildren();
+        // Cache the children collection and filter once for performance
+        final var children = node.getChildren()
+                .stream()
+                .filter((child) -> ignorePerms || permissionResolver.hasPermission(source, child.data.permission()))
+                .collect(Collectors.toSet());
+        
         for (var child : children) {
-            if (!ignorePerms && !hasPermission(permissionResolver, source, child.data.permission())) {
+            
+            if (child.isRequired()) {
+                ImperatDebugger.debug("Adding required child '%s' to valid children", child.data.format());
+                validChildren.add(child);
                 continue;
             }
             
-            if (child.isRequired()) {
-                validChildren.add(child);
-            } else if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepthOptimized(node, child)) {
-                final String format = child.data.format();
-                if (!skippedNames.contains(format)) {
-                    validChildren.add(child);
-                } else {
-                    skippedNames.add(format);
+            // For optional nodes: add if overlapOptionalArgs is true OR no similar node exists at different depth
+            if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepthOptimized(node, child)) {
+                
+                final String childFormat = child.data.format(); // Cache the format call
+                if (skippedSimilarChildren.contains(childFormat)) {
+                    continue;
                 }
+                validChildren.add(child);
+            } else {
+                final String childFormat = child.data.format(); // Cache the format call
+                skippedSimilarChildren.add(childFormat);
             }
         }
+        //DONE
         
         if (validChildren.isEmpty()) {
-            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
+            return CompletableFuture.completedFuture(EMPTY_STRING_LIST); // Use cached empty list
         }
         
+        // Process the first valid child and determine if we should include more
         return processValidChildrenOptimized(imperat, context, validChildren);
     }
     
