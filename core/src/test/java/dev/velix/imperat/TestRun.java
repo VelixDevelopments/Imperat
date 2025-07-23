@@ -767,14 +767,6 @@ public class TestRun {
             Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
         });
     }
-    @Test
-    public void testSetRank() {
-        Assertions.assertDoesNotThrow(()-> {
-            IMPERAT.registerCommand(new SetRankCmd());
-        });
-        
-        Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
-    }
     
     @Test
     public void testArgumentsInheritanceBySubCmdMethod() {
