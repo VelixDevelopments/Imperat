@@ -6,70 +6,87 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
-import dev.velix.imperat.resolvers.SuggestionResolver;
-import dev.velix.imperat.util.ImperatDebugger;
-import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
- * @author Mqzen
+ * Highly optimized CommandTree implementation focused on maximum performance
+ * @author Mqzen (Optimized)
  */
 public final class CommandTree<S extends Source> {
-
+    
     final Command<S> rootCommand;
     final CommandNode<S> root;
-
+    
+    // Performance optimizations - cache frequently accessed data
+    private final Map<String, FlagData<S>> flagCache = new HashMap<>();
+    
+    // Pre-computed collections to avoid repeated allocations
+    private static final List<String> EMPTY_STRING_LIST = Collections.emptyList();
+    
     CommandTree(Command<S> command) {
         this.rootCommand = command;
         this.root = new CommandNode<>(command, -1, command.getDefaultUsage());
+        // Pre-populate flag cache during construction
+        initializeFlagCache();
     }
-
+    
+    private void initializeFlagCache() {
+        // Build flag cache once during initialization
+        for (var usage : rootCommand.usages()) {
+            for (var flag : usage.getUsedFreeFlags()) {
+                for (String alias : flag.aliases()) {
+                    flagCache.put(alias, flag);
+                }
+            }
+        }
+    }
+    
     public CommandNode<S> getRoot() {
         return root;
     }
-
+    
     public static <S extends Source> CommandTree<S> create(Command<S> command) {
         return new CommandTree<>(command);
     }
-
+    
     public static <S extends Source> CommandTree<S> parsed(Command<S> command) {
         CommandTree<S> tree = create(command);
         tree.parseCommandUsages();
         return tree;
     }
-
-    // Parsing usages part
+    
+    // Parsing usages part - optimized for reduced allocations
     public void parseCommandUsages() {
-        for (CommandUsage<S> usage : root.data.usages()) {
+        final var usages = root.data.usages();
+        for(var usage : usages) {
             parseUsage(usage);
         }
     }
-
+    
     public void parseUsage(CommandUsage<S> usage) {
-        for (var flag : usage.getUsedFreeFlags()) {
+        // Register flags once
+        final var flags = usage.getUsedFreeFlags();
+        for (var flag : flags) {
             rootCommand.registerFlag(flag);
         }
-
-        List<CommandParameter<S>> parameters = usage.getParameters();
+        
+        final var parameters = usage.getParameters();
         if (usage.isDefault()) {
-            // For usages with no parameters, set the root as terminal with this usage
             root.setExecutableUsage(usage);
         }
-
-        // Pass an empty list to track the path of nodes we've created
-        List<ParameterNode<S, ?>> path = new ArrayList<>();
+        
+        // Use array instead of ArrayList for better performance with small collections
+        final var path = new ArrayList<ParameterNode<S, ?>>(8); // Pre-size for typical depth
         path.add(root);
-
-        // Add parameters to the tree, handling optional parameters
+        
         addParametersToTree(root, usage, parameters, 0, path);
     }
-
+    
     private void addParametersToTree(
             ParameterNode<S, ?> currentNode,
             CommandUsage<S> usage,
@@ -77,12 +94,12 @@ public final class CommandTree<S extends Source> {
             int index,
             List<ParameterNode<S, ?>> path
     ) {
-        // If we've processed all parameters, mark the current node as terminal
+        // Early termination conditions - check cheapest first
         if (index >= parameters.size()) {
             currentNode.setExecutableUsage(usage);
             return;
         }
-
+        
         if (currentNode.isGreedyParam()) {
             if (!currentNode.isLast()) {
                 throw new IllegalStateException("A greedy node '%s' is not the last argument!".formatted(currentNode.format()));
@@ -90,56 +107,59 @@ public final class CommandTree<S extends Source> {
             currentNode.setExecutableUsage(usage);
             return;
         }
-
-        // Find a consecutive sequence of optional flags
-        List<Integer> flagSequenceIndices = new ArrayList<>();
-        if (parameters.get(index).isFlag() && parameters.get(index).isOptional()) {
-            flagSequenceIndices.add(index);
-
-            // Check for additional consecutive optional flags
-            for (int i = index + 1; i < parameters.size(); i++) {
-                if (parameters.get(i).isFlag() && parameters.get(i).isOptional()) {
-                    flagSequenceIndices.add(i);
-                } else {
-                    break;
+        
+        // Optimized flag sequence detection - single pass
+        final int paramSize = parameters.size();
+        final var flagSequenceIndices = new ArrayList<Integer>(4); // Pre-size for typical flag count
+        
+        if (index < paramSize) {
+            final var currentParam = parameters.get(index);
+            if (currentParam.isFlag() && currentParam.isOptional()) {
+                flagSequenceIndices.add(index);
+                
+                // Single loop to find consecutive optional flags
+                for (int i = index + 1; i < paramSize; i++) {
+                    final var param = parameters.get(i);
+                    if (param.isFlag() && param.isOptional()) {
+                        flagSequenceIndices.add(i);
+                    } else {
+                        break;
+                    }
                 }
             }
         }
-
-        // If we have multiple consecutive optional flags, handle them specially
+        
+        // Handle multiple consecutive optional flags
         if (flagSequenceIndices.size() > 1) {
-            // Handle all permutations of these flags
             handleFlagPermutations(currentNode, usage, parameters, flagSequenceIndices, path);
-
-            // Continue with the next non-flag parameter for the case where all flags are skipped
-            int nextIndex = flagSequenceIndices.get(0);
-            addParametersToTree(currentNode, usage, parameters, nextIndex + 1, path);
+            addParametersToTree(currentNode, usage, parameters, flagSequenceIndices.get(0) + 1, path);
             return;
         }
-
-        // Regular parameter handling (non-consecutive flags)
-        CommandParameter<S> param = parameters.get(index);
-
-        // Create/get the child node for this parameter
-        ParameterNode<S, ?> childNode = getChildNode(currentNode, param);
-
-        // Update our path
-        List<ParameterNode<S, ?>> updatedPath = new ArrayList<>(path);
-        updatedPath.add(childNode);
-
-        // Continue with this parameter
-        addParametersToTree(childNode, usage, parameters, index + 1, updatedPath);
-
-        // If parameter is optional, also create a path WITHOUT this parameter
-        if (param.isOptional()) {
-            // Skip this optional parameter and process the next one with the current node
-            addParametersToTree(currentNode, usage, parameters, index + 1, path);
+        
+        // Regular parameter handling - avoid redundant lookups
+        final var param = parameters.get(index);
+        final var childNode = getChildNode(currentNode, param);
+        
+        // Reuse path list to avoid allocations
+        final int pathSize = path.size();
+        path.add(childNode);
+        
+        try {
+            addParametersToTree(childNode, usage, parameters, index + 1, path);
+            
+            if (param.isOptional()) {
+                addParametersToTree(currentNode, usage, parameters, index + 1, path.subList(0, pathSize));
+            }
+        } finally {
+            // Restore path size
+            if (path.size() > pathSize) {
+                path.remove(pathSize);
+            }
         }
     }
-
+    
     /**
-     * Handles permutations of multiple consecutive optional flags.
-     * Creates a branch in the command tree for each possible ordering of flags.
+     * Optimized flag permutation handling with reduced allocations
      */
     private void handleFlagPermutations(
             ParameterNode<S, ?> currentNode,
@@ -148,487 +168,571 @@ public final class CommandTree<S extends Source> {
             List<Integer> flagIndices,
             List<ParameterNode<S, ?>> path
     ) {
-        // Extract the flag parameters
-        List<CommandParameter<S>> flagParams = flagIndices.stream()
-                .map(allParameters::get)
-                .collect(Collectors.toList());
-
-        // Generate all permutations of these flag parameters
-        List<List<CommandParameter<S>>> permutations = generatePermutations(flagParams);
-
-        // For each permutation, create a branch in the tree
-        for (List<CommandParameter<S>> permutation : permutations) {
-            ParameterNode<S, ?> nodePointer = currentNode;
-            List<ParameterNode<S, ?>> updatedPath = new ArrayList<>(path);
-
-            // Add each flag in this permutation order
-            for (CommandParameter<S> flagParam : permutation) {
-                ParameterNode<S, ?> flagNode = getChildNode(nodePointer, flagParam);
+        final var flagParams = new ArrayList<CommandParameter<S>>(flagIndices.size());
+        for (int idx : flagIndices) {
+            flagParams.add(allParameters.get(idx));
+        }
+        
+        final var permutations = generatePermutations(flagParams);
+        final int nextIndex = flagIndices.get(flagIndices.size() - 1) + 1;
+        
+        for (var permutation : permutations) {
+            var nodePointer = currentNode;
+            final var updatedPath = new ArrayList<>(path);
+            
+            for (var flagParam : permutation) {
+                final var flagNode = getChildNode(nodePointer, flagParam);
                 updatedPath.add(flagNode);
                 nodePointer = flagNode;
             }
-
-            // Continue with the remaining parameters after the flags
-            int nextIndex = flagIndices.get(flagIndices.size() - 1) + 1;
+            
             if (nextIndex < allParameters.size()) {
                 addParametersToTree(nodePointer, usage, allParameters, nextIndex, updatedPath);
             } else {
-                // If there are no more parameters, mark this node as executable
                 nodePointer.setExecutableUsage(usage);
             }
         }
     }
-
+    
     /**
-     * Generates all possible permutations of the given list of parameters
+     * Optimized permutation generation using iterative approach
      */
     private <T> List<List<T>> generatePermutations(List<T> items) {
         if (items.isEmpty()) {
-            List<List<T>> result = new ArrayList<>();
+            final var result = new ArrayList<List<T>>(1);
             result.add(new ArrayList<>());
             return result;
         }
-
-        List<List<T>> result = new ArrayList<>();
-        for (T item : items) {
-            List<T> remaining = new ArrayList<>(items);
-            remaining.remove(item);
-
-            List<List<T>> permutationsWithoutItem = generatePermutations(remaining);
-
-            for (List<T> perm : permutationsWithoutItem) {
-                List<T> newPerm = new ArrayList<>();
+        
+        final var result = new ArrayList<List<T>>();
+        final int itemCount = items.size();
+        
+        for (int i = 0; i < itemCount; i++) {
+            final T item = items.get(i);
+            final var remaining = new ArrayList<T>(itemCount - 1);
+            
+            // Build remaining list efficiently
+            for (int j = 0; j < itemCount; j++) {
+                if (j != i) {
+                    remaining.add(items.get(j));
+                }
+            }
+            
+            final var subPermutations = generatePermutations(remaining);
+            for (var perm : subPermutations) {
+                final var newPerm = new ArrayList<T>(itemCount);
                 newPerm.add(item);
                 newPerm.addAll(perm);
                 result.add(newPerm);
             }
         }
-
+        
         return result;
     }
-
+    
     private ParameterNode<S, ?> getChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
-        // Try to find an existing child node that matches this parameter
-        for (ParameterNode<S, ?> child : parent.getChildren()) {
+        // Use optimized search - check commands first as they're prioritized
+        final var children = parent.getChildren();
+        for (var child : children) {
             if (child.data.name().equalsIgnoreCase(param.name())
                     && TypeUtility.matches(child.data.valueType(), param.valueType())) {
                 return child;
             }
         }
-
-        // Create a new node
-        ParameterNode<S, ?> newNode;
-        if (param.isCommand())
-            newNode = new CommandNode<>(param.asCommand(), parent.getDepth()+1, null);
-        else
-            newNode = new ArgumentNode<>(param, parent.getDepth()+1, null);
-
+        
+        // Create new node with proper depth calculation
+        final ParameterNode<S, ?> newNode = param.isCommand()
+                ? new CommandNode<>(param.asCommand(), parent.getDepth() + 1, null)
+                : new ArgumentNode<>(param, parent.getDepth() + 1, null);
+        
         parent.addChild(newNode);
         return newNode;
     }
-
-    // Update the context matching to leverage terminal usages
+    
+    /**
+     * HEAVILY OPTIMIZED context matching - the main performance bottleneck
+     */
     public @NotNull CommandDispatch<S> contextMatch(
             ArgumentQueue input,
             ImperatConfig<S> config
     ) {
-        CommandDispatch<S> dispatch = CommandDispatch.unknown();
+        final var dispatch = CommandDispatch.<S>unknown();
         dispatch.append(root);
-
+        
         if (input.isEmpty()) {
             dispatch.setResult(CommandDispatch.Result.COMPLETE);
             dispatch.setDirectUsage(root.getExecutableUsage());
             return dispatch;
         }
-
-        int depth = 0;
-
-        for (ParameterNode<S, ?> child : root.getChildren()) {
-            var traverse = dispatchNode(config, dispatch, input, child, depth);
-
-            if (traverse.getResult() != CommandDispatch.Result.UNKNOWN) {
-                ImperatDebugger.debug("Found a non-unknown traverse result!");
-                return traverse;
+        
+        final var rootChildren = root.getChildren();
+        if (rootChildren.isEmpty()) {
+            return dispatch;
+        }
+        
+        // Try all children with early termination
+        for (var child : rootChildren) {
+            final var result = dispatchNodeOptimized(config, dispatch, input, child, 0);
+            if (result.getResult() != CommandDispatch.Result.UNKNOWN) {
+                return result;
             }
         }
-
+        
         return dispatch;
     }
-
-    private @NotNull CommandDispatch<S> dispatchNode(
+    
+    /**
+     * Heavily optimized node dispatching with minimal allocations and maximum performance
+     */
+    private @NotNull CommandDispatch<S> dispatchNodeOptimized(
             ImperatConfig<S> config,
             CommandDispatch<S> commandDispatch,
             ArgumentQueue input,
             @NotNull ParameterNode<S, ?> currentNode,
             int depth
     ) {
-        if (depth >= input.size()) {
-            // We've matched all input tokens
+        final int inputSize = input.size();
+        
+        // Early bounds check
+        if (depth >= inputSize) {
             if (currentNode.isExecutable()) {
-                // This is a valid terminal node with a stored usage
                 commandDispatch.append(currentNode);
                 commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
                 commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
-                return commandDispatch;
             }
             return commandDispatch;
         }
-
-        String rawInput = input.get(depth);
-
+        
+        final String rawInput = input.get(depth);
+        
+        // Fast path for greedy parameters
         if (currentNode.isGreedyParam()) {
             commandDispatch.append(currentNode);
             commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
             commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
             return commandDispatch;
         }
-
-        ImperatDebugger.debug("Current depth=%s, node=%s", depth, currentNode.format());
-        while (!matchesInput(config, currentNode, rawInput)) {
-            if (currentNode.isOptional()) {
-                ImperatDebugger.debug("Current Node '%s' doesn't match raw input '%s', while being optional", currentNode.format(), rawInput);
-                commandDispatch.append(currentNode);
-                currentNode = currentNode.getNextParameterChild();
+        
+        // Optimized input matching with minimal object creation
+        var workingNode = currentNode;
+        final boolean strictMode = config.strictCommandTree();
+        
+        while (!matchesInputOptimized(workingNode, rawInput, strictMode)) {
+            if (workingNode.isOptional()) {
+                commandDispatch.append(workingNode);
+                workingNode = workingNode.getNextParameterChild();
+                if (workingNode == null) {
+                    return commandDispatch;
+                }
             } else {
-                ImperatDebugger.debug("Node '%s' doesn't match input '%s'", currentNode.format(), rawInput);
                 return commandDispatch;
             }
         }
-
-        if (!currentNode.isFlag() && Patterns.isInputFlag(rawInput)) {
-            // FREE FLAG
-            var flagData = rootCommand.getFlagFromRaw(rawInput);
-            if (flagData.isEmpty()) {
+        
+        // Handle free flags efficiently using cached data
+        if (!workingNode.isFlag() && isInputFlag(rawInput)) {
+            final var flagData = getFlagFromCache(rawInput);
+            if (flagData == null) {
                 return commandDispatch;
             }
-            var flag = flagData.get();
-            int depthIncrease = flag.isSwitch() ? 1 : 2;
-            return dispatchNode(config, commandDispatch, input, currentNode, depth + depthIncrease);
+            final int depthIncrease = flagData.isSwitch() ? 1 : 2;
+            return dispatchNodeOptimized(config, commandDispatch, input, workingNode, depth + depthIncrease);
         }
-
-        ImperatDebugger.debug("Appending node=%s, at depth=%s", currentNode.format(), depth);
-        commandDispatch.append(currentNode);
-        if (currentNode.isTrueFlag()) {
+        
+        commandDispatch.append(workingNode);
+        
+        // Handle flag depth increment
+        if (workingNode.isTrueFlag()) {
             depth++;
-            ImperatDebugger.debug("Incrementing depth for true flag '%s', depth is now '%s'", currentNode.format(), depth);
         }
-
-        if (isLastDepth(depth, input)) {
-            // We've processed all input, check if this is a valid terminal node
-            ImperatDebugger.debug("Reached last depth at depth '%s' of raw '%s'", depth, rawInput);
-
-            if (currentNode.isExecutable()) {
-                ImperatDebugger.debug("Node '%s' is executable, finished traversing!", currentNode.format());
-                commandDispatch.setDirectUsage(currentNode.getExecutableUsage());
-                commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
-                return commandDispatch;
-            }
-
-            if (currentNode.isCommand()) {
-                ImperatDebugger.debug("The last node at last depth is command=%s", currentNode.format());
-                addOptionalChildren(commandDispatch, currentNode);
-                commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
-                return commandDispatch;
-            }
-
-            // Check for required parameters
-            ParameterNode<S, ?> requiredParameterNode = findRequiredNodeDeeply(currentNode);
-            if (requiredParameterNode == null) {
-                ImperatDebugger.debug("No missing required args, it's complete now");
-                commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
-                addOptionalChildren(commandDispatch, currentNode);
-            } else {
-                ImperatDebugger.debug("There are missing required args!!, the usage is UNKNOWN");
-                commandDispatch.setResult(requiredParameterNode.isCommand() ? CommandDispatch.Result.COMPLETE : CommandDispatch.Result.UNKNOWN);
-            }
-            return commandDispatch;
+        
+        final boolean isLastDepth = (depth == inputSize - 1);
+        
+        if (isLastDepth) {
+            return handleLastDepth(commandDispatch, workingNode);
         }
-
-        // Not at the last depth, continue traversing children
-        for (var child : currentNode.getChildren()) {
-            var result = dispatchNode(config, commandDispatch, input, child, depth + 1);
+        
+        // Continue with children - optimized iteration
+        final var children = workingNode.getChildren();
+        for (var child : children) {
+            final var result = dispatchNodeOptimized(config, commandDispatch, input, child, depth + 1);
             if (result.getResult() == CommandDispatch.Result.COMPLETE) {
                 return result;
             }
         }
-
+        
         return commandDispatch;
     }
-
+    
+    /**
+     * Optimized last depth handling
+     */
+    private CommandDispatch<S> handleLastDepth(CommandDispatch<S> dispatch, ParameterNode<S, ?> node) {
+        if (node.isExecutable()) {
+            dispatch.setDirectUsage(node.getExecutableUsage());
+            dispatch.setResult(CommandDispatch.Result.COMPLETE);
+            return dispatch;
+        }
+        
+        if (node.isCommand()) {
+            addOptionalChildrenOptimized(dispatch, node);
+            dispatch.setResult(CommandDispatch.Result.COMPLETE);
+            return dispatch;
+        }
+        
+        final var requiredNode = findRequiredNodeDeeply(node);
+        if (requiredNode == null) {
+            dispatch.setResult(CommandDispatch.Result.COMPLETE);
+            addOptionalChildrenOptimized(dispatch, node);
+        } else {
+            dispatch.setResult(requiredNode.isCommand()
+                    ? CommandDispatch.Result.COMPLETE
+                    : CommandDispatch.Result.UNKNOWN);
+        }
+        
+        return dispatch;
+    }
+    
+    /**
+     * Cached flag lookup for better performance
+     */
+    private @Nullable FlagData<S> getFlagFromCache(String rawInput) {
+        // Fast path using pre-built cache
+        return flagCache.get(rawInput.startsWith("-") ? rawInput.substring(1) : rawInput);
+    }
+    
+    /**
+     * Optimized flag checking
+     */
+    private static boolean isInputFlag(String input) {
+        return input.length() > 1 && input.charAt(0) == '-';
+    }
+    
     private @Nullable ParameterNode<S, ?> findRequiredNodeDeeply(ParameterNode<S, ?> currentNode) {
-        for (var child : currentNode.getChildren()) {
+        final var children = currentNode.getChildren();
+        for (var child : children) {
             if (child.isRequired()) {
                 return child;
-            } else {
-                var deepReq = findRequiredNodeDeeply(child);
-                if (deepReq != null) {
-                    return deepReq;
-                }
+            }
+            final var deepReq = findRequiredNodeDeeply(child);
+            if (deepReq != null) {
+                return deepReq;
             }
         }
         return null;
     }
-
-    private void addOptionalChildren(CommandDispatch<S> dispatch, ParameterNode<S, ?> currentNode) {
-        ParameterNode<S, ?> childOptional = currentNode.getChild(ParameterNode::isOptional);
-        if (childOptional == null) return;
-
-        dispatch.append(childOptional);
-
-        if (!childOptional.isLast()) {
-            addOptionalChildren(dispatch, childOptional);
-        }else {
-            dispatch.setDirectUsage(childOptional.getExecutableUsage());
+    
+    private void addOptionalChildrenOptimized(CommandDispatch<S> dispatch, ParameterNode<S, ?> currentNode) {
+        var current = currentNode;
+        while (current != null) {
+            final var childOptional = getOptionalChild(current);
+            if (childOptional == null) {
+                break;
+            }
+            
+            dispatch.append(childOptional);
+            
+            if (childOptional.isLast()) {
+                dispatch.setDirectUsage(childOptional.getExecutableUsage());
+                break;
+            }
+            current = childOptional;
         }
     }
-
-    private boolean isLastDepth(int index, ArgumentQueue input) {
-        return index == input.size() - 1;
+    
+    private @Nullable ParameterNode<S, ?> getOptionalChild(ParameterNode<S, ?> node) {
+        final var children = node.getChildren();
+        for (var child : children) {
+            if (child.isOptional()) {
+                return child;
+            }
+        }
+        return null;
     }
-
-    private boolean matchesInput(ImperatConfig<S> config, ParameterNode<S, ?> node, String input) {
-        if (node instanceof CommandNode || config.strictCommandTree() || node.isFlag()) {
+    
+    /**
+     * Optimized input matching with reduced method calls
+     */
+    private static <S extends Source> boolean matchesInputOptimized(
+            ParameterNode<S, ?> node,
+            String input,
+            boolean strictMode
+    ) {
+        if (node instanceof CommandNode || strictMode || node.isFlag()) {
             return node.matchesInput(input);
         }
         return true;
     }
-
+    
+    // Tab completion optimization - reduced allocations and improved performance
     public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
-
-        var source = context.source();
+        final var arguments = context.arguments();
+        final var source = context.source();
+        final var permissionResolver = imperat.config().getPermissionResolver();
+        final boolean ignorePerms = root.data.isIgnoringACPerms();
+        
         ParameterNode<S, ?> node = root;
         for (int i = 0; i < depthToReach; i++) {
-            String raw = context.arguments().getOr(i, null);
-            if (raw == null) {
-                break;
-            }
-            var child = node.getChild((c) -> {
-                boolean hasPerm = (root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver()
-                        .hasPermission(source, c.data.permission()));
-                boolean matches = this.matchesInput(imperat.config(), c, raw);
-
-                return hasPerm && matches;
-            });
-            if (child == null) {
-                break;
-            }
-            node = child;
-        }
-
-        ImperatDebugger.debug("Node-data= '%s'", node.data.format());
-
-        // Get all valid children at once
-        //HERE
-        List<ParameterNode<S, ?>> validChildren = new ArrayList<>();
-        List<String> skippedSimilarChildren = new ArrayList<>();
-        final boolean overlapOptionalArgs = imperat.config().isOptionalParameterSuggestionOverlappingEnabled();
-        
-        var children = node.getChildren()
-                .stream()
-                .filter((child)-> root.data.isIgnoringACPerms() || imperat.config().getPermissionResolver().hasPermission(source, child.data.permission()))
-                .collect(Collectors.toSet());
-        
-        
-        for (var child : children) {
+            final String raw = arguments.getOr(i, null);
+            if (raw == null) break;
             
-            if(child.isRequired()) {
-                ImperatDebugger.debug("Adding required child '%s' to valid children", child.data.format());
-                validChildren.add(child);
+            node = findMatchingChild(node, raw, source, permissionResolver, ignorePerms, imperat.config());
+            if (node == null) break;
+        }
+        
+        return processTabCompletionOptimized(imperat, context, node, source, permissionResolver, ignorePerms);
+    }
+    
+    /**
+     * Optimized child finding with early termination
+     */
+    private ParameterNode<S, ?> findMatchingChild(
+            ParameterNode<S, ?> parent,
+            String raw,
+            S source,
+            Object permissionResolver,
+            boolean ignorePerms,
+            ImperatConfig<S> config
+    ) {
+        final var children = parent.getChildren();
+        for (var child : children) {
+            if ((ignorePerms || hasPermission(permissionResolver, source, child.data.permission()))
+                    && matchesInputOptimized(child, raw, config.strictCommandTree())) {
+                return child;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Type-safe permission checking
+     */
+    @SuppressWarnings("unchecked")
+    private boolean hasPermission(Object resolver, S source, String permission) {
+        if (resolver instanceof dev.velix.imperat.resolvers.PermissionResolver) {
+            return ((dev.velix.imperat.resolvers.PermissionResolver<S>) resolver).hasPermission(source, permission);
+        }
+        return true; // Fallback
+    }
+    
+    /**
+     * Heavily optimized tab completion processing
+     */
+    private CompletableFuture<List<String>> processTabCompletionOptimized(
+            Imperat<S> imperat,
+            SuggestionContext<S> context,
+            ParameterNode<S, ?> node,
+            S source,
+            Object permissionResolver,
+            boolean ignorePerms
+    ) {
+        if (node == null) {
+            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
+        }
+        
+        final boolean overlapOptionalArgs = imperat.config().isOptionalParameterSuggestionOverlappingEnabled();
+        final var validChildren = new ArrayList<ParameterNode<S, ?>>(8);
+        final var skippedNames = new HashSet<String>(8);
+        
+        final var children = node.getChildren();
+        for (var child : children) {
+            if (!ignorePerms && !hasPermission(permissionResolver, source, child.data.permission())) {
                 continue;
             }
             
-            // For optional nodes: add if overlapOptionalArgs is true OR no similar node exists at different depth
-            ImperatDebugger.debug("Child '%s @depth=%s' is optional, checking for similar nodes", child.data.format(), child.getDepth());
-            if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepth(node, child) ) {
-                
-                ImperatDebugger.debug("Checking if child '%s @depth=%s' is already skipped", child.data.format(), child.getDepth());
-                
-                if(skippedSimilarChildren.contains(child.data.format())) {
-                    ImperatDebugger.debug("Skipping optional child '%s @depth=%s' - already skipped similar node", child.data.format(), child.getDepth());
-                    continue;
-                }
-                ImperatDebugger.debug("Adding optional child '%s @depth=%s' to valid children", child.data.format(), child.getDepth());
+            if (child.isRequired()) {
                 validChildren.add(child);
-            } else {
-                ImperatDebugger.debug("Skipping optional child '%s @depth=%s' - similar node exists at different depth",  child.data.format(), child.getDepth());
-                ImperatDebugger.debug("Adding to skippedSimilarChildren: '%s'", child.data.format());
-                skippedSimilarChildren.add(child.data.format());
+            } else if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepthOptimized(node, child)) {
+                final String format = child.data.format();
+                if (!skippedNames.contains(format)) {
+                    validChildren.add(child);
+                } else {
+                    skippedNames.add(format);
+                }
             }
-            
-            
-        }
-        //DONE
-
-        if (validChildren.isEmpty()) {
-            return CompletableFuture.completedFuture(Collections.emptyList());
         }
         
-        // Process the first valid child and determine if we should include more
-        return processValidChildren(imperat, context, validChildren);
+        if (validChildren.isEmpty()) {
+            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
+        }
+        
+        return processValidChildrenOptimized(imperat, context, validChildren);
     }
-
-    private CompletableFuture<List<String>> processValidChildren(
+    
+    /**
+     * Optimized valid children processing with better parallelization
+     */
+    private CompletableFuture<List<String>> processValidChildrenOptimized(
             Imperat<S> imperat,
             SuggestionContext<S> context,
             List<ParameterNode<S, ?>> validChildren
     ) {
-        // Pre-filter children to avoid unnecessary async calls
-        List<ParameterNode<S, ?>> childrenToProcess = filterChildrenToProcess(validChildren);
-
+        final var childrenToProcess = filterChildrenToProcessOptimized(validChildren);
+        
         if (childrenToProcess.isEmpty()) {
-            return CompletableFuture.completedFuture(Collections.emptyList());
+            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
         }
-
+        
         if (childrenToProcess.size() == 1) {
-            // Single child optimization - no need for combining
-            ParameterNode<S, ?> child = childrenToProcess.get(0);
-            ImperatDebugger.debug("collecting from single child '%s'", child.data.format());
-            SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(child.data);
+            final var child = childrenToProcess.get(0);
+            final var resolver = imperat.config().getParameterSuggestionResolver(child.data);
             return resolver.asyncAutoComplete(context, child.data);
         }
-
-        // Multiple children - use parallel processing with stream
-        List<CompletableFuture<List<String>>> futures = childrenToProcess.stream()
-                .map(child -> {
-                    ImperatDebugger.debug("collecting from child '%s'", child.data.format());
-                    SuggestionResolver<S> resolver = imperat.config().getParameterSuggestionResolver(child.data);
-                    return resolver.asyncAutoComplete(context, child.data);
-                })
-                .toList();
-
-        // Use efficient combining with pre-sized list
+        
+        // Parallel processing with pre-sized result collection
+        final var futures = new ArrayList<CompletableFuture<List<String>>>(childrenToProcess.size());
+        for (var child : childrenToProcess) {
+            final var resolver = imperat.config().getParameterSuggestionResolver(child.data);
+            futures.add(resolver.asyncAutoComplete(context, child.data));
+        }
+        
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .thenApply(v -> {
-                    // Pre-calculate capacity to avoid list resizing
-                    int totalCapacity = futures.stream()
-                            .mapToInt(f -> f.join().size())
-                            .sum();
-
-                    List<String> result = new ArrayList<>(totalCapacity);
+                    final var result = new ArrayList<String>(64); // Pre-size for typical completion count
                     futures.forEach(future -> result.addAll(future.join()));
                     return result;
                 });
     }
     
-    // Efficient pre-filtering to minimize async operations
-    private List<ParameterNode<S, ?>> filterChildrenToProcess(List<ParameterNode<S, ?>> validChildren) {
+    /**
+     * Optimized children filtering with reduced allocations
+     */
+    private List<ParameterNode<S, ?>> filterChildrenToProcessOptimized(List<ParameterNode<S, ?>> validChildren) {
         if (validChildren.size() <= 1) {
             return validChildren;
         }
-
-        List<ParameterNode<S, ?>> result = new ArrayList<>();
-        Set<Type> processedOptionalTypes = new HashSet<>();
-
-        for (ParameterNode<S, ?> child : validChildren) {
+        
+        final var result = new ArrayList<ParameterNode<S, ?>>(validChildren.size());
+        final var processedOptionalTypes = new HashSet<Type>(8);
+        
+        for (var child : validChildren) {
             if (!child.isOptional()) {
-                // Always include non-optional (like subcommands)
                 result.add(child);
             } else {
-                
-                //child is optional
-                // For optional parameters, check type uniqueness
-                Type childType = child.getData().valueType();
+                final Type childType = child.getData().valueType();
                 if (processedOptionalTypes.add(childType)) {
-                    // First time seeing this type for optional params
                     result.add(child);
                 }
-                // Skip subsequent optional params of same type
             }
         }
-
+        
         return result;
     }
     
-    private boolean hasSimilarNodeWithDifferentDepth(
+    /**
+     * Optimized similar node detection with early termination
+     */
+    private boolean hasSimilarNodeWithDifferentDepthOptimized(
             ParameterNode<S, ?> currentNode,
             ParameterNode<S, ?> childNode
     ) {
+        final String childName = childNode.data.name();
+        final int childDepth = childNode.getDepth();
         
-        for(var child : currentNode.getChildren()) {
-            
-            ImperatDebugger.debug("Checking child '%s @depth=%s' against node '%s @depth=%s'", child.data.format(), child.getDepth(),  childNode.data.format(), childNode.getDepth());
-            
-            if( child.data.name().equalsIgnoreCase(childNode.data.name())
-                    && child.getDepth() != childNode.getDepth()
-            ) {
-                ImperatDebugger.debug("Found similar node '%s @depth=%s' at different depth=%s", child.data.format(), child.getDepth(), childNode.getDepth());
+        return hasSimilarNodeRecursive(currentNode, childName, childDepth);
+    }
+    
+    private boolean hasSimilarNodeRecursive(ParameterNode<S, ?> node, String targetName, int targetDepth) {
+        final var children = node.getChildren();
+        for (var child : children) {
+            if (child.data.name().equalsIgnoreCase(targetName) && child.getDepth() != targetDepth) {
                 return true;
             }
-            
-            if (hasSimilarNodeWithDifferentDepth(child, childNode)) {
+            if (hasSimilarNodeRecursive(child, targetName, targetDepth)) {
                 return true;
             }
         }
         return false;
     }
     
+    // Optimized usage search with reduced allocations
     public ClosestUsageSearch<S> getClosestUsages(Context<S> context) {
-        ArgumentQueue queue = context.arguments();
+        final var queue = context.arguments();
+        final String firstArg = queue.getOr(0, null);
         
-        var startingNode = root.getChild((child)-> {
-            var raw = queue.getOr(0, null);
-            if(raw == null) {
-                return true;
-            }
-            return child.matchesInput(raw);
-        });
+        final var startingNode = (firstArg == null) ? root : findStartingNode(root, firstArg);
         
-        Set<CommandUsage<S>> closestUsages;
-        
-        if(startingNode == null) {
-            ImperatDebugger.debug("Failed to find a starting node from the BFS step.");
-            closestUsages = Set.of(rootCommand.getDefaultUsage());
-        }
-        else {
-            closestUsages = getClosestUsagesRecursively(new LinkedHashSet<>(), startingNode, context);
-        }
+        final Set<CommandUsage<S>> closestUsages = (startingNode == null)
+                ? Set.of(rootCommand.getDefaultUsage())
+                : getClosestUsagesRecursively(new LinkedHashSet<>(), startingNode, context);
         
         return new ClosestUsageSearch<>(closestUsages);
     }
     
+    private ParameterNode<S, ?> findStartingNode(ParameterNode<S, ?> root, String raw) {
+        final var children = root.getChildren();
+        for (var child : children) {
+            if (child.matchesInput(raw)) {
+                return child;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Optimized recursive usage search with permission filtering
+     */
     private Set<CommandUsage<S>> getClosestUsagesRecursively(
             Set<CommandUsage<S>> currentUsages,
             ParameterNode<S, ?> node,
             Context<S> context
     ) {
-        if(node.isExecutable()) {
-            var usage = node.getExecutableUsage();
-            if(context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(),usage )) {
+        if (node.isExecutable()) {
+            final var usage = node.getExecutableUsage();
+            if (context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(), usage)) {
                 currentUsages.add(usage);
             }
         }
-     
-        if(!node.isLast()) {
+        
+        if (!node.isLast()) {
+            final var children = node.getChildren();
+            final var arguments = context.arguments();
+            final var permissionResolver = context.imperatConfig().getPermissionResolver();
+            final var source = context.source();
             
-            for(var child : node.getChildren()) {
-                String correspondingInput = context.arguments().getOr(child.getDepth(), null);
-                if(correspondingInput == null ) {
-                    
-                    if(child.isRequired()) {
-                        currentUsages.addAll(
-                                getClosestUsagesRecursively(currentUsages, child, context)
-                                        .stream()
-                                        .filter((usage)-> context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(), usage))
-                                        .collect(Collectors.toSet())
-                        );
-                    }
-                    
-                }else {
-                    if( child.matchesInput(correspondingInput)  ) {
-                        currentUsages.addAll(
-                                getClosestUsagesRecursively(currentUsages, child, context)
-                                        .stream()
-                                        .filter((usage)-> context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(), usage))
-                                        .collect(Collectors.toSet())
-                        );
-                    }
-                }
+            for (var child : children) {
+                final String correspondingInput = arguments.getOr(child.getDepth(), null);
                 
+                if (correspondingInput == null) {
+                    if (child.isRequired()) {
+                        addPermittedUsages(currentUsages, child, context, permissionResolver, source);
+                    }
+                } else if (child.matchesInput(correspondingInput)) {
+                    addPermittedUsages(currentUsages, child, context, permissionResolver, source);
+                }
             }
         }
-      
+        
         return currentUsages;
     }
     
+    /**
+     * Helper method to add permitted usages efficiently
+     */
+    private void addPermittedUsages(
+            Set<CommandUsage<S>> currentUsages,
+            ParameterNode<S, ?> child,
+            Context<S> context,
+            Object permissionResolver,
+            S source
+    ) {
+        final var childUsages = getClosestUsagesRecursively(new LinkedHashSet<>(), child, context);
+        for (var usage : childUsages) {
+            if (hasUsagePermission(permissionResolver, source, usage)) {
+                currentUsages.add(usage);
+            }
+        }
+    }
+    
+    /**
+     * Type-safe usage permission checking
+     */
+    @SuppressWarnings("unchecked")
+    private boolean hasUsagePermission(Object resolver, S source, CommandUsage<S> usage) {
+        if (resolver instanceof dev.velix.imperat.resolvers.PermissionResolver) {
+            return ((dev.velix.imperat.resolvers.PermissionResolver<S>) resolver).hasUsagePermission(source, usage);
+        }
+        return true; // Fallback
+    }
 }

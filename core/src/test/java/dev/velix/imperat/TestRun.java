@@ -739,6 +739,7 @@ public class TestRun {
         Assertions.assertNotNull(cmd);
         
         cmd.visualizeTree();
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("party", "invite mqzen"));
         
         ArgumentQueue queue = ArgumentQueue.parse(new String[]{"invite"});
         Context<TestSource> context = IMPERAT.config.getContextFactory().createContext(IMPERAT, new TestSource(System.out), cmd, "test", queue);
@@ -755,6 +756,17 @@ public class TestRun {
         for(var u : usages) {
             System.out.println("  - /" + CommandUsage.format(cmd, u) );
         }
+    }
+    
+    @Test
+    public void testSetRank() {
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new SetRankCmd());
+        });
+        
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
+        });
     }
     
     @Test

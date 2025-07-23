@@ -280,8 +280,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             executeUsage(command, source, context, defaultUsage);
             return CommandDispatch.Result.INCOMPLETE;
         }*/
-
+        
+        long t = System.currentTimeMillis();
         CommandDispatch<S> searchResult = command.contextMatch(context);
+        System.out.println("Took " + (System.currentTimeMillis()-t) + "ms for node search.");
+        
         searchResult.visualize();
 
         CommandUsage<S> usage = searchResult.toUsage();
