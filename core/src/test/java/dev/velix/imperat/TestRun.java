@@ -757,7 +757,16 @@ public class TestRun {
             System.out.println("  - /" + CommandUsage.format(cmd, u) );
         }
     }
-    
+    @Test
+    public void testSetRank() {
+        Assertions.assertDoesNotThrow(()-> {
+            IMPERAT.registerCommand(new SetRankCmd());
+        });
+        
+        Assertions.assertDoesNotThrow(()-> {
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
+        });
+    }
     @Test
     public void testSetRank() {
         Assertions.assertDoesNotThrow(()-> {
