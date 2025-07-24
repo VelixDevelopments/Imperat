@@ -26,7 +26,6 @@ public final class DurationParameterType extends BaseParameterType<TestSource, D
             @NotNull CommandInputStream<TestSource> inputStream,
             @NotNull String input
     ) throws ImperatException {
-        System.out.println("Duration input= " + input);
         return DurationParser.parseDuration(input);
     }
 

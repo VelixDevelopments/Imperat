@@ -42,6 +42,8 @@ import dev.velix.imperat.components.TestImperatConfig;
 import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.paramtypes.TestCompletableFutureParam;
 import dev.velix.imperat.paramtypes.TestJavaOptionalParam;
+import dev.velix.imperat.paramtypes.TestPlayer;
+import dev.velix.imperat.paramtypes.TestPlayerParamType;
 import dev.velix.imperat.special.PartyCommand;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeWrap;
@@ -84,6 +86,7 @@ public class TestRun {
                 .contextResolver(PlayerData.class, new PlayerDataContextResolver())
                 .parameterType(CustomEnum.class, new CustomEnumParameterType())
                 .parameterType(Duration.class, new DurationParameterType())
+                .parameterType(TestPlayer.class, new TestPlayerParamType())
                 .parameterType(dev.velix.imperat.commands.Duration.class, new ParameterDuration<>())
                 .build();
 
@@ -103,6 +106,8 @@ public class TestRun {
         IMPERAT.registerCommand(new KitCommand());
         IMPERAT.registerCommand(new TestCommand());
         IMPERAT.registerCommand(new Test2Command());
+        IMPERAT.registerCommand(new GiveCmd());
+        
     }
 
     private static CommandDispatch.Result testCmdTreeExecution(String cmdName, String input) {
@@ -765,6 +770,23 @@ public class TestRun {
         
         Assertions.assertDoesNotThrow(()-> {
             Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
+        });
+    }
+    
+    @Test
+    public void testTwoOptionals() {
+        Assertions.assertDoesNotThrow(()-> {
+            System.out.println("Running '/give apple mqzen 2'");
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple mqzen 2"));
+            
+            System.out.println("Running '/give apple 2'");
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple 2"));
+            
+            System.out.println("Running '/give apple mqzen'");
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple mqzen"));
+            
+            System.out.println("Running '/give apple'");
+            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple"));
         });
     }
     

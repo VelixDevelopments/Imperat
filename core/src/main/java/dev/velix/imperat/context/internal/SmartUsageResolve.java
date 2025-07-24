@@ -184,7 +184,7 @@ final class SmartUsageResolve<S extends Source> {
                 context.resolveFlag(extractedInputFlag);
                 stream.skip();
             } else if (currentParameter.isOptional()) {
-                ImperatDebugger.debug("Resolving optional %s, with current raw '%s'", currentParameter.name(), currentRaw);
+                ImperatDebugger.debug("Resolving optional %s, with current raw '%s'", currentParameter.format(), currentRaw);
                 resolveOptional(
                     currentRaw,
                     currentParameter,
@@ -193,7 +193,7 @@ final class SmartUsageResolve<S extends Source> {
                 );
             } else {
                 //required
-                ImperatDebugger.debug("Resolving required %s, with current raw '%s'", currentParameter.name(), currentRaw);
+                ImperatDebugger.debug("Resolving required %s, with current raw '%s'", currentParameter.format(), currentRaw);
                 resolveRequired(currentRaw, currentParameter, value);
             }
 
@@ -284,13 +284,12 @@ final class SmartUsageResolve<S extends Source> {
 
         if (lengthWithoutFlags > stream.rawsLength() ) {
             int diff = lengthWithoutFlags - stream.rawsLength();
-
             boolean isLastParameter = stream.cursor().isLast(ShiftTarget.PARAMETER_ONLY);
             if (!isLastParameter) {
                 //[o1]
 
                 if (diff > 1) {
-
+                    
                     CommandParameter<S> nextParam = stream.peekParameter().filter(CommandParameter::isRequired).orElse(null);
                     if (nextParam != null) {
                         //required NEXT parameter
@@ -322,14 +321,47 @@ final class SmartUsageResolve<S extends Source> {
 
                 } else {
                     //diff == 1
-                    context.resolveArgument(
-                        command,
-                        currentRaw,
-                        currentParameterPosition,
-                        currentParameter,
-                        resolveResult
-                    );
-                    stream.skip();
+                    //not last param, check for next optional
+                    CommandParameter<S> nextOptionalArg = stream.peekParameter().filter(CommandParameter::isOptional).orElse(null);
+                    if(nextOptionalArg != null) {
+                        //check for type
+                        var n = currentParameter;
+                        while (n != null) {
+                            
+                            if(n.type().matchesInput(currentRaw, n)) {
+                                ImperatDebugger.debug("n='%s', matching type for input '%s', resolve result= '%s'", n.format(), currentRaw, resolveResult);
+                                context.resolveArgument(
+                                        command,
+                                        currentRaw,
+                                        n.position(),
+                                        n,
+                                        resolveResult
+                                );
+                                stream.skip();
+                                break;
+                            }
+                            
+                            //resolve default
+                            Object def = getDefaultValue(context, stream, n);
+                            context.resolveArgument(command, n.getDefaultValueSupplier().isEmpty() ? null : n.getDefaultValueSupplier().supply(context.source(), n), n.position(), n, def);
+                            
+                            n = stream.popParameter().filter(CommandParameter::isOptional).orElse(null);
+                        }
+                        
+                        if(n == null || n.isRequired()) {
+                            stream.skipRaw();
+                        }
+                    }else {
+                        context.resolveArgument(
+                                command,
+                                currentRaw,
+                                currentParameterPosition,
+                                currentParameter,
+                                resolveResult
+                        );
+                        stream.skip();
+                    }
+                    
                 }
 
             } else {
@@ -347,7 +379,6 @@ final class SmartUsageResolve<S extends Source> {
             }
             return;
         }
-
         //raw.size >= parameterSize
         context.resolveArgument(
             command, currentRaw,

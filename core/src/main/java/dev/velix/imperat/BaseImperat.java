@@ -283,7 +283,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         
         long t = System.currentTimeMillis();
         CommandDispatch<S> searchResult = command.contextMatch(context);
-        System.out.println("Took " + (System.currentTimeMillis()-t) + "ms for node search.");
+        
+        ImperatDebugger.debug("Took %sms for node search.", (System.currentTimeMillis()-t));
         
         searchResult.visualize();
 

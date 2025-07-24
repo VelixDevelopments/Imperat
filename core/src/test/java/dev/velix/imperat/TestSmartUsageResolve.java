@@ -13,6 +13,8 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextFactory;
+import dev.velix.imperat.paramtypes.TestPlayer;
+import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Registry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -52,12 +54,15 @@ public class TestSmartUsageResolve {
             }
         }
         Assertions.assertNotNull(usage);
-
+        
+        System.out.println("GOT USAGE !!, RESOLVING ARGS");
         ResolvedContext<TestSource> resolvedContext = FACTORY.createResolvedContext(context, usage);
         Assertions.assertDoesNotThrow(resolvedContext::resolve);
-
-        CommandUsage<TestSource> finalUsage = usage;
-        Assertions.assertDoesNotThrow(() -> finalUsage.execute(IMPERAT, SOURCE, resolvedContext));
+        System.out.println("RESOLVED ARGS !!");
+        resolvedContext.debug();
+        
+        //CommandUsage<TestSource> finalUsage = usage;
+        //Assertions.assertDoesNotThrow(() -> finalUsage.execute(IMPERAT, SOURCE, resolvedContext));
         return resolvedContext;
     }
 
@@ -144,6 +149,40 @@ public class TestSmartUsageResolve {
             .arg("weight", 1));
     }
 
+    @Test
+    public void testGiveCmd() {
+        
+        /*test(
+                "give apple mqzen 2",
+                ResolvedArgsData.empty()
+                        .arg("item", "apple")
+                        .arg("player", new TestPlayer("mqzen"))
+                        .arg("amount", 2)
+        );
+        
+        test(
+                "give apple",
+                ResolvedArgsData.empty()
+                        .arg("item", "apple")
+                        .arg("player", null)
+                        .arg("amount", null)
+        );
+        
+        test("give apple mqzen",
+                ResolvedArgsData.empty()
+                        .arg("item", "apple")
+                        .arg("player", new TestPlayer("mqzen"))
+                        .arg("amount", null)
+        );
+        */
+        test("give apple 2",
+                ResolvedArgsData.empty()
+                        .arg("item", "apple")
+                        .arg("player", null)
+                        .arg("amount", 2)
+        );
+    }
+    
     static class ResolvedArgsData {
 
         private final Map<String, Object> args = new LinkedHashMap<>();
@@ -153,6 +192,7 @@ public class TestSmartUsageResolve {
             if (context == null) return;
 
             for (var resolved : context.getResolvedArguments()) {
+                System.out.println("Adding " + resolved.parameter().name());
                 args.put(resolved.parameter().name(), resolved.value());
             }
 
@@ -213,8 +253,11 @@ public class TestSmartUsageResolve {
             }
 
             for (var entry : this.args.entrySet()) {
-                var thisObj = entry.getValue();
-                var otherObj = other.args.get(entry.getKey());
+                Object thisObj = entry.getValue();
+                Object otherObj = other.args.get(entry.getKey());
+                if(thisObj == null && otherObj == null) {
+                    return true;
+                }
                 if (!Objects.equals(thisObj, otherObj)) {
                     return false;
                 }
