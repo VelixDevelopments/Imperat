@@ -13,8 +13,6 @@ import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextFactory;
-import dev.velix.imperat.paramtypes.TestPlayer;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Registry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
