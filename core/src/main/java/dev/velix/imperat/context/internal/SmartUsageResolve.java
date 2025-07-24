@@ -335,7 +335,7 @@ final class SmartUsageResolve<S extends Source> {
                                         currentRaw,
                                         n.position(),
                                         n,
-                                        resolveResult
+                                        n.type().resolve(context, stream, currentRaw)
                                 );
                                 stream.skip();
                                 break;

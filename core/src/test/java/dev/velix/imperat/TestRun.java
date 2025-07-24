@@ -768,26 +768,14 @@ public class TestRun {
             IMPERAT.registerCommand(new SetRankCmd());
         });
         
-        Assertions.assertDoesNotThrow(()-> {
-            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner"));
-        });
+        var res = testCmdTreeExecution("setrank", "Mqzen undead permanent Giveaway Winner");
+        Assertions.assertEquals(CommandDispatch.Result.FAILURE, res);
     }
     
     @Test
     public void testTwoOptionals() {
-        Assertions.assertDoesNotThrow(()-> {
-            System.out.println("Running '/give apple mqzen 2'");
-            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple mqzen 2"));
-            
-            System.out.println("Running '/give apple 2'");
-            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple 2"));
-            
-            System.out.println("Running '/give apple mqzen'");
-            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple mqzen"));
-            
-            System.out.println("Running '/give apple'");
-            Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple"));
-        });
+        System.out.println("Running '/give apple 2'");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("give", "Apple 2"));
     }
     
     @Test

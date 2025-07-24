@@ -22,7 +22,7 @@ final class MethodHandlesCallerFactory implements MethodCallerFactory {
 
     @Override
     public @NotNull MethodCaller createFor(@NotNull Method method) throws Throwable {
-        if (!method.isAccessible()) method.setAccessible(true);
+        method.setAccessible(true);
         MethodHandle handle = MethodHandles.lookup().unreflect(method);
         String methodString = method.toString();
         boolean isStatic = Modifier.isStatic(method.getModifiers());

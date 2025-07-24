@@ -46,7 +46,7 @@ public final class AnnotationHelper {
         ExecutionContext<S> context,
         MethodElement method
     ) throws ImperatException {
-
+        
         Object[] paramsInstances = new Object[method.getParameters().size()];
 
         ParameterElement firstParam = method.getParameterAt(0);
@@ -118,7 +118,13 @@ public final class AnnotationHelper {
                     paramsInstances[i] = flagValue;
                 }
             } else {
-                paramsInstances[i] = context.getArgument(name);
+                var ctxArg = context.getArgument(name);
+                ImperatDebugger.debugForTesting("Setting arg '%s' of type '%s' to value '%s' of type '%s' from context",
+                        parameter.format(), parameter.type().type().getTypeName(),
+                        (ctxArg == null ? "null" : ctxArg.toString()),
+                        (ctxArg == null ? parameter.type().type().getTypeName() : ctxArg.getClass().getTypeName()));
+                
+                paramsInstances[i] = ctxArg;
             }
 
         }

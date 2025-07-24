@@ -57,7 +57,6 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      * NOTE: the flags are NOT included as a resolved argument, it's treated differently
      */
     Collection<? extends Argument<S>> getResolvedArguments();
-
-
+    
     void debug();
 }
