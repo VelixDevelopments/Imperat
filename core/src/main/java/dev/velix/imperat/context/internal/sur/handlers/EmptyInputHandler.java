@@ -67,7 +67,7 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
             context.resolveFlag(flag, null, null, value);
         } else {
             ImperatDebugger.debug("[EmptyInputHandler] Resolving empty optional param '%s'", optionalEmptyParameter.format());
-            context.resolveArgument(context.getLastUsedCommand(), null, stream.cursor().getParameter(),
+            context.resolveArgument(context.getLastUsedCommand(), null, stream.position().getParameter(),
                 optionalEmptyParameter, getDefaultValue(context, stream, optionalEmptyParameter));
         }
     }

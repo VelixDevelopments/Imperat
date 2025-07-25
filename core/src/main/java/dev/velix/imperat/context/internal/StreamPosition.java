@@ -4,20 +4,19 @@ import dev.velix.imperat.context.Source;
 
 import java.util.function.IntUnaryOperator;
 
-public final class Cursor<S extends Source> {
-
+public final class StreamPosition<S extends Source> {
     
     int maxParamLength, maxRawLength;
     int parameter, raw;
 
-    Cursor(int maxParamLength, int maxRawLength, int parameter, int raw) {
+    StreamPosition(int maxParamLength, int maxRawLength, int parameter, int raw) {
         this.maxParamLength = maxParamLength;
         this.maxRawLength = maxRawLength;
         this.parameter = parameter;
         this.raw = raw;
     }
 
-    Cursor(int maxParamLength, int maxRawLength) {
+    StreamPosition(int maxParamLength, int maxRawLength) {
         this(maxParamLength, maxRawLength, 0, 0);
     }
     
@@ -42,6 +41,14 @@ public final class Cursor<S extends Source> {
 
     void shift(ShiftTarget target, ShiftOperation operation) {
         shift(target, operation.operator);
+    }
+    
+    void shiftRight(ShiftTarget target) {
+        shift(target, ShiftOperation.RIGHT);
+    }
+    
+    void shiftLeft(ShiftTarget target) {
+        shift(target, ShiftOperation.LEFT);
     }
 
     boolean canContinue(
@@ -74,7 +81,7 @@ public final class Cursor<S extends Source> {
     @Override
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof Cursor<?> other)) return false;
+        if (!(o instanceof StreamPosition<?> other)) return false;
         if (this.parameter != other.parameter) return false;
         return this.raw == other.raw;
     }
@@ -88,7 +95,7 @@ public final class Cursor<S extends Source> {
         return result;
     }
 
-    public Cursor<S> copy() {
-        return new Cursor<>(maxParamLength, maxRawLength, parameter, raw);
+    public StreamPosition<S> copy() {
+        return new StreamPosition<>(maxParamLength, maxRawLength, parameter, raw);
     }
 }

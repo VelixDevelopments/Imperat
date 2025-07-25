@@ -15,8 +15,8 @@ public enum ShiftTarget {
         this.canContinueCheck = canContinueCheck;
     }
 
-    boolean canContinue(Cursor<?> cursor) {
-        return canContinueCheck.canContinue(cursor);
+    boolean canContinue(StreamPosition<?> streamPosition) {
+        return canContinueCheck.canContinue(streamPosition);
     }
 
 }

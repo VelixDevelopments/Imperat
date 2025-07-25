@@ -48,7 +48,7 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
 
         if (lengthWithoutFlags > stream.rawsLength()) {
             int diff = lengthWithoutFlags - stream.rawsLength();
-            boolean isLastParameter = stream.cursor().isLast(ShiftTarget.PARAMETER_ONLY);
+            boolean isLastParameter = stream.position().isLast(ShiftTarget.PARAMETER_ONLY);
             if (!isLastParameter) {
                 if (diff > 1) {
                     CommandParameter<S> nextParam = stream.peekParameter().filter(CommandParameter::isRequired).orElse(null);

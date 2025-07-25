@@ -22,7 +22,7 @@ public interface CommandInputStream<S extends Source> {
      *
      * @return The current cursor.
      */
-    @NotNull Cursor<S> cursor();
+    @NotNull StreamPosition<S> position();
 
     /**
      * Retrieves the current command parameter at the cursor position.
@@ -170,10 +170,10 @@ public interface CommandInputStream<S extends Source> {
      * @return True if the skip was successful, false otherwise.
      */
     default boolean skipRaw() {
-        final Cursor<S> cursor = cursor();
-        int prevRaw = cursor.raw;
-        cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
-        return cursor.raw > prevRaw;
+        final StreamPosition<S> streamPosition = position();
+        int prevRaw = streamPosition.raw;
+        streamPosition.shiftRight(ShiftTarget.RAW_ONLY);
+        return streamPosition.raw > prevRaw;
     }
 
     /**
@@ -182,10 +182,10 @@ public interface CommandInputStream<S extends Source> {
      * @return True if the skip was successful, false otherwise.
      */
     default boolean skipParameter() {
-        final Cursor<S> cursor = cursor();
-        int prevParam = cursor.parameter;
-        cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
-        return cursor.parameter > prevParam;
+        final StreamPosition<S> streamPosition = position();
+        int prevParam = streamPosition.parameter;
+        streamPosition.shiftRight(ShiftTarget.PARAMETER_ONLY);
+        return streamPosition.parameter > prevParam;
     }
 
     /**
@@ -194,7 +194,7 @@ public interface CommandInputStream<S extends Source> {
      * @return The current raw input position.
      */
     default int currentRawPosition() {
-        return cursor().raw;
+        return position().raw;
     }
 
     /**
@@ -203,7 +203,7 @@ public interface CommandInputStream<S extends Source> {
      * @return The current parameter position.
      */
     default int currentParameterPosition() {
-        return cursor().parameter;
+        return position().parameter;
     }
 
     /**

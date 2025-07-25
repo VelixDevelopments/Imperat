@@ -12,7 +12,7 @@ import java.util.Optional;
 final class CommandInputStreamImpl<S extends Source> implements CommandInputStream<S> {
 
     private final String inputLine;
-    private final Cursor<S> cursor;
+    private final StreamPosition<S> streamPosition;
     private final ArgumentQueue queue;
     private final List<CommandParameter<S>> parametersList;
 
@@ -24,14 +24,14 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters) {
-        this(queue, parameters, new Cursor<>(parameters.size(), queue.size()), calculateRawStartPositions(queue, queue.getOriginalRaw()));
+        this(queue, parameters, new StreamPosition<>(parameters.size(), queue.size()), calculateRawStartPositions(queue, queue.getOriginalRaw()));
     }
 
-    CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters, Cursor<S> cursor, int[] rawStartPositions) {
+    CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters, StreamPosition<S> streamPosition, int[] rawStartPositions) {
         this.queue = queue;
         this.inputLine = queue.getOriginalRaw();
         this.parametersList = parameters;
-        this.cursor = cursor;
+        this.streamPosition = streamPosition;
         this.rawStartPositions = rawStartPositions;
     }
 
@@ -82,59 +82,59 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
 
     /**
-     * Get the current letter position based on the current raw cursor position
+     * Get the current letter position based on the current raw streamPosition position
      */
     private int getCurrentLetterPos() {
-        if (cursor.raw >= rawStartPositions.length) {
+        if (streamPosition.raw >= rawStartPositions.length) {
             return inputLine.length();
         }
-        return rawStartPositions[cursor.raw];
+        return rawStartPositions[streamPosition.raw];
     }
 
     @Override
-    public @NotNull Cursor<S> cursor() {
-        return cursor;
+    public @NotNull StreamPosition<S> position() {
+        return streamPosition;
     }
 
     @Override
     public @NotNull Optional<CommandParameter<S>> currentParameter() {
-        if(cursor.parameter >= parametersList.size()) {
+        if(streamPosition.parameter >= parametersList.size()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(parametersList.get(cursor.parameter));
+        return Optional.ofNullable(parametersList.get(streamPosition.parameter));
     }
 
     @Override
     public Optional<CommandParameter<S>> peekParameter() {
-        if(cursor.parameter+1 >= parametersList.size())
+        if(streamPosition.parameter+1 >= parametersList.size())
             return Optional.empty();
 
         return Optional.ofNullable(
-                parametersList.get(cursor.parameter + 1)
+                parametersList.get(streamPosition.parameter + 1)
         );
     }
 
     @Override
     public Optional<CommandParameter<S>> popParameter() {
-        cursor.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
+        streamPosition.shift(ShiftTarget.PARAMETER_ONLY, ShiftOperation.RIGHT);
         return currentParameter();
     }
 
     @Override
     public Optional<CommandParameter<S>> prevParameter() {
-        if(cursor.parameter <= 0)
+        if(streamPosition.parameter <= 0)
             return Optional.empty();
 
         return Optional.ofNullable(
-                parametersList.get(cursor.parameter - 1)
+                parametersList.get(streamPosition.parameter - 1)
         );
     }
 
     @Override
     public @NotNull Optional<String> currentRaw() {
-        if (cursor.raw >= queue.size())
+        if (streamPosition.raw >= queue.size())
             return Optional.empty();
-        return Optional.of(queue.get(cursor.raw));
+        return Optional.of(queue.get(streamPosition.raw));
     }
 
     @Override
@@ -162,8 +162,8 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
         }
 
         // Advance the position for the current raw argument
-        if (cursor.raw < rawStartPositions.length) {
-            rawStartPositions[cursor.raw]++;
+        if (streamPosition.raw < rawStartPositions.length) {
+            rawStartPositions[streamPosition.raw]++;
         }
 
         return Optional.of(inputLine.charAt(letterPos));
@@ -171,19 +171,19 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
 
     @Override
     public Optional<String> peekRaw() {
-        int next = cursor.raw + 1;
+        int next = streamPosition.raw + 1;
         return Optional.ofNullable(queue.getOr(next, null));
     }
 
     @Override
     public Optional<String> popRaw() {
-        cursor.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
+        streamPosition.shift(ShiftTarget.RAW_ONLY, ShiftOperation.RIGHT);
         return currentRaw();
     }
 
     @Override
     public Optional<String> prevRaw() {
-        int prev = cursor.raw - 1;
+        int prev = streamPosition.raw - 1;
         return Optional.ofNullable(queue.getOr(prev, null));
     }
 
@@ -194,22 +194,22 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
 
     @Override
     public boolean hasNextRaw() {
-        return cursor.raw < queue.size();
+        return streamPosition.canContinue(ShiftTarget.RAW_ONLY);
     }
 
     @Override
     public boolean hasPreviousRaw() {
-        return cursor.raw > 0;
+        return streamPosition.raw > 0;
     }
 
     @Override
     public boolean hasNextParameter() {
-        return cursor.parameter < parametersList.size();
+        return streamPosition.canContinue(ShiftTarget.PARAMETER_ONLY);
     }
 
     @Override
     public boolean hasPreviousParameter() {
-        return cursor.parameter > 0;
+        return streamPosition.parameter > 0;
     }
 
     @Override
@@ -224,14 +224,14 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
 
     @Override
     public boolean skip() {
-        final Cursor<S> cursor = cursor();
-        int prevRaw = cursor.raw;
-        cursor.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
+        final StreamPosition<S> streamPosition = position();
+        int prevRaw = streamPosition.raw;
+        streamPosition.shift(ShiftTarget.ALL, ShiftOperation.RIGHT);
 
-        // The letter position is now automatically synchronized with the raw cursor
+        // The letter position is now automatically synchronized with the raw streamPosition
         // through getCurrentLetterPos()
 
-        return cursor.raw > prevRaw;
+        return streamPosition.raw > prevRaw;
     }
 
     @Override
@@ -244,6 +244,6 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
      */
     @Override
     public CommandInputStream<S> copy() {
-        return new CommandInputStreamImpl<>(this.queue.copy(), List.copyOf(parametersList), cursor.copy(), rawStartPositions);
+        return new CommandInputStreamImpl<>(this.queue.copy(), List.copyOf(parametersList), streamPosition.copy(), rawStartPositions);
     }
 }
