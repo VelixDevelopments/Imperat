@@ -21,7 +21,7 @@ public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements 
         String currentRaw = stream.currentRaw().orElse(null);
         
         if (currentParameter == null || currentRaw == null || !currentParameter.isFlag() || Patterns.isInputFlag(currentRaw)) {
-            return HandleResult.CONTINUE;
+            return HandleResult.NEXT_HANDLER;
         }
         
         try {
@@ -35,7 +35,7 @@ public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements 
             }
             
             stream.skipParameter();
-            return HandleResult.GO_BACK;
+            return HandleResult.NEXT_ITERATION;
         } catch (Exception e) {
             return HandleResult.failure(new ImperatException("Error handling non-flag input when expecting flag", e));
         }

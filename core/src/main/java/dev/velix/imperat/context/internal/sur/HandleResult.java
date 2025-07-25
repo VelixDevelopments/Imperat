@@ -12,10 +12,10 @@ public enum HandleResult {
     TERMINATE,
     
     /** Continues to the next iteration of the main loop */
-    GO_BACK,
+    NEXT_ITERATION,
     
     /** Proceeds to the next handler in the chain */
-    CONTINUE,
+    NEXT_HANDLER,
     
     /** Indicates an error occurred during handling */
     FAILURE;

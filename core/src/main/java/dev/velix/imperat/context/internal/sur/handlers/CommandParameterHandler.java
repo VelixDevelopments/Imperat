@@ -17,7 +17,7 @@ public final class CommandParameterHandler<S extends Source> implements Paramete
         String currentRaw = stream.currentRaw().orElse(null);
         
         if (currentParameter == null || currentRaw == null || !currentParameter.isCommand()) {
-            return HandleResult.CONTINUE;
+            return HandleResult.NEXT_HANDLER;
         }
         
         try {
@@ -25,7 +25,7 @@ public final class CommandParameterHandler<S extends Source> implements Paramete
             if (parameterSubCmd.hasName(currentRaw)) {
                 context.setLastCommand(parameterSubCmd);
                 stream.skip();
-                return HandleResult.GO_BACK;
+                return HandleResult.NEXT_ITERATION;
             } else {
                 return HandleResult.failure(new UnknownSubCommandException(currentRaw));
             }

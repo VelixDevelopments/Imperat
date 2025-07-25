@@ -19,7 +19,7 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
         String currentRaw = stream.currentRaw().orElse(null);
         
         if (currentParameter == null || currentRaw == null || !currentParameter.isOptional()) {
-            return HandleResult.CONTINUE;
+            return HandleResult.NEXT_HANDLER;
         }
         
         try {
@@ -35,7 +35,7 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
                 resolveOptional(currentRaw, currentParameter, context, stream, value);
             }
             
-            return HandleResult.GO_BACK;
+            return HandleResult.NEXT_ITERATION;
         } catch (ImperatException e) {
             return HandleResult.failure(e);
         }

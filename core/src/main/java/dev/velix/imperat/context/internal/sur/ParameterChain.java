@@ -23,7 +23,7 @@ public class ParameterChain<S extends Source> {
                 switch (result) {
                     case TERMINATE:
                         break pipeLine;
-                    case GO_BACK:
+                    case NEXT_ITERATION:
                         continue pipeLine;
                     case FAILURE:
                         assert result.getException() != null;

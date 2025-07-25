@@ -25,7 +25,7 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
         
         String currentRaw = stream.currentRaw().orElse(null);
         if (currentRaw != null) {
-            return HandleResult.CONTINUE; // Not empty input, let other handlers process
+            return HandleResult.NEXT_HANDLER; // Not empty input, let other handlers process
         }
         
         try {
@@ -40,7 +40,7 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
                 throw new InvalidSyntaxException();
             }
             // Handle remaining optional parameters
-            return HandleResult.GO_BACK;
+            return HandleResult.NEXT_ITERATION;
         } catch (ImperatException e) {
             return HandleResult.failure(e);
         }

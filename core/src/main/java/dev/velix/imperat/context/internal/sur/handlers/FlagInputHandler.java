@@ -26,7 +26,7 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
         String currentRaw = stream.currentRaw().orElse(null);
         
         if (currentParameter == null || currentRaw == null || !Patterns.isInputFlag(currentRaw)) {
-            return HandleResult.CONTINUE;
+            return HandleResult.NEXT_HANDLER;
         }
         
         try {
@@ -34,7 +34,7 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
             if (context.hasResolvedFlag(currentParameter)) {
                 ImperatDebugger.debug("[FlagInputHandler] Flag-Parameter has been already resolved before!");
                 currentParameter = stream.popParameter().orElse(null);
-                if (currentParameter == null) return HandleResult.GO_BACK;
+                if (currentParameter == null) return HandleResult.NEXT_ITERATION;
             }
             
             CommandUsage<S> usage = context.getDetectedUsage();
@@ -71,7 +71,7 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
             }
             
             stream.skip();
-            return HandleResult.GO_BACK;
+            return HandleResult.NEXT_ITERATION;
         } catch (ImperatException e) {
             return HandleResult.failure(e);
         }
