@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal;
 
-enum ShiftTarget {
+public enum ShiftTarget {
 
     RAW_ONLY((pos) -> pos.raw < pos.maxRaws()),
 

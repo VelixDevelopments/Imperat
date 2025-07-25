@@ -58,5 +58,7 @@ public interface ResolvedContext<S extends Source> extends ExecutionContext<S> {
      */
     Collection<? extends Argument<S>> getResolvedArguments();
     
+    void setLastCommand(Command<S> lastCommand);
+    
     void debug();
 }

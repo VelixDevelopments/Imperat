@@ -9,6 +9,7 @@ import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.internal.sur.ParameterValueAssigner;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NumberOutOfRangeException;
 import dev.velix.imperat.resolvers.ContextResolver;
@@ -178,9 +179,8 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
      */
     @Override
     public void resolve() throws ImperatException {
-        SmartUsageResolve<S> sur = SmartUsageResolve.create(command(), this, usage);
-        sur.resolve();
-        this.lastCommand = sur.getCommand();
+        var resolver = ParameterValueAssigner.create(command(), this, usage);
+        resolver.resolve();
     }
 
 
@@ -226,7 +226,11 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     public @NotNull Command<S> getLastUsedCommand() {
         return lastCommand;
     }
-
+    
+    public void setLastCommand(Command<S> lastCommand) {
+        this.lastCommand = lastCommand;
+    }
+    
     /**
      * @return The used usage to use it to resolve commands
      */

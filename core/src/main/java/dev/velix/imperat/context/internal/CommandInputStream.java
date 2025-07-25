@@ -1,5 +1,6 @@
 package dev.velix.imperat.context.internal;
 
+import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Source;
@@ -278,7 +279,19 @@ public interface CommandInputStream<S extends Source> {
     default String readInput() {
         return currentRaw().orElseThrow();
     }
-
+    
+    /**
+     * Creates a new {@link CommandInputStream} with queue of all raw arguments
+     * and from the usage detected from the raw input by {@link dev.velix.imperat.command.tree.CommandTree}.
+     * @param queue the queue of all raw arguments.
+     * @param usage the usage detected.
+     * @return the stream containing pointers for raw input and parameter input.
+     * @param <S> the type of source/command-sender.
+     */
+    static <S extends Source> CommandInputStream<S> of(ArgumentQueue queue, CommandUsage<S> usage) {
+        return new CommandInputStreamImpl<>(queue, usage);
+    }
+    
     /**
      * Creates a new {@link CommandInputStream} with a single string as input.
      *

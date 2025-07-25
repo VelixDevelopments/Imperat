@@ -6,6 +6,7 @@ import java.util.function.IntUnaryOperator;
 
 public final class Cursor<S extends Source> {
 
+    
     int maxParamLength, maxRawLength;
     int parameter, raw;
 
@@ -19,8 +20,15 @@ public final class Cursor<S extends Source> {
     Cursor(int maxParamLength, int maxRawLength) {
         this(maxParamLength, maxRawLength, 0, 0);
     }
-
-
+    
+    public int getRaw() {
+        return raw;
+    }
+    
+    public int getParameter() {
+        return parameter;
+    }
+    
     void shift(ShiftTarget shift, IntUnaryOperator operator) {
         switch (shift) {
             case RAW_ONLY -> this.raw = operator.applyAsInt(raw);
@@ -51,7 +59,7 @@ public final class Cursor<S extends Source> {
             return parameter == maxParams - 1 && raw == maxRaws - 1;
     }
 
-    boolean isLast(ShiftTarget shiftTarget) {
+    public boolean isLast(ShiftTarget shiftTarget) {
         return isLast(shiftTarget, maxParamLength, maxRawLength);
     }
 
