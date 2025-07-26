@@ -121,8 +121,8 @@ public final class BukkitUtil {
     }
 
     @ApiStatus.Experimental
-    public static Command<BukkitSource> convertBukkitCmdToImperatCmd(org.bukkit.command.Command bukkitCmd) {
-        return Command.<BukkitSource>create(bukkitCmd.getName())
+    public static Command<BukkitSource> convertBukkitCmdToImperatCmd(Imperat<BukkitSource> imperat, org.bukkit.command.Command bukkitCmd) {
+        return Command.create(imperat, bukkitCmd.getName())
                 .aliases(bukkitCmd.getAliases())
                 .description(bukkitCmd.getDescription())
                 .permission(bukkitCmd.getPermission())
