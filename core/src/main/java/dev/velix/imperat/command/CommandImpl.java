@@ -23,7 +23,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -67,22 +66,24 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private final @NotNull SuggestionResolver<S> suggestionResolver;
     private final @NotNull Set<FlagData<S>> freeFlags = new HashSet<>();
 
-    CommandImpl(String name) {
-        this(null, name);
+    private final Imperat<S> imperat;
+    
+    CommandImpl(Imperat<S> imperat, String name) {
+        this(imperat, null, name);
     }
 
     //sub-command constructor
-    CommandImpl(@Nullable Command<S> parent, String name) {
-        this(parent, 0, name);
+    CommandImpl(Imperat<S> imperat, @Nullable Command<S> parent, String name) {
+        this(imperat, parent, 0, name);
     }
 
-    CommandImpl(@Nullable Command<S> parent, int position, String name) {
+    CommandImpl(Imperat<S> imperat, @Nullable Command<S> parent, int position, String name) {
+        this.imperat = imperat;
         this.parent = parent;
         this.position = position;
         this.name = name.toLowerCase();
         this.emptyUsage = CommandUsage.<S>builder().build(this);
-        this.defaultUsage = CommandUsage.<S>builder().build(this);
-        
+        this.defaultUsage = imperat.config().getGlobalDefaultUsage().build(this);
         this.autoCompleter = AutoCompleter.createNative(this);
         this.commandTree = parent != null ? null : CommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
@@ -485,7 +486,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
         //creating subcommand to modify
         Command<S> subCmd =
-            Command.create(this, position, subCommand.toLowerCase())
+            Command.create(imperat, this, position, subCommand.toLowerCase())
                 .aliases(aliases)
                 .usage(usage)
                 .build();

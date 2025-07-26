@@ -35,20 +35,25 @@ import java.util.function.Predicate;
 @ApiStatus.AvailableSince("1.0.0")
 public interface Command<S extends Source> extends CommandParameter<S>, FlagRegistrar<S> {
 
-    static <S extends Source> Command.Builder<S> create(String name) {
-        return create(null, name);
-    }
-
-    static <S extends Source> Command.Builder<S> create(@Nullable Command<S> parent, @NotNull String name) {
-        return create(parent, 0, name);
+    static <S extends Source> Command.Builder<S> create(@NotNull Imperat<S> imperat, String name) {
+        return create(imperat, null, name);
     }
 
     static <S extends Source> Command.Builder<S> create(
+        @NotNull Imperat<S> imperat,
+        @Nullable Command<S> parent,
+        @NotNull String name
+    ) {
+        return create(imperat, parent, 0, name);
+    }
+
+    static <S extends Source> Command.Builder<S> create(
+        @NotNull Imperat<S> imperat,
         @Nullable Command<S> parent,
         int position,
         @NotNull String name
     ) {
-        return new Builder<>(parent, position, name);
+        return new Builder<>(imperat, parent, position, name);
     }
 
     /**
@@ -450,10 +455,13 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
 
     class Builder<S extends Source> {
 
+        private final Imperat<S> imperat;
         private final Command<S> cmd;
-
-        Builder(@Nullable Command<S> parent, int position, String name) {
-            this.cmd = new CommandImpl<>(parent, position, name);
+        
+        
+        Builder(@NotNull Imperat<S> imperat, @Nullable Command<S> parent, int position, String name) {
+            this.imperat = imperat;
+            this.cmd = new CommandImpl<>(imperat, parent, position, name);
         }
 
         public Builder<S> ignoreACPermissions(boolean ignore) {
@@ -512,7 +520,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
 
         public Builder<S> subCommand(String name, CommandUsage.Builder<S> mainUsage, AttachmentMode attachmentMode) {
             return subCommand(
-                Command.<S>create(name)
+                Command.<S>create(imperat, name)
                     .usage(mainUsage)
                     .build(),
                 attachmentMode

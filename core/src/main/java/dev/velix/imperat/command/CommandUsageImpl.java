@@ -2,7 +2,6 @@ package dev.velix.imperat.command;
 
 import static dev.velix.imperat.util.Patterns.DOUBLE_FLAG;
 import static dev.velix.imperat.util.Patterns.SINGLE_FLAG;
-
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.cooldown.CooldownHandler;
 import dev.velix.imperat.command.cooldown.UsageCooldown;
@@ -26,8 +25,10 @@ import java.util.function.Predicate;
 @ApiStatus.Internal
 final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
-    private final List<CommandParameter<S>> parameters = new ArrayList<>();
-    private final List<CommandParameter<S>> parametersWithoutFlags = new ArrayList<>();
+    private final static int EXPECTED_PARAMETERS_CAPACITY = 8, EXPECTED_FREE_FLAGS_CAPACITY = 3;
+    
+    private final List<CommandParameter<S>> parameters = new ArrayList<>(EXPECTED_PARAMETERS_CAPACITY);
+    private final List<CommandParameter<S>> parametersWithoutFlags = new ArrayList<>(EXPECTED_PARAMETERS_CAPACITY);
     private final @NotNull CommandExecution<S> execution;
     private final boolean help;
     private String permission = null;
@@ -36,7 +37,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     private @Nullable UsageCooldown cooldown = null;
     private CommandCoordinator<S> commandCoordinator;
 
-    private final Set<FlagData<S>> freeflags = new HashSet<>();
+    private final Set<FlagData<S>> freeFlags = new HashSet<>(EXPECTED_FREE_FLAGS_CAPACITY);
     private final FlagExtractor<S> flagExtractor;
 
     CommandUsageImpl(@NotNull CommandExecution<S> execution) {
@@ -134,13 +135,13 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
 
     @Override
     public void addFlag(FlagData<S> flagData) {
-        freeflags.add(flagData);
+        freeFlags.add(flagData);
         flagExtractor.insertFlag(flagData);
     }
 
     @Override
     public Set<FlagData<S>> getUsedFreeFlags() {
-        return freeflags;
+        return freeFlags;
     }
 
 
@@ -164,7 +165,7 @@ final class CommandUsageImpl<S extends Source> implements CommandUsage<S> {
     public void addParameters(List<CommandParameter<S>> params) {
         for (var param : params) {
             if (param.isFlag() && param.asFlagParameter().flagData().isFree()) {
-                freeflags.add(param.asFlagParameter().flagData());
+                freeFlags.add(param.asFlagParameter().flagData());
                 continue;
             }
             parameters.add(param);

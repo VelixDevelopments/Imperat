@@ -1,6 +1,7 @@
 package dev.velix.imperat;
 
 import dev.velix.imperat.annotations.base.AnnotationReplacer;
+import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
@@ -38,7 +39,8 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>, B ex
     protected ConfigBuilder() {
         config = new ImperatConfigImpl<>();
     }
-
+    
+    
     /**
      * Sets the command prefix for the command processing chain.
      *
@@ -323,7 +325,34 @@ public abstract class ConfigBuilder<S extends Source, I extends Imperat<S>, B ex
         this.config.setStrictCommandTree(strict);
         return (B) this;
     }
-
+    
+    /**
+     * Sets the global default usage builder that will be used for all commands
+     * that do not have their own specific usage builder configured.
+     *
+     * <p>The usage builder is responsible for constructing the usage/syntax data
+     * structure that defines how a command should be used, including its arguments,
+     * parameters, and expected format. This global default will be applied to all
+     * commands registered through this builder unless they explicitly override it
+     * with their own usage configuration.
+     *
+     * <p>This method follows the builder pattern and returns the current builder
+     * instance to allow for method chaining.
+     *
+     * @param usage the {@link CommandUsage.Builder} to use as the global default
+     *              for building command usage/syntax data. Must not be {@code null}.
+     * @return this builder instance for method chaining
+     * @throws NullPointerException if {@code usage} is {@code null}
+     *
+     * @see CommandUsage.Builder
+     *
+     * @since 1.0.0
+     */
+    public B globalDefaultUsageBuilder(CommandUsage.Builder<S> usage) {
+        config.setGlobalDefaultUsage(usage);
+        return (B) this;
+    }
+    
     /**
      * Builds and returns the final configuration object based on the provided settings and definitions
      * within the builder. This method finalizes the configuration and ensures all dependencies
