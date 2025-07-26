@@ -97,6 +97,8 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
 
     private final Map<Class<?>, AnnotationReplacer<?>> annotationReplacerMap = new HashMap<>();
     
+    private CommandUsage.Builder<S> globalDefaultUsage = CommandUsage.builder();
+    
     ImperatConfigImpl() {
         contextResolverRegistry = ContextResolverRegistry.createDefault(this);
         paramTypeRegistry = ParamTypeRegistry.createDefault();
@@ -781,7 +783,16 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         this.handlers.put(exception, handler);
     }
     
-   
+    @Override
+    public CommandUsage.@NotNull Builder<S> getGlobalDefaultUsage() {
+        return globalDefaultUsage;
+    }
+    
+    @Override
+    public void setGlobalDefaultUsage(CommandUsage.@NotNull Builder<S> globalDefaultUsage) {
+        this.globalDefaultUsage = globalDefaultUsage;
+    }
+    
     
     @Override
     @SuppressWarnings("unchecked")

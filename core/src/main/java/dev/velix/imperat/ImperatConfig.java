@@ -6,8 +6,6 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.ContextResolverFactory;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.ParameterType;
-import dev.velix.imperat.command.processors.CommandProcessingChain;
-import dev.velix.imperat.command.processors.CommandProcessor;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
