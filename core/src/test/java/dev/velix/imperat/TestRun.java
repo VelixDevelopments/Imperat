@@ -334,7 +334,7 @@ public class TestRun {
 
     @Test
     public void testUpperCaseCommandName() {
-        IMPERAT.registerCommand(Command.create("UPPER_CAsE")
+        IMPERAT.registerCommand(Command.create(IMPERAT, "UPPER_CAsE")
             .defaultExecution((src, ctx) -> src.reply("Worked !"))
             .build());
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("upper_case", ""));
@@ -684,7 +684,7 @@ public class TestRun {
     @Test
     public void testPlainCmd() {
         
-        var cmd = Command.create("plain")
+        var cmd = Command.create(IMPERAT, "plain")
                 .defaultExecution(
                         (source, ctx)-> {
                             System.out.println("RUNNING DEFAULT !!");

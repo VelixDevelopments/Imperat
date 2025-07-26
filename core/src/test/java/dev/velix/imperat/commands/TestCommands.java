@@ -11,7 +11,7 @@ import dev.velix.imperat.help.CommandHelp;
 @SuppressWarnings("unused")
 public final class TestCommands {
 
-    public final static Command<TestSource> GROUP_CMD = Command.<TestSource>create("group")
+    public final static Command<TestSource> GROUP_CMD = Command.create(TestRun.IMPERAT, "group")
         .defaultExecution((source, context) -> {
             source.reply("/group <group>");
         })
@@ -23,7 +23,7 @@ public final class TestCommands {
 
         )
         .subCommand(
-            Command.<TestSource>create("setperm")
+            Command.create(TestRun.IMPERAT, "setperm")
                 .usage(CommandUsage.<TestSource>builder()
                     .parameters(
                         CommandParameter.requiredText("permission"),
@@ -40,7 +40,7 @@ public final class TestCommands {
                 )
                 .build()
         )
-        .subCommand(Command.<TestSource>create("setprefix")
+        .subCommand(Command.create(TestRun.IMPERAT, "setprefix")
             .usage(
                 CommandUsage.<TestSource>builder()
                     .parameters(
@@ -55,7 +55,7 @@ public final class TestCommands {
             )
             .build()
         )
-        .subCommand(Command.<TestSource>create("help")
+        .subCommand(Command.create(TestRun.IMPERAT, "help")
             .usage(
                 CommandUsage.<TestSource>builder()
                     .parameters(
@@ -77,9 +77,9 @@ public final class TestCommands {
         .build();
 
     public final static Command<TestSource> CHAINED_SUBCOMMANDS_CMD =
-        Command.<TestSource>create("subs")
+        Command.create(TestRun.IMPERAT, "subs")
             .subCommand(
-                Command.<TestSource>create("first")
+                Command.create(TestRun.IMPERAT, "first")
                     .defaultExecution((source, context) -> {
                         source.reply("FIRST, DEF EXEC");
                     })
@@ -89,14 +89,14 @@ public final class TestCommands {
 
                     )
                     .subCommand(
-                        Command.<TestSource>create("second")
+                        Command.create(TestRun.IMPERAT, "second")
                             .defaultExecution((source, context) -> source.reply("SECOND, DEF EXEC"))
                             .usage(CommandUsage.<TestSource>builder()
                                 .parameters(CommandParameter.requiredText("arg2"))
                                 .execute((source, ctx) -> source.reply("Arg1= " + ctx.getArgument("arg1") + ", Arg2= " + ctx.getArgument("arg2")))
                             )
                             .subCommand(
-                                Command.<TestSource>create("third")
+                                Command.create(TestRun.IMPERAT, "third")
                                     .defaultExecution((source, context) -> source.reply("THIRD, DEF EXEC"))
                                     .usage(CommandUsage.<TestSource>builder()
                                         .parameters(CommandParameter.requiredText("arg3"))
@@ -113,7 +113,7 @@ public final class TestCommands {
             .build();
 
     public final static Command<TestSource> MULTIPLE_OPTIONAL_CMD =
-        Command.<TestSource>create("ot")
+        Command.create(TestRun.IMPERAT, "ot")
             .usage(
                 CommandUsage.<TestSource>builder()
                     .parameters(
@@ -127,7 +127,7 @@ public final class TestCommands {
             .build();
 
 
-    public final static Command<TestSource> BAN_COMMAND = Command.<TestSource>create("ban")
+    public final static Command<TestSource> BAN_COMMAND = Command.create(TestRun.IMPERAT, "ban")
             .permission("command.ban")
             .description("Main command for banning players")
             .usage(

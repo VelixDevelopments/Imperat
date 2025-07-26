@@ -157,7 +157,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = cmdAnn.skipSuggestionsChecks();
 
-            var builder = Command.<S>create(values[0])
+            var builder = Command.create(imperat, values[0])
                 .ignoreACPermissions(ignoreAC)
                 .aliases(aliases);
             if (permission != null) {
@@ -197,7 +197,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             final List<String> aliases = List.of(values).subList(1, values.length);
             final boolean ignoreAC = subCommand.skipSuggestionsChecks();
 
-            var builder = Command.<S>create(values[0])
+            var builder = Command.create(imperat, values[0])
                 .ignoreACPermissions(ignoreAC)
                 .aliases(aliases);
 
