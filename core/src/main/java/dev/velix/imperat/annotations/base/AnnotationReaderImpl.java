@@ -1,7 +1,7 @@
 package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.Imperat;
-import dev.velix.imperat.annotations.Inherit;
+import dev.velix.imperat.annotations.ExternalSubCommand;
 import dev.velix.imperat.annotations.base.element.ClassElement;
 import dev.velix.imperat.annotations.base.element.CommandClassVisitor;
 import dev.velix.imperat.annotations.base.element.MethodElement;
@@ -76,11 +76,11 @@ final class AnnotationReaderImpl<S extends Source> implements AnnotationReader<S
             }
         }
 
-        //We add external subcommand classes from @Inherit as children
-        if (root.isAnnotationPresent(Inherit.class)) {
-            Inherit inherit = root.getAnnotation(Inherit.class);
-            assert inherit != null;
-            for (Class<?> subClass : inherit.value()) {
+        //We add external subcommand classes from @ExternalSubCommand as children
+        if (root.isAnnotationPresent(ExternalSubCommand.class)) {
+            ExternalSubCommand externalSubCommand = root.getAnnotation(ExternalSubCommand.class);
+            assert externalSubCommand != null;
+            for (Class<?> subClass : externalSubCommand.value()) {
                 root.addChild(
                     readClass(imperat, parser, root, subClass)
                 );

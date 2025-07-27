@@ -1,29 +1,7 @@
 package dev.velix.imperat.annotations.base;
 
-import dev.velix.imperat.annotations.Async;
-import dev.velix.imperat.annotations.Command;
-import dev.velix.imperat.annotations.ContextResolved;
-import dev.velix.imperat.annotations.Cooldown;
-import dev.velix.imperat.annotations.Default;
-import dev.velix.imperat.annotations.DefaultProvider;
-import dev.velix.imperat.annotations.Description;
-import dev.velix.imperat.annotations.Flag;
-import dev.velix.imperat.annotations.GlobalAttachmentMode;
-import dev.velix.imperat.annotations.Greedy;
-import dev.velix.imperat.annotations.Help;
-import dev.velix.imperat.annotations.Inherit;
-import dev.velix.imperat.annotations.Named;
-import dev.velix.imperat.annotations.Optional;
-import dev.velix.imperat.annotations.Permission;
-import dev.velix.imperat.annotations.PostProcessor;
-import dev.velix.imperat.annotations.PreProcessor;
-import dev.velix.imperat.annotations.Range;
-import dev.velix.imperat.annotations.SubCommand;
-import dev.velix.imperat.annotations.Suggest;
-import dev.velix.imperat.annotations.SuggestionProvider;
-import dev.velix.imperat.annotations.Switch;
-import dev.velix.imperat.annotations.Usage;
-import dev.velix.imperat.annotations.Values;
+import dev.velix.imperat.annotations.*;
+import dev.velix.imperat.annotations.ExternalSubCommand;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -42,7 +20,7 @@ final class AnnotationRegistry {
 
     AnnotationRegistry() {
         this.registerAnnotationTypes(
-            Command.class, Inherit.class, Usage.class, SubCommand.class,
+            Command.class, ExternalSubCommand.class, Usage.class, SubCommand.class,
             Cooldown.class, Description.class, Permission.class,
             Suggest.class, SuggestionProvider.class, Default.class, DefaultProvider.class, Values.class,
             Switch.class, Flag.class, Greedy.class, Named.class, Optional.class, ContextResolved.class, Range.class, Async.class,
