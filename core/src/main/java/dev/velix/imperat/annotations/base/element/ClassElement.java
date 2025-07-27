@@ -4,6 +4,7 @@ import dev.velix.imperat.annotations.Dependency;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.context.Source;
+import dev.velix.imperat.exception.UnknownDependencyException;
 import dev.velix.imperat.util.reflection.Reflections;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +58,9 @@ public final class ClassElement extends ParseElement<Class<?>> {
             field.setAccessible(true);
             try {
                 var supplied = parser.getImperat().config().resolveDependency(field.getType());
+                if(supplied == null) {
+                    throw new UnknownDependencyException("In class '" + this.element.getTypeName() + "', Field '" + field.getName()  +"' of type '" + field.getType().getTypeName() + "'" + " has no dependency registered for its type.");
+                }
                 field.set(instance, supplied);
             } catch (IllegalAccessException e) {
                 exception = e;

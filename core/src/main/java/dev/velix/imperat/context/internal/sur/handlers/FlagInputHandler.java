@@ -10,7 +10,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.sur.HandleResult;
-import dev.velix.imperat.exception.FlagException;
+import dev.velix.imperat.exception.ShortHandFlagException;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
@@ -45,11 +45,11 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
             long numberOfTrueFlags = extracted.size() - numberOfSwitches;
             
             if (extracted.size() != numberOfSwitches && extracted.size() != numberOfTrueFlags) {
-                return HandleResult.failure(new FlagException("Unsupported use of a mixture of switches and true flags!"));
+                return HandleResult.failure(new ShortHandFlagException("Unsupported use of a mixture of switches and true flags!"));
             }
             
             if (extracted.size() == numberOfTrueFlags && !TypeUtility.areTrueFlagsOfSameInputTpe(extracted)) {
-                return HandleResult.failure(new FlagException("You cannot use compressed true-flags, while they are not of same input type"));
+                return HandleResult.failure(new ShortHandFlagException("You cannot use compressed true-flags, while they are not of same input type"));
             }
             
             for (FlagData<S> extractedFlagData : extracted) {

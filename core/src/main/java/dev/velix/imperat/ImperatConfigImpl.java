@@ -204,7 +204,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
 
         this.setThrowableResolver(
             InvalidUUIDException.class, (exception, imperat, context) ->
-                context.source().error("Invalid uuid-format '" + exception.getRaw() + "'")
+                context.source().error("Invalid uuid-format '" + exception.getInput() + "'")
         );
 
         this.setThrowableResolver(
