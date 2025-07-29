@@ -61,8 +61,6 @@ public final class ParameterValueAssigner<S extends Source> {
     }
 
     public void resolve() throws ImperatException {
-        ImperatDebugger.debug("Resolving input '%s'", stream.getRawQueue().toString());
-        ImperatDebugger.debug("Resolving input stream of usage '%s'", CommandUsage.format(context.getLastUsedCommand().name(), usage));
         chain.execute(context, stream);
     }
 

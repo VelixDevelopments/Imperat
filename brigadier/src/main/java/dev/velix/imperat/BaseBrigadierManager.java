@@ -68,9 +68,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         ArgumentBuilder<T, ?> childBuilder = node instanceof CommandNode<?> ?
             LiteralArgumentBuilder.literal(node.getData().name())
             : RequiredArgumentBuilder.argument(node.getData().name(), argType);
-
-        ImperatDebugger.debugForTesting("parameter '%s' has type converted '%s'", node.getData().format(), argType.getClass().getName());
-
+        
         childBuilder.requires((obj) -> {
             var permissionResolver = dispatcher.config().getPermissionResolver();
             var source = wrapCommandSource(obj);
@@ -110,9 +108,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
         Command<S> command,
         CommandParameter<S> parameter
     ) {
-
-        //ImperatDebugger.debug("suggestion resolver is null=%s for param '%s'", parameterResolver == null, parameter.format());
-
+        
         return (context, builder) -> {
             S source = this.wrapCommandSource(context.getSource());
             String paramFormat = parameter.format();
@@ -123,15 +119,9 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             String label = input.substring(0, input.indexOf(' '));
 
             boolean hadExtraSpace = Character.isWhitespace(input.charAt(input.length() - 1));
-
-            //ImperatDebugger.debug("input= '%s', last-space='%s'", input, hadExtraSpace);
-
             String[] processed = processedInput(input);
-            //ImperatDebugger.debug("processed array= '%s'", Arrays.toString(processed));
 
             ArgumentQueue args = ArgumentQueue.parseAutoCompletion(processed, hadExtraSpace);
-            //ImperatDebugger.debug("Parsed queue= '%s'",args.join(":"));
-            //ImperatDebugger.debug("Last-argument='%s'", args.getLast());
 
             CompletionArg arg = new CompletionArg(args.isEmpty() ? "" : args.getLast(), args.size() - 1);
             SuggestionContext<S> ctx = dispatcher.config().getContextFactory().createSuggestionContext(dispatcher, source, command, label, args, arg);

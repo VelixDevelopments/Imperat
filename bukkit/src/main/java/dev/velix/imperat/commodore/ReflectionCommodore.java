@@ -115,7 +115,6 @@ final class ReflectionCommodore extends AbstractCommodore {
     ReflectionCommodore(Plugin plugin) {
         this.plugin = plugin;
         this.plugin.getServer().getPluginManager().registerEvents(new ServerReloadListener(this), this.plugin);
-        ImperatDebugger.debug("Using ReflectionCommodore !");
     }
 
     static void ensureSetup() {

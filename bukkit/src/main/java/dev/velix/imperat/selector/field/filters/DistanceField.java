@@ -46,7 +46,6 @@ final class DistanceField extends PredicateField<Range<Double>> {
             }
             Player commandSource = sender.asPlayer();
             double diffInDistance = commandSource.getLocation().distance(entity.getLocation());
-            ImperatDebugger.debug("Min=%s, Double value=%s", value.getMin(), diffInDistance);
 
             return value.isInRange(diffInDistance);
         });

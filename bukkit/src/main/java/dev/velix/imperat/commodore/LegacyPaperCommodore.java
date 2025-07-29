@@ -51,7 +51,6 @@ final class LegacyPaperCommodore extends AbstractCommodore implements Listener {
     LegacyPaperCommodore(Plugin plugin) throws ClassNotFoundException {
         Class.forName("com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        ImperatDebugger.debug("Using LegacyPaperCommodore !");
     }
 
     @Override

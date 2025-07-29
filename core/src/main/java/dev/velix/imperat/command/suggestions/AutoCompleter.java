@@ -57,7 +57,6 @@ public abstract class AutoCompleter<S extends Source> {
 
         SuggestionContext<S> context = dispatcher.config().getContextFactory()
             .createSuggestionContext(dispatcher, sender, command, label, queue, argToComplete);
-        //ImperatDebugger.debug("auto completing !");
         return autoComplete(dispatcher, context)
             .exceptionally((ex) -> {
                 dispatcher.config().handleExecutionThrowable(ex, context, AutoCompleter.class, "autoComplete(dispatcher, sender, args)");

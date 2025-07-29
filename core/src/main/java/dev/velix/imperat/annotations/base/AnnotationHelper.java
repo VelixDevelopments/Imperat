@@ -69,18 +69,13 @@ public final class AnnotationHelper {
             assert actualParameter != null;
 
             if(actualParameter.isContextResolved()) {
-                ImperatDebugger.debug("param an actual context param, '%s'", actualParameter.getName());
                 var contextResolver = dispatcher.config().getMethodParamContextResolver(actualParameter);
 
                 if (contextResolver != null) {
-                    ImperatDebugger.debug(">> Found Context resolver for parameter '%s' of type '%s'", actualParameter.getName(),
-                            actualParameter.getType().getTypeName());
                     paramsInstances[i] = contextResolver.resolve(context, actualParameter);
                     p--;
                     continue;
                 }else {
-                    ImperatDebugger.debug(">> No Context resolver found for parameter '%s' of type '%s'", actualParameter.getName(),
-                            actualParameter.getType().getTypeName());
 
                     throw new IllegalStateException(
                             "In class '%s', In method '%s', The parameter '%s' is set to be context resolved while not having a context resolver for its type '%s'"
@@ -88,8 +83,6 @@ public final class AnnotationHelper {
                                             actualParameter.getType().getTypeName())
                     );
                 }
-            }else {
-                ImperatDebugger.debug("Not a context param '%s', of type '%s'", actualParameter.getName(), actualParameter.getType());
             }
 
             CommandParameter<S> parameter = getUsageParam(fullParameters, p);
@@ -119,11 +112,6 @@ public final class AnnotationHelper {
                 }
             } else {
                 var ctxArg = context.getArgument(name);
-                ImperatDebugger.debugForTesting("Setting arg '%s' of type '%s' to value '%s' of type '%s' from context",
-                        parameter.format(), parameter.type().type().getTypeName(),
-                        (ctxArg == null ? "null" : ctxArg.toString()),
-                        (ctxArg == null ? parameter.type().type().getTypeName() : ctxArg.getClass().getTypeName()));
-                
                 paramsInstances[i] = ctxArg;
             }
 
@@ -185,7 +173,6 @@ public final class AnnotationHelper {
     ) throws ImperatException {
 
         if (defaultAnnotation != null) {
-            //ImperatDebugger.debug("Went in @Default checker, found def value '%s'", defaultAnnotation.value());
             String def = defaultAnnotation.value();
             return OptionalValueSupplier.of(def);
         } else if (provider != null) {

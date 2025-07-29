@@ -66,7 +66,6 @@ public final class CommandDispatch<S extends Source> implements Iterable<Paramet
     }
 
     public void visualize() {
-        ImperatDebugger.debug("Result => " + result.name());
         StringBuilder builder = new StringBuilder();
         int size = nodes.size();
 
@@ -78,7 +77,6 @@ public final class CommandDispatch<S extends Source> implements Iterable<Paramet
             }
             i++;
         }
-        ImperatDebugger.debug(builder.toString());
     }
 
     /**

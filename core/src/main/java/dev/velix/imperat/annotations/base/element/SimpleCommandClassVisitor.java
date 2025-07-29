@@ -641,7 +641,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             DefaultProvider provider = parameter.getAnnotation(DefaultProvider.class);
             try {
                 optionalValueSupplier = AnnotationHelper.deduceOptionalValueSupplier(parameter, defaultAnnotation, provider, optionalValueSupplier);
-                ImperatDebugger.debug("Optional value for param '%s' is present = (%s)", parameter.getName(), !optionalValueSupplier.isEmpty());
             } catch (ImperatException e) {
                 ImperatDebugger.error(AnnotationHelper.class, "deduceOptionalValueSupplier", e);
             }
@@ -697,7 +696,6 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
             type = ConstrainedParameterTypeDecorator.of(type, values, valuesAnnotation.caseSensitive());
         }
 
-        //ImperatDebugger.debug("Optional value is empty='%s'", optionalValueSupplier.isEmpty());
         CommandParameter<S> param =
             AnnotationParameterDecorator.decorate(
                 CommandParameter.of(

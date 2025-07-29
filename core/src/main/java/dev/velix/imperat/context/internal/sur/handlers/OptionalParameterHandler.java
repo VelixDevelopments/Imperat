@@ -23,15 +23,12 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
         }
         
         try {
-            ImperatDebugger.debug("[OptionalParameterHandler] type for param '%s' is '%s'", currentParameter.format(), currentParameter.type().getClass().getTypeName());
             var value = currentParameter.type().resolve(context, stream, stream.readInput());
-            ImperatDebugger.debug("[OptionalParameterHandler] AfterResolve >> current-raw=`%s`, current-param=`%s`, resolved-value='%s'", currentRaw, currentParameter.name(), value);
             
             if (value instanceof ExtractedInputFlag extractedInputFlag) {
                 context.resolveFlag(extractedInputFlag);
                 stream.skip();
             } else {
-                ImperatDebugger.debug("[OptionalParameterHandler] Resolving optional %s, with current raw '%s'", currentParameter.format(), currentRaw);
                 resolveOptional(currentRaw, currentParameter, context, stream, value);
             }
             
@@ -83,7 +80,6 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
                         var n = currentParameter;
                         while (n != null) {
                             if (n.type().matchesInput(currentRaw, n)) {
-                                ImperatDebugger.debug("[OptionalParameterHandler] n='%s', matching type for input '%s', resolve result= '%s'", n.format(), currentRaw, resolveResult);
                                 context.resolveArgument(
                                         context.getLastUsedCommand(),
                                         currentRaw,
@@ -141,13 +137,11 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
     private <T> T getDefaultValue(ResolvedContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
         OptionalValueSupplier optionalSupplier = parameter.getDefaultValueSupplier();
         if (optionalSupplier.isEmpty()) {
-            ImperatDebugger.debug("[OptionalParameterHandler] no def value for param='%s'", parameter.format());
             return null;
         }
         String value = optionalSupplier.supply(context.source(), parameter);
 
         if (value != null) {
-            ImperatDebugger.debug("[OptionalParameterHandler] DEF VALUE='%s', for param='%s'", value, parameter.format());
             return (T) parameter.type().resolve(context, stream, value);
         }
 

@@ -25,7 +25,6 @@ public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements 
         }
         
         try {
-            ImperatDebugger.debug("[NonFlagWhenExpectingFlagHandler] Current parameter is a flag while the raw '%s' doesn't match a flag input!", currentRaw);
             var nextParam = stream.peekParameter().orElse(null);
             
             if (nextParam == null) {
@@ -45,7 +44,6 @@ public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements 
         FlagData<S> flagDataFromRaw = flagParameter.flagData();
 
         if (flagDataFromRaw.isSwitch()) {
-            ImperatDebugger.debug("[NonFlagWhenExpectingFlagHandler] Resolving default value for switch '%s'", flagDataFromRaw.name());
             context.resolveFlag(new ExtractedInputFlag(flagDataFromRaw, null, "false", false));
             return;
         }
@@ -58,7 +56,6 @@ public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements 
                             CommandInputStream.subStream(stream, defValue),
                             defValue
                     );
-            ImperatDebugger.debug("[NonFlagWhenExpectingFlagHandler] Resolving flag '%s' default input value='%s'", flagDataFromRaw.name(), defValue);
             context.resolveFlag(new ExtractedInputFlag(flagDataFromRaw, null, defValue, flagValueResolved));
         }
     }

@@ -81,10 +81,8 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         final @NotNull String alias,
         final String[] args
     ) throws IllegalArgumentException {
-        //ImperatDebugger.debug("Starting bukkit tab-completion");
         BukkitSource source = dispatcher.wrapSender(sender);
         try {
-            //ImperatDebugger.debug("Size of completions= %s", completions.size());
             return dispatcher.autoComplete(imperatCommand, source, alias, args).join();
         } catch (Exception ex) {
             ImperatDebugger.error(InternalBukkitCommand.class, "tabComplete", ex);

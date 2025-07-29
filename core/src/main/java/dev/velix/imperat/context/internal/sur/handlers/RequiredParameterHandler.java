@@ -7,7 +7,6 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.ImperatDebugger;
 
 public final class RequiredParameterHandler<S extends Source> implements ParameterHandler<S> {
     
@@ -21,15 +20,12 @@ public final class RequiredParameterHandler<S extends Source> implements Paramet
         }
         
         try {
-            ImperatDebugger.debug("[RequiredParameterHandler] type for param '%s' is '%s'", currentParameter.format(), currentParameter.type().getClass().getTypeName());
             var value = currentParameter.type().resolve(context, stream, stream.readInput());
-            ImperatDebugger.debug("[RequiredParameterHandler] AfterResolve >> current-raw=`%s`, current-param=`%s`, resolved-value='%s'", currentRaw, currentParameter.name(), value);
             
             if (value instanceof ExtractedInputFlag extractedInputFlag) {
                 context.resolveFlag(extractedInputFlag);
                 stream.skip();
             } else {
-                ImperatDebugger.debug("[RequiredParameterHandler] Resolving required %s, with current raw '%s'", currentParameter.format(), currentRaw);
                 context.resolveArgument(context.getLastUsedCommand(), currentRaw, stream.currentParameterPosition(), currentParameter, value);
                 stream.skip();
             }

@@ -19,7 +19,6 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
     public HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
         CommandParameter<S> currentParameter = stream.currentParameter().orElse(null);
         if (currentParameter == null) {
-            ImperatDebugger.debug("[EmptyInputHandler] Something weird, there are no params!");
             return HandleResult.TERMINATE;
         }
         
@@ -29,9 +28,7 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
         }
         
         try {
-            ImperatDebugger.debug("[EmptyInputHandler] Input is too short or empty, checking for remaining optional parameters...");
             if (currentParameter.isOptional()) {
-                ImperatDebugger.debug("[EmptyInputHandler] Found optional parameter '%s'", currentParameter.format());
                 handleEmptyOptional(currentParameter, stream, context);
                 stream.skipParameter();
             }
@@ -63,10 +60,8 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
                 }
             }
             
-            ImperatDebugger.debug("[EmptyInputHandler] Resolving empty optional FLAG parameter '%s', with value='%s'", optionalEmptyParameter.format(), value);
             context.resolveFlag(flag, null, null, value);
         } else {
-            ImperatDebugger.debug("[EmptyInputHandler] Resolving empty optional param '%s'", optionalEmptyParameter.format());
             context.resolveArgument(context.getLastUsedCommand(), null, stream.position().getParameter(),
                 optionalEmptyParameter, getDefaultValue(context, stream, optionalEmptyParameter));
         }
@@ -75,13 +70,11 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
     private <T> T getDefaultValue(ResolvedContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
         OptionalValueSupplier optionalSupplier = parameter.getDefaultValueSupplier();
         if (optionalSupplier.isEmpty()) {
-            ImperatDebugger.debug("[EmptyInputHandler] no def value for param='%s'", parameter.format());
             return null;
         }
         String value = optionalSupplier.supply(context.source(), parameter);
         
         if (value != null) {
-            ImperatDebugger.debug("[EmptyInputHandler] DEF VALUE='%s', for param='%s'", value, parameter.format());
             return (T) parameter.type().resolve(context, stream, value);
         }
         

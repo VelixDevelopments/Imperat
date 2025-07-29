@@ -32,7 +32,6 @@ public final class FreeFlagHandler<S extends Source> implements ParameterHandler
             if (Patterns.isInputFlag(currentRaw) && freeFlagData.isPresent()) {
                 try {
                     FlagData<S> freeFlag = freeFlagData.get();
-                    ImperatDebugger.debug("[FreeFlagHandler] Resolving free flag: %s", currentRaw);
                     var value = ParameterTypes.flag(freeFlag).resolveFreeFlag(context, stream, freeFlag);
                     context.resolveFlag(value);
                 } catch (ImperatException e) {

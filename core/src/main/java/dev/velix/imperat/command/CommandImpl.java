@@ -453,7 +453,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
         CommandUsage<S> combo = prime.mergeWithCommand(command, command.getMainUsage());
         //adding the merged command usage
 
-        //ImperatDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
         this.addUsage(combo);
 
         for (CommandUsage<S> subUsage : command.usages()) {
@@ -461,7 +460,6 @@ final class CommandImpl<S extends Source> implements Command<S> {
             combo = prime.mergeWithCommand(command, subUsage);
             //adding the merged command usage
 
-            //ImperatDebugger.debug("Trying to add usage `%s`", CommandUsage.format(this, combo));
             this.addUsage(
                 combo
             );

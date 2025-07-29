@@ -250,7 +250,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             source.error("Unknown command input: '" + commandName + "'");
             return CommandDispatch.Result.UNKNOWN;
         }
-        command.visualizeTree();
         return dispatch(source, command, commandName, rawInput);
     }
 
@@ -274,51 +273,15 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         if (!config.getPermissionResolver().hasPermission(source, command.permission())) {
             throw new PermissionDeniedException();
         }
-
-        /*if (context.arguments().isEmpty()) {
-            CommandUsage<S> defaultUsage = command.getDefaultUsage();
-            executeUsage(command, source, context, defaultUsage);
-            return CommandDispatch.Result.INCOMPLETE;
-        }*/
         
-        long t = System.currentTimeMillis();
         CommandDispatch<S> searchResult = command.contextMatch(context);
-        
-        ImperatDebugger.debug("Took %sms for node search.", (System.currentTimeMillis()-t));
-        
-        searchResult.visualize();
-
         CommandUsage<S> usage = searchResult.toUsage();
 
-        //executing usage
-        if (searchResult.getResult() == CommandDispatch.Result.COMPLETE) {
-
-            if(usage == null) {
-                throw new InvalidSyntaxException();
-            }
-
-            ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
-            executeUsage(command, source, context, usage);
-        }
-        /*else if (searchResult.getResult() == CommandDispatch.Result.INCOMPLETE) {
-            if(Objects.requireNonNull(searchResult.getLastNode()).isCommand()) {
-                ImperatDebugger.debug("Executing last parameter as a sub command");
-                var defUsage = searchResult.getLastNode().getData().asCommand().getDefaultUsage();
-                executeUsage(command, source, context, defUsage);
-            }
-            else if (usage != null) {
-                ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
-                executeUsage(command, source, context, usage);
-            } else {
-                //usage is null and last param is not command
-                throw new InvalidSyntaxException();
-            }
-
-        }
-        */
-        else {
+        if(usage == null || searchResult.getResult() != CommandDispatch.Result.COMPLETE) {
             throw new InvalidSyntaxException();
         }
+        //executing usage
+        executeUsage(command, source, context, usage);
         return searchResult.getResult();
     }
 
@@ -329,8 +292,6 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         final CommandUsage<S> usage
     ) throws Throwable {
         //global pre-processing
-
-
         if (!preProcess(context, usage)) {
             return;
         }
@@ -340,10 +301,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             return;
         }
 
-        ImperatDebugger.debug("Resolving usage '%s'", CommandUsage.format(command, usage));
+        long ns = System.nanoTime();
         ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
         resolvedContext.resolve();
-        resolvedContext.debug();
+        System.out.println("Took " + (System.nanoTime()-ns) + "ns for resolving context");
 
         //global post-processing
         if (!postProcess(resolvedContext)) {
@@ -364,7 +325,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         @NotNull Context<S> context,
         @NotNull CommandUsage<S> usage
     ) {
-
+        
         for (CommandPreProcessor<S> preProcessor : config.getPreProcessors()) {
             try {
                 preProcessor.process(this, context, usage);

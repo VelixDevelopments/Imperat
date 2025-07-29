@@ -30,9 +30,7 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
         }
         
         try {
-            ImperatDebugger.debug("[FlagInputHandler] Resolving input flag");
             if (context.hasResolvedFlag(currentParameter)) {
-                ImperatDebugger.debug("[FlagInputHandler] Flag-Parameter has been already resolved before!");
                 currentParameter = stream.popParameter().orElse(null);
                 if (currentParameter == null) return HandleResult.NEXT_ITERATION;
             }
@@ -54,19 +52,14 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
             
             for (FlagData<S> extractedFlagData : extracted) {
                 if (context.hasResolvedFlag(extractedFlagData)) {
-                    ImperatDebugger.debug("[FlagInputHandler] Already resolved flag '%s', skipping...", extractedFlagData.name());
                     continue;
                 }
                 
                 if (currentParameter.isFlag() && !currentParameter.asFlagParameter().flagData().equals(extractedFlagData)) {
-                    ImperatDebugger.debug("[FlagInputHandler] Current flag parameter '%s' does not match the entered flag '%s' in the same position!",
-                        currentParameter.asFlagParameter().flagData().name(), extractedFlagData.name());
-                    ImperatDebugger.debug("[FlagInputHandler] Resolving parameter %s's default value", currentParameter.format());
                     resolveFlagDefaultValue(stream, currentParameter.asFlagParameter(), context);
                     break;
                 }
                 
-                ImperatDebugger.debug("[FlagInputHandler] Resolving flag '%s'", extractedFlagData.name());
                 context.resolveFlag(ParameterTypes.flag(extractedFlagData).resolve(context, stream, currentRaw));
             }
             
@@ -81,7 +74,6 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
         FlagData<S> flagDataFromRaw = flagParameter.flagData();
 
         if (flagDataFromRaw.isSwitch()) {
-            ImperatDebugger.debug("[FlagInputHandler] Resolving default value for switch '%s'", flagDataFromRaw.name());
             context.resolveFlag(new ExtractedInputFlag(flagDataFromRaw, null, "false", false));
             return;
         }
@@ -94,7 +86,6 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
                             CommandInputStream.subStream(stream, defValue),
                             defValue
                     );
-            ImperatDebugger.debug("[FlagInputHandler] Resolving flag '%s' default input value='%s'", flagDataFromRaw.name(), defValue);
             context.resolveFlag(new ExtractedInputFlag(flagDataFromRaw, null, defValue, flagValueResolved));
         }
     }

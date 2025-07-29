@@ -513,7 +513,6 @@ public final class CommandTree<S extends Source> {
         for (var child : children) {
             
             if (child.isRequired()) {
-                ImperatDebugger.debug("Adding required child '%s' to valid children", child.data.format());
                 validChildren.add(child);
                 continue;
             }

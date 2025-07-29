@@ -44,7 +44,6 @@ public final class ParameterEnum<S extends Source> extends BaseParameterType<S, 
             if (!TypeWrap.of(type).isSubtypeOf(Enum.class)) {
                 return true;
             }
-            //ImperatDebugger.debug("type-enum-name= " + type.getTypeName());
             Enum.valueOf((Class<? extends Enum>) type, input);
             return true;
         } catch (IllegalArgumentException | EnumConstantNotPresentException ex) {
