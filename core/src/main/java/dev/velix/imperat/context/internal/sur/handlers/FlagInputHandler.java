@@ -12,18 +12,18 @@ import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ShortHandFlagException;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
 import dev.velix.imperat.util.TypeUtility;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 public final class FlagInputHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
-        CommandParameter<S> currentParameter = stream.currentParameter().orElse(null);
-        String currentRaw = stream.currentRaw().orElse(null);
+    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+        CommandParameter<S> currentParameter = stream.currentParameterFast();
+        String currentRaw = stream.currentRawFast();
         
         if (currentParameter == null || currentRaw == null || !Patterns.isInputFlag(currentRaw)) {
             return HandleResult.NEXT_HANDLER;
@@ -49,7 +49,6 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
             if (extracted.size() == numberOfTrueFlags && !TypeUtility.areTrueFlagsOfSameInputTpe(extracted)) {
                 return HandleResult.failure(new ShortHandFlagException("You cannot use compressed true-flags, while they are not of same input type"));
             }
-            
             for (FlagData<S> extractedFlagData : extracted) {
                 if (context.hasResolvedFlag(extractedFlagData)) {
                     continue;
@@ -59,7 +58,6 @@ public final class FlagInputHandler<S extends Source> implements ParameterHandle
                     resolveFlagDefaultValue(stream, currentParameter.asFlagParameter(), context);
                     break;
                 }
-                
                 context.resolveFlag(ParameterTypes.flag(extractedFlagData).resolve(context, stream, currentRaw));
             }
             

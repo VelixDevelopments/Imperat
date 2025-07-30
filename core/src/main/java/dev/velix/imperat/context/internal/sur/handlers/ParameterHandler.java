@@ -4,6 +4,7 @@ import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.sur.HandleResult;
+import org.jetbrains.annotations.NotNull;
 
 public sealed interface ParameterHandler<S extends Source>
         permits CommandParameterHandler, EmptyInputHandler, FlagInputHandler,
@@ -11,6 +12,6 @@ public sealed interface ParameterHandler<S extends Source>
         OptionalParameterHandler, RequiredParameterHandler
 {
     
-    HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream);
+    @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream);
     
 }

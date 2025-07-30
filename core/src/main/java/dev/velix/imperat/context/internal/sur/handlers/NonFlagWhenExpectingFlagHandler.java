@@ -12,13 +12,14 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownFlagException;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
+import org.jetbrains.annotations.NotNull;
 
 public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
-        CommandParameter<S> currentParameter = stream.currentParameter().orElse(null);
-        String currentRaw = stream.currentRaw().orElse(null);
+    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+        CommandParameter<S> currentParameter = stream.currentParameterFast();
+        String currentRaw = stream.currentRawFast();
         
         if (currentParameter == null || currentRaw == null || !currentParameter.isFlag() || Patterns.isInputFlag(currentRaw)) {
             return HandleResult.NEXT_HANDLER;

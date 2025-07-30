@@ -7,7 +7,6 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.sur.handlers.*;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.ImperatDebugger;
 
 @SuppressWarnings("unchecked")
 public final class ParameterValueAssigner<S extends Source> {
@@ -59,8 +58,9 @@ public final class ParameterValueAssigner<S extends Source> {
     ) {
         return new ParameterValueAssigner<>(command, context, usage, customChain);
     }
-
+    
     public void resolve() throws ImperatException {
+        // ADD: Time the chain execution
         chain.execute(context, stream);
     }
 

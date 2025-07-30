@@ -11,18 +11,18 @@ import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.InvalidSyntaxException;
-import dev.velix.imperat.util.ImperatDebugger;
+import org.jetbrains.annotations.NotNull;
 
 public final class EmptyInputHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
-        CommandParameter<S> currentParameter = stream.currentParameter().orElse(null);
+    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+        CommandParameter<S> currentParameter = stream.currentParameterFast();
         if (currentParameter == null) {
             return HandleResult.TERMINATE;
         }
         
-        String currentRaw = stream.currentRaw().orElse(null);
+        String currentRaw = stream.currentRawFast();
         if (currentRaw != null) {
             return HandleResult.NEXT_HANDLER; // Not empty input, let other handlers process
         }

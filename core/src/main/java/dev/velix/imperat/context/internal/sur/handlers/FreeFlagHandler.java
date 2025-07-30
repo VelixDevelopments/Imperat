@@ -7,24 +7,20 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 public final class FreeFlagHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
         var lastParam = context.getDetectedUsage().getParameter(context.getDetectedUsage().size() - 1);
         
-        while (stream.hasNextRaw()) {
+        String currentRaw;
+        while ((currentRaw = stream.currentRawFast()) != null) {
             if (lastParam != null && lastParam.isGreedy()) {
-                break;
-            }
-
-            String currentRaw = stream.currentRaw().orElse(null);
-            if (currentRaw == null) {
                 break;
             }
 

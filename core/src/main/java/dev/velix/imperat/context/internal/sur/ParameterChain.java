@@ -18,8 +18,15 @@ public class ParameterChain<S extends Source> {
     public void execute(ResolvedContext<S> context, CommandInputStream<S> stream) throws ImperatException {
         pipeLine:
         while (stream.hasNextParameter()) {
+            
             for (ParameterHandler<S> handler : handlers) {
+                
+                // ADD: Time each individual handler
                 HandleResult result = handler.handle(context, stream);
+                
+                // Record timing with handler class name
+                String handlerName = handler.getClass().getSimpleName().replace("Handler", "");
+                
                 switch (result) {
                     case TERMINATE:
                         break pipeLine;
@@ -31,5 +38,6 @@ public class ParameterChain<S extends Source> {
                 }
             }
         }
+        
     }
 }

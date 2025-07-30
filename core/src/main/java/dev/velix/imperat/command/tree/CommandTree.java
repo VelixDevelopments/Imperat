@@ -6,46 +6,52 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
- * Highly optimized CommandTree implementation focused on maximum performance
- * @author Mqzen (Optimized)
+ * Ultra-optimized CommandTree implementation focused on maximum performance
+ * Removed excessive profiling and optimized hot paths
+ * @author Mqzen (Ultra-Optimized)
  */
 public final class CommandTree<S extends Source> {
-    
     final Command<S> rootCommand;
     final CommandNode<S> root;
     
-    // Performance optimizations - cache frequently accessed data
-    private final Map<String, FlagData<S>> flagCache = new HashMap<>();
-    
-    // Pre-computed collections to avoid repeated allocations
+    // Pre-computed immutable collections to eliminate allocations
     private static final List<String> EMPTY_STRING_LIST = Collections.emptyList();
+    
+    // Optimized flag cache with better hashing
+    private final Map<String, FlagData<S>> flagCache;
+    
+    // Pre-sized collections for common operations
+    private final ThreadLocal<ArrayList<ParameterNode<S, ?>>> pathBuffer =
+            ThreadLocal.withInitial(() -> new ArrayList<>(16));
+    private final ThreadLocal<ArrayList<CommandParameter<S>>> paramBuffer =
+            ThreadLocal.withInitial(() -> new ArrayList<>(8));
     
     CommandTree(Command<S> command) {
         this.rootCommand = command;
         this.root = new CommandNode<>(command, -1, command.getDefaultUsage());
-        // Pre-populate flag cache during construction
-        initializeFlagCache();
+        this.flagCache = initializeFlagCache();
     }
     
-    private void initializeFlagCache() {
-        // Build flag cache once during initialization
+    private Map<String, FlagData<S>> initializeFlagCache() {
+        // Use HashMap instead of concurrent map for better performance in single-threaded access
+        final var cache = new HashMap<String, FlagData<S>>();
         for (var usage : rootCommand.usages()) {
             for (var flag : usage.getUsedFreeFlags()) {
                 for (String alias : flag.aliases()) {
-                    flagCache.put(alias, flag);
+                    cache.put(alias, flag);
                 }
             }
         }
+        return Collections.unmodifiableMap(cache); // Make immutable
     }
     
     public CommandNode<S> getRoot() {
@@ -62,10 +68,10 @@ public final class CommandTree<S extends Source> {
         return tree;
     }
     
-    // Parsing usages part - optimized for reduced allocations
+    // Optimized parsing with reduced allocations
     public void parseCommandUsages() {
         final var usages = root.data.usages();
-        for(var usage : usages) {
+        for (var usage : usages) {
             parseUsage(usage);
         }
     }
@@ -82,11 +88,16 @@ public final class CommandTree<S extends Source> {
             root.setExecutableUsage(usage);
         }
         
-        // Use array instead of ArrayList for better performance with small collections
-        final var path = new ArrayList<ParameterNode<S, ?>>(8); // Pre-size for typical depth
+        // Use thread-local buffer to eliminate allocations
+        final var path = pathBuffer.get();
+        path.clear();
         path.add(root);
         
-        addParametersToTree(root, usage, parameters, 0, path);
+        try {
+            addParametersToTree(root, usage, parameters, 0, path);
+        } finally {
+            path.clear(); // Clean up for next use
+        }
     }
     
     private void addParametersToTree(
@@ -96,8 +107,9 @@ public final class CommandTree<S extends Source> {
             int index,
             List<ParameterNode<S, ?>> path
     ) {
-        // Early termination conditions - check cheapest first
-        if (index >= parameters.size()) {
+        // Early termination - check cheapest conditions first
+        final int paramSize = parameters.size();
+        if (index >= paramSize) {
             currentNode.setExecutableUsage(usage);
             return;
         }
@@ -110,39 +122,21 @@ public final class CommandTree<S extends Source> {
             return;
         }
         
-        // Optimized flag sequence detection - single pass
-        final int paramSize = parameters.size();
-        final var flagSequenceIndices = new ArrayList<Integer>(4); // Pre-size for typical flag count
+        // Optimized flag sequence detection
+        int flagSequenceEnd = findFlagSequenceEnd(parameters, index);
         
-        if (index < paramSize) {
-            final var currentParam = parameters.get(index);
-            if (currentParam.isFlag() && currentParam.isOptional()) {
-                flagSequenceIndices.add(index);
-                
-                // Single loop to find consecutive optional flags
-                for (int i = index + 1; i < paramSize; i++) {
-                    final var param = parameters.get(i);
-                    if (param.isFlag() && param.isOptional()) {
-                        flagSequenceIndices.add(i);
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
-        
-        // Handle multiple consecutive optional flags
-        if (flagSequenceIndices.size() > 1) {
-            handleFlagPermutations(currentNode, usage, parameters, flagSequenceIndices, path);
-            addParametersToTree(currentNode, usage, parameters, flagSequenceIndices.get(0) + 1, path);
+        if (flagSequenceEnd > index) {
+            // Handle multiple consecutive optional flags
+            handleFlagSequenceOptimized(currentNode, usage, parameters, index, flagSequenceEnd, path);
+            addParametersToTree(currentNode, usage, parameters, flagSequenceEnd, path);
             return;
         }
         
-        // Regular parameter handling - avoid redundant lookups
+        // Regular parameter handling
         final var param = parameters.get(index);
-        final var childNode = getChildNode(currentNode, param);
+        final var childNode = getOrCreateChildNode(currentNode, param);
         
-        // Reuse path list to avoid allocations
+        // Efficient path management
         final int pathSize = path.size();
         path.add(childNode);
         
@@ -150,10 +144,12 @@ public final class CommandTree<S extends Source> {
             addParametersToTree(childNode, usage, parameters, index + 1, path);
             
             if (param.isOptional()) {
-                addParametersToTree(currentNode, usage, parameters, index + 1, path.subList(0, pathSize));
+                // Create sublist view instead of new list
+                addParametersToTree(currentNode, usage, parameters, index + 1,
+                        path.subList(0, pathSize));
             }
         } finally {
-            // Restore path size
+            // Restore path size efficiently
             if (path.size() > pathSize) {
                 path.remove(pathSize);
             }
@@ -161,88 +157,231 @@ public final class CommandTree<S extends Source> {
     }
     
     /**
-     * Optimized flag permutation handling with reduced allocations
+     * Optimized flag sequence detection in single pass
      */
-    private void handleFlagPermutations(
+    private int findFlagSequenceEnd(List<CommandParameter<S>> parameters, int startIndex) {
+        if (startIndex >= parameters.size()) return startIndex;
+        
+        final var startParam = parameters.get(startIndex);
+        if (!startParam.isFlag() || !startParam.isOptional()) {
+            return startIndex;
+        }
+        
+        int end = startIndex + 1;
+        for (int i = startIndex + 1; i < parameters.size(); i++) {
+            final var param = parameters.get(i);
+            if (param.isFlag() && param.isOptional()) {
+                end = i + 1;
+            } else {
+                break;
+            }
+        }
+        
+        return end;
+    }
+    
+    /**
+     * Optimized flag permutation handling
+     */
+    private void handleFlagSequenceOptimized(
             ParameterNode<S, ?> currentNode,
             CommandUsage<S> usage,
             List<CommandParameter<S>> allParameters,
-            List<Integer> flagIndices,
+            int flagStart,
+            int flagEnd,
             List<ParameterNode<S, ?>> path
     ) {
-        final var flagParams = new ArrayList<CommandParameter<S>>(flagIndices.size());
-        for (int idx : flagIndices) {
-            flagParams.add(allParameters.get(idx));
-        }
+        final var flagParams = paramBuffer.get();
+        flagParams.clear();
         
-        final var permutations = generatePermutations(flagParams);
-        final int nextIndex = flagIndices.get(flagIndices.size() - 1) + 1;
-        
-        for (var permutation : permutations) {
-            var nodePointer = currentNode;
-            final var updatedPath = new ArrayList<>(path);
-            
-            for (var flagParam : permutation) {
-                final var flagNode = getChildNode(nodePointer, flagParam);
-                updatedPath.add(flagNode);
-                nodePointer = flagNode;
+        try {
+            // Collect flag parameters
+            for (int i = flagStart; i < flagEnd; i++) {
+                flagParams.add(allParameters.get(i));
             }
             
-            if (nextIndex < allParameters.size()) {
-                addParametersToTree(nodePointer, usage, allParameters, nextIndex, updatedPath);
-            } else {
-                nodePointer.setExecutableUsage(usage);
-            }
+            // Generate and process permutations efficiently
+            processPermutationsIteratively(currentNode, usage, allParameters, flagParams, flagEnd, path);
+        } finally {
+            flagParams.clear();
         }
     }
     
     /**
-     * Optimized permutation generation using iterative approach
+     * Iterative permutation processing to avoid recursion overhead
      */
-    private <T> List<List<T>> generatePermutations(List<T> items) {
-        if (items.isEmpty()) {
-            final var result = new ArrayList<List<T>>(1);
-            result.add(new ArrayList<>());
-            return result;
+    private void processPermutationsIteratively(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<CommandParameter<S>> flagParams,
+            int nextIndex,
+            List<ParameterNode<S, ?>> basePath
+    ) {
+        // For small flag sets, use simple permutation generation
+        if (flagParams.size() <= 3) {
+            generateSmallPermutations(currentNode, usage, allParameters, flagParams, nextIndex, basePath);
+        } else {
+            // For larger sets, use optimized iterative approach
+            generateLargePermutations(currentNode, usage, allParameters, flagParams, nextIndex, basePath);
         }
-        
-        final var result = new ArrayList<List<T>>();
-        final int itemCount = items.size();
-        
-        for (int i = 0; i < itemCount; i++) {
-            final T item = items.get(i);
-            final var remaining = new ArrayList<T>(itemCount - 1);
-            
-            // Build remaining list efficiently
-            for (int j = 0; j < itemCount; j++) {
-                if (j != i) {
-                    remaining.add(items.get(j));
-                }
-            }
-            
-            final var subPermutations = generatePermutations(remaining);
-            for (var perm : subPermutations) {
-                final var newPerm = new ArrayList<T>(itemCount);
-                newPerm.add(item);
-                newPerm.addAll(perm);
-                result.add(newPerm);
-            }
-        }
-        
-        return result;
     }
     
-    private ParameterNode<S, ?> getChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
-        // Use optimized search - check commands first as they're prioritized
+    private void generateSmallPermutations(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<CommandParameter<S>> flagParams,
+            int nextIndex,
+            List<ParameterNode<S, ?>> basePath
+    ) {
+        // Direct handling for 1-3 flags to avoid overhead
+        final int size = flagParams.size();
+        if (size == 1) {
+            processSinglePermutation(currentNode, usage, allParameters, flagParams, nextIndex, basePath);
+        } else if (size == 2) {
+            // Handle 2! = 2 permutations directly
+            processTwoPermutations(currentNode, usage, allParameters, flagParams, nextIndex, basePath);
+        } else {
+            // Handle 3! = 6 permutations directly
+            processThreePermutations(currentNode, usage, allParameters, flagParams, nextIndex, basePath);
+        }
+    }
+    
+    private void processSinglePermutation(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<CommandParameter<S>> flagParams,
+            int nextIndex,
+            List<ParameterNode<S, ?>> basePath
+    ) {
+        final var flagNode = getOrCreateChildNode(currentNode, flagParams.get(0));
+        final var updatedPath = new ArrayList<>(basePath);
+        updatedPath.add(flagNode);
+        
+        if (nextIndex < allParameters.size()) {
+            addParametersToTree(flagNode, usage, allParameters, nextIndex, updatedPath);
+        } else {
+            flagNode.setExecutableUsage(usage);
+        }
+    }
+    
+    private void processTwoPermutations(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<CommandParameter<S>> flagParams,
+            int nextIndex,
+            List<ParameterNode<S, ?>> basePath
+    ) {
+        final var flag1 = flagParams.get(0);
+        final var flag2 = flagParams.get(1);
+        
+        // Permutation 1: [flag1, flag2]
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag1, flag2), nextIndex, basePath);
+        
+        // Permutation 2: [flag2, flag1]
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag2, flag1), nextIndex, basePath);
+    }
+    
+    private void processThreePermutations(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<CommandParameter<S>> flagParams,
+            int nextIndex,
+            List<ParameterNode<S, ?>> basePath
+    ) {
+        final var flag1 = flagParams.get(0);
+        final var flag2 = flagParams.get(1);
+        final var flag3 = flagParams.get(2);
+        
+        // All 6 permutations of 3 flags
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag1, flag2, flag3), nextIndex, basePath);
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag1, flag3, flag2), nextIndex, basePath);
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag2, flag1, flag3), nextIndex, basePath);
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag2, flag3, flag1), nextIndex, basePath);
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag3, flag1, flag2), nextIndex, basePath);
+        processPermutationPath(currentNode, usage, allParameters, List.of(flag3, flag2, flag1), nextIndex, basePath);
+    }
+    
+    private void processPermutationPath(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<CommandParameter<S>> permutation,
+            int nextIndex,
+            List<ParameterNode<S, ?>> basePath
+    ) {
+        var nodePointer = currentNode;
+        final var updatedPath = new ArrayList<>(basePath);
+        
+        for (var flagParam : permutation) {
+            final var flagNode = getOrCreateChildNode(nodePointer, flagParam);
+            updatedPath.add(flagNode);
+            nodePointer = flagNode;
+        }
+        
+        if (nextIndex < allParameters.size()) {
+            addParametersToTree(nodePointer, usage, allParameters, nextIndex, updatedPath);
+        } else {
+            nodePointer.setExecutableUsage(usage);
+        }
+    }
+    
+    private void generateLargePermutations(
+            ParameterNode<S, ?> currentNode,
+            CommandUsage<S> usage,
+            List<CommandParameter<S>> allParameters,
+            List<CommandParameter<S>> flagParams,
+            int nextIndex,
+            List<ParameterNode<S, ?>> basePath
+    ) {
+        // For larger sets, use Heap's algorithm iteratively
+        // This is more complex but more efficient for larger permutation sets
+        final int n = flagParams.size();
+        final int[] indices = new int[n];
+        
+        // First permutation (identity)
+        processPermutationPath(currentNode, usage, allParameters, new ArrayList<>(flagParams), nextIndex, basePath);
+        
+        int i = 0;
+        while (i < n) {
+            if (indices[i] < i) {
+                // Swap elements
+                if (i % 2 == 0) {
+                    Collections.swap(flagParams, 0, i);
+                } else {
+                    Collections.swap(flagParams, indices[i], i);
+                }
+                
+                // Process this permutation
+                processPermutationPath(currentNode, usage, allParameters, new ArrayList<>(flagParams), nextIndex, basePath);
+                
+                indices[i]++;
+                i = 0;
+            } else {
+                indices[i] = 0;
+                i++;
+            }
+        }
+    }
+    
+    private ParameterNode<S, ?> getOrCreateChildNode(ParameterNode<S, ?> parent, CommandParameter<S> param) {
+        // Optimized child lookup with early termination
         final var children = parent.getChildren();
+        final String paramName = param.name();
+        final Type paramType = param.valueType();
+        
         for (var child : children) {
-            if (child.data.name().equalsIgnoreCase(param.name())
-                    && TypeUtility.matches(child.data.valueType(), param.valueType())) {
+            if (child.data.name().equalsIgnoreCase(paramName) &&
+                    TypeUtility.matches(child.data.valueType(), paramType)) {
                 return child;
             }
         }
         
-        // Create new node with proper depth calculation
+        // Create new node
         final ParameterNode<S, ?> newNode = param.isCommand()
                 ? new CommandNode<>(param.asCommand(), parent.getDepth() + 1, null)
                 : new ArgumentNode<>(param, parent.getDepth() + 1, null);
@@ -252,7 +391,7 @@ public final class CommandTree<S extends Source> {
     }
     
     /**
-     * HEAVILY OPTIMIZED context matching - the main performance bottleneck
+     * Ultra-optimized context matching - removed excessive profiling
      */
     public @NotNull CommandDispatch<S> contextMatch(
             ArgumentQueue input,
@@ -272,9 +411,9 @@ public final class CommandTree<S extends Source> {
             return dispatch;
         }
         
-        // Try all children with early termination
+        // Process children efficiently
         for (var child : rootChildren) {
-            final var result = dispatchNodeOptimized(config, dispatch, input, child, 0);
+            final var result = dispatchNode(config, dispatch, input, child, 0);
             if (result.getResult() != CommandDispatch.Result.UNKNOWN) {
                 return result;
             }
@@ -284,18 +423,17 @@ public final class CommandTree<S extends Source> {
     }
     
     /**
-     * Heavily optimized node dispatching with minimal allocations and maximum performance
+     * Streamlined node dispatching without profiling overhead
      */
-    private @NotNull CommandDispatch<S> dispatchNodeOptimized(
+    private @NotNull CommandDispatch<S> dispatchNode(
             ImperatConfig<S> config,
             CommandDispatch<S> commandDispatch,
             ArgumentQueue input,
             @NotNull ParameterNode<S, ?> currentNode,
             int depth
     ) {
+        // Bounds check
         final int inputSize = input.size();
-        
-        // Early bounds check
         if (depth >= inputSize) {
             if (currentNode.isExecutable()) {
                 commandDispatch.append(currentNode);
@@ -307,7 +445,7 @@ public final class CommandTree<S extends Source> {
         
         final String rawInput = input.get(depth);
         
-        // Fast path for greedy parameters
+        // Greedy parameter check
         if (currentNode.isGreedyParam()) {
             commandDispatch.append(currentNode);
             commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
@@ -315,17 +453,17 @@ public final class CommandTree<S extends Source> {
             return commandDispatch;
         }
         
-        // Optimized input matching with minimal object creation
+        // Input matching loop with reduced overhead
         var workingNode = currentNode;
         final boolean strictMode = config.strictCommandTree();
         
-        while (!matchesInputOptimized(workingNode, rawInput, strictMode)) {
+        while (!matchesInput(workingNode, rawInput, strictMode)) {
             if (workingNode.isOptional()) {
                 commandDispatch.append(workingNode);
                 
                 var nextWorkingNode = workingNode.getNextParameterChild();
                 if (nextWorkingNode == null) {
-                    if(workingNode.isExecutable()) {
+                    if (workingNode.isExecutable()) {
                         commandDispatch.setResult(CommandDispatch.Result.COMPLETE);
                         commandDispatch.setDirectUsage(workingNode.executableUsage);
                     }
@@ -337,19 +475,18 @@ public final class CommandTree<S extends Source> {
             }
         }
         
-        // Handle free flags efficiently using cached data
-        if (!workingNode.isFlag() && isInputFlag(rawInput)) {
-            final var flagData = getFlagFromCache(rawInput);
+        // Flag handling with cached lookup
+        if (!workingNode.isFlag() && isFlag(rawInput)) {
+            final var flagData = flagCache.get(rawInput.substring(1));
             if (flagData == null) {
                 return commandDispatch;
             }
             final int depthIncrease = flagData.isSwitch() ? 1 : 2;
-            return dispatchNodeOptimized(config, commandDispatch, input, workingNode, depth + depthIncrease);
+            return dispatchNode(config, commandDispatch, input, workingNode, depth + depthIncrease);
         }
         
         commandDispatch.append(workingNode);
         
-        // Handle flag depth increment
         if (workingNode.isTrueFlag()) {
             depth++;
         }
@@ -360,10 +497,10 @@ public final class CommandTree<S extends Source> {
             return handleLastDepth(commandDispatch, workingNode);
         }
         
-        // Continue with children - optimized iteration
+        // Process children
         final var children = workingNode.getChildren();
         for (var child : children) {
-            final var result = dispatchNodeOptimized(config, commandDispatch, input, child, depth + 1);
+            final var result = dispatchNode(config, commandDispatch, input, child, depth + 1);
             if (result.getResult() == CommandDispatch.Result.COMPLETE) {
                 return result;
             }
@@ -383,15 +520,16 @@ public final class CommandTree<S extends Source> {
         }
         
         if (node.isCommand()) {
-            addOptionalChildrenOptimized(dispatch, node);
+            addOptionalChildren(dispatch, node);
             dispatch.setResult(CommandDispatch.Result.COMPLETE);
             return dispatch;
         }
         
-        final var requiredNode = findRequiredNodeDeeply(node);
+        final var requiredNode = findRequiredNode(node);
+        
         if (requiredNode == null) {
             dispatch.setResult(CommandDispatch.Result.COMPLETE);
-            addOptionalChildrenOptimized(dispatch, node);
+            addOptionalChildren(dispatch, node);
         } else {
             dispatch.setResult(requiredNode.isCommand()
                     ? CommandDispatch.Result.COMPLETE
@@ -402,27 +540,22 @@ public final class CommandTree<S extends Source> {
     }
     
     /**
-     * Cached flag lookup for better performance
+     * Fast flag checking
      */
-    private @Nullable FlagData<S> getFlagFromCache(String rawInput) {
-        // Fast path using pre-built cache
-        return flagCache.get(rawInput.startsWith("-") ? rawInput.substring(1) : rawInput);
-    }
-    
-    /**
-     * Optimized flag checking
-     */
-    private static boolean isInputFlag(String input) {
+    private static boolean isFlag(String input) {
         return input.length() > 1 && input.charAt(0) == '-';
     }
     
-    private @Nullable ParameterNode<S, ?> findRequiredNodeDeeply(ParameterNode<S, ?> currentNode) {
+    /**
+     * Optimized required node search
+     */
+    private @Nullable ParameterNode<S, ?> findRequiredNode(ParameterNode<S, ?> currentNode) {
         final var children = currentNode.getChildren();
         for (var child : children) {
             if (child.isRequired()) {
                 return child;
             }
-            final var deepReq = findRequiredNodeDeeply(child);
+            final var deepReq = findRequiredNode(child);
             if (deepReq != null) {
                 return deepReq;
             }
@@ -430,7 +563,10 @@ public final class CommandTree<S extends Source> {
         return null;
     }
     
-    private void addOptionalChildrenOptimized(CommandDispatch<S> dispatch, ParameterNode<S, ?> currentNode) {
+    /**
+     * Streamlined optional children addition
+     */
+    private void addOptionalChildren(CommandDispatch<S> dispatch, ParameterNode<S, ?> currentNode) {
         var current = currentNode;
         while (current != null) {
             final var childOptional = getOptionalChild(current);
@@ -448,6 +584,9 @@ public final class CommandTree<S extends Source> {
         }
     }
     
+    /**
+     * Fast optional child getter
+     */
     private @Nullable ParameterNode<S, ?> getOptionalChild(ParameterNode<S, ?> node) {
         final var children = node.getChildren();
         for (var child : children) {
@@ -459,9 +598,9 @@ public final class CommandTree<S extends Source> {
     }
     
     /**
-     * Optimized input matching with reduced method calls
+     * Optimized input matching
      */
-    private static <S extends Source> boolean matchesInputOptimized(
+    private static <S extends Source> boolean matchesInput(
             ParameterNode<S, ?> node,
             String input,
             boolean strictMode
@@ -472,7 +611,7 @@ public final class CommandTree<S extends Source> {
         return true;
     }
     
-    // Tab completion optimization - same logic flow as version 1 with version 2's optimizations
+    // Tab completion - optimized version without excessive profiling
     public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
         final int depthToReach = context.getArgToComplete().index();
         final var arguments = context.arguments();
@@ -489,7 +628,7 @@ public final class CommandTree<S extends Source> {
             }
             var child = node.getChild((c) -> {
                 boolean hasPerm = (ignorePerms || permissionResolver.hasPermission(source, c.data.permission()));
-                boolean matches = matchesInputOptimized(c, raw, config.strictCommandTree());
+                boolean matches = matchesInput(c, raw, config.strictCommandTree());
                 return hasPerm && matches;
             });
             if (child == null) {
@@ -498,57 +637,63 @@ public final class CommandTree<S extends Source> {
             node = child;
         }
         
-        // Get all valid children at once - EXACT SAME LOGIC AS VERSION 1
-        //HERE
-        final var validChildren = new ArrayList<ParameterNode<S, ?>>(8); // Pre-sized for performance
-        final var skippedSimilarChildren = new ArrayList<String>(4); // Pre-sized for performance
+        final var validChildren = collectValidChildren(node, source, permissionResolver, ignorePerms, config);
+        
+        if (validChildren.isEmpty()) {
+            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
+        }
+        
+        return processValidChildren(imperat, context, validChildren);
+    }
+    
+    /**
+     * Optimized valid children collection
+     */
+    private List<ParameterNode<S, ?>> collectValidChildren(
+            ParameterNode<S, ?> node,
+            S source,
+            Object permissionResolver,
+            boolean ignorePerms,
+            ImperatConfig<S> config
+    ) {
+        final var validChildren = new ArrayList<ParameterNode<S, ?>>(8);
+        final var skippedSimilarChildren = new HashSet<String>(4);
         final boolean overlapOptionalArgs = config.isOptionalParameterSuggestionOverlappingEnabled();
         
-        // Cache the children collection and filter once for performance
-        final var children = node.getChildren()
-                .stream()
-                .filter((child) -> ignorePerms || permissionResolver.hasPermission(source, child.data.permission()))
-                .collect(Collectors.toSet());
+        final var children = node.getChildren();
         
         for (var child : children) {
+            // Permission check
+            if (!ignorePerms && !hasPermission(permissionResolver, source, child.data.permission())) {
+                continue;
+            }
             
             if (child.isRequired()) {
                 validChildren.add(child);
                 continue;
             }
             
-            // For optional nodes: add if overlapOptionalArgs is true OR no similar node exists at different depth
-            if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepthOptimized(node, child)) {
-                
-                final String childFormat = child.data.format(); // Cache the format call
-                if (skippedSimilarChildren.contains(childFormat)) {
-                    continue;
+            // For optional nodes
+            if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepth(node, child)) {
+                final String childFormat = child.data.format();
+                if (!skippedSimilarChildren.contains(childFormat)) {
+                    validChildren.add(child);
+                    skippedSimilarChildren.add(childFormat);
                 }
-                validChildren.add(child);
-            } else {
-                final String childFormat = child.data.format(); // Cache the format call
-                skippedSimilarChildren.add(childFormat);
             }
         }
-        //DONE
         
-        if (validChildren.isEmpty()) {
-            return CompletableFuture.completedFuture(EMPTY_STRING_LIST); // Use cached empty list
-        }
-        
-        // Process the first valid child and determine if we should include more
-        return processValidChildrenOptimized(imperat, context, validChildren);
+        return validChildren;
     }
     
-    /**
-     * Optimized valid children processing with better parallelization
-     */
-    private CompletableFuture<List<String>> processValidChildrenOptimized(
+
+    
+    private CompletableFuture<List<String>> processValidChildren(
             Imperat<S> imperat,
             SuggestionContext<S> context,
             List<ParameterNode<S, ?>> validChildren
     ) {
-        final var childrenToProcess = filterChildrenToProcessOptimized(validChildren);
+        final var childrenToProcess = filterChildrenToProcess(validChildren);
         
         if (childrenToProcess.isEmpty()) {
             return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
@@ -560,7 +705,7 @@ public final class CommandTree<S extends Source> {
             return resolver.asyncAutoComplete(context, child.data);
         }
         
-        // Parallel processing with pre-sized result collection
+        // Parallel processing
         final var futures = new ArrayList<CompletableFuture<List<String>>>(childrenToProcess.size());
         for (var child : childrenToProcess) {
             final var resolver = imperat.config().getParameterSuggestionResolver(child.data);
@@ -569,16 +714,13 @@ public final class CommandTree<S extends Source> {
         
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .thenApply(v -> {
-                    final var result = new ArrayList<String>(64); // Pre-size for typical completion count
+                    final var result = new ArrayList<String>(64);
                     futures.forEach(future -> result.addAll(future.join()));
                     return result;
                 });
     }
     
-    /**
-     * Optimized children filtering with reduced allocations
-     */
-    private List<ParameterNode<S, ?>> filterChildrenToProcessOptimized(List<ParameterNode<S, ?>> validChildren) {
+    private List<ParameterNode<S, ?>> filterChildrenToProcess(List<ParameterNode<S, ?>> validChildren) {
         if (validChildren.size() <= 1) {
             return validChildren;
         }
@@ -600,10 +742,7 @@ public final class CommandTree<S extends Source> {
         return result;
     }
     
-    /**
-     * Optimized similar node detection with early termination
-     */
-    private boolean hasSimilarNodeWithDifferentDepthOptimized(
+    private boolean hasSimilarNodeWithDifferentDepth(
             ParameterNode<S, ?> currentNode,
             ParameterNode<S, ?> childNode
     ) {
@@ -626,7 +765,7 @@ public final class CommandTree<S extends Source> {
         return false;
     }
     
-    // Optimized usage search with reduced allocations
+    // Optimized usage search
     public ClosestUsageSearch<S> getClosestUsages(Context<S> context) {
         final var queue = context.arguments();
         final String firstArg = queue.getOr(0, null);
@@ -650,9 +789,6 @@ public final class CommandTree<S extends Source> {
         return null;
     }
     
-    /**
-     * Optimized recursive usage search with permission filtering
-     */
     private Set<CommandUsage<S>> getClosestUsagesRecursively(
             Set<CommandUsage<S>> currentUsages,
             ParameterNode<S, ?> node,
@@ -660,7 +796,7 @@ public final class CommandTree<S extends Source> {
     ) {
         if (node.isExecutable()) {
             final var usage = node.getExecutableUsage();
-            if (context.imperatConfig().getPermissionResolver().hasUsagePermission(context.source(), usage)) {
+            if (hasUsagePermission(context.imperatConfig().getPermissionResolver(), context.source(), usage)) {
                 currentUsages.add(usage);
             }
         }
@@ -687,9 +823,6 @@ public final class CommandTree<S extends Source> {
         return currentUsages;
     }
     
-    /**
-     * Helper method to add permitted usages efficiently
-     */
     private void addPermittedUsages(
             Set<CommandUsage<S>> currentUsages,
             ParameterNode<S, ?> child,
@@ -705,14 +838,23 @@ public final class CommandTree<S extends Source> {
         }
     }
     
+    
     /**
-     * Type-safe usage permission checking
+     * Type-safe permission checking
      */
+    @SuppressWarnings("unchecked")
+    private boolean hasPermission(Object resolver, S source, String permission) {
+        if (resolver instanceof dev.velix.imperat.resolvers.PermissionResolver) {
+            return ((dev.velix.imperat.resolvers.PermissionResolver<S>) resolver).hasPermission(source, permission);
+        }
+        return true;
+    }
+    
     @SuppressWarnings("unchecked")
     private boolean hasUsagePermission(Object resolver, S source, CommandUsage<S> usage) {
         if (resolver instanceof dev.velix.imperat.resolvers.PermissionResolver) {
             return ((dev.velix.imperat.resolvers.PermissionResolver<S>) resolver).hasUsagePermission(source, usage);
         }
-        return true; // Fallback
+        return true;
     }
 }

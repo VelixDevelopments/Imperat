@@ -172,16 +172,14 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
             .map(ExtractedInputFlag::value)
             .orElse(null);
     }
-
-
-    /**
-     * Resolves the arguments from the given plain input {@link Context}
-     */
+    
+    
     @Override
     public void resolve() throws ImperatException {
         var resolver = ParameterValueAssigner.create(command(), this, usage);
         resolver.resolve();
     }
+
 
 
     @Override

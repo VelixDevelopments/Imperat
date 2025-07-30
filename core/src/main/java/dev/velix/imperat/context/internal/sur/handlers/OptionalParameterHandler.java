@@ -10,13 +10,14 @@ import dev.velix.imperat.context.internal.ShiftTarget;
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.util.ImperatDebugger;
+import org.jetbrains.annotations.NotNull;
 
 public final class OptionalParameterHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
-        CommandParameter<S> currentParameter = stream.currentParameter().orElse(null);
-        String currentRaw = stream.currentRaw().orElse(null);
+    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+        CommandParameter<S> currentParameter = stream.currentParameterFast();
+        String currentRaw = stream.currentRawFast();
         
         if (currentParameter == null || currentRaw == null || !currentParameter.isOptional()) {
             return HandleResult.NEXT_HANDLER;

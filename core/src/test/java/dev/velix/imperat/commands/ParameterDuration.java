@@ -29,7 +29,7 @@ public class ParameterDuration<S extends Source> extends BaseParameterType<S, Du
     ) throws ImperatException {
         final long ms = Utilities.convertDurationToMs(input);
         if (ms == 0) {
-            throw new SourceException("Bad duration input");
+            throw new SourceException("Bad duration input '" + input + "'");
         }
         return new Duration(ms);
     }

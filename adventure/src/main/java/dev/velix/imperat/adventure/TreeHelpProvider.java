@@ -443,26 +443,6 @@ public class TreeHelpProvider<S extends Source> implements HelpProvider<S> {
         }
 
         /**
-         * Creates a neon theme with bright, vibrant colors on dark background
-         */
-        public static Theme createNeonTheme() {
-            return new Theme()
-                    .setBranch("╠═ ", TextColor.fromHexString("#FF00FF")) // Bright magenta
-                    .setLastBranch("╚═ ", TextColor.fromHexString("#FF00FF")) // Bright magenta
-                    .setIndent("║  ", TextColor.fromHexString("#FF00FF")) // Bright magenta
-                    .setEmptyIndent("   ", TextColor.fromHexString("#FF00FF")) // Bright magenta
-                    .setCommandNameColor(TextColor.fromHexString("#00FFFF")) // Cyan
-                    .setSubCommandNameColor(TextColor.fromHexString("#00FF00")) // Bright green
-                    .setDescriptionColor(TextColor.fromHexString("#FFFFFF")) // White
-                    .setUsageColor(TextColor.fromHexString("#FFFF00")) // Yellow
-                    .setSeparatorColor(TextColor.fromHexString("#FF69B4")) // Hot pink
-                    .setHeaderColor(TextColor.fromHexString("#1e78ff")) // Cyan
-                    .setFooterColor(TextColor.fromHexString("#1e78ff")) // Cyan
-                    .setHeaderMessage("« AVAILABLE COMMANDS »")
-                    .setFooterMessage("Type /{command} help for more information");
-        }
-
-        /**
          * Creates a synth-wave theme with retro 80s colors
          */
         public static Theme createSynthwaveTheme() {

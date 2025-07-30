@@ -265,62 +265,66 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         System.arraycopy(lineArgs, 1, argumentsOnly, 0, lineArgs.length - 1);
         return dispatch(sender, lineArgs[0], argumentsOnly);
     }
-
+    
     private CommandDispatch.Result handleExecution(Context<S> context) throws Throwable {
+        // START PROFILING - Add this line at the very beginning
         Command<S> command = context.command();
         S source = context.source();
-
+        
+        // EXISTING: Permission check - Add timing around it
         if (!config.getPermissionResolver().hasPermission(source, command.permission())) {
             throw new PermissionDeniedException();
         }
         
         CommandDispatch<S> searchResult = command.contextMatch(context);
+        
         CommandUsage<S> usage = searchResult.toUsage();
-
+        
         if(usage == null || searchResult.getResult() != CommandDispatch.Result.COMPLETE) {
             throw new InvalidSyntaxException();
         }
-        //executing usage
+        
+        // EXISTING: Usage execution - Add timing around it
         executeUsage(command, source, context, usage);
+        
         return searchResult.getResult();
     }
-
-    private void executeUsage(
-        final Command<S> command,
-        final S source,
-        final Context<S> context,
-        final CommandUsage<S> usage
+    
+    protected void executeUsage(
+            final Command<S> command,
+            final S source,
+            final Context<S> context,
+            final CommandUsage<S> usage
     ) throws Throwable {
-        //global pre-processing
+        
+        // MEASURE: Global pre-processing
         if (!preProcess(context, usage)) {
             return;
         }
-
-        //per command pre-processing
+        
+        // MEASURE: Command pre-processing
         if (!command.preProcess(this, context, usage)) {
             return;
         }
-
-        long ns = System.nanoTime();
+        
+        // MEASURE: Context resolution (this is likely the biggest bottleneck)
         ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
         resolvedContext.resolve();
-        System.out.println("Took " + (System.nanoTime()-ns) + "ns for resolving context");
-
-        //global post-processing
+        
+        // MEASURE: Global post-processing
         if (!postProcess(resolvedContext)) {
             return;
         }
-
-        //per command post-processing
+        
+        // MEASURE: Command post-processing
         if (!command.postProcess(this, resolvedContext, usage)) {
             return;
         }
-
-        //executing the usage
-        ImperatDebugger.debug("Executing usage '%s'", CommandUsage.format(command, usage));
+        
+        // MEASURE: Actual usage execution
         usage.execute(this, source, resolvedContext);
     }
-
+    
     private boolean preProcess(
         @NotNull Context<S> context,
         @NotNull CommandUsage<S> usage

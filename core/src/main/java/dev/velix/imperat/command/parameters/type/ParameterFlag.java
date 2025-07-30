@@ -48,8 +48,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Extrac
 
     @Override
     public @Nullable ExtractedInputFlag resolve(@NotNull ExecutionContext<S> context, @NotNull CommandInputStream<S> commandInputStream, @NotNull String rawFlag) throws ImperatException {
-        var currentParameter = commandInputStream.currentParameter()
-            .orElse(null);
+        var currentParameter = commandInputStream.currentParameterFast();
         if (currentParameter == null)
             return null;
 
@@ -65,6 +64,7 @@ public class ParameterFlag<S extends Source> extends BaseParameterType<S, Extrac
         if (!flagParameter.isSwitch()) {
             ParameterType<S, ?> inputType = flagParameter.flagData().inputType();
             rawInput = commandInputStream.popRaw().orElse(null);
+            System.out.println("GOT FLAG RAW IN= " + rawInput);
             if (rawInput != null) {
                 objInput = inputType.resolve(context, commandInputStream, rawInput);
                 if(objInput == null && !flagParameter.getDefaultValueSupplier().isEmpty()) {
