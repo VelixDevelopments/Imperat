@@ -10,7 +10,6 @@ import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownFlagException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Patterns;
 import org.jetbrains.annotations.NotNull;
 

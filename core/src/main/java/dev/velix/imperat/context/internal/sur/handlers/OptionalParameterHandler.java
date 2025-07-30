@@ -9,7 +9,6 @@ import dev.velix.imperat.context.internal.ExtractedInputFlag;
 import dev.velix.imperat.context.internal.ShiftTarget;
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ImperatException;
-import dev.velix.imperat.util.ImperatDebugger;
 import org.jetbrains.annotations.NotNull;
 
 public final class OptionalParameterHandler<S extends Source> implements ParameterHandler<S> {

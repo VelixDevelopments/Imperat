@@ -47,7 +47,7 @@ public final class ParameterString<S extends Source> extends BaseParameterType<S
         return !isQuoteChar(input.charAt(0)); // Quoted strings need letter-level parsing
     }
     
-    private String resolveWithPrecision(CommandInputStream<S> inputStream, String input, CommandParameter<S> parameter) throws ImperatException {
+    private String resolveWithPrecision(CommandInputStream<S> inputStream, String input, CommandParameter<S> parameter) {
         StringBuilder builder = new StringBuilder();
         
         final Character current = inputStream.currentLetter().orElse(null);

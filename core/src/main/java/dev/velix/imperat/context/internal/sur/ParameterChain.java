@@ -24,9 +24,6 @@ public class ParameterChain<S extends Source> {
                 // ADD: Time each individual handler
                 HandleResult result = handler.handle(context, stream);
                 
-                // Record timing with handler class name
-                String handlerName = handler.getClass().getSimpleName().replace("Handler", "");
-                
                 switch (result) {
                     case TERMINATE:
                         break pipeLine;

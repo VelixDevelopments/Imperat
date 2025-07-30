@@ -508,7 +508,7 @@ public class TreeHelpProvider<S extends Source> implements HelpProvider<S> {
     }
 
     @Override
-    public void provide(ExecutionContext<S> context, S source) throws ImperatException {
+    public void provide(ExecutionContext<S> context, S source) {
         Command<S> command = context.command();
 
         // Display main command with usage
