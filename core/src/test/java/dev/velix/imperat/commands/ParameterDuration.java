@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ParameterDuration<S extends Source> extends BaseParameterType<S, Duration> {
 
-    private final SuggestionResolver<S> resolver = SuggestionResolver.plain(
+    private final SuggestionResolver<S> resolver = SuggestionResolver.staticSuggestions(
             "permanent", "30d", "1y", "5y"
     );
 

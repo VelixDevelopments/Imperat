@@ -34,6 +34,7 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         );
         this.dispatcher = dispatcher;
         this.imperatCommand = imperatCommand;
+        this.setPermission(imperatCommand.permission());
     }
 
     @Override

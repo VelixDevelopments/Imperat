@@ -598,7 +598,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         SuggestionResolver<S> suggestionResolver = null;
 
         if (suggestAnnotation != null) {
-            suggestionResolver = SuggestionResolver.plain(
+            suggestionResolver = SuggestionResolver.staticSuggestions(
                 config.replacePlaceholders(suggestAnnotation.value())
             );
         } else if (suggestionProvider != null) {
@@ -649,7 +649,7 @@ final class SimpleCommandClassVisitor<S extends Source> extends CommandClassVisi
         if (flag != null) {
             String[] flagAliases = flag.value();
             if (suggestAnnotation != null) {
-                suggestionResolver = SuggestionResolver.plain(config.replacePlaceholders(suggestAnnotation.value()));
+                suggestionResolver = SuggestionResolver.staticSuggestions(config.replacePlaceholders(suggestAnnotation.value()));
             }
 
             return AnnotationParameterDecorator.decorate(

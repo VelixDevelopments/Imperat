@@ -65,7 +65,7 @@ public final class NumericParameterDecorator<S extends Source> extends InputPara
         }else {
             suggestion = range.getMin() + "-" + range.getMax();
         }
-        return SuggestionResolver.plain(suggestion);
+        return SuggestionResolver.staticSuggestions(suggestion);
     }
 
 }

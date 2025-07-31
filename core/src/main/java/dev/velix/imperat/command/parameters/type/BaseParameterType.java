@@ -79,7 +79,7 @@ public abstract class BaseParameterType<S extends Source, T>
      */
     @Override
     public SuggestionResolver<S> getSuggestionResolver() {
-        return suggestions.isEmpty() ?  null : SuggestionResolver.plain(suggestions);
+        return suggestions.isEmpty() ?  null : SuggestionResolver.staticSuggestions(suggestions);
     }
 
     /**

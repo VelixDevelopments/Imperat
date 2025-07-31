@@ -21,19 +21,19 @@ import java.util.concurrent.CompletableFuture;
 @ApiStatus.AvailableSince("1.0.0")
 public interface SuggestionResolver<S extends Source> {
 
-    static <S extends Source> SuggestionResolver<S> plain(List<String> results) {
-        return ((context, parameterToComplete) -> results);
+    static <S extends Source> SuggestionResolver<S> staticSuggestions(List<String> results) {
+        return new StaticSuggestionResolver<>(results);
     }
 
-    static <S extends Source> SuggestionResolver<S> plain(String... results) {
-        return plain(Arrays.asList(results));
+    static <S extends Source> SuggestionResolver<S> staticSuggestions(String... results) {
+        return staticSuggestions(Arrays.asList(results));
     }
 
     static <S extends Source> SuggestionResolver<S> forCommand(Command<S> command) {
         List<String> list = new ArrayList<>();
         list.add(command.name());
         list.addAll(command.aliases());
-        return plain(list);
+        return staticSuggestions(list);
     }
 
 

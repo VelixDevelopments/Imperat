@@ -63,7 +63,7 @@ public sealed class ParameterBuilder<S extends Source, T> permits FlagBuilder {
     }
 
     public ParameterBuilder<S, T> suggest(String... suggestions) {
-        return suggest(SuggestionResolver.plain(suggestions));
+        return suggest(SuggestionResolver.staticSuggestions(suggestions));
     }
 
     public CommandParameter<S> build() {
