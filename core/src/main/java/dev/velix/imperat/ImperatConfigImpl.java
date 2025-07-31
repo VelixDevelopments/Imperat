@@ -11,7 +11,6 @@ import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.command.processors.impl.DefaultProcessors;
 import dev.velix.imperat.command.returns.ReturnResolver;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
-import dev.velix.imperat.command.tree.ClosestUsageSearch;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ParamTypeRegistry;
 import dev.velix.imperat.context.ResolvedContext;
@@ -224,9 +223,11 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
             (exception, imperat, context) -> {
                 S source = context.source();
                 //if usage is null, find the closest usage
-                ClosestUsageSearch<S> closestUsageSearch = context.command().tree().getClosestUsages(context);
+                /*ClosestUsageSearch<S> closestUsageSearch = context.command().tree().getClosestUsages(context);
                 source.error("Invalid command usage '/" + context.command().name() + " " + context.arguments().join(" ") + "'");
                 source.error("Closest Command Usage: " + (imperat.commandPrefix() + CommandUsage.format(context.label(), closestUsageSearch.getClosest())) );
+                */
+                
             }
         );
         
