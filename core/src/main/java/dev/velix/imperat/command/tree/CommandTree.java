@@ -18,9 +18,9 @@ import java.util.*;
  * Removed excessive profiling and optimized hot paths
  * @author Mqzen (Ultra-Optimized)
  */
-public final class CommandTree<S extends Source> {
-    final Command<S> rootCommand;
-    final CommandNode<S> root;
+public class CommandTree<S extends Source> {
+    protected final Command<S> rootCommand;
+    protected final CommandNode<S> root;
     
     // Pre-computed immutable collections to eliminate allocations
     private final static int MAX_SUGGESTIONS_PER_ARGUMENT = 20;
@@ -34,7 +34,7 @@ public final class CommandTree<S extends Source> {
     private final ThreadLocal<ArrayList<CommandParameter<S>>> paramBuffer =
             ThreadLocal.withInitial(() -> new ArrayList<>(8));
     
-    CommandTree(Command<S> command) {
+    protected CommandTree(Command<S> command) {
         this.rootCommand = command;
         this.root = new CommandNode<>(command, -1, command.getDefaultUsage());
         this.flagCache = initializeFlagCache();

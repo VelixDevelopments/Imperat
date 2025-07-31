@@ -301,7 +301,7 @@ public class TestRun {
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"target", ""});
         var res = results.join();
-        Assertions.assertLinesMatch(Stream.of("this is a long greedy", "some sentence", "idk"), res.stream());
+        Assertions.assertLinesMatch(Stream.of("idk", "some sentence", "this is a long greedy"), res.stream());
     }
 
     @Test

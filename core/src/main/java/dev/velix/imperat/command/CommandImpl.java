@@ -10,6 +10,7 @@ import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.CommandTreeVisualizer;
+import dev.velix.imperat.command.tree.suggestions.EnhancedCommandTree;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
@@ -85,7 +86,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.emptyUsage = CommandUsage.<S>builder().build(this);
         this.defaultUsage = imperat.config().getGlobalDefaultUsage().build(this);
         this.autoCompleter = AutoCompleter.createNative(this);
-        this.commandTree = parent != null ? null : CommandTree.create(this);
+        this.commandTree = parent != null ? null : EnhancedCommandTree.create(this);
         this.visualizer = CommandTreeVisualizer.of(commandTree);
         this.suggestionResolver = SuggestionResolver.forCommand(this);
 

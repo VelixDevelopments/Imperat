@@ -452,7 +452,6 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     @ApiStatus.AvailableSince("1.9.0")
     void registerSubCommand(Command<S> subCommand);
 
-
     class Builder<S extends Source> {
 
         private final Imperat<S> imperat;
