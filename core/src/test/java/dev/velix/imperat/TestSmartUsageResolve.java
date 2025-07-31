@@ -9,7 +9,7 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.annotations.examples.BanCommand;
 import dev.velix.imperat.components.TestSource;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.internal.ContextFactory;
@@ -32,7 +32,7 @@ public class TestSmartUsageResolve {
     private static ResolvedContext<TestSource> inputResolve(String command, String... args) {
         System.out.println("-------------");
         System.out.println("args= " + Arrays.toString(args));
-        ArgumentQueue queue = ArgumentQueue.parse(args);
+        ArgumentInput queue = ArgumentInput.parse(args);
         System.out.println("QUEUE: " + queue.join(","));
 
         Command<TestSource> cmd = IMPERAT.getCommand(command);
@@ -136,7 +136,7 @@ public class TestSmartUsageResolve {
 
     @Test
     public void testInputParse() {
-        ArgumentQueue queue = ArgumentQueue.parse("Its me again and this is my msg: \"sorry for interruption\"");
+        ArgumentInput queue = ArgumentInput.parse("Its me again and this is my msg: \"sorry for interruption\"");
         queue.forEach(System.out::println);
     }
 

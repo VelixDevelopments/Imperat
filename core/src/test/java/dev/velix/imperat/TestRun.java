@@ -18,8 +18,6 @@ import dev.velix.imperat.commands.ParameterDuration;
 import dev.velix.imperat.commands.RankCommand;
 import dev.velix.imperat.commands.TestAC;
 import dev.velix.imperat.commands.annotations.examples.*;
-import dev.velix.imperat.context.ArgumentQueue;
-import dev.velix.imperat.context.Context;
 import dev.velix.imperat.misc.CustomEnum;
 import dev.velix.imperat.misc.CustomEnumParameterType;
 import dev.velix.imperat.commands.EmptyCmd;
@@ -53,7 +51,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -748,22 +745,9 @@ public class TestRun {
         cmd.visualizeTree();
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("party", "invite mqzen"));
         
-        ArgumentQueue queue = ArgumentQueue.parse(new String[]{"invite"});
-        Context<TestSource> context = IMPERAT.config.getContextFactory().createContext(IMPERAT, new TestSource(System.out), cmd, "test", queue);
-        
-        var closestSearch = cmd.tree().getClosestUsages(context);
-        
-        Set<CommandUsage<TestSource>> usages = closestSearch.getClosestUsages();
-        CommandUsage<TestSource> closest = closestSearch.getClosest();
-        
-        System.out.println("Closest usage:- ");
-        System.out.println("  - " + closest.formatted());
-        
-        System.out.println("Possible usages:-");
-        for(var u : usages) {
-            System.out.println("  - /" + CommandUsage.format(cmd, u) );
-        }
+        //TODO create a smarter approach for closest usage approach, then test it here.
     }
+    
     @Test
     public void testSetRank() {
         Assertions.assertDoesNotThrow(()-> {

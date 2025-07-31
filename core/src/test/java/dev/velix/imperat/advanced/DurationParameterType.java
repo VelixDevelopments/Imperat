@@ -1,11 +1,9 @@
 package dev.velix.imperat.advanced;
 
-import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
-import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.components.TestSource;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
@@ -31,7 +29,7 @@ public final class DurationParameterType extends BaseParameterType<TestSource, D
 
     /**
      * Determines whether the provided input matches the expected format or criteria
-     * for a given command parameter. this is used during {@link CommandTree#contextMatch(ArgumentQueue, ImperatConfig)}
+     * for a given command parameter. this is used during {@link dev.velix.imperat.command.tree.CommandTree#contextMatch(ArgumentInput)}
      *
      * @param input     The input strings to be matched against the parameter criteria.
      * @param parameter The command parameter that provides context for the input handling.

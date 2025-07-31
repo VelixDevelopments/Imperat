@@ -44,7 +44,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private final Map<String, Command<S>> children = new LinkedHashMap<>();
     private final UsageMap<S> usages = new UsageMap<>();
     private final AutoCompleter<S> autoCompleter;
-    private final @Nullable CommandTree<S> commandTree;
+    private final @Nullable CommandTree<S> standardCommandTree;
     private final @NotNull CommandTreeVisualizer<S> visualizer;
     private String permission = null;
     private Description description = Description.EMPTY;
@@ -85,8 +85,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.emptyUsage = CommandUsage.<S>builder().build(this);
         this.defaultUsage = imperat.config().getGlobalDefaultUsage().build(this);
         this.autoCompleter = AutoCompleter.createNative(this);
-        this.commandTree = parent != null ? null : CommandTree.create(this);
-        this.visualizer = CommandTreeVisualizer.of(commandTree);
+        this.standardCommandTree = parent != null ? null : CommandTree.create(imperat.config(), this);
+        this.visualizer = CommandTreeVisualizer.of(standardCommandTree);
         this.suggestionResolver = SuggestionResolver.forCommand(this);
 
     }
@@ -173,10 +173,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
     @Override
     public @NotNull CommandDispatch<S> contextMatch(Context<S> context) {
-        if (commandTree != null) {
+        if (standardCommandTree != null) {
             var copy = context.arguments().copy();
             copy.removeIf(String::isBlank);
-            return commandTree.contextMatch(copy, context.imperat().config());
+            return standardCommandTree.contextMatch(copy);
         } else {
             throw new IllegalCallerException("Cannot match a sub command in a root's execution !");
         }
@@ -301,7 +301,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
     @Override
     public CommandTree<S> tree() {
-        return this.commandTree;
+        return this.standardCommandTree;
     }
 
     /**
@@ -352,7 +352,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
             mainUsage = usage;
         }
 
-        if (commandTree != null) commandTree.parseUsage(usage);
+        if (standardCommandTree != null) standardCommandTree.parseUsage(usage);
     }
 
     @Override

@@ -3,7 +3,7 @@ package dev.velix.imperat.context.internal;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
@@ -16,9 +16,9 @@ class ContextImpl<S extends Source> implements Context<S> {
     private final Command<S> commandUsed;
     private final S source;
     private final String label;
-    private final ArgumentQueue raw;
+    private final ArgumentInput raw;
 
-    public ContextImpl(Imperat<S> imperat, Command<S> commandUsed, S source, String label, ArgumentQueue raw) {
+    public ContextImpl(Imperat<S> imperat, Command<S> commandUsed, S source, String label, ArgumentInput raw) {
         this.imperat = imperat;
         this.imperatConfig = imperat.config();
         this.commandUsed = commandUsed;
@@ -57,7 +57,7 @@ class ContextImpl<S extends Source> implements Context<S> {
     }
 
     @Override
-    public @NotNull ArgumentQueue arguments() {
+    public @NotNull ArgumentInput arguments() {
         return raw;
     }
 
@@ -70,7 +70,7 @@ class ContextImpl<S extends Source> implements Context<S> {
         return this.source;
     }
 
-    public ArgumentQueue getRaw() {
+    public ArgumentInput getRaw() {
         return this.raw;
     }
 

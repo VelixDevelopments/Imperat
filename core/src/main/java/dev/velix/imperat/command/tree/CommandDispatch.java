@@ -65,7 +65,7 @@ public final class CommandDispatch<S extends Source> {
 
         /**
          * Defines a complete dispatch of the command,
-         * {@link CommandUsage} cannot be null unless the {@link CommandTree} has issues
+         * {@link CommandUsage} cannot be null unless the {@link StandardCommandTree} has issues
          */
         COMPLETE,
 

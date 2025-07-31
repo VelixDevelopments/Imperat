@@ -13,25 +13,25 @@ import java.util.List;
 import java.util.StringJoiner;
 
 @ApiStatus.Internal
-final class ArgumentQueueImpl extends LinkedList<String> implements ArgumentQueue {
+final class ArgumentInputImpl extends LinkedList<String> implements ArgumentInput {
 
     private final String originalRaw;
     private final List<String> unmodifiableView;
 
-    ArgumentQueueImpl(String originalRaw, @NotNull Collection<? extends String> input) {
+    ArgumentInputImpl(String originalRaw, @NotNull Collection<? extends String> input) {
         super(input);
         this.originalRaw = originalRaw;
         this.unmodifiableView = Collections.unmodifiableList(this);
     }
 
 
-    ArgumentQueueImpl(String originalRaw, @NotNull String... rawArgs) {
+    ArgumentInputImpl(String originalRaw, @NotNull String... rawArgs) {
         this.originalRaw = originalRaw;
         Collections.addAll(this, rawArgs);
         this.unmodifiableView = Collections.unmodifiableList(this);
     }
 
-    ArgumentQueueImpl() {
+    ArgumentInputImpl() {
         this.originalRaw = "";
         this.unmodifiableView = new ArrayList<>();
     }
@@ -67,8 +67,8 @@ final class ArgumentQueueImpl extends LinkedList<String> implements ArgumentQueu
     }
 
     @Override
-    public @NotNull ArgumentQueue copy() {
-        return new ArgumentQueueImpl(originalRaw, this);
+    public @NotNull ArgumentInput copy() {
+        return new ArgumentInputImpl(originalRaw, this);
     }
 
 }

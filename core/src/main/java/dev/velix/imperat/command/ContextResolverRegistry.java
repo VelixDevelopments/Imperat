@@ -2,7 +2,7 @@ package dev.velix.imperat.command;
 
 import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.help.CommandHelp;
@@ -24,7 +24,7 @@ public final class ContextResolverRegistry<S extends Source> extends Registry<Ty
         super();
         this.registerResolver(TypeWrap.of(CommandHelp.class).getType(), (ctx, param) -> new CommandHelp(config, ctx));
         this.registerResolver(new TypeWrap<ExecutionContext<S>>(){}.getType(), (ctx, param)-> ctx);
-        this.registerResolver(new TypeWrap<ArgumentQueue>(){}.getType(),(ctx, param)-> ctx.arguments());
+        this.registerResolver(new TypeWrap<ArgumentInput>(){}.getType(),(ctx, param)-> ctx.arguments());
     }
 
     public static <S extends Source> ContextResolverRegistry<S> createDefault(final ImperatConfig<S> imperat) {

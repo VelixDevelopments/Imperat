@@ -44,9 +44,9 @@ public interface Context<S extends Source> {
 
     /**
      * @return the arguments entered by the {@link Source}
-     * @see ArgumentQueue
+     * @see ArgumentInput
      */
-    ArgumentQueue arguments();
+    ArgumentInput arguments();
 
 
 }

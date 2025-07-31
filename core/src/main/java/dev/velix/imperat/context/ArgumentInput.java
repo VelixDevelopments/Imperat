@@ -17,17 +17,17 @@ import java.util.List;
  */
 @ApiStatus.AvailableSince("1.0.0")
 @ContextResolved
-public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
+public interface ArgumentInput extends Deque<String>, List<String>, Cloneable {
 
-    static ArgumentQueue parse(String[] rawArguments) {
+    static ArgumentInput parse(String[] rawArguments) {
         return StringUtils.parseToQueue(String.join(" ", rawArguments), false);
     }
 
-    static ArgumentQueue parse(String string) {
+    static ArgumentInput parse(String string) {
         return StringUtils.parseToQueue(string, false);
     }
 
-    static ArgumentQueue parseAutoCompletion(String[] argumentsOnly, boolean extraLastSpace) {
+    static ArgumentInput parseAutoCompletion(String[] argumentsOnly, boolean extraLastSpace) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < argumentsOnly.length; i++) {
             var arg = argumentsOnly[i];
@@ -41,7 +41,7 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
         return parseAutoCompletion(builder.toString(), extraLastSpace);
     }
 
-    static ArgumentQueue parseAutoCompletion(String string, boolean extraLastSpace) {
+    static ArgumentInput parseAutoCompletion(String string, boolean extraLastSpace) {
         if (string.isEmpty()) {
             return StringUtils.parseToQueue("", true);
         }
@@ -49,17 +49,17 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
     }
 
     /**
-     * @return a new, empty {@link ArgumentQueue}.
+     * @return a new, empty {@link ArgumentInput}.
      */
-    static ArgumentQueue of(String originalLine) {
-        return new ArgumentQueueImpl(originalLine);
+    static ArgumentInput of(String originalLine) {
+        return new ArgumentInputImpl(originalLine);
     }
 
     /**
-     * @return a new, empty {@link ArgumentQueue}.
+     * @return a new, empty {@link ArgumentInput}.
      */
-    static ArgumentQueue empty() {
-        return new ArgumentQueueImpl();
+    static ArgumentInput empty() {
+        return new ArgumentInputImpl();
     }
 
     String getOriginalRaw();
@@ -115,9 +115,9 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
 
     /**
      * Returns an immutable copy of this stack. This copy will behave
-     * independently of the original {@link ArgumentQueue}.
+     * independently of the original {@link ArgumentInput}.
      *
-     * @return An immutable copy of this {@link ArgumentQueue}.
+     * @return An immutable copy of this {@link ArgumentInput}.
      */
     @NotNull
     @Unmodifiable
@@ -129,6 +129,6 @@ public interface ArgumentQueue extends Deque<String>, List<String>, Cloneable {
      * @return A copy of this argument stack
      */
     @NotNull
-    ArgumentQueue copy();
+    ArgumentInput copy();
 
 }

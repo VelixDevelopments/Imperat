@@ -1,6 +1,6 @@
 package dev.velix.imperat;
 
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.help.CommandHelp;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -28,7 +28,7 @@ final class ImperatBukkitHelpTopic extends GenericCommandHelpTopic {
         List<String> messages = new ArrayList<>();
 
         HelpSource source = new HelpSource(imperat.wrapSender(Bukkit.getConsoleSender()), messages);
-        var context = factory.createContext(imperat, source, command.imperatCommand, command.imperatCommand.name(), ArgumentQueue.empty());
+        var context = factory.createContext(imperat, source, command.imperatCommand, command.imperatCommand.name(), ArgumentInput.empty());
         var resolvedContext = factory.createResolvedContext(context, command.imperatCommand.getDefaultUsage());
         CommandHelp commandHelp = new CommandHelp(imperat.config, resolvedContext);
         commandHelp.display(source);

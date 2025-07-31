@@ -2,7 +2,7 @@ package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import java.util.List;
@@ -12,7 +12,7 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     
     private final String inputLine;
     private final StreamPosition<S> streamPosition;
-    private final ArgumentQueue queue;
+    private final ArgumentInput queue;
     private final List<CommandParameter<S>> parametersList;
     
     // Cache to store the starting position of each raw argument in the input line
@@ -25,15 +25,15 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     private int lastRawPosition = -1;
     private boolean cacheValid = false;
     
-    CommandInputStreamImpl(ArgumentQueue queue, CommandUsage<S> parametersList) {
+    CommandInputStreamImpl(ArgumentInput queue, CommandUsage<S> parametersList) {
         this(queue, parametersList.getParameters());
     }
     
-    CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters) {
+    CommandInputStreamImpl(ArgumentInput queue, List<CommandParameter<S>> parameters) {
         this(queue, parameters, new StreamPosition<>(parameters.size(), queue.size()), calculateRawStartPositions(queue, queue.getOriginalRaw()));
     }
     
-    CommandInputStreamImpl(ArgumentQueue queue, List<CommandParameter<S>> parameters, StreamPosition<S> streamPosition, int[] rawStartPositions) {
+    CommandInputStreamImpl(ArgumentInput queue, List<CommandParameter<S>> parameters, StreamPosition<S> streamPosition, int[] rawStartPositions) {
         this.queue = queue;
         this.inputLine = queue.getOriginalRaw();
         this.parametersList = parameters;
@@ -45,7 +45,7 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     /**
      * Calculate the starting position of each raw argument in the input line
      */
-    private static int[] calculateRawStartPositions(ArgumentQueue queue, String inputLine) {
+    private static int[] calculateRawStartPositions(ArgumentInput queue, String inputLine) {
         int[] positions = new int[queue.size()];
         int currentPos = 0;
         
@@ -264,7 +264,7 @@ final class CommandInputStreamImpl<S extends Source> implements CommandInputStre
     }
     
     @Override
-    public @NotNull ArgumentQueue getRawQueue() {
+    public @NotNull ArgumentInput getRawQueue() {
         return queue;
     }
     

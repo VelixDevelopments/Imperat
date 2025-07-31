@@ -4,7 +4,7 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.suggestions.CompletionArg;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
@@ -32,7 +32,7 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull String label,
-        @NotNull ArgumentQueue queue
+        @NotNull ArgumentInput queue
     ) {
         return new ContextImpl<>(imperat, command, source, label, queue);
     }
@@ -43,7 +43,7 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull String label,
-        @NotNull ArgumentQueue queue,
+        @NotNull ArgumentInput queue,
         @NotNull CompletionArg arg
     ) {
         return new SuggestionContextImpl<>(imperat, command, source, label, queue, arg);

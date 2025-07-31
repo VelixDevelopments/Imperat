@@ -9,7 +9,7 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
@@ -236,7 +236,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
 
     @Override
     public @NotNull CommandDispatch.Result dispatch(S source, Command<S> command, String commandName, String[] rawInput) {
-        ArgumentQueue rawArguments = ArgumentQueue.parse(rawInput);
+        ArgumentInput rawArguments = ArgumentInput.parse(rawInput);
         Context<S> plainContext = config.getContextFactory()
             .createContext(this, source, command, commandName, rawArguments);
 

@@ -1,6 +1,6 @@
 package dev.velix.imperat.util;
 
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,11 +47,11 @@ public final class StringUtils {
         return prefix + parameterContent + suffix;
     }
 
-    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion, boolean extraSpace) {
+    public static ArgumentInput parseToQueue(String argumentsInOneLine, boolean autoCompletion, boolean extraSpace) {
         if (argumentsInOneLine.isEmpty())
-            return !autoCompletion ? ArgumentQueue.of(argumentsInOneLine) : ArgumentQueue.parse(" ");
+            return !autoCompletion ? ArgumentInput.of(argumentsInOneLine) : ArgumentInput.parse(" ");
 
-        ArgumentQueue toCollect = ArgumentQueue.of(argumentsInOneLine);
+        ArgumentInput toCollect = ArgumentInput.of(argumentsInOneLine);
         char[] chars = argumentsInOneLine.toCharArray();
         StringBuilder builder = new StringBuilder();
 
@@ -94,7 +94,7 @@ public final class StringUtils {
         return toCollect;
     }
 
-    public static ArgumentQueue parseToQueue(String argumentsInOneLine, boolean autoCompletion) {
+    public static ArgumentInput parseToQueue(String argumentsInOneLine, boolean autoCompletion) {
         return parseToQueue(argumentsInOneLine, autoCompletion, false);
     }
 

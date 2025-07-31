@@ -18,10 +18,9 @@ import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.suggestions.CompletionArg;
 import dev.velix.imperat.command.tree.CommandNode;
 import dev.velix.imperat.command.tree.ParameterNode;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.SuggestionContext;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +40,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
     @Override
     public @NotNull <T> LiteralCommandNode<T> parseCommandIntoNode(@NotNull Command<S> command) {
         var tree = command.tree();
-        var root = tree.getRoot();
+        var root = tree.rootNode();
         return this.<T>convertRoot(root).build();
     }
 
@@ -121,7 +120,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
             boolean hadExtraSpace = Character.isWhitespace(input.charAt(input.length() - 1));
             String[] processed = processedInput(input);
 
-            ArgumentQueue args = ArgumentQueue.parseAutoCompletion(processed, hadExtraSpace);
+            ArgumentInput args = ArgumentInput.parseAutoCompletion(processed, hadExtraSpace);
 
             CompletionArg arg = new CompletionArg(args.isEmpty() ? "" : args.getLast(), args.size() - 1);
             SuggestionContext<S> ctx = dispatcher.config().getContextFactory().createSuggestionContext(dispatcher, source, command, label, args, arg);

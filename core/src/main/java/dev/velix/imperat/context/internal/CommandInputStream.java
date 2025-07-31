@@ -2,7 +2,8 @@ package dev.velix.imperat.context.internal;
 
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.ArgumentQueue;
+import dev.velix.imperat.command.tree.CommandTree;
+import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -210,9 +211,9 @@ public interface CommandInputStream<S extends Source> {
     /**
      * Retrieves the queue of raw inputs.
      *
-     * @return The {@link ArgumentQueue} containing raw inputs.
+     * @return The {@link ArgumentInput} containing raw inputs.
      */
-    @NotNull ArgumentQueue getRawQueue();
+    @NotNull ArgumentInput getRawQueue();
     
     /**
      * Retrieves the list of command parameters.
@@ -357,13 +358,13 @@ public interface CommandInputStream<S extends Source> {
     
     /**
      * Creates a new {@link CommandInputStream} with queue of all raw arguments
-     * and from the usage detected from the raw input by {@link dev.velix.imperat.command.tree.CommandTree}.
+     * and from the usage detected from the raw input by {@link CommandTree}.
      * @param queue the queue of all raw arguments.
      * @param usage the usage detected.
      * @return the stream containing pointers for raw input and parameter input.
      * @param <S> the type of source/command-sender.
      */
-    static <S extends Source> CommandInputStream<S> of(ArgumentQueue queue, CommandUsage<S> usage) {
+    static <S extends Source> CommandInputStream<S> of(ArgumentInput queue, CommandUsage<S> usage) {
         return new CommandInputStreamImpl<>(queue, usage);
     }
     
@@ -376,7 +377,7 @@ public interface CommandInputStream<S extends Source> {
      * @return A new {@link CommandInputStream} instance.
      */
     static <S extends Source> CommandInputStream<S> ofSingleString(@NotNull CommandParameter<S> parameter, @NotNull String str) {
-        return new CommandInputStreamImpl<>(ArgumentQueue.of(str), List.of(parameter));
+        return new CommandInputStreamImpl<>(ArgumentInput.of(str), List.of(parameter));
     }
     
     /**
