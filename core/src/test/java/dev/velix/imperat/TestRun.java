@@ -17,7 +17,6 @@ import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.commands.ParameterDuration;
 import dev.velix.imperat.commands.RankCommand;
 import dev.velix.imperat.commands.TestAC;
-import dev.velix.imperat.commands.TestAC2;
 import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.context.ArgumentQueue;
 import dev.velix.imperat.context.Context;
