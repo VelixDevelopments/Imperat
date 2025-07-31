@@ -232,7 +232,10 @@ public class TestRun {
         Assertions.assertDoesNotThrow(() -> {
             var result = IMPERAT.dispatch(SOURCE, "test");
             Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
+            Assertions.assertEquals(CommandDispatch.Result.FAILURE, IMPERAT.dispatch(SOURCE, "test hi bye invalid"));
         });
+        
+        
     }
 
     @Test

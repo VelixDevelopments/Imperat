@@ -15,7 +15,14 @@ public final class CommandDispatch<S extends Source> {
     private CommandDispatch(Result result) {
         this.result = result;
     }
-
+    
+    private CommandDispatch(Result result, ParameterNode<S, ?> lastNode, CommandUsage<S> directUsage) {
+        this.result = result;
+        this.lastNode = lastNode;
+        this.directUsage = directUsage;
+    }
+    
+    
     static <S extends Source> CommandDispatch<S> of(final Result result) {
         return new CommandDispatch<>(result);
     }
@@ -70,7 +77,11 @@ public final class CommandDispatch<S extends Source> {
         /**
          * Defines an execution that ended up with throwing an exception that had no handler
          */
-        FAILURE;
+        FAILURE
 
+    }
+    
+    public CommandDispatch<S> copy() {
+        return new CommandDispatch<>(result, lastNode, directUsage);
     }
 }
