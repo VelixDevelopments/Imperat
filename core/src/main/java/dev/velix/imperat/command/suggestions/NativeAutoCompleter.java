@@ -24,15 +24,7 @@ final class NativeAutoCompleter<S extends Source> extends AutoCompleter<S> {
      */
     @Override
     public CompletableFuture<List<String>> autoComplete(Imperat<S> imperat, SuggestionContext<S> context) {
-        var tree = command.tree();
-        return tree.tabComplete(imperat, context).thenApply((results)-> {
-            var toComplete = context.getArgToComplete();
-                String input = context.getArgToComplete().value().toLowerCase(); // Lowercase input for case-insensitive comparison
-                return results.stream()
-                        .distinct()
-                        .filter((str)-> toComplete.isEmpty() || str.toLowerCase().startsWith(input))
-                        .toList();
-        });
+        return CompletableFuture.supplyAsync(()-> command.tree().tabComplete(imperat, context));
     }
 
 }

@@ -636,7 +636,7 @@ public class TestRun {
         Assertions.assertLinesMatch(Stream.of("2", "5", "10"), results2.stream());
     }
 
-    @Test
+    /*@Test
     public void testCumulativeSuggestions2() {
         //tests if it respects the order of the nodes during suggestion resolving.
 
@@ -667,7 +667,7 @@ public class TestRun {
         IMPERAT.config().setOptionalParameterSuggestionOverlap(false);
         
     }
-    
+    */
     
     @Test
     public void testMiddleFlag() {

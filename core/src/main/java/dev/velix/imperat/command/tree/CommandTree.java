@@ -6,13 +6,12 @@ import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.*;
+import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Ultra-optimized CommandTree implementation focused on maximum performance
@@ -24,7 +23,7 @@ public final class CommandTree<S extends Source> {
     final CommandNode<S> root;
     
     // Pre-computed immutable collections to eliminate allocations
-    private static final List<String> EMPTY_STRING_LIST = Collections.emptyList();
+    private final static int MAX_SUGGESTIONS_PER_ARGUMENT = 20;
     
     // Optimized flag cache with better hashing
     private final Map<String, FlagData<S>> flagCache;
@@ -612,157 +611,46 @@ public final class CommandTree<S extends Source> {
     }
     
     // Tab completion - optimized version without excessive profiling
-    public @NotNull CompletableFuture<List<String>> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
-        final int depthToReach = context.getArgToComplete().index();
-        final var arguments = context.arguments();
-        final var source = context.source();
-        final var permissionResolver = imperat.config().getPermissionResolver();
-        final boolean ignorePerms = root.data.isIgnoringACPerms();
-        final var config = imperat.config();
-        
-        ParameterNode<S, ?> node = root;
-        for (int i = 0; i < depthToReach; i++) {
-            final String raw = arguments.getOr(i, null);
-            if (raw == null) {
-                break;
-            }
-            var child = node.getChild((c) -> {
-                boolean hasPerm = (ignorePerms || permissionResolver.hasPermission(source, c.data.permission()));
-                boolean matches = matchesInput(c, raw, config.strictCommandTree());
-                return hasPerm && matches;
-            });
-            if (child == null) {
-                break;
-            }
-            node = child;
-        }
-        
-        final var validChildren = collectValidChildren(node, source, permissionResolver, ignorePerms, config);
-        
-        if (validChildren.isEmpty()) {
-            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
-        }
-        
-        return processValidChildren(imperat, context, validChildren);
+    public @NotNull List<String> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
+        return new ArrayList<>(tabComplete$1(root, imperat, context));
     }
     
-    /**
-     * Optimized valid children collection
-     */
-    private List<ParameterNode<S, ?>> collectValidChildren(
-            ParameterNode<S, ?> node,
-            S source,
-            Object permissionResolver,
-            boolean ignorePerms,
-            ImperatConfig<S> config
-    ) {
-        final var validChildren = new ArrayList<ParameterNode<S, ?>>(8);
-        final var skippedSimilarChildren = new HashSet<String>(4);
-        final boolean overlapOptionalArgs = config.isOptionalParameterSuggestionOverlappingEnabled();
+    private Set<String> tabComplete$1(ParameterNode<S, ?> node,  Imperat<S> imperat, SuggestionContext<S> context) {
         
-        final var children = node.getChildren();
-        
-        for (var child : children) {
-            // Permission check
-            if (!ignorePerms && !hasPermission(permissionResolver, source, child.data.permission())) {
-                continue;
-            }
+        //base condition
+        if(context.getArgToComplete().index()-node.getDepth() == 1) {
+            Set<String> completeList = new LinkedHashSet<>(MAX_SUGGESTIONS_PER_ARGUMENT);
+            String currentInput = context.getArgToComplete().value();
             
-            if (child.isRequired()) {
-                validChildren.add(child);
-                continue;
-            }
-            
-            // For optional nodes
-            if (overlapOptionalArgs || !hasSimilarNodeWithDifferentDepth(node, child)) {
-                final String childFormat = child.data.format();
-                if (!skippedSimilarChildren.contains(childFormat)) {
-                    validChildren.add(child);
-                    skippedSimilarChildren.add(childFormat);
-                }
-            }
+            node.getChildren().stream()
+                    .map((child)-> child.data)
+                    .map((param)-> {
+                        var resolver = imperat.config().getParameterSuggestionResolver(param);
+                        return resolver.autoComplete(context, param);
+                    })
+                    .map((list)-> {
+                        if(currentInput == null || currentInput.isBlank()) {
+                            return list;
+                        }
+                        LinkedHashSet<String> l = new LinkedHashSet<>(list);
+                        l.removeIf((str)-> !str.startsWith(currentInput));
+                        return l;
+                    })
+                    .forEachOrdered(completeList::addAll);
+            return completeList;
         }
         
-        return validChildren;
-    }
-    
-
-    
-    private CompletableFuture<List<String>> processValidChildren(
-            Imperat<S> imperat,
-            SuggestionContext<S> context,
-            List<ParameterNode<S, ?>> validChildren
-    ) {
-        final var childrenToProcess = filterChildrenToProcess(validChildren);
-        
-        if (childrenToProcess.isEmpty()) {
-            return CompletableFuture.completedFuture(EMPTY_STRING_LIST);
-        }
-        
-        if (childrenToProcess.size() == 1) {
-            final var child = childrenToProcess.get(0);
-            final var resolver = imperat.config().getParameterSuggestionResolver(child.data);
-            return resolver.asyncAutoComplete(context, child.data);
-        }
-        
-        // Parallel processing
-        final var futures = new ArrayList<CompletableFuture<List<String>>>(childrenToProcess.size());
-        for (var child : childrenToProcess) {
-            final var resolver = imperat.config().getParameterSuggestionResolver(child.data);
-            futures.add(resolver.asyncAutoComplete(context, child.data));
-        }
-        
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenApply(v -> {
-                    final var result = new ArrayList<String>(64);
-                    futures.forEach(future -> result.addAll(future.join()));
-                    return result;
-                });
-    }
-    
-    private List<ParameterNode<S, ?>> filterChildrenToProcess(List<ParameterNode<S, ?>> validChildren) {
-        if (validChildren.size() <= 1) {
-            return validChildren;
-        }
-        
-        final var result = new ArrayList<ParameterNode<S, ?>>(validChildren.size());
-        final var processedOptionalTypes = new HashSet<Type>(8);
-        
-        for (var child : validChildren) {
-            if (!child.isOptional()) {
-                result.add(child);
-            } else {
-                final Type childType = child.getData().valueType();
-                if (processedOptionalTypes.add(childType)) {
-                    result.add(child);
-                }
+        //not the last node before the depth.
+        for(var child : node.getChildren()) {
+            if(
+                    hasPermission(imperat.config().getPermissionResolver(), context.source(), child.data.permission()) &&
+                    matchesInput(child, context.arguments().getOr(child.getDepth(), null), false)
+            ) {
+                return tabComplete$1(child, imperat, context);
             }
         }
         
-        return result;
-    }
-    
-    private boolean hasSimilarNodeWithDifferentDepth(
-            ParameterNode<S, ?> currentNode,
-            ParameterNode<S, ?> childNode
-    ) {
-        final String childName = childNode.data.name();
-        final int childDepth = childNode.getDepth();
-        
-        return hasSimilarNodeRecursive(currentNode, childName, childDepth);
-    }
-    
-    private boolean hasSimilarNodeRecursive(ParameterNode<S, ?> node, String targetName, int targetDepth) {
-        final var children = node.getChildren();
-        for (var child : children) {
-            if (child.data.name().equalsIgnoreCase(targetName) && child.getDepth() != targetDepth) {
-                return true;
-            }
-            if (hasSimilarNodeRecursive(child, targetName, targetDepth)) {
-                return true;
-            }
-        }
-        return false;
+        return Collections.emptySet();
     }
     
     // Optimized usage search
@@ -827,7 +715,7 @@ public final class CommandTree<S extends Source> {
             Set<CommandUsage<S>> currentUsages,
             ParameterNode<S, ?> child,
             Context<S> context,
-            Object permissionResolver,
+            PermissionResolver<S> permissionResolver,
             S source
     ) {
         final var childUsages = getClosestUsagesRecursively(new LinkedHashSet<>(), child, context);
@@ -842,19 +730,11 @@ public final class CommandTree<S extends Source> {
     /**
      * Type-safe permission checking
      */
-    @SuppressWarnings("unchecked")
-    private boolean hasPermission(Object resolver, S source, String permission) {
-        if (resolver instanceof dev.velix.imperat.resolvers.PermissionResolver) {
-            return ((dev.velix.imperat.resolvers.PermissionResolver<S>) resolver).hasPermission(source, permission);
-        }
-        return true;
+    private boolean hasPermission(PermissionResolver<S> resolver, S source, String permission) {
+        return resolver.hasPermission(source, permission);
     }
     
-    @SuppressWarnings("unchecked")
-    private boolean hasUsagePermission(Object resolver, S source, CommandUsage<S> usage) {
-        if (resolver instanceof dev.velix.imperat.resolvers.PermissionResolver) {
-            return ((dev.velix.imperat.resolvers.PermissionResolver<S>) resolver).hasUsagePermission(source, usage);
-        }
-        return true;
+    private boolean hasUsagePermission(PermissionResolver<S> resolver, S source, CommandUsage<S> usage) {
+        return resolver.hasUsagePermission(source, usage);
     }
 }
