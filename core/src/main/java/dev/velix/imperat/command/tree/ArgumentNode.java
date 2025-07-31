@@ -29,6 +29,5 @@ public final class ArgumentNode<S extends Source> extends ParameterNode<S, Comma
     public int priority() {
         return 1;
     }
-
-
+    
 }

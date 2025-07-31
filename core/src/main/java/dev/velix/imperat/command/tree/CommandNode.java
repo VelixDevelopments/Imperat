@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public final class CommandNode<S extends Source> extends ParameterNode<S, Command<S>> {
-
     
     CommandNode(@NotNull Command<S> data, int depth, @Nullable CommandUsage<S> usage) {
         super(data, depth, usage);

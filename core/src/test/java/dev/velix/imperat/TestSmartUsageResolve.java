@@ -40,7 +40,6 @@ public class TestSmartUsageResolve {
 
         Context<TestSource> context = FACTORY.createContext(IMPERAT, SOURCE, cmd, command, queue);
         CommandDispatch<TestSource> res = cmd.contextMatch(context);
-        res.visualize();
 
         CommandUsage<TestSource> usage = res.toUsage();
 

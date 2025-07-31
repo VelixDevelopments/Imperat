@@ -2,17 +2,12 @@ package dev.velix.imperat.command.tree;
 
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.util.ImperatDebugger;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-public final class CommandDispatch<S extends Source> implements Iterable<ParameterNode<S, ?>> {
-
-    private final List<ParameterNode<S, ?>> nodes = new ArrayList<>();
-
+public final class CommandDispatch<S extends Source> {
+    
+    private ParameterNode<S, ?> lastNode;
+    
     private CommandUsage<S> directUsage;
 
     private Result result;
@@ -31,21 +26,11 @@ public final class CommandDispatch<S extends Source> implements Iterable<Paramet
 
     public void append(ParameterNode<S, ?> node) {
         if (node == null) return;
-        //if (parameters.contains(node.data)) return;
-        nodes.add(node);
+        this.lastNode = node;
     }
 
     public @Nullable ParameterNode<S, ?> getLastNode() {
-        int lastIndex = nodes.size()-1;
-        if(lastIndex < 0) {
-            return null;
-        }
-        return nodes.get(nodes.size() - 1);
-    }
-
-    @Override
-    public @NotNull Iterator<ParameterNode<S, ?>> iterator() {
-        return nodes.iterator();
+        return lastNode;
     }
 
 
@@ -64,20 +49,7 @@ public final class CommandDispatch<S extends Source> implements Iterable<Paramet
     public @Nullable CommandUsage<S> toUsage() {
         return directUsage;
     }
-
-    public void visualize() {
-        StringBuilder builder = new StringBuilder();
-        int size = nodes.size();
-
-        int i = 0;
-        for (var node : nodes) {
-            builder.append(node.format());
-            if (i != size - 1) {
-                builder.append(" -> ");
-            }
-            i++;
-        }
-    }
+    
 
     /**
      * Defines a setResult from dispatching the command execution.

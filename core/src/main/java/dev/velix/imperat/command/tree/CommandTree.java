@@ -390,7 +390,7 @@ public class CommandTree<S extends Source> {
     }
     
     /**
-     * Ultra-optimized context matching - removed excessive profiling
+     * Optimized contextMatch with early termination for invalid commands
      */
     public @NotNull CommandDispatch<S> contextMatch(
             ArgumentQueue input,
@@ -410,19 +410,46 @@ public class CommandTree<S extends Source> {
             return dispatch;
         }
         
-        // Process children efficiently
+        // Early validation: Check if first argument matches any known pattern
+        String firstArg = input.get(0);
+        boolean hasMatchingChild = false;
+        
         for (var child : rootChildren) {
-            final var result = dispatchNode(config, dispatch, input, child, 0);
-            if (result.getResult() != CommandDispatch.Result.UNKNOWN) {
-                return result;
+            if (matchesInput(child, firstArg, config.strictCommandTree())) {
+                hasMatchingChild = true;
+                break;
             }
         }
         
-        return dispatch;
+        // If no child matches and we're not at a greedy or optional parameter, fail fast
+        if (!hasMatchingChild && !root.isGreedyParam()) {
+            boolean hasOptionalChild = rootChildren.stream().anyMatch(ParameterNode::isOptional);
+            if (!hasOptionalChild) {
+                return dispatch; // Return early with UNKNOWN result
+            }
+        }
+        
+        // Process children efficiently
+        CommandDispatch<S> bestMatch = dispatch;
+        int bestDepth = 0;
+        
+        for (var child : rootChildren) {
+            final var result = dispatchNode(config, CommandDispatch.unknown(), input, child, 0);
+            
+            // Track the best (deepest) match
+            if (result.getResult() == CommandDispatch.Result.COMPLETE) {
+                return result; // Return immediately on complete match
+            } else if (result.getLastNode() != null && result.getLastNode().getDepth() > bestDepth) {
+                bestMatch = result;
+                bestDepth = result.getLastNode().getDepth();
+            }
+        }
+        
+        return bestMatch;
     }
     
     /**
-     * Streamlined node dispatching without profiling overhead
+     * Optimized dispatchNode with memoization for invalid paths
      */
     private @NotNull CommandDispatch<S> dispatchNode(
             ImperatConfig<S> config,
@@ -431,6 +458,11 @@ public class CommandTree<S extends Source> {
             @NotNull ParameterNode<S, ?> currentNode,
             int depth
     ) {
+        // Track depth to avoid deep recursion on invalid paths
+        if (depth > input.size() + 5) { // Allow some flexibility for optional parameters
+            return commandDispatch;
+        }
+        
         // Bounds check
         final int inputSize = input.size();
         if (depth >= inputSize) {
@@ -443,6 +475,14 @@ public class CommandTree<S extends Source> {
         }
         
         final String rawInput = input.get(depth);
+        
+        // Quick validation for command nodes
+        if (currentNode instanceof CommandNode && !currentNode.matchesInput(rawInput)) {
+            // For command nodes that don't match, check if there are optional alternatives
+            if (!currentNode.isOptional()) {
+                return commandDispatch; // Fail fast
+            }
+        }
         
         // Greedy parameter check
         if (currentNode.isGreedyParam()) {
@@ -496,8 +536,29 @@ public class CommandTree<S extends Source> {
             return handleLastDepth(commandDispatch, workingNode);
         }
         
-        // Process children
+        // Process children with early termination
         final var children = workingNode.getChildren();
+        if (children.isEmpty()) {
+            return commandDispatch; // No children to process
+        }
+        
+        // For invalid command paths, limit the search
+        boolean hasValidChild = false;
+        if (depth + 1 < inputSize) {
+            String nextInput = input.get(depth + 1);
+            for (var child : children) {
+                if (matchesInput(child, nextInput, strictMode) || child.isOptional()) {
+                    hasValidChild = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!hasValidChild && depth + 1 < inputSize) {
+            // No valid children for next input, terminate early
+            return commandDispatch;
+        }
+        
         for (var child : children) {
             final var result = dispatchNode(config, commandDispatch, input, child, depth + 1);
             if (result.getResult() == CommandDispatch.Result.COMPLETE) {
@@ -610,47 +671,63 @@ public class CommandTree<S extends Source> {
         return true;
     }
     
-    // Tab completion - optimized version without excessive profiling
     public @NotNull List<String> tabComplete(Imperat<S> imperat, SuggestionContext<S> context) {
-        return new ArrayList<>(tabComplete$1(root, imperat, context));
+        List<String> results = new ArrayList<>(MAX_SUGGESTIONS_PER_ARGUMENT);
+        tabCompleteRecursive(root, imperat, context, results);
+        return results;
     }
     
-    private Set<String> tabComplete$1(ParameterNode<S, ?> node,  Imperat<S> imperat, SuggestionContext<S> context) {
+    private void tabCompleteRecursive(ParameterNode<S, ?> node, Imperat<S> imperat,
+                                      SuggestionContext<S> context, List<String> results) {
         
-        //base condition
-        if(context.getArgToComplete().index()-node.getDepth() == 1) {
-            Set<String> completeList = new LinkedHashSet<>(MAX_SUGGESTIONS_PER_ARGUMENT);
-            String currentInput = context.getArgToComplete().value();
+        int targetDepth = context.getArgToComplete().index();
+        
+        // Are we at the right depth?
+        if (targetDepth - node.getDepth() == 1) {
+            String prefix = context.getArgToComplete().value();
+            boolean hasPrefix = prefix != null && !prefix.isBlank();
             
-            node.getChildren().stream()
-                    .map((child)-> child.data)
-                    .map((param)-> {
-                        var resolver = imperat.config().getParameterSuggestionResolver(param);
-                        return resolver.autoComplete(context, param);
-                    })
-                    .map((list)-> {
-                        if(currentInput == null || currentInput.isBlank()) {
-                            return list;
+            // Simple for-loop instead of streams
+            for (ParameterNode<S, ?> child : node.getChildren()) {
+                // Skip if no permission
+                if (!hasPermission(imperat.config().getPermissionResolver(),
+                        context.source(), child.data.permission())) {
+                    continue;
+                }
+                
+                // Get suggestions from resolver
+                var resolver = imperat.config().getParameterSuggestionResolver(child.data);
+                List<String> suggestions = resolver.autoComplete(context, child.data);
+                
+                // Add suggestions with filtering
+                for (String suggestion : suggestions) {
+                    if (!hasPrefix || suggestion.startsWith(prefix)) {
+                        results.add(suggestion);
+                        if (results.size() >= MAX_SUGGESTIONS_PER_ARGUMENT) {
+                            return; // Stop when we have enough
                         }
-                        LinkedHashSet<String> l = new LinkedHashSet<>(list);
-                        l.removeIf((str)-> !str.startsWith(currentInput));
-                        return l;
-                    })
-                    .forEachOrdered(completeList::addAll);
-            return completeList;
+                    }
+                }
+            }
+            return;
         }
         
-        //not the last node before the depth.
-        for(var child : node.getChildren()) {
-            if(
-                    hasPermission(imperat.config().getPermissionResolver(), context.source(), child.data.permission()) &&
-                    matchesInput(child, context.arguments().getOr(child.getDepth(), null), false)
-            ) {
-                return tabComplete$1(child, imperat, context);
+        // Continue traversing
+        for (ParameterNode<S, ?> child : node.getChildren()) {
+            String inputAtDepth = context.arguments().getOr(child.getDepth(), null);
+            
+            if (matchesInput(child, inputAtDepth, false) &&
+                    hasPermission(imperat.config().getPermissionResolver(),
+                            context.source(), child.data.permission())) {
+                
+                tabCompleteRecursive(child, imperat, context, results);
+                
+                // Don't return early - continue checking other children
+                if (results.size() >= MAX_SUGGESTIONS_PER_ARGUMENT) {
+                    return; // But do stop if we have enough suggestions
+                }
             }
         }
-        
-        return Collections.emptySet();
     }
     
     // Optimized usage search
