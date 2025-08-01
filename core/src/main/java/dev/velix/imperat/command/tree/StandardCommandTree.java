@@ -680,14 +680,14 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         final boolean hasPrefix = prefix != null && !prefix.isBlank();
         
         // ITERATIVE TRAVERSAL - No recursive overhead!
-        return tabCompleteIterative(context, targetDepth, prefix, hasPrefix, results);
+        return tabCompleteIterativeDFS(context, targetDepth, prefix, hasPrefix, results);
     }
     
     /**
-     * ULTRA-OPTIMIZED Iterative tab completion
+     * ULTRA-OPTIMIZED Iterative tab completion DFS
      * Every microsecond matters here!
      */
-    private List<String> tabCompleteIterative(
+    private List<String> tabCompleteIterativeDFS(
             SuggestionContext<S> context,
             int targetDepth,
             String prefix,
@@ -702,7 +702,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         final var source = context.source();
         final var arguments = context.arguments();
         
-        // MAIN ITERATIVE LOOP - Pure performance
+        // MAIN ITERATIVE DFS LOOP - Pure performance
         while (!stack.isEmpty()) {
             final var currentNode = stack.pop();
             final int currentDepth = currentNode.getDepth();
@@ -711,17 +711,17 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             if (targetDepth - currentDepth == 1) {
                 // COLLECT SUGGESTIONS from all children at this level
                 collectSuggestionsOptimized(
-                        currentNode,context, prefix,
+                        currentNode, context, prefix,
                         hasPrefix, source, results
                 );
                 
                 continue; // Don't traverse deeper from suggestion nodes
             }
             
-            // TRAVERSAL PATH: Add matching children to stack
+            // DFS TRAVERSAL PATH: Add valid children in REVERSE order for proper DFS
             if (currentDepth < targetDepth - 1) {
                 final String inputAtDepth = arguments.getOr(currentDepth + 1, null);
-                addValidChildrenToStack(currentNode, inputAtDepth, source, stack);
+                addValidChildrenToStackDFS(currentNode, inputAtDepth, source, stack);
             }
         }
         
@@ -764,14 +764,14 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
                     results.add(suggestion);
                 }
             }
-            
         }
     }
     
     /**
-     * FAST child validation and stack addition
+     * FAST child validation and stack addition for DFS
+     * Children added in REVERSE order to maintain left-to-right traversal
      */
-    private void addValidChildrenToStack(
+    private void addValidChildrenToStackDFS(
             ParameterNode<S, ?> node,
             String inputAtDepth,
             S source,
@@ -779,12 +779,66 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
     ) {
         final var children = node.getChildren();
         
-        for (var child : children) {
+        // DFS OPTIMIZATION: Add children in reverse order
+        // Stack is LIFO, so reverse order gives us left-to-right DFS traversal
+        for (int i = children.size() - 1; i >= 0; i--) {
+            final var child = children.get(i);
             
             // FAST validation checks
             if (matchesInput(child, inputAtDepth, false) &&
                     hasPermissionCached(source, child.data.permission())) {
                 stack.push(child);
+            }
+        }
+    }
+    
+    /**
+     * Alternative DFS implementation using recursion (may be faster for shallow trees)
+     * Use this if your command trees are typically shallow (< 10 levels)
+     */
+    private List<String> tabCompleteRecursiveDFS(
+            SuggestionContext<S> context,
+            int targetDepth,
+            String prefix,
+            boolean hasPrefix,
+            List<String> results
+    ) {
+        dfsTraverseRecursively(root, context, targetDepth, prefix, hasPrefix, results);
+        return Collections.unmodifiableList(results);
+    }
+    
+    /**
+     * RECURSIVE DFS helper - Optimized for shallow trees
+     */
+    private void dfsTraverseRecursively(
+            ParameterNode<S, ?> node,
+            SuggestionContext<S> context,
+            int targetDepth,
+            String prefix,
+            boolean hasPrefix,
+            List<String> results
+    ) {
+        final int currentDepth = node.getDepth();
+        final var source = context.source();
+        final var arguments = context.arguments();
+        
+        // BASE CASE: At suggestion depth
+        if (targetDepth - currentDepth == 1) {
+            collectSuggestionsOptimized(node, context, prefix, hasPrefix, source, results);
+            return;
+        }
+        
+        // RECURSIVE CASE: Continue DFS traversal
+        if (currentDepth < targetDepth - 1) {
+            final String inputAtDepth = arguments.getOr(currentDepth + 1, null);
+            final var children = node.getChildren();
+            
+            // DFS: Process each valid child completely before moving to next
+            for (var child : children) {
+                if (matchesInput(child, inputAtDepth, false) &&
+                        hasPermissionCached(source, child.data.permission())) {
+                    dfsTraverseRecursively(child, context, targetDepth, prefix, hasPrefix, results);
+                }
             }
         }
     }
