@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 public final class CommandDispatch<S extends Source> {
     
     private ParameterNode<S, ?> lastNode;
-    private CommandNode<S> lastCommandNode;
+    private ParameterNode<S, ?> lastCommandNode;
     
     private CommandUsage<S> directUsage, closestUsage;
 
@@ -39,11 +39,10 @@ public final class CommandDispatch<S extends Source> {
         return dispatch;
     }
     
-    @SuppressWarnings("unchecked")
     public void append(ParameterNode<S, ?> node) {
         if (node == null) return;
         if(node.isCommand()) {
-            this.lastCommandNode = (CommandNode<S>) node;
+            this.lastCommandNode = node;
         }
         this.lastNode = node;
     }
@@ -109,7 +108,7 @@ public final class CommandDispatch<S extends Source> {
             if(lastCommandNode.isExecutable()) {
                 closestUsage = lastCommandNode.getExecutableUsage();
             }else {
-                closestUsage = lastCommandNode.getData().getDefaultUsage();
+                closestUsage = ((CommandNode<S>)lastCommandNode).getData().getDefaultUsage();
             }
         }
         
@@ -121,7 +120,7 @@ public final class CommandDispatch<S extends Source> {
     }
     
     public CommandNode<S> getLastCommandNode() {
-        return lastCommandNode;
+        return (CommandNode<S>) lastCommandNode;
     }
     
     /**

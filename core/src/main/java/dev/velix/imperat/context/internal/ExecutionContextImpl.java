@@ -49,7 +49,8 @@ final class ExecutionContextImpl<S extends Source> extends ContextImpl<S> implem
         CommandDispatch<S> result
     ) {
         super(context.imperat(), context.command(), context.source(), context.label(), context.arguments());
-        this.lastCommand = result.getLastCommandNode() == null ? context.command() : result.getLastCommandNode().getData();
+        var lastCmdNode = result.getLastCommandNode();
+        this.lastCommand = lastCmdNode == null ? context.command() : lastCmdNode.getData();
         this.usage = result.getFoundUsage();
     }
 
