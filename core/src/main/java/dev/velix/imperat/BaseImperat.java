@@ -22,6 +22,7 @@ import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -228,9 +229,10 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     public @NotNull CommandDispatch.Result dispatch(Context<S> context) {
         try {
             return handleExecution(context);
-        } catch (Throwable ex) {
+        }
+        catch (Throwable ex) {
             config.handleExecutionThrowable(ex, context, BaseImperat.class, "dispatch");
-            return CommandDispatch.Result.FAILURE;
+            return ex instanceof InvalidSyntaxException ise ? ise.getExecutionResult().getResult() : CommandDispatch.Result.FAILURE;
         }
     }
 
@@ -278,10 +280,11 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         
         CommandDispatch<S> searchResult = command.contextMatch(context);
         
-        CommandUsage<S> usage = searchResult.toUsage();
+        CommandUsage<S> usage = searchResult.getFoundUsage();
         
-        if(usage == null || searchResult.getResult() != CommandDispatch.Result.COMPLETE) {
-            throw new InvalidSyntaxException();
+        if(usage == null || searchResult.getLastNode() == null ||
+                searchResult.getResult() != CommandDispatch.Result.COMPLETE) {
+            throw new InvalidSyntaxException(searchResult);
         }
         
         // EXISTING: Usage execution - Add timing around it

@@ -4,11 +4,15 @@ import dev.velix.imperat.ImperatConfig;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.*;
+import dev.velix.imperat.context.ArgumentInput;
+import dev.velix.imperat.context.FlagData;
+import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.SuggestionContext;
 import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -490,7 +494,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         int bestDepth = 0;
         
         for (var child : rootChildren) {
-            final var result = dispatchNode(CommandDispatch.unknown(), input, child, 0);
+            final var result = dispatchNode(dispatch, input, child, 0);
             
             // Track the best (deepest) match
             if (result.getResult() == CommandDispatch.Result.COMPLETE) {
@@ -623,6 +627,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         
         if(!node.isExecutable()) {
             if (node.isCommand()) {
+                dispatch.setDirectUsage(node.data.asCommand().getDefaultUsage());
                 dispatch.setResult(CommandDispatch.Result.COMPLETE);
             }
             return dispatch;

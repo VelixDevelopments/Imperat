@@ -5,7 +5,10 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.*;
+
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public abstract class ParameterNode<S extends Source, T extends CommandParameter<S>> {
@@ -44,17 +47,43 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
     public T getData() {
         return data;
     }
-
+    
     public void addChild(ParameterNode<S, ?> node) {
         if (nextNodes.contains(node)) return;
-        if(node.isCommand()) {
+        
+        int newNodePriority = node.priority();
+        
+        // Fast path for empty list
+        if (nextNodes.isEmpty()) {
+            nextNodes.add(node);
+            return;
+        }
+        
+        // Fast path for highest priority (commands) - add to front
+        if (newNodePriority < nextNodes.getFirst().priority()) {
             nextNodes.addFirst(node);
-        }else {
+            return;
+        }
+        
+        // Fast path for lowest priority - add to end
+        if (newNodePriority >= nextNodes.getLast().priority()) {
             nextNodes.addLast(node);
+            return;
+        }
+        
+        // Find insertion point using ListIterator for efficient insertion
+        ListIterator<ParameterNode<S, ?>> iterator = nextNodes.listIterator();
+        while (iterator.hasNext()) {
+            ParameterNode<S, ?> existingNode = iterator.next();
+            if (newNodePriority < existingNode.priority()) {
+                iterator.previous(); // Step back
+                iterator.add(node);  // Insert before current position
+                return;
+            }
         }
     }
 
-    public Collection<ParameterNode<S,?>> getChildren() {
+    public LinkedList<ParameterNode<S,?>> getChildren() {
         return nextNodes;
     }
 
@@ -118,6 +147,11 @@ public abstract class ParameterNode<S extends Source, T extends CommandParameter
     @Override
     public int hashCode() {
         return Objects.hash(data.name(), this.depth,  nextNodes);
+    }
+    
+    public @Nullable ParameterNode<S,?> getTopChild() {
+        if(nextNodes.isEmpty())return null;
+        return nextNodes.getFirst();
     }
     
 }

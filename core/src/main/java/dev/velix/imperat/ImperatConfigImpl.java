@@ -16,36 +16,13 @@ import dev.velix.imperat.context.ParamTypeRegistry;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.ContextFactory;
-import dev.velix.imperat.exception.CooldownException;
-import dev.velix.imperat.exception.InvalidSourceException;
-import dev.velix.imperat.exception.InvalidSyntaxException;
-import dev.velix.imperat.exception.InvalidUUIDException;
-import dev.velix.imperat.exception.MissingFlagInputException;
-import dev.velix.imperat.exception.NoHelpException;
-import dev.velix.imperat.exception.NoHelpPageException;
-import dev.velix.imperat.exception.NumberOutOfRangeException;
-import dev.velix.imperat.exception.OnlyPlayerAllowedException;
-import dev.velix.imperat.exception.PermissionDeniedException;
-import dev.velix.imperat.exception.SelfHandledException;
-import dev.velix.imperat.exception.SourceException;
-import dev.velix.imperat.exception.ThrowableResolver;
-import dev.velix.imperat.exception.UnknownFlagException;
-import dev.velix.imperat.exception.parse.InvalidBooleanException;
-import dev.velix.imperat.exception.parse.InvalidEnumException;
-import dev.velix.imperat.exception.parse.InvalidNumberFormatException;
-import dev.velix.imperat.exception.parse.UnknownSubCommandException;
-import dev.velix.imperat.exception.parse.ValueOutOfConstraintException;
-import dev.velix.imperat.exception.parse.InvalidMapEntryFormatException;
-import dev.velix.imperat.exception.parse.WordOutOfRestrictionsException;
+import dev.velix.imperat.exception.*;
+import dev.velix.imperat.exception.parse.*;
 import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderRegistry;
 import dev.velix.imperat.placeholders.PlaceholderResolver;
-import dev.velix.imperat.resolvers.ContextResolver;
-import dev.velix.imperat.resolvers.DependencySupplier;
-import dev.velix.imperat.resolvers.PermissionResolver;
-import dev.velix.imperat.resolvers.SourceResolver;
-import dev.velix.imperat.resolvers.SuggestionResolver;
+import dev.velix.imperat.resolvers.*;
 import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.Preconditions;
 import dev.velix.imperat.util.Registry;
@@ -57,11 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
@@ -223,11 +196,8 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
             (exception, imperat, context) -> {
                 S source = context.source();
                 //if usage is null, find the closest usage
-                /*ClosestUsageSearch<S> closestUsageSearch = context.command().tree().getClosestUsages(context);
                 source.error("Invalid command usage '/" + context.command().name() + " " + context.arguments().join(" ") + "'");
-                source.error("Closest Command Usage: " + (imperat.commandPrefix() + CommandUsage.format(context.label(), closestUsageSearch.getClosest())) );
-                */
-                
+                source.error("Closest Command Usage: " + (imperat.commandPrefix() + CommandUsage.format(context.label(), exception.getExecutionResult().getClosestUsage())) );
             }
         );
         

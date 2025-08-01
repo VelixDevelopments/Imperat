@@ -10,8 +10,10 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 public final class ArgumentNode<S extends Source> extends ParameterNode<S, CommandParameter<S>> {
 
+    private final int priority;
     ArgumentNode(@NotNull CommandParameter<S> data, int depth, @Nullable CommandUsage<S> usage) {
         super(data, depth, usage);
+        priority = data.isOptional() ? 2 : 1;
     }
 
     @Override
@@ -27,7 +29,7 @@ public final class ArgumentNode<S extends Source> extends ParameterNode<S, Comma
 
     @Override
     public int priority() {
-        return 1;
+        return priority;
     }
     
 }

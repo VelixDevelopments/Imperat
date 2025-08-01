@@ -21,6 +21,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -257,28 +258,13 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
     default void addUsage(CommandUsage.Builder<S> builder) {
         addUsage(builder, false);
     }
-
-    /**
-     * Fetches the usage with specific sequence of parameters
-     *
-     * @param parameters the parameters
-     * @return the usage from its sequence of parameters, null if no usage has such a sequence of parameters
-     */
-    @Nullable
-    CommandUsage<S> getUsage(List<CommandParameter<S>> parameters);
-
+    
     /**
      * @return All {@link CommandUsage} that were registered
      * to this command by the user
      */
     Collection<? extends CommandUsage<S>> usages();
-
-    /**
-     * @param predicate the criteria
-     * @return a list of usages that match a certain criteria
-     */
-    Collection<? extends CommandUsage<S>> findUsages(Predicate<CommandUsage<S>> predicate);
-
+    
     /**
      * @return the usage that doesn't include any subcommands, only
      * required parameters

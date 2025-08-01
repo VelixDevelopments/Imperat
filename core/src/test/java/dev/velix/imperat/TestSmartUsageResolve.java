@@ -1,9 +1,6 @@
 package dev.velix.imperat;
 
 
-import static dev.velix.imperat.TestRun.IMPERAT;
-import static dev.velix.imperat.TestRun.SOURCE;
-
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.tree.CommandDispatch;
@@ -21,6 +18,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static dev.velix.imperat.TestRun.IMPERAT;
+import static dev.velix.imperat.TestRun.SOURCE;
 
 public class TestSmartUsageResolve {
 
@@ -41,7 +41,7 @@ public class TestSmartUsageResolve {
         Context<TestSource> context = FACTORY.createContext(IMPERAT, SOURCE, cmd, command, queue);
         CommandDispatch<TestSource> res = cmd.contextMatch(context);
 
-        CommandUsage<TestSource> usage = res.toUsage();
+        CommandUsage<TestSource> usage = res.getFoundUsage();
 
         if (usage == null) {
             System.out.println("USAGE IS NULL");

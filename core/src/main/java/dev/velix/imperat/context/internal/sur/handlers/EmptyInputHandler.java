@@ -3,11 +3,11 @@ package dev.velix.imperat.context.internal.sur.handlers;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.OptionalValueSupplier;
+import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
-
 import dev.velix.imperat.context.internal.sur.HandleResult;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.InvalidSyntaxException;
@@ -34,7 +34,7 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
             }
             else {
                 //required
-                throw new InvalidSyntaxException();
+                throw new InvalidSyntaxException(CommandDispatch.freshlyNew(context.getLastUsedCommand()));
             }
             // Handle remaining optional parameters
             return HandleResult.NEXT_ITERATION;

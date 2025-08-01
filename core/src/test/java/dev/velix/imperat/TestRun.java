@@ -1,8 +1,5 @@
 package dev.velix.imperat;
 
-import static dev.velix.imperat.commands.TestCommands.CHAINED_SUBCOMMANDS_CMD;
-import static dev.velix.imperat.commands.TestCommands.GROUP_CMD;
-import static dev.velix.imperat.commands.TestCommands.MULTIPLE_OPTIONAL_CMD;
 import dev.velix.imperat.advanced.DurationParameterType;
 import dev.velix.imperat.advanced.GuildMOTDCommand;
 import dev.velix.imperat.annotations.base.AnnotationFactory;
@@ -14,29 +11,21 @@ import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterType;
 import dev.velix.imperat.command.parameters.type.ParameterTypes;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.commands.ParameterDuration;
-import dev.velix.imperat.commands.RankCommand;
-import dev.velix.imperat.commands.TestAC;
-import dev.velix.imperat.commands.annotations.examples.*;
-import dev.velix.imperat.misc.CustomEnum;
-import dev.velix.imperat.misc.CustomEnumParameterType;
-import dev.velix.imperat.commands.EmptyCmd;
-import dev.velix.imperat.commands.KingdomChatCommand;
-import dev.velix.imperat.commands.MyCustomAnnotation;
-import dev.velix.imperat.misc.ParameterGroup;
-import dev.velix.imperat.commands.Test2Command;
-import dev.velix.imperat.commands.Test3Command;
-import dev.velix.imperat.misc.Test4Cmd;
-import dev.velix.imperat.commands.TestCustomAnnotationCmd;
+import dev.velix.imperat.commands.*;
 import dev.velix.imperat.commands.annotations.FirstOptionalArgumentCmd;
 import dev.velix.imperat.commands.annotations.KitCommand;
 import dev.velix.imperat.commands.annotations.TestCommand;
 import dev.velix.imperat.commands.annotations.contextresolver.ContextResolvingCmd;
 import dev.velix.imperat.commands.annotations.contextresolver.PlayerData;
 import dev.velix.imperat.commands.annotations.contextresolver.PlayerDataContextResolver;
+import dev.velix.imperat.commands.annotations.examples.*;
 import dev.velix.imperat.components.TestImperat;
 import dev.velix.imperat.components.TestImperatConfig;
 import dev.velix.imperat.components.TestSource;
+import dev.velix.imperat.misc.CustomEnum;
+import dev.velix.imperat.misc.CustomEnumParameterType;
+import dev.velix.imperat.misc.ParameterGroup;
+import dev.velix.imperat.misc.Test4Cmd;
 import dev.velix.imperat.paramtypes.TestCompletableFutureParam;
 import dev.velix.imperat.paramtypes.TestJavaOptionalParam;
 import dev.velix.imperat.paramtypes.TestPlayer;
@@ -47,12 +36,15 @@ import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+
+import static dev.velix.imperat.commands.TestCommands.*;
 
 public class TestRun {
 
@@ -76,6 +68,9 @@ public class TestRun {
 
         IMPERAT = TestImperatConfig.builder()
                 .usageVerifier(UsageVerifier.typeTolerantVerifier())
+                .globalDefaultUsageBuilder(CommandUsage.<TestSource>builder().execute((src, ctx)-> {
+                    //throw new InvalidSyntaxException(CommandDispatch.freshlyNew(ctx.getLastUsedCommand()));
+                }))
                 .dependencyResolver(Group.class, () -> new Group("my-global-group"))
                 .dependencyResolver(SomeInstance.class, ()-> SOME_INSTANCE)
                 .parameterType(Group.class, new ParameterGroup())
@@ -175,7 +170,7 @@ public class TestRun {
     public void testIncompleteSubCommand() {
         //syntax -> /group <group> setperm <permission> [value]
         var result = testCmdTreeExecution("group", "member setperm");
-        Assertions.assertEquals(CommandDispatch.Result.FAILURE, result);
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
     }
 
     @Test
@@ -229,7 +224,7 @@ public class TestRun {
         Assertions.assertDoesNotThrow(() -> {
             var result = IMPERAT.dispatch(SOURCE, "test");
             Assertions.assertEquals(CommandDispatch.Result.COMPLETE, result);
-            Assertions.assertEquals(CommandDispatch.Result.FAILURE, IMPERAT.dispatch(SOURCE, "test hi bye invalid"));
+            Assertions.assertEquals(CommandDispatch.Result.UNKNOWN, IMPERAT.dispatch(SOURCE, "test hi bye invalid"));
         });
         
         
@@ -280,7 +275,7 @@ public class TestRun {
         debugCommand(cmd);
         var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{"hi", "bye", "s"});
         var res = results.join();
-        Assertions.assertEquals(List.of("sub4", "sub1"), new ArrayList<>(res));
+        Assertions.assertEquals(List.of("sub1", "sub4"), new ArrayList<>(res));
     }
 
 
@@ -459,10 +454,10 @@ public class TestRun {
 
 
         Assertions.assertDoesNotThrow(()-> {
-            Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("test3", "hello-world sub"));
+            Assertions.assertEquals(CommandDispatch.Result.UNKNOWN, testCmdTreeExecution("test3", "hello-world sub"));
         });
         Assertions.assertDoesNotThrow(()-> {
-            Assertions.assertEquals(CommandDispatch.Result.FAILURE, testCmdTreeExecution("test3", "hello-world sub HI_BRO"));
+            Assertions.assertEquals(CommandDispatch.Result.UNKNOWN, testCmdTreeExecution("test3", "hello-world sub HI_BRO"));
         });
 
         Assertions.assertDoesNotThrow(()-> {

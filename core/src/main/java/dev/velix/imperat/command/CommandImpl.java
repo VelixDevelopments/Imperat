@@ -23,17 +23,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import java.util.*;
 
 @ApiStatus.Internal
 final class CommandImpl<S extends Source> implements Command<S> {
@@ -42,9 +33,9 @@ final class CommandImpl<S extends Source> implements Command<S> {
     private final int position;
     private final List<String> aliases = new ArrayList<>();
     private final Map<String, Command<S>> children = new LinkedHashMap<>();
-    private final UsageMap<S> usages = new UsageMap<>();
+    private final CommandUsageSet<S> usages = new CommandUsageSet<>();
     private final AutoCompleter<S> autoCompleter;
-    private final @Nullable CommandTree<S> standardCommandTree;
+    private final @Nullable CommandTree<S> tree;
     private final @NotNull CommandTreeVisualizer<S> visualizer;
     private String permission = null;
     private Description description = Description.EMPTY;
@@ -85,8 +76,8 @@ final class CommandImpl<S extends Source> implements Command<S> {
         this.emptyUsage = CommandUsage.<S>builder().build(this);
         this.defaultUsage = imperat.config().getGlobalDefaultUsage().build(this);
         this.autoCompleter = AutoCompleter.createNative(this);
-        this.standardCommandTree = parent != null ? null : CommandTree.create(imperat.config(), this);
-        this.visualizer = CommandTreeVisualizer.of(standardCommandTree);
+        this.tree = parent != null ? null : CommandTree.create(imperat.config(), this);
+        this.visualizer = CommandTreeVisualizer.of(tree);
         this.suggestionResolver = SuggestionResolver.forCommand(this);
 
     }
@@ -173,10 +164,10 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
     @Override
     public @NotNull CommandDispatch<S> contextMatch(Context<S> context) {
-        if (standardCommandTree != null) {
+        if (tree != null) {
             var copy = context.arguments().copy();
             copy.removeIf(String::isBlank);
-            return standardCommandTree.contextMatch(copy);
+            return tree.contextMatch(copy);
         } else {
             throw new IllegalCallerException("Cannot match a sub command in a root's execution !");
         }
@@ -301,7 +292,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
 
     @Override
     public CommandTree<S> tree() {
-        return this.standardCommandTree;
+        return this.tree;
     }
 
     /**
@@ -346,35 +337,15 @@ final class CommandImpl<S extends Source> implements Command<S> {
             this.defaultUsage = usage;
         }
 
-        usages.put(usage.getParameters(), usage);
+        usages.put(usage);
 
         if (mainUsage == null && !usage.isDefault() && usage.getMaxLength() >= 1 && !usage.hasParamType(Command.class)) {
             mainUsage = usage;
         }
 
-        if (standardCommandTree != null) standardCommandTree.parseUsage(usage);
+        if (tree != null) tree.parseUsage(usage);
     }
-
-    @Override
-    public @Nullable CommandUsage<S> getUsage(List<CommandParameter<S>> parameters) {
-        if (parameters.isEmpty()) {
-            //default
-            return defaultUsage;
-        }
-
-        var mapped = usages.get(parameters);
-        if(mapped == null) {
-            for(var usage : usages()) {
-                if(usage.hasParameters(parameters)) {
-                    return usage;
-                }
-            }
-        }
-
-
-        return mapped;
-    }
-
+    
     /**
      * @return all {@link CommandUsage} that were registered
      * to this command by the user
@@ -383,13 +354,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
     public Collection<? extends CommandUsage<S>> usages() {
         return usages.asSortedSet();
     }
-
-    @Override
-    public Collection<? extends CommandUsage<S>> findUsages(Predicate<CommandUsage<S>> predicate) {
-        return usages.values().stream().filter(predicate)
-            .collect(Collectors.toList());
-    }
-
+    
     /**
      * @return the usage that doesn't include any subcommands, only
      * required parameters
