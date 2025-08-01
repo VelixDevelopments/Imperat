@@ -766,6 +766,16 @@ public class TestRun {
     }
     
     @Test
+    public void testSimpleAutoCompletion() {
+        IMPERAT.registerCommand(new PlainCmd());
+        var cmd = IMPERAT.getCommand("plain");
+        Assertions.assertNotNull(cmd);
+        String[] test = new String[] {" "};
+        Assertions.assertLinesMatch(List.of("hi", "hello", "bruh", "awesomeee", "i-love-imperat"),
+                IMPERAT.autoComplete(cmd, SOURCE, "plain", test).join());
+    }
+    
+    @Test
     public void testArgumentsInheritanceBySubCmdMethod() {
         //TODO test later on...
     }

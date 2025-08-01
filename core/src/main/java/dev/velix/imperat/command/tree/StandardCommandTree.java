@@ -677,7 +677,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         
         final int targetDepth = context.getArgToComplete().index();
         final String prefix = context.getArgToComplete().value();
-        final boolean hasPrefix = prefix != null && !prefix.isEmpty();
+        final boolean hasPrefix = prefix != null && !prefix.isBlank();
         
         // ITERATIVE TRAVERSAL - No recursive overhead!
         return tabCompleteIterative(context, targetDepth, prefix, hasPrefix, results);
@@ -696,13 +696,14 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
     ) {
         final var stack = traversalStack.get();
         stack.clear();
+        
         stack.push(root);
         
         final var source = context.source();
         final var arguments = context.arguments();
         
         // MAIN ITERATIVE LOOP - Pure performance
-        while (!stack.isEmpty() && results.size() < MAX_SUGGESTIONS_PER_ARGUMENT) {
+        while (!stack.isEmpty()) {
             final var currentNode = stack.pop();
             final int currentDepth = currentNode.getDepth();
             
@@ -713,7 +714,8 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
                         currentNode,context, prefix,
                         hasPrefix, source, results
                 );
-                break; // Don't traverse deeper from suggestion nodes
+                
+                continue; // Don't traverse deeper from suggestion nodes
             }
             
             // TRAVERSAL PATH: Add matching children to stack
@@ -738,7 +740,9 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             List<String> results
     ) {
         final var children = node.getChildren();
-        if (children.isEmpty()) return;
+        if (children.isEmpty()) {
+            return;
+        }
         
         // ULTRA-FAST child processing
         for (var child : children) {
@@ -754,19 +758,13 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             final var suggestions = resolver.autoComplete(context, child.data);
             
             // OPTIMIZED suggestion filtering and adding
-            for (int i = 0; i < suggestions.size() && results.size() < MAX_SUGGESTIONS_PER_ARGUMENT; i++) {
-                final String suggestion = suggestions.get(i);
-                
+            for (final String suggestion : suggestions) {
                 // ULTRA-FAST prefix matching - optimized for common cases
                 if (!hasPrefix || fastStartsWith(suggestion, prefix)) {
                     results.add(suggestion);
                 }
             }
             
-            // AGGRESSIVE early termination
-            if (results.size() >= MAX_SUGGESTIONS_PER_ARGUMENT) {
-                return;
-            }
         }
     }
     
