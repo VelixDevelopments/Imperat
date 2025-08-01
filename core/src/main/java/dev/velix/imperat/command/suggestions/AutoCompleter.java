@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @ApiStatus.AvailableSince("1.0.0")
 public abstract class AutoCompleter<S extends Source> {
-
+    
     protected final Command<S> command;
 
     protected AutoCompleter(Command<S> command) {
@@ -31,7 +31,7 @@ public abstract class AutoCompleter<S extends Source> {
     }
 
     private static @NotNull CompletionArg getLastArg(String[] args) {
-        if (args.length == 0) return new CompletionArg("", -1);
+        if (args.length == 0) return CompletionArg.EMPTY;
         int index = args.length - 1;
         String result = args[args.length - 1];
         return new CompletionArg(result, index);

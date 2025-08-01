@@ -12,7 +12,6 @@ import dev.velix.imperat.resolvers.PermissionResolver;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -714,7 +713,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
                         currentNode,context, prefix,
                         hasPrefix, source, results
                 );
-                continue; // Don't traverse deeper from suggestion nodes
+                break; // Don't traverse deeper from suggestion nodes
             }
             
             // TRAVERSAL PATH: Add matching children to stack
@@ -724,7 +723,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             }
         }
         
-        return new ArrayList<>(results); // Return defensive copy
+        return results; // Return defensive copy
     }
     
     /**
