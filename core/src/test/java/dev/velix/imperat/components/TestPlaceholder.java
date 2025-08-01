@@ -1,11 +1,11 @@
 package dev.velix.imperat.components;
 
-import static dev.velix.imperat.TestRun.IMPERAT;
-
 import dev.velix.imperat.placeholders.Placeholder;
 import dev.velix.imperat.placeholders.PlaceholderRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static dev.velix.imperat.TestRun.IMPERAT;
 
 public class TestPlaceholder {
     PlaceholderRegistry<TestSource> placeholderRegistry = PlaceholderRegistry.createDefault(IMPERAT.config());
