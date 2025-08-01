@@ -1,10 +1,10 @@
 package dev.velix.imperat.commands;
 
-import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.SubCommand;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.components.TestSource;
 
 import java.util.List;
 import java.util.Map;

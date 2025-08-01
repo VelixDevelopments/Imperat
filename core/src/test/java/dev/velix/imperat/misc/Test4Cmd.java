@@ -1,9 +1,9 @@
 package dev.velix.imperat.misc;
 
-import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.components.TestSource;
 
 @Command("test4")
 public class Test4Cmd {

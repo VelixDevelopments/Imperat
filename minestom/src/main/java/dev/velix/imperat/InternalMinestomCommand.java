@@ -1,10 +1,8 @@
 package dev.velix.imperat;
 
-import static dev.velix.imperat.SyntaxDataLoader.loadArguments;
-import static dev.velix.imperat.SyntaxDataLoader.loadCondition;
-import static dev.velix.imperat.SyntaxDataLoader.loadExecutor;
-
 import net.minestom.server.command.builder.Command;
+
+import static dev.velix.imperat.SyntaxDataLoader.*;
 
 final class InternalMinestomCommand extends Command {
 

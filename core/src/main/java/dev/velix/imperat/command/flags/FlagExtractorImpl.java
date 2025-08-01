@@ -5,14 +5,8 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.context.FlagData;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.UnknownFlagException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 final class FlagExtractorImpl<S extends Source> implements FlagExtractor<S>{

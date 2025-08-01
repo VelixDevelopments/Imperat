@@ -1,9 +1,9 @@
 package dev.velix.imperat.commands.annotations;
 
-import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Named;
 import dev.velix.imperat.annotations.SubCommand;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.components.TestSource;
 
 @SubCommand("second")
 public class SecondSub {

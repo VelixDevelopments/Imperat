@@ -2,9 +2,9 @@ package dev.velix.imperat.processors;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.TestRun;
-import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.exception.ImperatException;
 

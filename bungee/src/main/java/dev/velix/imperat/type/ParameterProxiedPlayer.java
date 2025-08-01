@@ -12,6 +12,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 public final class ParameterProxiedPlayer extends BaseParameterType<BungeeSource, ProxiedPlayer> {

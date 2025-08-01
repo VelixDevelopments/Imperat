@@ -2,11 +2,7 @@ package dev.velix.imperat.command.parameters;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.Description;
-import dev.velix.imperat.command.parameters.type.ParameterArray;
-import dev.velix.imperat.command.parameters.type.ParameterCollection;
-import dev.velix.imperat.command.parameters.type.ParameterMap;
-import dev.velix.imperat.command.parameters.type.ParameterCommand;
-import dev.velix.imperat.command.parameters.type.ParameterType;
+import dev.velix.imperat.command.parameters.type.*;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeUtility;

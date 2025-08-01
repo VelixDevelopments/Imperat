@@ -2,7 +2,6 @@ package dev.velix.imperat.selector.field;
 
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.SourceException;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import dev.velix.imperat.util.TypeWrap;
 

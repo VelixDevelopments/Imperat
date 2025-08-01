@@ -2,11 +2,7 @@ package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.ImperatConfig;
-import dev.velix.imperat.annotations.Default;
-import dev.velix.imperat.annotations.DefaultProvider;
-import dev.velix.imperat.annotations.Flag;
-import dev.velix.imperat.annotations.Named;
-import dev.velix.imperat.annotations.Switch;
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.element.ClassElement;
 import dev.velix.imperat.annotations.base.element.MethodElement;
 import dev.velix.imperat.annotations.base.element.ParameterElement;
@@ -17,10 +13,10 @@ import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.CommandHelp;
-import dev.velix.imperat.util.ImperatDebugger;
 import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

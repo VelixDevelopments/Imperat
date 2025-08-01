@@ -11,6 +11,7 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.function.Supplier;

@@ -1,12 +1,12 @@
 package dev.velix.imperat.commands.annotations.contextresolver;
 
 
-import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.annotations.SubCommand;
 import dev.velix.imperat.annotations.Usage;
 import dev.velix.imperat.commands.annotations.examples.Group;
+import dev.velix.imperat.components.TestSource;
 import org.junit.jupiter.api.Assertions;
 
 @Command("ctx")

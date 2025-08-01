@@ -2,10 +2,9 @@ package dev.velix.imperat.commands.annotations;
 
 import dev.velix.imperat.TestRun;
 import dev.velix.imperat.annotations.*;
-import dev.velix.imperat.components.TestSource;
-import dev.velix.imperat.annotations.ExternalSubCommand;
 import dev.velix.imperat.command.AttachmentMode;
 import dev.velix.imperat.commands.annotations.examples.Group;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.help.CommandHelp;
 import dev.velix.imperat.util.ImperatDebugger;
 

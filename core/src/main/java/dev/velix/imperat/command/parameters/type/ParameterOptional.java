@@ -9,6 +9,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.Optional;
 
 public final class ParameterOptional<S extends Source, T> extends BaseParameterType<S, Optional<T>> {

@@ -14,10 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.jar.JarFile;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 public final class BukkitImperat extends BaseImperat<BukkitSource> {
 

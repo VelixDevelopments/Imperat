@@ -1,7 +1,5 @@
 package dev.velix.imperat.brigadier;
 
-import static dev.velix.imperat.commodore.CommodoreProvider.isSupported;
-
 import dev.velix.imperat.BaseBrigadierManager;
 import dev.velix.imperat.BukkitImperat;
 import dev.velix.imperat.BukkitSource;
@@ -12,6 +10,8 @@ import dev.velix.imperat.resolvers.PermissionResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+
+import static dev.velix.imperat.commodore.CommodoreProvider.isSupported;
 
 public final class BukkitBrigadierManager extends BaseBrigadierManager<BukkitSource> {
 

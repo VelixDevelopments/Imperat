@@ -10,6 +10,7 @@ import dev.velix.imperat.resolvers.SuggestionResolver;
 import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.concurrent.CompletableFuture;
 
 public final class ParameterCompletableFuture<S extends Source, T> extends BaseParameterType<S, CompletableFuture<T>> {

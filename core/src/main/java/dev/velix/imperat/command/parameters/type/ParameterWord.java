@@ -8,6 +8,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.parse.WordOutOfRestrictionsException;
 import dev.velix.imperat.util.Preconditions;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 

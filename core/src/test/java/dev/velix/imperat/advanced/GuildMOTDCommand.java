@@ -1,12 +1,6 @@
 package dev.velix.imperat.advanced;
 
-import dev.velix.imperat.annotations.Command;
-
-import dev.velix.imperat.annotations.Default;
-import dev.velix.imperat.annotations.Flag;
-import dev.velix.imperat.annotations.Greedy;
-import dev.velix.imperat.annotations.Named;
-import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.components.TestSource;
 
 import java.time.Duration;

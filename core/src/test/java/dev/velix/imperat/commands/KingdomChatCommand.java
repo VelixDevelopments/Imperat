@@ -1,9 +1,9 @@
 package dev.velix.imperat.commands;
 
-import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.annotations.Command;
 import dev.velix.imperat.annotations.Greedy;
 import dev.velix.imperat.annotations.Usage;
+import dev.velix.imperat.components.TestSource;
 
 @Command("kingdomchat")
 public class KingdomChatCommand {

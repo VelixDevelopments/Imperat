@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a type handler for command parameters, providing methods for

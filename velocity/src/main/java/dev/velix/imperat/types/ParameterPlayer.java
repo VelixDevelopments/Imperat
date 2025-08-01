@@ -12,6 +12,7 @@ import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.SuggestionResolver;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 public final class ParameterPlayer extends BaseParameterType<VelocitySource, Player> {

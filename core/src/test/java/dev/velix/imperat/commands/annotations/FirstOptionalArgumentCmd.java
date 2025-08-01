@@ -1,12 +1,7 @@
 package dev.velix.imperat.commands.annotations;
 
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.components.TestSource;
-import dev.velix.imperat.annotations.Command;
-import dev.velix.imperat.annotations.Default;
-import dev.velix.imperat.annotations.Named;
-import dev.velix.imperat.annotations.Optional;
-import dev.velix.imperat.annotations.SubCommand;
-import dev.velix.imperat.annotations.Usage;
 
 @Command("foa")
 public final class FirstOptionalArgumentCmd {

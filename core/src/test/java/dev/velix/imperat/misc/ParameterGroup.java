@@ -1,10 +1,10 @@
 package dev.velix.imperat.misc;
 
-import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.command.parameters.type.BaseParameterType;
 import dev.velix.imperat.commands.annotations.examples.Group;
 import dev.velix.imperat.commands.annotations.examples.GroupRegistry;
 import dev.velix.imperat.commands.annotations.examples.GroupSuggestionResolver;
+import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;

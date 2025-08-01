@@ -1,13 +1,9 @@
 package dev.velix.imperat.annotations.base.element;
 
-import dev.velix.imperat.annotations.Default;
-import dev.velix.imperat.annotations.DefaultProvider;
-import dev.velix.imperat.annotations.Flag;
-import dev.velix.imperat.annotations.Switch;
+import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.annotations.base.AnnotationHelper;
 import dev.velix.imperat.annotations.base.AnnotationParser;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.annotations.ContextResolved;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;

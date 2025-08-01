@@ -6,7 +6,10 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.context.*;
+import dev.velix.imperat.context.Context;
+import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.context.FlagData;
+import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.sur.ParameterValueAssigner;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NumberOutOfRangeException;
@@ -19,12 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @ApiStatus.Internal

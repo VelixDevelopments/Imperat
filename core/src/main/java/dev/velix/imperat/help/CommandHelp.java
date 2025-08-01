@@ -1,10 +1,10 @@
 package dev.velix.imperat.help;
 
 import dev.velix.imperat.ImperatConfig;
+import dev.velix.imperat.annotations.ContextResolved;
 import dev.velix.imperat.context.Context;
 import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
-import dev.velix.imperat.annotations.ContextResolved;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.AvailableSince("1.0.0")

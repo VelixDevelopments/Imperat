@@ -2,7 +2,6 @@ package dev.velix.imperat.commands.annotations;
 
 import dev.velix.imperat.annotations.*;
 import dev.velix.imperat.components.TestSource;
-import dev.velix.imperat.annotations.ExternalSubCommand;
 
 @SubCommand("first")
 @ExternalSubCommand(SecondSub.class)

@@ -1,16 +1,11 @@
 package dev.velix.imperat.annotations.base;
 
 import dev.velix.imperat.annotations.*;
-import dev.velix.imperat.annotations.ExternalSubCommand;
+import dev.velix.imperat.annotations.Optional;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 final class AnnotationRegistry {
 

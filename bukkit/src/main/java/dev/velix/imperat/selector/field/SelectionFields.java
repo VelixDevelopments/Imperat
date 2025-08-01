@@ -1,8 +1,8 @@
 package dev.velix.imperat.selector.field;
 
+import dev.velix.imperat.BukkitUtil;
 import dev.velix.imperat.selector.field.filters.PredicateField;
 import dev.velix.imperat.selector.field.operators.OperatorField;
-import dev.velix.imperat.BukkitUtil;
 
 import java.util.HashSet;
 import java.util.Set;

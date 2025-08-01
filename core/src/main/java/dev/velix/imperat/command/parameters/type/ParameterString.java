@@ -6,6 +6,7 @@ import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.exception.ImperatException;
 import org.jetbrains.annotations.NotNull;
+
 import static dev.velix.imperat.util.StringUtils.isQuoteChar;
 
 public final class ParameterString<S extends Source> extends BaseParameterType<S, String> {
