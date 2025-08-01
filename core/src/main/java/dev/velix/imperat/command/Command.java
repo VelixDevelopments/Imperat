@@ -504,7 +504,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
 
         public Builder<S> subCommand(String name, CommandUsage.Builder<S> mainUsage, AttachmentMode attachmentMode) {
             return subCommand(
-                Command.<S>create(imperat, name)
+                Command.create(imperat, name)
                     .usage(mainUsage)
                     .build(),
                 attachmentMode
