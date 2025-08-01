@@ -723,7 +723,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             }
         }
         
-        return results; // Return defensive copy
+        return Collections.unmodifiableList(results); // Return defensive copy
     }
     
     /**
