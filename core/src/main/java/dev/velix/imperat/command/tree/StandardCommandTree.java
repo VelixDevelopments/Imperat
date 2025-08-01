@@ -517,7 +517,6 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             @NotNull ParameterNode<S, ?> currentNode,
             int depth
     ) {
-        System.out.println("Processing child node= " + currentNode.format());
         final int inputSize = input.size();
         final boolean isLastDepth = (depth == inputSize - 1);
         

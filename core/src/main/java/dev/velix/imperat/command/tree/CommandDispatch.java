@@ -82,7 +82,6 @@ public final class CommandDispatch<S extends Source> {
             if(lastNode != null && lastNode.isLast()) {
                 return directUsage;
             }
-            System.out.println("GOING FOR OTHER");
         }
         
         return (closestUsage = closestUsageLookup());
@@ -90,7 +89,6 @@ public final class CommandDispatch<S extends Source> {
     
     private CommandUsage<S> closestUsageLookup() {
         if(lastNode == null) {
-            System.out.println("NODE IS NULL?!");
             return null;
         }
         CommandUsage<S> closestUsage = null;
