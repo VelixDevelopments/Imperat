@@ -9,12 +9,9 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.context.ArgumentInput;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.exception.AmbiguousUsageAdditionException;
-import dev.velix.imperat.exception.InvalidCommandUsageException;
+import dev.velix.imperat.exception.UsageRegistrationException;
 import dev.velix.imperat.exception.InvalidSyntaxException;
 import dev.velix.imperat.exception.PermissionDeniedException;
 import dev.velix.imperat.util.ImperatDebugger;
@@ -74,7 +71,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         try {
             var verifier = config.getUsageVerifier();
             for (CommandUsage<S> usage : command.usages()) {
-                if (!verifier.verify(usage)) throw new InvalidCommandUsageException(command, usage);
+                if (!verifier.verify(usage)) throw new UsageRegistrationException(command, usage);
 
                 for (CommandUsage<S> other : command.usages()) {
                     if (other.equals(usage)) continue;
@@ -288,7 +285,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
         
         // EXISTING: Usage execution - Add timing around it
-        executeUsage(command, source, context, usage);
+        executeUsage(command, source, context, usage, searchResult);
         
         return searchResult.getResult();
     }
@@ -297,7 +294,8 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
             final Command<S> command,
             final S source,
             final Context<S> context,
-            final CommandUsage<S> usage
+            final CommandUsage<S> usage,
+            final CommandDispatch<S> dispatch
     ) throws Throwable {
         
         // MEASURE: Global pre-processing
@@ -311,7 +309,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
         }
         
         // MEASURE: Context resolution (this is likely the biggest bottleneck)
-        ResolvedContext<S> resolvedContext = config.getContextFactory().createResolvedContext(context, usage);
+        ExecutionContext<S> resolvedContext = config.getContextFactory().createExecutionContext(context, dispatch);
         resolvedContext.resolve();
         
         // MEASURE: Global post-processing
@@ -349,7 +347,7 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     private boolean postProcess(
-        @NotNull ResolvedContext<S> context
+        @NotNull ExecutionContext<S> context
     ) {
         for (CommandPostProcessor<S> postProcessor : config.getPostProcessors()) {
             try {

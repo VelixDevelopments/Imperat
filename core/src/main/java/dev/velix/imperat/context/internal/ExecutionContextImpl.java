@@ -5,10 +5,8 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.NumericParameter;
 import dev.velix.imperat.command.parameters.NumericRange;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.FlagData;
-import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.Source;
+import dev.velix.imperat.command.tree.CommandDispatch;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.sur.ParameterValueAssigner;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.exception.NumberOutOfRangeException;
@@ -28,18 +26,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * The purpose of this class is to resolve string inputs
- * into values , each subcommand {@link Command} may have its own args
- * Therefore, it loads the arguments per subcommand USED in the context input
- * from the command source/sender
- * the results (resolved arguments) will be used later on to
- * find the command usage object then use the found command usage to execute the action.
- *
- * @param <S> the sender valueType
- */
+
 @ApiStatus.Internal
-final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> implements ResolvedContext<S> {
+final class ExecutionContextImpl<S extends Source> extends ContextImpl<S> implements ExecutionContext<S> {
 
     private final CommandUsage<S> usage;
     private final Registry<String, ExtractedInputFlag> flagRegistry = new Registry<>();
@@ -47,17 +36,23 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     private final Registry<Command<S>, Registry<String, Argument<S>>> resolvedArgumentsPerCommand = new Registry<>(LinkedHashMap::new);
     //all resolved arguments EXCEPT for subcommands and flags.
     private final Registry<String, Argument<S>> allResolvedArgs = new Registry<>(LinkedHashMap::new);
-
+    
     //last command used
-    private Command<S> lastCommand;
-
-    ResolvedContextImpl(
-        Context<S> context,
-        CommandUsage<S> usage
-    ) {
+    private final Command<S> lastCommand;
+    
+    ExecutionContextImpl(Context<S> context, CommandUsage<S> usage) {
         super(context.imperat(), context.command(), context.source(), context.label(), context.arguments());
         this.lastCommand = context.command();
         this.usage = usage;
+    }
+    
+    ExecutionContextImpl(
+        Context<S> context,
+        CommandDispatch<S> result
+    ) {
+        super(context.imperat(), context.command(), context.source(), context.label(), context.arguments());
+        this.lastCommand = result.getLastCommandNode() == null ? context.command() : result.getLastCommandNode().getData();
+        this.usage = result.getFoundUsage();
     }
 
     /**
@@ -176,7 +171,7 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     
     @Override
     public void resolve() throws ImperatException {
-        var resolver = ParameterValueAssigner.create(command(), this, usage);
+        var resolver = ParameterValueAssigner.create(this, usage);
         resolver.resolve();
     }
 
@@ -223,10 +218,6 @@ final class ResolvedContextImpl<S extends Source> extends ContextImpl<S> impleme
     @Override
     public @NotNull Command<S> getLastUsedCommand() {
         return lastCommand;
-    }
-    
-    public void setLastCommand(Command<S> lastCommand) {
-        this.lastCommand = lastCommand;
     }
     
     /**

@@ -8,7 +8,7 @@ import dev.velix.imperat.commands.annotations.examples.BanCommand;
 import dev.velix.imperat.components.TestSource;
 import dev.velix.imperat.context.ArgumentInput;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.util.Registry;
 import org.junit.jupiter.api.Assertions;
@@ -29,7 +29,7 @@ public class TestSmartUsageResolve {
 
     private final static ContextFactory<TestSource> FACTORY = IMPERAT.config.getContextFactory();
 
-    private static ResolvedContext<TestSource> inputResolve(String command, String... args) {
+    private static ExecutionContext<TestSource> inputResolve(String command, String... args) {
         System.out.println("-------------");
         System.out.println("args= " + Arrays.toString(args));
         ArgumentInput queue = ArgumentInput.parse(args);
@@ -53,7 +53,7 @@ public class TestSmartUsageResolve {
         Assertions.assertNotNull(usage);
         
         System.out.println("GOT USAGE !!, RESOLVING ARGS");
-        ResolvedContext<TestSource> resolvedContext = FACTORY.createResolvedContext(context, usage);
+        ExecutionContext<TestSource> resolvedContext = FACTORY.createExecutionContext(context, res);
         Assertions.assertDoesNotThrow(resolvedContext::resolve);
         System.out.println("RESOLVED ARGS !!");
         resolvedContext.debug();
@@ -185,7 +185,7 @@ public class TestSmartUsageResolve {
         private final Map<String, Object> args = new LinkedHashMap<>();
         private final Registry<String, Object> resolvedFlags = new Registry<>(LinkedHashMap::new);
 
-        private ResolvedArgsData(ResolvedContext<TestSource> context) {
+        private ResolvedArgsData(ExecutionContext<TestSource> context) {
             if (context == null) return;
 
             for (var resolved : context.getResolvedArguments()) {
@@ -211,7 +211,7 @@ public class TestSmartUsageResolve {
         }
 
 
-        public static ResolvedArgsData of(ResolvedContext<TestSource> context) {
+        public static ResolvedArgsData of(ExecutionContext<TestSource> context) {
             return new ResolvedArgsData(context);
         }
 

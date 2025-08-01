@@ -10,10 +10,7 @@ import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.command.tree.CommandTreeVisualizer;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.FlagData;
-import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.HelpProvider;
 import dev.velix.imperat.help.PaginatedHelpTemplate;
@@ -228,7 +225,7 @@ final class CommandImpl<S extends Source> implements Command<S> {
      * @param usage   the usage detected being used
      */
     @Override
-    public boolean postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) {
+    public boolean postProcess(@NotNull Imperat<S> api, @NotNull ExecutionContext<S> context, @NotNull CommandUsage<S> usage) {
         for(var processor : postProcessors) {
             try {
                 processor.process(api, context);

@@ -67,9 +67,13 @@ public class TestRun {
         //ImperatDebugger.setTesting(true);
 
         IMPERAT = TestImperatConfig.builder()
-                .usageVerifier(UsageVerifier.typeTolerantVerifier())
                 .globalDefaultUsageBuilder(CommandUsage.<TestSource>builder().execute((src, ctx)-> {
-                    //throw new InvalidSyntaxException(CommandDispatch.freshlyNew(ctx.getLastUsedCommand()));
+                    var rootCmd = ctx.command();
+                    var lastCmd = ctx.getLastUsedCommand();
+                    var correctUsage = rootCmd.getUsage((usage)->
+                        usage.hasParameters((p)-> p.similarTo(lastCmd))
+                    );
+                    src.error("Correct usage: /" + CommandUsage.format(rootCmd, correctUsage));
                 }))
                 .dependencyResolver(Group.class, () -> new Group("my-global-group"))
                 .dependencyResolver(SomeInstance.class, ()-> SOME_INSTANCE)
@@ -730,7 +734,7 @@ public class TestRun {
     
     @Test
     public void testClosestUsage() {
-        Assertions.assertDoesNotThrow(()-> {
+        Assertions.assertDoesNotThrow(() -> {
             IMPERAT.registerCommand(new PartyCommand());
         });
         
@@ -739,8 +743,10 @@ public class TestRun {
         
         cmd.visualizeTree();
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("party", "invite mqzen"));
-        
-        //TODO create a smarter approach for closest usage approach, then test it here.
+        System.out.println("-------------");
+        Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("party", "invite"));
+        System.out.println("-------------");
+        Assertions.assertEquals(CommandDispatch.Result.UNKNOWN, testCmdTreeExecution("party", "invite hello world damn"));
     }
     
     @Test

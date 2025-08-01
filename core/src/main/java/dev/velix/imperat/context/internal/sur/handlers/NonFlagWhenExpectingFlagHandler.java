@@ -2,8 +2,8 @@ package dev.velix.imperat.context.internal.sur.handlers;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
-import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.ExtractedInputFlag;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+    public @NotNull HandleResult handle(ExecutionContext<S> context, CommandInputStream<S> stream) {
         CommandParameter<S> currentParameter = stream.currentParameterFast();
         String currentRaw = stream.currentRawFast();
         
@@ -40,7 +40,7 @@ public final class NonFlagWhenExpectingFlagHandler<S extends Source> implements 
         }
     }
     
-    private void resolveFlagDefaultValue(CommandInputStream<S> stream, FlagParameter<S> flagParameter, ResolvedContext<S> context) throws ImperatException {
+    private void resolveFlagDefaultValue(CommandInputStream<S> stream, FlagParameter<S> flagParameter, ExecutionContext<S> context) throws ImperatException {
         FlagData<S> flagDataFromRaw = flagParameter.flagData();
 
         if (flagDataFromRaw.isSwitch()) {

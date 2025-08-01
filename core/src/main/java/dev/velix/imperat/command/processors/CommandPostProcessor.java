@@ -2,7 +2,7 @@ package dev.velix.imperat.command.processors;
 
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 
@@ -22,8 +22,8 @@ public interface CommandPostProcessor<S extends Source> extends CommandProcessor
      * @throws ImperatException the exception to throw if something happens
      */
     void process(
-        Imperat<S> imperat,
-        ResolvedContext<S> context
+            Imperat<S> imperat,
+            ExecutionContext<S> context
     ) throws ImperatException;
 
 }

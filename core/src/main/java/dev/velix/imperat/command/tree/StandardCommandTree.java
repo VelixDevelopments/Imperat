@@ -494,7 +494,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         int bestDepth = 0;
         
         for (var child : rootChildren) {
-            final var result = dispatchNode(dispatch, input, child, 0);
+            final var result = dispatchNode(CommandDispatch.unknown(), input, child, 0);
             
             // Track the best (deepest) match
             if (result.getResult() == CommandDispatch.Result.COMPLETE) {
@@ -517,7 +517,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             @NotNull ParameterNode<S, ?> currentNode,
             int depth
     ) {
-        
+        System.out.println("Processing child node= " + currentNode.format());
         final int inputSize = input.size();
         final boolean isLastDepth = (depth == inputSize - 1);
         
@@ -624,6 +624,8 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         if(!matchesInput(node, lastArg, cfg.strictCommandTree())) {
             return dispatch;
         }
+        
+        dispatch.append(node);
         
         if(!node.isExecutable()) {
             if (node.isCommand()) {

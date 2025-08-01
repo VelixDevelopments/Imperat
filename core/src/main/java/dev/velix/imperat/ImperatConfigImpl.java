@@ -11,10 +11,7 @@ import dev.velix.imperat.command.processors.CommandProcessingChain;
 import dev.velix.imperat.command.processors.impl.DefaultProcessors;
 import dev.velix.imperat.command.returns.ReturnResolver;
 import dev.velix.imperat.command.suggestions.SuggestionResolverRegistry;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ParamTypeRegistry;
-import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.context.internal.ContextFactory;
 import dev.velix.imperat.exception.*;
 import dev.velix.imperat.exception.parse.*;
@@ -197,7 +194,11 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
                 S source = context.source();
                 //if usage is null, find the closest usage
                 source.error("Invalid command usage '/" + context.command().name() + " " + context.arguments().join(" ") + "'");
-                source.error("Closest Command Usage: " + (imperat.commandPrefix() + CommandUsage.format(context.label(), exception.getExecutionResult().getClosestUsage())) );
+                
+                var closestUsage = exception.getExecutionResult().getClosestUsage();
+                if(closestUsage != null) {
+                    source.error("Closest Command Usage: " + (imperat.commandPrefix() + CommandUsage.format(context.label(), closestUsage)) );
+                }
             }
         );
         
@@ -205,7 +206,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
             NoHelpException.class,
             (exception, imperat, context) -> {
                 Command<S> cmdUsed;
-                if (context instanceof ResolvedContext<S> resolvedContext) {
+                if (context instanceof ExecutionContext<S> resolvedContext) {
                     cmdUsed = resolvedContext.getLastUsedCommand();
                 } else {
                     cmdUsed = context.command();
@@ -217,7 +218,7 @@ final class ImperatConfigImpl<S extends Source> implements ImperatConfig<S> {
         this.setThrowableResolver(
             NoHelpPageException.class,
             (exception, imperat, context) -> {
-                if (!(context instanceof ResolvedContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
+                if (!(context instanceof ExecutionContext<S> resolvedContext) || resolvedContext.getDetectedUsage() == null) {
                     throw new IllegalCallerException("Called NoHelpPageCaption in wrong the wrong sequence/part of the code");
                 }
 

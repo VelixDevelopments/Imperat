@@ -79,7 +79,10 @@ public final class CommandDispatch<S extends Source> {
     
     private CommandUsage<S> computeClosestUsage() {
         if(directUsage != null) {
-            return directUsage;
+            if(lastNode != null && lastNode.isLast()) {
+                return directUsage;
+            }
+            System.out.println("GOING FOR OTHER");
         }
         
         return (closestUsage = closestUsageLookup());
@@ -87,11 +90,12 @@ public final class CommandDispatch<S extends Source> {
     
     private CommandUsage<S> closestUsageLookup() {
         if(lastNode == null) {
+            System.out.println("NODE IS NULL?!");
             return null;
         }
         CommandUsage<S> closestUsage = null;
-
-        ParameterNode<S, ?> curr = lastNode.getTopChild();
+        
+        ParameterNode<S, ?> curr = lastNode;
         while (curr != null) {
             
             if(curr.isExecutable()) {
@@ -116,6 +120,10 @@ public final class CommandDispatch<S extends Source> {
     
     public CommandDispatch<S> copy() {
         return new CommandDispatch<>(result, lastNode, directUsage);
+    }
+    
+    public CommandNode<S> getLastCommandNode() {
+        return lastCommandNode;
     }
     
     /**

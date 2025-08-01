@@ -29,7 +29,7 @@ final class ImperatBukkitHelpTopic extends GenericCommandHelpTopic {
 
         HelpSource source = new HelpSource(imperat.wrapSender(Bukkit.getConsoleSender()), messages);
         var context = factory.createContext(imperat, source, command.imperatCommand, command.imperatCommand.name(), ArgumentInput.empty());
-        var resolvedContext = factory.createResolvedContext(context, command.imperatCommand.getDefaultUsage());
+        var resolvedContext = factory.createExecutionContext(context, command.imperatCommand.getDefaultUsage());
         CommandHelp commandHelp = new CommandHelp(imperat.config, resolvedContext);
         commandHelp.display(source);
 

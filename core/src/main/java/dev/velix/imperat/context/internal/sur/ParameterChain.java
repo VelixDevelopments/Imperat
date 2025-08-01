@@ -1,6 +1,6 @@
 package dev.velix.imperat.context.internal.sur;
 
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.sur.handlers.ParameterHandler;
@@ -15,7 +15,7 @@ public class ParameterChain<S extends Source> {
         this.handlers = List.copyOf(handlers);
     }
     
-    public void execute(ResolvedContext<S> context, CommandInputStream<S> stream) throws ImperatException {
+    public void execute(ExecutionContext<S> context, CommandInputStream<S> stream) throws ImperatException {
         pipeLine:
         while (stream.hasNextParameter()) {
             

@@ -12,7 +12,7 @@ import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.command.tree.CommandTree;
 import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.exception.ImperatException;
 import dev.velix.imperat.help.HelpProvider;
@@ -215,7 +215,7 @@ public interface Command<S extends Source> extends CommandParameter<S>, FlagRegi
      * @param context the context
      * @param usage   the usage detected being used
      */
-    boolean postProcess(@NotNull Imperat<S> api, @NotNull ResolvedContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
+    boolean postProcess(@NotNull Imperat<S> api, @NotNull ExecutionContext<S> context, @NotNull CommandUsage<S> usage) throws ImperatException;
 
     /**
      * Retrieves a usage with no args for this command

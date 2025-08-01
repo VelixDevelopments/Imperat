@@ -2,7 +2,7 @@ package dev.velix.imperat.context.internal.sur.handlers;
 
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.OptionalValueSupplier;
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.ExtractedInputFlag;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public final class OptionalParameterHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+    public @NotNull HandleResult handle(ExecutionContext<S> context, CommandInputStream<S> stream) {
         CommandParameter<S> currentParameter = stream.currentParameterFast();
         String currentRaw = stream.currentRawFast();
         
@@ -38,7 +38,7 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
         }
     }
     
-    private void resolveOptional(String currentRaw, CommandParameter<S> currentParameter, ResolvedContext<S> context,
+    private void resolveOptional(String currentRaw, CommandParameter<S> currentParameter, ExecutionContext<S> context,
                                CommandInputStream<S> stream, Object resolveResult) throws ImperatException {
         int currentParameterPosition = stream.currentParameterPosition();
         int lengthWithoutFlags = context.getDetectedUsage().getParametersWithoutFlags().size();
@@ -134,7 +134,7 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
     }
     
     @SuppressWarnings("unchecked")
-    private <T> T getDefaultValue(ResolvedContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
+    private <T> T getDefaultValue(ExecutionContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
         OptionalValueSupplier optionalSupplier = parameter.getDefaultValueSupplier();
         if (optionalSupplier.isEmpty()) {
             return null;

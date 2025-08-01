@@ -4,11 +4,8 @@ import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.suggestions.CompletionArg;
-import dev.velix.imperat.context.ArgumentInput;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ResolvedContext;
-import dev.velix.imperat.context.Source;
-import dev.velix.imperat.context.SuggestionContext;
+import dev.velix.imperat.command.tree.CommandDispatch;
+import dev.velix.imperat.context.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,13 +60,23 @@ public abstract class ContextFactory<S extends Source> {
 
     /**
      * @param plainContext the context plain
-     * @param usage        the command usage
+     * @param dispatch     the result of a search and dispatch for the proper {@link CommandUsage}
      * @return the context after resolving args into values for
      * later on parsing it into the execution
      */
-    public abstract ResolvedContext<S> createResolvedContext(
-        @NotNull Context<S> plainContext,
-        @NotNull CommandUsage<S> usage
+    public abstract ExecutionContext<S> createExecutionContext(
+            @NotNull Context<S> plainContext,
+            @NotNull CommandDispatch<S> dispatch
     );
-
+    
+    /**
+     * @param plainContext the context plain
+     * @param usage     the proper {@link CommandUsage}
+     * @return the context after resolving args into values for
+     * later on parsing it into the execution
+     */
+    public abstract ExecutionContext<S> createExecutionContext(
+            @NotNull Context<S> plainContext,
+            @NotNull CommandUsage<S> usage
+    );
 }

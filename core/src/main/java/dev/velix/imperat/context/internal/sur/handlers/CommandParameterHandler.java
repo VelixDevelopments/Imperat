@@ -2,7 +2,7 @@ package dev.velix.imperat.context.internal.sur.handlers;
 
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.parameters.CommandParameter;
-import dev.velix.imperat.context.ResolvedContext;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.sur.HandleResult;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public final class CommandParameterHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+    public @NotNull HandleResult handle(ExecutionContext<S> context, CommandInputStream<S> stream) {
         CommandParameter<S> currentParameter = stream.currentParameterFast();
         String currentRaw = stream.currentRawFast();
         
@@ -24,7 +24,7 @@ public final class CommandParameterHandler<S extends Source> implements Paramete
         try {
             Command<S> parameterSubCmd = (Command<S>) currentParameter;
             if (parameterSubCmd.hasName(currentRaw)) {
-                context.setLastCommand(parameterSubCmd);
+                //context.setLastCommand(parameterSubCmd);
                 stream.skip();
                 return HandleResult.NEXT_ITERATION;
             } else {

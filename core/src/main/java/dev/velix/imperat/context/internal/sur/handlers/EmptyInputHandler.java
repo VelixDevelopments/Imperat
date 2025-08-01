@@ -4,8 +4,8 @@ import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.parameters.FlagParameter;
 import dev.velix.imperat.command.parameters.OptionalValueSupplier;
 import dev.velix.imperat.command.tree.CommandDispatch;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.context.FlagData;
-import dev.velix.imperat.context.ResolvedContext;
 import dev.velix.imperat.context.Source;
 import dev.velix.imperat.context.internal.CommandInputStream;
 import dev.velix.imperat.context.internal.sur.HandleResult;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public final class EmptyInputHandler<S extends Source> implements ParameterHandler<S> {
     
     @Override
-    public @NotNull HandleResult handle(ResolvedContext<S> context, CommandInputStream<S> stream) {
+    public @NotNull HandleResult handle(ExecutionContext<S> context, CommandInputStream<S> stream) {
         CommandParameter<S> currentParameter = stream.currentParameterFast();
         if (currentParameter == null) {
             return HandleResult.TERMINATE;
@@ -44,7 +44,7 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
     }
     
     private void handleEmptyOptional(CommandParameter<S> optionalEmptyParameter, CommandInputStream<S> stream, 
-                                   ResolvedContext<S> context) throws ImperatException {
+                                   ExecutionContext<S> context) throws ImperatException {
         if (optionalEmptyParameter.isFlag()) {
             FlagParameter<S> flagParameter = optionalEmptyParameter.asFlagParameter();
             FlagData<S> flag = flagParameter.flagData();
@@ -67,7 +67,7 @@ public final class EmptyInputHandler<S extends Source> implements ParameterHandl
         }
     }
     @SuppressWarnings("unchecked")
-    private <T> T getDefaultValue(ResolvedContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
+    private <T> T getDefaultValue(ExecutionContext<S> context, CommandInputStream<S> stream, CommandParameter<S> parameter) throws ImperatException {
         OptionalValueSupplier optionalSupplier = parameter.getDefaultValueSupplier();
         if (optionalSupplier.isEmpty()) {
             return null;
