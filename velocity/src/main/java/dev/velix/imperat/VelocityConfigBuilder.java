@@ -4,9 +4,11 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.types.ParameterPlayer;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
 public final class VelocityConfigBuilder extends ConfigBuilder<VelocitySource, VelocityImperat, VelocityConfigBuilder> {
@@ -20,6 +22,14 @@ public final class VelocityConfigBuilder extends ConfigBuilder<VelocitySource, V
         addThrowableHandlers();
         registerSourceResolvers();
         registerValueResolvers();
+        registerContextResolvers();
+    }
+    
+    private void registerContextResolvers() {
+        config.registerContextResolver(
+                new TypeWrap<ExecutionContext<VelocitySource>>() {}.getType(),
+                (ctx, paramElement)-> ctx
+        );
     }
 
     private void registerSourceResolvers() {

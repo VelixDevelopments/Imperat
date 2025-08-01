@@ -3,6 +3,7 @@ package dev.velix.imperat;
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.CastingAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.exception.InvalidLocationFormatException;
 import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.UnknownOfflinePlayerException;
@@ -16,6 +17,7 @@ import dev.velix.imperat.type.ParameterLocation;
 import dev.velix.imperat.type.ParameterOfflinePlayer;
 import dev.velix.imperat.type.ParameterPlayer;
 import dev.velix.imperat.type.ParameterTargetSelector;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Location;
@@ -40,8 +42,16 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitSource, Bukki
         addThrowableHandlers();
         registerSourceResolvers();
         registerValueResolvers();
+        registerContextResolvers();
     }
-
+    
+    private void registerContextResolvers() {
+        config.registerContextResolver(
+                new TypeWrap<ExecutionContext<BukkitSource>>() {}.getType(),
+                (ctx, paramElement)-> ctx
+        );
+    }
+    
     private void registerSourceResolvers() {
         config.registerSourceResolver(CommandSender.class, BukkitSource::origin);
         config.registerSourceResolver(Player.class, (source) -> {

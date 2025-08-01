@@ -1,5 +1,7 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.context.ExecutionContext;
+import dev.velix.imperat.util.TypeWrap;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
@@ -12,8 +14,16 @@ public final class CommandLineConfigBuilder extends ConfigBuilder<ConsoleSource,
     CommandLineConfigBuilder(InputStream inputStream) {
         this.inputStream = inputStream;
         config.registerSourceResolver(PrintStream.class, ConsoleSource::origin);
+        registerContextResolvers();
     }
-
+    
+    private void registerContextResolvers() {
+        config.registerContextResolver(
+                new TypeWrap<ExecutionContext<ConsoleSource>>() {}.getType(),
+                (ctx, paramElement)-> ctx
+        );
+    }
+    
     /**
      * Builds and returns a configured CommandLineImperat instance.
      *

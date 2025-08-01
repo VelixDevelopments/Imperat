@@ -1,7 +1,9 @@
 package dev.velix.imperat;
 
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.UnknownPlayerException;
+import dev.velix.imperat.util.TypeWrap;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
@@ -15,6 +17,14 @@ public final class MinestomConfigBuilder extends ConfigBuilder<MinestomSource, M
         this.serverProcess = serverProcess;
         registerDefaultResolvers();
         addThrowableHandlers();
+        registerContextResolvers();
+    }
+    
+    private void registerContextResolvers() {
+        config.registerContextResolver(
+                new TypeWrap<ExecutionContext<MinestomSource>>() {}.getType(),
+                (ctx, paramElement)-> ctx
+        );
     }
 
     private void registerDefaultResolvers() {

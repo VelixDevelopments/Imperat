@@ -3,10 +3,12 @@ package dev.velix.imperat;
 import dev.velix.imperat.adventure.AdventureProvider;
 import dev.velix.imperat.adventure.BungeeAdventure;
 import dev.velix.imperat.adventure.EmptyAdventure;
+import dev.velix.imperat.context.ExecutionContext;
 import dev.velix.imperat.exception.OnlyPlayerAllowedException;
 import dev.velix.imperat.exception.UnknownPlayerException;
 import dev.velix.imperat.resolvers.BungeePermissionResolver;
 import dev.velix.imperat.type.ParameterProxiedPlayer;
+import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.util.reflection.Reflections;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.CommandSender;
@@ -28,6 +30,14 @@ public final class BungeeConfigBuilder extends ConfigBuilder<BungeeSource, Bunge
         addThrowableHandlers();
         registerSourceResolvers();
         registerValueResolvers();
+        registerContextResolvers();
+    }
+    
+    private void registerContextResolvers() {
+        config.registerContextResolver(
+                new TypeWrap<ExecutionContext<BungeeSource>>() {}.getType(),
+                (ctx, paramElement)-> ctx
+        );
     }
 
     public void setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {
