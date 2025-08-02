@@ -14,7 +14,6 @@ import dev.velix.imperat.util.TypeUtility;
 import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Ultra-optimized N-ary tree implementation focused on maximum performance
@@ -23,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 final class StandardCommandTree<S extends Source> implements CommandTree<S> {
     private final Command<S> rootCommand;
     final CommandNode<S> root;
+    
+    private int size;
     
     // Pre-computed immutable collections to eliminate allocations
     private final static int MAX_SUGGESTIONS_PER_ARGUMENT = 20;
@@ -36,11 +37,13 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
     private final ThreadLocal<ArrayList<CommandParameter<S>>> paramBuffer =
             ThreadLocal.withInitial(() -> new ArrayList<>(8));
     
-    // SAFE OPTIMIZATION: Pre-compute root children to avoid repeated getChildren() calls
+    // Pre-compute root children to avoid repeated getChildren() calls
     private List<ParameterNode<S, ?>> cachedRootChildren;
     
     private final ImperatConfig<S> imperatConfig;
     private final @NotNull PermissionResolver<S> permissionResolver;
+    
+    private final SuggestionCache<S> suggestionCache = new SuggestionCache<>();
     
     StandardCommandTree(ImperatConfig<S> imperatConfig, Command<S> command) {
         this.rootCommand = command;
@@ -67,10 +70,6 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         return Collections.unmodifiableMap(cache); // Make immutable
     }
     
-    public CommandNode<S> getRoot() {
-        return root;
-    }
-    
     // Optimized parsing with reduced allocations
     void parseCommandUsages() {
         final var usages = root.data.usages();
@@ -79,9 +78,6 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         }
         // SAFE OPTIMIZATION: Update cached root children after parsing
         this.cachedRootChildren = new ArrayList<>(this.root.getChildren());
-        
-        // Clear performance caches since tree structure changed
-        clearPerformanceCaches();
     }
     
     @Override
@@ -92,6 +88,11 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
     @Override
     public @NotNull CommandNode<S> rootNode() {
         return root;
+    }
+    
+    @Override
+    public int size() {
+        return size;
     }
     
     @Override
@@ -126,12 +127,12 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             int index,
             List<ParameterNode<S, ?>> path
     ) {
-        // Early termination - check cheapest conditions first
         final int paramSize = parameters.size();
         if (index >= paramSize) {
             currentNode.setExecutableUsage(usage);
             return;
         }
+        
         
         if (currentNode.isGreedyParam()) {
             if (!currentNode.isLast()) {
@@ -140,7 +141,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             currentNode.setExecutableUsage(usage);
             return;
         }
-        
+
         // Optimized flag sequence detection
         int flagSequenceEnd = findFlagSequenceEnd(parameters, index);
         
@@ -442,6 +443,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
                 : new ArgumentNode<>(param, parent.getDepth() + 1, null);
         
         parent.addChild(newNode);
+        size++;
         return newNode;
     }
     
@@ -660,24 +662,29 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         return true;
     }
     
-    // ULTRA-FAST SUGGESTION CACHES - Thread-safe for concurrent access
-    private final Map<String, Boolean> permissionCache = new ConcurrentHashMap<>();
-    
-    // Thread-local buffers for ZERO allocation during suggestions
-    private final ThreadLocal<ArrayDeque<ParameterNode<S, ?>>> traversalStack =
-            ThreadLocal.withInitial(() -> new ArrayDeque<>(16));
-    
-    private final ThreadLocal<ArrayList<String>> resultBuffer =
-            ThreadLocal.withInitial(() -> new ArrayList<>(MAX_SUGGESTIONS_PER_ARGUMENT));
-    
     @Override
     public @NotNull List<String> tabComplete(@NotNull SuggestionContext<S> context) {
-        final var results = resultBuffer.get();
-        results.clear();
+        
+        List<String> results = new ArrayList<>(MAX_SUGGESTIONS_PER_ARGUMENT);
         
         final int targetDepth = context.getArgToComplete().index();
         final String prefix = context.getArgToComplete().value();
         final boolean hasPrefix = prefix != null && !prefix.isBlank();
+        
+        var lastNodes = suggestionCache.getLastNodes(context.command(), context.arguments());
+        if(lastNodes != null) {
+            /*System.out.println(
+                    "Found last Nodes [" + lastNodes.stream().map(ParameterNode::format).collect(Collectors.joining(","))
+                            + "] for input : '" + context.arguments().join(",") + "'" );
+                           
+             */
+            for(var lastNode : lastNodes) {
+                collectSuggestionsOptimized(
+                        lastNode, context, prefix, hasPrefix, context.source(), results
+                );
+            }
+            return results;
+        }
         
         // ITERATIVE TRAVERSAL - No recursive overhead!
         return tabCompleteIterativeDFS(context, targetDepth, prefix, hasPrefix, results);
@@ -694,8 +701,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             boolean hasPrefix,
             List<String> results
     ) {
-        final var stack = traversalStack.get();
-        stack.clear();
+        final ArrayDeque<ParameterNode<S, ?>> stack = new ArrayDeque<>(this.size);
         
         stack.push(root);
         
@@ -714,7 +720,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
                         currentNode, context, prefix,
                         hasPrefix, source, results
                 );
-                
+                suggestionCache.computeInput(context.command(), context.arguments(), currentNode);
                 continue; // Don't traverse deeper from suggestion nodes
             }
             
@@ -747,7 +753,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
         // ULTRA-FAST child processing
         for (var child : children) {
             // FAST PERMISSION CHECK with caching
-            if (!hasPermissionCached(source, child.data.permission())) {
+            if (!hasPermission(source, child.data.permission())) {
                 continue;
             }
             
@@ -785,13 +791,42 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             final var child = children.get(i);
             
             // FAST validation checks
-            if (matchesInput(child, inputAtDepth, false) &&
-                    hasPermissionCached(source, child.data.permission())) {
+            if (matchesInput(child, inputAtDepth, imperatConfig.strictCommandTree()) &&
+                    hasPermission(source, child.data.permission())) {
                 stack.push(child);
+                
+                if(child.isCommand()) {
+                    break;
+                }
             }
         }
     }
-    
+    /**
+     * FAST child validation and stack addition for DFS
+     * Children added in REVERSE order to maintain left-to-right traversal
+     */
+    private void addValidChildrenToCollectionDFS(
+            ParameterNode<S, ?> node,
+            String inputAtDepth,
+            S source,
+            Collection<ParameterNode<S, ?>> collection
+    ) {
+        final var children = node.getChildren();
+        
+        // DFS OPTIMIZATION: Add children in reverse order
+        // Stack is LIFO, so reverse order gives us left-to-right DFS traversal
+        for (var child : children) {
+            // FAST validation checks
+            if (matchesInput(child, inputAtDepth, imperatConfig.strictCommandTree()) &&
+                    hasPermission(source, child.data.permission())) {
+                collection.add(child);
+                
+                if(child.isCommand()) {
+                    break;
+                }
+            }
+        }
+    }
     /**
      * Alternative DFS implementation using recursion (may be faster for shallow trees)
      * Use this if your command trees are typically shallow (< 10 levels)
@@ -836,7 +871,7 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
             // DFS: Process each valid child completely before moving to next
             for (var child : children) {
                 if (matchesInput(child, inputAtDepth, false) &&
-                        hasPermissionCached(source, child.data.permission())) {
+                        hasPermission(source, child.data.permission())) {
                     dfsTraverseRecursively(child, context, targetDepth, prefix, hasPrefix, results);
                 }
             }
@@ -846,11 +881,9 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
     /**
      * CACHED permission checking - Eliminates repeated lookups
      */
-    private boolean hasPermissionCached(S source, String permission) {
+    private boolean hasPermission(S source, String permission) {
         if (permission == null || permission.isEmpty()) return true;
-        
-        final String cacheKey = source.uuid().toString() + ":" + permission;
-        return permissionCache.computeIfAbsent(cacheKey, k -> permissionResolver.hasPermission(source, permission));
+        return permissionResolver.hasPermission(source, permission);
     }
     
     /**
@@ -858,13 +891,6 @@ final class StandardCommandTree<S extends Source> implements CommandTree<S> {
      */
     private SuggestionResolver<S> getResolverCached(CommandParameter<S> param) {
         return imperatConfig.getParameterSuggestionResolver(param);
-    }
-    
-    /**
-     * Clear all performance caches - Call when command structure changes
-     */
-    public void clearPerformanceCaches() {
-        permissionCache.clear();
     }
     
     /**

@@ -46,7 +46,6 @@ public abstract class ContextFactory<S extends Source> {
      * @param source  the source
      * @param command the command
      * @param queue   the argument input
-     * @param arg     the arg being completed
      * @return new context for auto completions with {@link CompletionArg}
      */
     public abstract SuggestionContext<S> createSuggestionContext(
@@ -54,8 +53,7 @@ public abstract class ContextFactory<S extends Source> {
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull String label,
-        @NotNull ArgumentInput queue,
-        @NotNull CompletionArg arg
+        @NotNull ArgumentInput queue
     );
 
     /**

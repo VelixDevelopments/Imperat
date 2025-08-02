@@ -92,16 +92,11 @@ public non-sealed interface Imperat<S extends Source> extends AnnotationInjector
     CommandDispatch.Result dispatch(S sender, String commandLine);
 
     /**
-     * @param command the data about the command being written in the chat box
-     * @param sender  the sender writing the command
-     * @param args    the arguments currently written
+     * @param sender          the sender writing the command
+     * @param fullCommandLine the full command line
      * @return the suggestions at the current position
      */
-    CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String label, String[] args);
-
-    default CompletableFuture<List<String>> autoComplete(Command<S> command, S sender, String label, String argsOneLine) {
-        return autoComplete(command, sender, label, argsOneLine.split(" "));
-    }
+    CompletableFuture<List<String>> autoComplete(S sender, String fullCommandLine);
 
     /**
      * Debugs all registered commands and their usages.

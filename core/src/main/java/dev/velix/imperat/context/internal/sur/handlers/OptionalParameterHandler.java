@@ -92,7 +92,11 @@ public final class OptionalParameterHandler<S extends Source> implements Paramet
                             }
                             
                             Object def = getDefaultValue(context, stream, n);
-                            context.resolveArgument(context.getLastUsedCommand(), n.getDefaultValueSupplier().isEmpty() ? null : n.getDefaultValueSupplier().supply(context.source(), n), n.position(), n, def);
+                            context.resolveArgument(
+                                    context.getLastUsedCommand(),
+                                    n.getDefaultValueSupplier().isEmpty() ? null : n.getDefaultValueSupplier().supply(context.source(), n),
+                                    n.position(), n, def
+                            );
                             
                             n = stream.popParameter().filter(CommandParameter::isOptional).orElse(null);
                         }

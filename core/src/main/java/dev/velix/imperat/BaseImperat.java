@@ -8,11 +8,9 @@ import dev.velix.imperat.command.CommandUsage;
 import dev.velix.imperat.command.parameters.CommandParameter;
 import dev.velix.imperat.command.processors.CommandPostProcessor;
 import dev.velix.imperat.command.processors.CommandPreProcessor;
+import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.command.tree.CommandDispatch;
-import dev.velix.imperat.context.ArgumentInput;
-import dev.velix.imperat.context.Context;
-import dev.velix.imperat.context.ExecutionContext;
-import dev.velix.imperat.context.Source;
+import dev.velix.imperat.context.*;
 import dev.velix.imperat.exception.AmbiguousUsageAdditionException;
 import dev.velix.imperat.exception.InvalidSyntaxException;
 import dev.velix.imperat.exception.PermissionDeniedException;
@@ -25,10 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class BaseImperat<S extends Source> implements Imperat<S> {
@@ -368,14 +363,40 @@ public abstract class BaseImperat<S extends Source> implements Imperat<S> {
     }
 
     /**
-     * @param command the data about the command being written in the chat box
-     * @param source  the sender writing the command
-     * @param args    the arguments currently written
+     * @param source          the sender writing the command
+     * @param fullCommandLine the full command line
      * @return the suggestions at the current position
      */
     @Override
-    public CompletableFuture<List<String>> autoComplete(Command<S> command, S source, String label, String[] args) {
-        return command.autoCompleter().autoComplete(this, source, label, args);
+    public CompletableFuture<List<String>> autoComplete(S source, String fullCommandLine) {
+        int firstSpace = fullCommandLine.indexOf(' ');
+        if(firstSpace == -1) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+        
+        String cmdName = fullCommandLine.substring(0, firstSpace);
+        
+        Command<S> command = getCommand(cmdName);
+        if(command == null ){
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+        
+        ArgumentInput argumentInput = ArgumentInput.parseAutoCompletion(
+                fullCommandLine.substring(firstSpace),
+                fullCommandLine.charAt(fullCommandLine.length()-1) == ' '
+        );
+        
+        SuggestionContext<S> context =  this.config.getContextFactory()
+                .createSuggestionContext(
+                        this, source, command, cmdName, argumentInput
+                );
+        
+        return command.autoCompleter()
+                .autoComplete(context)
+                .exceptionally((ex) -> {
+                    this.config.handleExecutionThrowable(ex, context, AutoCompleter.class, "autoComplete(dispatcher, sender, args)");
+                    return Collections.emptyList();
+                });
     }
 
     /**

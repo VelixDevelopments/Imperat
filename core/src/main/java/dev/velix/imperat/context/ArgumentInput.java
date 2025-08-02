@@ -95,31 +95,6 @@ public interface ArgumentInput extends Deque<String>, List<String>, Cloneable {
     String join(@NotNull String delimiter, int startIndex);
 
     /**
-     * Returns this argument stack as an immutable view. This can be therefore
-     * passed to any conditions or resolvers without having to worry about being
-     * unintentionally modified.
-     * <p>
-     * Note that this does not create an independent copy, and instead returns
-     * a view which does not allow modifications. If this argument stack gets
-     * modified from somewhere else, the immutable view will also be modified.
-     *
-     * @return The argument stack as an immutable view
-     */
-    @NotNull
-    @UnmodifiableView
-    List<String> asImmutableView();
-
-    /**
-     * Returns an immutable copy of this stack. This copy will behave
-     * independently of the original {@link ArgumentInput}.
-     *
-     * @return An immutable copy of this {@link ArgumentInput}.
-     */
-    @NotNull
-    @Unmodifiable
-    List<String> asImmutableCopy();
-
-    /**
      * Returns an independent copy of this argument stack.
      *
      * @return A copy of this argument stack

@@ -33,6 +33,13 @@ public interface CommandTree<S extends Source> {
     @NotNull CommandNode<S> rootNode();
     
     /**
+     * The number of nodes cached in this {@link CommandTree}.
+     * @return the number of nodes representing the size
+     * of this N-ary tree
+     */
+    int size();
+    
+    /**
      * Parses the given command usage and updates the command tree accordingly.
      *
      * @param usage the command usage to parse, must not be null

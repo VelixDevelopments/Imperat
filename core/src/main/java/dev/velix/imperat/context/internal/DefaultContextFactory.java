@@ -3,7 +3,7 @@ package dev.velix.imperat.context.internal;
 import dev.velix.imperat.Imperat;
 import dev.velix.imperat.command.Command;
 import dev.velix.imperat.command.CommandUsage;
-import dev.velix.imperat.command.suggestions.CompletionArg;
+import dev.velix.imperat.command.suggestions.AutoCompleter;
 import dev.velix.imperat.command.tree.CommandDispatch;
 import dev.velix.imperat.context.*;
 import org.jetbrains.annotations.ApiStatus;
@@ -40,10 +40,9 @@ final class DefaultContextFactory<S extends Source> extends ContextFactory<S> {
         @NotNull S source,
         @NotNull Command<S> command,
         @NotNull String label,
-        @NotNull ArgumentInput queue,
-        @NotNull CompletionArg arg
+        @NotNull ArgumentInput queue
     ) {
-        return new SuggestionContextImpl<>(imperat, command, source, label, queue, arg);
+        return new SuggestionContextImpl<>(imperat, command, source, label, queue, AutoCompleter.getLastArg(queue));
     }
 
     /**

@@ -30,13 +30,14 @@ public abstract class AutoCompleter<S extends Source> {
         return new NativeAutoCompleter<>(command);
     }
 
-    private static @NotNull CompletionArg getLastArg(String[] args) {
-        if (args.length == 0) return CompletionArg.EMPTY;
-        int index = args.length - 1;
-        String result = args[args.length - 1];
-        return new CompletionArg(result, index);
+    public static @NotNull CompletionArg getLastArg(ArgumentInput argumentInput) {
+        if (argumentInput.isEmpty()) return CompletionArg.EMPTY;
+        return new CompletionArg(
+                argumentInput.getLast(),
+                argumentInput.size() - 1
+        );
     }
-
+    
     /**
      * Autocompletes an argument from the whole position of the
      * argument-raw input
@@ -52,16 +53,26 @@ public abstract class AutoCompleter<S extends Source> {
         final String label,
         final String[] args
     ) {
-        CompletionArg argToComplete = getLastArg(args);
-        ArgumentInput queue = ArgumentInput.parseAutoCompletion(args, argToComplete.isEmpty());
-
-        SuggestionContext<S> context = dispatcher.config().getContextFactory()
-            .createSuggestionContext(dispatcher, sender, command, label, queue, argToComplete);
-        return autoComplete(context)
-            .exceptionally((ex) -> {
-                dispatcher.config().handleExecutionThrowable(ex, context, AutoCompleter.class, "autoComplete(dispatcher, sender, args)");
-                return Collections.emptyList();
-            });
+        return CompletableFuture.supplyAsync(()-> {
+            StringBuilder builder = new StringBuilder();
+            for(var a : args) {
+                builder.append(a)
+                        .append(" ");
+            }
+            if(!builder.isEmpty()) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            boolean endWithSpace = builder.charAt(builder.length()-1) == ' ';
+            ArgumentInput queue = ArgumentInput.parseAutoCompletion(builder.toString(), endWithSpace);
+            
+            return dispatcher.config().getContextFactory()
+                    .createSuggestionContext(dispatcher, sender, command, label, queue);
+        }).thenCompose((context)->
+                autoComplete(context).exceptionally((ex) -> {
+                    dispatcher.config().handleExecutionThrowable(ex, context, AutoCompleter.class, "autoComplete(dispatcher, sender, args)");
+                    return Collections.emptyList();
+                })
+        );
     }
 
     /**

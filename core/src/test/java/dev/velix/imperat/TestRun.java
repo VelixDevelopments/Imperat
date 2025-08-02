@@ -36,9 +36,7 @@ import dev.velix.imperat.util.TypeWrap;
 import dev.velix.imperat.verification.UsageVerifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -261,25 +259,22 @@ public class TestRun {
         Assertions.assertEquals(CommandDispatch.Result.COMPLETE, testCmdTreeExecution("test", "text text2 sub4 hi sub5 bye sub6 hello"));
 
     }
-
-    @Test
-    public void testAutoCompletion1() {
-        var cmd = IMPERAT.getCommand("test");
-        assert cmd != null;
-        debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"b"});
-        var res = results.join();
-        Assertions.assertEquals(List.of("bye"), new ArrayList<>(res));
-    }
+    
 
     @Test
     public void testAutoCompletion2() {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{"hi", "bye", "s"});
-        var res = results.join();
-        Assertions.assertEquals(List.of("sub1", "sub4"), new ArrayList<>(res));
+        
+        var results = IMPERAT.autoComplete(new TestSource(System.out), "test ");
+        Assertions.assertEquals(List.of("help", "hi", "bye"), results.join());
+        
+        var results2 = IMPERAT.autoComplete(new TestSource(System.out), "test ");
+        Assertions.assertEquals(List.of("help", "hi", "bye"), results2.join());
+        
+        var results3 = IMPERAT.autoComplete(new TestSource(System.out),"test a b ");
+        Assertions.assertEquals(List.of("othersub", "first", "sub1", "sub4"), results3.join());
     }
 
 
@@ -288,7 +283,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("test");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"hi", "bye", "first", ""});
+        var results = IMPERAT.autoComplete(new TestSource(System.out), "test hi bye first ");
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("x", "y", "z", "sexy"), res.stream());
     }
@@ -298,7 +293,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("message");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out), "test", new String[]{"target", ""});
+        var results = IMPERAT.autoComplete(new TestSource(System.out), "message mqzen ");
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("this is a long greedy", "some sentence", "idk"), res.stream());
     }
@@ -308,7 +303,7 @@ public class TestRun {
         var cmd = IMPERAT.getCommand("printnum");
         assert cmd != null;
         debugCommand(cmd);
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"test", new String[]{""});
+        var results = IMPERAT.autoComplete(new TestSource(System.out), "printnum ");
         var res = results.join();
         Assertions.assertLinesMatch(Stream.of("1.0"), res.stream());
     }
@@ -627,10 +622,10 @@ public class TestRun {
         assert cmd != null;
         debugCommand(cmd);
 
-        var results = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac", new String[]{""}).join();
+        var results = IMPERAT.autoComplete(new TestSource(System.out), "testac ").join();
         Assertions.assertLinesMatch(Stream.of("any_text"), results.stream());
 
-        var results2 = IMPERAT.autoComplete(cmd, new TestSource(System.out),"testac", new String[]{"my_text", ""}).join();
+        var results2 = IMPERAT.autoComplete(new TestSource(System.out),"testac hello ").join();
         Assertions.assertLinesMatch(Stream.of("2", "5", "10"), results2.stream());
     }
 
@@ -770,9 +765,8 @@ public class TestRun {
         IMPERAT.registerCommand(new PlainCmd());
         var cmd = IMPERAT.getCommand("plain");
         Assertions.assertNotNull(cmd);
-        String[] test = new String[] {" "};
         Assertions.assertLinesMatch(List.of("hi", "hello", "bruh", "awesomeee", "i-love-imperat"),
-                IMPERAT.autoComplete(cmd, SOURCE, "plain", test).join());
+                IMPERAT.autoComplete(SOURCE, "plain ").join());
     }
     
     @Test

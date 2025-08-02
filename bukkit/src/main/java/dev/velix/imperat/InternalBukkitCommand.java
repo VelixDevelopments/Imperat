@@ -83,8 +83,12 @@ final class InternalBukkitCommand extends org.bukkit.command.Command implements 
         final String[] args
     ) throws IllegalArgumentException {
         BukkitSource source = dispatcher.wrapSender(sender);
+        StringBuilder builder = new StringBuilder(alias).append(" ");
+        for(String arg : args) {
+            builder.append(arg).append(" ");
+        }
         try {
-            return dispatcher.autoComplete(imperatCommand, source, alias, args).join();
+            return dispatcher.autoComplete(source, builder.toString()).join();
         } catch (Exception ex) {
             ImperatDebugger.error(InternalBukkitCommand.class, "tabComplete", ex);
             return Collections.emptyList();

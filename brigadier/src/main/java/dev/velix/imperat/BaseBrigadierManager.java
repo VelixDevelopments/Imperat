@@ -122,9 +122,9 @@ public abstract non-sealed class BaseBrigadierManager<S extends Source> implemen
 
             ArgumentInput args = ArgumentInput.parseAutoCompletion(processed, hadExtraSpace);
 
-            CompletionArg arg = new CompletionArg(args.isEmpty() ? "" : args.getLast(), args.size() - 1);
-            SuggestionContext<S> ctx = dispatcher.config().getContextFactory().createSuggestionContext(dispatcher, source, command, label, args, arg);
-
+            SuggestionContext<S> ctx = dispatcher.config().getContextFactory().createSuggestionContext(dispatcher, source, command, label, args);
+            CompletionArg arg = ctx.getArgToComplete();
+            
             return dispatcher.config().getParameterSuggestionResolver(parameter).asyncAutoComplete(ctx, parameter)
                 .thenCompose((results) -> {
                     results
