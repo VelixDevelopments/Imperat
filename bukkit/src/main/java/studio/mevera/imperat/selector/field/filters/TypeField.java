@@ -4,7 +4,9 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.context.CommandContext;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.BukkitResponseKey;
 import studio.mevera.imperat.selector.EntityCondition;
 import studio.mevera.imperat.util.TypeWrap;
 
@@ -43,7 +45,7 @@ final class TypeField extends PredicateField<EntityType> {
         try {
             return EntityType.valueOf(value.toUpperCase());
         } catch (EnumConstantNotPresentException ex) {
-            throw new CommandException("Unknown entity-type '%s'", value);
+            throw new ArgumentParseException(BukkitResponseKey.SELECTOR_UNKNOWN_ENTITY_TYPE, value);
         }
     }
 }

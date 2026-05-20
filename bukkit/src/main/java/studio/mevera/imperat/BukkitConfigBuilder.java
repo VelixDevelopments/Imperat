@@ -150,6 +150,19 @@ public class BukkitConfigBuilder<S extends BukkitCommandSource>
             registry.registerResponse(BukkitResponseKey.UNKNOWN_SELECTION_TYPE, () -> "Unknown selection type '%type_entered%'", "input",
                     "type_entered");
 
+            registry.registerResponse(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE,
+                    () -> "Invalid %numeric_type% value '%input%'", "input", "numeric_type");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_INVALID_RANGE_FORMAT,
+                    () -> "Invalid range format '%input%'%reason%", "input", "reason");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_UNKNOWN_GAMEMODE,
+                    () -> "Unknown gamemode '%input%'", "input");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_UNKNOWN_ENTITY_TYPE,
+                    () -> "Unknown entity-type '%input%'", "input");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_DISTANCE_PLAYER_ONLY,
+                    () -> "Only players can use the field=`distance`");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_UNKNOWN_SORT_OPTION,
+                    () -> "Unknown sort option '%input%'", "input");
+
         });
     }
 

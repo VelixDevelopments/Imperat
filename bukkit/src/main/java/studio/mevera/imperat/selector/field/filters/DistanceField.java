@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.exception.ResponseException;
+import studio.mevera.imperat.responses.BukkitResponseKey;
 import studio.mevera.imperat.selector.EntityCondition;
 import studio.mevera.imperat.selector.field.NumericField;
 import studio.mevera.imperat.selector.field.Range;
@@ -40,7 +42,7 @@ final class DistanceField extends PredicateField<Range<Double>> {
     protected @NotNull EntityCondition getCondition(Range<Double> value, CommandContext<BukkitCommandSource> context) {
         return ((sender, entity) -> {
             if (sender.isConsole()) {
-                throw new CommandException("Only players can use the field=`distance`");
+                throw ResponseException.of(BukkitResponseKey.SELECTOR_DISTANCE_PLAYER_ONLY);
             }
             Player commandSource = sender.asPlayer();
             double diffInDistance = commandSource.getLocation().distance(entity.getLocation());
