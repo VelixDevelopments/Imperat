@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.math.BigDecimal;
 
@@ -21,7 +23,7 @@ public final class BigDecimalArgument<S extends CommandSource> extends SimpleArg
         try {
             return new BigDecimal(input);
         } catch (NumberFormatException ex) {
-            throw new CommandException("Invalid decimal number: '%s'", input);
+            throw new ArgumentParseException(ResponseKey.INVALID_DECIMAL, input);
         }
     }
 }

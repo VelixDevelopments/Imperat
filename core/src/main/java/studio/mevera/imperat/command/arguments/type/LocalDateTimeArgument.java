@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +22,7 @@ public final class LocalDateTimeArgument<S extends CommandSource> extends Simple
         try {
             return LocalDateTime.parse(input);
         } catch (Exception ex) {
-            throw new CommandException("Invalid ISO date-time: '%s' (expected e.g. 2026-04-27T05:00:00)", input);
+            throw new ArgumentParseException(ResponseKey.INVALID_DATE_TIME, input);
         }
     }
 }

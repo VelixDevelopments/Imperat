@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.time.Duration;
 import java.util.regex.Matcher;
@@ -29,7 +31,7 @@ public final class DurationArgument<S extends CommandSource> extends SimpleArgum
             throws CommandException {
         String trimmed = input.trim();
         if (trimmed.isEmpty()) {
-            throw new CommandException("Duration cannot be empty");
+            throw new ArgumentParseException(ResponseKey.INVALID_DURATION, input);
         }
 
         // Try ISO-8601 first; many users will type "PT5M" verbatim.
@@ -46,7 +48,7 @@ public final class DurationArgument<S extends CommandSource> extends SimpleArgum
 
         while (matcher.find()) {
             if (matcher.start() != lastEnd) {
-                throw new CommandException("Invalid duration format: '%s'", input);
+                throw new ArgumentParseException(ResponseKey.INVALID_DURATION, input);
             }
             matched = true;
             long value = Long.parseLong(matcher.group(1));
@@ -60,7 +62,7 @@ public final class DurationArgument<S extends CommandSource> extends SimpleArgum
         }
 
         if (!matched || lastEnd != trimmed.replace(" ", "").length()) {
-            throw new CommandException("Invalid duration format: '%s'", input);
+            throw new ArgumentParseException(ResponseKey.INVALID_DURATION, input);
         }
 
         return Duration.ZERO

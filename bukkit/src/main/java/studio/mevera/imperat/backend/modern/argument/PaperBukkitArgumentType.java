@@ -9,7 +9,9 @@ import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.type.ArgumentType;
 import studio.mevera.imperat.command.arguments.type.Cursor;
 import studio.mevera.imperat.context.CommandContext;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.lang.reflect.Type;
 
@@ -111,7 +113,8 @@ public class PaperBukkitArgumentType<N, T> extends ArgumentType<BukkitCommandSou
             CommandSourceStack stack = (CommandSourceStack) context.source().stack();
             return paperType.resolver().apply(nativeValue, stack);
         } catch (CommandSyntaxException ex) {
-            throw new CommandException(ex.getMessage(), ex);
+            throw new ArgumentParseException(ResponseKey.INVALID_INPUT_NATIVE, joined)
+                    .withPlaceholder("message", ex.getMessage() == null ? "" : ex.getMessage());
         }
     }
 

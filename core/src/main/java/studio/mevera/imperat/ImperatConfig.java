@@ -95,6 +95,22 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
     void setThrowablePrinter(@NotNull ThrowablePrinter printer);
 
     /**
+     * @return the generic message sent to the command source when no
+     *         exception handler claims a thrown throwable
+     */
+    @NotNull String getUnhandledExceptionMessage();
+
+    /**
+     * Sets the generic message sent to the command source when no
+     * exception handler claims a thrown throwable. The throwable's
+     * stack trace is still printed to the console by the configured
+     * {@link ThrowablePrinter}.
+     *
+     * @param message the generic error message
+     */
+    void setUnhandledExceptionMessage(@NotNull String message);
+
+    /**
      * Fetches {@link ArgumentType} for a certain value
      *
      * @param resolvingValueType the value that the resolver ends providing it from the context

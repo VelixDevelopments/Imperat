@@ -34,6 +34,11 @@ public final class RuntimeConfig<S extends CommandSource> {
         return this;
     }
 
+    public RuntimeConfig<S> unhandledExceptionMessage(@NotNull String message) {
+        config.setUnhandledExceptionMessage(message);
+        return this;
+    }
+
     public RuntimeConfig<S> coroutineScope(@NotNull Object scope) {
         config.setCoroutineScope(scope);
         return this;

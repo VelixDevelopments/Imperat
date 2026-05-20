@@ -116,6 +116,18 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
         return (B) this;
     }
 
+    /**
+     * Sets the generic message sent to the command source when no
+     * exception handler claims a thrown throwable.
+     *
+     * @param message the generic error message
+     * @return the current builder instance for chaining
+     */
+    public B unhandledExceptionMessage(String message) {
+        config.setUnhandledExceptionMessage(message);
+        return (B) this;
+    }
+
     public B response(Response response) {
         config.getResponseRegistry().registerResponse(response);
         return (B) this;

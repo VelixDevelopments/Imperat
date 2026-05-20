@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,7 +23,8 @@ public final class URIArgument<S extends CommandSource> extends SimpleArgumentTy
         try {
             return new URI(input);
         } catch (URISyntaxException ex) {
-            throw new CommandException("Invalid URI: '%s' (%s)", input, ex.getReason());
+            throw new ArgumentParseException(ResponseKey.INVALID_URI, input)
+                    .withPlaceholder("reason", ex.getReason() == null ? "" : ex.getReason());
         }
     }
 }

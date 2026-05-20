@@ -7,7 +7,9 @@ import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.type.ArgumentType;
 import studio.mevera.imperat.command.arguments.type.Cursor;
 import studio.mevera.imperat.context.CommandContext;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.lang.reflect.Type;
 import java.util.function.BiFunction;
@@ -49,7 +51,8 @@ public final class MinestomArgumentType<T> extends ArgumentType<MinestomCommandS
         try {
             return (T) getMinestomType(argument.getName()).parse(context.source().origin(), input);
         } catch (ArgumentSyntaxException exception) {
-            throw new CommandException(exception.getMessage());
+            throw new ArgumentParseException(ResponseKey.INVALID_INPUT_NATIVE, input)
+                    .withPlaceholder("message", exception.getMessage() == null ? "" : exception.getMessage());
         }
     }
 

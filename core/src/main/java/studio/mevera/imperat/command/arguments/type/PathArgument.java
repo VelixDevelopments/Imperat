@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -22,7 +24,8 @@ public final class PathArgument<S extends CommandSource> extends SimpleArgumentT
         try {
             return Paths.get(input);
         } catch (InvalidPathException ex) {
-            throw new CommandException("Invalid path: '%s' (%s)", input, ex.getReason());
+            throw new ArgumentParseException(ResponseKey.INVALID_PATH, input)
+                    .withPlaceholder("reason", ex.getReason() == null ? "" : ex.getReason());
         }
     }
 }

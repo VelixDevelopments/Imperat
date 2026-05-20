@@ -22,7 +22,9 @@ import studio.mevera.imperat.util.ImperatDebugger;
  *       {@link ErrorHandlerRegistry}, with priority for
  *       {@link SelfHandlingException}s.</li>
  *   <li>Fallback: prints the throwable via the configured
- *       {@link ThrowablePrinter}.</li>
+ *       {@link ThrowablePrinter} <em>and</em> sends the configured
+ *       generic message to the source via {@link CommandSource#error}
+ *       so that the raw throwable never leaks to the player.</li>
  * </ol>
  *
  * <p>Stateless w.r.t. the throwable being processed; one instance per config.</p>
@@ -57,6 +59,7 @@ public final class CommandErrorDispatcher<S extends CommandSource> {
             return true;
         }
         printer.print(throwable);
+        context.source().error(context.imperatConfig().getUnhandledExceptionMessage());
         return true;
     }
 

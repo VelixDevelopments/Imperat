@@ -82,6 +82,8 @@ final class ImperatConfigImpl<S extends CommandSource> implements ImperatConfig<
     private AutoCompleterFactory<S> autoCompleterFactory = new NativeAutoCompleterFactory<>(false);
     private CommandCoordinator<S> commandCoordinator = CommandCoordinator.sync();
     private ThrowablePrinter throwablePrinter = ThrowablePrinter.simple();
+    private @NotNull String unhandledExceptionMessage =
+            "An internal error occurred while executing this command.";
     private EventBus eventBus = EventBus.createDummy();
     private CommandPathway.Builder<S> globalDefaultUsage = CommandPathway.<S>builder()
                                                                  .execute((src, ctx) -> {
@@ -288,6 +290,16 @@ final class ImperatConfigImpl<S extends CommandSource> implements ImperatConfig<
     @Override
     public void setThrowablePrinter(@NotNull ThrowablePrinter printer) {
         this.throwablePrinter = printer;
+    }
+
+    @Override
+    public @NotNull String getUnhandledExceptionMessage() {
+        return unhandledExceptionMessage;
+    }
+
+    @Override
+    public void setUnhandledExceptionMessage(@NotNull String message) {
+        this.unhandledExceptionMessage = message;
     }
 
     @Override

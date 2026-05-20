@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.time.Instant;
 
@@ -21,7 +23,7 @@ public final class InstantArgument<S extends CommandSource> extends SimpleArgume
         try {
             return Instant.parse(input);
         } catch (Exception ex) {
-            throw new CommandException("Invalid ISO-8601 instant: '%s' (expected e.g. 2026-04-27T05:00:00Z)", input);
+            throw new ArgumentParseException(ResponseKey.INVALID_INSTANT, input);
         }
     }
 }

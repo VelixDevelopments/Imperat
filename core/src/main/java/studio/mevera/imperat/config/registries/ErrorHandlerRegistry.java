@@ -6,7 +6,6 @@ import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.CommandPathway;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.events.exception.EventException;
-import studio.mevera.imperat.exception.CommandException;
 import studio.mevera.imperat.exception.CommandExceptionHandler;
 import studio.mevera.imperat.exception.InvalidSyntaxException;
 import studio.mevera.imperat.exception.PermissionDeniedException;
@@ -33,9 +32,11 @@ public final class ErrorHandlerRegistry<S extends CommandSource> {
     /**
      * Construct a registry pre-populated with the framework's default
      * handlers (invalid syntax, permission denied, response-driven exceptions,
-     * event errors, plain {@code CommandException} fallback). The caller-owned
-     * {@link ResponseRegistry} is used to resolve {@link ResponseException}s
-     * at handle time.
+     * event errors). The caller-owned {@link ResponseRegistry} is used to
+     * resolve {@link ResponseException}s at handle time. Unhandled throwables
+     * are surfaced via the configured unhandled-exception fallback in
+     * {@code CommandErrorDispatcher} — they no longer leak raw messages to the
+     * source.
      */
     public static <S extends CommandSource> ErrorHandlerRegistry<S> createDefault(@NotNull ResponseRegistry responseRegistry) {
         ErrorHandlerRegistry<S> registry = new ErrorHandlerRegistry<>();
@@ -114,8 +115,5 @@ public final class ErrorHandlerRegistry<S extends CommandSource> {
                 ImperatDebugger.debug(ex.getMessage());
             }
         });
-
-        register(CommandException.class, (exception, context) ->
-                                                 context.source().reply(exception.getMessage()));
     }
 }
