@@ -2,9 +2,11 @@ package studio.mevera.imperat.command.arguments.type;
 
 import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.command.arguments.Argument;
+import studio.mevera.imperat.command.arguments.DefaultValueProvider;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.exception.ArgumentParseException;
+import studio.mevera.imperat.providers.SuggestionProvider;
 import studio.mevera.imperat.responses.ResponseKey;
 import studio.mevera.imperat.util.priority.Priority;
 
@@ -20,6 +22,8 @@ public final class BooleanArgument<S extends CommandSource> extends SimpleArgume
             "enabled", true, "disabled", false
     );
 
+    private final DefaultValueProvider defaultValueProvider = DefaultValueProvider.of("false");
+    private final SuggestionProvider<S> suggestionProvider = SuggestionProvider.staticSuggestions("true", "false");
     private boolean allowVariants = false;
 
     BooleanArgument() {
@@ -59,5 +63,15 @@ public final class BooleanArgument<S extends CommandSource> extends SimpleArgume
     @Override
     public @NotNull Priority getPriority() {
         return Priority.NORMAL.plus(1);
+    }
+
+    @Override
+    public DefaultValueProvider getDefaultValueProvider() {
+        return defaultValueProvider;
+    }
+
+    @Override
+    public SuggestionProvider<S> getSuggestionProvider() {
+        return suggestionProvider;
     }
 }
