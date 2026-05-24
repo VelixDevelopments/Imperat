@@ -46,15 +46,9 @@ final class InternalVelocityCommand<P, S extends VelocityCommandSource> implemen
 
     @Override
     public List<String> suggest(Invocation invocation) {
-        StringBuilder builder = new StringBuilder(StringUtils.stripNamespace(invocation.alias())).append(" ");
-        for (String arg : invocation.arguments()) {
-            builder.append(arg).append(" ");
-        }
-        if (!builder.isEmpty()) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
+        final String input = StringUtils.stripNamespace(invocation.alias()) + " " + String.join(" ", invocation.arguments());
         return imperat.autoComplete(
-                imperat.wrapSender(invocation.source()), builder.toString()
+                imperat.wrapSender(invocation.source()), input
         ).join();
     }
 

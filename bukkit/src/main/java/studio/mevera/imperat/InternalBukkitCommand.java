@@ -67,15 +67,11 @@ public final class InternalBukkitCommand<S extends BukkitCommandSource> extends 
             //we will tab complete from the async tab completion event
             return Collections.emptyList();
         }
-        S source = dispatcher.wrapSender(sender);
-        StringBuilder builder = new StringBuilder(alias).append(" ");
-        for (String arg : args) {
-            builder.append(arg).append(" ");
-        }
-        if (!builder.isEmpty()) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-        return dispatcher.autoComplete(source, builder.toString()).join();
+        final String input = alias + " " + String.join(" ", args);
+        return dispatcher.autoComplete(
+                dispatcher.wrapSender(sender),
+                input
+        ).join();
     }
 
 }

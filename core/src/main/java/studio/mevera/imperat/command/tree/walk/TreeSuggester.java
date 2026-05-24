@@ -462,6 +462,7 @@ public final class TreeSuggester<S extends CommandSource> {
             String consumedInput = rootCursor.slice(0, consumedTokenCount);
             return ParseResult.of(argument, consumedInput, result, null);
         } catch (Throwable error) {
+            inputStream.setRawIndex(beforeIndex);
             String attemptedInput = rootCursor.slice(0, tokens.size());
             if (argument.isCommand()) {
                 return ParseResult.unacceptableParse(argument, attemptedInput, error);
@@ -563,17 +564,19 @@ public final class TreeSuggester<S extends CommandSource> {
                 for (Argument<S> optional : unresolvedOptionals) {
                     addArgumentProviderSuggestions(context, optional, currentNode.getOriginalPathway(), target, false);
                 }
-                for (Node<S> child : currentNode.getChildren()) {
-                    addChildSuggestions(context, child, target, seenChildSuggestions);
-                }
             } else {
-                addArgumentProviderSuggestions(context, unresolvedOptionals.get(0), currentNode.getOriginalPathway(), target, false);
+                addArgumentProviderSuggestions(context, unresolvedOptionals.getFirst(), currentNode.getOriginalPathway(), target, false);
+            }
+            for (Node<S> child : currentNode.getChildren()) {
+                addChildSuggestions(context, child, target, seenChildSuggestions);
             }
             return;
         }
 
-        for (Node<S> child : currentNode.getChildren()) {
-            addChildSuggestions(context, child, target, seenChildSuggestions);
+        if (currentNode.getOptionalArguments().isEmpty()) {
+            for (Node<S> child : currentNode.getChildren()) {
+                addChildSuggestions(context, child, target, seenChildSuggestions);
+            }
         }
     }
 

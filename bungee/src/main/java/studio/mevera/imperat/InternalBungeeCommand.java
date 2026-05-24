@@ -38,18 +38,10 @@ final class InternalBungeeCommand<S extends BungeeCommandSource> extends net.md_
             CommandSender sender,
             String[] args
     ) {
-        StringBuilder builder = new StringBuilder(this.bungeeCommand.getName()).append(" ");
-        for (String arg : args) {
-            builder.append(arg).append(" ");
-        }
-
-        if (!builder.isEmpty()) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-
+        final String input = this.bungeeCommand.getName() + " " + String.join(" ", args);
         return bungeeCommandDispatcher.autoComplete(
                 bungeeCommandDispatcher.wrapSender(sender),
-                builder.toString()
+                input
         ).join();
     }
 
