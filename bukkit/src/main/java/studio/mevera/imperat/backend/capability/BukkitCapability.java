@@ -1,6 +1,7 @@
 package studio.mevera.imperat.backend.capability;
 
 import org.jetbrains.annotations.NotNull;
+import studio.mevera.imperat.Version;
 
 /**
  * Runtime-detectable platform capabilities the bukkit module discriminates
@@ -30,7 +31,8 @@ public enum BukkitCapability {
     BRIGADIER {
         @Override
         public boolean capable(@NotNull BukkitClassProbe probe) {
-            return probe.exists("com.mojang.brigadier.tree.CommandNode");
+            return Version.isOver(1, 13, 0)
+                    && probe.exists("com.mojang.brigadier.tree.CommandNode");
         }
     },
 
@@ -47,8 +49,9 @@ public enum BukkitCapability {
     MODERN_NATIVE_BRIGADIER {
         @Override
         public boolean capable(@NotNull BukkitClassProbe probe) {
-            return probe.exists("io.papermc.paper.command.brigadier.Commands")
-                           && probe.exists("io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents");
+            return Version.isOver(1, 21, 4)
+                    && probe.exists("io.papermc.paper.command.brigadier.Commands")
+                    && probe.exists("io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents");
         }
     },
 
@@ -67,8 +70,10 @@ public enum BukkitCapability {
     PAPER_LEGACY_BRIGADIER {
         @Override
         public boolean capable(@NotNull BukkitClassProbe probe) {
-            return probe.exists("com.destroystokyo.paper.event.brigadier.CommandRegisteredEvent")
-                           && !MODERN_NATIVE_BRIGADIER.capable(probe);
+            return Version.isOver(1, 13, 0)
+                    && Version.isBelow(1, 21, 4)
+                    && probe.exists("com.destroystokyo.paper.event.brigadier.CommandRegisteredEvent")
+                    && !MODERN_NATIVE_BRIGADIER.capable(probe);
         }
     },
 
@@ -86,10 +91,11 @@ public enum BukkitCapability {
     COMMODORE_BRIGADIER {
         @Override
         public boolean capable(@NotNull BukkitClassProbe probe) {
-            return BRIGADIER.capable(probe)
-                           && !MODERN_NATIVE_BRIGADIER.capable(probe)
-                           && !PAPER_LEGACY_BRIGADIER.capable(probe)
-                           && !probe.exists("org.bukkit.entity.Warden");
+            return Version.isOver(1, 13, 0)
+                    && BRIGADIER.capable(probe)
+                    && !MODERN_NATIVE_BRIGADIER.capable(probe)
+                    && !PAPER_LEGACY_BRIGADIER.capable(probe)
+                    && !probe.exists("org.bukkit.entity.Warden");
         }
     },
 
