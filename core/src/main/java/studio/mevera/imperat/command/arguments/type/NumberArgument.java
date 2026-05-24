@@ -84,7 +84,7 @@ public abstract class NumberArgument<S extends CommandSource, N extends Number> 
 
         @Override
         public SuggestionProvider<S> getSuggestionProvider() {
-            return (ctx, arg) -> Collections.singletonList("0");
+            return (ctx, arg) -> Collections.emptyList();
         }
     }
 
