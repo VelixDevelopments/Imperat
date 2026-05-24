@@ -10,6 +10,7 @@ public final class Version {
     public static final boolean IS_PAPER =
             Reflections.findClass("com.destroystokyo.paper.PaperConfig", "io.papermc.paper.configuration.Configuration");
     public static final boolean SUPPORTS_PAPER_ASYNC_TAB_COMPLETION =
+            Version.isOrOver(1, 13, 0) &&
             Reflections.findClass("com.destroystokyo.paper.event.server.AsyncTabCompleteEvent");
     public static final int MAJOR, MINOR, PATCH;
     // initialize after IS_PAPER is initialized
