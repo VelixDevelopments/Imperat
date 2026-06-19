@@ -1,6 +1,7 @@
 package studio.mevera.imperat;
 
 import com.velocitypowered.api.plugin.PluginContainer;
+import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -41,7 +42,7 @@ public class VelocityConfigBuilder<P, S extends VelocityCommandSource>
             return src.asPlayer().hasPermission(perm);
         });
         registerVelocityResponses();
-        registerSourceResolvers();
+        registerDefaultSourceProviders();
         registerArgumentTypes();
         registerContextResolvers();
     }
@@ -75,19 +76,15 @@ public class VelocityConfigBuilder<P, S extends VelocityCommandSource>
                 () -> new IllegalStateException("Cannot get plugin container")));
     }
 
-    private void registerSourceResolvers() {
-        // v4: SourceProviderRegistry deleted. Cross-source-type @Execute
-        // params resolve via assignability. Player / ConsoleCommandSource
-        // gating goes through ContextArgumentProvider.
-        config.registerContextArgumentProvider(Player.class, (ctx, p) -> {
-            VelocityCommandSource source = ctx.source();
+    private void registerDefaultSourceProviders() {
+        config.registerSourceProvider(CommandSource.class, VelocityCommandSource::origin);
+        config.registerSourceProvider(Player.class, source -> {
             if (source.isConsole()) {
                 throw ResponseException.of(VelocityResponseKey.ONLY_PLAYER);
             }
             return source.asPlayer();
         });
-        config.registerContextArgumentProvider(ConsoleCommandSource.class, (ctx, p) -> {
-            VelocityCommandSource source = ctx.source();
+        config.registerSourceProvider(ConsoleCommandSource.class, source -> {
             if (!source.isConsole()) {
                 throw ResponseException.of(VelocityResponseKey.ONLY_CONSOLE);
             }

@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.asset.type.particle.config.ParticleSystem;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.asset.type.weather.config.Weather;
+import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.arguments.types.Coord;
 import com.hypixel.hytale.server.core.command.system.arguments.types.IntCoord;
@@ -156,7 +157,7 @@ public class HytaleConfigBuilder<S extends HytaleCommandSource>
             return src.asPlayer().hasPermission(perm);
         });
         this.registerContextResolvers();
-        this.registerDefaultSourceResolvers();
+        this.registerDefaultSourceProviders();
         this.registerDefaultParamTypes();
         this.registerHytaleResponses();
     }
@@ -184,28 +185,21 @@ public class HytaleConfigBuilder<S extends HytaleCommandSource>
      * Registers source resolvers for type-safe command source handling.
      * This enables automatic casting and validation of command sources.
      */
-    private void registerDefaultSourceResolvers() {
-        // v4: SourceProviderRegistry deleted. Gating-aware Player /
-        // PlayerRef / ConsoleSender views move to ContextArgumentProvider.
-        // CommandSender resolves via assignability (it IS the origin).
-        config.registerContextArgumentProvider(ConsoleSender.class, (ctx, p) -> {
-            HytaleCommandSource source = ctx.source();
+    private void registerDefaultSourceProviders() {
+        config.registerSourceProvider(CommandSender.class, HytaleCommandSource::origin);
+        config.registerSourceProvider(ConsoleSender.class, source -> {
             if (!source.isConsole()) {
                 throw ResponseException.of(HytaleResponseKey.ONLY_CONSOLE);
             }
             return (ConsoleSender) source.origin();
         });
-
-        config.registerContextArgumentProvider(Player.class, (ctx, p) -> {
-            HytaleCommandSource source = ctx.source();
+        config.registerSourceProvider(Player.class, source -> {
             if (source.isConsole()) {
                 throw ResponseException.of(HytaleResponseKey.ONLY_PLAYER);
             }
             return source.as(Player.class);
         });
-
-        config.registerContextArgumentProvider(PlayerRef.class, (ctx, p) -> {
-            HytaleCommandSource source = ctx.source();
+        config.registerSourceProvider(PlayerRef.class, source -> {
             if (source.isConsole()) {
                 throw ResponseException.of(HytaleResponseKey.ONLY_PLAYER);
             }

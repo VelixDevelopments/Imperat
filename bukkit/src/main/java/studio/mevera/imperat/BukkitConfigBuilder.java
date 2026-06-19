@@ -65,7 +65,7 @@ public class BukkitConfigBuilder<S extends BukkitCommandSource>
         config.setSourceMapper(mapper);
         config.setPermissionResolver((BukkitPermissionChecker) DEFAULT_PERMISSION_RESOLVER);
         registerBukkitResponses();
-        registerSourceResolvers();
+        registerDefaultSourceProviders();
         registerContextResolvers();
         config.setDefaultSuggestionProvider(
                 (context, argument) -> {
@@ -104,29 +104,19 @@ public class BukkitConfigBuilder<S extends BukkitCommandSource>
         config.registerContextArgumentProvider(Server.class, (ctx, paramElement) -> plugin.getServer());
     }
 
-    private void registerSourceResolvers() {
-        // v4: SourceProviderRegistry deleted. Cross-source-type @Execute
-        // params resolve via ExecutionContextImpl.provideSource(Type) ->
-        // assignability against the canonical S + its origin(). With
-        // S extends BukkitCommandSource, declaring `Player` / `CommandSender`
-        // / `ConsoleCommandSender` parameters works automatically because
-        // they're assignable from `s.origin()` (or s itself for
-        // CommandSender). Domain-specific `@Execute void cmd(Player p)`
-        // throws when `s` is console — that gating moves to the
-        // ContextArgumentProvider below.
-        config.registerContextArgumentProvider(Player.class, (ctx, p) -> {
-            BukkitCommandSource s = ctx.source();
-            if (s.isConsole()) {
+    private void registerDefaultSourceProviders() {
+        config.registerSourceProvider(CommandSender.class, BukkitCommandSource::origin);
+        config.registerSourceProvider(Player.class, source -> {
+            if (source.isConsole()) {
                 throw ResponseException.of(BukkitResponseKey.ONLY_PLAYER);
             }
-            return s.asPlayer();
+            return source.asPlayer();
         });
-        config.registerContextArgumentProvider(ConsoleCommandSender.class, (ctx, p) -> {
-            var origin = ctx.source().origin();
-            if (!(origin instanceof ConsoleCommandSender console)) {
+        config.registerSourceProvider(ConsoleCommandSender.class, source -> {
+            if (!source.isConsole()) {
                 throw ResponseException.of(BukkitResponseKey.ONLY_CONSOLE);
             }
-            return console;
+            return (ConsoleCommandSender) source.origin();
         });
     }
 

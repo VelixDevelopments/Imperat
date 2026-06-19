@@ -1,6 +1,7 @@
 package studio.mevera.imperat;
 
 import net.minestom.server.ServerProcess;
+import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ public class MinestomConfigBuilder<S extends MinestomCommandSource>
         this.serverProcess = serverProcess;
         config.setSourceMapper(mapper);
         this.permissionChecker((src, perm) -> perm == null || src.isConsole());
-        registerDefaultResolvers();
+        registerDefaultSourceProviders();
         addThrowableHandlers();
         registerContextResolvers();
     }
@@ -46,21 +47,15 @@ public class MinestomConfigBuilder<S extends MinestomCommandSource>
         config.registerContextArgumentProvider(ServerProcess.class, (ctx, paramElement) -> serverProcess);
     }
 
-    private void registerDefaultResolvers() {
-        // v4: SourceProviderRegistry deleted. ConsoleSender / Player gating
-        // moves to ContextArgumentProvider — assignability handles
-        // CommandSender / AdventureCommandSource directly via covariance
-        // through `S extends MinestomCommandSource`.
-        config.registerContextArgumentProvider(ConsoleSender.class, (ctx, p) -> {
-            MinestomCommandSource source = ctx.source();
+    private void registerDefaultSourceProviders() {
+        config.registerSourceProvider(CommandSender.class, MinestomCommandSource::origin);
+        config.registerSourceProvider(ConsoleSender.class, source -> {
             if (!source.isConsole()) {
                 throw ResponseException.of(MinestomResponseKey.ONLY_CONSOLE);
             }
             return (ConsoleSender) source.origin();
         });
-
-        config.registerContextArgumentProvider(Player.class, (ctx, p) -> {
-            MinestomCommandSource source = ctx.source();
+        config.registerSourceProvider(Player.class, source -> {
             if (source.isConsole()) {
                 throw ResponseException.of(MinestomResponseKey.ONLY_PLAYER);
             }

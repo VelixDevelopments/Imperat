@@ -55,7 +55,7 @@ public class BungeeConfigBuilder<S extends BungeeCommandSource>
 
     private AdventureProvider<CommandSender> adventureProvider;
 
-    @SuppressWarnings({"unchecked", "rawtypes"}) BungeeConfigBuilder(
+    @SuppressWarnings({"unchecked"}) BungeeConfigBuilder(
             Plugin plugin,
             Class<S> sourceClass,
             CommandSourceMapper<BungeeCommandSource, S> mapper,
@@ -65,9 +65,9 @@ public class BungeeConfigBuilder<S extends BungeeCommandSource>
         this.plugin = plugin;
         this.adventureProvider = adventureProvider;
         config.setSourceMapper(mapper);
-        config.setPermissionResolver((BungeePermissionChecker) DEFAULT_PERMISSION_RESOLVER);
+        config.setPermissionResolver(DEFAULT_PERMISSION_RESOLVER);
         registerBungeeResponses();
-        registerSourceResolvers();
+        registerDefaultSourceProviders();
         registerValueResolvers();
         registerContextResolvers();
     }
@@ -110,13 +110,9 @@ public class BungeeConfigBuilder<S extends BungeeCommandSource>
         return new EmptyAdventure<>();
     }
 
-    private void registerSourceResolvers() {
-        // v4: SourceProviderRegistry deleted. Cross-source-type @Execute
-        // params resolve via assignability against the canonical S
-        // (or its origin()) plus the ContextArgumentProvider below for
-        // the gating-required ProxiedPlayer view.
-        config.registerContextArgumentProvider(ProxiedPlayer.class, (ctx, p) -> {
-            BungeeCommandSource source = ctx.source();
+    private void registerDefaultSourceProviders() {
+        config.registerSourceProvider(CommandSender.class, BungeeCommandSource::origin);
+        config.registerSourceProvider(ProxiedPlayer.class, source -> {
             if (source.isConsole()) {
                 throw ResponseException.of(BungeeResponseKey.ONLY_PLAYER);
             }
