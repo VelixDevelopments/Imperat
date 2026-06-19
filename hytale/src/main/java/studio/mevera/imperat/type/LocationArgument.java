@@ -1,7 +1,7 @@
 package studio.mevera.imperat.type;
 
 import com.hypixel.hytale.math.vector.Location;
-import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -68,9 +68,9 @@ public class LocationArgument extends GreedyArgumentType<HytaleCommandSource, Lo
         if (split[1].equals(SELF_LOCATION_SYMBOL)) {
             if (playerLocation == null) {
                 throw new InvalidLocationFormatException(currentRaw, InvalidLocationFormatException.Reason.SELF_LOCATION_NOT_AVAILABLE, split[1],
-                        null, null, null, null);
+                        null, null, null, null, null);
             }
-            x = playerLocation.getPosition().getX();
+            x = playerLocation.getPosition().x();
         } else {
             x = Objects.requireNonNull(doubleParser.parse(context, currentArg, Cursor.single(context, split[1])));
         }
@@ -79,9 +79,9 @@ public class LocationArgument extends GreedyArgumentType<HytaleCommandSource, Lo
         if (split[2].equals(SELF_LOCATION_SYMBOL)) {
             if (playerLocation == null) {
                 throw new InvalidLocationFormatException(currentRaw, InvalidLocationFormatException.Reason.SELF_LOCATION_NOT_AVAILABLE, null,
-                        split[2], null, null, null);
+                        split[2], null, null, null, null);
             }
-            y = playerLocation.getPosition().getY();
+            y = playerLocation.getPosition().y();
         } else {
             y = Objects.requireNonNull(doubleParser.parse(context, currentArg, Cursor.single(context, split[2])));
         }
@@ -90,23 +90,24 @@ public class LocationArgument extends GreedyArgumentType<HytaleCommandSource, Lo
         if (split[3].equals(SELF_LOCATION_SYMBOL)) {
             if (playerLocation == null) {
                 throw new InvalidLocationFormatException(currentRaw, InvalidLocationFormatException.Reason.SELF_LOCATION_NOT_AVAILABLE, null, null,
-                        split[3], null, null);
+                        split[3], null, null, null);
             }
-            z = playerLocation.getPosition().getZ();
+            z = playerLocation.getPosition().z();
         } else {
             z = Objects.requireNonNull(doubleParser.parse(context, currentArg, Cursor.single(context, split[3])));
         }
 
         float yaw = 0.0f;
         float pitch = 0.0f;
+        float roll = 0.0f;
 
         if (split.length > 4) {
             if (split[4].equals(SELF_LOCATION_SYMBOL)) {
                 if (playerLocation == null) {
                     throw new InvalidLocationFormatException(currentRaw, InvalidLocationFormatException.Reason.SELF_LOCATION_NOT_AVAILABLE, null,
-                            null, null, null, split[4]);
+                            null, null, null, split[4], null);
                 }
-                yaw = playerLocation.getRotation().getYaw();
+                yaw = playerLocation.getRotation().yaw();
             } else {
                 yaw = (float) Objects.requireNonNull(doubleParser.parse(context, currentArg, Cursor.single(context, split[4]))).doubleValue();
             }
@@ -116,20 +117,32 @@ public class LocationArgument extends GreedyArgumentType<HytaleCommandSource, Lo
             if (split[5].equals(SELF_LOCATION_SYMBOL)) {
                 if (playerLocation == null) {
                     throw new InvalidLocationFormatException(currentRaw, InvalidLocationFormatException.Reason.SELF_LOCATION_NOT_AVAILABLE, null,
-                            null, null, split[5], null);
+                            null, null, split[5], null, null);
                 }
-                pitch = playerLocation.getRotation().getPitch();
+                pitch = playerLocation.getRotation().pitch();
             } else {
                 pitch = (float) Objects.requireNonNull(doubleParser.parse(context, currentArg, Cursor.single(context, split[5]))).doubleValue();
             }
         }
 
-        return createLocation(world, x, y, z, yaw, pitch);
+        if (split.length > 6) {
+            if (split[6].equals(SELF_LOCATION_SYMBOL)) {
+                if (playerLocation == null) {
+                    throw new InvalidLocationFormatException(currentRaw, InvalidLocationFormatException.Reason.SELF_LOCATION_NOT_AVAILABLE, null,
+                            null, null, null, null, split[6]);
+                }
+                roll = playerLocation.getRotation().roll();
+            } else {
+                roll = (float) Objects.requireNonNull(doubleParser.parse(context, currentArg, Cursor.single(context, split[6]))).doubleValue();
+            }
+        }
+
+        return createLocation(world, x, y, z, yaw, pitch, roll);
     }
 
-    private Location createLocation(World world, double x, double y, double z, float yaw, float pitch) {
+    private Location createLocation(World world, double x, double y, double z, float yaw, float pitch, float roll) {
         Location location = new Location(world == null ? null : world.getName(), x, y, z);
-        location.setRotation(new Vector3f(yaw, pitch));
+        location.setRotation(new Rotation3f(yaw, pitch, roll));
         return location;
     }
 

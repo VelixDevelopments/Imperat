@@ -1,9 +1,7 @@
 package studio.mevera.imperat;
 
 import com.hypixel.hytale.math.vector.Location;
-import com.hypixel.hytale.math.vector.Vector2i;
-import com.hypixel.hytale.math.vector.Vector3f;
-import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.math.vector.Rotation3fc;
 import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.asset.type.ambiencefx.config.AmbienceFX;
@@ -37,6 +35,8 @@ import com.hypixel.hytale.server.core.prefab.selection.mask.BlockPattern;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2i;
+import org.joml.Vector3i;
 import studio.mevera.imperat.command.tree.help.CommandHelp;
 import studio.mevera.imperat.context.ExecutionContext;
 import studio.mevera.imperat.exception.ResponseException;
@@ -95,7 +95,7 @@ public class HytaleConfigBuilder<S extends HytaleCommandSource>
             new HytaleArgumentType.Data<>(RelativeChunkPosition.class, ArgTypes.RELATIVE_CHUNK_POSITION,
                     new HytaleArgumentType.ResponseKeyExceptionProvider(HytaleResponseKey.INVALID_RELATIVE_CHUNK_POSITION)),
 
-            new HytaleArgumentType.Data<>(Vector3f.class, ArgTypes.ROTATION,
+            new HytaleArgumentType.Data<>(Rotation3fc.class, ArgTypes.ROTATION,
                     new HytaleArgumentType.ResponseKeyExceptionProvider(HytaleResponseKey.INVALID_ROTATION)),
 
             new HytaleArgumentType.Data<>(ModelAsset.class, ArgTypes.MODEL_ASSET,
@@ -154,7 +154,7 @@ public class HytaleConfigBuilder<S extends HytaleCommandSource>
             if (perm == null || src.isConsole()) {
                 return true;
             }
-            return src.asPlayer().hasPermission(perm);
+            return src.origin().hasPermission(perm);
         });
         this.registerContextResolvers();
         this.registerDefaultSourceProviders();
