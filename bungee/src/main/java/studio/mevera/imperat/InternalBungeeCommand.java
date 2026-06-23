@@ -27,6 +27,7 @@ final class InternalBungeeCommand<S extends BungeeCommandSource> extends net.md_
     public void execute(CommandSender sender, String[] args) {
         bungeeCommandDispatcher.execute(
                 bungeeCommandDispatcher.wrapSender(sender),
+                bungeeCommand,
                 bungeeCommand.getName(),
                 args
         );

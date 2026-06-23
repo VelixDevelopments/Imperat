@@ -6,6 +6,7 @@ import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.CommandRegistry;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.util.Preconditions;
+import studio.mevera.imperat.util.StringUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ final class MapCommandRegistry<S extends CommandSource> implements CommandRegist
 
     @Override
     public @Nullable Command<S> get(@NotNull String name) {
-        final String cmdName = name.toLowerCase();
+        final String cmdName = StringUtils.stripNamespace(name.toLowerCase());
         final Command<S> result = commands.get(cmdName);
         if (result != null) {
             return result;

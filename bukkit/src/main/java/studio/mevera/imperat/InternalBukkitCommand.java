@@ -6,8 +6,10 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.CommandPathway;
+import studio.mevera.imperat.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,21 +40,20 @@ public final class InternalBukkitCommand<S extends BukkitCommandSource> extends 
         return dispatcher.getPlatform();
     }
 
-
     @Nullable
     @Override
     public String getPermission() {
         return imperatCommand.getPrimaryPermission();
     }
 
-
-
     @Override
-    public boolean execute(@NotNull CommandSender sender,
+    public boolean execute(
+            @NotNull CommandSender sender,
             @NotNull String label,
-            String[] raw) {
-        S source = dispatcher.wrapSender(sender);
-        dispatcher.execute(source, this.imperatCommand, label, raw);
+            String @NonNull [] raw
+    ) {
+        final S source = dispatcher.wrapSender(sender);
+        dispatcher.execute(source, this.imperatCommand, StringUtils.stripNamespace(label), raw);
         return true;
     }
 
@@ -60,7 +61,7 @@ public final class InternalBukkitCommand<S extends BukkitCommandSource> extends 
     public @NotNull List<String> tabComplete(
             final @NotNull CommandSender sender,
             final @NotNull String alias,
-            final String[] args
+            final String @NonNull [] args
     ) throws IllegalArgumentException {
         if (Version.SUPPORTS_PAPER_ASYNC_TAB_COMPLETION) {
             //supports async tab completion

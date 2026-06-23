@@ -41,7 +41,7 @@ final class InternalVelocityCommand<P, S extends VelocityCommandSource> implemen
         String label = invocation.alias();
         CommandSource source = invocation.source();
         String[] args = invocation.arguments();
-        imperat.execute(imperat.wrapSender(source), StringUtils.stripNamespace(label), args);
+        imperat.execute(imperat.wrapSender(source), command, StringUtils.stripNamespace(label), args);
     }
 
     @Override
