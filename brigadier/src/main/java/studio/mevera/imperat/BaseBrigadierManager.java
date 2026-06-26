@@ -262,9 +262,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             String fillerName = partNames != null
                                         ? partNames[i]
                                         : argument.getName() + "_part" + (i + 1);
-            @SuppressWarnings({"rawtypes", "unchecked"})
-            RequiredArgumentBuilder<BS, ?> filler = (RequiredArgumentBuilder)
-                                                            RequiredArgumentBuilder.argument(fillerName, StringArgumentType.string());
+            RequiredArgumentBuilder<BS, ?> filler = RequiredArgumentBuilder.argument(fillerName, new PermissiveStringArgumentType());
             filler.requires(visibility::test);
             filler.suggests(createSuggestionProvider(rootCommand, argument));
             executor(filler);
@@ -696,8 +694,9 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     /**
      * Resolves the Brigadier {@link com.mojang.brigadier.arguments.ArgumentType}
      * to register for a flag's VALUE node — driven by the flag's
-     * {@link FlagArgument#flagData() input type}. Default falls back to
-     * {@link StringArgumentType#string()} (no native rendering).
+     * {@link FlagArgument#flagData() input type}. Default returns
+     * a {@link PermissiveStringArgumentType} (accepts any single token,
+     * including characters Brigadier's stock {@code string()} rejects).
      *
      * <p>Backends that map Imperat-side {@code ArgumentType}s onto native
      * Paper / Brigadier types (e.g. {@code ModernPaperBrigadierManager}'s
@@ -710,7 +709,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     protected com.mojang.brigadier.arguments.@NotNull ArgumentType<?> getFlagValueArgumentType(
             @NotNull FlagArgument<S> flag
     ) {
-        return StringArgumentType.string();
+        return new PermissiveStringArgumentType();
     }
 
     /**
@@ -735,11 +734,20 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         return null;
     }
 
-    protected StringArgumentType getStringArgType(Argument<S> parameter) {
+    /**
+     * Resolves the Brigadier {@link com.mojang.brigadier.arguments.ArgumentType}
+     * for a positional string {@link Argument}. Greedy parameters use
+     * {@link StringArgumentType#greedyString()} (consumes all remaining
+     * input). Non-greedy parameters use {@link PermissiveStringArgumentType},
+     * which accepts a single whitespace-delimited token with no character
+     * restrictions, unlike Brigadier's stock {@code string()} which rejects
+     * characters outside {@code [0-9A-Za-z._-+]}.
+     */
+    protected com.mojang.brigadier.arguments.ArgumentType<String> getStringArgType(Argument<S> parameter) {
         if (parameter.isGreedy()) {
             return StringArgumentType.greedyString();
         } else {
-            return StringArgumentType.string();
+            return new PermissiveStringArgumentType();
         }
     }
 
