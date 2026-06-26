@@ -73,7 +73,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     @Override
     public @NotNull <BS> LiteralCommandNode<BS> parseCommandIntoNode(@NotNull Command<S> command) {
         CommandTreeProjection<S> projection = CommandTreeProjection.of(command);
-        return this.<BS>buildRoot(command, projection.root());
+        return this.buildRoot(command, projection.root());
     }
 
     private <BS> LiteralCommandNode<BS> buildRoot(Command<S> rootCommand, ProjectedNode<S> root) {
@@ -87,7 +87,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                     });
         executor(builder);
         appendContinuations(rootCommand, root, builder, 0);
-        LiteralCommandNode<BS> rootNode = (LiteralCommandNode<BS>) builder.build();
+        LiteralCommandNode<BS> rootNode = builder.build();
         appendFlagsWithRedirects(rootCommand, root, rootNode);
         return rootNode;
     }
@@ -103,7 +103,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         // Brigadier requires one node per consumed token for the client-side
         // tree to render the input as N segments — a single Brigadier node
         // would only consume the first whitespace-separated token and paint
-        // the rest grey/red. Detect the count and chain N-1 string-typed
+        // the rest gray/red. Detect the count and chain N-1 string-typed
         // filler nodes after the head; the deepest node owns the executor
         // and continuations so children/optionals/flags only surface after
         // the user has typed all N tokens.
@@ -149,7 +149,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                                  .replace("[", "")
                                  .replace("]", "")
                                  .trim();
-        if (cleaned.isEmpty() || !cleaned.contains(" ")) {
+        if (!cleaned.contains(" ")) {
             return null;
         }
         String[] parts = cleaned.split("\\s+");
@@ -213,9 +213,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                 (obj) -> isNodeVisible(rootCommand, projected, wrapCommandSource(obj));
 
         String headName = partNames != null ? partNames[0] : main.getName();
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        RequiredArgumentBuilder<BS, ?> head = (RequiredArgumentBuilder)
-                                                      RequiredArgumentBuilder.argument(headName, getArgumentType(main));
+        RequiredArgumentBuilder<BS, ?> head = RequiredArgumentBuilder.argument(headName, getArgumentType(main));
         head.requires(visibility::test);
         head.suggests(createSuggestionProvider(rootCommand, main));
         executor(head);
@@ -262,7 +260,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             String fillerName = partNames != null
                                         ? partNames[i]
                                         : argument.getName() + "_part" + (i + 1);
-            RequiredArgumentBuilder<BS, ?> filler = RequiredArgumentBuilder.argument(fillerName, new PermissiveStringArgumentType());
+            RequiredArgumentBuilder<BS, ?> filler = RequiredArgumentBuilder.argument(fillerName, getStringArgType(argument));
             filler.requires(visibility::test);
             filler.suggests(createSuggestionProvider(rootCommand, argument));
             executor(filler);
@@ -341,9 +339,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             // Imperat tree.
             return;
         }
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        RequiredArgumentBuilder<BS, ?> inlineFlagBuilder =
-                (RequiredArgumentBuilder) RequiredArgumentBuilder.argument("flag", inlineFlagType);
+        RequiredArgumentBuilder<BS, ?> inlineFlagBuilder = RequiredArgumentBuilder.argument("flag", inlineFlagType);
         inlineFlagBuilder.requires((obj) -> {
             S source = wrapCommandSource(obj);
             if (rootCommand.isIgnoringACPerms()) {
@@ -512,9 +508,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         if (!projectedFlag.isSwitch()) {
             com.mojang.brigadier.arguments.ArgumentType<?> valueType =
                     getFlagValueArgumentType(projectedFlag.flag());
-            @SuppressWarnings({"unchecked", "rawtypes"})
-            RequiredArgumentBuilder<BS, ?> valueBuilder = (RequiredArgumentBuilder)
-                    RequiredArgumentBuilder.argument(suffixForValueArg + "_value", valueType);
+            RequiredArgumentBuilder<BS, ?> valueBuilder = RequiredArgumentBuilder.argument(suffixForValueArg + "_value", valueType);
             valueBuilder.requires((obj) -> isFlagVisible(command, projectedFlag, wrapCommandSource(obj)));
             SuggestionProvider<BS> nativeSugg = createNativeFlagValueSuggester(projectedFlag.flag());
             valueBuilder.suggests(nativeSugg != null ? nativeSugg : createFlagValueProvider(command, projectedFlag));

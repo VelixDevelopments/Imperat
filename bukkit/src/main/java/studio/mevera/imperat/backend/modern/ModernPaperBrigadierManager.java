@@ -1,20 +1,28 @@
 package studio.mevera.imperat.backend.modern;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import studio.mevera.imperat.BaseBrigadierManager;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.BukkitImperat;
+import studio.mevera.imperat.PermissiveStringArgumentType;
 import studio.mevera.imperat.backend.modern.argument.PaperNativeArgumentType;
 import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.FlagArgument;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -33,6 +41,7 @@ import java.util.List;
  *
  * @since 4.0.0 (Paper module)
  */
+@SuppressWarnings("UnstableApiUsage")
 public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> extends BaseBrigadierManager<S> {
 
     private final BukkitImperat<S> bukkitImperat;
@@ -48,23 +57,38 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
     }
 
     @Override
-    public @NotNull com.mojang.brigadier.arguments.ArgumentType<?> getArgumentType(
+    public @NotNull ArgumentType<?> getArgumentType(
             @NotNull Argument<S> imperatArgument
     ) {
-        com.mojang.brigadier.arguments.ArgumentType<?> nativeType = paperNativeOf(imperatArgument.type());
+        ArgumentType<?> nativeType = paperNativeOf(imperatArgument.type());
         return nativeType != null ? nativeType : getStringArgType(imperatArgument);
     }
 
     @Override
-    protected com.mojang.brigadier.arguments.@NotNull ArgumentType<?> getFlagValueArgumentType(
+    @SuppressWarnings("unchecked")
+    protected @NotNull ArgumentType<String> getStringArgType(
+            @NotNull Argument<S> parameter
+    ) {
+        ArgumentType<String> type = super.getStringArgType(parameter);
+        if (type instanceof PermissiveStringArgumentType) {
+            return (ArgumentType<String>) wrapForPaper(type);
+        }
+        return type;
+    }
+
+    @Override
+    protected @NotNull ArgumentType<?> getFlagValueArgumentType(
             @NotNull FlagArgument<S> flag
     ) {
         var inputType = flag.flagData().inputType();
         if (inputType == null) {
-            return super.getFlagValueArgumentType(flag);
+            return wrapForPaper(super.getFlagValueArgumentType(flag));
         }
-        com.mojang.brigadier.arguments.ArgumentType<?> nativeType = paperNativeOf(inputType);
-        return nativeType != null ? nativeType : super.getFlagValueArgumentType(flag);
+        ArgumentType<?> nativeType = paperNativeOf(inputType);
+        if (nativeType != null) {
+            return nativeType;
+        }
+        return wrapForPaper(super.getFlagValueArgumentType(flag));
     }
 
     /**
@@ -76,15 +100,14 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
      * menu, filter keys, dimension list, etc.).
      */
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     protected @NotNull <BS> SuggestionProvider<BS> createSuggestionProvider(
             Command<S> command,
             Argument<S> parameter
     ) {
-        com.mojang.brigadier.arguments.ArgumentType<?> nativeType = paperNativeOf(parameter.type());
+        ArgumentType<?> nativeType = paperNativeOf(parameter.type());
         if (nativeType != null) {
-            @SuppressWarnings({"rawtypes", "unchecked"})
-            com.mojang.brigadier.arguments.ArgumentType raw = nativeType;
-            return (ctx, builder) -> raw.listSuggestions(ctx, builder);
+            return ((ArgumentType) nativeType)::listSuggestions;
         }
         return super.createSuggestionProvider(command, parameter);
     }
@@ -102,12 +125,11 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
         if (inputType == null) {
             return null;
         }
-        com.mojang.brigadier.arguments.ArgumentType<?> nativeType = paperNativeOf(inputType);
+        ArgumentType<?> nativeType = paperNativeOf(inputType);
         if (nativeType == null) {
             return null;
         }
-        com.mojang.brigadier.arguments.ArgumentType raw = nativeType;
-        return (ctx, builder) -> raw.listSuggestions(ctx, builder);
+        return ((ArgumentType) nativeType)::listSuggestions;
     }
 
     /**
@@ -136,7 +158,7 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
      * {@code UnknownCommandEvent} fallback in {@code BukkitImperat}.</p>
      */
     @Override
-    protected com.mojang.brigadier.arguments.@Nullable ArgumentType<?> inlineFlagArgumentType() {
+    protected @Nullable ArgumentType<?> inlineFlagArgumentType() {
         return null;
     }
 
@@ -147,11 +169,34 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
      */
     public void register(@NotNull Commands registrar, @NotNull Command<S> command) {
         LiteralCommandNode<CommandSourceStack> node = this.parseCommandIntoNode(command);
-        String description = command.getDescription() != null
-                                     ? command.getDescription().getValueOrElse("")
-                                     : "";
+        command.getDescription();
+        String description = command.getDescription().getValueOrElse("");
         List<String> aliases = new ArrayList<>(command.aliases());
         registrar.register(node, description.isEmpty() ? null : description, aliases);
+    }
+
+    /**
+     * Wraps a {@link PermissiveStringArgumentType} in Paper's
+     * {@link CustomArgumentType} so the {@code ApiMirrorRootNode}
+     * accepts it. Paper's modern Brigadier registrar rejects raw
+     * custom {@link ArgumentType} implementations — they must be
+     * wrapped with a native type for client-side tree sync.
+     * Non-permissive types pass through unchanged.
+     */
+    private static ArgumentType<?> wrapForPaper(ArgumentType<?> type) {
+        if (type instanceof PermissiveStringArgumentType pst) {
+            return new CustomArgumentType<String, String>() {
+                @Override
+                public @NonNull String parse(@NonNull StringReader reader) throws CommandSyntaxException {
+                    return pst.parse(reader);
+                }
+                @Override
+                public @NonNull ArgumentType<String> getNativeType() {
+                    return StringArgumentType.string();
+                }
+            };
+        }
+        return type;
     }
 
     /**
@@ -162,7 +207,7 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
      * {@link #createSuggestionProvider(Command, Argument)}, and
      * {@link #createNativeFlagValueSuggester(FlagArgument)}.
      */
-    private com.mojang.brigadier.arguments.@Nullable ArgumentType<?> paperNativeOf(
+    private @Nullable ArgumentType<?> paperNativeOf(
             studio.mevera.imperat.command.arguments.type.ArgumentType<S, ?> imperatType
     ) {
         return imperatType instanceof PaperNativeArgumentType paperNative
