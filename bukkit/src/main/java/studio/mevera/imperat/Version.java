@@ -5,7 +5,7 @@ import studio.mevera.imperat.util.reflection.Reflections;
 
 public final class Version {
 
-    public static final String VERSION_EXACT = Bukkit.getBukkitVersion().split("-")[0];
+    public static final String VERSION_EXACT = Bukkit.getBukkitVersion().split("-")[0].replaceAll("\\.build\\.\\d+", "");
     public static final boolean IS_FOLIA = Reflections.findClass("io.papermc.paper.threadedregions.RegionizedServer");
     public static final boolean IS_PAPER =
             Reflections.findClass("com.destroystokyo.paper.PaperConfig", "io.papermc.paper.configuration.Configuration");
@@ -17,10 +17,14 @@ public final class Version {
     //public static final String NMS = findVersion();
 
     static {
-        final String[] versions = VERSION_EXACT.split("\\.");
-        MAJOR = Integer.parseInt(versions[0]);
-        MINOR = Integer.parseInt(versions[1]);
-        PATCH = versions.length > 2 ? Integer.parseInt(versions[2]) : 0;
+        try {
+            final String[] versions = VERSION_EXACT.split("\\.");
+            MAJOR = Integer.parseInt(versions[0]);
+            MINOR = Integer.parseInt(versions[1]);
+            PATCH = versions.length > 2 ? Integer.parseInt(versions[2]) : 0;
+        } catch (final NumberFormatException e) {
+            throw new RuntimeException("Could not parse version out of: %s".formatted(VERSION_EXACT), e);
+        }
     }
 
     public static boolean is(final int major, final int minor, final int patch) {
