@@ -123,7 +123,7 @@ public final class TreeHelpQuery<S extends CommandSource> {
                        .permission(pathway.getPermissionsData())
                        .description(pathway.getDescription())
                        .coordinator(pathway.getCoordinator())
-                       .cooldown(pathway.getCooldown())
+                       .cooldownHandler(pathway.getCooldownHandler())
                        .build(rootCommand);
     }
 

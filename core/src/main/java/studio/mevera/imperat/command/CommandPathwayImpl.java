@@ -11,7 +11,6 @@ import studio.mevera.imperat.annotations.base.element.MethodElement;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.FlagArgument;
 import studio.mevera.imperat.command.cooldown.CooldownHandler;
-import studio.mevera.imperat.command.cooldown.CooldownRecord;
 import studio.mevera.imperat.command.flags.FlagExtractor;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.context.ExecutionContext;
@@ -46,7 +45,6 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
     private @NotNull CooldownHandler<S> cooldownHandler;
     private CommandCoordinator<S> commandCoordinator;
     private final @Nullable MethodElement methodElement;
-    private @Nullable CooldownRecord cooldown = null;
 
     /**
      * The command this pathway was registered against — set by
@@ -65,7 +63,7 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
     CommandPathwayImpl(@Nullable MethodElement methodElement, @NotNull CommandExecution<S> execution) {
         this.methodElement = methodElement;
         this.execution = execution;
-        this.cooldownHandler = CooldownHandler.createDefault(this);
+        this.cooldownHandler = CooldownHandler.noop();
         this.commandCoordinator = null;
         this.flagExtractor = FlagExtractor.createNative(this);
     }
@@ -292,16 +290,6 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
             }
         }
         return null;
-    }
-
-    @Override
-    public @Nullable CooldownRecord getCooldown() {
-        return cooldown;
-    }
-
-    @Override
-    public void setCooldown(@Nullable CooldownRecord usageCooldown) {
-        this.cooldown = usageCooldown;
     }
 
     @Override

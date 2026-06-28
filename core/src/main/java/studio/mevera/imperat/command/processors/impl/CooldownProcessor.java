@@ -29,7 +29,7 @@ public final class CooldownProcessor<S extends CommandSource> implements Command
         var source = context.source();
         var pathway = context.getDetectedPathway();
         var handler = pathway.getCooldownHandler();
-        var cooldown = pathway.getCooldown();
+        var cooldown = handler.getUsageCooldown().orElse(null);
 
         if (handler.hasCooldown(source)) {
             assert cooldown != null;

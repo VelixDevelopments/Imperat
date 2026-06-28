@@ -634,6 +634,10 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
                                                .execute(originalPathway.getExecution())
                                                .permission(originalPathway.getPermission())
                                                .description(originalPathway.getDescription())
+                                               .examples(originalPathway.getExamples())
+                                               .withFlags(originalPathway.getFlagArguments())
+                                               .cooldownHandler(originalPathway.getCooldownHandler())
+                                               .coordinator(originalPathway.getCommandCoordinator())
                                                .build(shortcut);
 
         shortcut.addPathway(fabricated);

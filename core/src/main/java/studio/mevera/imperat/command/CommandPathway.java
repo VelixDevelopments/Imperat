@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public sealed interface CommandPathway<S extends CommandSource> extends Iterable<Argument<S>>, PermissionHolder, DescriptionHolder, CooldownHolder
+public sealed interface CommandPathway<S extends CommandSource> extends Iterable<Argument<S>>, PermissionHolder, DescriptionHolder
         permits CommandPathwayImpl {
 
 
@@ -364,10 +364,15 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
         private PermissionsData permission = PermissionsData.empty();
         private CommandCoordinator<S> commandCoordinator = CommandCoordinator.sync();
         private @Nullable MethodElement methodElement;
-        private CooldownRecord cooldown = null;
+        private @Nullable CooldownHandler<S> cooldownHandler;
 
         Builder(@Nullable MethodElement methodElement) {
             this.methodElement = methodElement;
+        }
+
+        public Builder<S> cooldownHandler(@Nullable CooldownHandler<S> cooldownHandler) {
+            this.cooldownHandler = cooldownHandler;
+            return this;
         }
 
         Builder() {
@@ -410,12 +415,7 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
         }
 
         public Builder<S> cooldown(long value, TimeUnit unit, @Nullable String permission) {
-            this.cooldown = new CooldownRecord(value, unit, permission);
-            return this;
-        }
-
-        public Builder<S> cooldown(@Nullable CooldownRecord cooldown) {
-            this.cooldown = cooldown;
+            this.cooldownHandler = CooldownHandler.createShared(new CooldownRecord(value, unit, permission));
             return this;
         }
 
@@ -480,13 +480,6 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
             impl.setCoordinator(commandCoordinator);
             impl.setPermissionData(permission);
             impl.describe(description);
-            impl.setCooldown(cooldown);
-            // Stamp owner so {@link CommandPathway#formatted()} can derive
-            // a subcommand-chain prefix even when the pathway has zero
-            // positional arguments. {@code addPathway} also sets it again
-            // for safety, but doing it here covers callers that build a
-            // pathway and reach for {@code formatted()} before
-            // {@code addPathway} runs.
             impl.setOwningCommand(command);
 
             // Then set personal parameters (these are used for tree building)
@@ -498,6 +491,9 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
 
             flagArguments.forEach(impl::addFlag);
             impl.addExamples(this.examples);
+            if (cooldownHandler != null) {
+                impl.setCooldownHandler(cooldownHandler);
+            }
             return impl;
         }
 
@@ -509,8 +505,9 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
             return execution;
         }
 
-        public CooldownRecord getCooldown() {
-            return cooldown;
+        @Nullable
+        public CooldownHandler<S> getCooldownHandler() {
+            return cooldownHandler;
         }
 
         public Description getDescription() {
