@@ -560,16 +560,19 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
 
         Shortcut shortcutAnn = method.getAnnotation(Shortcut.class);
         if (shortcutAnn != null) {
-            if (shortcutAnn.value().isEmpty()) {
-                throw new IllegalStateException("Shortcut value cannot be empty for method '" + method.getName() + "'");
-            }
+            for (String rawValue : shortcutAnn.value()) {
+                String shortcutValue = config.replacePlaceholders(rawValue);
+                if (shortcutValue.isEmpty()) {
+                    throw new IllegalStateException("Shortcut value cannot be empty for method '" + method.getName() + "'");
+                }
 
-            if (shortcutAnn.value().contains(" ")) {
-                throw new IllegalStateException("Shortcut value cannot contain spaces for method '" + method.getName() + "'");
-            }
+                if (shortcutValue.contains(" ")) {
+                    throw new IllegalStateException("Shortcut value cannot contain spaces for method '" + method.getName() + "'");
+                }
 
-            var shortcut = loadPathwayShortcut(method, parsedMethodArgs, owningCommand, builder, shortcutAnn);
-            owningCommand.addShortcut(shortcut);
+                var shortcut = loadPathwayShortcut(method, parsedMethodArgs, owningCommand, builder, shortcutValue);
+                owningCommand.addShortcut(shortcut);
+            }
         }
         return builder;
     }
@@ -617,11 +620,8 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
             @NotNull List<Argument<S>> parseMethodParameters,
             @NotNull Command<S> originalCommand,
             @NotNull CommandPathway.Builder<S> originalPathway,
-            @NotNull Shortcut shortcutAnn
+            @NotNull String shortcutValue
     ) {
-
-        String shortcutValue = config.replacePlaceholders(shortcutAnn.value());
-
         Command<S> shortcut = originalCommand.getShortcut(shortcutValue);
         if (shortcut == null) {
             shortcut = Command.create(imperat, shortcutValue, method)
