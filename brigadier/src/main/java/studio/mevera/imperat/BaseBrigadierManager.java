@@ -8,7 +8,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +31,7 @@ import studio.mevera.imperat.context.SuggestionContext;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Brigadier-tree builder backed by a {@link CommandTreeProjection}. The
@@ -120,9 +125,14 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             );
         }
 
-        appendContinuations(rootCommand, projected, childBuilder, 0);
+        boolean isGreedy = main.isGreedy() || main.type().isGreedy(main);
+        if (!isGreedy) {
+            appendContinuations(rootCommand, projected, childBuilder, 0);
+        }
         CommandNode<BS> scopeAnchor = childBuilder.build();
-        appendFlagsWithRedirects(rootCommand, projected, scopeAnchor);
+        if (!isGreedy) {
+            appendFlagsWithRedirects(rootCommand, projected, scopeAnchor);
+        }
         return scopeAnchor;
     }
 
@@ -523,7 +533,30 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             flagLiteral.redirect(scopeAnchor);
         }
 
-        scopeAnchor.addChild(flagLiteral.build());
+        LiteralCommandNode<BS> builtNode = flagLiteral.build();
+        java.util.Set<String> flagForms = collectFlagForms(projectedFlag);
+        LiteralCommandNode<BS> filteredNode = new LiteralCommandNode<>(
+                builtNode.getLiteral(),
+                builtNode.getCommand(),
+                builtNode.getRequirement(),
+                builtNode.getRedirect(),
+                builtNode.getRedirectModifier(),
+                builtNode.isFork()
+        ) {
+            @Override
+            public CompletableFuture<Suggestions> listSuggestions(
+                    CommandContext<BS> context, SuggestionsBuilder builder
+            ) {
+                if (isAnyFlagFormInInput(context.getInput(), flagForms)) {
+                    return Suggestions.empty();
+                }
+                return super.listSuggestions(context, builder);
+            }
+        };
+        for (CommandNode<BS> child : builtNode.getChildren()) {
+            filteredNode.addChild(child);
+        }
+        scopeAnchor.addChild(filteredNode);
     }
 
     private @NotNull <BS> com.mojang.brigadier.suggestion.SuggestionProvider<BS> createFlagValueProvider(
@@ -609,6 +642,50 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         var checker = dispatcher.config().getPermissionChecker();
         return checker.hasPermission(source, flag.owningPathway())
                        && checker.hasPermission(source, flag.flag());
+    }
+
+    /**
+     * All CLI forms for a flag (e.g. {@code --scenario}, {@code -scenario},
+     * {@code -sc}) so callers can detect whether ANY form of the flag is
+     * already present in a Brigadier input string.
+     */
+    private static java.util.Set<String> collectFlagForms(ProjectedFlag<?> projectedFlag) {
+        String primary = projectedFlag.name();
+        java.util.Set<String> forms = new java.util.LinkedHashSet<>();
+        forms.add("--" + primary);
+        forms.add("-" + primary);
+        for (String alias : projectedFlag.aliases()) {
+            if (!alias.equals(primary)) {
+                forms.add("-" + alias);
+            }
+        }
+        return forms;
+    }
+
+    /**
+     * Returns {@code true} when any token in {@code input} exactly matches
+     * one of the {@code flagForms}. Used to suppress Brigadier literal
+     * suggestions for flags the user has already typed.
+     */
+    private static boolean isAnyFlagFormInInput(String input, java.util.Set<String> flagForms) {
+        String normalized = input;
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        // Tokenize by whitespace and check exact match against every flag form
+        int start = 0;
+        for (int i = 0; i <= normalized.length(); i++) {
+            if (i == normalized.length() || Character.isWhitespace(normalized.charAt(i))) {
+                if (i > start) {
+                    String token = normalized.substring(start, i);
+                    if (flagForms.contains(token)) {
+                        return true;
+                    }
+                }
+                start = i + 1;
+            }
+        }
+        return false;
     }
 
     private List<String> collectFlagValueSuggestions(SuggestionContext<S> ctx, FlagArgument<S> flag) {
