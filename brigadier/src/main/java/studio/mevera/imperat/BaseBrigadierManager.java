@@ -9,7 +9,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -530,28 +529,21 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             valueBuilder.redirect(scopeAnchor);
             flagLiteral.then(valueBuilder.build());
         } else {
-            // Switch has no value — redirect the literal.
-            // When scopeAnchor has a greedy-string child (e.g. a @Greedy
-            // positional arg that consumes all remaining input), redirect
-            // the switch to THAT child instead of scopeAnchor so the switch
-            // literal is no longer reachable after consumption. This prevents
-            // re-suggestion even when Paper's Commands API bypasses the
-            // listSuggestions override on our LiteralCommandNode subclass.
-            //
-            // Non-greedy scopes redirect to scopeAnchor as before, preserving
-            // multi-switch tab-completion (e.g. `cmd -a -b`).
-            CommandNode<BS> redirectTarget = scopeAnchor;
-            for (CommandNode<BS> child : scopeAnchor.getChildren()) {
-                if (child instanceof ArgumentCommandNode<?, ?> argNode) {
-                    var argType = argNode.getType();
-                    if (argType instanceof com.mojang.brigadier.arguments.StringArgumentType strArg
-                                && strArg.getType() == com.mojang.brigadier.arguments.StringArgumentType.StringType.GREEDY_PHRASE) {
-                        redirectTarget = child;
-                        break;
-                    }
-                }
+            // Switch has no value.
+            // When the scope has a greedy child, give the switch that child as
+            // a direct continuation (no redirect). After consuming the switch,
+            // the greedy arg is the next reachable node — the switch literal
+            // is structurally unreachable, preventing re-suggestion without
+            // relying on listSuggestions overrides (which Paper's Commands API
+            // may bypass).
+            CommandNode<BS> greedyChild = findGreedyChild(scopeAnchor);
+            if (greedyChild != null) {
+                flagLiteral.then(greedyChild);
+            } else {
+                // Non-greedy scope: redirect to scopeAnchor, preserving
+                // multi-switch tab-completion (e.g. `cmd -a -b`).
+                flagLiteral.redirect(scopeAnchor);
             }
-            flagLiteral.redirect(redirectTarget);
         }
 
         LiteralCommandNode<BS> builtNode = flagLiteral.build();
@@ -646,11 +638,17 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
 
             return dispatcher.config().getParameterSuggestionResolver(parameter).provideAsynchronously(ctx, parameter)
                            .thenCompose((results) -> {
-                               results
-                                       .stream()
-                                       .filter((candidate) -> prefix.isEmpty()
-                                                                      || candidate.toLowerCase().startsWith(prefix))
-                                       .forEachOrdered((result) -> alignedBuilder.suggest(result, tooltip));
+                               if (results.isEmpty()) {
+                                   // No custom suggestions — use the argument format
+                                   // as a placeholder hint (e.g. `<target>`).
+                                   alignedBuilder.suggest(paramFormat);
+                               } else {
+                                   results
+                                           .stream()
+                                           .filter((candidate) -> prefix.isEmpty()
+                                                                           || candidate.toLowerCase().startsWith(prefix))
+                                           .forEachOrdered((result) -> alignedBuilder.suggest(result, tooltip));
+                               }
                                return alignedBuilder.buildFuture();
                            });
         };
@@ -708,6 +706,29 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             }
         }
         return false;
+    }
+
+    /**
+     * Finds the first child of {@code parent} that is a greedy-string argument
+     * (e.g. a {@code @Greedy String} positional arg). Returns {@code null} if
+     * no such child exists.
+     */
+    private static <BS> @Nullable CommandNode<BS> findGreedyChild(CommandNode<BS> parent) {
+        for (CommandNode<BS> child : parent.getChildren()) {
+            if (!(child instanceof ArgumentCommandNode<?, ?> argNode)) {
+                continue;
+            }
+            var type = argNode.getType();
+            if (type instanceof StringArgumentType strArg) {
+                try {
+                    if (strArg.getType() == StringArgumentType.StringType.GREEDY_PHRASE) {
+                        return child;
+                    }
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
+        return null;
     }
 
     private List<String> collectFlagValueSuggestions(SuggestionContext<S> ctx, FlagArgument<S> flag) {
