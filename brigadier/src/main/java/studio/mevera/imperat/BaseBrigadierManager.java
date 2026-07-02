@@ -500,6 +500,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                     continue;
                 }
                 addFlagWithRedirect(command, projectedFlag, "-" + alias, alias, scopeAnchor);
+                addFlagWithRedirect(command, projectedFlag, "--" + alias, alias, scopeAnchor);
             }
         }
     }
@@ -657,6 +658,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         for (String alias : projectedFlag.aliases()) {
             if (!alias.equals(primary)) {
                 forms.add("-" + alias);
+                forms.add("--" + alias);
             }
         }
         return forms;

@@ -52,9 +52,9 @@ class BukkitBrigadierFlagSuggestionTest {
         var suggestions = complete("flagtest ");
 
         // Permissive: primary registers under both `--scenario` AND `-scenario`,
-        // plus alias `-sc`.
-        assertEquals(5, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("play", "mix", "--scenario", "-scenario", "-sc")));
+        // plus alias `-sc` and `--sc`.
+        assertEquals(6, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("play", "mix", "--scenario", "-scenario", "-sc", "--sc")));
     }
 
     @Test
@@ -71,8 +71,8 @@ class BukkitBrigadierFlagSuggestionTest {
     void testBrigadierShowsSubcommandFlagNames() {
         var suggestions = complete("flagtest play ");
 
-        assertEquals(3, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("--scenario", "-scenario", "-sc")));
+        assertEquals(4, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("--scenario", "-scenario", "-sc", "--sc")));
     }
 
     @Test
@@ -102,8 +102,8 @@ class BukkitBrigadierFlagSuggestionTest {
     void testBrigadierShowsFlagsAfterArguments() {
         var suggestions = complete("flagtest mix player ");
 
-        assertEquals(3, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("--scenario", "-scenario", "-sc")));
+        assertEquals(4, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("--scenario", "-scenario", "-sc", "--sc")));
     }
 
     @Test
