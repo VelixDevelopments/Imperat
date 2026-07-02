@@ -1,6 +1,7 @@
 package studio.mevera.imperat.bukkit.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -52,9 +53,9 @@ class BukkitBrigadierFlagSuggestionTest {
         var suggestions = complete("flagtest ");
 
         // Permissive: primary registers under both `--scenario` AND `-scenario`,
-        // plus alias `-sc` and `--sc`.
-        assertEquals(6, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("play", "mix", "--scenario", "-scenario", "-sc", "--sc")));
+        // plus alias `-sc` and `--sc`, plus subcommands play, mix, greedyflag.
+        assertEquals(7, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("play", "mix", "greedyflag", "--scenario", "-scenario", "-sc", "--sc")));
     }
 
     @Test
@@ -113,6 +114,46 @@ class BukkitBrigadierFlagSuggestionTest {
 
         assertEquals(4, suggestions.size());
         assertTrue(suggestions.containsAll(List.of("kindergarten", "castle", "sandstorm", "tsunami")));
+    }
+
+    @Test
+    @DisplayName("Should NOT suggest flag name again after it was just used in Brigadier")
+    void testBrigadierDoesNotSuggestUsedFlagAgain() {
+        var suggestions = complete("flagtest --sc ");
+
+        assertFalse(suggestions.contains("--scenario"), "--scenario should not be suggested");
+        assertFalse(suggestions.contains("-scenario"), "-scenario should not be suggested");
+        assertFalse(suggestions.contains("-sc"), "-sc should not be suggested");
+        assertFalse(suggestions.contains("--sc"), "--sc should not be suggested");
+    }
+
+    @Test
+    @DisplayName("Should NOT suggest flag name after alias was used in Brigadier")
+    void testBrigadierDoesNotSuggestUsedAliasFlagAgain() {
+        var suggestions = complete("flagtest -sc ");
+
+        assertFalse(suggestions.contains("--scenario"), "--scenario should not be suggested");
+        assertFalse(suggestions.contains("-scenario"), "-scenario should not be suggested");
+        assertFalse(suggestions.contains("-sc"), "-sc should not be suggested");
+        assertFalse(suggestions.contains("--sc"), "--sc should not be suggested");
+    }
+
+    @Test
+    @DisplayName("Should NOT suggest switch again after use with greedy arg in Brigadier")
+    void testBrigadierDoesNotSuggestGreedySwitchAgain() {
+        var suggestions = complete("flagtest greedyflag --shallow ");
+
+        assertFalse(suggestions.contains("--shallow"), "--shallow should not be suggested, got " + suggestions);
+        assertFalse(suggestions.contains("-shallow"), "-shallow should not be suggested, got " + suggestions);
+    }
+
+    @Test
+    @DisplayName("Should suggest switch before use with greedy arg in Brigadier")
+    void testBrigadierShowsGreedySwitchAtStart() {
+        var suggestions = complete("flagtest greedyflag ");
+
+        assertTrue(suggestions.contains("--shallow"), "expected --shallow in " + suggestions);
+        assertTrue(suggestions.contains("-shallow"), "expected -shallow in " + suggestions);
     }
 
     private List<String> complete(String input) {
