@@ -156,6 +156,17 @@ class BukkitBrigadierFlagSuggestionTest {
         assertTrue(suggestions.contains("-shallow"), "expected -shallow in " + suggestions);
     }
 
+    @Test
+    @DisplayName("Should suggest greedy argument values containing space correctly through Brigadier")
+    void testBrigadierGreedySuggestionsWithSpace() {
+        var suggestions = complete("flagtest greedyflag pluginsDir/my ");
+
+        assertEquals(2, suggestions.size(), "Suggestions: " + suggestions);
+        assertTrue(suggestions.contains("pluginsDir/my plugin/config.yml"), "expected config.yml in " + suggestions);
+        assertTrue(suggestions.contains("pluginsDir/my plugin/messages.yml"), "expected messages.yml in " + suggestions);
+        assertFalse(suggestions.contains("pluginsDir/itsmyconfig/"), "did not expect itsmyconfig/ in " + suggestions);
+    }
+
     private List<String> complete(String input) {
         return completeSuggestions(input)
                        .stream()

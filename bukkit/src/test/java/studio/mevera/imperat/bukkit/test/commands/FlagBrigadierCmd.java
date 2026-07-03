@@ -44,7 +44,7 @@ public final class FlagBrigadierCmd {
     @SubCommand("greedyflag")
     public void greedyflag(
             BukkitCommandSource source,
-            @Named("target") @Greedy String target,
+            @Named("target") @Greedy @Suggest({"pluginsDir/itsmyconfig/", "pluginsDir/my plugin/config.yml", "pluginsDir/my plugin/messages.yml"}) String target,
             @Switch("shallow") boolean shallow
     ) {
     }

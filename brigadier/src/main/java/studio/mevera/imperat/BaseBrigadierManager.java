@@ -372,14 +372,16 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     private @NotNull <BS> com.mojang.brigadier.suggestion.SuggestionProvider<BS>
     createInlineFlagSuggestionProvider(Command<S> command) {
         return (context, builder) -> {
-            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput());
+            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
             CompletionArg arg = ctx.getArgToComplete();
             var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
             for (String suggestion : command.tree().tabComplete(ctx)) {
                 if (suggestion == null || suggestion.isEmpty()) {
                     continue;
                 }
-                alignedBuilder.suggest(suggestion);
+                if (suggestion.startsWith("-")) {
+                    alignedBuilder.suggest(suggestion);
+                }
             }
             return alignedBuilder.buildFuture();
         };
@@ -578,7 +580,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     ) {
         FlagArgument<S> flag = projectedFlag.flag();
         return (context, builder) -> {
-            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput());
+            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
             CompletionArg arg = ctx.getArgToComplete();
             String prefix = arg.isEmpty() ? "" : arg.value().toLowerCase(Locale.ROOT);
 
@@ -601,7 +603,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     ) {
 
         return (context, builder) -> {
-            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput());
+            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, parameter);
             CompletionArg arg = ctx.getArgToComplete();
 
             String paramFormat = parameter.format();
@@ -752,19 +754,46 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     private @NotNull SuggestionContext<S> createSuggestionContext(
             Command<S> command,
             Object rawSource,
-            String rawInput
+            String rawInput,
+            @Nullable SuggestionsBuilder builder,
+            @Nullable Argument<S> parameter
     ) {
+        if (parameter == null) {
+            parameter = findActiveGreedyArgument(command, rawInput, builder);
+        }
         S source = wrapCommandSource(rawSource);
         String input = normalizeInput(rawInput);
         int firstSpaceIndex = input.indexOf(' ');
         String label = firstSpaceIndex == -1 ? input : input.substring(0, firstSpaceIndex);
         boolean endsWithSpace = !input.isEmpty() && Character.isWhitespace(input.charAt(input.length() - 1));
         int argumentsStart = firstSpaceIndex == -1 ? input.length() : firstSpaceIndex + 1;
-        int argumentsEnd = endsWithSpace ? input.length() - 1 : input.length();
-        String argumentsSection = argumentsStart >= argumentsEnd
-                                          ? ""
-                                          : input.substring(argumentsStart, argumentsEnd);
-        ArgumentInput args = ArgumentInput.parseAutoCompletion(argumentsSection, endsWithSpace);
+
+        ArgumentInput args;
+        if (parameter != null && builder != null && (parameter.isGreedy() || parameter.type().isGreedy(parameter))) {
+            String originalRawInput = builder.getInput();
+            String normalizedOriginal = normalizeInput(originalRawInput);
+            int leadingOffset = originalRawInput.length() - normalizedOriginal.length();
+            int greedyStartInInput = builder.getStart() - leadingOffset;
+            if (greedyStartInInput >= argumentsStart && greedyStartInInput <= input.length()) {
+                String preceding = input.substring(argumentsStart, greedyStartInInput);
+                args = ArgumentInput.parse(preceding);
+                String greedyValue = input.substring(greedyStartInInput);
+                args.add(greedyValue);
+            } else {
+                int argumentsEnd = endsWithSpace ? input.length() - 1 : input.length();
+                String argumentsSection = argumentsStart >= argumentsEnd
+                                                  ? ""
+                                                  : input.substring(argumentsStart, argumentsEnd);
+                args = ArgumentInput.parseAutoCompletion(argumentsSection, endsWithSpace);
+            }
+        } else {
+            int argumentsEnd = endsWithSpace ? input.length() - 1 : input.length();
+            String argumentsSection = argumentsStart >= argumentsEnd
+                                              ? ""
+                                              : input.substring(argumentsStart, argumentsEnd);
+            args = ArgumentInput.parseAutoCompletion(argumentsSection, endsWithSpace);
+        }
+
         return dispatcher.config().getContextFactory().createSuggestionContext(dispatcher, source, command, label, args);
     }
 
@@ -863,6 +892,142 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         } else {
             return new PermissiveStringArgumentType();
         }
+    }
+
+    private @Nullable Argument<S> findActiveGreedyArgument(
+            Command<S> command,
+            String rawInput,
+            @Nullable SuggestionsBuilder builder
+    ) {
+        if (builder == null) {
+            return null;
+        }
+        Command<S> activeCommand = findActiveCommand(command, rawInput);
+        Argument<S> greedyArg = findGreedyArgument(activeCommand);
+        if (greedyArg == null) {
+            return null;
+        }
+
+        String input = normalizeInput(rawInput);
+        String normalizedOriginal = normalizeInput(builder.getInput());
+        int leadingOffset = builder.getInput().length() - normalizedOriginal.length();
+        int nodeStartInInput = builder.getStart() - leadingOffset;
+
+        int precedingExpected = 0;
+        for (CommandPathway<S> pathway : activeCommand.getDedicatedPathways()) {
+            int idx = 0;
+            for (Argument<S> argument : pathway.getArguments()) {
+                if (argument.isGreedy() || argument.type().isGreedy(argument)) {
+                    precedingExpected = idx;
+                    break;
+                }
+                idx++;
+            }
+        }
+
+        int activeCmdStart = input.indexOf(activeCommand.getName());
+        if (activeCmdStart == -1) {
+            for (String alias : activeCommand.aliases()) {
+                activeCmdStart = input.indexOf(alias);
+                if (activeCmdStart != -1) {
+                    break;
+                }
+            }
+        }
+        int activeArgsStart = activeCmdStart == -1 ? 0 : activeCmdStart + activeCommand.getName().length();
+        while (activeArgsStart < input.length() && Character.isWhitespace(input.charAt(activeArgsStart))) {
+            activeArgsStart++;
+        }
+
+        if (nodeStartInInput >= activeArgsStart) {
+            boolean precedingIsValueFlag = false;
+            int lastPos = nodeStartInInput - 1;
+            while (lastPos >= activeArgsStart && Character.isWhitespace(input.charAt(lastPos))) {
+                lastPos--;
+            }
+            if (lastPos >= activeArgsStart) {
+                int tokenStart = lastPos;
+                while (tokenStart > activeArgsStart && !Character.isWhitespace(input.charAt(tokenStart - 1))) {
+                    tokenStart--;
+                }
+                String precedingToken = input.substring(tokenStart, lastPos + 1);
+                if (precedingToken.startsWith("-") && isValueFlag(activeCommand, precedingToken)) {
+                    precedingIsValueFlag = true;
+                }
+            }
+
+            if (precedingIsValueFlag) {
+                return null;
+            }
+
+            String precedingSection = input.substring(activeArgsStart, nodeStartInInput);
+            ArgumentInput precedingArgs = ArgumentInput.parse(precedingSection);
+            int actualPositionalCount = 0;
+            for (int i = 0; i < precedingArgs.size(); i++) {
+                String arg = precedingArgs.get(i);
+                if (arg != null && arg.startsWith("-")) {
+                    if (isValueFlag(activeCommand, arg)) {
+                        i++; // Skip the flag's value
+                    }
+                } else {
+                    actualPositionalCount++;
+                }
+            }
+            if (actualPositionalCount >= precedingExpected) {
+                return greedyArg;
+            }
+        }
+
+        return null;
+    }
+
+    private Command<S> findActiveCommand(Command<S> rootCommand, String rawInput) {
+        String input = normalizeInput(rawInput);
+        if (input.isEmpty()) {
+            return rootCommand;
+        }
+        String[] parts = input.split("\\s+");
+        Command<S> current = rootCommand;
+        int startIndex = 0;
+        if (parts.length > 0 && rootCommand.hasName(parts[0])) {
+            startIndex = 1;
+        }
+        for (int i = startIndex; i < parts.length; i++) {
+            Command<S> sub = current.getSubCommand(parts[i], false);
+            if (sub != null) {
+                current = sub;
+            } else {
+                break;
+            }
+        }
+        return current;
+    }
+
+    private @Nullable Argument<S> findGreedyArgument(Command<S> activeCommand) {
+        for (CommandPathway<S> pathway : activeCommand.getDedicatedPathways()) {
+            for (Argument<S> argument : pathway.getArguments()) {
+                if (argument.isGreedy() || argument.type().isGreedy(argument)) {
+                    return argument;
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isValueFlag(Command<S> activeCommand, String token) {
+        String name = token;
+        while (name.startsWith("-")) {
+            name = name.substring(1);
+        }
+        final String finalName = name;
+        for (CommandPathway<S> pathway : activeCommand.getDedicatedPathways()) {
+            for (FlagArgument<S> flag : pathway.getFlagExtractor().getRegisteredFlags()) {
+                if (flag.getName().equalsIgnoreCase(finalName) || flag.flagData().aliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(finalName))) {
+                    return !flag.isSwitch();
+                }
+            }
+        }
+        return false;
     }
 
 }
