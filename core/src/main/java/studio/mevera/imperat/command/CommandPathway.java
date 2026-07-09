@@ -1,5 +1,6 @@
 package studio.mevera.imperat.command;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.mevera.imperat.Imperat;
@@ -233,6 +234,35 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
      */
     @NotNull
     CommandExecution<S> getExecution();
+
+    /**
+     * Whether this pathway is the framework-injected fallback built from
+     * {@link studio.mevera.imperat.ImperatConfig#getGlobalDefaultPathway()}
+     * during command construction (the "invalid usage" handler), as opposed
+     * to a user-authored pathway. Fallback pathways carry a real execution
+     * but must not count as executable targets for suggestion visibility.
+     */
+    @ApiStatus.Internal
+    default boolean isSyntheticFallback() {
+        return false;
+    }
+
+    /**
+     * Whether this pathway can actually run user code — either through an
+     * annotated method element or through a programmatic execution supplied
+     * via {@link Builder#execute(CommandExecution)}. Synthetic pathways —
+     * ones keeping the shared {@link CommandExecution#empty()} instance or
+     * marked as the {@link #isSyntheticFallback() framework fallback} —
+     * report {@code false}. Suggestion-visibility walks use this instead of
+     * a method-element-only check so builder-API commands are not hidden
+     * from tab completion.
+     */
+    default boolean isExecutable() {
+        if (getMethodElement() != null) {
+            return true;
+        }
+        return !isSyntheticFallback() && getExecution() != CommandExecution.empty();
+    }
 
     /**
      * @param clazz the valueType of the parameter to check upon

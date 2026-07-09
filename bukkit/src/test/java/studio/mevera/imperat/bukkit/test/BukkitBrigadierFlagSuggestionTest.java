@@ -52,10 +52,10 @@ class BukkitBrigadierFlagSuggestionTest {
     void testBrigadierShowsRootFlagsAndSubcommands() {
         var suggestions = complete("flagtest ");
 
-        // Permissive: primary registers under both `--scenario` AND `-scenario`,
-        // plus alias `-sc` and `--sc`, plus subcommands play, mix, greedyflag.
-        assertEquals(7, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("play", "mix", "greedyflag", "--scenario", "-scenario", "-sc", "--sc")));
+        // Flag-name suggestions are server-driven (core tree suggester) and
+        // use the canonical single-dash forms; long `--` forms still parse.
+        assertEquals(6, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("play", "mix", "greedyflag", "multi", "-scenario", "-sc")));
     }
 
     @Test
@@ -72,8 +72,8 @@ class BukkitBrigadierFlagSuggestionTest {
     void testBrigadierShowsSubcommandFlagNames() {
         var suggestions = complete("flagtest play ");
 
-        assertEquals(4, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("--scenario", "-scenario", "-sc", "--sc")));
+        assertEquals(2, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("-scenario", "-sc")));
     }
 
     @Test
@@ -103,8 +103,8 @@ class BukkitBrigadierFlagSuggestionTest {
     void testBrigadierShowsFlagsAfterArguments() {
         var suggestions = complete("flagtest mix player ");
 
-        assertEquals(4, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("--scenario", "-scenario", "-sc", "--sc")));
+        assertEquals(2, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("-scenario", "-sc")));
     }
 
     @Test
@@ -152,8 +152,27 @@ class BukkitBrigadierFlagSuggestionTest {
     void testBrigadierShowsGreedySwitchAtStart() {
         var suggestions = complete("flagtest greedyflag ");
 
-        assertTrue(suggestions.contains("--shallow"), "expected --shallow in " + suggestions);
         assertTrue(suggestions.contains("-shallow"), "expected -shallow in " + suggestions);
+    }
+
+    @Test
+    @DisplayName("Should suggest the remaining switch after one switch is used in a greedy scope")
+    void testBrigadierSuggestsSecondSwitchAfterFirstInGreedyScope() {
+        var suggestions = complete("flagtest multi --silent ");
+
+        assertTrue(suggestions.contains("-anon"), "expected -anon in " + suggestions);
+        assertFalse(suggestions.contains("-silent"), "-silent was used, got " + suggestions);
+        assertFalse(suggestions.contains("--silent"), "--silent was used, got " + suggestions);
+    }
+
+    @Test
+    @DisplayName("Should suggest no switches once all are used in a greedy scope")
+    void testBrigadierSuggestsNoSwitchesWhenAllUsedInGreedyScope() {
+        var suggestions = complete("flagtest multi --silent -anon ");
+
+        assertFalse(suggestions.contains("-silent"), "-silent was used, got " + suggestions);
+        assertFalse(suggestions.contains("-anon"), "-anon was used, got " + suggestions);
+        assertFalse(suggestions.contains("--anon"), "--anon was used, got " + suggestions);
     }
 
     @Test

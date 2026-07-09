@@ -59,6 +59,13 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
      */
     private @Nullable Command<S> owningCommand;
 
+    /**
+     * Set when this pathway is the framework-injected global-default
+     * fallback built during {@link CommandImpl} construction — see
+     * {@link CommandPathway#isSyntheticFallback()}.
+     */
+    private boolean syntheticFallback = false;
+
 
     CommandPathwayImpl(@Nullable MethodElement methodElement, @NotNull CommandExecution<S> execution) {
         this.methodElement = methodElement;
@@ -75,6 +82,15 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
 
     void setOwningCommand(@Nullable Command<S> command) {
         this.owningCommand = command;
+    }
+
+    @Override
+    public boolean isSyntheticFallback() {
+        return syntheticFallback;
+    }
+
+    void setSyntheticFallback(boolean syntheticFallback) {
+        this.syntheticFallback = syntheticFallback;
     }
 
     @Override

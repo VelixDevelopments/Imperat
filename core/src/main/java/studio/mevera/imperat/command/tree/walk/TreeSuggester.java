@@ -627,7 +627,7 @@ public final class TreeSuggester<S extends CommandSource> {
         var checker = imperatConfig.getPermissionChecker();
         boolean hasExecutableTerminal = false;
         for (CommandPathway<S> pathway : node.getTerminalPathways()) {
-            if (pathway.getMethodElement() == null) {
+            if (!pathway.isExecutable()) {
                 continue;
             }
             hasExecutableTerminal = true;

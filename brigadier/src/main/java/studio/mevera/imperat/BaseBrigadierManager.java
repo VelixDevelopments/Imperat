@@ -8,11 +8,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +29,6 @@ import studio.mevera.imperat.context.SuggestionContext;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Brigadier-tree builder backed by a {@link CommandTreeProjection}. The
@@ -66,23 +62,30 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         return clone;
     }
 
-    private static <S extends CommandSource, BS> void injectCommandNodeAliasesIntoBrigadier(
-            Command<S> imperatCommand,
-            LiteralCommandNode<BS> brigCommandNode,
-            ArgumentBuilder<BS, ?> parentBrigNodeBuilder
-    ) {
-        for (var alias : imperatCommand.aliases()) {
-            parentBrigNodeBuilder.then(cloneWithDiffName(brigCommandNode, alias));
-        }
+    /**
+     * Per-{@link #parseCommandIntoNode} memo of built nodes so the emitted
+     * Brigadier graph is a DAG rather than a tree of copies. A child scope is
+     * reachable from its parent anchor AND after every optional argument —
+     * without sharing, each attach point would rebuild the entire child
+     * subtree (plus alias clones), multiplying node count by
+     * (optionals + 1) at every level of the tree packet sent to clients.
+     *
+     * <p>Keys are {@link ProjectedNode} instances (identity — the projection
+     * is built once per registration). Sharing is safe because the duplicate
+     * subtrees were structurally identical: same requirement closures, same
+     * suggestion providers, same flag redirects.</p>
+     */
+    private static final class BuildCache<BS> {
+        final java.util.Map<Object, java.util.List<CommandNode<BS>>> childNodes = new java.util.IdentityHashMap<>();
     }
 
     @Override
     public @NotNull <BS> LiteralCommandNode<BS> parseCommandIntoNode(@NotNull Command<S> command) {
         CommandTreeProjection<S> projection = CommandTreeProjection.of(command);
-        return this.buildRoot(command, projection.root());
+        return this.buildRoot(command, projection.root(), new BuildCache<>());
     }
 
-    private <BS> LiteralCommandNode<BS> buildRoot(Command<S> rootCommand, ProjectedNode<S> root) {
+    private <BS> LiteralCommandNode<BS> buildRoot(Command<S> rootCommand, ProjectedNode<S> root, BuildCache<BS> cache) {
         Command<S> rootCmdLit = root.mainArgument().asCommand();
         LiteralArgumentBuilder<BS> builder = (LiteralArgumentBuilder<BS>)
                                                      literal(rootCmdLit.getName())
@@ -92,15 +95,16 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                                        || dispatcher.config().getPermissionChecker().hasPermission(source, rootCmdLit);
                     });
         executor(builder);
-        appendContinuations(rootCommand, root, builder, 0);
+        appendContinuations(rootCommand, root, builder, 0, cache);
         LiteralCommandNode<BS> rootNode = builder.build();
-        appendFlagsWithRedirects(rootCommand, root, rootNode);
+        appendFlagNode(rootCommand, root, rootNode);
         return rootNode;
     }
 
     private <BS> CommandNode<BS> convertProjectedNode(
             Command<S> rootCommand,
-            ProjectedNode<S> projected
+            ProjectedNode<S> projected,
+            BuildCache<BS> cache
     ) {
         Argument<S> main = projected.mainArgument();
 
@@ -115,7 +119,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         // the user has typed all N tokens.
         int tokenCount = tokenCountOf(main);
         if (tokenCount > 1) {
-            return chainMultiTokenNode(rootCommand, projected, tokenCount);
+            return chainMultiTokenNode(rootCommand, projected, tokenCount, cache);
         }
 
         ArgumentBuilder<BS, ?> childBuilder = createBrigadierBuilder(rootCommand, projected);
@@ -128,11 +132,11 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
 
         boolean isGreedy = main.isGreedy() || main.type().isGreedy(main);
         if (!isGreedy) {
-            appendContinuations(rootCommand, projected, childBuilder, 0);
+            appendContinuations(rootCommand, projected, childBuilder, 0, cache);
         }
         CommandNode<BS> scopeAnchor = childBuilder.build();
         if (!isGreedy) {
-            appendFlagsWithRedirects(rootCommand, projected, scopeAnchor);
+            appendFlagNode(rootCommand, projected, scopeAnchor);
         }
         return scopeAnchor;
     }
@@ -216,7 +220,8 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     private <BS> CommandNode<BS> chainMultiTokenNode(
             Command<S> rootCommand,
             ProjectedNode<S> projected,
-            int tokenCount
+            int tokenCount,
+            BuildCache<BS> cache
     ) {
         Argument<S> main = projected.mainArgument();
         String[] partNames = derivePartNamesFromFormat(main, tokenCount);
@@ -232,7 +237,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         ArgumentBuilder<BS, ?> deepest = appendStringTokenFillers(
                 rootCommand, main, head, tokenCount, visibility, partNames
         );
-        appendContinuations(rootCommand, projected, deepest, 0);
+        appendContinuations(rootCommand, projected, deepest, 0, cache);
         CommandNode<BS> headNode = head.build();
         // Walk the linear filler chain to find the deepest built node, then
         // attach flags there so they redirect back to that scope anchor.
@@ -240,7 +245,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         for (int i = 1; i < tokenCount; i++) {
             deepestNode = deepestNode.getChildren().iterator().next();
         }
-        appendFlagsWithRedirects(rootCommand, projected, deepestNode);
+        appendFlagNode(rootCommand, projected, deepestNode);
         return headNode;
     }
 
@@ -323,7 +328,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         var checker = dispatcher.config().getPermissionChecker();
         boolean hasExecutableTerminal = false;
         for (CommandPathway<S> pathway : node.getTerminalPathways()) {
-            if (pathway.getMethodElement() == null) {
+            if (!pathway.isExecutable()) {
                 continue;
             }
             hasExecutableTerminal = true;
@@ -346,68 +351,33 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     }
 
     /**
-     * Adds optional continuations, child nodes, and the inline-flag catch-all
-     * to {@code parentBuilder}. Flags are NOT registered here — they are added
-     * post-build via {@link #appendFlagsWithRedirects} so they can redirect
-     * back to the already-built scope anchor node, avoiding factorial tree growth.
+     * Adds optional continuations and child nodes to {@code parentBuilder}.
+     * Flags are NOT registered here — they are added post-build via
+     * {@link #appendFlagNode} so the flag-value node can redirect back to
+     * the already-built scope anchor node.
      */
     private <BS> void appendContinuations(
             Command<S> rootCommand,
             ProjectedNode<S> scope,
             ArgumentBuilder<BS, ?> parentBuilder,
-            int optionalIndex
+            int optionalIndex,
+            BuildCache<BS> cache
     ) {
-        appendOptionalContinuation(rootCommand, scope, parentBuilder, optionalIndex);
-        appendChildContinuations(rootCommand, scope, parentBuilder);
-        appendInlineFlagSibling(rootCommand, scope, parentBuilder);
+        appendOptionalContinuation(rootCommand, scope, parentBuilder, optionalIndex, cache);
+        appendChildContinuations(rootCommand, scope, parentBuilder, cache);
     }
 
     /**
-     * Catch-all sibling per scope: a {@code <flag>} required-argument node
-     * whose custom {@link InlineFlagArgumentType} consumes a whole
-     * {@code -name=value} token. Falls through to other siblings for
-     * non-flag input. Suggestions delegate to Imperat's tree suggester
-     * (which formats inline values via the same single-node logic).
+     * Suggestion provider for the {@code <flag>} node: delegates to the
+     * Imperat tree suggester with the full input context and keeps only
+     * flag-shaped entries ({@code -name}, {@code --name}, inline
+     * {@code -name=value}). The core suggester owns used-flag filtering,
+     * per-pathway scoping, and permission checks — this provider adds
+     * nothing on top, so Brigadier and the core suggester can never
+     * disagree about which flags are offered.
      */
-    private <BS> void appendInlineFlagSibling(
-            Command<S> rootCommand,
-            ProjectedNode<S> scope,
-            ArgumentBuilder<BS, ?> parentBuilder
-    ) {
-        if (scope.flags().isEmpty()) {
-            return;
-        }
-        com.mojang.brigadier.arguments.ArgumentType<?> inlineFlagType = inlineFlagArgumentType();
-        if (inlineFlagType == null) {
-            // Backend opted out (e.g. modern Paper before a CustomArgumentType
-            // wrapper is wired up). Inline `=`-form will render red on the
-            // client, but completions still flow through the
-            // sibling-positional suggester wrapper that delegates to the
-            // Imperat tree.
-            return;
-        }
-        RequiredArgumentBuilder<BS, ?> inlineFlagBuilder = RequiredArgumentBuilder.argument("flag", inlineFlagType);
-        inlineFlagBuilder.requires((obj) -> {
-            S source = wrapCommandSource(obj);
-            if (rootCommand.isIgnoringACPerms()) {
-                return true;
-            }
-            // Show this catch-all whenever ANY flag in the scope is visible
-            // — fine-grained filtering happens in the suggestion provider.
-            for (ProjectedFlag<S> flag : scope.flags()) {
-                if (isFlagVisible(rootCommand, flag, source)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-        inlineFlagBuilder.suggests(createInlineFlagSuggestionProvider(rootCommand));
-        executor(inlineFlagBuilder);
-        parentBuilder.then(inlineFlagBuilder.build());
-    }
-
     private @NotNull <BS> com.mojang.brigadier.suggestion.SuggestionProvider<BS>
-    createInlineFlagSuggestionProvider(Command<S> command) {
+    createFlagSuggestionProvider(Command<S> command) {
         return (context, builder) -> {
             SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
             CompletionArg arg = ctx.getArgToComplete();
@@ -424,11 +394,34 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         };
     }
 
+    /**
+     * Suggestion provider for the {@code <flag_value>} node — the position
+     * right after a flag token. Delegates to the Imperat tree suggester
+     * UNFILTERED: after a value flag the core returns that flag's value
+     * completions; after a switch (which consumes no value) it returns the
+     * remaining flags and positional/greedy suggestions for this position.
+     */
+    private @NotNull <BS> com.mojang.brigadier.suggestion.SuggestionProvider<BS>
+    createFlagValueDelegateProvider(Command<S> command) {
+        return (context, builder) -> {
+            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
+            CompletionArg arg = ctx.getArgToComplete();
+            var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
+            for (String suggestion : command.tree().tabComplete(ctx)) {
+                if (suggestion != null && !suggestion.isEmpty()) {
+                    alignedBuilder.suggest(suggestion);
+                }
+            }
+            return alignedBuilder.buildFuture();
+        };
+    }
+
     private <BS> void appendOptionalContinuation(
             Command<S> rootCommand,
             ProjectedNode<S> scope,
             ArgumentBuilder<BS, ?> parentBuilder,
-            int optionalIndex
+            int optionalIndex,
+            BuildCache<BS> cache
     ) {
         List<Argument<S>> optionals = scope.optionalArguments();
         if (optionalIndex >= optionals.size()) {
@@ -467,26 +460,40 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         )
                                                  : optionalBuilder;
 
-        appendContinuations(rootCommand, scope, deepest, optionalIndex + 1);
+        appendContinuations(rootCommand, scope, deepest, optionalIndex + 1, cache);
         parentBuilder.then(optionalBuilder);
     }
 
+    /**
+     * Attaches each child scope's node (plus its alias clones) to
+     * {@code parentBuilder}. Built nodes are memoized in {@code cache} so
+     * every attach point — the scope anchor and each optional-argument
+     * depth — shares the SAME node instances instead of rebuilding the
+     * subtree per attach point.
+     */
     private <BS> void appendChildContinuations(
             Command<S> rootCommand,
             ProjectedNode<S> scope,
-            ArgumentBuilder<BS, ?> parentBuilder
+            ArgumentBuilder<BS, ?> parentBuilder,
+            BuildCache<BS> cache
     ) {
         for (ProjectedNode<S> child : scope.children()) {
-            var childBrigNode = this.<BS>convertProjectedNode(rootCommand, child);
-            parentBuilder.then(childBrigNode);
+            java.util.List<CommandNode<BS>> built = cache.childNodes.get(child);
+            if (built == null) {
+                built = new java.util.ArrayList<>();
+                CommandNode<BS> childBrigNode = this.convertProjectedNode(rootCommand, child, cache);
+                built.add(childBrigNode);
 
-            Argument<S> childArgument = child.mainArgument();
-            if (childArgument.isCommand()) {
-                injectCommandNodeAliasesIntoBrigadier(
-                        childArgument.asCommand(),
-                        (LiteralCommandNode<BS>) childBrigNode,
-                        parentBuilder
-                );
+                Argument<S> childArgument = child.mainArgument();
+                if (childArgument.isCommand()) {
+                    for (String alias : childArgument.asCommand().aliases()) {
+                        built.add(cloneWithDiffName((LiteralCommandNode<BS>) childBrigNode, alias));
+                    }
+                }
+                cache.childNodes.put(child, built);
+            }
+            for (CommandNode<BS> node : built) {
+                parentBuilder.then(node);
             }
         }
     }
@@ -511,18 +518,29 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     }
 
     /**
-     * Adds each scope flag as a literal child of {@code scopeAnchor} (the
-     * already-built scope node). Value flags carry a required-argument value
-     * child that redirects back to {@code scopeAnchor} after the value is
-     * consumed. Switches redirect the literal itself back to {@code scopeAnchor}.
+     * Adds the per-scope flag machinery to {@code scopeAnchor} (the
+     * already-built scope node): a single {@code <flag>} argument node whose
+     * {@link FlagTokenArgumentType} consumes any flag-shaped token (bare or
+     * inline {@code =}-form), with a {@code <flag_value>} child that
+     * redirects back to {@code scopeAnchor}. The same node pair is also
+     * attached at every optional-argument depth of the scope so flags stay
+     * reachable after optionals.
      *
-     * <p>The redirect creates a finite cycle in the Brigadier graph — after
-     * consuming any flag the parser returns to the scope anchor and can
-     * consume another flag or a positional arg. This gives correct multi-flag
-     * tab completion with O(N) nodes instead of the O(N!) tree that would
-     * result from recursively nesting flags inside each other's continuations.</p>
+     * <p>Flags are argument nodes, NOT literals, on purpose. Literal
+     * completion happens client-side from the synced tree — the server is
+     * never asked, so a used flag could not be filtered out of literal
+     * suggestions (and structural workarounds cost exponential node counts).
+     * With argument nodes every flag suggestion is server-driven and
+     * delegates to the core Imperat tree suggester, which already implements
+     * the desired semantics: flags offered before greedy text, used flags
+     * never re-suggested, value completion per flag.</p>
+     *
+     * <p>The value node's redirect creates a finite cycle — after a flag
+     * (and its value) the parser returns to the scope anchor and can consume
+     * another flag or a positional arg, with 2 nodes per scope regardless of
+     * flag count.</p>
      */
-    private <BS> void appendFlagsWithRedirects(
+    private <BS> void appendFlagNode(
             Command<S> command,
             ProjectedNode<S> scope,
             CommandNode<BS> scopeAnchor
@@ -530,108 +548,80 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         if (scope.flags().isEmpty()) {
             return;
         }
-        for (ProjectedFlag<S> projectedFlag : scope.flags()) {
-            String primary = projectedFlag.name();
-            addFlagWithRedirect(command, projectedFlag, "--" + primary, primary, scopeAnchor);
-            addFlagWithRedirect(command, projectedFlag, "-" + primary, primary, scopeAnchor);
-            for (String alias : projectedFlag.aliases()) {
-                if (alias.equals(primary)) {
-                    continue;
-                }
-                addFlagWithRedirect(command, projectedFlag, "-" + alias, alias, scopeAnchor);
-                addFlagWithRedirect(command, projectedFlag, "--" + alias, alias, scopeAnchor);
-            }
+        com.mojang.brigadier.arguments.ArgumentType<?> flagType = flagTokenArgumentType();
+        if (flagType == null) {
+            // Backend opted out — flags won't parse client-side (render red)
+            // but completions still flow through sibling providers that
+            // delegate to the Imperat tree, and execution parses server-side.
+            return;
         }
+
+        java.util.function.Predicate<Object> anyFlagVisible = (obj) -> {
+            S source = wrapCommandSource(obj);
+            if (command.isIgnoringACPerms()) {
+                return true;
+            }
+            for (ProjectedFlag<S> flag : scope.flags()) {
+                if (isFlagVisible(command, flag, source)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        RequiredArgumentBuilder<BS, ?> valueBuilder =
+                RequiredArgumentBuilder.argument("flag_value", flagValueArgumentType());
+        valueBuilder.requires(anyFlagVisible::test);
+        valueBuilder.suggests(createFlagValueDelegateProvider(command));
+        executor(valueBuilder);
+        valueBuilder.redirect(scopeAnchor);
+
+        RequiredArgumentBuilder<BS, ?> flagBuilder = RequiredArgumentBuilder.argument("flag", flagType);
+        flagBuilder.requires(anyFlagVisible::test);
+        flagBuilder.suggests(createFlagSuggestionProvider(command));
+        executor(flagBuilder);
+        flagBuilder.then(valueBuilder.build());
+
+        CommandNode<BS> flagNode = flagBuilder.build();
+        scopeAnchor.addChild(flagNode);
+        attachToOptionalChain(scopeAnchor, scope, flagNode);
     }
 
-    private <BS> void addFlagWithRedirect(
-            Command<S> command,
-            ProjectedFlag<S> projectedFlag,
-            String literalName,
-            String suffixForValueArg,
-            CommandNode<BS> scopeAnchor
+    /**
+     * Attaches {@code node} to each optional-argument attach point of the
+     * built scope subtree — the deepest filler node of every optional in
+     * declaration order (mirroring where {@link #appendContinuations}
+     * attaches continuations during the builder phase). Walks by the same
+     * names {@link #appendOptionalContinuation} generated.
+     */
+    private <BS> void attachToOptionalChain(
+            CommandNode<BS> scopeAnchor,
+            ProjectedNode<S> scope,
+            CommandNode<BS> node
     ) {
-        LiteralArgumentBuilder<BS> flagLiteral = LiteralArgumentBuilder.literal(literalName);
-        flagLiteral.requires((obj) -> isFlagVisible(command, projectedFlag, wrapCommandSource(obj)));
-        executor(flagLiteral);
-
-        if (!projectedFlag.isSwitch()) {
-            com.mojang.brigadier.arguments.ArgumentType<?> valueType =
-                    getFlagValueArgumentType(projectedFlag.flag());
-            RequiredArgumentBuilder<BS, ?> valueBuilder = RequiredArgumentBuilder.argument(suffixForValueArg + "_value", valueType);
-            valueBuilder.requires((obj) -> isFlagVisible(command, projectedFlag, wrapCommandSource(obj)));
-            SuggestionProvider<BS> nativeSugg = createNativeFlagValueSuggester(projectedFlag.flag());
-            valueBuilder.suggests(nativeSugg != null ? nativeSugg : createFlagValueProvider(command, projectedFlag));
-            executor(valueBuilder);
-            // Redirect back to scope after value consumed — parser returns to
-            // scope anchor and can suggest more flags or positional args.
-            valueBuilder.redirect(scopeAnchor);
-            flagLiteral.then(valueBuilder.build());
-        } else {
-            // Switch has no value.
-            // When the scope has a greedy child, give the switch that child as
-            // a direct continuation (no redirect). After consuming the switch,
-            // the greedy arg is the next reachable node — the switch literal
-            // is structurally unreachable, preventing re-suggestion without
-            // relying on listSuggestions overrides (which Paper's Commands API
-            // may bypass).
-            CommandNode<BS> greedyChild = findGreedyChild(scopeAnchor);
-            if (greedyChild != null) {
-                flagLiteral.then(greedyChild);
-            } else {
-                // Non-greedy scope: redirect to scopeAnchor, preserving
-                // multi-switch tab-completion (e.g. `cmd -a -b`).
-                flagLiteral.redirect(scopeAnchor);
+        CommandNode<BS> current = scopeAnchor;
+        for (Argument<S> optional : scope.optionalArguments()) {
+            int tokenCount = tokenCountOf(optional);
+            String[] partNames = tokenCount > 1
+                                         ? derivePartNamesFromFormat(optional, tokenCount)
+                                         : null;
+            String headName = partNames != null ? partNames[0] : optional.getName();
+            CommandNode<BS> next = current.getChild(headName);
+            if (next == null) {
+                return;
             }
+            for (int i = 1; i < tokenCount; i++) {
+                String fillerName = partNames != null
+                                            ? partNames[i]
+                                            : optional.getName() + "_part" + (i + 1);
+                next = next.getChild(fillerName);
+                if (next == null) {
+                    return;
+                }
+            }
+            next.addChild(node);
+            current = next;
         }
-
-        LiteralCommandNode<BS> builtNode = flagLiteral.build();
-        java.util.Set<String> flagForms = collectFlagForms(projectedFlag);
-        LiteralCommandNode<BS> filteredNode = new LiteralCommandNode<>(
-                builtNode.getLiteral(),
-                builtNode.getCommand(),
-                builtNode.getRequirement(),
-                builtNode.getRedirect(),
-                builtNode.getRedirectModifier(),
-                builtNode.isFork()
-        ) {
-            @Override
-            public CompletableFuture<Suggestions> listSuggestions(
-                    CommandContext<BS> context, SuggestionsBuilder builder
-            ) {
-                if (isAnyFlagFormInInput(context.getInput(), flagForms)) {
-                    return Suggestions.empty();
-                }
-                return super.listSuggestions(context, builder);
-            }
-        };
-        for (CommandNode<BS> child : builtNode.getChildren()) {
-            filteredNode.addChild(child);
-        }
-        scopeAnchor.addChild(filteredNode);
-    }
-
-    private @NotNull <BS> com.mojang.brigadier.suggestion.SuggestionProvider<BS> createFlagValueProvider(
-            Command<S> command,
-            ProjectedFlag<S> projectedFlag
-    ) {
-        FlagArgument<S> flag = projectedFlag.flag();
-        return (context, builder) -> {
-            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
-            CompletionArg arg = ctx.getArgToComplete();
-            String prefix = arg.isEmpty() ? "" : arg.value().toLowerCase(Locale.ROOT);
-
-            List<String> values = collectFlagValueSuggestions(ctx, flag);
-            for (String value : values) {
-                if (value == null || value.isEmpty()) {
-                    continue;
-                }
-                if (prefix.isEmpty() || value.toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                    builder.suggest(value);
-                }
-            }
-            return builder.buildFuture();
-        };
     }
 
     protected @NotNull <BS> SuggestionProvider<BS> createSuggestionProvider(
@@ -653,7 +643,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             // a different sibling — without this, suggestions silently get
             // dropped client-side because their replace-range is wrong.
             var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
-            String prefix = arg.isEmpty() ? "" : arg.value().toLowerCase();
+            String prefix = arg.isEmpty() ? "" : arg.value().toLowerCase(Locale.ROOT);
 
             // Inline-flag partial (`-name=` / `-name=partial`) is structurally
             // a single token, so it falls into whichever ArgumentNode parses
@@ -670,7 +660,12 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                     if (suggestion == null || suggestion.isEmpty()) {
                         continue;
                     }
-                    alignedBuilder.suggest(suggestion, tooltip);
+                    // No tooltip on purpose: the inline-flag catch-all
+                    // sibling node emits the same texts without one, and
+                    // Brigadier's merge only dedups suggestions that are
+                    // FULLY equal (text + range + tooltip). A tooltip here
+                    // would surface every inline value twice client-side.
+                    alignedBuilder.suggest(suggestion);
                 }
                 return alignedBuilder.buildFuture();
             }
@@ -685,7 +680,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                                    results
                                            .stream()
                                            .filter((candidate) -> prefix.isEmpty()
-                                                                           || candidate.toLowerCase().startsWith(prefix))
+                                                                           || candidate.toLowerCase(Locale.ROOT).startsWith(prefix))
                                            .forEachOrdered((result) -> alignedBuilder.suggest(result, tooltip));
                                }
                                return alignedBuilder.buildFuture();
@@ -700,92 +695,6 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         var checker = dispatcher.config().getPermissionChecker();
         return checker.hasPermission(source, flag.owningPathway())
                        && checker.hasPermission(source, flag.flag());
-    }
-
-    /**
-     * All CLI forms for a flag (e.g. {@code --scenario}, {@code -scenario},
-     * {@code -sc}) so callers can detect whether ANY form of the flag is
-     * already present in a Brigadier input string.
-     */
-    private static java.util.Set<String> collectFlagForms(ProjectedFlag<?> projectedFlag) {
-        String primary = projectedFlag.name();
-        java.util.Set<String> forms = new java.util.LinkedHashSet<>();
-        forms.add("--" + primary);
-        forms.add("-" + primary);
-        for (String alias : projectedFlag.aliases()) {
-            if (!alias.equals(primary)) {
-                forms.add("-" + alias);
-                forms.add("--" + alias);
-            }
-        }
-        return forms;
-    }
-
-    /**
-     * Returns {@code true} when any token in {@code input} exactly matches
-     * one of the {@code flagForms}. Used to suppress Brigadier literal
-     * suggestions for flags the user has already typed.
-     */
-    private static boolean isAnyFlagFormInInput(String input, java.util.Set<String> flagForms) {
-        String normalized = input;
-        while (normalized.startsWith("/")) {
-            normalized = normalized.substring(1);
-        }
-        // Tokenize by whitespace and check exact match against every flag form
-        int start = 0;
-        for (int i = 0; i <= normalized.length(); i++) {
-            if (i == normalized.length() || Character.isWhitespace(normalized.charAt(i))) {
-                if (i > start) {
-                    String token = normalized.substring(start, i);
-                    if (flagForms.contains(token)) {
-                        return true;
-                    }
-                }
-                start = i + 1;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Finds the first child of {@code parent} that is a greedy-string argument
-     * (e.g. a {@code @Greedy String} positional arg). Returns {@code null} if
-     * no such child exists.
-     */
-    private static <BS> @Nullable CommandNode<BS> findGreedyChild(CommandNode<BS> parent) {
-        for (CommandNode<BS> child : parent.getChildren()) {
-            if (!(child instanceof ArgumentCommandNode<?, ?> argNode)) {
-                continue;
-            }
-            var type = argNode.getType();
-            if (type instanceof StringArgumentType strArg) {
-                try {
-                    if (strArg.getType() == StringArgumentType.StringType.GREEDY_PHRASE) {
-                        return child;
-                    }
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-        }
-        return null;
-    }
-
-    private List<String> collectFlagValueSuggestions(SuggestionContext<S> ctx, FlagArgument<S> flag) {
-        var provider = flag.inputSuggestionResolver();
-        if (provider != null) {
-            List<String> result = provider.provide(ctx, flag);
-            return result == null ? List.of() : result;
-        }
-        var inputType = flag.flagData().inputType();
-        if (inputType == null) {
-            return List.of();
-        }
-        var inputProvider = inputType.getSuggestionProvider();
-        if (inputProvider == null) {
-            return List.of();
-        }
-        List<String> result = inputProvider.provide(ctx, flag);
-        return result == null ? List.of() : result;
     }
 
     private @NotNull SuggestionContext<S> createSuggestionContext(
@@ -806,7 +715,14 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         int argumentsStart = firstSpaceIndex == -1 ? input.length() : firstSpaceIndex + 1;
 
         ArgumentInput args;
-        if (parameter != null && builder != null && (parameter.isGreedy() || parameter.type().isGreedy(parameter))) {
+        // A flag-shaped token at the tail of the input (`-name`, `--name`,
+        // `-name=value` — under the cursor OR just completed with a trailing
+        // space) must NOT be joined into a greedy span: the completion
+        // target is flag-land, and the tree suggester's flag paths (name
+        // filtering, value completion, inline assignment) only fire when
+        // the input is tokenized the way the core autocompleter tokenizes.
+        boolean flagShapedTail = lastTokenIsFlagShaped(input);
+        if (!flagShapedTail && parameter != null && builder != null && (parameter.isGreedy() || parameter.type().isGreedy(parameter))) {
             String originalRawInput = builder.getInput();
             String normalizedOriginal = normalizeInput(originalRawInput);
             int leadingOffset = originalRawInput.length() - normalizedOriginal.length();
@@ -834,6 +750,31 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         return dispatcher.config().getContextFactory().createSuggestionContext(dispatcher, source, command, label, args);
     }
 
+    /**
+     * True when the last whitespace-delimited token of {@code input} (the
+     * token under the cursor — so only when the input does NOT end with a
+     * space) is an inline flag assignment.
+     */
+    private boolean lastTokenIsFlagShaped(String input) {
+        int end = input.length();
+        while (end > 0 && Character.isWhitespace(input.charAt(end - 1))) {
+            end--;
+        }
+        if (end == 0) {
+            return false;
+        }
+        // With a trailing space the cursor targets a NEW token and the check
+        // applies to the just-completed one: a flag right before the cursor
+        // means the next position is a flag value (or, for a switch, more
+        // flags) — not greedy text. Without a trailing space this inspects
+        // the partial token under the cursor itself.
+        int start = end;
+        while (start > 0 && !Character.isWhitespace(input.charAt(start - 1))) {
+            start--;
+        }
+        return studio.mevera.imperat.util.Patterns.isInputFlag(input.substring(start, end));
+    }
+
     private int resolveSuggestionStart(String rawInput, CompletionArg arg) {
         if (arg.isEmpty()) {
             return rawInput.length();
@@ -859,59 +800,31 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
 
 
     /**
-     * Argument type for the inline-flag catch-all sibling node. Default is
-     * the platform-agnostic {@link InlineFlagArgumentType}. Backends whose
-     * underlying registrar rejects raw Brigadier types (e.g. modern Paper's
-     * {@code Commands} API requires {@code CustomArgumentType} wrappers)
-     * MUST override to return a wrapped instance — or {@code null} to skip
-     * registering the inline-flag sibling and accept red coloring on the
-     * client side for inline {@code =}-form input.
+     * Argument type for the per-scope {@code <flag>} node — consumes any
+     * flag-shaped token (bare {@code -name}/{@code --name} or inline
+     * {@code -name=value}). Default is the platform-agnostic
+     * {@link FlagTokenArgumentType}. Backends whose registrar rejects raw
+     * Brigadier types (e.g. modern Paper's {@code Commands} API requires
+     * {@code CustomArgumentType} wrappers) MUST override to return a wrapped
+     * instance — or {@code null} to skip flag nodes entirely (flags then
+     * render red client-side but execution and server-side completions still
+     * work).
      */
-    protected @Nullable com.mojang.brigadier.arguments.ArgumentType<?> inlineFlagArgumentType() {
-        return new InlineFlagArgumentType();
+    protected @Nullable com.mojang.brigadier.arguments.ArgumentType<?> flagTokenArgumentType() {
+        return new FlagTokenArgumentType();
     }
 
     /**
-     * Resolves the Brigadier {@link com.mojang.brigadier.arguments.ArgumentType}
-     * to register for a flag's VALUE node — driven by the flag's
-     * {@link FlagArgument#flagData() input type}. Default returns
-     * a {@link PermissiveStringArgumentType} (accepts any single token,
-     * including characters Brigadier's stock {@code string()} rejects).
-     *
-     * <p>Backends that map Imperat-side {@code ArgumentType}s onto native
-     * Paper / Brigadier types (e.g. {@code ModernPaperBrigadierManager}'s
-     * {@code PaperBukkitArgumentType} + {@code PaperNativeAware} bridges)
-     * SHOULD override to delegate the flag's value-type lookup through the
-     * same channel as positional arguments — keeps client coloring +
-     * native autocomplete consistent between {@code <arg>} positional
-     * nodes and {@code --flag <arg>} flag-value nodes.</p>
+     * Argument type for the shared {@code <flag_value>} node that follows
+     * the {@code <flag>} node. Generic across all of a scope's flags (the
+     * node is built once per scope), so the default is a
+     * {@link PermissiveStringArgumentType} — any single token. Value
+     * completions come from the Imperat tree suggester, which resolves the
+     * actual flag from the input. Backends needing wrapped types (modern
+     * Paper) should override accordingly.
      */
-    protected com.mojang.brigadier.arguments.@NotNull ArgumentType<?> getFlagValueArgumentType(
-            @NotNull FlagArgument<S> flag
-    ) {
+    protected com.mojang.brigadier.arguments.@NotNull ArgumentType<?> flagValueArgumentType() {
         return new PermissiveStringArgumentType();
-    }
-
-    /**
-     * Optional native suggestions delegate for a flag's value node. Default
-     * returns {@code null} — the framework then uses the Imperat-side
-     * {@code createFlagValueProvider} (built from the flag's
-     * {@link FlagArgument#inputSuggestionResolver() inputSuggestionResolver}
-     * + its input type's suggestion provider).
-     *
-     * <p>Backends that map flag value-types onto Brigadier-native
-     * {@link com.mojang.brigadier.arguments.ArgumentType ArgumentTypes}
-     * (e.g. {@code ModernPaperBrigadierManager} routing {@code TargetSelector}
-     * to {@code ArgumentTypes.entities()}) SHOULD override and return a
-     * provider that delegates to {@code nativeType.listSuggestions} so
-     * the client gets selector filter keys / NBT keys / etc. directly
-     * from Mojang's native parser instead of Imperat's flat string list.
-     * Returning {@code null} means "fall back to the Imperat path".</p>
-     */
-    protected <BS> @Nullable SuggestionProvider<BS> createNativeFlagValueSuggester(
-            @NotNull FlagArgument<S> flag
-    ) {
-        return null;
     }
 
     /**
@@ -939,116 +852,150 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         if (builder == null) {
             return null;
         }
-        Command<S> activeCommand = findActiveCommand(command, rawInput);
-        Argument<S> greedyArg = findGreedyArgument(activeCommand);
+        String input = normalizeInput(rawInput);
+        ActiveScope<S> scope = resolveActiveScope(command, input);
+        Command<S> activeCommand = scope.command();
+        int activeArgsStart = scope.argsStart();
+
+        // Locate the greedy argument and count the POSITIONAL arguments that
+        // precede it — command literals and flags are excluded because the
+        // typed-token count below also excludes them. (The previous raw-index
+        // count included the leading subcommand literal, so the comparison
+        // could never match for subcommand-scoped greedy args.)
+        Argument<S> greedyArg = null;
+        int precedingExpected = 0;
+        for (CommandPathway<S> pathway : activeCommand.getDedicatedPathways()) {
+            int positionals = 0;
+            for (Argument<S> argument : pathway.getArguments()) {
+                if (argument.isCommand() || argument.isFlag()) {
+                    continue;
+                }
+                if (argument.isGreedy() || argument.type().isGreedy(argument)) {
+                    greedyArg = argument;
+                    precedingExpected = positionals;
+                    break;
+                }
+                positionals++;
+            }
+            if (greedyArg != null) {
+                break;
+            }
+        }
         if (greedyArg == null) {
             return null;
         }
 
-        String input = normalizeInput(rawInput);
         String normalizedOriginal = normalizeInput(builder.getInput());
         int leadingOffset = builder.getInput().length() - normalizedOriginal.length();
         int nodeStartInInput = builder.getStart() - leadingOffset;
 
-        int precedingExpected = 0;
-        for (CommandPathway<S> pathway : activeCommand.getDedicatedPathways()) {
-            int idx = 0;
-            for (Argument<S> argument : pathway.getArguments()) {
-                if (argument.isGreedy() || argument.type().isGreedy(argument)) {
-                    precedingExpected = idx;
-                    break;
-                }
-                idx++;
-            }
+        if (nodeStartInInput < activeArgsStart) {
+            return null;
         }
 
-        int activeCmdStart = input.indexOf(activeCommand.getName());
-        if (activeCmdStart == -1) {
-            for (String alias : activeCommand.aliases()) {
-                activeCmdStart = input.indexOf(alias);
-                if (activeCmdStart != -1) {
-                    break;
-                }
+        boolean precedingIsValueFlag = false;
+        int lastPos = nodeStartInInput - 1;
+        while (lastPos >= activeArgsStart && Character.isWhitespace(input.charAt(lastPos))) {
+            lastPos--;
+        }
+        if (lastPos >= activeArgsStart) {
+            int tokenStart = lastPos;
+            while (tokenStart > activeArgsStart && !Character.isWhitespace(input.charAt(tokenStart - 1))) {
+                tokenStart--;
+            }
+            String precedingToken = input.substring(tokenStart, lastPos + 1);
+            if (precedingToken.startsWith("-") && isValueFlag(activeCommand, precedingToken)) {
+                precedingIsValueFlag = true;
             }
         }
-        int activeArgsStart = activeCmdStart == -1 ? 0 : activeCmdStart + activeCommand.getName().length();
-        while (activeArgsStart < input.length() && Character.isWhitespace(input.charAt(activeArgsStart))) {
-            activeArgsStart++;
+        if (precedingIsValueFlag) {
+            return null;
         }
 
-        if (nodeStartInInput >= activeArgsStart) {
-            boolean precedingIsValueFlag = false;
-            int lastPos = nodeStartInInput - 1;
-            while (lastPos >= activeArgsStart && Character.isWhitespace(input.charAt(lastPos))) {
-                lastPos--;
-            }
-            if (lastPos >= activeArgsStart) {
-                int tokenStart = lastPos;
-                while (tokenStart > activeArgsStart && !Character.isWhitespace(input.charAt(tokenStart - 1))) {
-                    tokenStart--;
+        String precedingSection = input.substring(activeArgsStart, Math.min(nodeStartInInput, input.length()));
+        ArgumentInput precedingArgs = ArgumentInput.parse(precedingSection);
+        int actualPositionalCount = 0;
+        for (int i = 0; i < precedingArgs.size(); i++) {
+            String arg = precedingArgs.get(i);
+            if (arg != null && arg.startsWith("-")) {
+                if (isValueFlag(activeCommand, arg)) {
+                    i++; // Skip the flag's value
                 }
-                String precedingToken = input.substring(tokenStart, lastPos + 1);
-                if (precedingToken.startsWith("-") && isValueFlag(activeCommand, precedingToken)) {
-                    precedingIsValueFlag = true;
-                }
-            }
-
-            if (precedingIsValueFlag) {
-                return null;
-            }
-
-            String precedingSection = input.substring(activeArgsStart, nodeStartInInput);
-            ArgumentInput precedingArgs = ArgumentInput.parse(precedingSection);
-            int actualPositionalCount = 0;
-            for (int i = 0; i < precedingArgs.size(); i++) {
-                String arg = precedingArgs.get(i);
-                if (arg != null && arg.startsWith("-")) {
-                    if (isValueFlag(activeCommand, arg)) {
-                        i++; // Skip the flag's value
-                    }
-                } else {
-                    actualPositionalCount++;
-                }
-            }
-            if (actualPositionalCount >= precedingExpected) {
-                return greedyArg;
+            } else {
+                actualPositionalCount++;
             }
         }
-
-        return null;
+        return actualPositionalCount >= precedingExpected ? greedyArg : null;
     }
 
-    private Command<S> findActiveCommand(Command<S> rootCommand, String rawInput) {
-        String input = normalizeInput(rawInput);
-        if (input.isEmpty()) {
-            return rootCommand;
+    /**
+     * Walks whitespace tokens of {@code input} (already {@link #normalizeInput
+     * normalized}) against the command tree's literal children — aliases
+     * included via {@link Command#hasName} — returning the deepest command
+     * reached plus the char offset where its arguments begin.
+     *
+     * <p>Token-position based, replacing the previous
+     * {@code String#indexOf(name)} arithmetic which broke in two ways: a
+     * subcommand reached via an ALIAS had the primary name's length added at
+     * the alias's index (offset landing mid-token), and a name occurring as a
+     * substring of an earlier token anchored the offset to the wrong place.
+     * Walking tree literals (instead of a {@code getSubCommand} name lookup)
+     * also keeps the descent position-aware: a positional token stops the
+     * walk rather than matching a same-named subcommand attached elsewhere
+     * in the command.</p>
+     */
+    private ActiveScope<S> resolveActiveScope(Command<S> rootCommand, String input) {
+        int length = input.length();
+        int pos = 0;
+        while (pos < length && Character.isWhitespace(input.charAt(pos))) {
+            pos++;
         }
-        String[] parts = input.split("\\s+");
-        Command<S> current = rootCommand;
-        int startIndex = 0;
-        if (parts.length > 0 && rootCommand.hasName(parts[0])) {
-            startIndex = 1;
+        int labelStart = pos;
+        while (pos < length && !Character.isWhitespace(input.charAt(pos))) {
+            pos++;
         }
-        for (int i = startIndex; i < parts.length; i++) {
-            Command<S> sub = current.getSubCommand(parts[i], false);
-            if (sub != null) {
-                current = sub;
-            } else {
+        if (!rootCommand.hasName(input.substring(labelStart, pos))) {
+            // Input doesn't lead with the command label — treat every token
+            // as an argument of the root scope.
+            return new ActiveScope<>(rootCommand, labelStart);
+        }
+
+        Node<S> node = rootCommand.tree().rootNode();
+        Command<S> active = rootCommand;
+        while (pos < length && Character.isWhitespace(input.charAt(pos))) {
+            pos++;
+        }
+        int argsStart = pos;
+
+        while (pos < length) {
+            int tokenStart = pos;
+            while (pos < length && !Character.isWhitespace(input.charAt(pos))) {
+                pos++;
+            }
+            String token = input.substring(tokenStart, pos);
+
+            Node<S> matched = null;
+            for (Node<S> child : node.getChildren()) {
+                Argument<S> main = child.getMainArgument();
+                if (main.isCommand() && main.asCommand().hasName(token)) {
+                    matched = child;
+                    break;
+                }
+            }
+            if (matched == null) {
                 break;
             }
+            node = matched;
+            active = matched.getMainArgument().asCommand();
+            while (pos < length && Character.isWhitespace(input.charAt(pos))) {
+                pos++;
+            }
+            argsStart = pos;
         }
-        return current;
+        return new ActiveScope<>(active, argsStart);
     }
 
-    private @Nullable Argument<S> findGreedyArgument(Command<S> activeCommand) {
-        for (CommandPathway<S> pathway : activeCommand.getDedicatedPathways()) {
-            for (Argument<S> argument : pathway.getArguments()) {
-                if (argument.isGreedy() || argument.type().isGreedy(argument)) {
-                    return argument;
-                }
-            }
-        }
-        return null;
+    private record ActiveScope<S extends CommandSource>(Command<S> command, int argsStart) {
     }
 
     private boolean isValueFlag(Command<S> activeCommand, String token) {
@@ -1057,7 +1004,11 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             name = name.substring(1);
         }
         final String finalName = name;
-        for (CommandPathway<S> pathway : activeCommand.getDedicatedPathways()) {
+        // Default pathway included: a custom global-default pathway may carry
+        // flags of its own (mirrors the core suggester's effectivePathways).
+        List<CommandPathway<S>> pathways = new java.util.ArrayList<>(activeCommand.getDedicatedPathways());
+        pathways.add(activeCommand.getDefaultPathway());
+        for (CommandPathway<S> pathway : pathways) {
             for (FlagArgument<S> flag : pathway.getFlagExtractor().getRegisteredFlags()) {
                 if (flag.getName().equalsIgnoreCase(finalName) || flag.flagData().aliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(finalName))) {
                     return !flag.isSwitch();

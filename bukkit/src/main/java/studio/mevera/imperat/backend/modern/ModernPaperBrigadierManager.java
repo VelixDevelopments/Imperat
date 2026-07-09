@@ -15,6 +15,7 @@ import org.jspecify.annotations.NonNull;
 import studio.mevera.imperat.BaseBrigadierManager;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.BukkitImperat;
+import studio.mevera.imperat.FlagTokenArgumentType;
 import studio.mevera.imperat.PermissiveStringArgumentType;
 import studio.mevera.imperat.backend.modern.argument.PaperNativeArgumentType;
 import studio.mevera.imperat.command.Command;
@@ -75,19 +76,24 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
         return type;
     }
 
+    /**
+     * Wraps the platform-agnostic {@link FlagTokenArgumentType} in Paper's
+     * {@link CustomArgumentType} (native {@code string()}) so the modern
+     * registrar accepts it. Bare flag forms ({@code -sc}, {@code --scenario})
+     * fit {@code string()}'s unquoted charset and stay green client-side;
+     * inline {@code -name=value} still renders red on modern Paper because
+     * the native charset excludes {@code =} (unchanged from before — the
+     * old inline catch-all was skipped here entirely), while completions
+     * and execution remain server-driven and correct.
+     */
     @Override
-    protected @NotNull ArgumentType<?> getFlagValueArgumentType(
-            @NotNull FlagArgument<S> flag
-    ) {
-        var inputType = flag.flagData().inputType();
-        if (inputType == null) {
-            return wrapForPaper(super.getFlagValueArgumentType(flag));
-        }
-        ArgumentType<?> nativeType = paperNativeOf(inputType);
-        if (nativeType != null) {
-            return nativeType;
-        }
-        return wrapForPaper(super.getFlagValueArgumentType(flag));
+    protected @NotNull ArgumentType<?> flagTokenArgumentType() {
+        return wrapStringLike(new FlagTokenArgumentType(), StringArgumentType.string());
+    }
+
+    @Override
+    protected @NotNull ArgumentType<?> flagValueArgumentType() {
+        return wrapStringLike(new PermissiveStringArgumentType(), StringArgumentType.string());
     }
 
     /**
@@ -112,56 +118,6 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
     }
 
     /**
-     * Flag-value variant of {@link #createSuggestionProvider} — same
-     * native-delegation rule, applied to the flag's input type.
-     */
-    @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    protected <BS> @Nullable SuggestionProvider<BS> createNativeFlagValueSuggester(
-            @NotNull FlagArgument<S> flag
-    ) {
-        var inputType = flag.flagData().inputType();
-        if (inputType == null) {
-            return null;
-        }
-        ArgumentType<?> nativeType = paperNativeOf(inputType);
-        if (nativeType == null) {
-            return null;
-        }
-        return ((ArgumentType) nativeType)::listSuggestions;
-    }
-
-    /**
-     * Modern Paper opts out of the inline-flag catch-all sibling.
-     *
-     * <p>Two failed paths walked first:
-     * <ul>
-     *   <li>Raw {@link studio.mevera.imperat.InlineFlagArgumentType}: rejected by Paper's
-     *       {@code Commands} registrar with
-     *       "Custom unknown argument type was passed, should be wrapped
-     *       inside a CustomArgumentType".</li>
-     *   <li>Wrapped via {@code CustomArgumentType} with
-     *       {@code greedyString} as native: registers, but the greedy
-     *       native sent to the client confuses Brigadier's client-side
-     *       tree-walk for completions — sibling nodes never collect
-     *       suggestions because the client thinks {@code <flag>}
-     *       consumes the rest of input.</li>
-     * </ul></p>
-     *
-     * <p>No vanilla native type accepts {@code =} in single-token form
-     * AND leaves siblings reachable for client-side completion. Skip the
-     * node here. Inline {@code -flag=value} renders red on modern Paper,
-     * but completions still flow via the
-     * {@link BaseBrigadierManager}-level positional-suggester wrapper
-     * (delegates to the Imperat tree), and execution succeeds via the
-     * {@code UnknownCommandEvent} fallback in {@code BukkitImperat}.</p>
-     */
-    @Override
-    protected @Nullable ArgumentType<?> inlineFlagArgumentType() {
-        return null;
-    }
-
-    /**
      * Builds the Brigadier node tree for {@code command} and registers it
      * with Paper's {@link Commands} registrar (captured during the
      * {@code COMMANDS} lifecycle event).
@@ -175,7 +131,7 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
     }
 
     /**
-     * Wraps a {@link PermissiveStringArgumentType} in Paper's
+     * Wraps a custom string-shaped {@link ArgumentType} in Paper's
      * {@link CustomArgumentType} so the {@code ApiMirrorRootNode}
      * accepts it. Paper's modern Brigadier registrar rejects raw
      * custom {@link ArgumentType} implementations — they must be
@@ -184,18 +140,22 @@ public final class ModernPaperBrigadierManager<S extends BukkitCommandSource> ex
      */
     private static ArgumentType<?> wrapForPaper(ArgumentType<?> type) {
         if (type instanceof PermissiveStringArgumentType pst) {
-            return new CustomArgumentType<String, String>() {
-                @Override
-                public @NonNull String parse(@NonNull StringReader reader) throws CommandSyntaxException {
-                    return pst.parse(reader);
-                }
-                @Override
-                public @NonNull ArgumentType<String> getNativeType() {
-                    return StringArgumentType.string();
-                }
-            };
+            return wrapStringLike(pst, StringArgumentType.string());
         }
         return type;
+    }
+
+    private static ArgumentType<String> wrapStringLike(ArgumentType<String> delegate, ArgumentType<String> nativeType) {
+        return new CustomArgumentType<String, String>() {
+            @Override
+            public @NonNull String parse(@NonNull StringReader reader) throws CommandSyntaxException {
+                return delegate.parse(reader);
+            }
+            @Override
+            public @NonNull ArgumentType<String> getNativeType() {
+                return nativeType;
+            }
+        };
     }
 
     /**

@@ -82,7 +82,11 @@ final class CommandImpl<S extends CommandSource> implements Command<S> {
         this.parent = parent;
         this.position = position;
         this.name = name.toLowerCase();
-        this.setDefaultPathwayWithValidation(imperat.config().getGlobalDefaultPathway().build(this));
+        CommandPathway<S> globalFallback = imperat.config().getGlobalDefaultPathway().build(this);
+        if (globalFallback instanceof CommandPathwayImpl<S> fallbackImpl) {
+            fallbackImpl.setSyntheticFallback(true);
+        }
+        this.setDefaultPathwayWithValidation(globalFallback);
         this.autoCompleter = imperat.config().getAutoCompleterFactory().create(this);
         this.suggestionProvider = SuggestionProvider.forCommand(this);
         this.annotatedElement = annotatedElement;

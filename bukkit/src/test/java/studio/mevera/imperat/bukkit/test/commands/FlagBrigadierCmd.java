@@ -48,4 +48,13 @@ public final class FlagBrigadierCmd {
             @Switch("shallow") boolean shallow
     ) {
     }
+
+    @SubCommand("multi")
+    public void multi(
+            BukkitCommandSource source,
+            @Switch("silent") boolean silent,
+            @Switch("anon") boolean anon,
+            @Named("message") @Greedy String message
+    ) {
+    }
 }
