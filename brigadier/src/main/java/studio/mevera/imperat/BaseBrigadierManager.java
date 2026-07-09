@@ -22,6 +22,7 @@ import studio.mevera.imperat.command.CommandPathway;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.FlagArgument;
 import studio.mevera.imperat.command.suggestions.CompletionArg;
+import studio.mevera.imperat.command.tree.Node;
 import studio.mevera.imperat.command.tree.projection.CommandTreeProjection;
 import studio.mevera.imperat.command.tree.projection.ProjectedFlag;
 import studio.mevera.imperat.command.tree.projection.ProjectedNode;
@@ -304,8 +305,44 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         }
 
         var checker = dispatcher.config().getPermissionChecker();
-        return checker.hasPermission(source, projected.originalPathway())
-                       && checker.hasPermission(source, argument);
+        if (!argument.isCommand()) {
+            return checker.hasPermission(source, projected.originalPathway())
+                           && checker.hasPermission(source, argument);
+        }
+
+        // Command literal: a grafted subcommand root keeps the subcommand's
+        // synthetic default-pathway as its originalPathway, so a method-level
+        // @Permission lives only on the TERMINAL pathway. Mirror the core
+        // TreeSuggester's visibility walk: the literal is visible only if at
+        // least one executable pathway beneath it is permitted.
+        return checker.hasPermission(source, argument)
+                       && hasVisibleExecutablePathway(projected.sourceNode(), source);
+    }
+
+    private boolean hasVisibleExecutablePathway(Node<S> node, S source) {
+        var checker = dispatcher.config().getPermissionChecker();
+        boolean hasExecutableTerminal = false;
+        for (CommandPathway<S> pathway : node.getTerminalPathways()) {
+            if (pathway.getMethodElement() == null) {
+                continue;
+            }
+            hasExecutableTerminal = true;
+            if (checker.hasPermission(source, pathway)) {
+                return true;
+            }
+        }
+
+        if (hasExecutableTerminal) {
+            return false;
+        }
+
+        for (Node<S> child : node.getChildren()) {
+            if (hasVisibleExecutablePathway(child, source)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
