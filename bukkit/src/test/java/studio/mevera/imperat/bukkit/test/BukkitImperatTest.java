@@ -19,13 +19,12 @@ import studio.mevera.imperat.util.ImperatDebugger;
 class BukkitImperatTest {
 
     private ServerMock server;
-    private TestImperatPlugin plugin;
-    private BukkitImperat imperat;
+    private BukkitImperat<BukkitCommandSource> imperat;
 
     @BeforeEach
     void setUp() {
         server = MockBukkit.mock();
-        plugin = MockBukkit.load(TestImperatPlugin.class);
+        TestImperatPlugin plugin = MockBukkit.load(TestImperatPlugin.class);
         imperat = plugin.getImperat();
     }
 

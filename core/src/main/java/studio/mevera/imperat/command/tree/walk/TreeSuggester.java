@@ -546,6 +546,12 @@ public final class TreeSuggester<S extends CommandSource> {
             Node<S> currentNode,
             List<String> target
     ) {
+        Argument<S> currentMain = currentNode.getMainArgument();
+        if (isGreedyArgument(currentMain)) {
+            addArgumentProviderSuggestions(context, currentMain, currentNode.getOriginalPathway(), target, true);
+            return;
+        }
+
         Map<String, ParseResult<S>> parseResults = currentParsed.getParseResults();
         Set<String> consumedNames = parseResults.keySet();
 

@@ -164,9 +164,7 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
                               .stream()
                               .filter((e) -> e instanceof MethodElement)
                               .map((e) -> (MethodElement) e)
-                              .filter((m) -> {
-                                  return methodSelector.canBeSelected(imperat, imperat.getAnnotationParser(), m, false);
-                              })
+                              .filter((m) -> methodSelector.canBeSelected(imperat, imperat.getAnnotationParser(), m, false))
                               .sorted((m1, m2) -> {
                                   // Order: @Processor first, then @Execute, then @SubCommand, then the rest
                                   int rank1 = methodSortRank(m1);

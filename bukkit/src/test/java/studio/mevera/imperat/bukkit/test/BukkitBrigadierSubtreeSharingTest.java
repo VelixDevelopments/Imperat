@@ -10,6 +10,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,15 +38,13 @@ import java.util.Objects;
 @DisplayName("Bukkit Brigadier Subtree Sharing Tests")
 class BukkitBrigadierSubtreeSharingTest {
 
-    private ServerMock server;
-    private TestImperatPlugin plugin;
-    private BukkitImperat imperat;
+    private BukkitImperat<BukkitCommandSource> imperat;
     private PlayerMock player;
 
     @BeforeEach
     void setUp() {
-        server = MockBukkit.mock();
-        plugin = MockBukkit.load(TestImperatPlugin.class);
+        ServerMock server = MockBukkit.mock();
+        TestImperatPlugin plugin = MockBukkit.load(TestImperatPlugin.class);
         imperat = plugin.getImperat();
         imperat.registerCommand(new OptionalDuplicationCmd());
         player = server.addPlayer("TestPlayer");
@@ -119,9 +118,9 @@ class BukkitBrigadierSubtreeSharingTest {
 
     private static final class TestBrigadierManager extends BaseBrigadierManager<BukkitCommandSource> {
 
-        private final BukkitImperat imperat;
+        private final BukkitImperat<BukkitCommandSource> imperat;
 
-        private TestBrigadierManager(BukkitImperat imperat) {
+        private TestBrigadierManager(BukkitImperat<BukkitCommandSource> imperat) {
             super(imperat);
             this.imperat = imperat;
         }
@@ -132,7 +131,7 @@ class BukkitBrigadierSubtreeSharingTest {
         }
 
         @Override
-        public ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
+        public @NonNull ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
             return parameter.isGreedy() ? StringArgumentType.greedyString() : StringArgumentType.word();
         }
     }

@@ -1,6 +1,7 @@
 package studio.mevera.imperat.bukkit.test;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.BukkitImperat;
 import studio.mevera.imperat.bukkit.test.commands.TellCmd;
 
@@ -9,7 +10,7 @@ import studio.mevera.imperat.bukkit.test.commands.TellCmd;
  */
 public class TestImperatPlugin extends JavaPlugin {
 
-    private BukkitImperat imperat;
+    private BukkitImperat<BukkitCommandSource> imperat;
 
     @Override
     public void onEnable() {
@@ -28,7 +29,7 @@ public class TestImperatPlugin extends JavaPlugin {
         }
     }
 
-    public BukkitImperat getImperat() {
+    public BukkitImperat<BukkitCommandSource> getImperat() {
         return imperat;
     }
 }

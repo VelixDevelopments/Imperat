@@ -1,6 +1,5 @@
 package studio.mevera.imperat.bukkit.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -18,15 +17,21 @@ import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import studio.mevera.imperat.BaseBrigadierManager;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.BukkitImperat;
-import studio.mevera.imperat.bukkit.test.commands.TestCmd;
+import studio.mevera.imperat.bukkit.test.commands.GreedyWithSwitchBrigadierCmd;
 import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.arguments.Argument;
 
 import java.util.List;
 import java.util.Objects;
 
-@DisplayName("Bukkit Brigadier Alias Suggestion Tests")
-class BukkitBrigadierAliasSuggestionTest {
+/**
+ * A greedy positional followed by a {@code @Switch} must still surface both
+ * the greedy argument's own suggestions AND the switch, at every relevant
+ * position — the flag is folded into the greedy node's suggester so no
+ * cyclic {@code <flag>} node is emitted beside the greedy string.
+ */
+@DisplayName("Bukkit Brigadier Greedy + Switch Suggestion Tests")
+class BukkitBrigadierGreedyWithSwitchTest {
 
     private BukkitImperat<BukkitCommandSource> imperat;
     private PlayerMock player;
@@ -36,7 +41,7 @@ class BukkitBrigadierAliasSuggestionTest {
         ServerMock server = MockBukkit.mock();
         TestImperatPlugin plugin = MockBukkit.load(TestImperatPlugin.class);
         imperat = plugin.getImperat();
-        imperat.registerCommand(new TestCmd());
+        imperat.registerCommand(new GreedyWithSwitchBrigadierCmd());
         player = server.addPlayer("TestPlayer");
     }
 
@@ -46,26 +51,32 @@ class BukkitBrigadierAliasSuggestionTest {
     }
 
     @Test
-    @DisplayName("Should expose every first-level subcommand alias through Brigadier suggestions")
-    void testBrigadierShowsAllFirstLevelAliases() {
-        var suggestions = complete("test ");
-
-        assertEquals(3, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("sub1", "s1", "subone")));
+    @DisplayName("Suggests greedy targets AND the switch at the greedy position")
+    void suggestsTargetsAndSwitch() {
+        var suggestions = complete("greedysw migrate ");
+        assertTrue(suggestions.containsAll(List.of("alpha", "beta", "gamma", "-shallow")),
+                "expected targets and the switch, got " + suggestions);
     }
 
     @Test
-    @DisplayName("Should expose nested subcommand aliases when traversing a parent alias through Brigadier")
-    void testBrigadierShowsNestedAliasesFromParentAlias() {
-        var suggestions = complete("test s1 ");
+    @DisplayName("Filters greedy targets by the typed prefix")
+    void filtersByPrefix() {
+        var suggestions = complete("greedysw migrate al");
+        assertTrue(suggestions.contains("alpha") && !suggestions.contains("beta"),
+                "expected only 'alpha', got " + suggestions);
+    }
 
-        assertEquals(3, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("sub2", "s2", "subtwo")));
+    @Test
+    @DisplayName("Continues suggesting greedy targets after the switch is consumed")
+    void suggestsTargetsAfterSwitch() {
+        var suggestions = complete("greedysw migrate -shallow ");
+        assertTrue(suggestions.containsAll(List.of("alpha", "beta", "gamma")),
+                "expected targets after the switch, got " + suggestions);
     }
 
     private List<String> complete(String input) {
         TestBrigadierManager manager = new TestBrigadierManager(imperat);
-        Command<BukkitCommandSource> command = Objects.requireNonNull(imperat.getCommand("test"));
+        Command<BukkitCommandSource> command = Objects.requireNonNull(imperat.getCommand("greedysw"));
         var dispatcher = new CommandDispatcher<PlayerMock>();
         dispatcher.getRoot().addChild(manager.parseCommandIntoNode(command));
         return dispatcher.getCompletionSuggestions(dispatcher.parse(input, player))
@@ -77,7 +88,6 @@ class BukkitBrigadierAliasSuggestionTest {
     }
 
     private static final class TestBrigadierManager extends BaseBrigadierManager<BukkitCommandSource> {
-
         private final BukkitImperat<BukkitCommandSource> imperat;
 
         private TestBrigadierManager(BukkitImperat<BukkitCommandSource> imperat) {

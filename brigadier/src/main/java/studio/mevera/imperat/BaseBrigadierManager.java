@@ -122,15 +122,18 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             return chainMultiTokenNode(rootCommand, projected, tokenCount, cache);
         }
 
+        boolean isGreedy = main.isGreedy() || main.type().isGreedy(main);
+
         ArgumentBuilder<BS, ?> childBuilder = createBrigadierBuilder(rootCommand, projected);
         executor(childBuilder);
         if (!main.isCommand()) {
             ((RequiredArgumentBuilder<BS, ?>) childBuilder).suggests(
-                    createSuggestionProvider(rootCommand, main)
+                    isGreedy
+                            ? createGreedyDelegateProvider(rootCommand)
+                            : createSuggestionProvider(rootCommand, main)
             );
         }
 
-        boolean isGreedy = main.isGreedy() || main.type().isGreedy(main);
         if (!isGreedy) {
             appendContinuations(rootCommand, projected, childBuilder, 0, cache);
         }
@@ -416,6 +419,45 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         };
     }
 
+    /**
+     * Suggestion provider for a greedy positional node. Delegates UNFILTERED
+     * to the Imperat tree suggester, which at a greedy position returns both
+     * the greedy argument's own completions AND the scope's still-available
+     * flag names (the flag names the skipped cyclic {@code <flag>} node would
+     * otherwise have offered). This keeps {@code -flag} suggested before / at
+     * greedy text while avoiding the greedy-sibling cycle Paper rejects.
+     */
+    private @NotNull <BS> com.mojang.brigadier.suggestion.SuggestionProvider<BS>
+    createGreedyDelegateProvider(Command<S> command) {
+        return (context, builder) -> {
+            SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
+            CompletionArg arg = ctx.getArgToComplete();
+            var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
+            for (String suggestion : command.tree().tabComplete(ctx)) {
+                if (suggestion != null && !suggestion.isEmpty()) {
+                    alignedBuilder.suggest(suggestion);
+                }
+            }
+            return alignedBuilder.buildFuture();
+        };
+    }
+
+    /**
+     * True when {@code scope} has a greedy positional child. Such a scope
+     * folds its flags into the greedy node's suggester instead of emitting
+     * the cyclic {@code <flag>} node (which modern Paper cannot serialize
+     * next to a greedy-string node).
+     */
+    private boolean scopeHasGreedyChild(ProjectedNode<S> scope) {
+        for (ProjectedNode<S> child : scope.children()) {
+            Argument<S> main = child.mainArgument();
+            if (!main.isCommand() && (main.isGreedy() || main.type().isGreedy(main))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private <BS> void appendOptionalContinuation(
             Command<S> rootCommand,
             ProjectedNode<S> scope,
@@ -546,6 +588,14 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             CommandNode<BS> scopeAnchor
     ) {
         if (scope.flags().isEmpty()) {
+            return;
+        }
+        // A greedy positional child folds this scope's flags into its own
+        // (core-delegated) suggester. Emitting the cyclic <flag>/<flag_value>
+        // pair beside a greedyString node is a shape modern Paper's client
+        // mirror cannot serialize — it silently drops ASK_SERVER for the whole
+        // scope. Skip the flag nodes here; the greedy node covers flag names.
+        if (scopeHasGreedyChild(scope)) {
             return;
         }
         com.mojang.brigadier.arguments.ArgumentType<?> flagType = flagTokenArgumentType();

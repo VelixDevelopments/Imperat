@@ -8,6 +8,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,14 +36,13 @@ import java.util.Objects;
 @DisplayName("Bukkit Brigadier Permission Visibility Tests")
 class BukkitBrigadierPermissionVisibilityTest {
 
-    private ServerMock server;
     private TestImperatPlugin plugin;
-    private BukkitImperat imperat;
+    private BukkitImperat<BukkitCommandSource> imperat;
     private PlayerMock player;
 
     @BeforeEach
     void setUp() {
-        server = MockBukkit.mock();
+        ServerMock server = MockBukkit.mock();
         plugin = MockBukkit.load(TestImperatPlugin.class);
         imperat = plugin.getImperat();
         imperat.registerCommand(new PermissionBrigadierCmd());
@@ -109,9 +109,9 @@ class BukkitBrigadierPermissionVisibilityTest {
 
     private static final class TestBrigadierManager extends BaseBrigadierManager<BukkitCommandSource> {
 
-        private final BukkitImperat imperat;
+        private final BukkitImperat<BukkitCommandSource> imperat;
 
-        private TestBrigadierManager(BukkitImperat imperat) {
+        private TestBrigadierManager(BukkitImperat<BukkitCommandSource> imperat) {
             super(imperat);
             this.imperat = imperat;
         }
@@ -122,7 +122,7 @@ class BukkitBrigadierPermissionVisibilityTest {
         }
 
         @Override
-        public ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
+        public @NonNull ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
             return parameter.isGreedy() ? StringArgumentType.greedyString() : StringArgumentType.word();
         }
     }
