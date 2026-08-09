@@ -237,44 +237,44 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         head.suggests(createSuggestionProvider(rootCommand, main));
         executor(head);
 
-        ArgumentBuilder<BS, ?> deepest = appendStringTokenFillers(
-                rootCommand, main, head, tokenCount, visibility, partNames
+        List<ArgumentBuilder<BS, ?>> fillers = createStringTokenFillers(
+                rootCommand, main, tokenCount, visibility, partNames
         );
+        ArgumentBuilder<BS, ?> deepest = fillers.isEmpty() ? head : fillers.get(fillers.size() - 1);
         appendContinuations(rootCommand, projected, deepest, 0, cache);
-        CommandNode<BS> headNode = head.build();
-        // Walk the linear filler chain to find the deepest built node, then
-        // attach flags there so they redirect back to that scope anchor.
-        CommandNode<BS> deepestNode = headNode;
-        for (int i = 1; i < tokenCount; i++) {
-            deepestNode = deepestNode.getChildren().iterator().next();
-        }
-        appendFlagNode(rootCommand, projected, deepestNode);
-        return headNode;
+        return buildTokenChain(head, fillers, (deepestNode) -> appendFlagNode(rootCommand, projected, deepestNode));
     }
 
     /**
-     * Chains {@code tokenCount - 1} string-typed filler nodes after
-     * {@code head}, returning the deepest builder. Used by both the
-     * positional-arg path ({@link #chainMultiTokenNode}) and the
-     * optional-arg path ({@link #appendOptionalContinuation}) so
-     * fixed-arity Imperat types render with one Brigadier node per
-     * consumed token regardless of where they appear. Each filler
-     * shares the head's visibility predicate + the same Imperat-side
-     * suggester so autocomplete reads the same list at every segment.
+     * Creates the {@code tokenCount - 1} string-typed filler builders that
+     * follow the head node, in head→deepest order (the list is empty for
+     * single-token arguments). Used by both the positional-arg path
+     * ({@link #chainMultiTokenNode}) and the optional-arg path
+     * ({@link #appendOptionalContinuation}) so fixed-arity Imperat types
+     * render with one Brigadier node per consumed token regardless of
+     * where they appear. Each filler shares the head's visibility
+     * predicate + the same Imperat-side suggester so autocomplete reads
+     * the same list at every segment.
+     *
+     * <p>The builders are deliberately NOT linked here: Brigadier's
+     * {@link ArgumentBuilder#then(ArgumentBuilder)} builds its argument
+     * immediately, so linking before continuations are attached would
+     * freeze every filler as a childless snapshot. Linking happens
+     * bottom-up in {@link #buildTokenChain} once the deepest builder is
+     * fully populated.</p>
      *
      * <p>Filler naming: if {@code partNames} is non-null filler {@code i}
      * (1-indexed) uses {@code partNames[i]}. Otherwise the auto-generated
      * {@code <argName>_part<i+1>} scheme is used.</p>
      */
-    private <BS> ArgumentBuilder<BS, ?> appendStringTokenFillers(
+    private <BS> List<ArgumentBuilder<BS, ?>> createStringTokenFillers(
             Command<S> rootCommand,
             Argument<S> argument,
-            ArgumentBuilder<BS, ?> head,
             int tokenCount,
             java.util.function.Predicate<Object> visibility,
             @Nullable String[] partNames
     ) {
-        ArgumentBuilder<BS, ?> deepest = head;
+        List<ArgumentBuilder<BS, ?>> fillers = new java.util.ArrayList<>(Math.max(0, tokenCount - 1));
         for (int i = 1; i < tokenCount; i++) {
             String fillerName = partNames != null
                                         ? partNames[i]
@@ -283,10 +283,47 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             filler.requires(visibility::test);
             filler.suggests(createSuggestionProvider(rootCommand, argument));
             executor(filler);
-            deepest.then(filler);
-            deepest = filler;
+            fillers.add(filler);
         }
-        return deepest;
+        return fillers;
+    }
+
+    /**
+     * Builds a head + filler chain bottom-up and returns the built head
+     * node. Bottom-up is required because {@code then(builder)} snapshots
+     * the builder at call time — a top-down link would emit fillers whose
+     * own children (deeper fillers, continuations, flags) were added after
+     * the snapshot and are therefore lost.
+     *
+     * @param deepestVisitor invoked with the deepest BUILT node (the head
+     *                       itself when there are no fillers) before it is
+     *                       attached to its parent, so flags can redirect
+     *                       back to the real scope anchor.
+     */
+    private <BS> CommandNode<BS> buildTokenChain(
+            ArgumentBuilder<BS, ?> head,
+            List<ArgumentBuilder<BS, ?>> fillers,
+            @Nullable java.util.function.Consumer<CommandNode<BS>> deepestVisitor
+    ) {
+        CommandNode<BS> built = null;
+        for (int i = fillers.size() - 1; i >= 0; i--) {
+            ArgumentBuilder<BS, ?> filler = fillers.get(i);
+            if (built != null) {
+                filler.then(built);
+            }
+            built = filler.build();
+            if (i == fillers.size() - 1 && deepestVisitor != null) {
+                deepestVisitor.accept(built);
+            }
+        }
+        if (built != null) {
+            head.then(built);
+        }
+        CommandNode<BS> headNode = head.build();
+        if (fillers.isEmpty() && deepestVisitor != null) {
+            deepestVisitor.accept(headNode);
+        }
+        return headNode;
     }
 
     private <BS> ArgumentBuilder<BS, ?> createBrigadierBuilder(
@@ -495,15 +532,15 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         // optionals render as N segments client-side too. Continuation
         // attaches to the deepest filler so the next optional / sibling
         // arrives only after all N tokens.
-        ArgumentBuilder<BS, ?> deepest = tokenCount > 1
-                                                 ? appendStringTokenFillers(
-                rootCommand, optional, optionalBuilder,
-                tokenCount, visibility, partNames
-        )
-                                                 : optionalBuilder;
+        List<ArgumentBuilder<BS, ?>> fillers = createStringTokenFillers(
+                rootCommand, optional, tokenCount, visibility, partNames
+        );
+        ArgumentBuilder<BS, ?> deepest = fillers.isEmpty()
+                                                 ? optionalBuilder
+                                                 : fillers.get(fillers.size() - 1);
 
         appendContinuations(rootCommand, scope, deepest, optionalIndex + 1, cache);
-        parentBuilder.then(optionalBuilder);
+        parentBuilder.then(buildTokenChain(optionalBuilder, fillers, null));
     }
 
     /**
