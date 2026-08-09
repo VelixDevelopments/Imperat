@@ -123,13 +123,10 @@ final class ImperatExecutor<S extends CommandSource> {
         executionContext.setLastUsedCommand(terminalCommand);
         executionContext.setTreeMatch(treeMatch);
 
-        Optional<Pair<ParsedNode<S>, Argument<S>>> inAccessibleNode =
-                parsedNodes.stream().map((n) -> {
-                            var argOpt = n.findInAccessibleArgument(config, source);
-                            return argOpt.map(argument -> new Pair<>(n, argument)).orElse(null);
-                        })
-                        .filter(Objects::nonNull)
-                        .findFirst();
+        final Optional<Pair<ParsedNode<S>, Argument<S>>> inAccessibleNode = parsedNodes.stream().map((n) -> {
+            var argOpt = n.findInAccessibleArgument(config, source);
+            return argOpt.map(argument -> new Pair<>(n, argument)).orElse(null);
+        }).filter(Objects::nonNull).findFirst();
 
         if (inAccessibleNode.isPresent() || !config.getPermissionChecker().hasPermission(source, detectedPathway)) {
             var inAccessible = inAccessibleNode.orElse(null);
