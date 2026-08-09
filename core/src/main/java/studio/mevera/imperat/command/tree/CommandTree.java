@@ -8,6 +8,7 @@ import studio.mevera.imperat.command.tree.help.HelpEntry;
 import studio.mevera.imperat.command.tree.help.HelpQuery;
 import studio.mevera.imperat.command.tree.help.HelpResult;
 import studio.mevera.imperat.context.ArgumentInput;
+import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.context.ExecutionContext;
 import studio.mevera.imperat.context.SuggestionContext;
@@ -24,22 +25,16 @@ import java.util.List;
 public interface CommandTree<S extends CommandSource> {
 
     static <S extends CommandSource> CommandTree<S> create(ImperatConfig<S> imperatConfig, Command<S> command) {
-        return new StandardCommandTree<>(imperatConfig, command);
+        return new SuperCommandTree<>(imperatConfig, command);
     }
 
-    /**
-     * Gets the root command of this command tree.
-     *
-     * @return the root command, never null
-     */
-    @NotNull Command<S> root();
 
     /**
      * Gets the root node of this command tree.
      *
      * @return the root command node, never null
      */
-    @NotNull LiteralCommandNode<S> rootNode();
+    @NotNull Node<S> rootNode();
 
     /**
      * The number of nodes cached in this {@link CommandTree}.
@@ -70,7 +65,7 @@ public interface CommandTree<S extends CommandSource> {
      * @return the result of the tree execution containing status and resolved context
      * @throws CommandException if an error occurs during argument resolution or execution
      */
-    @NotNull TreeExecutionResult<S> execute(ExecutionContext<S> context, @NotNull ArgumentInput input) throws CommandException;
+    @NotNull CommandTreeMatch<S> execute(ExecutionContext<S> context, @NotNull ArgumentInput input) throws CommandException;
 
     /**
      * Generates tab-completion suggestions based on the current command context.
@@ -113,4 +108,5 @@ public interface CommandTree<S extends CommandSource> {
             @NotNull HelpQuery<S> query
     );
 
+    @NotNull CommandPathway<S> getClosestPathwayToContext(CommandContext<S> context, CommandTreeMatch<S> treeMatch);
 }

@@ -5,13 +5,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.type.ArgumentType;
+import studio.mevera.imperat.command.arguments.type.Cursor;
 import studio.mevera.imperat.context.CommandContext;
-import studio.mevera.imperat.context.ExecutionContext;
-import studio.mevera.imperat.context.internal.Cursor;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
 import java.util.function.BiFunction;
 
 public final class MinestomArgumentType<T> extends ArgumentType<MinestomCommandSource, T> {
@@ -38,41 +38,21 @@ public final class MinestomArgumentType<T> extends ArgumentType<MinestomCommandS
     }
 
     @Override
-    public T parse(@NotNull CommandContext<MinestomCommandSource> context, @NonNull Argument<MinestomCommandSource> argument, @NotNull String input)
+    @SuppressWarnings("unchecked")
+    public T parse(@NotNull CommandContext<MinestomCommandSource> context, @NonNull Argument<MinestomCommandSource> argument,
+            @NotNull Cursor<MinestomCommandSource> cursor)
             throws CommandException {
+        // Drain the cursor's full budget — fixed-arity Minestom types declare
+        // their token count via {@link #getNumberOfParametersToConsume},
+        // greedy ones use {@code -1} (unbounded). Either way, joining the
+        // budget tokens with a single space produces the input Minestom's
+        // own parser expects.
+        String input = cursor.collectRemaining();
         try {
-            return (T) getMinestomType("").parse(context.source().origin(), input);
+            return (T) getMinestomType(argument.getName()).parse(context.source().origin(), input);
         } catch (ArgumentSyntaxException exception) {
-            throw new CommandException(exception.getMessage());
-        }
-    }
-
-    @Override @SuppressWarnings("unchecked")
-    public @NotNull T parse(
-            @NotNull ExecutionContext<MinestomCommandSource> context,
-            @NotNull Cursor<MinestomCommandSource> cursor
-    ) throws CommandException {
-        String correspondingInput = cursor.currentRawIfPresent();
-        int limit = numberOfParametersToConsume == -1 ? cursor.rawsLength()-1 : numberOfParametersToConsume;
-        //greedy
-        assert correspondingInput != null;
-        StringBuilder input = new StringBuilder(correspondingInput);
-        for (int i = 1; i <= limit; i++) {
-            cursor.currentRaw().ifPresent(raw -> {
-                input.append(" ").append(raw);
-                cursor.skipRaw();
-            });
-        }
-
-        try {
-            return (T) getMinestomType(
-                    Objects.requireNonNull(cursor.currentParameterIfPresent()).getName()
-            ).parse(
-                    context.source().origin(),
-                    input.toString()
-            );
-        }catch (ArgumentSyntaxException exception) {
-            throw new CommandException(exception.getMessage());
+            throw new ArgumentParseException(ResponseKey.INVALID_INPUT_NATIVE, input)
+                    .withPlaceholder("message", exception.getMessage() == null ? "" : exception.getMessage());
         }
     }
 

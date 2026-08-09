@@ -9,14 +9,14 @@ import studio.mevera.imperat.util.StringUtils;
 
 import java.util.List;
 
-final class InternalVelocityCommand<P> implements SimpleCommand {
+final class InternalVelocityCommand<P, S extends VelocityCommandSource> implements SimpleCommand {
 
-    private final VelocityImperat<P> imperat;
-    private final Command<VelocityCommandSource> command;
+    private final VelocityImperat<P, S> imperat;
+    private final Command<S> command;
 
     private final CommandMeta meta;
 
-    InternalVelocityCommand(VelocityImperat<P> imperat, Command<VelocityCommandSource> command, CommandManager commandManager) {
+    InternalVelocityCommand(VelocityImperat<P, S> imperat, Command<S> command, CommandManager commandManager) {
         this.imperat = imperat;
         this.command = command;
         this.meta = createMeta(commandManager);
@@ -41,17 +41,14 @@ final class InternalVelocityCommand<P> implements SimpleCommand {
         String label = invocation.alias();
         CommandSource source = invocation.source();
         String[] args = invocation.arguments();
-        imperat.execute(imperat.wrapSender(source), StringUtils.stripNamespace(label), args);
+        imperat.execute(imperat.wrapSender(source), command, StringUtils.stripNamespace(label), args);
     }
 
     @Override
     public List<String> suggest(Invocation invocation) {
-        StringBuilder builder = new StringBuilder(invocation.alias()).append(" ");
-        for (String arg : invocation.arguments()) {
-            builder.append(arg).append(" ");
-        }
+        final String input = StringUtils.stripNamespace(invocation.alias()) + " " + String.join(" ", invocation.arguments());
         return imperat.autoComplete(
-                imperat.wrapSender(invocation.source()), builder.toString()
+                imperat.wrapSender(invocation.source()), input
         ).join();
     }
 

@@ -7,6 +7,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.Suggestion;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,15 +28,13 @@ import java.util.Objects;
 @DisplayName("Bukkit Brigadier Alias Suggestion Tests")
 class BukkitBrigadierAliasSuggestionTest {
 
-    private ServerMock server;
-    private TestImperatPlugin plugin;
-    private BukkitImperat imperat;
+    private BukkitImperat<BukkitCommandSource> imperat;
     private PlayerMock player;
 
     @BeforeEach
     void setUp() {
-        server = MockBukkit.mock();
-        plugin = MockBukkit.load(TestImperatPlugin.class);
+        ServerMock server = MockBukkit.mock();
+        TestImperatPlugin plugin = MockBukkit.load(TestImperatPlugin.class);
         imperat = plugin.getImperat();
         imperat.registerCommand(new TestCmd());
         player = server.addPlayer("TestPlayer");
@@ -79,9 +78,9 @@ class BukkitBrigadierAliasSuggestionTest {
 
     private static final class TestBrigadierManager extends BaseBrigadierManager<BukkitCommandSource> {
 
-        private final BukkitImperat imperat;
+        private final BukkitImperat<BukkitCommandSource> imperat;
 
-        private TestBrigadierManager(BukkitImperat imperat) {
+        private TestBrigadierManager(BukkitImperat<BukkitCommandSource> imperat) {
             super(imperat);
             this.imperat = imperat;
         }
@@ -92,7 +91,7 @@ class BukkitBrigadierAliasSuggestionTest {
         }
 
         @Override
-        public ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
+        public @NonNull ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
             return parameter.isGreedy() ? StringArgumentType.greedyString() : StringArgumentType.word();
         }
     }

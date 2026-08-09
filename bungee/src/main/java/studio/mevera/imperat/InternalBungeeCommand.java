@@ -5,14 +5,14 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 import studio.mevera.imperat.command.Command;
 
 
-final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command implements TabExecutor {
+final class InternalBungeeCommand<S extends BungeeCommandSource> extends net.md_5.bungee.api.plugin.Command implements TabExecutor {
 
-    private final BungeeImperat bungeeCommandDispatcher;
-    private final Command<BungeeCommandSource> bungeeCommand;
+    private final BungeeImperat<S> bungeeCommandDispatcher;
+    private final Command<S> bungeeCommand;
 
     InternalBungeeCommand(
-            BungeeImperat commandDispatcher,
-            Command<BungeeCommandSource> bungeeCommand
+            BungeeImperat<S> commandDispatcher,
+            Command<S> bungeeCommand
     ) {
         super(
                 bungeeCommand.getName(),
@@ -27,6 +27,7 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
     public void execute(CommandSender sender, String[] args) {
         bungeeCommandDispatcher.execute(
                 bungeeCommandDispatcher.wrapSender(sender),
+                bungeeCommand,
                 bungeeCommand.getName(),
                 args
         );
@@ -38,18 +39,10 @@ final class InternalBungeeCommand extends net.md_5.bungee.api.plugin.Command imp
             CommandSender sender,
             String[] args
     ) {
-        StringBuilder builder = new StringBuilder(this.bungeeCommand.getName()).append(" ");
-        for (String arg : args) {
-            builder.append(arg).append(" ");
-        }
-
-        if (!builder.isEmpty()) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-
+        final String input = this.bungeeCommand.getName() + " " + String.join(" ", args);
         return bungeeCommandDispatcher.autoComplete(
                 bungeeCommandDispatcher.wrapSender(sender),
-                builder.toString()
+                input
         ).join();
     }
 

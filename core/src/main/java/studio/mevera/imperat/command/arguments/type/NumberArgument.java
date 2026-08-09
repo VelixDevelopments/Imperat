@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
 
-public abstract class NumberArgument<S extends CommandSource, N extends Number> extends ArgumentType<S, N> {
+public abstract class NumberArgument<S extends CommandSource, N extends Number> extends SimpleArgumentType<S, N> {
     protected NumberArgument() {
         super();
     }
@@ -84,7 +84,7 @@ public abstract class NumberArgument<S extends CommandSource, N extends Number> 
 
         @Override
         public SuggestionProvider<S> getSuggestionProvider() {
-            return (ctx, arg) -> Collections.singletonList("0");
+            return (ctx, arg) -> Collections.emptyList();
         }
     }
 

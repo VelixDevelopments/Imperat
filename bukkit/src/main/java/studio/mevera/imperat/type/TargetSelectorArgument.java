@@ -4,19 +4,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.Version;
 import studio.mevera.imperat.command.arguments.Argument;
-import studio.mevera.imperat.command.arguments.type.ArgumentType;
+import studio.mevera.imperat.command.arguments.type.SimpleArgumentType;
 import studio.mevera.imperat.context.CommandContext;
-import studio.mevera.imperat.context.ExecutionContext;
 import studio.mevera.imperat.context.SuggestionContext;
-import studio.mevera.imperat.context.internal.Cursor;
 import studio.mevera.imperat.exception.CommandException;
 import studio.mevera.imperat.exception.ResponseException;
 import studio.mevera.imperat.providers.SuggestionProvider;
 import studio.mevera.imperat.responses.BukkitResponseKey;
+import studio.mevera.imperat.selector.CharStream;
 import studio.mevera.imperat.selector.EntityCondition;
 import studio.mevera.imperat.selector.SelectionParameterInput;
 import studio.mevera.imperat.selector.SelectionType;
@@ -27,12 +25,12 @@ import studio.mevera.imperat.selector.field.operators.OperatorField;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class TargetSelectorArgument extends ArgumentType<BukkitCommandSource, TargetSelector> {
+public class TargetSelectorArgument<S extends BukkitCommandSource> extends SimpleArgumentType<S, TargetSelector> {
 
     private final static char PARAMETER_START = '[';
     private final static char PARAMETER_END = ']';
 
-    private final SuggestionProvider<BukkitCommandSource> suggestionProvider;
+    private final SuggestionProvider<S> suggestionProvider;
 
     public TargetSelectorArgument() {
         super();
@@ -40,21 +38,14 @@ public final class TargetSelectorArgument extends ArgumentType<BukkitCommandSour
                 .filter(type -> type != SelectionType.UNKNOWN)
                 .map(SelectionType::id)
                 .forEach((id) -> suggestions.add(SelectionType.MENTION_CHARACTER + id));
-        suggestionProvider = new TargetSelectorSuggestionProvider();
-    }
-
-    @Override
-    public TargetSelector parse(
-            @NotNull CommandContext<BukkitCommandSource> context,
-            @NotNull Argument<BukkitCommandSource> argument,
-            @NotNull String input
-    ) throws CommandException {
-        return parseNative(context, Cursor.ofSingleString(argument, input));
+        suggestionProvider = new TargetSelectorSuggestionProvider<>();
     }
 
     @SuppressWarnings("unchecked")
-    private static @NotNull <V> EntityCondition getEntityPredicate(@NotNull Cursor<BukkitCommandSource> cursor,
-            List<SelectionParameterInput<?>> inputParameters, CommandContext<BukkitCommandSource> ctx) {
+    private static <V> @NotNull EntityCondition getEntityPredicate(
+            List<SelectionParameterInput<?>> inputParameters,
+            CommandContext<BukkitCommandSource> ctx
+    ) {
         EntityCondition entityPredicted = (sender, entity) -> true;
         for (var input : inputParameters) {
             if (!(input.getField() instanceof PredicateField<?>)) {
@@ -62,11 +53,37 @@ public final class TargetSelectorArgument extends ArgumentType<BukkitCommandSour
             }
             PredicateField<V> predicateField = (PredicateField<V>) input.getField();
             entityPredicted = entityPredicted.and(
-                    (sender, entity) -> predicateField.isApplicable(sender, entity, (V) input.getValue(), cursor, ctx)
+                    (sender, entity) -> predicateField.isApplicable(sender, entity, (V) input.getValue(), ctx)
             );
-
         }
         return entityPredicted;
+    }
+
+    /**
+     * Reads the {@code @x} prefix from a selector input. Advances the stream
+     * past the mention character and the type letter (so the cursor is left
+     * pointing at whatever follows, typically {@code [} or end-of-input).
+     */
+    static @NotNull SelectionType resolveSelectionType(
+            @NotNull CharStream stream,
+            @NotNull String raw
+    ) throws CommandException {
+        if (!isSelectorInput(raw)) {
+            return SelectionType.UNKNOWN;
+        }
+
+        stream.skip(); // skip MENTION_CHARACTER ('@')
+        Character typeChar = stream.next();
+        String selectorId = typeChar == null ? "" : String.valueOf(typeChar);
+        SelectionType type = SelectionType.from(selectorId);
+        if (type != SelectionType.UNKNOWN) {
+            return type;
+        }
+
+        String invalidType = selectorId.isEmpty() ? raw : selectorId;
+        throw ResponseException.of(BukkitResponseKey.UNKNOWN_SELECTION_TYPE)
+                      .withPlaceholder("input", raw)
+                      .withPlaceholder("type_entered", invalidType);
     }
 
     @SuppressWarnings("unchecked")
@@ -79,81 +96,65 @@ public final class TargetSelectorArgument extends ArgumentType<BukkitCommandSour
         }
     }
 
-    @Override
-    public TargetSelector parse(@NotNull ExecutionContext<BukkitCommandSource> context, @NonNull Cursor<BukkitCommandSource> cursor)
-            throws CommandException {
-        return parseNative(context, cursor);
-    }
-
     static boolean isSelectorInput(@NotNull String raw) {
         return raw.startsWith(SelectionType.MENTION_CHARACTER);
     }
 
-    static @NotNull SelectionType resolveSelectionType(
-            @NotNull Cursor<BukkitCommandSource> cursor,
-            @NotNull String raw
+    @Override
+    public TargetSelector parse(
+            @NotNull CommandContext<S> context,
+            @NotNull Argument<S> argument,
+            @NotNull String input
     ) throws CommandException {
-        if (!isSelectorInput(raw)) {
-            return SelectionType.UNKNOWN;
-        }
-
-        cursor.skipLetter();
-        String selectorId = cursor.popLetter()
-                                    .map(String::valueOf)
-                                    .orElse("");
-        SelectionType type = SelectionType.from(selectorId);
-        if (type != SelectionType.UNKNOWN) {
-            return type;
-        }
-
-        String invalidType = selectorId.isEmpty() ? raw : selectorId;
-        throw ResponseException.of(BukkitResponseKey.UNKNOWN_SELECTION_TYPE)
-                      .withPlaceholder("input", raw)
-                      .withPlaceholder("type_entered", invalidType);
-    }
-
-    private TargetSelector parseNative(@NotNull CommandContext<BukkitCommandSource> context, Cursor<BukkitCommandSource> cursor)
-            throws CommandException {
-        String raw = cursor.currentRaw().orElse(null);
-        if (raw == null) {
+        if (input.isEmpty()) {
             return TargetSelector.empty();
         }
 
-        if (!isSelectorInput(raw)) {
-            Player target = Bukkit.getPlayer(raw);
+        if (!isSelectorInput(input)) {
+            Player target = Bukkit.getPlayer(input);
             if (target == null) {
                 return TargetSelector.empty();
             }
-
             return TargetSelector.of(SelectionType.UNKNOWN, target);
         }
 
+        // The selector helper utilities (SelectionParameterInput, SelectionType,
+        // EntityCondition) are typed against BukkitCommandSource. The user's S
+        // extends BukkitCommandSource, so the source instance + every call
+        // chained off it is reachable; the generics narrowing is purely a
+        // compile-time formality. Erase to a raw context for the helper calls
+        // — runtime erasure makes this a no-op.
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        CommandContext<BukkitCommandSource> bukkitContext = (CommandContext) context;
+
         if (Version.isOrOver(1, 13, 0)) {
-            SelectionType type = resolveSelectionType(cursor, raw);
+            // 1.13+: delegate to vanilla's selector dispatcher.
+            CharStream typeStream = new CharStream(input);
+            SelectionType type = resolveSelectionType(typeStream, input);
             return TargetSelector.of(
                     type,
-                    Bukkit.selectEntities(context.source().origin(), raw)
+                    Bukkit.selectEntities(context.source().origin(), input)
             );
         }
 
-        //For legacy (below 1.13)
-        char last = raw.charAt(raw.length() - 1);
-        SelectionType type = resolveSelectionType(cursor, raw);
+        // Legacy (<1.13): walk the input one character at a time.
+        CharStream stream = new CharStream(input);
+        SelectionType type = resolveSelectionType(stream, input);
 
         List<SelectionParameterInput<?>> inputParameters = new ArrayList<>();
-
-        boolean parameterized = cursor.currentLetter().map((c) -> c == PARAMETER_START).orElse(false) && last == PARAMETER_END;
+        char last = input.charAt(input.length() - 1);
+        Character current = stream.peek();
+        boolean parameterized = current != null && current == PARAMETER_START && last == PARAMETER_END;
         if (parameterized) {
-            cursor.skipLetter();
-
-            String params = cursor.collectBeforeFirst(PARAMETER_END);
-            inputParameters = SelectionParameterInput.parseAll(params, cursor, context);
+            stream.skip(); // consume PARAMETER_START
+            String params = stream.collectUntil(PARAMETER_END);
+            inputParameters = SelectionParameterInput.parseAll(params, input, bukkitContext);
         }
 
-        List<Entity> entities = type.getTargetEntities(context, cursor);
+        List<Entity> entities = type.getTargetEntities(bukkitContext);
         List<Entity> selected = new ArrayList<>();
 
-        EntityCondition entityPredicted = getEntityPredicate(cursor, inputParameters, context);
+        EntityCondition entityPredicted = getEntityPredicate(inputParameters, bukkitContext);
         for (Entity entity : entities) {
             if (entityPredicted.test(context.source(), entity)) {
                 selected.add(entity);
@@ -170,11 +171,11 @@ public final class TargetSelectorArgument extends ArgumentType<BukkitCommandSour
      * @return the suggestion resolver for generating suggestions based on the parameter type.
      */
     @Override
-    public SuggestionProvider<BukkitCommandSource> getSuggestionProvider() {
+    public SuggestionProvider<S> getSuggestionProvider() {
         return suggestionProvider;
     }
 
-    private final class TargetSelectorSuggestionProvider implements SuggestionProvider<BukkitCommandSource> {
+    private final class TargetSelectorSuggestionProvider<TS extends BukkitCommandSource> implements SuggestionProvider<TS> {
 
         /**
          * @param context   the context for suggestions
@@ -183,8 +184,8 @@ public final class TargetSelectorArgument extends ArgumentType<BukkitCommandSour
          */
         @Override
         public List<String> provide(
-                SuggestionContext<BukkitCommandSource> context,
-                Argument<BukkitCommandSource> argument
+                SuggestionContext<TS> context,
+                Argument<TS> argument
         ) {
             List<String> completions = new ArrayList<>(suggestions);
             Bukkit.getOnlinePlayers().stream().

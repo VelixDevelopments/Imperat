@@ -164,9 +164,7 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
                               .stream()
                               .filter((e) -> e instanceof MethodElement)
                               .map((e) -> (MethodElement) e)
-                              .filter((m) -> {
-                                  return methodSelector.canBeSelected(imperat, imperat.getAnnotationParser(), m, false);
-                              })
+                              .filter((m) -> methodSelector.canBeSelected(imperat, imperat.getAnnotationParser(), m, false))
                               .sorted((m1, m2) -> {
                                   // Order: @Processor first, then @Execute, then @SubCommand, then the rest
                                   int rank1 = methodSortRank(m1);
@@ -560,16 +558,19 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
 
         Shortcut shortcutAnn = method.getAnnotation(Shortcut.class);
         if (shortcutAnn != null) {
-            if (shortcutAnn.value().isEmpty()) {
-                throw new IllegalStateException("Shortcut value cannot be empty for method '" + method.getName() + "'");
-            }
+            for (String rawValue : shortcutAnn.value()) {
+                String shortcutValue = config.replacePlaceholders(rawValue);
+                if (shortcutValue.isEmpty()) {
+                    throw new IllegalStateException("Shortcut value cannot be empty for method '" + method.getName() + "'");
+                }
 
-            if (shortcutAnn.value().contains(" ")) {
-                throw new IllegalStateException("Shortcut value cannot contain spaces for method '" + method.getName() + "'");
-            }
+                if (shortcutValue.contains(" ")) {
+                    throw new IllegalStateException("Shortcut value cannot contain spaces for method '" + method.getName() + "'");
+                }
 
-            var shortcut = loadPathwayShortcut(method, parsedMethodArgs, owningCommand, builder, shortcutAnn);
-            owningCommand.addShortcut(shortcut);
+                var shortcut = loadPathwayShortcut(method, parsedMethodArgs, owningCommand, builder, shortcutValue);
+                owningCommand.addShortcut(shortcut);
+            }
         }
         return builder;
     }
@@ -600,7 +601,16 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
 
     private boolean isSenderParameter(ParameterElement param) {
         Type type = param.getElement().getParameterizedType();
-        return imperat.canBeSender(type) || config.hasSourceResolver(type);
+        // v4: a parameter qualifies as sender if the framework can either
+        // (a) treat it as the canonical source S / its CommandSource
+        // supertypes, (b) derive it from the source via a registered
+        // SourceProvider (explicit per-type override), or (c) resolve it
+        // through a ContextArgumentProvider (domain types). Both (b) and
+        // (c) materialise at param-injection time via
+        // ExecutionContextImpl.provideSource.
+        return imperat.canBeSender(type)
+                       || config.getSourceProvider(type) != null
+                       || config.getContextArgumentProvider(type) != null;
     }
 
     private Command<S> loadPathwayShortcut(
@@ -608,11 +618,8 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
             @NotNull List<Argument<S>> parseMethodParameters,
             @NotNull Command<S> originalCommand,
             @NotNull CommandPathway.Builder<S> originalPathway,
-            @NotNull Shortcut shortcutAnn
+            @NotNull String shortcutValue
     ) {
-
-        String shortcutValue = config.replacePlaceholders(shortcutAnn.value());
-
         Command<S> shortcut = originalCommand.getShortcut(shortcutValue);
         if (shortcut == null) {
             shortcut = Command.create(imperat, shortcutValue, method)
@@ -625,6 +632,10 @@ public class CommandElementParser<S extends CommandSource> extends CommandClassP
                                                .execute(originalPathway.getExecution())
                                                .permission(originalPathway.getPermission())
                                                .description(originalPathway.getDescription())
+                                               .examples(originalPathway.getExamples())
+                                               .withFlags(originalPathway.getFlagArguments())
+                                               .cooldownHandler(originalPathway.getCooldownHandler())
+                                               .coordinator(originalPathway.getCommandCoordinator())
                                                .build(shortcut);
 
         shortcut.addPathway(fabricated);

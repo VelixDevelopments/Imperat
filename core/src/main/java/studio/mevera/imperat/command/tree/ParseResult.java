@@ -4,115 +4,84 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandSource;
-import studio.mevera.imperat.context.ParsedArgument;
 
 public final class ParseResult<S extends CommandSource> {
 
-    private final Object value;
-    private final Throwable error;
-    private final @Nullable Argument<S> argument;
-    private final @Nullable String rawInput;
-    private final int inputPosition;
-    private final int nextDepth;
+    static final int SUCCESSFUL_PARSE_SCORE = 1;
+    static final int FAILED_PARSE_SCORE = 0;
+    static final int UNACCEPTABLE_SCORE = -1;
 
-    private ParseResult(
-            Object value,
-            @Nullable Argument<S> argument,
-            @Nullable String rawInput,
-            int inputPosition,
-            int nextDepth
-    ) {
-        this.value = value;
-        this.error = null;
+    final @NotNull Argument<S> argument;
+    final String input;
+    final @Nullable Object parsedValue;
+    final @Nullable Throwable error;
+
+    int parseScore = FAILED_PARSE_SCORE;
+
+    private ParseResult(@NotNull Argument<S> argument, String input, @Nullable Object parsedValue, @Nullable Throwable error) {
         this.argument = argument;
-        this.rawInput = rawInput;
-        this.inputPosition = inputPosition;
-        this.nextDepth = nextDepth;
-    }
-
-    private ParseResult(
-            Throwable error,
-            @Nullable Argument<S> argument,
-            @Nullable String rawInput,
-            int inputPosition,
-            int nextDepth
-    ) {
+        this.input = input;
+        this.parsedValue = parsedValue;
         this.error = error;
-        this.value = null;
-        this.argument = argument;
-        this.rawInput = rawInput;
-        this.inputPosition = inputPosition;
-        this.nextDepth = nextDepth;
+        this.parseScore = calculateParseScore();
     }
 
-    public static <S extends CommandSource> ParseResult<S> successful(
-            Object value,
-            @Nullable Argument<S> argument,
-            @Nullable String rawInput,
-            int inputPosition,
-            int nextDepth
+    public static <S extends CommandSource> ParseResult<S> of(@NotNull Argument<S> node, String input, @Nullable Object parsedValue,
+            @Nullable Throwable error) {
+        return new ParseResult<>(node, input, parsedValue, error);
+    }
+
+    public static <S extends CommandSource> ParseResult<S> unacceptableParse(@NotNull Argument<S> argument, String input,
+            @NotNull Throwable error) {
+        ParseResult<S> result = new ParseResult<>(argument, input, null, error);
+        result.parseScore = UNACCEPTABLE_SCORE;
+        return result;
+    }
+
+    public static <S extends CommandSource> ParseResult<S> failedParse(
+            @NotNull Argument<S> argument,
+            String input,
+            @Nullable Throwable error
     ) {
-        return new ParseResult<>(value, argument, rawInput, inputPosition, nextDepth);
+        ParseResult<S> result = new ParseResult<>(argument, input, null, error);
+        result.parseScore = FAILED_PARSE_SCORE;
+        return result;
     }
 
-    public static <S extends CommandSource> ParseResult<S> failed(Throwable ex) {
-        return new ParseResult<>(ex, null, null, -1, -1);
-    }
-
-    public static <S extends CommandSource> ParseResult<S> failed(
-            Throwable ex,
-            @Nullable Argument<S> argument,
-            @Nullable String rawInput,
-            int inputPosition,
-            int nextDepth
-    ) {
-        return new ParseResult<>(ex, argument, rawInput, inputPosition, nextDepth);
-    }
-
-    public boolean isSuccessful() {
-        return error == null;
-    }
-
-    public boolean isFailure() {
-        return error != null;
+    public @NotNull Argument<S> getArgument() {
+        return argument;
     }
 
     public @Nullable Object getParsedValue() {
-        return value;
+        return parsedValue;
     }
 
-    /**
-     * The exception thrown by {@link studio.mevera.imperat.command.arguments.type.ArgumentType#parse}
-     * (or a structural error raised during parse orchestration). {@code null} on success.
-     */
+    public String getInput() {
+        return input;
+    }
+
     public @Nullable Throwable getError() {
         return error;
     }
 
-    public @Nullable Argument<S> getArgument() {
-        return argument;
+    public boolean isUnAcceptableScore() {
+        return parseScore == UNACCEPTABLE_SCORE;
     }
 
-    public @Nullable String getRawInput() {
-        return rawInput;
+    public int getParseScore() {
+        return parseScore;
     }
 
-    public int getInputPosition() {
-        return inputPosition;
-    }
-
-    public int getNextDepth() {
-        return nextDepth;
-    }
-
-    public boolean canReuseInExecution() {
-        return isSuccessful() && argument != null;
-    }
-
-    public @NotNull ParsedArgument<S> toParsedArgument() {
-        if (!isSuccessful() || argument == null) {
-            throw new IllegalStateException("This parse result does not carry a reusable parsed argument");
+    private int calculateParseScore() {
+        if (error != null) {
+            //no match, return failure
+            return FAILED_PARSE_SCORE;
         }
-        return new ParsedArgument<>(rawInput, argument, inputPosition, value);
+
+        return SUCCESSFUL_PARSE_SCORE;
+    }
+
+    public boolean isFailureScore() {
+        return parseScore == FAILED_PARSE_SCORE;
     }
 }

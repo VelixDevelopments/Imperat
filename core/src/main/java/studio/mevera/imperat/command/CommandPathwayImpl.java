@@ -11,7 +11,6 @@ import studio.mevera.imperat.annotations.base.element.MethodElement;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.FlagArgument;
 import studio.mevera.imperat.command.cooldown.CooldownHandler;
-import studio.mevera.imperat.command.cooldown.CooldownRecord;
 import studio.mevera.imperat.command.flags.FlagExtractor;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.context.ExecutionContext;
@@ -46,15 +45,52 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
     private @NotNull CooldownHandler<S> cooldownHandler;
     private CommandCoordinator<S> commandCoordinator;
     private final @Nullable MethodElement methodElement;
-    private @Nullable CooldownRecord cooldown = null;
+
+    /**
+     * The command this pathway was registered against — set by
+     * {@link Command#addPathway(CommandPathway)} during registration.
+     * Allows the default {@link CommandPathway#formatted() formatted()}
+     * implementation to derive a subcommand-chain prefix even when the
+     * pathway has zero positional arguments (e.g. a no-arg
+     * {@code @Execute} on a {@code @SubCommand} class). Without this the
+     * inference falls back to {@code arguments[0].getParent()} which is
+     * unreachable when the argument list is empty, and the closest-usage
+     * hint loses the subcommand chain.
+     */
+    private @Nullable Command<S> owningCommand;
+
+    /**
+     * Set when this pathway is the framework-injected global-default
+     * fallback built during {@link CommandImpl} construction — see
+     * {@link CommandPathway#isSyntheticFallback()}.
+     */
+    private boolean syntheticFallback = false;
 
 
     CommandPathwayImpl(@Nullable MethodElement methodElement, @NotNull CommandExecution<S> execution) {
         this.methodElement = methodElement;
         this.execution = execution;
-        this.cooldownHandler = CooldownHandler.createDefault(this);
+        this.cooldownHandler = CooldownHandler.noop();
         this.commandCoordinator = null;
         this.flagExtractor = FlagExtractor.createNative(this);
+    }
+
+    @Override
+    public @Nullable Command<S> getOwningCommand() {
+        return owningCommand;
+    }
+
+    void setOwningCommand(@Nullable Command<S> command) {
+        this.owningCommand = command;
+    }
+
+    @Override
+    public boolean isSyntheticFallback() {
+        return syntheticFallback;
+    }
+
+    void setSyntheticFallback(boolean syntheticFallback) {
+        this.syntheticFallback = syntheticFallback;
     }
 
     @Override
@@ -126,12 +162,55 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
             if (param.isFlag()) {
                 addFlag(param.asFlagParameter());
             } else {
+                if (param.isRequired() && hasOptionalNonFlagArgument()) {
+                    throw new IllegalArgumentException(
+                            "Cannot add required argument '" + param.getName()
+                                    + "' after optional argument(s). Middle-positioned positional"
+                                    + " optionals are not supported — convert to a flag (e.g. --"
+                                    + param.getName() + " <value>) or move all optionals to the tail."
+                    );
+                }
                 arguments.add(param);
                 if (param.isRequired()) {
                     this.permissionsData.append(param.getPermissionsData());
                 }
             }
         }
+    }
+
+    private boolean hasOptionalNonFlagArgument() {
+        for (var arg : arguments) {
+            if (!arg.isFlag() && arg.isOptional()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public List<Argument<S>> getRequiredArguments() {
+        List<Argument<S>> required = new ArrayList<>(arguments.size());
+        for (var arg : arguments) {
+            if (arg.isFlag()) {
+                continue;
+            }
+            if (arg.isOptional()) {
+                break;
+            }
+            required.add(arg);
+        }
+        return required;
+    }
+
+    @Override
+    public List<Argument<S>> getTailOptionalArguments() {
+        List<Argument<S>> optionals = new ArrayList<>();
+        for (var arg : arguments) {
+            if (!arg.isFlag() && arg.isOptional()) {
+                optionals.add(arg);
+            }
+        }
+        return optionals;
     }
 
     /**
@@ -227,16 +306,6 @@ final class CommandPathwayImpl<S extends CommandSource> implements CommandPathwa
             }
         }
         return null;
-    }
-
-    @Override
-    public @Nullable CooldownRecord getCooldown() {
-        return cooldown;
-    }
-
-    @Override
-    public void setCooldown(@Nullable CooldownRecord usageCooldown) {
-        this.cooldown = usageCooldown;
     }
 
     @Override

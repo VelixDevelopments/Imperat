@@ -5,9 +5,11 @@ import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.ResponseKey;
 
-public final class CommandArgument<S extends CommandSource> extends ArgumentType<S, Command<S>> {
+public final class CommandArgument<S extends CommandSource> extends SimpleArgumentType<S, Command<S>> {
 
     private final Command<S> command;
 
@@ -23,7 +25,7 @@ public final class CommandArgument<S extends CommandSource> extends ArgumentType
         if (command.hasName(input)) {
             return command;
         }
-        throw new CommandException("Invalid literal argument '%s'", input);
+        throw new ArgumentParseException(ResponseKey.INVALID_LITERAL, input);
     }
 
     public String getName() {

@@ -29,8 +29,8 @@ public final class FuzzyAutoCompleter<S extends CommandSource> extends AutoCompl
             }
             String lower = prefix.toLowerCase();
             return all.stream()
-                    .filter(s -> s.toLowerCase().contains(lower))
-                    .toList();
+                           .filter(s -> s.toLowerCase().contains(lower))
+                           .toList();
         });
     }
 }

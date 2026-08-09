@@ -138,16 +138,16 @@ public interface Argument<S extends CommandSource> extends PermissionHolder, Des
     static <S extends CommandSource> Command<S> literal(Imperat<S> imperat, String... names) {
         String primaryName = names[0];
         Preconditions.notNull(primaryName, "part");
-        Preconditions.checkArgument(!primaryName.isEmpty(), "Literal  cannot be empty");
-        Preconditions.checkArgument(primaryName.chars().allMatch(c -> Character.isLetterOrDigit(c) || c == '_'),
-                "Literal  must be alphanumeric or underscore only");
+        Preconditions.checkArgument(!primaryName.isEmpty(), "Literal cannot be empty");
+        Preconditions.checkArgument(primaryName.chars().allMatch(c -> Character.isLetterOrDigit(c) || c == '_' || c == '-' || c == '.'),
+                "Literal must be alphanumeric, dash, dot, or underscore only");
 
         List<String> aliases = new ArrayList<>(names.length - 1);
         aliases.addAll(Arrays.asList(names).subList(1, names.length));
 
         return Command.create(imperat, primaryName)
-                       .aliases(aliases)
-                       .build();
+                .aliases(aliases)
+                .build();
     }
 
     /**

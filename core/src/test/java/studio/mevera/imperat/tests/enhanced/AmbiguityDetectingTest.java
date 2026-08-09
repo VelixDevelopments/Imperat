@@ -62,7 +62,7 @@ public class AmbiguityDetectingTest extends EnhancedBaseImperatTest {
     }
 
     @Test
-    @DisplayName("Should detect ambiguity: Three optional parameters with same type (String)")
+    @DisplayName("Should detect ambiguity: Three optional parameters with same type")
     void testAmbiguousThreeOptional() {
         try {
             IMPERAT.registerCommand(AmbiguousThreeOptional.class);

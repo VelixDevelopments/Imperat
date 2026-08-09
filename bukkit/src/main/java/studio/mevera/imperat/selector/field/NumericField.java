@@ -2,7 +2,9 @@ package studio.mevera.imperat.selector.field;
 
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.context.CommandContext;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.BukkitResponseKey;
 import studio.mevera.imperat.util.TypeUtility;
 import studio.mevera.imperat.util.TypeWrap;
 
@@ -68,7 +70,8 @@ public sealed abstract class NumericField<N extends Number> extends AbstractFiel
         @Override
         public Integer parseNumber(String value, CommandContext<BukkitCommandSource> ctx) throws CommandException {
             if (!TypeUtility.isInteger(value)) {
-                throw new CommandException("Invalid limit-value integer '%s'", value);
+                throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE, value)
+                        .withPlaceholder("numeric_type", "limit-value integer");
             }
             return Integer.parseInt(value);
         }
@@ -83,7 +86,8 @@ public sealed abstract class NumericField<N extends Number> extends AbstractFiel
         @Override
         public Double parseNumber(String value, CommandContext<BukkitCommandSource> ctx) throws CommandException {
             if (!TypeUtility.isDouble(value)) {
-                throw new CommandException("Invalid double value '%s'", value);
+                throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE, value)
+                        .withPlaceholder("numeric_type", "double");
             }
             return Double.parseDouble(value);
         }
@@ -98,7 +102,8 @@ public sealed abstract class NumericField<N extends Number> extends AbstractFiel
         @Override
         public Float parseNumber(String value, CommandContext<BukkitCommandSource> ctx) throws CommandException {
             if (!TypeUtility.isFloat(value)) {
-                throw new CommandException("Invalid float value '%s'", value);
+                throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE, value)
+                        .withPlaceholder("numeric_type", "float");
             }
             return Float.parseFloat(value);
         }
@@ -113,7 +118,8 @@ public sealed abstract class NumericField<N extends Number> extends AbstractFiel
         @Override
         public Long parseNumber(String value, CommandContext<BukkitCommandSource> ctx) throws CommandException {
             if (!TypeUtility.isLong(value)) {
-                throw new CommandException("Invalid long value '%s'", value);
+                throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE, value)
+                        .withPlaceholder("numeric_type", "long");
             }
             return Long.parseLong(value);
         }
@@ -128,7 +134,8 @@ public sealed abstract class NumericField<N extends Number> extends AbstractFiel
         @Override
         public Short parseNumber(String value, CommandContext<BukkitCommandSource> ctx) throws CommandException {
             if (!TypeUtility.isShort(value)) {
-                throw new CommandException("Invalid short value '%s'", value);
+                throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE, value)
+                        .withPlaceholder("numeric_type", "short");
             }
             return Short.parseShort(value);
         }
@@ -144,7 +151,8 @@ public sealed abstract class NumericField<N extends Number> extends AbstractFiel
         @Override
         public Byte parseNumber(String value, CommandContext<BukkitCommandSource> ctx) throws CommandException {
             if (!TypeUtility.isByte(value)) {
-                throw new CommandException("Invalid byte value '%s'", value);
+                throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE, value)
+                        .withPlaceholder("numeric_type", "byte");
             }
             return Byte.parseByte(value);
         }

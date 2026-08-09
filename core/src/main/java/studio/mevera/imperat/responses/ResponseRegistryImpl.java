@@ -67,6 +67,78 @@ final class ResponseRegistryImpl implements ResponseRegistry {
                         .addContextPlaceholders()
         );
 
+        registerResponse(
+                new Response(ResponseKey.INVALID_DECIMAL, () -> "Invalid decimal number: '%input%'")
+                        .addPlaceholder("input")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_INTEGER, () -> "Invalid integer: '%input%'")
+                        .addPlaceholder("input")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_LITERAL, () -> "Invalid literal argument '%input%'")
+                        .addPlaceholder("input")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_DURATION, () -> "Invalid duration format: '%input%'")
+                        .addPlaceholder("input")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_INSTANT,
+                        () -> "Invalid ISO-8601 instant: '%input%' (expected e.g. 2026-04-27T05:00:00Z)")
+                        .addPlaceholder("input")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_DATE, () -> "Invalid ISO date: '%input%' (expected e.g. 2026-04-27)")
+                        .addPlaceholder("input")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_DATE_TIME,
+                        () -> "Invalid ISO date-time: '%input%' (expected e.g. 2026-04-27T05:00:00)")
+                        .addPlaceholder("input")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_PATH, () -> "Invalid path: '%input%' (%reason%)")
+                        .addPlaceholder("input")
+                        .addPlaceholder("reason")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_REGEX, () -> "Invalid regex: '%input%' (%reason%)")
+                        .addPlaceholder("input")
+                        .addPlaceholder("reason")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_URI, () -> "Invalid URI: '%input%' (%reason%)")
+                        .addPlaceholder("input")
+                        .addPlaceholder("reason")
+                        .addContextPlaceholders()
+        );
+
+        registerResponse(
+                new Response(ResponseKey.INVALID_INPUT_NATIVE, () -> "Invalid input '%input%': %message%")
+                        .addPlaceholder("input")
+                        .addPlaceholder("message")
+                        .addContextPlaceholders()
+        );
+
         // Flag-related exceptions
 
         // UnknownFlagException: String input

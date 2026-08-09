@@ -7,37 +7,30 @@ import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.CommandPathway;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.FlagArgument;
+import studio.mevera.imperat.command.tree.CommandTreeMatch;
 import studio.mevera.imperat.command.tree.ParseResult;
-import studio.mevera.imperat.command.tree.TreeExecutionResult;
+import studio.mevera.imperat.command.tree.ParsedNode;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.context.ExecutionContext;
 import studio.mevera.imperat.context.FlagData;
 import studio.mevera.imperat.context.ParsedArgument;
-import studio.mevera.imperat.exception.CombinedFlagsException;
 import studio.mevera.imperat.exception.CommandException;
 import studio.mevera.imperat.exception.InvalidSyntaxException;
-import studio.mevera.imperat.exception.ResponseException;
-import studio.mevera.imperat.providers.ContextArgumentProvider;
-import studio.mevera.imperat.responses.ResponseKey;
-import studio.mevera.imperat.util.ImperatDebugger;
-import studio.mevera.imperat.util.Patterns;
 import studio.mevera.imperat.util.Registry;
-import studio.mevera.imperat.util.TypeUtility;
-import studio.mevera.imperat.util.UsageFormatting;
 
 import java.lang.reflect.Type;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @ApiStatus.Internal
@@ -50,10 +43,9 @@ final class ExecutionContextImpl<S extends CommandSource> extends ContextImpl<S>
     //all resolved arguments EXCEPT for subcommands and flags.
     private final Registry<String, ParsedArgument<S>> allResolvedArgs = new Registry<>(LinkedHashMap::new);
 
+    private CommandTreeMatch<S> treeMatch = null;
     //last command used
-    private final Command<S> lastCommand;
-
-    private TreeExecutionResult<S> treeExecutionResult;
+    private Command<S> lastCommand;
 
     ExecutionContextImpl(
             CommandContext<S> context,
@@ -130,22 +122,48 @@ final class ExecutionContextImpl<S extends CommandSource> extends ContextImpl<S>
     @Override
     @SuppressWarnings("unchecked")
     public <R> @NotNull R provideSource(Type type) throws CommandException {
-        if (!imperatConfig.hasSourceResolver(type)) {
-            throw new IllegalArgumentException("Found no SourceProvider for valueType `" + type.getTypeName() + "`");
+        // v4 source-resolution chain (in precedence order):
+        //   1. S-identity / supertype-of-S — fast pass-through, no allocation
+        //   2. Registered SourceProvider — explicit user override
+        //   3. source.origin() instance check — platform-derived default
+        //      (Player / OfflinePlayer / ConsoleCommandSender / CommandSender
+        //      on bukkit, ProxiedPlayer on bungee, etc.)
+        //   4. ContextArgumentProvider registry — user-defined domain types
+        //   5. Throw — type is unreachable from current source
+        //
+        // A SourceProvider returning null falls through to step 3. This is
+        // intentional: it lets users register conditional overrides that
+        // delegate to the default path when their custom logic doesn't
+        // apply.
+        S source = this.source();
+        if (type instanceof Class<?> clazz && clazz.isInstance(source)) {
+            return (R) source;
         }
-        var sourceResolver = imperatConfig.getSourceProviderFor(type);
-        assert sourceResolver != null;
-
-        return (R) sourceResolver.resolve(this.source(), this);
+        var sourceProvider = imperatConfig.<R>getSourceProvider(type);
+        if (sourceProvider != null) {
+            R resolved = sourceProvider.provide(source);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+        if (type instanceof Class<?> clazz) {
+            Object origin = source.origin();
+            if (origin != null && clazz.isInstance(origin)) {
+                return (R) origin;
+            }
+        }
+        var ctxProvider = imperatConfig.getContextArgumentProvider(type);
+        if (ctxProvider != null) {
+            R resolved = (R) ctxProvider.provide(this, null);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+        throw new IllegalArgumentException(
+                "Cannot derive source view of type `" + type.getTypeName()
+                        + "` from canonical source `" + source.getClass().getName() + "`");
     }
 
-    /**
-     * Fetches the argument/input resolved by the context
-     * using {@link ContextArgumentProvider}
-     *
-     * @param type valueType of argument to return
-     * @return the argument/input resolved by the context
-     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> @Nullable T getContextArgument(Class<T> type) throws CommandException {
@@ -161,203 +179,6 @@ final class ExecutionContextImpl<S extends CommandSource> extends ContextImpl<S>
         return flagRegistry.getAll();
     }
 
-
-    @Override
-    public @NotNull TreeExecutionResult<S> getTreeExecutionResult() {
-        if (treeExecutionResult == null) {
-            throw new IllegalStateException("The ExecutionContext hasn't been resolved yet, please call ExecutionContext#resolve");
-        }
-        return treeExecutionResult;
-    }
-
-    @Override
-    public void handleRemainingParsing(TreeExecutionResult<S> result) throws CommandException {
-        if (pathway == null) {
-            return;
-        }
-
-        Cursor<S> cursor = Cursor.of(this.arguments(), pathway);
-        OptionalArgumentHandler<S> optionalArgumentHandler = new OptionalArgumentHandler<>();
-        Deque<ParseResult<S>> preParsedArguments = new ArrayDeque<>(result.getParsedArguments());
-        while (cursor.isCurrentParameterAvailable()) {
-            Argument<S> currentParameter = cursor.currentParameterIfPresent();
-            if (currentParameter == null) {
-                break;
-            }
-
-            String currentRaw = cursor.currentRawIfPresent();
-            if (currentParameter.isCommand()) {
-                if (currentRaw == null) {
-                    throw invalidSyntax(result);
-                }
-                ArgumentValueBinder.bindCurrentSubCommand(cursor);
-                continue;
-            }
-
-            if (currentRaw == null) {
-                if (!currentParameter.isOptional()) {
-                    throw invalidSyntax(result);
-                }
-                parseMissingOptional(cursor, currentParameter);
-                cursor.skipParameter();
-                continue;
-            }
-
-            if (ArgumentValueBinder.skipCurrentFlag(this, cursor)) {
-                continue;
-            }
-
-            ParseResult<S> preParsed = preParsedArguments.peekFirst();
-            if (preParsed != null && preParsed.getArgument() == currentParameter) {
-                ArgumentValueBinder.bindParsedParameter(this, cursor, preParsed);
-                preParsedArguments.removeFirst();
-                continue;
-            }
-
-            if (currentParameter.isOptional()) {
-                optionalArgumentHandler.handle(result, this, cursor);
-                continue;
-            }
-
-            ArgumentValueBinder.bindCurrentParameter(this, cursor);
-        }
-
-        var usage = this.getDetectedPathway();
-        Command<S> lastCmd = this.command();
-
-        for (int rPos = 0; rPos < cursor.rawsLength(); rPos++) {
-            String raw = this.getRawArgument(rPos);
-            if (!Patterns.isInputFlag(raw)) {
-                var sub = lastCmd.getSubCommand(raw, false);
-                if (sub != null) {
-                    lastCmd = sub;
-                }
-                continue;
-            }
-            String nextRaw = rPos + 1 < cursor.rawsLength() ? this.getRawArgument(rPos + 1) : null;
-            //identify if its a registered flag
-            Set<FlagArgument<S>> extracted = usage.getFlagExtractor().extract(Patterns.withoutFlagSign(raw));
-            String inputRaw = validateExtractedFlagsAndGetInputRaw(raw, nextRaw, extracted);
-
-            //all flags here must be resolved inside the this
-            for (var flagParam : extracted) {
-
-                var lastCmdPathways = lastCmd.getDedicatedPathways();
-                boolean foundOutsideScope = true;
-                for (var pathway : lastCmdPathways) {
-                    if (pathway.getFlagExtractor().getRegisteredFlags().contains(flagParam)) {
-                        foundOutsideScope = false;
-                        break;
-                    }
-
-                }
-                if (foundOutsideScope) {
-                    throw ResponseException.of(ResponseKey.FLAG_OUTSIDE_SCOPE)
-                                  .withPlaceholder("flag_input", raw)
-                                  .withPlaceholder("wrong_cmd", lastCmd.getName());
-                }
-                this.resolveFlag(
-                        ParsedFlagArgument.forFlag(
-                                flagParam,
-                                raw,
-                                inputRaw,
-                                rPos,
-                                flagParam.isSwitch() ? rPos : rPos + 1,
-                                flagParam.isSwitch() ? true : Objects.requireNonNull(flagParam.flagData().inputType()).parse(this, flagParam,
-                                        inputRaw)
-                        )
-                );
-            }
-
-        }
-
-        for (FlagArgument<S> registered : usage.getFlagExtractor().getRegisteredFlags()) {
-            if (this.hasResolvedFlag(registered.flagData())) {
-                continue;
-            }
-            resolveFlagDefaultValue(registered);
-        }
-
-    }
-
-    private InvalidSyntaxException invalidSyntax(TreeExecutionResult<S> result) {
-        var closestUsage = result.getClosestUsage();
-        String invalidUsage = UsageFormatting.formatInput(
-                imperatConfig().commandPrefix(),
-                getRootCommandLabelUsed(),
-                arguments().join(" ")
-        );
-        return new InvalidSyntaxException(invalidUsage, closestUsage);
-    }
-
-    private void parseMissingOptional(Cursor<S> cursor, Argument<S> optionalParameter) throws CommandException {
-        Object value = getDefaultValue(optionalParameter);
-        this.parseArgument(
-                new ParsedArgument<>(
-                        null,
-                        optionalParameter,
-                        cursor.position().getParameter(),
-                        value
-                )
-        );
-    }
-
-    private Object getDefaultValue(Argument<S> argument) throws CommandException {
-        var supplier = argument.getDefaultValueSupplier();
-        if (supplier.isEmpty()) {
-            return null;
-        }
-        String raw = supplier.provide(this, argument);
-        if (raw == null) {
-            return null;
-        }
-        return argument.type().parse(this, argument, raw);
-    }
-
-    private String validateExtractedFlagsAndGetInputRaw(String currentRaw, @Nullable String nextRaw, Set<FlagArgument<S>> extracted)
-            throws CommandException {
-        long numberOfSwitches = extracted.stream().filter(FlagArgument::isSwitch).count();
-        long numberOfTrueFlags = extracted.size() - numberOfSwitches;
-
-        if (extracted.size() != numberOfSwitches && extracted.size() != numberOfTrueFlags) {
-            throw new CombinedFlagsException("Unsupported use of a mixture of switches and true flags!");
-        }
-
-        if (extracted.size() == numberOfTrueFlags && !TypeUtility.areTrueFlagsOfSameInputType(extracted)) {
-            throw new CombinedFlagsException("You cannot use compressed true-flags, while they are not of same input type");
-        }
-
-        boolean areAllSwitches = extracted.size() == numberOfSwitches;
-
-        String inputRaw = areAllSwitches ? currentRaw : nextRaw;
-        if (!areAllSwitches && inputRaw == null) {
-            throw ResponseException.of(ResponseKey.MISSING_FLAG_INPUT)
-                          .withPlaceholder("flags", extracted.stream().map(FlagArgument::getName).collect(Collectors.joining(",")));
-        }
-        return inputRaw;
-    }
-
-    private void resolveFlagDefaultValue(FlagArgument<S> flagArgument) throws
-            CommandException {
-
-        if (flagArgument.isSwitch()) {
-            this.resolveFlag(
-                    ParsedFlagArgument.forDefaultSwitch(
-                            flagArgument
-                    )
-            );
-            return;
-        }
-
-        String defValue = flagArgument.getDefaultValueSupplier().provide(this, flagArgument);
-        if (defValue != null) {
-            Object flagValueResolved = flagArgument.getDefaultValueSupplier().isEmpty() ? null :
-                                               Objects.requireNonNull(flagArgument.flagData().inputType()).parse(
-                                                       this, flagArgument, defValue);
-            this.resolveFlag(ParsedFlagArgument.forDefaultFlag(flagArgument, defValue, flagValueResolved));
-        }
-    }
-
     @Override
     public void parseArgument(ParsedArgument<S> parsedArgument) throws CommandException {
         var argument = parsedArgument.getOriginalArgument();
@@ -370,9 +191,11 @@ final class ExecutionContextImpl<S extends CommandSource> extends ContextImpl<S>
             }
             return new Registry<>(argument.getName(), parsedArgument, LinkedHashMap::new);
         });
-        allResolvedArgs.setData(argument.getName(), parsedArgument);
+        if (!argument.isCommand()) {
+            allResolvedArgs.setData(argument.getName(), parsedArgument);
+        }
     }
-    
+
 
     @Override
     public Optional<ParsedFlagArgument<S>> getFlag(String flagName) {
@@ -393,30 +216,6 @@ final class ExecutionContextImpl<S extends CommandSource> extends ContextImpl<S>
         return (T) getFlag(flagName)
                            .map(ParsedArgument::getArgumentParsedValue)
                            .orElse(null);
-    }
-
-
-    @Override
-    public <T> void parseArgument(
-            @NotNull Cursor<S> cursor,
-            @Nullable T value
-    ) throws CommandException {
-        var argument = cursor.currentParameterIfPresent();
-        if (argument == null) {
-            throw new IllegalStateException(
-                    "No argument found at index " + cursor.position().parameter + " for command " + getLastUsedCommand().getName());
-        }
-
-        String raw = cursor.currentRawIfPresent();
-        if (argument.type().getNumberOfParametersToConsume(argument) > 1) {
-            StringBuilder builder = new StringBuilder();
-            for (int i = cursor.position().parameter; i <= cursor.position().raw; i++)
-                builder.append(arguments().get(i)).append(" ");
-            raw = builder.toString();
-        }
-
-        final ParsedArgument<S> parsedArgument = new ParsedArgument<>(raw, argument, cursor.position().parameter, value);
-        parseArgument(parsedArgument);
     }
 
     /**
@@ -445,8 +244,14 @@ final class ExecutionContextImpl<S extends CommandSource> extends ContextImpl<S>
     }
 
     @Override
+    public void setLastUsedCommand(@NotNull Command<S> command) {
+        this.lastCommand = command;
+    }
+
+    @Override
     public void setDetectedPathway(CommandPathway<S> pathway) {
         this.pathway = pathway;
+        this.lastCommand = resolveLastCommand(pathway, this.command());
     }
 
     @Override
@@ -456,21 +261,277 @@ final class ExecutionContextImpl<S extends CommandSource> extends ContextImpl<S>
     }
 
     @Override
-    public void debug() {
-        if (allResolvedArgs.size() == 0) {
-            ImperatDebugger.debug("No arguments were resolved!");
-            return;
+    public CommandTreeMatch<S> getTreeMatch() {
+        if (treeMatch == null) {
+            throw new RuntimeException("TreeMatch hasn't been initialized yet!");
         }
-
-        for (var arg : allResolvedArgs.getAll()) {
-            ImperatDebugger.debug("Argument '%s' at index #%s with input='%s' with value='%s'",
-                    arg.getOriginalArgument().format(), arg.getInputPosition(), arg.getArgumentRawInput(), arg.getArgumentParsedValue());
-        }
+        return treeMatch;
     }
 
     @Override
-    public void setTreeResult(TreeExecutionResult<S> treeResult) {
-        this.treeExecutionResult = treeResult;
+    public void setTreeMatch(CommandTreeMatch<S> treeMatch) {
+        this.treeMatch = treeMatch;
+    }
+
+    /**
+     * Drains the tree's parse-result chain into this context's registries.
+     *
+     * <p>The tree walk is the single source of truth: each {@link ParsedNode}
+     * already carries fully-resolved {@link ParseResult}s for its main argument,
+     * its bound optionals, and any inline flags. Trailing flags (those that
+     * appear after the last positional/optional consumed by the chain) live on
+     * a dedicated channel inside {@link CommandTreeMatch} so they can carry
+     * parse errors without polluting the tree's failure-penalty scoring.</p>
+     *
+     * <p>This method:
+     * <ol>
+     *   <li>Iterates the chain and binds command literals, flags, and positional
+     *       arguments. Required positionals with errors throw immediately;
+     *       optional ones fall back to their declared default.</li>
+     *   <li>Drains the trailing-flag channel through the same flag-binding logic
+     *       so malformed value-flags surface their error here, not silently.</li>
+     *   <li>Materialises declared defaults for any pathway argument or flag the
+     *       chain never reached.</li>
+     *   <li>Verifies all required positionals were satisfied and that no
+     *       trailing input remains beyond what greedy-limit rules permit.</li>
+     * </ol></p>
+     */
+    @Override
+    public void parse(List<ParsedNode<S>> parsedNodes) throws Throwable {
+        CommandPathway<S> usage = getDetectedPathway();
+        if (usage == null) {
+            return;
+        }
+
+        // Dedup by argument identity, not name: a subcommand literal and a sibling
+        // positional arg can legitimately share a name (e.g. @SubCommand("warp") with
+        // a Warp positional named "warp"), but they are distinct Argument instances.
+        // Name-based dedup would silently drop the positional's parse result.
+        Set<String> resolvedNames = new HashSet<>();
+        Set<Argument<S>> appliedArgs = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (ParsedNode<S> parsedNode : parsedNodes) {
+            for (ParseResult<S> result : parsedNode.getParseResults().values()) {
+                Argument<S> arg = result.getArgument();
+                if (!appliedArgs.add(arg)) {
+                    continue;
+                }
+                applyParseResult(arg, result);
+                resolvedNames.add(arg.getName());
+            }
+        }
+
+        Map<String, ParseResult<S>> trailingFlags = treeMatch == null
+                                                            ? Collections.emptyMap()
+                                                            : treeMatch.trailingFlagResults();
+        for (ParseResult<S> result : trailingFlags.values()) {
+            Argument<S> arg = result.getArgument();
+            if (!arg.isFlag()) {
+                continue;
+            }
+            applyFlagResult(arg.asFlagParameter(), result);
+        }
+
+        materialiseDeclaredDefaults(usage, resolvedNames);
+        materialiseUnresolvedFlagDefaults(usage);
+        validatePresenceOfRequired(usage);
+        validateNoTrailingInput(usage);
+    }
+
+    /**
+     * Routes a single {@link ParseResult} from the tree to the correct registry.
+     */
+    @SuppressWarnings("unchecked")
+    private void applyParseResult(Argument<S> arg, ParseResult<S> result) throws Throwable {
+        if (arg.isCommand()) {
+            Object resolvedValue = result.getParsedValue();
+            Command<S> resolvedCommand = (resolvedValue instanceof Command<?>)
+                                                 ? (Command<S>) resolvedValue
+                                                 : arg.asCommand();
+            setLastUsedCommand(resolvedCommand);
+            parseArgument(new ParsedArgument<>(result.getInput(), arg, resolvedCommand));
+            return;
+        }
+
+        if (arg.isFlag()) {
+            applyFlagResult(arg.asFlagParameter(), result);
+            return;
+        }
+
+        if (result.getError() != null) {
+            // Required arg with a captured error → always surface.
+            // Optional arg → surface only if the user actually supplied
+            // input for this slot. The result's input field carries the
+            // joined tokens the type tried to parse; a non-empty value
+            // means the user intentionally wrote something here and the
+            // type rejected it. Silently swapping in the default would
+            // mask a real user error. Empty-input optionals (slot not
+            // provided) keep the legacy "use default" behaviour.
+            boolean inputProvided = result.getInput() != null && !result.getInput().isEmpty();
+            if (!arg.isOptional() || inputProvided) {
+                throw result.getError();
+            }
+        }
+        Object value = result.getParsedValue();
+        if (value == null && arg.isOptional()) {
+            value = getDefaultValue(arg);
+        }
+        parseArgument(new ParsedArgument<>(result.getInput(), arg, value));
+    }
+
+    /**
+     * Common flag-binding path used both for chain-resident flags (inside a
+     * node's optional/flag span) and trailing flags (post-chain, carried on a
+     * separate channel by the tree match).
+     *
+     * <p>Note: {@link ParsedFlagArgument#forSwitch} is reserved for switches
+     * that <em>did not appear</em> in the input — its constructor hard-codes
+     * the parsed value to {@code false}. For switches that actually fired we
+     * must use {@link ParsedFlagArgument#forFlag} with {@code Boolean.TRUE},
+     * matching the legacy {@code resolveInputFlags} semantics.</p>
+     */
+    private void applyFlagResult(FlagArgument<S> flag, ParseResult<S> result) throws Throwable {
+        if (result.getError() != null) {
+            throw result.getError();
+        }
+        Object value = flag.isSwitch() ? Boolean.TRUE : result.getParsedValue();
+        resolveFlag(ParsedFlagArgument.forFlag(
+                flag,
+                result.getInput(),
+                result.getInput(),
+                -1,
+                -1,
+                value
+        ));
+    }
+
+    /**
+     * For every optional positional argument declared on the pathway that the
+     * chain never bound, materialise its declared default value and register it
+     * so handler injection sees a complete argument set.
+     */
+    private void materialiseDeclaredDefaults(CommandPathway<S> usage, Set<String> resolvedNames) throws CommandException {
+        for (Argument<S> arg : usage) {
+            if (arg.isCommand() || arg.isFlag()) {
+                continue;
+            }
+            if (resolvedNames.contains(arg.getName())) {
+                continue;
+            }
+            if (!arg.isOptional()) {
+                // Required arguments are validated by validatePresenceOfRequired.
+                continue;
+            }
+            Object defaultValue = getDefaultValue(arg);
+            parseArgument(new ParsedArgument<>(null, arg, defaultValue));
+            resolvedNames.add(arg.getName());
+        }
+    }
+
+    private void materialiseUnresolvedFlagDefaults(CommandPathway<S> usage) throws CommandException {
+        for (FlagArgument<S> registered : usage.getFlagExtractor().getRegisteredFlags()) {
+            if (hasResolvedFlag(registered.flagData())) {
+                continue;
+            }
+            resolveFlagDefaultValue(registered);
+        }
+    }
+
+    private void validatePresenceOfRequired(CommandPathway<S> usage) throws InvalidSyntaxException {
+        for (Argument<S> arg : usage) {
+            if (!arg.isRequired() || arg.isCommand() || arg.isFlag()) {
+                continue;
+            }
+            if (allResolvedArgs.getData(arg.getName()).isEmpty()) {
+                throw invalidSyntax(usage);
+            }
+        }
+    }
+
+    private void validateNoTrailingInput(CommandPathway<S> usage) throws InvalidSyntaxException {
+        if (treeMatch == null) {
+            return;
+        }
+        int consumedIndex = treeMatch.consumedIndex();
+        if (consumedIndex + 1 >= arguments().size()) {
+            return;
+        }
+        if (canIgnoreTrailingRawAfterLimitedGreedy(usage)) {
+            return;
+        }
+        throw invalidSyntax(usage);
+    }
+
+    private boolean canIgnoreTrailingRawAfterLimitedGreedy(CommandPathway<S> usage) {
+        for (int index = usage.size() - 1; index >= 0; index--) {
+            Argument<S> argument = usage.getArgumentAt(index);
+            if (argument == null || argument.isFlag() || argument.isCommand()) {
+                continue;
+            }
+            return (argument.isGreedy() || argument.type().isGreedy(argument)) && argument.greedyLimit() > 0;
+        }
+        return false;
+    }
+
+    private Object getDefaultValue(Argument<S> argument) throws CommandException {
+        var supplier = argument.getDefaultValueSupplier();
+        if (supplier.isEmpty()) {
+            return null;
+        }
+        String raw = supplier.provide(this, argument);
+        if (raw == null) {
+            return null;
+        }
+        return argument.type().parse(
+                this,
+                argument,
+                studio.mevera.imperat.command.arguments.type.Cursor.single(this, raw)
+        );
+    }
+
+    private void resolveFlagDefaultValue(FlagArgument<S> flagArgument) throws CommandException {
+        if (flagArgument.isSwitch()) {
+            this.resolveFlag(ParsedFlagArgument.forDefaultSwitch(flagArgument));
+            return;
+        }
+
+        String defValue = flagArgument.getDefaultValueSupplier().provide(this, flagArgument);
+        if (defValue != null) {
+            // Blank defaults (`@Default("")`, `@Default(" ")`) signal
+            // "no value, keep null at runtime" — the input type's parse
+            // would typically reject blank input ("Input is empty"),
+            // skip parse entirely and register the flag with a null
+            // resolved value.
+            boolean parsable = !flagArgument.getDefaultValueSupplier().isEmpty()
+                    && !defValue.isBlank();
+            Object flagValueResolved = parsable
+                    ? Objects.requireNonNull(flagArgument.flagData().inputType()).parse(
+                            this,
+                            flagArgument,
+                            studio.mevera.imperat.command.arguments.type.Cursor.single(this, defValue))
+                    : null;
+            this.resolveFlag(ParsedFlagArgument.forDefaultFlag(flagArgument, defValue, flagValueResolved));
+        }
+    }
+
+    private InvalidSyntaxException invalidSyntax(CommandPathway<S> usage) {
+        StringBuilder invalidUsage = new StringBuilder(this.getRootCommandLabelUsed());
+        for (String raw : arguments()) {
+            invalidUsage.append(" ").append(raw);
+        }
+        return new InvalidSyntaxException(invalidUsage.toString(), usage);
+    }
+
+    private @NotNull Command<S> resolveLastCommand(@Nullable CommandPathway<S> pathway, @NotNull Command<S> fallback) {
+        if (pathway == null) {
+            return fallback;
+        }
+        Command<S> resolved = fallback;
+        for (Argument<S> argument : pathway.getArguments()) {
+            if (argument.isCommand()) {
+                resolved = argument.asCommand();
+            }
+        }
+        return resolved;
     }
 
 }

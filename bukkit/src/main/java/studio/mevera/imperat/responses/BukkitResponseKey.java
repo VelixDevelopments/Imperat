@@ -25,6 +25,12 @@ public interface BukkitResponseKey extends ResponseKey {
     BukkitResponseKey INVALID_SELECTOR_FIELD = () -> "invalid-selector-field";
     BukkitResponseKey UNKNOWN_SELECTOR_FIELD = () -> "unknown-selector-field";
     BukkitResponseKey UNKNOWN_SELECTION_TYPE = () -> "unknown-selection-type";
+    BukkitResponseKey SELECTOR_INVALID_NUMERIC_VALUE = () -> "selector-invalid-numeric-value";
+    BukkitResponseKey SELECTOR_INVALID_RANGE_FORMAT = () -> "selector-invalid-range-format";
+    BukkitResponseKey SELECTOR_UNKNOWN_GAMEMODE = () -> "selector-unknown-gamemode";
+    BukkitResponseKey SELECTOR_UNKNOWN_ENTITY_TYPE = () -> "selector-unknown-entity-type";
+    BukkitResponseKey SELECTOR_DISTANCE_PLAYER_ONLY = () -> "selector-distance-player-only";
+    BukkitResponseKey SELECTOR_UNKNOWN_SORT_OPTION = () -> "selector-unknown-sort-option";
 
 }
 

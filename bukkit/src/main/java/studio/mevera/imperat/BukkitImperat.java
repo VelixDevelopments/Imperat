@@ -2,37 +2,41 @@ package studio.mevera.imperat;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.command.UnknownCommandEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.adventure.AdventureProvider;
-import studio.mevera.imperat.brigadier.BukkitBrigadierManager;
+import studio.mevera.imperat.backend.BukkitBackend;
+import studio.mevera.imperat.backend.capability.BukkitCapability;
+import studio.mevera.imperat.backend.capability.CapabilityResolver;
+import studio.mevera.imperat.backend.capability.RegistrationCapability;
 import studio.mevera.imperat.command.Command;
+import studio.mevera.imperat.providers.CommandSourceMapper;
 import studio.mevera.imperat.util.ImperatDebugger;
 import studio.mevera.imperat.util.StringUtils;
+import studio.mevera.imperat.util.reflection.Reflections;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.jar.JarFile;
 
 /**
  * Main Imperat implementation for Bukkit/Spigot/Paper servers.
  * This class serves as the primary entry point for integrating the Imperat command framework
  * with Bukkit-based server platforms, providing comprehensive command management capabilities.
  *
- * <p>Key Features:</p>
- * <ul>
- *   <li>Full integration with Bukkit's command system</li>
- *   <li>Adventure API support for rich text messaging</li>
- *   <li>Brigadier integration for Paper servers (optional)</li>
- *   <li>Built-in parameter types for Bukkit objects (Players, Locations, etc.)</li>
- *   <li>Entity selector support (@p, @a, @e, @r)</li>
- *   <li>Automatic command registration and cleanup</li>
- * </ul>
+ * <p>Backend selection is automatic — at construction time the runtime classpath
+ * is probed; if Paper's modern Brigadier API ({@code io.papermc.paper.command.brigadier.Commands})
+ * <i>and</i> the lifecycle event types are present, the modern backend is selected
+ * and Brigadier integration is wired transparently. Otherwise the legacy backend
+ * registers commands via Bukkit's command-map reflection with no Brigadier on the
+ * legacy path.</p>
+ *
+ * <p>Plugin authors choose nothing — both classpaths produce the same
+ * {@code BukkitImperat} entry-point.</p>
  *
  * <p>Usage Example:</p>
  * <pre>{@code
@@ -41,10 +45,7 @@ import java.util.jar.JarFile;
  *
  *     @Override
  *     public void onEnable() {
- *         imperat = BukkitImperat.builder(this)
- *             .applyBrigadier(true)  // Enable for Paper
- *             .build();
- *
+ *         imperat = BukkitImperat.builder(this).build();
  *         imperat.registerCommand(MyCommand.class);
  *     }
  *
@@ -62,26 +63,25 @@ import java.util.jar.JarFile;
  * @see BukkitConfigBuilder
  * @see BukkitCommandSource
  */
-public final class BukkitImperat extends BaseImperat<BukkitCommandSource> {
+public final class BukkitImperat<S extends BukkitCommandSource> extends BaseImperat<S> {
 
     private final Plugin plugin;
-    private final boolean paperPlugin;
     private final AdventureProvider<CommandSender> adventureProvider;
-    private BukkitBrigadierManager brigadierManager;
+    private final RegistrationCapability<S> backend;
     private Map<String, org.bukkit.command.Command> bukkitCommands = new HashMap<>();
 
     @SuppressWarnings("unchecked") BukkitImperat(
             Plugin plugin,
             AdventureProvider<CommandSender> adventureProvider,
-            boolean supportBrigadier,
-            ImperatConfig<BukkitCommandSource> config
+            ImperatConfig<S> config,
+            boolean rewriteUnknownCommandMessage
     ) {
         super(config);
         this.plugin = plugin;
-        this.paperPlugin = isPaperPlugin(plugin);
         this.adventureProvider = adventureProvider;
 
         ImperatDebugger.setLogger(plugin.getLogger());
+
         try {
             if (BukkitUtil.KNOWN_COMMANDS != null) {
                 this.bukkitCommands = (Map<String, org.bukkit.command.Command>)
@@ -91,55 +91,160 @@ public final class BukkitImperat extends BaseImperat<BukkitCommandSource> {
             throw new RuntimeException(e);
         }
 
-        if (supportBrigadier) {
-            applyBrigadier();
-        } else {
-            applyAsyncTabListener();
+        // Capability resolver picks the right registration backend based on
+        // runtime class probes (modern Paper > legacy Paper Brigadier event >
+        // Commodore > plain CommandMap). Impl class is loaded reflectively
+        // — probed-but-unselected impls never hit the classloader.
+        this.backend = CapabilityResolver.resolve(plugin);
+        this.backend.initialize(plugin, this, adventureProvider);
+
+        // Argument-type defaults are registered LATE — backend-specific.
+        backend.applyArgumentTypeDefaults(config);
+
+        // Permission-denied rewrite via UnknownCommandEvent is independent
+        // of registration backend — wired here so all Bukkit-flavoured
+        // backends benefit when the option is enabled. UnknownCommandEvent
+        // was added in 1.13 (CB/Spigot/Paper); on 1.8.x–1.12.x the class
+        // doesn't exist and PluginManager.registerEvents reflects on the
+        // listener's @EventHandler methods at registration time, throwing
+        // NoClassDefFoundError. Gate the registration on runtime class
+        // presence so legacy servers boot the plugin instead of crashing.
+        if (rewriteUnknownCommandMessage
+                    && Reflections.findClass("org.bukkit.event.command.UnknownCommandEvent")) {
+            registerUnknownCommandListener();
         }
+
+        // AsyncTabCompleteEvent listener — registered ONLY on the plain
+        // CommandMap backend, where Brigadier ISN'T producing native
+        // suggestions and the listener's flat Imperat-tree output is the
+        // only path to tab completion. On Brigadier-capable backends
+        // (modern Paper, legacy Paper, Commodore) this event also fires
+        // AFTER Brigadier populates completions; the listener's
+        // {@code event.setCompletions(...)} + {@code setHandled(true)}
+        // would overwrite native selector menus, filter keys, and other
+        // rich client-side autocomplete with our flat list. Gating on
+        // capability keeps the two paths mutually exclusive.
+        if (Version.SUPPORTS_PAPER_ASYNC_TAB_COMPLETION
+                    && backend.kind() == BukkitCapability.PLAIN_COMMAND_MAP) {
+            plugin.getServer().getPluginManager().registerEvents(new AsyncTabListener(this), plugin);
+        }
+
+        registerAutoCleanupListener();
     }
 
     /**
-     * Creates a new configuration builder for BukkitImperat.
-     * This is the recommended way to create and configure a BukkitImperat instance.
+     * Auto-unregisters Imperat commands when the owning plugin is disabled.
+     * Bukkit's {@link org.bukkit.command.CommandMap} doesn't unregister
+     * plugin-scoped entries on plugin disable — without this listener,
+     * a hot-reload or {@code /reload} leaves orphan command entries that
+     * either ghost on the next enable or trip the registration's
+     * "command already registered" path. Mirrors the standard
+     * {@code PluginDisableEvent} cleanup pattern other command frameworks
+     * use.
      *
-     * @param plugin the plugin instance that will own this Imperat instance
-     * @return a new BukkitConfigBuilder for further configuration
+     * <p>Calls {@link #unregisterAllCommands()} + {@link #shutdownPlatform()}
+     * — both are safe to call again from the user's {@code onDisable}
+     * (registry is empty after the first run; backend's
+     * {@code adventureProvider.close()} is null-guarded).</p>
      */
-    public static BukkitConfigBuilder builder(Plugin plugin) {
-        return new BukkitConfigBuilder(plugin, false);
+    private void registerAutoCleanupListener() {
+        plugin.getServer().getPluginManager().registerEvents(new Listener() {
+            @EventHandler(priority = EventPriority.HIGHEST)
+            public void onPluginDisable(org.bukkit.event.server.PluginDisableEvent event) {
+                if (event.getPlugin() == plugin) {
+                    unregisterAllCommands();
+                    shutdownPlatform();
+                }
+            }
+        }, plugin);
+    }
+
+    private static String stripLabel(@NotNull String commandLine) {
+        String trimmed = commandLine.startsWith("/") ? commandLine.substring(1) : commandLine;
+        int space = trimmed.indexOf(' ');
+        String label = space >= 0 ? trimmed.substring(0, space) : trimmed;
+        return label.isEmpty() ? null : label.toLowerCase();
     }
 
     /**
-     * Creates a new configuration builder for BukkitImperat.
-     * This is the recommended way to create and configure a BukkitImperat instance.
-     *
-     * @param plugin the plugin instance that will own this Imperat instance
-     * @param integrateWithBrigadier whether to enable Brigadier integration (Paper only)
-     * @return a new BukkitConfigBuilder for further configuration
+     * Default-source builder. The canonical {@code S} is the platform's
+     * own {@link BukkitCommandSource} and the mapper is the identity.
      */
-    public static BukkitConfigBuilder builder(Plugin plugin, boolean integrateWithBrigadier) {
-        return new BukkitConfigBuilder(plugin, integrateWithBrigadier);
+    public static BukkitConfigBuilder<BukkitCommandSource> builder(Plugin plugin) {
+        return new BukkitConfigBuilder<>(plugin, BukkitCommandSource.class, CommandSourceMapper.identity());
+    }
+
+    /**
+     * Custom-source builder — both the source class token AND the mapper
+     * are required at construction. There is no half-configured state:
+     * either the user supplies both pieces (custom path) or neither
+     * (default path via {@link #builder(Plugin)}).
+     */
+    public static <S extends BukkitCommandSource> BukkitConfigBuilder<S> builder(
+            Plugin plugin, Class<S> sourceClass, CommandSourceMapper<BukkitCommandSource, S> mapper
+    ) {
+        return new BukkitConfigBuilder<>(plugin, sourceClass, mapper);
+    }
+
+    private void registerUnknownCommandListener() {
+        plugin.getServer().getPluginManager().registerEvents(new Listener() {
+            @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+            public void onUnknown(UnknownCommandEvent event) {
+                String line = event.getCommandLine();
+                if (line == null || line.isEmpty()) {
+                    return;
+                }
+                String label = stripLabel(line);
+                if (label == null) {
+                    return;
+                }
+                Command<S> imperatCommand = getCommand(label);
+                if (imperatCommand == null) {
+                    return;
+                }
+                event.message(null);
+                execute(wrapSender(event.getSender()), line);
+            }
+        }, plugin);
+    }
+
+    /** @return the active backend (modern Paper, legacy Paper, Commodore, or plain CommandMap). */
+    public BukkitBackend<S> backend() {
+        return backend;
+    }
+
+    /** @return the capability that satisfied the runtime probe — for diagnostics. */
+    public BukkitCapability capability() {
+        return backend.kind();
     }
 
     @Override
-    public BukkitCommandSource createDummySender() {
-        return new BukkitCommandSource(Bukkit.getConsoleSender(), adventureProvider);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public S createDummySender() {
+        BukkitCommandSource platform = new BukkitCommandSource(Bukkit.getConsoleSender(), adventureProvider);
+        // Lift via the user's mapper so a dummy sender produced for
+        // tree-only phases (parse-without-source, suggestion previews,
+        // help printers) is the same canonical type the rest of the
+        // framework operates on.
+        CommandSourceMapper mapper = config().sourceMapper();
+        return (S) mapper.wrap(platform);
     }
 
     /**
-     * Wraps the sender into a built-in command-sender valueType
+     * Wraps the sender into the platform-aware command-source type. Modern
+     * backend may receive a Paper {@code CommandSourceStack}; legacy backend
+     * always receives a {@code CommandSender}. Backend-specific logic is
+     * delegated to the active {@link BukkitBackend}.
      *
-     * @param sender the sender's actual value
-     * @return the wrapped command-sender valueType
+     * @param sender the platform sender (CommandSender or CommandSourceStack)
+     * @return the wrapped command source
      */
     @Override
-    public BukkitCommandSource wrapSender(Object sender) {
-        return new BukkitCommandSource((CommandSender) sender, adventureProvider);
+    public S wrapSender(Object sender) {
+        return backend.wrapSender(sender);
     }
 
-    /**
-     * @return the platform of the module
-     */
+    /** @return the platform plugin instance. */
     @Override
     public Plugin getPlatform() {
         return plugin;
@@ -147,8 +252,7 @@ public final class BukkitImperat extends BaseImperat<BukkitCommandSource> {
 
     @Override
     public void shutdownPlatform() {
-        this.adventureProvider.close();
-        Bukkit.getPluginManager().disablePlugin(plugin);
+        backend.shutdown();
     }
 
     /**
@@ -157,27 +261,12 @@ public final class BukkitImperat extends BaseImperat<BukkitCommandSource> {
      * @param command the command to register
      */
     @Override
-    public void registerSimpleCommand(Command<BukkitCommandSource> command) {
+    public void registerSimpleCommand(Command<S> command) {
         super.registerSimpleCommand(command);
-
-        //let's make a safety check for the plugin.yml
-        if (!paperPlugin && plugin instanceof JavaPlugin javaPlugin) {
-            var existingPluginYamlCmd = javaPlugin.getCommand(command.getName().toLowerCase());
-            if (existingPluginYamlCmd != null) {
-                throw new IllegalArgumentException("RootCommand with name '" + command.getName() + "' already exists in plugin.yml!");
-            }
-        }
-
-        var internalCmd = new InternalBukkitCommand(this, command);
-
-        BukkitUtil.COMMAND_MAP.register(this.plugin.getName(), internalCmd);
-
-        if (brigadierManager != null) {
-            brigadierManager.registerBukkitCommand(internalCmd, command, config.getPermissionChecker());
-        }
+        backend.registerCommand(command);
     }
 
-    public void updateCommand(Command<BukkitCommandSource> command) {
+    public void updateCommand(Command<S> command) {
         registerSimpleCommand(command);
     }
 
@@ -188,7 +277,7 @@ public final class BukkitImperat extends BaseImperat<BukkitCommandSource> {
      */
     @Override
     public void unregisterCommand(String name) {
-        Command<BukkitCommandSource> imperatCmd = getCommand(name);
+        Command<S> imperatCmd = getCommand(name);
         super.unregisterCommand(name);
 
         if (imperatCmd == null) {
@@ -225,37 +314,5 @@ public final class BukkitImperat extends BaseImperat<BukkitCommandSource> {
                 throw new RuntimeException(e);
             }
         }
-        //BukkitUtil.COMMAND_MAP.clearCommands();
     }
-
-
-    private void applyBrigadier() {
-        if (Version.isOrOver(1, 13, 0)) {
-            brigadierManager = BukkitBrigadierManager.load(this);
-        }
-    }
-
-    private void applyAsyncTabListener() {
-        if (Version.SUPPORTS_PAPER_ASYNC_TAB_COMPLETION) {
-            plugin.getServer().getPluginManager().registerEvents(new AsyncTabListener(this), plugin);
-        }
-    }
-
-    private boolean isPaperPlugin(Plugin plugin) {
-        if (!Version.IS_PAPER || Version.isOrBelow(1, 13, 0)) {
-            return false;
-        }
-
-        try {
-            URI uri = plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
-
-            try (JarFile jar = new JarFile(new File(uri))) {
-                return jar.getEntry("paper-plugin.yml") != null;
-            }
-        } catch (IOException | URISyntaxException e) {
-            config().getThrowablePrinter().print(e);
-            return false;
-        }
-    }
-
 }

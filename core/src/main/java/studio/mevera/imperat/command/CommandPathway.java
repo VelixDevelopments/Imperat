@@ -1,5 +1,6 @@
 package studio.mevera.imperat.command;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.mevera.imperat.Imperat;
@@ -33,7 +34,7 @@ import java.util.function.Predicate;
  *
  * @see Command
  */
-public sealed interface CommandPathway<S extends CommandSource> extends Iterable<Argument<S>>, PermissionHolder, DescriptionHolder, CooldownHolder
+public sealed interface CommandPathway<S extends CommandSource> extends Iterable<Argument<S>>, PermissionHolder, DescriptionHolder
         permits CommandPathwayImpl {
 
 
@@ -56,11 +57,15 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
     static <S extends CommandSource> String format(@Nullable String label, CommandPathway<S> usage) {
         Preconditions.notNull(usage, "usage");
         StringBuilder builder = new StringBuilder(label == null ? "" : label);
-        if (label != null) {
+        List<Argument<S>> params = usage.getArgumentsWithFlags();
+        // Only insert the label-args separator when both sides exist —
+        // avoids a trailing space for label-only output (no-arg
+        // subcommand pathways where {@code formatted()} renders just
+        // the subcommand-chain prefix).
+        if (label != null && !params.isEmpty()) {
             builder.append(' ');
         }
 
-        List<Argument<S>> params = usage.getArgumentsWithFlags();
         int i = 0;
         for (Argument<S> parameter : params) {
             builder.append(parameter.format());
@@ -86,6 +91,16 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
     }
 
     @Nullable MethodElement getMethodElement();
+
+    /**
+     * The command this pathway is registered against. Set during
+     * {@link Command#addPathway(CommandPathway)} so the default
+     * {@link #formatted()} implementation can build a subcommand-chain
+     * prefix even when the pathway has zero positional arguments. May be
+     * {@code null} for legacy / programmatically-built pathways that
+     * never went through {@code addPathway}.
+     */
+    @Nullable Command<S> getOwningCommand();
 
     /**
      * Retrieves the flag extractor instance for parsing command flags from input strings.
@@ -173,6 +188,23 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
     List<Argument<S>> getArguments();
 
     /**
+     * Required (non-flag) positional arguments in declaration order. The
+     * pathway invariant guarantees these all appear BEFORE any optional
+     * arguments — middle-positioned optionals are rejected at
+     * {@link #addArguments} time.
+     */
+    @org.jetbrains.annotations.NotNull
+    List<Argument<S>> getRequiredArguments();
+
+    /**
+     * Tail (non-flag) positional optional arguments in declaration order.
+     * Always appear AFTER every required argument. Empty when the usage has
+     * no positional optionals.
+     */
+    @org.jetbrains.annotations.NotNull
+    List<Argument<S>> getTailOptionalArguments();
+
+    /**
      * The pre-defined syntax examples for this usage.
      * @return the pre-defined examples for this {@link CommandPathway}
      */
@@ -202,6 +234,35 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
      */
     @NotNull
     CommandExecution<S> getExecution();
+
+    /**
+     * Whether this pathway is the framework-injected fallback built from
+     * {@link studio.mevera.imperat.ImperatConfig#getGlobalDefaultPathway()}
+     * during command construction (the "invalid usage" handler), as opposed
+     * to a user-authored pathway. Fallback pathways carry a real execution
+     * but must not count as executable targets for suggestion visibility.
+     */
+    @ApiStatus.Internal
+    default boolean isSyntheticFallback() {
+        return false;
+    }
+
+    /**
+     * Whether this pathway can actually run user code — either through an
+     * annotated method element or through a programmatic execution supplied
+     * via {@link Builder#execute(CommandExecution)}. Synthetic pathways —
+     * ones keeping the shared {@link CommandExecution#empty()} instance or
+     * marked as the {@link #isSyntheticFallback() framework fallback} —
+     * report {@code false}. Suggestion-visibility walks use this instead of
+     * a method-element-only check so builder-API commands are not hidden
+     * from tab completion.
+     */
+    default boolean isExecutable() {
+        if (getMethodElement() != null) {
+            return true;
+        }
+        return !isSyntheticFallback() && getExecution() != CommandExecution.empty();
+    }
 
     /**
      * @param clazz the valueType of the parameter to check upon
@@ -289,6 +350,31 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
     }
 
     default String formatted() {
+        // Prefer the explicit owning command (set during addPathway) so
+        // subcommand-chain prefixes are reachable even when the pathway
+        // has zero positional arguments. Fall back to arguments[0].getParent()
+        // for programmatically-built pathways that bypassed
+        // {@code Command.addPathway}.
+        Command<S> owner = getOwningCommand();
+        if (owner == null) {
+            List<Argument<S>> arguments = getArgumentsWithFlags();
+            if (!arguments.isEmpty() && !arguments.get(0).isCommand()) {
+                owner = arguments.get(0).getParent();
+            }
+        }
+
+        if (owner != null && owner.hasParent()) {
+            List<String> prefixes = new ArrayList<>();
+            Command<S> current = owner;
+            while (current != null && current.hasParent()) {
+                prefixes.add(0, current.getName());
+                current = current.getParent();
+            }
+
+            if (!prefixes.isEmpty()) {
+                return format(String.join(" ", prefixes), this);
+            }
+        }
         return format((String) null, this);
     }
 
@@ -308,10 +394,15 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
         private PermissionsData permission = PermissionsData.empty();
         private CommandCoordinator<S> commandCoordinator = CommandCoordinator.sync();
         private @Nullable MethodElement methodElement;
-        private CooldownRecord cooldown = null;
+        private @Nullable CooldownHandler<S> cooldownHandler;
 
         Builder(@Nullable MethodElement methodElement) {
             this.methodElement = methodElement;
+        }
+
+        public Builder<S> cooldownHandler(@Nullable CooldownHandler<S> cooldownHandler) {
+            this.cooldownHandler = cooldownHandler;
+            return this;
         }
 
         Builder() {
@@ -354,12 +445,7 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
         }
 
         public Builder<S> cooldown(long value, TimeUnit unit, @Nullable String permission) {
-            this.cooldown = new CooldownRecord(value, unit, permission);
-            return this;
-        }
-
-        public Builder<S> cooldown(@Nullable CooldownRecord cooldown) {
-            this.cooldown = cooldown;
+            this.cooldownHandler = CooldownHandler.createShared(new CooldownRecord(value, unit, permission));
             return this;
         }
 
@@ -424,7 +510,7 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
             impl.setCoordinator(commandCoordinator);
             impl.setPermissionData(permission);
             impl.describe(description);
-            impl.setCooldown(cooldown);
+            impl.setOwningCommand(command);
 
             // Then set personal parameters (these are used for tree building)
             impl.addArguments(
@@ -435,6 +521,9 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
 
             flagArguments.forEach(impl::addFlag);
             impl.addExamples(this.examples);
+            if (cooldownHandler != null) {
+                impl.setCooldownHandler(cooldownHandler);
+            }
             return impl;
         }
 
@@ -446,8 +535,9 @@ public sealed interface CommandPathway<S extends CommandSource> extends Iterable
             return execution;
         }
 
-        public CooldownRecord getCooldown() {
-            return cooldown;
+        @Nullable
+        public CooldownHandler<S> getCooldownHandler() {
+            return cooldownHandler;
         }
 
         public Description getDescription() {

@@ -6,8 +6,6 @@ import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.DefaultValueProvider;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
-import studio.mevera.imperat.context.ExecutionContext;
-import studio.mevera.imperat.context.internal.Cursor;
 import studio.mevera.imperat.exception.CommandException;
 import studio.mevera.imperat.providers.SuggestionProvider;
 import studio.mevera.imperat.util.TypeCapturer;
@@ -22,8 +20,20 @@ import java.util.List;
 
 /**
  * Base class for defining parameter types in a command processing framework.
- * This class handles the basic functionality for managing type information and
- * suggestions for parameters.
+ *
+ * <p>Argument types parse raw input tokens into typed values. The parse
+ * contract is a single method, {@link #parse(CommandContext, Argument, Cursor)},
+ * which receives a transactional {@link Cursor} over the input tokens the
+ * command tree has allocated to this argument. The cursor is detached: the
+ * tree commits a successful parse's advancement back to the underlying input
+ * stream and silently rolls back on a thrown {@link CommandException}.</p>
+ *
+ * <p>For the common single-token case, prefer extending
+ * {@link SimpleArgumentType} — it handles the cursor and exposes a String
+ * input. For greedy types that consume all remaining tokens (with optional
+ * limit and downstream-aware reservation), extend {@link GreedyArgumentType}.
+ * Extend this class directly only when you need full cursor control: peek,
+ * consume a variable number of tokens based on input shape, etc.</p>
  *
  * @param <S> The type of the source from which the command originates.
  * @param <T> The type of the parameter being handled.
@@ -80,38 +90,26 @@ public abstract class ArgumentType<S extends CommandSource, T>
 
 
     /**
-     * Parses the argument value from the given input string, using the provided
-     * execution context. This method is responsible for converting the raw input into the appropriate type,
-     * handling any necessary validation or error handling during the parsing process.
+     * Parses the argument value by reading from {@code cursor}.
      *
-     * @param context  the execution context.
-     * @param argument the argument with this type.
-     * @param input    the raw input string to parse.
+     * <p>The cursor is a detached snapshot; the tree commits the cursor's
+     * final position back to the underlying input stream only on a successful
+     * return. Throwing any {@link CommandException} signals a parse failure
+     * and rolls back any tokens this type consumed from the cursor.</p>
+     *
+     * <p>Implementations should consume the tokens that comprise this
+     * argument's value and return the parsed result. Tokens not consumed
+     * within this argument's budget are returned to the input stream for
+     * subsequent arguments.</p>
+     *
+     * @param context  the execution / command context.
+     * @param argument the argument descriptor (name, position, modifiers).
+     * @param cursor   a transactional cursor over the input tokens allocated
+     *                 to this argument.
      * @return the resolved value of type T.
      * @throws CommandException if parsing fails.
      */
-    public abstract T parse(@NotNull CommandContext<S> context, @NotNull Argument<S> argument, @NotNull String input) throws CommandException;
-
-    /**
-     * Parses the argument value from the current position of the cursor, using the provided
-     * execution context. This method fetches the input from the cursor and delegates to
-     * {@link #parse(CommandContext, Argument, String)}. This is the main entry point for argument parsing
-     * during command execution.
-     *
-     * @param context the execution context.
-     * @param cursor the command input stream.
-     * @return the resolved value of type T.
-     * @throws CommandException if parsing fails.
-     */
-    public T parse(@NotNull ExecutionContext<S> context, @NotNull Cursor<S> cursor) throws CommandException {
-        Argument<S> currentArgument = cursor.currentParameterIfPresent();
-        assert currentArgument != null;
-        String input = isGreedy(currentArgument) ? cursor.collectRawArguments(currentArgument.greedyLimit()) : cursor.currentRawIfPresent();
-        if (input == null) {
-            throw new IllegalArgumentException("No input available at cursor position");
-        }
-        return parse(context, currentArgument, input);
-    }
+    public abstract T parse(@NotNull CommandContext<S> context, @NotNull Argument<S> argument, @NotNull Cursor<S> cursor) throws CommandException;
 
     /**
      * Returns the suggestion resolver associated with this parameter type.

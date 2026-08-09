@@ -2,7 +2,9 @@ package studio.mevera.imperat.selector.field;
 
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.context.CommandContext;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.BukkitResponseKey;
 import studio.mevera.imperat.util.TypeUtility;
 import studio.mevera.imperat.util.TypeWrap;
 
@@ -54,16 +56,19 @@ public final class RangedNumericField<N extends Number> extends AbstractField<Ra
             } else {
                 String[] minMaxSplit = value.split(RANGE_CHARACTER);
                 if (minMaxSplit.length > 2) {
-                    throw new CommandException("Invalid distance range format '%s'", value);
+                    throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_RANGE_FORMAT, value)
+                            .withPlaceholder("reason", "");
                 }
                 String minStr = minMaxSplit[0], maxStr = minMaxSplit[1];
 
                 if (!TypeUtility.isNumber(minStr)) {
-                    throw new CommandException("Invalid min-value '%s'", minStr);
+                    throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_RANGE_FORMAT, value)
+                            .withPlaceholder("reason", " (invalid min-value '" + minStr + "')");
                 }
 
                 if (!TypeUtility.isNumber(maxStr)) {
-                    throw new CommandException("Invalid max-value '%s'", maxStr);
+                    throw new ArgumentParseException(BukkitResponseKey.SELECTOR_INVALID_RANGE_FORMAT, value)
+                            .withPlaceholder("reason", " (invalid max-value '" + maxStr + "')");
                 }
 
                 N min = numericField.parseFieldValue(minStr, context), max = numericField.parseFieldValue(maxStr, context);

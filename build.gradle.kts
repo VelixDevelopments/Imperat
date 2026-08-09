@@ -4,10 +4,10 @@ plugins {
     kotlin("jvm") version "2.3.0" apply false
 }
 
-val baseVersion = "3.5.1"
+val baseVersion = "4.0.0"
 val releaseSnapshots = true
 val isSnapshot = System.getenv("SNAPSHOT_BUILD") == "true"
-val rootJavaVersion = 17
+val rootJavaVersion = 21
 
 tasks.register("printReleaseSnapshots") {
     doLast {
@@ -34,7 +34,7 @@ allprojects {
     }
 
     extra.apply {
-        val kyoriVersion = "4.24.0"
+        val kyoriVersion = "5.1.1"
         val kyoriPlatformVersion = "4.4.1"
 
         set("kyori", fun(module: String): String {
@@ -70,10 +70,6 @@ tasks.withType<JavaCompile>().configureEach {
 
 subprojects {
     apply(plugin = "java-library")
-
-    if (project.name == "paper") {
-        return@subprojects
-    }
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"

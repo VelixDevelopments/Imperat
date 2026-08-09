@@ -188,7 +188,7 @@ internal abstract class AbstractKotlinCommandClassParser<S : CommandSource>(
             .description(basePathway.description)
             .examples(*basePathway.examples.toTypedArray())
             .apply {
-                basePathway.cooldown?.let { cd ->
+                basePathway.cooldownHandler?.usageCooldown?.orElse(null)?.let { cd ->
                     cooldown(cd.value(), cd.unit(), cd.permission())
                 }
             }
@@ -218,11 +218,12 @@ internal abstract class AbstractKotlinCommandClassParser<S : CommandSource>(
             .permission(basePathway.permission)
             .description(basePathway.description)
             .examples(*basePathway.examples.toTypedArray())
+            .withFlags(basePathway.flagArguments)
+            .coordinator(CoroutineCommandCoordinator(coroutineScope))
             .apply {
-                basePathway.cooldown?.let { cd ->
+                basePathway.cooldownHandler?.usageCooldown?.orElse(null)?.let { cd ->
                     cooldown(cd.value(), cd.unit(), cd.permission())
                 }
-                coordinator(CoroutineCommandCoordinator(coroutineScope))
             }
     }
 

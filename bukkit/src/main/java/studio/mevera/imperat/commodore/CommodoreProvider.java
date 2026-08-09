@@ -63,23 +63,10 @@ public final class CommodoreProvider {
 
         Plugin plugin = imperat.getPlatform();
 
-        try {
-            ImperatDebugger.debug("Hooking into ModernPaperCommodore...");
-            return new ModernPaperCommodore(plugin);
-        } catch (Throwable e) {
-            printDebugInfo(imperat, e);
-        }
-
-        // try the paper impl
-        try {
-            ImperatDebugger.debug("Hooking into LegacyPaperCommodore...");
-            return new LegacyPaperCommodore(imperat);
-        } catch (Throwable e) {
-            //printDebugInfo(e);
-            ImperatDebugger.warning("Paper not found, falling back to Reflection for brigadier");
-        }
-
-        // try reflection impl
+        // The capability layer (CapabilityResolver) routes modern Paper +
+        // legacy Paper Brigadier paths through dedicated registrations —
+        // Commodore is reserved for Spigot/pre-Brigadier-event Paper
+        // (1.13 to 1.18.x). Only the reflection-based impl applies here.
         try {
             ImperatDebugger.debug("Hooking into ReflectionCommodore...");
             ReflectionCommodore.ensureSetup();

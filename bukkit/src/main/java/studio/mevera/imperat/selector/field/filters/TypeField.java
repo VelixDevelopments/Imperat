@@ -4,8 +4,9 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.context.CommandContext;
-import studio.mevera.imperat.context.internal.Cursor;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.BukkitResponseKey;
 import studio.mevera.imperat.selector.EntityCondition;
 import studio.mevera.imperat.util.TypeWrap;
 
@@ -27,8 +28,7 @@ final class TypeField extends PredicateField<EntityType> {
     }
 
     @Override
-    protected @NotNull EntityCondition getCondition(EntityType value, Cursor<BukkitCommandSource> cursor,
-            CommandContext<BukkitCommandSource> context) {
+    protected @NotNull EntityCondition getCondition(EntityType value, CommandContext<BukkitCommandSource> context) {
         return (sender, entity) -> entity.getType() == value;
     }
 
@@ -45,7 +45,7 @@ final class TypeField extends PredicateField<EntityType> {
         try {
             return EntityType.valueOf(value.toUpperCase());
         } catch (EnumConstantNotPresentException ex) {
-            throw new CommandException("Unknown entity-type '%s'", value);
+            throw new ArgumentParseException(BukkitResponseKey.SELECTOR_UNKNOWN_ENTITY_TYPE, value);
         }
     }
 }

@@ -55,6 +55,32 @@ public sealed interface ResolverRegistrar<S extends CommandSource> permits Imper
      */
     <T> void registerContextArgumentProvider(Type type, @NotNull ContextArgumentProvider<S, T> resolver);
 
+    /**
+     * Registers a {@link SourceProvider} for a derived view of the canonical
+     * source. Consulted by
+     * {@link studio.mevera.imperat.context.ExecutionContext#provideSource(Type)}
+     * after the {@code S}-identity fast path and before the
+     * {@code source.origin()}-based default. Returning {@code null} from
+     * the provider falls through to the origin path.
+     *
+     * @param type     the derived view type
+     * @param provider the provider that materialises the view from the
+     *                 live source instance
+     * @param <R>      the derived view type
+     */
+    <R> void registerSourceProvider(@NotNull Type type, @NotNull SourceProvider<S, R> provider);
+
+    /**
+     * Fetches the {@link SourceProvider} registered for the given derived
+     * view type, or {@code null} if no provider is registered.
+     *
+     * @param type the derived view type
+     * @param <R>  the derived view type
+     * @return the registered provider, or {@code null}
+     */
+    @Nullable
+    <R> SourceProvider<S, R> getSourceProvider(@NotNull Type type);
+
 
     /**
      * Registers {@link ArgumentType}
@@ -128,35 +154,6 @@ public sealed interface ResolverRegistrar<S extends CommandSource> permits Imper
     @Nullable
     SuggestionProvider<S> getSuggestionProviderForType(Type type);
 
-
-    /**
-     * Fetches the {@link SourceProvider} from an internal registry.
-     *
-     * @param type the target source valueType
-     * @param <R>  the new source valueType parameter
-     * @return the {@link SourceProvider} for specific valueType
-     */
-    <R> @Nullable SourceProvider<S, R> getSourceProviderFor(Type type);
-
-    /**
-     * Registers the {@link SourceProvider} into an internal registry
-     *
-     * @param type           the target source valueType
-     * @param sourceProvider the source resolver to register
-     * @param <R>            the new source valueType parameter
-     */
-    default <R> void registerSourceProvider(TypeWrap<R> type, SourceProvider<S, R> sourceProvider) {
-        registerSourceProvider(type.getType(), sourceProvider);
-    }
-
-    /**
-     * Registers the {@link SourceProvider} into an internal registry
-     *
-     * @param type           the target source valueType
-     * @param sourceProvider the source resolver to register
-     * @param <R>            the new source valueType parameter
-     */
-    <R> void registerSourceProvider(Type type, SourceProvider<S, R> sourceProvider);
 
     /**
      * Fetches the {@link ReturnResolver} from an internal registry.

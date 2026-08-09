@@ -21,7 +21,7 @@ public class HytaleCommandSource implements CommandSource {
 
     @Override
     public String name() {
-        return sender.getDisplayName();
+        return sender.getUsername();
     }
 
     @Override

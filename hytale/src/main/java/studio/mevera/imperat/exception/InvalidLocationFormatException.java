@@ -6,7 +6,7 @@ import studio.mevera.imperat.responses.HytaleResponseKey;
 public class InvalidLocationFormatException extends ResponseException {
 
     private final Reason reason;
-    private final @Nullable String inputX, inputY, inputZ, inputPitch, inputYaw;
+    private final @Nullable String inputX, inputY, inputZ, inputPitch, inputYaw, inputRoll;
 
     public InvalidLocationFormatException(
             String input,
@@ -15,7 +15,8 @@ public class InvalidLocationFormatException extends ResponseException {
             @Nullable String inputY,
             @Nullable String inputZ,
             @Nullable String inputPitch,
-            @Nullable String inputYaw
+            @Nullable String inputYaw,
+            @Nullable String inputRoll
     ) {
         super(HytaleResponseKey.INVALID_LOCATION);
         this.reason = reason;
@@ -24,6 +25,7 @@ public class InvalidLocationFormatException extends ResponseException {
         this.inputZ = inputZ;
         this.inputPitch = inputPitch;
         this.inputYaw = inputYaw;
+        this.inputRoll = inputRoll;
 
         withPlaceholder("input", input)
                 .withPlaceholder("reason", reason.name())
@@ -31,11 +33,12 @@ public class InvalidLocationFormatException extends ResponseException {
                 .withPlaceholder("inputY", inputY != null ? inputY : "")
                 .withPlaceholder("inputZ", inputZ != null ? inputZ : "")
                 .withPlaceholder("inputPitch", inputPitch != null ? inputPitch : "")
-                .withPlaceholder("inputYaw", inputYaw != null ? inputYaw : "");
+                .withPlaceholder("inputYaw", inputYaw != null ? inputYaw : "")
+                .withPlaceholder("inputRoll", inputRoll != null ? inputRoll : "");
     }
 
     public InvalidLocationFormatException(String input, Reason reason) {
-        this(input, reason, null, null, null, null, null);
+        this(input, reason, null, null, null, null, null, null);
     }
 
     public Reason getReason() {
@@ -60,6 +63,10 @@ public class InvalidLocationFormatException extends ResponseException {
 
     public @Nullable String getInputPitch() {
         return inputPitch;
+    }
+
+    public @Nullable String getInputRoll() {
+        return inputRoll;
     }
 
     public enum Reason {

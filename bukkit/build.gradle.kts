@@ -1,6 +1,5 @@
 plugins {
     id("com.gradleup.shadow") version "8.3.9"
-    kotlin("jvm") version "2.3.0"
 }
 
 repositories {
@@ -41,10 +40,12 @@ dependencies {
     api(project(":brigadier"))
 
     compileOnly(project(":core"))
-    compileOnly(project(":paper"))
 
     compileOnly("com.mojang:brigadier:1.0.18")
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    // Modern Paper API (1.21.4+) — required for the modern backend's
+    // Brigadier integration. Class-loaded at runtime only after detection,
+    // so plugins on legacy Spigot do NOT need paper-api on their classpath.
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT")
 
     compileOnly(kyoriPlatform(KyoriModule["BUKKIT"]!!))
@@ -53,10 +54,8 @@ dependencies {
     testImplementation(project(":core"))
     testImplementation(project(":adventure"))
     testImplementation(project(":brigadier"))
-    testImplementation(project(":paper"))
     testImplementation("com.mojang:brigadier:1.0.18")
     testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    //testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     testImplementation(kyoriPlatform(KyoriModule["BUKKIT"]!!))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
@@ -71,7 +70,7 @@ tasks.test {
     useJUnitPlatform()
 }
 
-val targetJavaVersion = 17
+val targetJavaVersion = 21
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -102,6 +101,3 @@ tasks.test {
     })
 }
 
-kotlin {
-    jvmToolchain(17)
-}

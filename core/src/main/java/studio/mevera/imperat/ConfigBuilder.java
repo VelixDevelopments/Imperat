@@ -25,6 +25,8 @@ import studio.mevera.imperat.responses.ResponseKey;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -41,8 +43,44 @@ import java.util.function.Supplier;
 public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S>, B extends ConfigBuilder<S, I, B>> {
 
     protected final ImperatConfig<S> config;
-    protected ConfigBuilder() {
-        config = new ImperatConfigImpl<>();
+
+    /**
+     * Default-deferred registrations populated during subclass-builder
+     * construction and drained inside {@link #build()} <b>after</b> the
+     * source-mapper has been set. This staging is required because some
+     * default registrations key by parameterized type literals
+     * ({@code ExecutionContext<S>}, {@code CommandHelp<S>}); building those
+     * keys before {@code S} is fully resolved would silently miss lookups
+     * for user-supplied custom source types. See
+     * {@link #materializeDeferredDefaults()}.
+     */
+    protected final List<Consumer<ImperatConfig<S>>> deferredDefaults = new ArrayList<>();
+
+    /**
+     * The class token for the canonical source type {@code S}. Required
+     * because Java erases generics — without it {@link Imperat#canBeSender(Type)}
+     * cannot decide whether a method parameter is the user-declared
+     * source class. Subclass builders pass this in.
+     */
+    protected final Class<S> sourceClass;
+
+    protected ConfigBuilder(@NotNull Class<S> sourceClass) {
+        this.sourceClass = sourceClass;
+        this.config = new ImperatConfigImpl<>(sourceClass);
+    }
+
+    /**
+     * Drains {@link #deferredDefaults} into the config. Subclass builders
+     * MUST call this from their {@link #build()} implementation after
+     * the mapper has been finalised but before constructing the
+     * platform's {@code Imperat} instance — every consumer captures the
+     * mapper / sourceClass via closure and runs once at that point.
+     */
+    protected final void materializeDeferredDefaults() {
+        for (Consumer<ImperatConfig<S>> action : deferredDefaults) {
+            action.accept(config);
+        }
+        deferredDefaults.clear();
     }
 
     /**
@@ -78,6 +116,18 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
         return (B) this;
     }
 
+    /**
+     * Sets the generic message sent to the command source when no
+     * exception handler claims a thrown throwable.
+     *
+     * @param message the generic error message
+     * @return the current builder instance for chaining
+     */
+    public B unhandledExceptionMessage(String message) {
+        config.setUnhandledExceptionMessage(message);
+        return (B) this;
+    }
+
     public B response(Response response) {
         config.getResponseRegistry().registerResponse(response);
         return (B) this;
@@ -85,6 +135,11 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
 
     public B response(ResponseKey key, Supplier<String> contentSupplier, String... placeholders) {
         config.getResponseRegistry().registerResponse(key, contentSupplier, placeholders);
+        return (B) this;
+    }
+
+    public B responses(Consumer<ResponsesConfig<S>> consumer) {
+        consumer.accept(new ResponsesConfig<>(config));
         return (B) this;
     }
 
@@ -118,18 +173,6 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
     }
 
     /**
-     * Sets the factory used to create an {@link studio.mevera.imperat.command.suggestions.AutoCompleter}
-     * for each registered command.
-     *
-     * @param factory the factory to use
-     * @return this builder instance for chaining
-     */
-    public B autoCompleterFactory(AutoCompleterFactory<S> factory) {
-        config.setAutoCompleterFactory(factory);
-        return (B) this;
-    }
-
-    /**
      * Registers a {@link ReturnResolver}
      * @param type the type of value to return using the return resolver
      * @param returnResolver the return resolving instance.
@@ -143,6 +186,11 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
         return (B) this;
     }
 
+    public B returnResolvers(Consumer<ReturnResolversConfig<S>> consumer) {
+        consumer.accept(new ReturnResolversConfig<>(config));
+        return (B) this;
+    }
+
     /**
      * Registers a dependency resolver for a specific type and returns the current {@code ConfigBuilder} instance.
      *
@@ -153,6 +201,11 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
     // Dependency Resolver
     public B dependencyResolver(Type type, DependencySupplier resolver) {
         config.registerDependencyResolver(type, resolver);
+        return (B) this;
+    }
+
+    public B dependencies(Consumer<DependenciesConfig<S>> consumer) {
+        consumer.accept(new DependenciesConfig<>(config));
         return (B) this;
     }
 
@@ -191,6 +244,11 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
      */
     public <A extends Annotation> B annotationReplacer(Class<A> annotationType, AnnotationReplacer<A> replacer) {
         config.registerAnnotationReplacer(annotationType, replacer);
+        return (B) this;
+    }
+
+    public B annotations(Consumer<AnnotationsConfig<S>> consumer) {
+        consumer.accept(new AnnotationsConfig<>(config));
         return (B) this;
     }
 
@@ -250,6 +308,11 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
         return (B) this;
     }
 
+    public B errorHandlers(Consumer<ErrorHandlersConfig<S>> consumer) {
+        consumer.accept(new ErrorHandlersConfig<>(config));
+        return (B) this;
+    }
+
 
     /**
      * Registers a context resolver factory for the specified type.
@@ -283,6 +346,52 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
         return (B) this;
     }
 
+    public B contextArguments(Consumer<ContextArgumentsConfig<S>> consumer) {
+        consumer.accept(new ContextArgumentsConfig<>(config));
+        return (B) this;
+    }
+
+    /**
+     * Registers a {@link SourceProvider} that materialises a derived view of
+     * the canonical source on {@code @Execute} dispatch. Use this to override
+     * how a specific parameter type is produced from the live source — for
+     * example, mapping {@code Player} to an Adventure-aware audience, or
+     * exposing a domain-specific projection of the source state.
+     *
+     * <p>Resolution precedence: an {@code S}-identity match wins, then the
+     * registered {@code SourceProvider} runs, then the
+     * {@code source.origin()}-based default fires, then the
+     * {@link ContextArgumentProvider} registry. Returning {@code null} from
+     * the provider falls through to the origin default — useful for
+     * conditional overrides.</p>
+     *
+     * @param type     the derived view type
+     * @param provider the provider that materialises the view from the
+     *                 live source instance
+     * @param <R>      the derived view type
+     * @return this builder for chaining
+     */
+    public <R> B sourceProvider(Class<R> type, SourceProvider<S, R> provider) {
+        config.registerSourceProvider(type, provider);
+        return (B) this;
+    }
+
+    /**
+     * Type-overload for {@link #sourceProvider(Class, SourceProvider)} that
+     * accepts a {@link Type} (e.g. a parameterised type built via
+     * {@code TypeWrap}). Same precedence rules apply.
+     *
+     * @param type     the derived view type
+     * @param provider the provider that materialises the view from the
+     *                 live source instance
+     * @param <R>      the derived view type
+     * @return this builder for chaining
+     */
+    public <R> B sourceProvider(Type type, SourceProvider<S, R> provider) {
+        config.registerSourceProvider(type, provider);
+        return (B) this;
+    }
+
     /**
      * Registers a parameter type and its associated resolver for parsing command arguments.
      *
@@ -306,6 +415,11 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
      */
     public B argTypeHandler(ArgumentTypeHandler<S> handler) {
         config.registerArgTypeHandler(handler);
+        return (B) this;
+    }
+
+    public B argTypes(Consumer<ArgumentTypesConfig<S>> consumer) {
+        consumer.accept(new ArgumentTypesConfig<>(config));
         return (B) this;
     }
 
@@ -336,20 +450,6 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
     }
 
     /**
-     * Registers a {@link SourceProvider} for a specific type to resolve command sources.
-     *
-     * @param <R>            the resulting type resolved by the source resolver
-     * @param type           the type of the source to be resolved
-     * @param sourceProvider the source resolver instance that converts the source
-     * @return the current {@link ConfigBuilder} instance for method chaining
-     */
-    // CommandSource Resolver
-    public <R> B sourceProvider(Type type, SourceProvider<S, R> sourceProvider) {
-        config.registerSourceProvider(type, sourceProvider);
-        return (B) this;
-    }
-
-    /**
      * Registers a placeholder with the configuration.
      *
      * @param placeholder the placeholder to be registered, containing the unique identifier
@@ -359,6 +459,11 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
     // Placeholder
     public B placeholder(Placeholder placeholder) {
         config.registerPlaceholder(placeholder);
+        return (B) this;
+    }
+
+    public B placeholders(Consumer<PlaceholdersConfig<S>> consumer) {
+        consumer.accept(new PlaceholdersConfig<>(config));
         return (B) this;
     }
 
@@ -390,16 +495,6 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
     }
 
     /**
-     * Refer to {@link ImperatConfig#setHandleExecutionConsecutiveOptionalArgumentsSkip(boolean)}
-     * @param toggle the toggle for this option
-     * @return whether this option is enabled or not.
-     */
-    public B handleMiddleOptionalArgSkipping(boolean toggle) {
-        config.setHandleExecutionConsecutiveOptionalArgumentsSkip(toggle);
-        return (B) this;
-    }
-
-    /**
      * Sets the instance factory used for creating instances of classes
      * during command processing and dependency resolution.
      *
@@ -411,6 +506,28 @@ public abstract class ConfigBuilder<S extends CommandSource, I extends Imperat<S
      */
     public B instanceFactory(InstanceFactory<S> instanceFactory) {
         config.setInstanceFactory(instanceFactory);
+        return (B) this;
+    }
+
+    /**
+     * Sets the factory used to create an {@link studio.mevera.imperat.command.suggestions.AutoCompleter}
+     * for each registered command.
+     *
+     * @param factory the factory to use
+     * @return this builder instance for chaining
+     */
+    public B autoCompleterFactory(AutoCompleterFactory<S> factory) {
+        config.setAutoCompleterFactory(factory);
+        return (B) this;
+    }
+
+    public B execution(Consumer<ExecutionConfig<S>> consumer) {
+        consumer.accept(new ExecutionConfig<>(config));
+        return (B) this;
+    }
+
+    public B runtime(Consumer<RuntimeConfig<S>> consumer) {
+        consumer.accept(new RuntimeConfig<>(config));
         return (B) this;
     }
 

@@ -2,57 +2,31 @@ package studio.mevera.imperat.command.tree;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import studio.mevera.imperat.command.Command;
+import studio.mevera.imperat.command.CommandPathway;
+import studio.mevera.imperat.command.arguments.Argument;
+import studio.mevera.imperat.command.arguments.FlagArgument;
 import studio.mevera.imperat.context.CommandSource;
 import studio.mevera.imperat.util.ImperatDebugger;
-import studio.mevera.imperat.util.priority.Priority;
-import studio.mevera.imperat.util.priority.PriorityList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.StringJoiner;
 
 @ApiStatus.Internal
 public final class CommandTreeVisualizer<S extends CommandSource> {
 
-    private static final String HORIZONTAL_LINE = "─";
-    private static final String VERTICAL_LINE = "│";
-    private static final String CORNER_TOP_LEFT = "┌";
-    private static final String CORNER_TOP_RIGHT = "┐";
-    private static final String CORNER_BOTTOM_LEFT = "└";
-    private static final String CORNER_BOTTOM_RIGHT = "┘";
-    private static final String T_JUNCTION = "┬";
-    private static final String T_JUNCTION_UP = "┴";
-    private static final String T_JUNCTION_RIGHT = "├";
-    private static final String T_JUNCTION_LEFT = "┤";
-    private static final String CROSS_JUNCTION = "┼";
-    // ANSI color codes
-    private static final String RESET = "\u001B[0m";
-    private static final String CYAN = "\u001B[36m";      // Subcommands
-    private static final String YELLOW = "\u001B[33m";    // Required args
-    private static final String GREEN = "\u001B[32m";     // Optional flags
-    private static final String GRAY = "\u001B[90m";      // Optional args
-    private static final String BOLD = "\u001B[1m";
-    private static final String WHITE = "\u001B[37m";
     private final @Nullable CommandTree<S> tree;
-    private final boolean useColors;
     private final boolean showNodeTypes;
-    private final int minNodeWidth;
-    private final int nodeSpacing;
 
     CommandTreeVisualizer(@Nullable CommandTree<S> tree) {
-        this(tree, true, true, 12, 2);
+        this(tree, true);
     }
 
-    CommandTreeVisualizer(@Nullable CommandTree<S> tree,
-            boolean useColors,
-            boolean showNodeTypes,
-            int minNodeWidth,
-            int nodeSpacing) {
+    CommandTreeVisualizer(@Nullable CommandTree<S> tree, boolean showNodeTypes) {
         this.tree = tree;
-        this.useColors = useColors;
         this.showNodeTypes = showNodeTypes;
-        this.minNodeWidth = minNodeWidth;
-        this.nodeSpacing = nodeSpacing;
     }
 
     public static <S extends CommandSource> CommandTreeVisualizer<S> of(@Nullable CommandTree<S> tree) {
@@ -60,310 +34,14 @@ public final class CommandTreeVisualizer<S extends CommandSource> {
     }
 
     public void visualize() {
-        if (tree == null || !ImperatDebugger.isEnabled()) {
-            return;
-        }
-
-        // Build the tree structure
-        TreeNode root = buildTreeStructure(tree.rootNode(), null);
-
-        // Calculate positions for each node
-        calculateNodePositions(root);
-
-        // Render the tree to a string
-        String visualization = renderTree(root);
-
-        ImperatDebugger.debug(visualization);
+        visualizeSimple();
     }
 
-    private TreeNode buildTreeStructure(CommandNode<S, ?> node, TreeNode parent) {
-        if (node == null) {
-            return null;
-        }
-
-        NodeType type = parent == null ? NodeType.ROOT : determineNodeType(node);
-        TreeNode treeNode = new TreeNode(node, type);
-
-        for (CommandNode<S, ?> child : node.getChildren()) {
-            TreeNode childTreeNode = buildTreeStructure(child, treeNode);
-            if (childTreeNode != null) {
-                treeNode.children.add(childTreeNode);
-            }
-        }
-
-        return treeNode;
-    }
-
-    private void calculateNodePositions(TreeNode root) {
-        // First pass: calculate widths bottom-up
-        calculateWidths(root);
-
-        // Second pass: assign positions top-down
-        assignPositions(root, 0, 0);
-    }
-
-    private int calculateWidths(TreeNode node) {
-        if (node.children.isEmpty()) {
-            node.width = Math.max(minNodeWidth, node.getDisplayText().length() + 4);
-            return node.width;
-        }
-
-        int totalChildrenWidth = 0;
-        for (TreeNode child : node.children) {
-            totalChildrenWidth += calculateWidths(child);
-        }
-
-        // Add spacing between children
-        totalChildrenWidth += nodeSpacing * (node.children.size() - 1);
-
-        // Node width is either its own minimum width or the total width of its children
-        node.width = Math.max(
-                Math.max(minNodeWidth, node.getDisplayText().length() + 4),
-                totalChildrenWidth
-        );
-
-        return node.width;
-    }
-
-    private void assignPositions(TreeNode node, int x, int y) {
-        node.x = x;
-        node.y = y;
-
-        if (!node.children.isEmpty()) {
-            int currentX = x;
-
-            // If node is wider than children total, center the children
-            int totalChildrenWidth = 0;
-            for (TreeNode child : node.children) {
-                totalChildrenWidth += child.width;
-            }
-            totalChildrenWidth += nodeSpacing * (node.children.size() - 1);
-
-            if (node.width > totalChildrenWidth) {
-                currentX = x + (node.width - totalChildrenWidth) / 2;
-            }
-
-            // Assign positions to children
-            for (TreeNode child : node.children) {
-                assignPositions(child, currentX, y + 4); // 4 lines between levels
-                currentX += child.width + nodeSpacing;
-            }
-        }
-    }
-
-    private String renderTree(TreeNode root) {
-        // Find the dimensions of the canvas
-        int maxX = findMaxX(root) + 5;
-        int maxY = findMaxY(root) + 3;
-
-        // Create a 2D character array as our canvas
-        char[][] canvas = new char[maxY][maxX];
-        for (char[] row : canvas) {
-            Arrays.fill(row, ' ');
-        }
-
-        // Draw the tree on the canvas
-        drawNode(canvas, root);
-
-        // Add header and legend
-        StringBuilder result = new StringBuilder();
-        result.append("\n");
-        if (useColors) {
-            result.append(BOLD);
-        }
-        result.append("RootCommand Tree Structure\n");
-        if (useColors) {
-            result.append(RESET);
-        }
-        result.append("=".repeat(maxX)).append("\n").append("\n");
-
-        // Convert canvas to string
-        for (char[] row : canvas) {
-            result.append(new String(row).replaceAll("\\s+$", "")).append("\n");
-        }
-
-        // Add legend
-        if (showNodeTypes) {
-            result.append("\n").append("Legend:\n");
-            if (useColors) {
-                result.append("  ").append(CYAN).append("□").append(RESET).append(" Subcommands\n");
-                result.append("  ").append(YELLOW).append("□").append(RESET).append(" Required Arguments\n");
-                result.append("  ").append(GREEN).append("□").append(RESET).append(" Optional Flags\n");
-                result.append("  ").append(GRAY).append("□").append(RESET).append(" Optional Arguments\n");
-            } else {
-                result.append("  [SUB] Subcommands\n");
-                result.append("  [REQ] Required Arguments\n");
-                result.append("  [FLAG] Optional Flags\n");
-                result.append("  [OPT] Optional Arguments\n");
-            }
-        }
-
-        return result.toString();
-    }
-
-    private void drawNode(char[][] canvas, TreeNode node) {
-        String text = node.getDisplayText();
-        int boxWidth = Math.max(text.length() + 2, 10);
-        int boxX = node.x + (node.width - boxWidth) / 2;
-        int boxY = node.y;
-
-        // Draw the box
-        drawBox(canvas, boxX, boxY, boxWidth, text);
-
-        // Draw connections to children
-        if (!node.children.isEmpty()) {
-            // Draw vertical line from bottom of parent box
-            int parentCenterX = boxX + boxWidth / 2;
-            canvas[boxY + 2][parentCenterX] = VERTICAL_LINE.charAt(0);
-
-            if (node.children.size() == 1) {
-                // Single child - straight line down
-                TreeNode child = node.children.get(0);
-                int childBoxWidth = Math.max(child.getDisplayText().length() + 2, 10);
-                int childCenterX = child.x + (child.width - childBoxWidth) / 2 + childBoxWidth / 2;
-
-                // Draw vertical line
-                if (parentCenterX == childCenterX) {
-                    canvas[boxY + 3][parentCenterX] = VERTICAL_LINE.charAt(0);
-                } else {
-                    // Need to draw an L-shape
-                    canvas[boxY + 3][parentCenterX] = VERTICAL_LINE.charAt(0);
-
-                    int startX = Math.min(parentCenterX, childCenterX);
-                    int endX = Math.max(parentCenterX, childCenterX);
-                    for (int x = startX; x <= endX; x++) {
-                        if (canvas[boxY + 3][x] == ' ') {
-                            canvas[boxY + 3][x] = HORIZONTAL_LINE.charAt(0);
-                        }
-                    }
-                    canvas[boxY + 3][parentCenterX] = parentCenterX < childCenterX ? CORNER_BOTTOM_LEFT.charAt(0) : CORNER_BOTTOM_RIGHT.charAt(0);
-                    canvas[boxY + 3][childCenterX] = T_JUNCTION.charAt(0);
-                }
-            } else {
-                // Multiple children - draw branching lines
-                canvas[boxY + 3][parentCenterX] = T_JUNCTION.charAt(0);
-
-                // Find the range of children centers
-                int leftmostX = Integer.MAX_VALUE;
-                int rightmostX = Integer.MIN_VALUE;
-
-                for (TreeNode child : node.children) {
-                    int childBoxWidth = Math.max(child.getDisplayText().length() + 2, 10);
-                    int childCenterX = child.x + (child.width - childBoxWidth) / 2 + childBoxWidth / 2;
-                    leftmostX = Math.min(leftmostX, childCenterX);
-                    rightmostX = Math.max(rightmostX, childCenterX);
-                }
-
-                // Draw horizontal line
-                for (int x = leftmostX; x <= rightmostX; x++) {
-                    if (canvas[boxY + 3][x] == ' ') {
-                        canvas[boxY + 3][x] = HORIZONTAL_LINE.charAt(0);
-                    }
-                }
-
-                // Draw down lines to each child
-                for (TreeNode child : node.children) {
-                    int childBoxWidth = Math.max(child.getDisplayText().length() + 2, 10);
-                    int childCenterX = child.x + (child.width - childBoxWidth) / 2 + childBoxWidth / 2;
-
-                    if (canvas[boxY + 3][childCenterX] == HORIZONTAL_LINE.charAt(0)) {
-                        canvas[boxY + 3][childCenterX] = T_JUNCTION.charAt(0);
-                    }
-                    /*else if (canvas[boxY + 3][childCenterX] == T_JUNCTION.charAt(0)) {
-                        // Already set
-                    }*/
-                }
-            }
-        }
-
-        // Recursively draw children
-        for (TreeNode child : node.children) {
-            drawNode(canvas, child);
-        }
-    }
-
-    private void drawBox(char[][] canvas, int x, int y, int width, String text) {
-        // Ensure we don't go out of bounds
-        if (y >= canvas.length || x + width >= canvas[0].length) {
-            return;
-        }
-
-        // Top border
-        canvas[y][x] = CORNER_TOP_LEFT.charAt(0);
-        for (int i = 1; i < width - 1; i++) {
-            canvas[y][x + i] = HORIZONTAL_LINE.charAt(0);
-        }
-        canvas[y][x + width - 1] = CORNER_TOP_RIGHT.charAt(0);
-
-        // Middle with text
-        canvas[y + 1][x] = VERTICAL_LINE.charAt(0);
-
-        // Center the text
-        int textStart = x + 1 + (width - 2 - text.length()) / 2;
-        for (int i = 0; i < text.length() && textStart + i < x + width - 1; i++) {
-            canvas[y + 1][textStart + i] = text.charAt(i);
-        }
-
-        canvas[y + 1][x + width - 1] = VERTICAL_LINE.charAt(0);
-
-        // Bottom border
-        canvas[y + 2][x] = CORNER_BOTTOM_LEFT.charAt(0);
-        for (int i = 1; i < width - 1; i++) {
-            canvas[y + 2][x + i] = HORIZONTAL_LINE.charAt(0);
-        }
-        canvas[y + 2][x + width - 1] = CORNER_BOTTOM_RIGHT.charAt(0);
-
-        // Add color markers if needed (these would need special handling in actual output)
-        if (useColors && showNodeTypes) {
-            // This is a simplified approach - in reality I'd need to handle ANSI codes differently
-            // as they don't fit well in a char array
-        }
-    }
-
-    private int findMaxX(TreeNode node) {
-        int max = node.x + node.width;
-        for (TreeNode child : node.children) {
-            max = Math.max(max, findMaxX(child));
-        }
-        return max;
-    }
-
-    private int findMaxY(TreeNode node) {
-        int max = node.y + 3; // Box height is 3
-        for (TreeNode child : node.children) {
-            max = Math.max(max, findMaxY(child));
-        }
-        return max;
-    }
-
-    private NodeType determineNodeType(CommandNode<S, ?> node) {
-        // Adjust based on your actual node structure
-        String format = node.format().toLowerCase();
-        if (format.startsWith("-") || format.startsWith("--")) {
-            return NodeType.OPTIONAL_FLAG;
-        } else if (format.startsWith("<") && format.endsWith(">")) {
-            return NodeType.REQUIRED_ARG;
-        } else if (format.startsWith("[") && format.endsWith("]")) {
-            return NodeType.OPTIONAL_ARG;
-        } else {
-            return NodeType.SUBCOMMAND;
-        }
-    }
-
-    /**
-     * Alternative visualization using a simpler node representation
-     */
     public void visualizeSimple() {
         if (tree == null || !ImperatDebugger.isEnabled()) {
             return;
         }
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("\n==== RootCommand Tree ====\n\n");
-
-        visualizeSimpleNode(tree.rootNode(), builder, 0, new ArrayList<>(), true);
-
-        ImperatDebugger.debug(builder.toString());
+        ImperatDebugger.debug(getVisualizationString());
     }
 
     public String getVisualizationString() {
@@ -372,87 +50,229 @@ public final class CommandTreeVisualizer<S extends CommandSource> {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append("\n==== RootCommand Tree ====\n\n");
-
-        visualizeSimpleNode(tree.rootNode(), builder, 0, new ArrayList<>(), true);
-
+        builder.append("\n==== SuperCommandTree ====\n");
+        builder.append("nodes=").append(tree.size()).append('\n').append('\n');
+        renderNode(tree.rootNode(), builder, "", true);
         return builder.toString();
     }
 
-
-    private void visualizeSimpleNode(CommandNode<S, ?> node,
-            StringBuilder builder,
-            int depth,
-            List<Boolean> lastFlags,
-            boolean isLast) {
-        // Draw connection lines
-        for (int i = 0; i < depth - 1; i++) {
-            builder.append(lastFlags.get(i) ? "     " : "  " + VERTICAL_LINE + "  ");
+    private void renderNode(Node<S> node, StringBuilder out, String prefix, boolean tail) {
+        if (node.isRoot()) {
+            out.append(formatNode(node)).append('\n');
+        } else {
+            out.append(prefix)
+                    .append(tail ? "└── " : "├── ")
+                    .append(formatNode(node))
+                    .append('\n');
         }
 
-        if (depth > 0) {
-            builder.append(isLast ? "  " + CORNER_BOTTOM_LEFT + HORIZONTAL_LINE + " " : "  " + T_JUNCTION_RIGHT + HORIZONTAL_LINE + " ");
+        String childPrefix = prefix + childPrefixSegment(node, tail);
+        renderNodeMetadata(node, out, childPrefix);
+
+        List<Node<S>> children = node.getChildren().toList();
+        for (int i = 0; i < children.size(); i++) {
+            renderNode(children.get(i), out, childPrefix, i == children.size() - 1);
         }
-
-        // Draw node box
-        String nodeText =
-                node.format() + ": " + (node.isExecutable() ? "Executable" : "Non-executable") + ":P=" + (node.getPriority() == Priority.MAXIMUM ?
-                                                                                                                  "MAX" :
-                                                                                                                  node.getPriority().getLevel());
-        builder.append(nodeText).append("\n");
-
-        // Draw children
-        PriorityList<CommandNode<S, ?>> children = node.getChildren();
-        List<Boolean> newLastFlags = new ArrayList<>(lastFlags);
-        if (depth > 0) {
-            newLastFlags.add(isLast);
-        }
-
-        int i = 0;
-        for (var child : children) {
-            visualizeSimpleNode(child, builder, depth + 1, newLastFlags, i == children.size() - 1);
-            i++;
-        }
-
     }
 
-
-    private enum NodeType {
-        ROOT,
-        SUBCOMMAND,
-        REQUIRED_ARG,
-        OPTIONAL_FLAG,
-        OPTIONAL_ARG
+    private String childPrefixSegment(Node<S> node, boolean tail) {
+        if (node.isRoot()) {
+            return "";
+        }
+        return tail ? "    " : "│   ";
     }
 
-    private class TreeNode {
+    private void renderNodeMetadata(Node<S> node, StringBuilder out, String prefix) {
+        String detailPrefix = prefix + "  ";
 
-        CommandNode<S, ?> node;
-        NodeType type;
-        List<TreeNode> children = new ArrayList<>();
-        int x, y;  // Position in the canvas
-        int width; // Width needed for this subtree
+        out.append(detailPrefix)
+                .append("pathway: ")
+                .append(formatPathway(node.getOriginalPathway(), false))
+                .append('\n');
 
-        TreeNode(CommandNode<S, ?> node, NodeType type) {
-            this.node = node;
-            this.type = type;
+        if (!node.getOptionalArguments().isEmpty()) {
+            out.append(detailPrefix)
+                    .append("optionals: ")
+                    .append(formatArguments(node.getOptionalArguments()))
+                    .append('\n');
         }
 
-        String getDisplayText() {
-            String base = node.format();
-            if (showNodeTypes && type != NodeType.ROOT) {
-                switch (type) {
-                    case SUBCOMMAND:
-                        return "[SUB] " + base;
-                    case REQUIRED_ARG:
-                        return "[REQ] " + base;
-                    case OPTIONAL_FLAG:
-                        return "[FLAG] " + base;
-                    case OPTIONAL_ARG:
-                        return "[OPT] " + base;
-                }
+        List<CommandPathway<S>> flagScopes = effectivePathways(node);
+        for (CommandPathway<S> flagScope : flagScopes) {
+            if (flagScope.getFlagExtractor().getRegisteredFlags().isEmpty()) {
+                continue;
             }
+            out.append(detailPrefix)
+                    .append("flags @ ")
+                    .append(formatPathway(flagScope, false))
+                    .append(": ")
+                    .append(formatFlags(flagScope.getFlagExtractor().getRegisteredFlags()))
+                    .append('\n');
+        }
+    }
+
+    private String formatNode(Node<S> node) {
+        String base = node.format();
+        if (!showNodeTypes) {
             return base;
         }
+        if (node.isRoot()) {
+            return "[ROOT] " + base;
+        }
+        if (node.getMainArgument().isCommand()) {
+            return "[SUB] " + base;
+        }
+        return "[REQ] " + base;
+    }
+
+    private String formatArguments(Collection<? extends Argument<S>> arguments) {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (Argument<S> argument : arguments) {
+            joiner.add(formatArgument(argument));
+        }
+        return joiner.toString();
+    }
+
+    private String formatArgument(Argument<S> argument) {
+        if (!showNodeTypes) {
+            return argument.format();
+        }
+        if (argument.isFlag()) {
+            return "[FLAG] " + argument.format();
+        }
+        if (argument.isCommand()) {
+            return "[SUB] " + argument.format();
+        }
+        if (argument.isOptional()) {
+            return "[OPT] " + argument.format();
+        }
+        return "[REQ] " + argument.format();
+    }
+
+    private String formatFlags(Collection<? extends FlagArgument<S>> flags) {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (FlagArgument<S> flag : flags) {
+            joiner.add(formatFlag(flag));
+        }
+        return joiner.toString();
+    }
+
+    private String formatFlag(FlagArgument<S> flag) {
+        StringBuilder builder = new StringBuilder();
+        if (showNodeTypes) {
+            builder.append(flag.isSwitch() ? "[SWITCH] " : "[VALUE_FLAG] ");
+        }
+        builder.append(flag.format());
+
+        List<String> aliases = flag.flagData().aliases();
+        if (!aliases.isEmpty()) {
+            StringJoiner aliasesJoiner = new StringJoiner(", ", " aliases=[", "]");
+            for (String alias : aliases) {
+                aliasesJoiner.add("-" + alias);
+            }
+            builder.append(aliasesJoiner);
+        }
+        return builder.toString();
+    }
+
+    private String formatPathway(CommandPathway<S> pathway, boolean includeFlags) {
+        List<Argument<S>> arguments = includeFlags ? pathway.getArgumentsWithFlags() : pathway.getArguments();
+        if (arguments.isEmpty()) {
+            return "<default>";
+        }
+
+        StringJoiner joiner = new StringJoiner(" ");
+        for (Argument<S> argument : arguments) {
+            joiner.add(argument.format());
+        }
+        return joiner.toString();
+    }
+
+    private List<CommandPathway<S>> effectivePathways(Node<S> node) {
+        List<CommandPathway<S>> scopes = new ArrayList<>();
+        addPathwayScope(scopes, node.getOriginalPathway());
+
+        Argument<S> main = node.getMainArgument();
+        if (main.isCommand()) {
+            Command<S> commandScope = main.asCommand();
+            for (CommandPathway<S> pathway : commandScope.getDedicatedPathways()) {
+                addPathwayScope(scopes, pathway);
+            }
+            addPathwayScope(scopes, commandScope.getDefaultPathway());
+        }
+
+        for (CommandPathway<S> pathway : rootPathwaysForCommandScope(commandChainForNode(node))) {
+            addPathwayScope(scopes, pathway);
+        }
+        return scopes;
+    }
+
+    private void addPathwayScope(List<CommandPathway<S>> scopes, @Nullable CommandPathway<S> pathway) {
+        if (pathway == null) {
+            return;
+        }
+        for (CommandPathway<S> existing : scopes) {
+            if (existing == pathway) {
+                return;
+            }
+        }
+        scopes.add(pathway);
+    }
+
+    private List<String> commandChainForNode(Node<S> node) {
+        List<String> chain = new ArrayList<>();
+        Node<S> current = node;
+        while (current != null && !current.isRoot()) {
+            Argument<S> main = current.getMainArgument();
+            if (main.isCommand()) {
+                chain.add(0, main.asCommand().getName());
+            }
+            current = current.getParent();
+        }
+        return chain;
+    }
+
+    private List<CommandPathway<S>> rootPathwaysForCommandScope(List<String> commandChain) {
+        List<CommandPathway<S>> rootPathways = new ArrayList<>();
+        Command<S> rootCommand = tree.rootNode().getMainArgument().asCommand();
+        for (CommandPathway<S> pathway : rootCommand.getDedicatedPathways()) {
+            addPathwayScope(rootPathways, pathway);
+        }
+        addPathwayScope(rootPathways, rootCommand.getDefaultPathway());
+
+        List<CommandPathway<S>> scoped = new ArrayList<>();
+        for (CommandPathway<S> pathway : rootPathways) {
+            if (isExactCommandScope(pathway, commandChain)) {
+                addPathwayScope(scoped, pathway);
+            }
+        }
+        return scoped;
+    }
+
+    private boolean isExactCommandScope(CommandPathway<S> pathway, List<String> commandChain) {
+        int commandPrefixLength = leadingCommandPrefixLength(pathway);
+        if (commandPrefixLength != commandChain.size()) {
+            return false;
+        }
+
+        List<Argument<S>> arguments = pathway.getArguments();
+        for (int i = 0; i < commandChain.size(); i++) {
+            Argument<S> argument = arguments.get(i);
+            if (!argument.isCommand() || !argument.asCommand().hasName(commandChain.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int leadingCommandPrefixLength(CommandPathway<S> pathway) {
+        int count = 0;
+        for (Argument<S> argument : pathway.getArguments()) {
+            if (!argument.isCommand()) {
+                break;
+            }
+            count++;
+        }
+        return count;
     }
 }

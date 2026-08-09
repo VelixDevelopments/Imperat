@@ -1,27 +1,20 @@
 package studio.mevera.imperat;
 
 import net.kyori.adventure.audience.Audience;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import studio.mevera.imperat.adventure.AdventureCommandSource;
 import studio.mevera.imperat.adventure.AdventureProvider;
 import studio.mevera.imperat.adventure.CastingAdventure;
 import studio.mevera.imperat.adventure.EmptyAdventure;
 import studio.mevera.imperat.command.tree.help.CommandHelp;
 import studio.mevera.imperat.context.ExecutionContext;
 import studio.mevera.imperat.exception.ResponseException;
+import studio.mevera.imperat.providers.CommandSourceMapper;
 import studio.mevera.imperat.responses.BukkitResponseKey;
-import studio.mevera.imperat.selector.TargetSelector;
-import studio.mevera.imperat.type.LocationArgument;
-import studio.mevera.imperat.type.OfflinePlayerArgument;
-import studio.mevera.imperat.type.PlayerArgument;
-import studio.mevera.imperat.type.TargetSelectorArgument;
 import studio.mevera.imperat.util.TypeWrap;
 import studio.mevera.imperat.util.reflection.Reflections;
 
@@ -33,43 +26,46 @@ import java.util.List;
  * This builder provides a fluent API for configuring and customizing the behavior
  * of Imperat commands in a Bukkit/Spigot/Paper environment.
  *
- * <p>The builder automatically sets up:</p>
+ * <p>The builder automatically sets up backend-agnostic defaults:</p>
  * <ul>
- *   <li>Bukkit-specific parameter types (Player, Location, OfflinePlayer, TargetSelector)</li>
  *   <li>Exception handlers for common Bukkit scenarios</li>
  *   <li>CommandSource resolvers for type-safe command source handling</li>
  *   <li>Adventure API integration with automatic detection</li>
- *   <li>Entity selector support (@p, @a, @e, @r)</li>
  *   <li>Permission system integration</li>
  * </ul>
  *
+ * <p>Backend-specific defaults (parameter types, Brigadier wiring) are applied
+ * by the chosen {@link studio.mevera.imperat.backend.BukkitBackend} during
+ * {@code BukkitImperat} construction — modern Paper installs Paper-native
+ * argument types with client-side suggestions, legacy installs the existing
+ * name-based bukkit types.</p>
+ *
  * <p>Usage Example:</p>
  * <pre>{@code
- * BukkitImperat imperat = BukkitImperat.builder(plugin)
- *     .applyBrigadier(true)  // Enable Brigadier for Paper
- *     .build();
+ * BukkitImperat imperat = BukkitImperat.builder(plugin).build();
  * }</pre>
  *
  * @author Imperat Framework
  * @see BukkitImperat
  * @since 1.0
  */
-public final class BukkitConfigBuilder extends ConfigBuilder<BukkitCommandSource, BukkitImperat, BukkitConfigBuilder> {
+public class BukkitConfigBuilder<S extends BukkitCommandSource>
+        extends ConfigBuilder<S, BukkitImperat<S>, BukkitConfigBuilder<S>> {
 
-    private final static BukkitPermissionChecker DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionChecker();
+    private final static BukkitPermissionChecker<?> DEFAULT_PERMISSION_RESOLVER = new BukkitPermissionChecker<>();
 
     private final Plugin plugin;
     private AdventureProvider<CommandSender> adventureProvider;
+    private boolean setOverrideBrigadierMessaging = true;
 
-    private final boolean supportBrigadier;
-
-    BukkitConfigBuilder(Plugin plugin, boolean supportBrigadier) {
+    @SuppressWarnings({"unchecked", "rawtypes"}) BukkitConfigBuilder(Plugin plugin, Class<S> sourceClass,
+            CommandSourceMapper<BukkitCommandSource, S> mapper) {
+        super(sourceClass);
         this.plugin = plugin;
-        this.supportBrigadier = supportBrigadier;
-        config.setPermissionResolver(DEFAULT_PERMISSION_RESOLVER);
+        config.setSourceMapper(mapper);
+        config.setPermissionResolver((BukkitPermissionChecker) DEFAULT_PERMISSION_RESOLVER);
         registerBukkitResponses();
-        registerSourceResolvers();
-        registerValueResolvers();
+        registerDefaultSourceProviders();
         registerContextResolvers();
         config.setDefaultSuggestionProvider(
                 (context, argument) -> {
@@ -88,38 +84,39 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitCommandSource
     }
 
     private void registerContextResolvers() {
-        config.registerContextArgumentProvider(
-                new TypeWrap<ExecutionContext<BukkitCommandSource>>() {
-                }.getType(),
-                (ctx, paramElement) -> ctx
-        );
-        config.registerContextArgumentProvider(
-                new TypeWrap<CommandHelp<BukkitCommandSource>>() {
-                }.getType(),
-                (ctx, paramElement) -> CommandHelp.create(ctx)
-        );
+        // Type-literal-keyed registrations parameterized over S MUST be
+        // deferred until build() — the mapper / sourceClass might still
+        // change before the user calls build(). Building the type literal
+        // eagerly here would freeze it to the wrong S.
+        deferredDefaults.add(cfg -> {
+            cfg.registerContextArgumentProvider(
+                    TypeWrap.ofParameterized(ExecutionContext.class, sourceClass).getType(),
+                    (ctx, paramElement) -> ctx
+            );
+            cfg.registerContextArgumentProvider(
+                    TypeWrap.ofParameterized(CommandHelp.class, sourceClass).getType(),
+                    (ctx, paramElement) -> CommandHelp.create(ctx)
+            );
+        });
 
-        // Enhanced context resolvers similar to Velocity
+        // Plugin / Server are raw-class-keyed — no S parametrization, eager is fine
         config.registerContextArgumentProvider(Plugin.class, (ctx, paramElement) -> plugin);
         config.registerContextArgumentProvider(Server.class, (ctx, paramElement) -> plugin.getServer());
     }
 
-    private void registerSourceResolvers() {
-        config.registerSourceProvider(AdventureCommandSource.class, (bukkitSource, ctx) -> bukkitSource);
-        config.registerSourceProvider(CommandSender.class, (bukkitSource, ctx) -> bukkitSource.origin());
-        config.registerSourceProvider(ConsoleCommandSender.class, (bukkitSource, ctx) -> {
-            var origin = bukkitSource.origin();
-            if (!(origin instanceof ConsoleCommandSender console)) {
-                throw ResponseException.of(BukkitResponseKey.ONLY_CONSOLE);
-            }
-            return console;
-        });
-
-        config.registerSourceProvider(Player.class, (source, ctx) -> {
+    private void registerDefaultSourceProviders() {
+        config.registerSourceProvider(CommandSender.class, BukkitCommandSource::origin);
+        config.registerSourceProvider(Player.class, source -> {
             if (source.isConsole()) {
                 throw ResponseException.of(BukkitResponseKey.ONLY_PLAYER);
             }
             return source.asPlayer();
+        });
+        config.registerSourceProvider(ConsoleCommandSender.class, source -> {
+            if (!source.isConsole()) {
+                throw ResponseException.of(BukkitResponseKey.ONLY_CONSOLE);
+            }
+            return (ConsoleCommandSender) source.origin();
         });
     }
 
@@ -143,27 +140,46 @@ public final class BukkitConfigBuilder extends ConfigBuilder<BukkitCommandSource
             registry.registerResponse(BukkitResponseKey.UNKNOWN_SELECTION_TYPE, () -> "Unknown selection type '%type_entered%'", "input",
                     "type_entered");
 
+            registry.registerResponse(BukkitResponseKey.SELECTOR_INVALID_NUMERIC_VALUE,
+                    () -> "Invalid %numeric_type% value '%input%'", "input", "numeric_type");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_INVALID_RANGE_FORMAT,
+                    () -> "Invalid range format '%input%'%reason%", "input", "reason");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_UNKNOWN_GAMEMODE,
+                    () -> "Unknown gamemode '%input%'", "input");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_UNKNOWN_ENTITY_TYPE,
+                    () -> "Unknown entity-type '%input%'", "input");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_DISTANCE_PLAYER_ONLY,
+                    () -> "Only players can use the field=`distance`");
+            registry.registerResponse(BukkitResponseKey.SELECTOR_UNKNOWN_SORT_OPTION,
+                    () -> "Unknown sort option '%input%'", "input");
+
         });
     }
 
-    private void registerValueResolvers() {
-        config.registerArgType(Player.class, new PlayerArgument());
-        config.registerArgType(OfflinePlayer.class, new OfflinePlayerArgument());
-        config.registerArgType(Location.class, new LocationArgument());
-        config.registerArgType(TargetSelector.class, new TargetSelectorArgument());
-    }
-
-    public BukkitConfigBuilder setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {
+    public BukkitConfigBuilder<S> setAdventureProvider(AdventureProvider<CommandSender> adventureProvider) {
         this.adventureProvider = adventureProvider;
         return this;
     }
 
+    /**
+     * Whether the modern Paper backend should listen for {@code UnknownCommandEvent}
+     * and reroute hidden-by-permissions cases through Imperat's exception pipeline.
+     * No effect on the legacy backend. Default: {@code true}.
+     */
+    public BukkitConfigBuilder<S> setOverrideBrigadierMessaging(boolean enabled) {
+        this.setOverrideBrigadierMessaging = enabled;
+        return this;
+    }
+
     @Override
-    public @NotNull BukkitImperat build() {
+    public @NotNull BukkitImperat<S> build() {
         if (this.adventureProvider == null) {
             this.adventureProvider = this.loadAdventure();
         }
-        return new BukkitImperat(plugin, adventureProvider, supportBrigadier, this.config);
+        // Drain deferred defaults AFTER mapper is set — the mapper might
+        // have been swapped by the user's `.source(...)` call.
+        materializeDeferredDefaults();
+        return new BukkitImperat<>(plugin, adventureProvider, this.config, setOverrideBrigadierMessaging);
     }
 
     @SuppressWarnings("ConstantConditions")

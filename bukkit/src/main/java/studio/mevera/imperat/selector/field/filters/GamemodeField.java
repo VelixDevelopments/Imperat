@@ -5,8 +5,9 @@ import org.bukkit.entity.HumanEntity;
 import org.jetbrains.annotations.NotNull;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.context.CommandContext;
-import studio.mevera.imperat.context.internal.Cursor;
+import studio.mevera.imperat.exception.ArgumentParseException;
 import studio.mevera.imperat.exception.CommandException;
+import studio.mevera.imperat.responses.BukkitResponseKey;
 import studio.mevera.imperat.selector.EntityCondition;
 import studio.mevera.imperat.util.TypeWrap;
 
@@ -23,8 +24,7 @@ final class GamemodeField extends PredicateField<GameMode> {
     }
 
     @Override
-    protected @NotNull EntityCondition getCondition(GameMode value, Cursor<BukkitCommandSource> cursor,
-            CommandContext<BukkitCommandSource> context) {
+    protected @NotNull EntityCondition getCondition(GameMode value, CommandContext<BukkitCommandSource> context) {
         return ((sender, entity) -> {
             if (!(entity instanceof HumanEntity humanEntity)) {
                 return false;
@@ -45,7 +45,7 @@ final class GamemodeField extends PredicateField<GameMode> {
         try {
             return GameMode.valueOf(value);
         } catch (EnumConstantNotPresentException ex) {
-            throw new CommandException("Unknown gamemode '%s'", value);
+            throw new ArgumentParseException(BukkitResponseKey.SELECTOR_UNKNOWN_GAMEMODE, value);
         }
     }
 }

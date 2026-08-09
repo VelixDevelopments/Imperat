@@ -1,29 +1,27 @@
 package studio.mevera.imperat;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.mevera.imperat.annotations.base.AnnotationReplacer;
 import studio.mevera.imperat.annotations.base.InstanceFactory;
 import studio.mevera.imperat.annotations.base.element.ParameterElement;
-import studio.mevera.imperat.command.suggestions.AutoCompleterFactory;
 import studio.mevera.imperat.command.Command;
 import studio.mevera.imperat.command.CommandCoordinator;
 import studio.mevera.imperat.command.CommandPathway;
 import studio.mevera.imperat.command.ContextArgumentProviderFactory;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.type.ArgumentType;
+import studio.mevera.imperat.command.arguments.type.Cursor;
+import studio.mevera.imperat.command.suggestions.AutoCompleterFactory;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
-import studio.mevera.imperat.context.ExecutionContext;
 import studio.mevera.imperat.context.internal.ContextFactory;
-import studio.mevera.imperat.context.internal.Cursor;
-import studio.mevera.imperat.context.internal.OptionalArgumentHandler;
 import studio.mevera.imperat.events.EventBus;
 import studio.mevera.imperat.exception.CommandExceptionHandler;
 import studio.mevera.imperat.permissions.PermissionChecker;
 import studio.mevera.imperat.placeholders.Placeholder;
 import studio.mevera.imperat.placeholders.PlaceholderResolver;
+import studio.mevera.imperat.providers.CommandSourceMapper;
 import studio.mevera.imperat.providers.ContextArgumentProvider;
 import studio.mevera.imperat.providers.DependencySupplier;
 
@@ -56,6 +54,35 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
     void setCommandPrefix(String cmdPrefix);
 
     /**
+     * Class token for the canonical source type {@code S}. Captured at
+     * builder-construction time. Required by reflective param-resolution
+     * paths that compare {@code @Execute} method parameters against the
+     * user-declared source class.
+     */
+    @NotNull Class<S> sourceClass();
+
+    /**
+     * Bidirectional mapper between the platform-native source and the
+     * canonical {@code S}. Default-path builders install
+     * {@link CommandSourceMapper#identity()}; custom-source plugins
+     * install their own via {@code .source(...)}.
+     *
+     * <p>Returned as a raw {@link CommandSourceMapper} because the
+     * {@code S extends P} bound on the interface is incompatible with
+     * wildcard storage across generic erasure. Callers cast to their
+     * expected platform type.</p>
+     */
+    @SuppressWarnings("rawtypes")
+    @NotNull CommandSourceMapper sourceMapper();
+
+    /**
+     * Sets the source mapper. Called by the platform-specific
+     * {@code ConfigBuilder} when the user chains {@code .source(...)}.
+     */
+    @SuppressWarnings("rawtypes")
+    void setSourceMapper(@NotNull CommandSourceMapper mapper);
+
+    /**
      * @return the printer used for unhandled throwables
      */
     @NotNull ThrowablePrinter getThrowablePrinter();
@@ -66,6 +93,22 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
      * @param printer the throwable printer to use
      */
     void setThrowablePrinter(@NotNull ThrowablePrinter printer);
+
+    /**
+     * @return the generic message sent to the command source when no
+     *         exception handler claims a thrown throwable
+     */
+    @NotNull String getUnhandledExceptionMessage();
+
+    /**
+     * Sets the generic message sent to the command source when no
+     * exception handler claims a thrown throwable. The throwable's
+     * stack trace is still printed to the console by the configured
+     * {@link ThrowablePrinter}.
+     *
+     * @param message the generic error message
+     */
+    void setUnhandledExceptionMessage(@NotNull String message);
 
     /**
      * Fetches {@link ArgumentType} for a certain value
@@ -81,20 +124,18 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
     }
 
     /**
-     * Registers annotation replacer
+     * Registers an {@link AnnotationReplacer} that will be applied to the
+     * annotation parser when the owning {@link Imperat} instance is built.
+     *
+     * <p>The replacer is staged on this config; the framework forwards it to
+     * the parser internally during {@code Imperat} construction. Callers do
+     * not need to (and cannot) invoke any "apply" step themselves.</p>
+     *
      * @param type the type of annotation to register
      * @param replacer the replacer for this annotation
      * @param <A> the type of annotation to replace by the {@link AnnotationReplacer}
      */
     <A extends Annotation> void registerAnnotationReplacer(Class<A> type, AnnotationReplacer<A> replacer);
-
-    /**
-     * Apply annotation replacers.
-     * @param imperat the imperat instance
-     * @param <A> A type variable used internally
-     */
-    @ApiStatus.Internal
-    <A extends Annotation> void applyAnnotationReplacers(Imperat<S> imperat);
 
     /**
      * Determines whether multiple optional parameters can be suggested simultaneously
@@ -148,30 +189,6 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
     void setOptionalParameterSuggestionOverlap(boolean enabled);
 
     /**
-     * <p>
-     * Whether to handle the skipping of consecutive optional argument <b>during execution</b>
-     * For example if you have `/test [a] [b]` where parameter 'a' is of type String
-     * and parameter 'b' is of type Integer.
-     * if you enter `/test 1` while this option is enabled, it would handle this and assign
-     * the parameter 'b' to the value that suits its type.
-     * with no respect for the order of optional arguments.
-     * <p>
-     * Else if the option is disabled, then Imperat's {@link OptionalArgumentHandler}
-     * will respect the order of the optional arguments, and will resolve the arguments in order.
-     *
-     *
-     * @return Whether to handle the skipping of consecutive optional argument
-     * <b>DURING EXECUTION</b>.
-     */
-    boolean handleExecutionMiddleOptionalSkipping();
-
-    /**
-     * Refer to {@link #handleExecutionMiddleOptionalSkipping()} to know about this option.
-     * @param toggle whether to toggle the handling of middle optional skipping
-     */
-    void setHandleExecutionConsecutiveOptionalArgumentsSkip(boolean toggle);
-
-    /**
      * Checks whether the valueType has
      * a registered context-resolver
      *
@@ -206,7 +223,7 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
      *
      * @param Argument the parameter of a command's usage
      * @param <T>              the valueType of value that will be resolved by
-     * {@link ArgumentType#parse(CommandContext, Argument, String)} OR {@link ArgumentType#parse(ExecutionContext, Cursor)} during execution
+     * {@link ArgumentType#parse(CommandContext, Argument, Cursor)} during execution
      * @return the context resolver for this parameter's value valueType
      */
     default <T> ContextArgumentProvider<S, T> getContextArgumentProvider(Argument<S> Argument) {
@@ -220,6 +237,84 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
      */
     @Nullable
     <T> ContextArgumentProviderFactory<S, T> getContextArgumentProviderFactory(Type resolvingContextType);
+
+    /**
+     * Determines whether strict ambiguity validation is enabled for command registration.
+     *
+     * <p>When enabled ({@code true}), Imperat performs aggressive ambiguity checks
+     * during command tree construction and registration. Commands that contain
+     * potentially conflicting parsing pathways will fail registration with an
+     * {@link studio.mevera.imperat.exception.AmbiguousCommandException}.
+     *
+     * <p>This includes validation such as:
+     * <ul>
+     *   <li>Sibling argument conflicts with overlapping priorities or value types</li>
+     *   <li>Optional parameter pathway overlaps</li>
+     *   <li>Greedy arguments followed by additional parameters</li>
+     *   <li>Conflicting optional parsing branches</li>
+     * </ul>
+     *
+     * <p>When disabled ({@code false}), Imperat skips strict ambiguity validation,
+     * allowing potentially overlapping command pathways to coexist. This can be
+     * useful for experimental parsers, advanced custom argument resolvers, or
+     * intentionally flexible command structures.
+     *
+     * <p><strong>Warning:</strong> Disabling strict ambiguity resolution may result
+     * in undefined parsing behavior if multiple arguments can consume the same input
+     * token sequence.
+     *
+     * <p>This setting only affects registration-time validation and does not change
+     * the runtime parser implementation itself.
+     *
+     * <p>Enabled by default.
+     *
+     * @return {@code true} if strict ambiguity validation is enabled,
+     *         {@code false} otherwise
+     * @see #setStrictAmbiguityResolution(boolean)
+     * @see studio.mevera.imperat.exception.AmbiguousCommandException
+     */
+    boolean isStrictAmbiguityResolutionEnabled();
+
+    /**
+     * Enables or disables strict ambiguity validation during command registration.
+     *
+     * <p>Strict ambiguity resolution ensures that command pathways remain
+     * deterministic and free from overlapping parsing patterns. When enabled,
+     * Imperat validates command structures and rejects ambiguous pathways before
+     * they can be registered.
+     *
+     * <p>Disabling this setting allows more permissive command trees and may be
+     * useful when:
+     * <ul>
+     *   <li>Using custom argument types with non-standard parsing behavior</li>
+     *   <li>Experimenting with overlapping optional parameters</li>
+     *   <li>Building advanced fallback parsing systems</li>
+     *   <li>Temporarily bypassing validation during development</li>
+     * </ul>
+     *
+     * <p><strong>Example:</strong>
+     * <pre>{@code
+     * config.setStrictAmbiguityResolution(false);
+     *
+     * // Potentially overlapping pathways become allowed:
+     * // /command <player>
+     * // /command <offline-player>
+     * }</pre>
+     *
+     * <p><strong>Warning:</strong> Disabling strict ambiguity validation may cause
+     * commands to parse unpredictably if multiple arguments match the same input.
+     * It is recommended to keep this enabled unless the command structure is fully
+     * controlled and intentionally designed for overlap.
+     *
+     * <p>Enabled by default.
+     *
+     * @param enabled {@code true} to enforce strict ambiguity validation,
+     *                {@code false} to allow potentially ambiguous pathways
+     * @return this config instance
+     * @see #isStrictAmbiguityResolutionEnabled()
+     * @see studio.mevera.imperat.exception.AmbiguousCommandException
+     */
+    ImperatConfig<S> setStrictAmbiguityResolution(boolean enabled);
 
     /**
      * @return {@link PermissionChecker} for the dispatcher
@@ -287,10 +382,6 @@ public sealed interface ImperatConfig<S extends CommandSource> extends ResolverR
      * @param type the type
      */
     <T> @Nullable T resolveDependency(Type type);
-
-    default boolean hasSourceResolver(Type wrap) {
-        return getSourceProviderFor(wrap) != null;
-    }
 
     /**
      * Registers a new {@link CommandExceptionHandler} for the specified valueType of throwable.

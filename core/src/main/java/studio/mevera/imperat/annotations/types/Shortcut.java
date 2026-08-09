@@ -17,5 +17,5 @@ import java.lang.annotation.Target;
 @ApiStatus.Experimental
 public @interface Shortcut {
 
-    String value();
+    String[] value();
 }

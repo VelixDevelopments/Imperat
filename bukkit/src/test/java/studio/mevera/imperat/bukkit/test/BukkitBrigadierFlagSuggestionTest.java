@@ -1,12 +1,14 @@
 package studio.mevera.imperat.bukkit.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.Suggestion;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,15 +29,13 @@ import java.util.Objects;
 @DisplayName("Bukkit Brigadier Flag Suggestion Tests")
 class BukkitBrigadierFlagSuggestionTest {
 
-    private ServerMock server;
-    private TestImperatPlugin plugin;
-    private BukkitImperat imperat;
+    private BukkitImperat<BukkitCommandSource> imperat;
     private PlayerMock player;
 
     @BeforeEach
     void setUp() {
-        server = MockBukkit.mock();
-        plugin = MockBukkit.load(TestImperatPlugin.class);
+        ServerMock server = MockBukkit.mock();
+        TestImperatPlugin plugin = MockBukkit.load(TestImperatPlugin.class);
         imperat = plugin.getImperat();
         imperat.registerCommand(new FlagBrigadierCmd());
         player = server.addPlayer("TestPlayer");
@@ -51,8 +51,10 @@ class BukkitBrigadierFlagSuggestionTest {
     void testBrigadierShowsRootFlagsAndSubcommands() {
         var suggestions = complete("flagtest ");
 
-        assertEquals(4, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("play", "mix", "-scenario", "-sc")));
+        // Flag-name suggestions are server-driven (core tree suggester) and
+        // use the canonical single-dash forms; long `--` forms still parse.
+        assertEquals(6, suggestions.size());
+        assertTrue(suggestions.containsAll(List.of("play", "mix", "greedyflag", "multi", "-scenario", "-sc")));
     }
 
     @Test
@@ -113,6 +115,76 @@ class BukkitBrigadierFlagSuggestionTest {
         assertTrue(suggestions.containsAll(List.of("kindergarten", "castle", "sandstorm", "tsunami")));
     }
 
+    @Test
+    @DisplayName("Should NOT suggest flag name again after it was just used in Brigadier")
+    void testBrigadierDoesNotSuggestUsedFlagAgain() {
+        var suggestions = complete("flagtest --sc ");
+
+        assertFalse(suggestions.contains("--scenario"), "--scenario should not be suggested");
+        assertFalse(suggestions.contains("-scenario"), "-scenario should not be suggested");
+        assertFalse(suggestions.contains("-sc"), "-sc should not be suggested");
+        assertFalse(suggestions.contains("--sc"), "--sc should not be suggested");
+    }
+
+    @Test
+    @DisplayName("Should NOT suggest flag name after alias was used in Brigadier")
+    void testBrigadierDoesNotSuggestUsedAliasFlagAgain() {
+        var suggestions = complete("flagtest -sc ");
+
+        assertFalse(suggestions.contains("--scenario"), "--scenario should not be suggested");
+        assertFalse(suggestions.contains("-scenario"), "-scenario should not be suggested");
+        assertFalse(suggestions.contains("-sc"), "-sc should not be suggested");
+        assertFalse(suggestions.contains("--sc"), "--sc should not be suggested");
+    }
+
+    @Test
+    @DisplayName("Should NOT suggest switch again after use with greedy arg in Brigadier")
+    void testBrigadierDoesNotSuggestGreedySwitchAgain() {
+        var suggestions = complete("flagtest greedyflag --shallow ");
+
+        assertFalse(suggestions.contains("--shallow"), "--shallow should not be suggested, got " + suggestions);
+        assertFalse(suggestions.contains("-shallow"), "-shallow should not be suggested, got " + suggestions);
+    }
+
+    @Test
+    @DisplayName("Should suggest switch before use with greedy arg in Brigadier")
+    void testBrigadierShowsGreedySwitchAtStart() {
+        var suggestions = complete("flagtest greedyflag ");
+
+        assertTrue(suggestions.contains("-shallow"), "expected -shallow in " + suggestions);
+    }
+
+    @Test
+    @DisplayName("Should suggest the remaining switch after one switch is used in a greedy scope")
+    void testBrigadierSuggestsSecondSwitchAfterFirstInGreedyScope() {
+        var suggestions = complete("flagtest multi --silent ");
+
+        assertTrue(suggestions.contains("-anon"), "expected -anon in " + suggestions);
+        assertFalse(suggestions.contains("-silent"), "-silent was used, got " + suggestions);
+        assertFalse(suggestions.contains("--silent"), "--silent was used, got " + suggestions);
+    }
+
+    @Test
+    @DisplayName("Should suggest no switches once all are used in a greedy scope")
+    void testBrigadierSuggestsNoSwitchesWhenAllUsedInGreedyScope() {
+        var suggestions = complete("flagtest multi --silent -anon ");
+
+        assertFalse(suggestions.contains("-silent"), "-silent was used, got " + suggestions);
+        assertFalse(suggestions.contains("-anon"), "-anon was used, got " + suggestions);
+        assertFalse(suggestions.contains("--anon"), "--anon was used, got " + suggestions);
+    }
+
+    @Test
+    @DisplayName("Should suggest greedy argument values containing space correctly through Brigadier")
+    void testBrigadierGreedySuggestionsWithSpace() {
+        var suggestions = complete("flagtest greedyflag pluginsDir/my ");
+
+        assertEquals(2, suggestions.size(), "Suggestions: " + suggestions);
+        assertTrue(suggestions.contains("pluginsDir/my plugin/config.yml"), "expected config.yml in " + suggestions);
+        assertTrue(suggestions.contains("pluginsDir/my plugin/messages.yml"), "expected messages.yml in " + suggestions);
+        assertFalse(suggestions.contains("pluginsDir/itsmyconfig/"), "did not expect itsmyconfig/ in " + suggestions);
+    }
+
     private List<String> complete(String input) {
         return completeSuggestions(input)
                        .stream()
@@ -132,9 +204,9 @@ class BukkitBrigadierFlagSuggestionTest {
 
     private static final class TestBrigadierManager extends BaseBrigadierManager<BukkitCommandSource> {
 
-        private final BukkitImperat imperat;
+        private final BukkitImperat<BukkitCommandSource> imperat;
 
-        private TestBrigadierManager(BukkitImperat imperat) {
+        private TestBrigadierManager(BukkitImperat<BukkitCommandSource> imperat) {
             super(imperat);
             this.imperat = imperat;
         }
@@ -145,7 +217,7 @@ class BukkitBrigadierFlagSuggestionTest {
         }
 
         @Override
-        public ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
+        public @NonNull ArgumentType<?> getArgumentType(Argument<BukkitCommandSource> parameter) {
             return parameter.isGreedy() ? StringArgumentType.greedyString() : StringArgumentType.word();
         }
     }

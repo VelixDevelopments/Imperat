@@ -9,21 +9,19 @@ import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.command.arguments.Argument;
 import studio.mevera.imperat.command.arguments.type.ArgumentType;
 import studio.mevera.imperat.command.arguments.type.ArgumentTypes;
+import studio.mevera.imperat.command.arguments.type.Cursor;
+import studio.mevera.imperat.command.arguments.type.GreedyArgumentType;
 import studio.mevera.imperat.context.CommandContext;
-import studio.mevera.imperat.context.ExecutionContext;
-import studio.mevera.imperat.context.internal.Cursor;
 import studio.mevera.imperat.exception.CommandException;
 import studio.mevera.imperat.exception.ResponseException;
 import studio.mevera.imperat.responses.BukkitResponseKey;
 
-import java.util.Objects;
-
-public class LocationArgument extends ArgumentType<BukkitCommandSource, Location> {
+public class LocationArgument<S extends BukkitCommandSource> extends GreedyArgumentType<S, Location> {
 
     private final static String SINGLE_STRING_SEPARATOR = ";";
     private final static String SELF_LOCATION_SYMBOL = "~";
 
-    private final ArgumentType<BukkitCommandSource, Double> doubleParser;
+    private final ArgumentType<S, Double> doubleParser;
 
     public LocationArgument() {
         super();
@@ -31,7 +29,7 @@ public class LocationArgument extends ArgumentType<BukkitCommandSource, Location
     }
 
     @Override
-    public Location parse(@NotNull CommandContext<BukkitCommandSource> context, @NonNull Argument<BukkitCommandSource> argument,
+    public Location parse(@NotNull CommandContext<S> context, @NonNull Argument<S> argument,
             @NotNull String input) throws CommandException {
         // Parse from a single string (semicolon-separated)
         String[] split = input.split(SINGLE_STRING_SEPARATOR);
@@ -57,7 +55,7 @@ public class LocationArgument extends ArgumentType<BukkitCommandSource, Location
             }
             x = playerLocation.getX();
         } else {
-            x = doubleParser.parse(context, argument, split[1]);
+            x = doubleParser.parse(context, argument, Cursor.single(context, split[1]));
         }
 
         double y;
@@ -67,7 +65,7 @@ public class LocationArgument extends ArgumentType<BukkitCommandSource, Location
             }
             y = playerLocation.getY();
         } else {
-            y = doubleParser.parse(context, argument, split[2]);
+            y = doubleParser.parse(context, argument, Cursor.single(context, split[2]));
         }
 
         double z;
@@ -77,7 +75,7 @@ public class LocationArgument extends ArgumentType<BukkitCommandSource, Location
             }
             z = playerLocation.getZ();
         } else {
-            z = doubleParser.parse(context, argument, split[3]);
+            z = doubleParser.parse(context, argument, Cursor.single(context, split[3]));
         }
 
         float yaw = 0.0f;
@@ -90,7 +88,7 @@ public class LocationArgument extends ArgumentType<BukkitCommandSource, Location
                 }
                 yaw = playerLocation.getYaw();
             } else {
-                yaw = (float) doubleParser.parse(context, argument, split[4]).doubleValue();
+                yaw = (float) doubleParser.parse(context, argument, Cursor.single(context, split[4])).doubleValue();
             }
         }
 
@@ -101,18 +99,11 @@ public class LocationArgument extends ArgumentType<BukkitCommandSource, Location
                 }
                 pitch = playerLocation.getPitch();
             } else {
-                pitch = (float) doubleParser.parse(context, argument, split[5]).doubleValue();
+                pitch = (float) doubleParser.parse(context, argument, Cursor.single(context, split[5])).doubleValue();
             }
         }
 
         return createLocation(world, x, y, z, yaw, pitch);
-    }
-
-    @Override
-    public Location parse(@NotNull ExecutionContext<BukkitCommandSource> context, @NotNull Cursor<BukkitCommandSource> cursor)
-            throws CommandException {
-        String currentRaw = cursor.currentRaw().orElse("");
-        return parse(context, Objects.requireNonNull(cursor.currentParameterIfPresent()), currentRaw);
     }
 
     private Location createLocation(World world, double x, double y, double z, float yaw, float pitch) {
@@ -144,8 +135,4 @@ public class LocationArgument extends ArgumentType<BukkitCommandSource, Location
                        .withPlaceholder("inputYaw", inputYaw != null ? inputYaw : "");
     }
 
-    @Override
-    public boolean isGreedy(Argument<BukkitCommandSource> parameter) {
-        return true;
-    }
 }

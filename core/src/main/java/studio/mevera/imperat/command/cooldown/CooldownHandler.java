@@ -17,9 +17,13 @@ import java.util.Optional;
 @ApiStatus.AvailableSince("1.0.0")
 public interface CooldownHandler<S extends CommandSource> {
 
+    static <S extends CommandSource> CooldownHandler<S> createShared(CooldownRecord cooldown) {
+        return new DefaultCooldownHandler<>(cooldown);
+    }
 
-    static <S extends CommandSource> CooldownHandler<S> createDefault(CommandPathway<S> usage) {
-        return new DefaultCooldownHandler<>(usage);
+    @SuppressWarnings("unchecked")
+    static <S extends CommandSource> CooldownHandler<S> noop() {
+        return (CooldownHandler<S>) DefaultCooldownHandler.NOOP_INSTANCE;
     }
 
     /**

@@ -14,8 +14,8 @@ import studio.mevera.imperat.command.processors.CommandPostProcessor;
 import studio.mevera.imperat.command.processors.CommandPreProcessor;
 import studio.mevera.imperat.command.suggestions.AutoCompleter;
 import studio.mevera.imperat.command.tree.CommandTree;
+import studio.mevera.imperat.command.tree.CommandTreeMatch;
 import studio.mevera.imperat.command.tree.CommandTreeVisualizer;
-import studio.mevera.imperat.command.tree.TreeExecutionResult;
 import studio.mevera.imperat.context.ArgumentInput;
 import studio.mevera.imperat.context.CommandContext;
 import studio.mevera.imperat.context.CommandSource;
@@ -82,7 +82,11 @@ final class CommandImpl<S extends CommandSource> implements Command<S> {
         this.parent = parent;
         this.position = position;
         this.name = name.toLowerCase();
-        this.setDefaultPathwayWithValidation(imperat.config().getGlobalDefaultPathway().build(this));
+        CommandPathway<S> globalFallback = imperat.config().getGlobalDefaultPathway().build(this);
+        if (globalFallback instanceof CommandPathwayImpl<S> fallbackImpl) {
+            fallbackImpl.setSyntheticFallback(true);
+        }
+        this.setDefaultPathwayWithValidation(globalFallback);
         this.autoCompleter = imperat.config().getAutoCompleterFactory().create(this);
         this.suggestionProvider = SuggestionProvider.forCommand(this);
         this.annotatedElement = annotatedElement;
@@ -166,7 +170,7 @@ final class CommandImpl<S extends CommandSource> implements Command<S> {
     }
 
     @Override
-    public @NotNull TreeExecutionResult<S> execute(@UnknownNullability ExecutionContext<S> context) throws CommandException {
+    public @NotNull CommandTreeMatch<S> execute(@UnknownNullability ExecutionContext<S> context) throws CommandException {
         ArgumentInput arguments = context.arguments();
         var copy = arguments.copy();
         return tree.execute(context, copy);
@@ -313,6 +317,17 @@ final class CommandImpl<S extends CommandSource> implements Command<S> {
      */
     @Override
     public void addPathway(CommandPathway<S> usage) {
+        // Stamp the owning command on the pathway so the default
+        // {@link CommandPathway#formatted()} can build a subcommand-chain
+        // prefix even when the pathway has zero positional arguments
+        // (e.g. {@code @Execute void run(Source s)} on a {@code @SubCommand}).
+        // Without this stamp the inference falls back to
+        // {@code arguments[0].getParent()} which is unreachable when the
+        // argument list is empty, and the closest-usage hint loses the
+        // subcommand chain.
+        if (usage instanceof CommandPathwayImpl<S> impl) {
+            impl.setOwningCommand(this);
+        }
         tree.parseUsage(usage);
         if (usage.isDefault()) {
             this.defaultPathway = usage;
