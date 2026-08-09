@@ -19,6 +19,7 @@ import studio.mevera.imperat.backend.capability.BukkitCapability;
 import studio.mevera.imperat.backend.capability.RegistrationCapability;
 import studio.mevera.imperat.backend.modern.BukkitBrigadierManager;
 import studio.mevera.imperat.command.Command;
+import studio.mevera.imperat.command.arguments.type.ArgumentType;
 import studio.mevera.imperat.commodore.Commodore;
 import studio.mevera.imperat.commodore.CommodoreProvider;
 import studio.mevera.imperat.providers.CommandSourceMapper;
@@ -28,6 +29,7 @@ import studio.mevera.imperat.type.OfflinePlayerArgument;
 import studio.mevera.imperat.type.PlayerArgument;
 import studio.mevera.imperat.type.TargetSelectorArgument;
 import studio.mevera.imperat.type.WorldArgument;
+import studio.mevera.imperat.util.priority.Priority;
 
 /**
  * {@link BukkitCapability#COMMODORE_BRIGADIER} registration impl —
@@ -105,11 +107,21 @@ public final class CommodoreRegistration<S extends BukkitCommandSource> implemen
 
     @Override
     public void applyArgumentTypeDefaults(@NotNull ImperatConfig<S> config) {
-        config.registerArgType(Player.class, new PlayerArgument<S>());
-        config.registerArgType(OfflinePlayer.class, new OfflinePlayerArgument<S>());
-        config.registerArgType(Location.class, new LocationArgument<S>());
-        config.registerArgType(World.class, new WorldArgument<S>());
-        config.registerArgType(TargetSelector.class, new TargetSelectorArgument<S>());
+        // Framework defaults register below user `registerArgType` (HIGH) so
+        // user overrides always win regardless of registration order.
+        registerDefault(config, Player.class, new PlayerArgument<>());
+        registerDefault(config, OfflinePlayer.class, new OfflinePlayerArgument<>());
+        registerDefault(config, Location.class, new LocationArgument<>());
+        registerDefault(config, World.class, new WorldArgument<>());
+        registerDefault(config, TargetSelector.class, new TargetSelectorArgument<>());
+    }
+
+    private <T> void registerDefault(
+            @NotNull ImperatConfig<S> config,
+            Class<T> type,
+            ArgumentType<S, T> resolver
+    ) {
+        config.getArgumentTypeRegistry().registerResolver(type, () -> resolver, Priority.LOW.plus(1));
     }
 
     @Override

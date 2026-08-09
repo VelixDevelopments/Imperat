@@ -16,6 +16,7 @@ import studio.mevera.imperat.adventure.AdventureProvider;
 import studio.mevera.imperat.backend.capability.BukkitCapability;
 import studio.mevera.imperat.backend.capability.RegistrationCapability;
 import studio.mevera.imperat.command.Command;
+import studio.mevera.imperat.command.arguments.type.ArgumentType;
 import studio.mevera.imperat.providers.CommandSourceMapper;
 import studio.mevera.imperat.selector.TargetSelector;
 import studio.mevera.imperat.type.LocationArgument;
@@ -23,6 +24,7 @@ import studio.mevera.imperat.type.OfflinePlayerArgument;
 import studio.mevera.imperat.type.PlayerArgument;
 import studio.mevera.imperat.type.TargetSelectorArgument;
 import studio.mevera.imperat.type.WorldArgument;
+import studio.mevera.imperat.util.priority.Priority;
 
 /**
  * {@link BukkitCapability#PLAIN_COMMAND_MAP} registration impl — universal
@@ -78,13 +80,23 @@ public final class PlainCommandMapRegistration<S extends BukkitCommandSource> im
     @Override
     public void applyArgumentTypeDefaults(@NotNull ImperatConfig<S> config) {
         // The premade types are now generic over `<S extends BukkitCommandSource>`
-        // so they parameterise cleanly against the user's canonical source type
+        // so they parameterize cleanly against the user's canonical source type
         // — no raw casts needed for any of them.
-        config.registerArgType(Player.class, new PlayerArgument<S>());
-        config.registerArgType(OfflinePlayer.class, new OfflinePlayerArgument<S>());
-        config.registerArgType(Location.class, new LocationArgument<S>());
-        config.registerArgType(World.class, new WorldArgument<S>());
-        config.registerArgType(TargetSelector.class, new TargetSelectorArgument<S>());
+        // Framework defaults register below user `registerArgType` (HIGH) so
+        // user overrides always win regardless of registration order.
+        registerDefault(config, Player.class, new PlayerArgument<>());
+        registerDefault(config, OfflinePlayer.class, new OfflinePlayerArgument<>());
+        registerDefault(config, Location.class, new LocationArgument<>());
+        registerDefault(config, World.class, new WorldArgument<>());
+        registerDefault(config, TargetSelector.class, new TargetSelectorArgument<>());
+    }
+
+    private <T> void registerDefault(
+            @NotNull ImperatConfig<S> config,
+            Class<T> type,
+            ArgumentType<S, T> resolver
+    ) {
+        config.getArgumentTypeRegistry().registerResolver(type, () -> resolver, Priority.LOW.plus(1));
     }
 
     @Override

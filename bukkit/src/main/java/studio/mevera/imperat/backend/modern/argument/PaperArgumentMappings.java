@@ -11,10 +11,12 @@ import org.bukkit.inventory.ItemStack;
 import studio.mevera.imperat.BukkitCommandSource;
 import studio.mevera.imperat.ImperatConfig;
 import studio.mevera.imperat.backend.modern.type.PaperTargetSelectorArgument;
+import studio.mevera.imperat.command.arguments.type.ArgumentType;
 import studio.mevera.imperat.selector.TargetSelector;
 import studio.mevera.imperat.type.LocationArgument;
 import studio.mevera.imperat.type.OfflinePlayerArgument;
 import studio.mevera.imperat.type.PlayerArgument;
+import studio.mevera.imperat.util.priority.Priority;
 
 import java.util.UUID;
 
@@ -36,28 +38,29 @@ public final class PaperArgumentMappings {
     private PaperArgumentMappings() {
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void applyDefaults(ImperatConfig<BukkitCommandSource> config) {
         // Player → name-based Imperat-side argument (mirror of legacy
         // bukkit module). Suggestion provider returns online player names
         // via Imperat's customSuggestions path.
-        config.registerArgType(Player.class, new PlayerArgument());
+        registerDefault(config, Player.class, new PlayerArgument<>());
 
         // OfflinePlayer kept on the legacy name-based path (Paper's
         // playerProfiles selector returns PlayerProfile, not OfflinePlayer,
         // and most plugin code wants the bukkit OfflinePlayer view).
-        config.registerArgType(OfflinePlayer.class, new OfflinePlayerArgument());
+        registerDefault(config, OfflinePlayer.class, new OfflinePlayerArgument<>());
 
         // Location → legacy multi-token name-based parser (kept for
         // callers using the bukkit-style "world;x;y;z" form). Plugin
         // authors who want selector-style positions can register the
         // FinePosition mapping themselves at use-site.
-        config.registerArgType(Location.class, new LocationArgument());
+        registerDefault(config, Location.class, new LocationArgument<>());
 
         // TargetSelector → Paper-native-aware variant. Server-side parsing
         // stays in the legacy TargetSelectorArgument; client gets
         // ArgumentTypes.entities() for native @e[...] coloring +
         // autocomplete via the PaperNativeAware bridge.
-        config.registerArgType(TargetSelector.class, new PaperTargetSelectorArgument());
+        registerDefault(config, TargetSelector.class, new PaperTargetSelectorArgument());
 
         // Identity-resolved native types — eagerly call ArgumentTypes.X()
         // which can throw under test mocks (MockBukkit's
@@ -74,6 +77,23 @@ public final class PaperArgumentMappings {
         registerNative(config, UUID.class, ArgumentTypes::uuid);
     }
 
+    /**
+     * Registers a default framework-provided mapping <b>below</b> user
+     * registrations. {@code ConfigBuilder#argType}/{@code registerArgType}
+     * default to {@link Priority#HIGH}; registering our defaults at
+     * {@code LOW.plus(1)} (the framework's documented default convention)
+     * guarantees a user override always wins regardless of registration
+     * order — including post-build registration, which would otherwise
+     * lose to ctor-time defaults on the insertion-order tie-break.
+     */
+    private static <T> void registerDefault(
+            ImperatConfig<BukkitCommandSource> config,
+            Class<T> type,
+            ArgumentType<BukkitCommandSource, T> resolver
+    ) {
+        config.getArgumentTypeRegistry().registerResolver(type, () -> resolver, Priority.LOW.plus(1));
+    }
+
     private static <T> void registerNative(
             ImperatConfig<BukkitCommandSource> config,
             Class<T> type,
@@ -88,6 +108,6 @@ public final class PaperArgumentMappings {
             // the surrounding test.
             return;
         }
-        config.registerArgType(type, new PaperBukkitArgumentType<>(type, PaperArgumentType.identity(nativeType)));
+        registerDefault(config, type, new PaperBukkitArgumentType<>(type, PaperArgumentType.identity(nativeType)));
     }
 }
