@@ -240,7 +240,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         List<ArgumentBuilder<BS, ?>> fillers = createStringTokenFillers(
                 rootCommand, main, tokenCount, visibility, partNames
         );
-        ArgumentBuilder<BS, ?> deepest = fillers.isEmpty() ? head : fillers.get(fillers.size() - 1);
+        ArgumentBuilder<BS, ?> deepest = fillers.isEmpty() ? head : fillers.getLast();
         appendContinuations(rootCommand, projected, deepest, 0, cache);
         return buildTokenChain(head, fillers, (deepestNode) -> appendFlagNode(rootCommand, projected, deepestNode));
     }
@@ -480,15 +480,44 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     }
 
     /**
-     * True when {@code scope} has a greedy positional child. Such a scope
-     * folds its flags into the greedy node's suggester instead of emitting
-     * the cyclic {@code <flag>} node (which modern Paper cannot serialize
-     * next to a greedy-string node).
+     * True when {@code scope} has a greedy positional descendant — a
+     * direct child OR reachable through a nested positional chain (e.g.
+     * {@code <target> <greedy>}).
+     * <p>
+     * Such a scope folds its flags into the
+     * greedy node's suggester instead of emitting the cyclic
+     * {@code <flag>} node.
+     * <p>
+     * Emitting the flag pair beside any node of a
+     * greedy-bearing path is a shape modern Paper's client mirror cannot
+     * serialize.
+     * <p>
+     * It silently drops ASK_SERVER for the whole scope, so
+     * the server still computes suggestions but the client never shows
+     * them.
      */
     private boolean scopeHasGreedyChild(ProjectedNode<S> scope) {
         for (ProjectedNode<S> child : scope.children()) {
-            Argument<S> main = child.mainArgument();
-            if (!main.isCommand() && (main.isGreedy() || main.type().isGreedy(main))) {
+            if (isOrHasGreedy(child)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isOrHasGreedy(ProjectedNode<S> node) {
+        Argument<S> main = node.mainArgument();
+        if (!main.isCommand() && (main.isGreedy() || main.type().isGreedy(main))) {
+            return true;
+        }
+        if (main.isCommand()) {
+            // A nested subcommand is its own serialization branch: a greedy
+            // inside it does not share the position chain with this scope's
+            // flags, so it must not fold this scope's flags away.
+            return false;
+        }
+        for (ProjectedNode<S> child : node.children()) {
+            if (isOrHasGreedy(child)) {
                 return true;
             }
         }
@@ -537,7 +566,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         );
         ArgumentBuilder<BS, ?> deepest = fillers.isEmpty()
                                                  ? optionalBuilder
-                                                 : fillers.get(fillers.size() - 1);
+                                                 : fillers.getLast();
 
         appendContinuations(rootCommand, scope, deepest, optionalIndex + 1, cache);
         parentBuilder.then(buildTokenChain(optionalBuilder, fillers, null));
@@ -766,8 +795,8 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
                                } else {
                                    results
                                            .stream()
-                                           .filter((candidate) -> prefix.isEmpty()
-                                                                           || candidate.toLowerCase(Locale.ROOT).startsWith(prefix))
+                                           .filter((candidate) ->
+                                                   prefix.isEmpty() || candidate.toLowerCase(Locale.ROOT).startsWith(prefix))
                                            .forEachOrdered((result) -> alignedBuilder.suggest(result, tooltip));
                                }
                                return alignedBuilder.buildFuture();
