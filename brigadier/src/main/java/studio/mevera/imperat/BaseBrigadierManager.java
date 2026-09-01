@@ -421,7 +421,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         return (context, builder) -> {
             SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
             CompletionArg arg = ctx.getArgToComplete();
-            var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
+            var alignedBuilder = alignToResolvedStart(builder, context.getInput(), arg);
             for (String suggestion : command.tree().tabComplete(ctx)) {
                 if (suggestion == null || suggestion.isEmpty()) {
                     continue;
@@ -446,7 +446,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         return (context, builder) -> {
             SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
             CompletionArg arg = ctx.getArgToComplete();
-            var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
+            var alignedBuilder = alignToResolvedStart(builder, context.getInput(), arg);
             for (String suggestion : command.tree().tabComplete(ctx)) {
                 if (suggestion != null && !suggestion.isEmpty()) {
                     alignedBuilder.suggest(suggestion);
@@ -469,7 +469,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         return (context, builder) -> {
             SuggestionContext<S> ctx = createSuggestionContext(command, context.getSource(), context.getInput(), builder, null);
             CompletionArg arg = ctx.getArgToComplete();
-            var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
+            var alignedBuilder = alignToResolvedStart(builder, context.getInput(), arg);
             for (String suggestion : command.tree().tabComplete(ctx)) {
                 if (suggestion != null && !suggestion.isEmpty()) {
                     alignedBuilder.suggest(suggestion);
@@ -758,7 +758,7 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             // start of an earlier node (e.g. the literal) when parse picks
             // a different sibling — without this, suggestions silently get
             // dropped client-side because their replace-range is wrong.
-            var alignedBuilder = builder.createOffset(resolveSuggestionStart(context.getInput(), arg));
+            var alignedBuilder = alignToResolvedStart(builder, context.getInput(), arg);
             String prefix = arg.isEmpty() ? "" : arg.value().toLowerCase(Locale.ROOT);
 
             // Inline-flag partial (`-name=` / `-name=partial`) is structurally
@@ -891,11 +891,47 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
         return studio.mevera.imperat.util.Patterns.isInputFlag(input.substring(start, end));
     }
 
-    private int resolveSuggestionStart(String rawInput, CompletionArg arg) {
-        if (arg.isEmpty()) {
-            return rawInput.length();
+    /**
+     * Realigns {@code builder} so every emitted suggestion range is anchored
+     * to the CLIENT-VISIBLE input — the raw input with trailing whitespace
+     * stripped — and starts at {@code arg}'s token position.
+     *
+     * <p>When the command client requests completions it sends the box text
+     * plus a trailing space the user has not typed, so Brigadier's
+     * {@code context.getInput()} is one character longer than the string the
+     * client renders. Brigadier gives each suggestion the range
+     * {@code [offset, input.length())}, so anchoring to the raw input pushes
+     * BOTH bounds past the client's text when completing an empty arg (the
+     * start alone is already {@code rawInput.length()}). Modern clients throw
+     * {@code StringIndexOutOfBoundsException} (e.g. an inverted substring
+     * range) while re-anchoring those ranges against the shorter visible
+     * text. Rebasing onto the stripped input keeps every range inside
+     * {@code [0, clientLength]} for appended spaces, typed spaces, and
+     * multiple trailing spaces alike.</p>
+     */
+    private SuggestionsBuilder alignToResolvedStart(
+            SuggestionsBuilder builder,
+            String rawInput,
+            CompletionArg arg
+    ) {
+        String visibleInput = stripTrailingWhitespace(rawInput);
+        int start = resolveSuggestionStart(visibleInput, arg);
+        return new SuggestionsBuilder(visibleInput, start);
+    }
+
+    private String stripTrailingWhitespace(String input) {
+        int end = input.length();
+        while (end > 0 && Character.isWhitespace(input.charAt(end - 1))) {
+            end--;
         }
-        return Math.max(0, rawInput.length() - arg.value().length());
+        return input.substring(0, end);
+    }
+
+    private int resolveSuggestionStart(String input, CompletionArg arg) {
+        if (arg.isEmpty()) {
+            return input.length();
+        }
+        return Math.max(0, input.length() - arg.value().length());
     }
 
     private String normalizeInput(String input) {

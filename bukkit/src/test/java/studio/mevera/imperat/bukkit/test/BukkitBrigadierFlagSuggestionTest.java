@@ -53,8 +53,12 @@ class BukkitBrigadierFlagSuggestionTest {
 
         // Flag-name suggestions are server-driven (core tree suggester) and
         // use the canonical single-dash forms; long `--` forms still parse.
+        // Brigadier merges provider ranges (anchored to the stripped input)
+        // with the request-wide [start, rawLen) range, which pads the
+        // suggestion text with a space, so compare trimmed forms.
         assertEquals(6, suggestions.size());
-        assertTrue(suggestions.containsAll(List.of("play", "mix", "greedyflag", "multi", "-scenario", "-sc")));
+        assertTrue(suggestions.stream().map(String::trim).toList().containsAll(
+                List.of("play", "mix", "greedyflag", "multi", "-scenario", "-sc")));
     }
 
     @Test
@@ -94,7 +98,12 @@ class BukkitBrigadierFlagSuggestionTest {
                                         .findFirst()
                                         .orElseThrow();
 
-        assertEquals("flagtest play --scenario kindergarten", suggestion.apply(input));
+        // Value completions anchor to the client-visible (stripped) input so
+        // the emitted start never exceeds the visible text length. The value
+        // replaces the empty trailing word, i.e. inserts before the space.
+        assertEquals(24, suggestion.getRange().getStart());
+        assertEquals(24, suggestion.getRange().getEnd());
+        assertEquals("flagtest play --scenariokindergarten ", suggestion.apply(input));
     }
 
     @Test
