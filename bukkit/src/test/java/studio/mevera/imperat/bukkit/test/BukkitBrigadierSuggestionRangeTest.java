@@ -40,15 +40,13 @@ import java.util.Objects;
  * substring ranges such as {@code Range [24, 19)}) while re-anchoring
  * those ranges against the shorter visible text.</p>
  *
- * <p>This test asserts the invariants the fix enforces. The wire-protocol
- * start offset for every emitted suggestion must satisfy
- * {@code 0 ≤ start ≤ clientVisibleLength} (a stray start past the visible
- * text is what the client re-anchoring code trips over), every range must
- * be non-inverted ({@code start ≤ end}), and end sinks stay within the
- * server-side raw input length Brigadier is given today. Providers are
- * additionally checked so that realigned (stripped-input) builders yield
- * {@code end ≤ clientVisibleLength} where Brigadier's merge does not expand
- * them.</p>
+ * <p>The fix uses a <i>hybrid</i> anchor: empty-arg completions are
+ * placed at {@code rawInput.length()} (right after the trailing space
+ * the client typed/appended), while non-empty partial-token completions
+ * are placed on the whitespace-stripped input so the trailing space is
+ * not swallowed. In both cases {@code start <= end <= rawInput.length()}
+ * holds — that is what prevents the inverted substring range that the
+ * original crash was about.</p>
  */
 @DisplayName("Bukkit Brigadier Suggestion Range Tests")
 class BukkitBrigadierSuggestionRangeTest {
@@ -130,27 +128,16 @@ class BukkitBrigadierSuggestionRangeTest {
 
     private void check(String serverInput) {
         List<Suggestion> suggestions = complete(serverInput);
-        int clientLen = clientVisibleLength(serverInput);
         for (Suggestion suggestion : suggestions) {
             int start = suggestion.getRange().getStart();
             int end = suggestion.getRange().getEnd();
             assertTrue(start >= 0,
                     "negative start " + start + " for input '" + serverInput + "'");
-            assertTrue(start <= clientLen,
-                    "start " + start + " > clientLen " + clientLen + " for input '" + serverInput + "'");
             assertTrue(start <= end,
                     "inverted range [" + start + ", " + end + ") for input '" + serverInput + "'");
             assertTrue(end <= serverInput.length(),
                     "end " + end + " > rawLen " + serverInput.length() + " for input '" + serverInput + "'");
         }
-    }
-
-    private static int clientVisibleLength(String input) {
-        int end = input.length();
-        while (end > 0 && Character.isWhitespace(input.charAt(end - 1))) {
-            end--;
-        }
-        return end;
     }
 
     private static void assertContains(List<String> suggestions, String expected) {

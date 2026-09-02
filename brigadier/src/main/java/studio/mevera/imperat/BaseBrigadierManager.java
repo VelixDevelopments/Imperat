@@ -892,22 +892,26 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
     }
 
     /**
-     * Realigns {@code builder} so every emitted suggestion range is anchored
-     * to the CLIENT-VISIBLE input — the raw input with trailing whitespace
-     * stripped — and starts at {@code arg}'s token position.
+     * Realigns {@code builder} so every emitted suggestion range is safe
+     * for the client to apply against the visible text.
      *
-     * <p>When the command client requests completions it sends the box text
-     * plus a trailing space the user has not typed, so Brigadier's
-     * {@code context.getInput()} is one character longer than the string the
-     * client renders. Brigadier gives each suggestion the range
-     * {@code [offset, input.length())}, so anchoring to the raw input pushes
-     * BOTH bounds past the client's text when completing an empty arg (the
-     * start alone is already {@code rawInput.length()}). Modern clients throw
-     * {@code StringIndexOutOfBoundsException} (e.g. an inverted substring
-     * range) while re-anchoring those ranges against the shorter visible
-     * text. Rebasing onto the stripped input keeps every range inside
-     * {@code [0, clientLength]} for appended spaces, typed spaces, and
-     * multiple trailing spaces alike.</p>
+     * <p>Two cases must be handled differently because the client
+     * appends a trailing space for the empty-arg completion slot:</p>
+     * <ul>
+     * <li><b>Empty argument:</b> the insertion point must sit right
+     * after the trailing space ({@code rawInput.length()}). Placing
+     * it at the stripped length would glue the completion to the
+     * command word ({@code /msgMyPlayerName}).</li>
+     * <li><b>Non-empty partial token:</b> the range must replace
+     * exactly the partial token and ignore any trailing space the
+     * client appended, so {@code -sc} becomes {@code -sc castle}
+     * and not {@code -sccastle }.</li>
+     * </ul>
+     * In both cases {@code start <= builder.getInput().length()} holds,
+     * so no inverted ({@code start > end}) range is ever produced —
+     * that is what caused the original
+     * {@code StringIndexOutOfBoundsException} (e.g. inverted substring
+     * range {@code Range [24, 19)}).</ul>
      */
     private SuggestionsBuilder alignToResolvedStart(
             SuggestionsBuilder builder,
@@ -915,7 +919,12 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             CompletionArg arg
     ) {
         String visibleInput = stripTrailingWhitespace(rawInput);
-        int start = resolveSuggestionStart(visibleInput, arg);
+        if (arg.isEmpty()) {
+            // Insert right after the trailing space the client sent/typed.
+            return new SuggestionsBuilder(rawInput, rawInput.length());
+        }
+        // Replace exactly the partial token, ignoring any trailing space.
+        int start = Math.max(0, visibleInput.length() - arg.value().length());
         return new SuggestionsBuilder(visibleInput, start);
     }
 
@@ -925,13 +934,6 @@ public abstract non-sealed class BaseBrigadierManager<S extends CommandSource> i
             end--;
         }
         return input.substring(0, end);
-    }
-
-    private int resolveSuggestionStart(String input, CompletionArg arg) {
-        if (arg.isEmpty()) {
-            return input.length();
-        }
-        return Math.max(0, input.length() - arg.value().length());
     }
 
     private String normalizeInput(String input) {

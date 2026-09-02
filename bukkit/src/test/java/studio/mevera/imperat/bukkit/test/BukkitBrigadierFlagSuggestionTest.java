@@ -98,12 +98,9 @@ class BukkitBrigadierFlagSuggestionTest {
                                         .findFirst()
                                         .orElseThrow();
 
-        // Value completions anchor to the client-visible (stripped) input so
-        // the emitted start never exceeds the visible text length. The value
-        // replaces the empty trailing word, i.e. inserts before the space.
-        assertEquals(24, suggestion.getRange().getStart());
-        assertEquals(24, suggestion.getRange().getEnd());
-        assertEquals("flagtest play --scenariokindergarten ", suggestion.apply(input));
+        // Value completions are anchored right after the trailing
+        // space, so the inserted value does not swallow it.
+        assertEquals("flagtest play --scenario kindergarten", suggestion.apply(input));
     }
 
     @Test
